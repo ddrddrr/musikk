@@ -1,0 +1,28 @@
+@startuml BackendAudio
+
+skinparam groupInheritance 2
+
+
+' ### Audio
+class FFMPEGWrapper <<singleton>>{
+    + {static} converters: list[AudioConverter]
+    ' returns manifest path
+    + {static} convert_song(song: bytes): BaseSong
+}
+
+interface AudioConverter{
+    --Attributes--
+    + codec: str
+    + bitrates: list[int]
+    + extras: dict
+    --Methods--
+    + build_ffmpeg_args(): str
+    ' generate uuid inside(used for song later on),
+    ' take global var for base path --> create paths
+    - _manifest_path(): str
+    - _media_path(): Generator[str]
+}
+class DASHConverter
+class HLSConverter
+
+@enduml

@@ -1,0 +1,135 @@
+@startuml BackendBase
+
+skinparam groupInheritance 2
+skinparam linetype ortho
+skinparam nodesep 70
+skinparam ranksep 100
+' INFO: all images are represented as their paths(strings)
+
+' INFO: all models inherit from `BaseModel`,
+'  not inserting actual links in order no to clutter the diagram
+class BaseModel<<DjangoModel>>{
+    ' uuidv7
+    + uuid: UUID
+    + date_created: datetime
+    + date_modified: datetime
+}
+
+' ### Users
+class BaseUser<<DjangoModel>>{
+    ' unique
+    + login: str
+    + email: str
+
+    + first_name: str
+    + last_name: str
+    + display_name: str
+    + avatar: str | None
+
+    + is_admin: bool
+    ' auth stuff later
+}
+BaseUser "1"--->"0..*" SongCollection: created_song_collections
+
+class StreamingUser<<DjangoModel>>{
+    + song_queue: LinkedList
+'    + spaceTaken: int - future
+}
+StreamingUser "1"--->"1" SongCollection: liked_songs
+StreamingUser "1"--->"0..*" SongCollection: liked_song_collections
+StreamingUser "1"---> "0..*" Stream: stream_history
+BaseUser <|- StreamingUser
+
+class ContentOwner<<Mixin>>{
+    + get_statistics(obj): ...
+}
+ContentOwner "1"--->"0..*" BaseSong: owned_songs
+ContentOwner "1"--->"0..*" SongCollection: owned_song_collections
+
+class Artist<<DjangoModel>>{
+    + bio: str
+'    + hub: InfoHub
+'    + artist_relations: ArtistRelation
+}
+StreamingUser <|- Artist
+ContentOwner <|- Artist: <<adds>>
+'class ArtistRelation{
+'    + related_to: Artist
+'    + degree: int
+'}
+
+abstract class Hidable{
+    + is_hidden: bool
+
+    + {abstract} hide(): bool
+    + {abstract} unhide(): bool
+}
+abstract class Bannable{
+    + is_banned: bool
+
+    + {abstract} ban(): bool
+    + {abstract} unban(): bool
+}
+
+' ### Songs
+class BaseSong<<DjangoModel>> extends Hidable, Bannable {
+    --Attributes--
+    ..Info..
+    + title: str
+    + description: str
+    + image: str | None
+    + metadata: dict
+    + duration: int
+    + like_count: int
+    + dislike_count: int
+
+    ..Structure..
+    + mpd_path: str
+    + m3u8_path: str
+    + is_hidden: bool
+    + is_banned: bool
+}
+BaseSong "1"--->"1..*" BaseUser: authors
+BaseSong "1"-->"0..*" HashTag: hashtags
+BaseSong "1"-->"0..*" SongCollection: song_collections
+
+class AuthorSong<<DjangoModel>>{
+    + added_by_count(): int
+    + get_stream_count(from: datetime, to: datetime, unique_only: bool): int
+}
+BaseSong <|- AuthorSong
+
+' ### Song containers
+class SongCollection<<DjangoModel>> implements Hidable, Bannable{
+    + title: str
+    + image: str | None
+    + metadata: dict
+}
+SongCollection "1"->"0..*" BaseSong: songs
+SongCollection "1"-->"1..*" BaseUser: created_by
+
+class AuthorSongCollection<<DjangoModel>> extends SongCollection{
+    + added_by_count(): int
+    + get_save_count(from: datetime, to: datetime, unique_only: bool): int
+}
+SongCollection <|- AuthorSongCollection
+
+class Stream<<DjangoModel>>
+Stream "1" --> "1" StreamingUser: streamed_by
+Stream <|-left SongStream
+Stream <|- SongCollectionStream
+
+' ### Categorisation
+class HashTag<<DjangoModel>>{
+    type: str
+    name: str
+}
+class Genre<<DjangoModel>>
+HashTag <|- Genre
+class Mood<<DjangoModel>>
+HashTag <|- Mood
+class Characteristic<<DjangoModel>>
+HashTag <|- Characteristic
+
+' layout
+@enduml

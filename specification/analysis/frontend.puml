@@ -1,0 +1,25 @@
+@startuml FrontendSystem
+
+actor User as user
+
+skinparam packageStyle rectangle
+
+package "Reverse Proxy" as nginx
+
+package "Frontend" as frontend {
+    [Node.js Server] as node
+    [Dash.js Player] as dashjs
+    [React UI] as react
+}
+
+node --> nginx : API Call(HTTP Request)
+nginx --> node : API Response(HTTP Request)
+
+user --> react : Interact with UI
+react --> node : API Calls
+node --> react : Serve Processed Data
+
+nginx --> dashjs : Audio Data/Presentation
+dashjs --> react : Playback Events
+
+@enduml

@@ -1,0 +1,30 @@
+@startuml HighLevelSystem
+
+actor User as user
+
+skinparam packageStyle rectangle
+
+package "Frontend" {
+    [React] as frontend
+}
+
+package "Reverse Proxy" {
+    [Nginx] as proxy
+}
+
+package "Backend" as backend {
+    [Django Sever] as django
+}
+
+user --> frontend : Interact with UI
+user <-- frontend: Present Content
+
+frontend --> proxy : Send HTTP Request
+django --> frontend : Serve Data
+proxy --> backend : Route API Request
+
+' layout
+user --[hidden]down-> frontend
+frontend --[hidden]down-> backend
+
+@enduml

@@ -1,0 +1,38 @@
+@startuml DjangoServer
+
+skinparam packageStyle rectangle
+
+package "Reverse Proxy" as nginx
+
+package "Django Server" as django {
+    [SQL Database] as db
+'    [Task Queue] as rabbit
+'    [Workers] as celery
+}
+
+package "Audio Processor" as audioproc{
+     [ffmpeg]
+}
+entity "Storage" as store
+
+nginx --> django: API Call(HTTP Request)
+note right of django
+Chunked Audio Data
+JSON Model Data
+etc.
+end note
+
+django -up-> nginx: API Response(HTTP Response)
+note left of nginx
+Upload Song
+Fetch Model
+Alter Data
+etc.
+end note
+
+django --> db: CRUD Operations with Model Data
+django -down-> ffmpeg: Process Audio Data/Presentation
+ffmpeg -down-> store: Store Processed Audio/Presentation
+django <-down- store: Get Audio Data/Presentation
+
+@enduml
