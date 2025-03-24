@@ -1,26 +1,38 @@
 @startuml BackendAudio
 
-class FFMPEGWrapper <<singleton>>{
-    + {static} converters: list[AudioConverter]
+skinparam linetype ortho
+
+class FFMPEGWrapper{
+    + converters: list[AudioConverter]
+
+    + add_converter(converted: AudioConverter): bool
     ' returns manifest paths - {manifest_format: path}
-    + {static} convert_song(song: bytes): dict[str, str]
+    + convert_song(song: bytes): dict[str, str]
 }
+FFMPEGWrapper -up[dashed]> AudioConverter: <<uses>>
 
-interface AudioConverter{
-    + frag_duration = 2000ms(segment duration)
-    + codec: str
-    + bitrates: list[int]
-    + extras: dict
+abstract class AudioConverter{
+    + {static} dash_segment_type: str = "mp4"
+
     + song_identifier: uuid | None
-
-    + __init__(song: bytes): None
-    + ffmpeg_args(): str
+    + seg_duration = 5000ms
+    + codec_bitrate_map: dict[str, list[int]]
+    + extras: dict
     ' generate uuid inside(used for song later on),
     ' take global var for base path --> create paths
-    + manifest_path(): str
-    + chunk_paths(): Generator[str]
-}
-class DASHConverter implements AudioConverter
-class HLSConverter implements AudioConverter
 
+    + __init__(song: bytes): None
+    + max_playback_rate(): int
+    + min_playback_rate(): int
+    + manifest_path(): str
+    + init_seg_name(): str
+    + media_seg_name(): str
+    + ffmpeg_args(): str
+}
+class DASHConverter
+class HLSConverter
+DASHConverter -|> AudioConverter
+HLSConverter -|> AudioConverter
+
+'layout
 @enduml
