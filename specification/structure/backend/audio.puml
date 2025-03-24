@@ -1,28 +1,26 @@
 @startuml BackendAudio
 
-skinparam groupInheritance 2
-
-
-' ### Audio
 class FFMPEGWrapper <<singleton>>{
     + {static} converters: list[AudioConverter]
-    ' returns manifest path
-    + {static} convert_song(song: bytes): BaseSong
+    ' returns manifest paths - {manifest_format: path}
+    + {static} convert_song(song: bytes): dict[str, str]
 }
 
 interface AudioConverter{
-    --Attributes--
+    + frag_duration = 2000ms(segment duration)
     + codec: str
     + bitrates: list[int]
     + extras: dict
-    --Methods--
-    + build_ffmpeg_args(): str
+    + song_identifier: uuid | None
+
+    + __init__(song: bytes): None
+    + ffmpeg_args(): str
     ' generate uuid inside(used for song later on),
     ' take global var for base path --> create paths
-    - _manifest_path(): str
-    - _media_path(): Generator[str]
+    + manifest_path(): str
+    + chunk_paths(): Generator[str]
 }
-class DASHConverter
-class HLSConverter
+class DASHConverter implements AudioConverter
+class HLSConverter implements AudioConverter
 
 @enduml

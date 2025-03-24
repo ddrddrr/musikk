@@ -29,22 +29,22 @@ class BaseUser<<DjangoModel>>{
     + is_admin: bool
     ' auth stuff later
 }
-BaseUser "1"--->"0..*" SongCollection: created_song_collections
 
 class StreamingUser<<DjangoModel>>{
-    + song_queue: LinkedList
+    + song_queue: LinkedList[BaseSong]
 '    + spaceTaken: int - future
 }
-StreamingUser "1"--->"1" SongCollection: liked_songs
-StreamingUser "1"--->"0..*" SongCollection: liked_song_collections
-StreamingUser "1"---> "0..*" Stream: stream_history
+StreamingUser "1"*--->"1" SongCollection: liked_songs
+StreamingUser "0..* \n followed_song_collections" <---> "0..* \n followers" SongCollection
+StreamingUser "0..* \n created_song_collections" <---> "0..* \n created_by" SongCollection
+StreamingUser "1 \n stream_history" *---> "0..* \n user" Stream
 BaseUser <|- StreamingUser
 
-class ContentOwner<<Mixin>>{
+abstract class ContentOwner<<Django Model>>{
     + get_statistics(obj): ...
 }
-ContentOwner "1"--->"0..*" BaseSong: owned_songs
-ContentOwner "1"--->"0..*" SongCollection: owned_song_collections
+ContentOwner "1..* \n owned_songs"<--->"0..* \n owners" BaseSong
+ContentOwner "1..* \n owned_song_collections"<--->"0..* \n owners" SongCollection
 
 class Artist<<DjangoModel>>{
     + bio: str
@@ -52,7 +52,7 @@ class Artist<<DjangoModel>>{
 '    + artist_relations: ArtistRelation
 }
 StreamingUser <|- Artist
-ContentOwner <|- Artist: <<adds>>
+ContentOwner <|- Artist
 'class ArtistRelation{
 '    + related_to: Artist
 '    + degree: int
@@ -73,8 +73,6 @@ abstract class Bannable{
 
 ' ### Songs
 class BaseSong<<DjangoModel>> extends Hidable, Bannable {
-    --Attributes--
-    ..Info..
     + title: str
     + description: str
     + image: str | None
@@ -83,15 +81,10 @@ class BaseSong<<DjangoModel>> extends Hidable, Bannable {
     + like_count: int
     + dislike_count: int
 
-    ..Structure..
     + mpd_path: str
     + m3u8_path: str
-    + is_hidden: bool
-    + is_banned: bool
 }
-BaseSong "1"--->"1..*" BaseUser: authors
-BaseSong "1"-->"0..*" HashTag: hashtags
-BaseSong "1"-->"0..*" SongCollection: song_collections
+BaseSong "0..* \n hashtags"<--->"0..* \n basesong_set" HashTag
 
 class AuthorSong<<DjangoModel>>{
     + added_by_count(): int
@@ -105,8 +98,8 @@ class SongCollection<<DjangoModel>> implements Hidable, Bannable{
     + image: str | None
     + metadata: dict
 }
-SongCollection "1"->"0..*" BaseSong: songs
-SongCollection "1"-->"1..*" BaseUser: created_by
+SongCollection "1..* \n songs" <---> "0..* \n songcollection_set" BaseSong
+SongCollection "0..* \n hashtags"<--->"0..* \n songcollections_set" HashTag
 
 class AuthorSongCollection<<DjangoModel>> extends SongCollection{
     + added_by_count(): int
@@ -115,7 +108,6 @@ class AuthorSongCollection<<DjangoModel>> extends SongCollection{
 SongCollection <|- AuthorSongCollection
 
 class Stream<<DjangoModel>>
-Stream "1" --> "1" StreamingUser: streamed_by
 Stream <|-left SongStream
 Stream <|- SongCollectionStream
 
