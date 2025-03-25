@@ -80,7 +80,6 @@ DATABASES = {
     },
 }
 
-
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
@@ -99,7 +98,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
@@ -111,7 +109,6 @@ USE_I18N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
@@ -122,7 +119,6 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-
 INTERNAL_IPS = [
     config("DJANGO_BASE_URL", default="127.0.0.1"),
 ]
@@ -130,8 +126,8 @@ INTERNAL_IPS = [
 AUTH_USER_MODEL = "users.BaseUser"
 
 # MEDIA CONTENT
-AUDIO_CONTENT_PATH = config(
+AUDIO_CONTENT_PATH = (config(
     "AUDIO_CONTENT_PATH", default="/tmp/musikk_audio"
-)
-MEDIA_ROOT = config("AUDIO_CONTENT_PATH", default="/tmp/musikk_media")
+)).rstrip("/")
+MEDIA_ROOT = (config("AUDIO_CONTENT_PATH", default="/tmp/musikk_media")).rstrip("/")
 MEDIA_URL = "media/"

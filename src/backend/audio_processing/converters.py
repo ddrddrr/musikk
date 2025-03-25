@@ -1,69 +1,40 @@
-import uuid
-from abc import abstractmethod, ABC
-from typing import Final, override
+from typing import Self
 
 
-class Codec:
-    opus = "libopus"
-    he_aac_v2 = "aac"
-    flac = "flac"
+class AudioConverter:
+    def __init__(self, encoder: str, protocol: str):
+        self.encoder = encoder
+        self.protocol = protocol
+        self.bitrates: list[int] = []
+        self.extras: list[str] = []
 
+    def set_bitrates(self, bitrates: list[int]) -> Self:
+        self.bitrates = bitrates
+        return self
 
-class AudioConverter(ABC):
-    # -adaptation_sets "id=0,1,2...,streams=a"
-    dash_segment_type: Final[str] = "mp4"
-    seg_duration: int = 5000
-    codec_bitrate_map: dict[str, list[int]] = {}
-    # format_options=movflags=frag_keyframe+faststart
-    extras: dict = {}
+    def add_extra(self, extra: str) -> Self:
+        self.extras.append(extra)
+        return self
 
-    def __init__(self, song: bytes) -> None:
-        self.song = song
-        self.song_uuid: uuid.UUID = uuid.uuid4()
-
-    @abstractmethod
     def construct_ffmpeg_command(self) -> str:
-        pass
+        instruction_list = [
+            "-map 0",
+            "-c:a",
+            self.encoder,
+            f"-f {self.protocol}",
+        ]
+        instruction_list.extend(self.extras)
 
-    @property
-    @abstractmethod
-    def manifest_path(self) -> str:
-        pass
+        base_command = " ".join(instruction_list)
+        if not self.bitrates:
+            return base_command
 
-    @property
-    def min_playback_rate(self) -> int:
-        return min(min(v) for v in self.codec_bitrate_map.values())
-
-    @property
-    def max_playback_rate(self) -> int:
-        return max(max(v) for v in self.codec_bitrate_map.values())
-
-    @property
-    def init_seg_name(self) -> str:
-        return "init-stream$RepresentationID$.$ext$"
-
-    @property
-    def media_seg_name(self) -> str:
-        return "chunk-stream$RepresentationID$-$Number%05d$.$ext$"
+        return " ".join(f"{base_command} b:a {bitrate}" for bitrate in self.bitrates)
 
 
-class DASHConverter(AudioConverter):
-    codec_bitrate_map: dict[str, list[int]] = {}
-    extras: dict = {}
-
-    @override
-    def manifest_path(self) -> str:
-        return f"{self.song_uuid}.mpd"
-
-    def ffmpeg_args(self) -> str:
-        pass
-
-
-class HLSConverter(AudioConverter):
-    @override
-    def manifest_path(self) -> str:
-        return f"{self.song_uuid}.m3u8"
-
-    def ffmpeg_args(self) -> str:
-        # Implement HLS-specific ffmpeg arguments
-        pass
+FLAC_CONVERTER = AudioConverter("flac", "dash")
+OPUS_CONVERTER = AudioConverter("libopus", "dash").set_bitrates([96, 160, 320])
+AACHEv2_CONVERTER = \
+    (AudioConverter("libfdk_aac", "dash")
+     .set_bitrates([24])
+     .add_extra("-profile aac_he_v2"))
