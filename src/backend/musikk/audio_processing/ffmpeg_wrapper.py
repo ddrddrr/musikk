@@ -11,6 +11,7 @@ from audio_processing.converters import AudioConverter
 
 # TODO: add cleanup logic in case of failures
 
+
 class FFMPEGWrapper:
     def __init__(self):
         self.converters: list[AudioConverter] = []
@@ -29,31 +30,38 @@ class FFMPEGWrapper:
 
         song_uuid = uuid.uuid4()
         song_content_path = self._prepare_content_dir(song_uuid=song_uuid)
-        song_path = self._prepare_song_file(song=song, song_content_path=song_content_path)
+        song_path = self._prepare_song_file(
+            song=song, song_content_path=song_content_path
+        )
 
-        command = [
-            "ffmpeg",
-            "-i",
-            str(song_path)
-        ]
-        for converter in self.converters:
-            ffmpeg_command = converter.construct_ffmpeg_command(song_content_path=song_content_path)
-            for sublist in ffmpeg_command:
-                command.extend(sublist)
-
-        mpd_path = str(self._prepare_mpd_dir() / f"{song_uuid}.mpd")
+        command = ["ffmpeg", "-i", str(song_path)]  # provide input file
+        command.extend(self.construct_converter_commands())  # add convert options
+        command.extend(["-f", "dash"])  # specify that dash is used as protocol
+        mpd_path = str(song_content_path / f"{song_uuid}.mpd")
         command.append(mpd_path)
 
         ffmpeg_result = subprocess.run(command, capture_output=True, text=True)
         if ffmpeg_result.returncode != 0:
-            raise Exception(f"ffmpeg command failed\n{ffmpeg_result.stderr}\n{ffmpeg_result.args}")
+            raise Exception(
+                f"ffmpeg could not process audio.\nError: {ffmpeg_result.stderr}\n{ffmpeg_result.args}"
+            )
 
         return {"mpd_path": mpd_path}
 
-    def _prepare_mpd_dir(self):
-        mpd_dir = Path(settings.MPD_DIR_PATH)
-        mpd_dir.mkdir(parents=True, exist_ok=True)
-        return mpd_dir
+    def construct_converter_commands(self) -> list[str]:
+        channel_input = 0
+        commands = []
+        for converter in self.converters:
+            ffmpeg_command = converter.construct_ffmpeg_command(channel_input)
+            for sublist in ffmpeg_command:
+                commands.extend(sublist)
+
+            if bitrate_count := len(converter.bitrates):
+                channel_input += bitrate_count
+            else:
+                channel_input += 1
+
+        return commands
 
     def _prepare_content_dir(self, song_uuid: uuid.UUID) -> Path:
         song_content_path = Path(settings.AUDIO_CONTENT_PATH) / str(song_uuid)

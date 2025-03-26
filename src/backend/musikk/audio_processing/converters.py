@@ -1,4 +1,3 @@
-from pathlib import Path
 from typing import Self
 
 
@@ -13,42 +12,34 @@ class AudioConverter:
         self.bitrates = bitrates
         return self
 
-    def add_extra(self, extra: str) -> Self:
-        self.extras.append(extra)
+    def set_extras(self, extras: list[str]) -> Self:
+        self.extras = extras
         return self
 
-    def construct_ffmpeg_command(self, song_content_path: Path) -> list[list[str]]:
-        segments_dir = self._prepare_segment_dirs(song_content_path)
-        # Base command for each bitrate
+    def construct_ffmpeg_command(self, channel_input: int) -> list[list[str]]:
+        # TODO: change data structures, so there is no clunky indexing on lists
         base_command = [
-            "-map", "0",
-            "-c:a", self.encoder,
-            f"-f", self.protocol,
-            f"-init_seg_name", self.init_seg_name(segments_dir),
-            f"-media_seg_name", self.media_seg_name(segments_dir),
+            "-map",
+            "0:a",
+            "-c:a:0",
+            self.encoder,
         ]
         base_command.extend(self.extras)
+        if not self.bitrates:
+            return [base_command]
 
-        if self.bitrates:
-            return [base_command + [f"b:a {bitrate}"] for bitrate in self.bitrates]
-
-        return [base_command]
-
-    def init_seg_name(self, segments_dir: Path):
-        return f"{segments_dir}/init-stream$RepresentationID$.$ext$"
-
-    def media_seg_name(self, segments_dir: Path):
-        return f"{segments_dir}/chunk-stream$RepresentationID$-$Number%05d$.$ext$"
-
-    def _prepare_segment_dirs(self, song_content_path: Path) -> Path:
-        segments_dir = song_content_path / "segments"
-        segments_dir.mkdir(parents=True, exist_ok=True)
-        return segments_dir
+        commands = []
+        for bitrate in self.bitrates:
+            base_command[2] = base_command[2][:-1] + str(channel_input)
+            commands.append(base_command + ["-b:a", f"{bitrate}k"])
+            channel_input += 1
+        return commands
 
 
 FLAC_CONVERTER = AudioConverter("flac", "dash")
 OPUS_CONVERTER = AudioConverter("libopus", "dash").set_bitrates([96, 160, 320])
-AACHEv2_CONVERTER = \
-    (AudioConverter("libfdk_aac", "dash")
-     .set_bitrates([24])
-     .add_extra("-profile aac_he_v2"))
+AACHEv2_CONVERTER = (
+    AudioConverter("libfdk_aac", "dash")
+    .set_bitrates([24])
+    .set_extras(["-profile", "aac_he_v2"])
+)
