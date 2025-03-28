@@ -108,6 +108,7 @@ class AuthorSongCollection<<DjangoModel>> extends SongCollection{
 SongCollection <|- AuthorSongCollection
 
 class Stream<<DjangoModel>>
+
 Stream <|-left SongStream
 Stream <|- SongCollectionStream
 

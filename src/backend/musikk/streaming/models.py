@@ -1,38 +1,21 @@
-import os
-
-from django.conf import settings
 from django.db import models
-from django.db.models import CASCADE
+
+from musikk.models import BaseModel
+from streaming.songs import *
+from streaming.song_collections import *
+from streaming.song_queue import *
 
 
-def song_path(instance, filename):
-    return os.path.join(settings.MEDIA_ROOT, "songs", "images", str(instance.uuid))
+class Stream(BaseModel):
+    class Meta:
+        abstract = True
+
+    user = models.ForeignKey("StreamingUser", on_delete=models.SET_NULL)
 
 
-class SongMetadata(models.Model):
-    written_by = models.CharField(max_length=64)
-    performed_by = models.CharField(max_length=64)
-    extras = models.TextField(
-        max_length=2000, help_text="Any extra information from the author."
-    )
+class SongStream(Stream):
+    song = models.ForeignKey(BaseSong, on_delete=models.CASCADE)
 
 
-class BaseSong(models.Model):
-    title = models.CharField(max_length=64)
-    description = models.TextField(max_length=500, blank=True, default="")
-    image = models.ImageField(upload_to=song_path, null=True, blank=True)
-    metadata = models.OneToOneField(
-        SongMetadata, on_delete=CASCADE, null=True, blank=True
-    )
-    like_count = models.IntegerField(default=0, blank=True)
-    dislike_count = models.IntegerField(default=0, blank=True)
-
-    # hashtags = ...
-
-    duration = models.IntegerField(default=-1, editable=False, blank=True)
-    mpd = models.FilePathField(path=settings.AUDIO_CONTENT_PATH)
-    # m3u8 = ...
-
-
-class SongCollection(models.Model):
-    songs = models.ManyToManyField(BaseSong)
+class SongCollectionStream(Stream):
+    song_collection = models.ForeignKey(SongCollection, on_delete=models.CASCADE)

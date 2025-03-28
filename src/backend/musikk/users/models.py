@@ -5,7 +5,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 from musikk.models import BaseModel
-
+from users.models_extended import *
 
 def avatar_path(instance, filename):
     return os.path.join(settings.MEDIA_ROOT, "users", "avatars", str(instance.uuid))
