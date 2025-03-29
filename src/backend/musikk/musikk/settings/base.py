@@ -33,8 +33,9 @@ INSTALLED_APPS = [
     "django.contrib.sites",
     ### Local
     "users.apps.UsersConfig",
-    # "streaming.apps.StreamingConfig",
-    # "recommendations.apps.RecommendationsConfig",
+    "streaming.apps.StreamingConfig",
+    "recommendations.apps.RecommendationsConfig",
+    "base.apps.BaseConfig",
     # "api.apps.ApiConfig",
     ### External
     "jazzmin",
