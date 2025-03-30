@@ -1,0 +1,21 @@
+{% extends "admin/change_form.html" %}
+
+{% block after_related_objects %}
+    {{ block.super }}
+
+    {% if original.mpd %}
+        <audio id="dash-audio" controls></audio>
+
+        <script src="http://cdn.dashjs.org/v5.0.0/modern/umd/dash.all.min.js"></script>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                var player = dashjs.MediaPlayer().create();
+                var mpd_url = window.location.origin + "{{ MEDIA_URL }}audio_content/{{ original.uuid }}/{{ original.uuid }}.mpd";
+                console.log(mpd_url)
+                player.initialize(document.querySelector("#dash-audio"), mpd_url, true);
+            });
+        </script>
+    {% else %}
+        <p>No MPD file available.</p>
+    {% endif %}
+{% endblock %}

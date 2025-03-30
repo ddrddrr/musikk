@@ -24,21 +24,20 @@ ALLOWED_HOSTS = config(
 # Application definition
 
 INSTALLED_APPS = [
+    "jazzmin",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "django.contrib.sites",
+    # "django.contrib.sites",
     ### Local
     "users.apps.UsersConfig",
     "streaming.apps.StreamingConfig",
     "recommendations.apps.RecommendationsConfig",
     "base.apps.BaseConfig",
     # "api.apps.ApiConfig",
-    ### External
-    "jazzmin",
 ]
 
 MIDDLEWARE = [
@@ -64,6 +63,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "django.template.context_processors.media",
             ],
         },
     },
@@ -130,9 +130,9 @@ INTERNAL_IPS = [
 AUTH_USER_MODEL = "users.BaseUser"
 
 # MEDIA CONTENT
-AUDIO_CONTENT_PATH = config("AUDIO_CONTENT_PATH", default="/tmp/musikk_audio")
-MPD_DIR_PATH = config("MPD_DIR_PATH", default="/tmp/musikk_media/mpd")
-M3U8_DIR_PATH = config("M3U8_DIR_PATH", default="/tmp/musikk_media/m3u8")
-
-MEDIA_ROOT = config("MEDIA_ROOT", default="/tmp/musikk_media")
+MEDIA_ROOT = config("MEDIA_ROOT", default="/tmp/media/musikk_media")
 MEDIA_URL = "media/"
+AUDIO_CONTENT_PATH = config("AUDIO_CONTENT_PATH", default="/tmp/media/musikk_audio")
+
+# MISC
+MAX_PATH_LENGTH = os.pathconf("/", "PC_PATH_MAX")
