@@ -55,10 +55,9 @@ class BaseSong(BaseModel):
 
 class SongCollectionSong(BaseModel):
     song = models.ForeignKey(BaseSong, on_delete=models.CASCADE)
-    position = models.IntegerField(
-        default=None, null=True, help_text="The position of the song."
-    )
     song_collection = models.ForeignKey(
-        SongCollection, on_delete=models.SET_NULL, blank=False, null=True
+        SongCollection, on_delete=models.CASCADE, blank=False, null=True
     )
-    date_added = models.DateTimeField(auto_now_add=True)
+    position = models.IntegerField(
+        default=None, null=True, help_text="The order of the song in the collection."
+    )

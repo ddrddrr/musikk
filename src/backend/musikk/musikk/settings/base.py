@@ -32,12 +32,13 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     # "django.contrib.sites",
-    ### Local
     "users.apps.UsersConfig",
     "streaming.apps.StreamingConfig",
     "recommendations.apps.RecommendationsConfig",
     "base.apps.BaseConfig",
     # "api.apps.ApiConfig",
+    "django_filters",
+    "rest_framework",
 ]
 
 MIDDLEWARE = [

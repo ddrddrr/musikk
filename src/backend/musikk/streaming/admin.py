@@ -6,6 +6,7 @@ from django import forms
 from audio_processing.ffmpeg_wrapper import FFMPEGWrapper
 from audio_processing.converters import FLAC_CONVERTER
 from musikk.utils import delete_dir_for_file
+from streaming.song_collections import SongCollection
 from streaming.songs import BaseSong
 
 
@@ -43,3 +44,14 @@ class BaseSongAdmin(admin.ModelAdmin):
             obj.mpd = song_repr.manifests["mpd_path"]
             obj.uuid = song_repr.uuid_
         super().save_model(request, obj, form, change)
+
+
+@admin.register(SongCollection)
+class SongCollectionAdmin(admin.ModelAdmin):
+    fields = [
+        "title",
+        "songs",
+        "description",
+        "image",
+        "metadata",
+    ]
