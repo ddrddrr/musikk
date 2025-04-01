@@ -7,7 +7,7 @@ from audio_processing.ffmpeg_wrapper import FFMPEGWrapper
 from audio_processing.converters import FLAC_CONVERTER
 from musikk.utils import delete_dir_for_file
 from streaming.song_collections import SongCollection
-from streaming.songs import BaseSong
+from streaming.songs import BaseSong, SongCollectionSong
 
 
 class BaseSongAdminForm(forms.ModelForm):
@@ -46,11 +46,17 @@ class BaseSongAdmin(admin.ModelAdmin):
         super().save_model(request, obj, form, change)
 
 
+class SongCollectionSongInline(admin.StackedInline):
+    model = SongCollectionSong
+    ordering = ["position"]
+
+
 @admin.register(SongCollection)
 class SongCollectionAdmin(admin.ModelAdmin):
+    inlines = [SongCollectionSongInline]
+
     fields = [
         "title",
-        "songs",
         "description",
         "image",
         "metadata",

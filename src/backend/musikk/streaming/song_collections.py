@@ -11,13 +11,18 @@ class SongCollectionMetadata(BaseModel):
 
 
 class SongCollection(BaseModel):
-    songs = models.ManyToManyField("streaming.BaseSong")
+    songs = models.ManyToManyField(
+        "streaming.BaseSong", through="streaming.SongCollectionSong"
+    )
     title = models.CharField(max_length=128)
     description = models.TextField(max_length=512, blank=True, default="")
     image = models.ImageField(upload_to=image_path, null=True, blank=True)
     metadata = models.OneToOneField(
         SongCollectionMetadata, on_delete=models.CASCADE, null=True, blank=True
     )
+
+    def __str__(self):
+        return self.title
 
 
 class Playlist(SongCollection):

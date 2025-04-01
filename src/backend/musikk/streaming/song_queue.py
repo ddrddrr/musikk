@@ -1,6 +1,9 @@
+from django.conf import settings
 from django.db import models
 
 from base.models import BaseModel
+from streaming.song_collections import SongCollection
+from streaming.songs import BaseSong
 
 
 class SongQueueNode(BaseModel):
@@ -22,6 +25,29 @@ class SongQueueNode(BaseModel):
         on_delete=models.SET_NULL,
         related_name="+",
     )
+
+    def __iter__(self):
+        current = self.head
+        while current:
+            yield current
+            current = current.next
+
+    # TODO: add error handling in order not to lose objects
+    def delete(self, using=None, keep_parents=False):
+        if self.prev:
+            self.prev.next = self.next
+            self.prev.save()
+        else:
+            self.head = self.next
+
+        if self.next:
+            self.next.prev = self.prev
+            self.next.save()
+        else:
+            self.tail = self.prev
+
+        self.save()
+        return super().delete(using, keep_parents)
 
 
 class SongQueueManager(models.Manager):
@@ -45,25 +71,50 @@ class SongQueue(BaseModel):
         on_delete=models.SET_NULL,
         related_name="+",
     )
+    # INFO: used instead of calling `COUNT()`, as this is accessed frequently
+    song_count = models.IntegerField(default=0)
 
-    # TODO: implement add_random method
-    # TODO: wrap in transaction
-    def add_node(
+    # TODO: wrap all in transactions?
+    def add_song(
         self,
-        node: SongQueueNode,
+        song: BaseSong,
         before: SongQueueNode = None,
         after: SongQueueNode = None,
     ) -> SongQueueNode | None:
+        node = SongQueueNode.objects.create(song=song, song_queue=self)
+
         if before:
-            return self.add_before(node, before)
+            return self.add_node_before(node, before)
         elif after:
-            return self.add_after(node, after)
+            return self.add_node_after(node, after)
         else:
             self.append_node(node)
 
+        self.song_count += 1
+        self.save()
         return node
 
-    def add_before(self, node: SongQueueNode, target: SongQueueNode) -> SongQueueNode:
+    def append_collection_songs(self, collection: SongCollection):
+        # TODO: implement, maybe also add after head?
+        raise NotImplementedError()
+
+    # TODO: implement
+    # from likedsongs --> filter on likedsongs id
+    # total random --> all available songs in the sys
+    # radom on hastags --> all available with hashtag
+    def append_random_songs(
+        self, size: int = settings.DEFAULT_SONG_QUEUE_SIZE, where: str = ""
+    ) -> list[SongQueueNode]:
+        query = (
+            f"SELECT * FROM {BaseSong._meta.db_table} TABLESAMPLE SYSTEM_ROWS({size})"
+        )
+        query = query + where
+        songs = BaseSong.objects.raw(query)
+        return [self.add_song(song) for song in songs]
+
+    def add_node_before(
+        self, node: SongQueueNode, target: SongQueueNode
+    ) -> SongQueueNode:
         node.next = target
         node.prev = target.prev
 
@@ -71,15 +122,17 @@ class SongQueue(BaseModel):
             target.prev.next = node
             target.prev.next.save()
         else:
-            node.song_queue.head = node
+            self.head = node
         target.prev = node
 
         node.save()
         target.save()
-        node.song_queue.save()
+        self.save()
         return node
 
-    def add_after(self, node: SongQueueNode, target: SongQueueNode) -> SongQueueNode:
+    def add_node_after(
+        self, node: SongQueueNode, target: SongQueueNode
+    ) -> SongQueueNode:
         node.next = target.next
         node.prev = target
 
@@ -87,42 +140,31 @@ class SongQueue(BaseModel):
             target.next.prev = node
             target.next.prev.save()
         else:
-            node.song_queue.tail = node
+            self.tail = node
         target.next = node
 
         node.save()
         target.save()
-        node.song_queue.save()
+        self.save()
         return node
 
     def append_node(self, node: SongQueueNode) -> SongQueueNode:
-        if self.objects.count() == 0:
-            node.song_queue.head = node
+        if self.song_count == 0:
+            self.head = node
         else:
-            tail = node.song_queue.tail
+            tail = self.tail
             tail.next = node
+            node.prev = tail
             tail.save()
-            node.song_queue.tail = node
+        self.tail = node
         node.is_tail = True
 
         node.save()
-        node.song_queue.save()
+        self.save()
         return node
 
     def delete_node(self, node: SongQueueNode) -> bool:
-        if node.prev:
-            node.prev.next = node.next
-            node.prev.save()
-        else:
-            node.song_queue.head = node.next
-
-        if node.next:
-            node.next.prev = node.prev
-            node.next.save()
-        else:
-            node.song_queue.tail = node.prev
-
-        node.song_queue.save()
+        # TODO: probably a try-catch block and return based on its res
         node.delete()
         return True
 
@@ -144,25 +186,24 @@ class SongQueue(BaseModel):
         if node1.prev:
             node1.prev.next = node1
         else:
-            node1.song_queue.head = node1
+            self.head = node1
 
         if node1.next:
             node1.next.prev = node1
         else:
-            node1.song_queue.tail = node1
+            self.tail = node1
 
         if node2.prev:
             node2.prev.next = node2
         else:
-            node2.song_queue.head = node2
+            self.head = node2
 
         if node2.next:
             node2.next.prev = node2
         else:
-            node2.song_queue.tail = node2
+            self.tail = node2
 
-        node1.song_queue.save()
-        node2.song_queue.save()
+        self.save()
         node1.save()
         node2.save()
 

@@ -1,6 +1,7 @@
 from django.db import models
 
-from users.base_user import BaseUser
+from streaming.song_queue import SongQueue
+from users.user_base import BaseUser
 
 
 class StreamingUser(BaseUser):
@@ -23,8 +24,13 @@ class StreamingUser(BaseUser):
         "streaming.SongQueue",
         related_name="user",
         null=True,
-        on_delete=models.SET_NULL,
+        on_delete=models.DO_NOTHING,
     )
+
+    def save(self, *args, **kwargs):
+        if not self.song_queue:
+            self.song_queue = SongQueue.objects.create()
+        super().save(*args, **kwargs)
 
 
 class ContentOwner(models.Model):

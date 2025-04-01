@@ -3,7 +3,6 @@ from django.db import models
 
 from base.models import BaseModel
 from musikk.utils import image_path, delete_dir_for_file
-from streaming.song_collections import SongCollection
 
 
 class SongMetadata(BaseModel):
@@ -31,8 +30,6 @@ class BaseSong(BaseModel):
 
     # hashtags = ...
 
-    # TODO: use ffprobe to get duration
-    duration = models.IntegerField(default=-1, editable=False, blank=True)
     mpd = models.CharField(
         default="",
         blank=True,
@@ -52,12 +49,18 @@ class BaseSong(BaseModel):
 
     # m3u8 = ...
 
+    def __str__(self):
+        return self.title
+
 
 class SongCollectionSong(BaseModel):
     song = models.ForeignKey(BaseSong, on_delete=models.CASCADE)
     song_collection = models.ForeignKey(
-        SongCollection, on_delete=models.CASCADE, blank=False, null=True
+        "streaming.SongCollection", on_delete=models.CASCADE, blank=False, null=True
     )
     position = models.IntegerField(
         default=None, null=True, help_text="The order of the song in the collection."
     )
+
+    def __str__(self):
+        return self.song.title
