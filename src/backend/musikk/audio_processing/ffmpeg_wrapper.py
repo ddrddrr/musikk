@@ -8,6 +8,7 @@ from typing import Self
 
 import magic
 from django.conf import settings
+from django.core.files.uploadedfile import InMemoryUploadedFile, TemporaryUploadedFile
 
 from audio_processing.converters import AudioConverter
 
@@ -29,7 +30,7 @@ class FFMPEGWrapper:
         self.converters.append(converter)
         return self
 
-    # TODO: remove raw file when not in debug
+    # TODO: remove raw file when not in debug?
     def convert_song(self, song: bytes | BytesIO) -> SongRepresentation:
         # TODO: improve handling
         if not song:
@@ -99,15 +100,16 @@ class FFMPEGWrapper:
 
         return song_content_path
 
-    # TODO: move somwhere else?
+    # TODO: move somwehere else?
     def _prepare_song_file(
         self,
-        song: bytes | BytesIO,
+        song: (
+            bytes | BytesIO | InMemoryUploadedFile | TemporaryUploadedFile
+        ),  # can be e.g.
     ) -> Path:
-        if isinstance(song, BytesIO):
+        if not isinstance(song, bytes):
             song = song.read()
-        mime = magic.Magic(mime=True)
-        file_type = mime.from_buffer(song)
+        file_type = magic.Magic(mime=True).from_buffer(song)
         if not file_type.startswith("audio/"):
             raise ValueError(f"Expected audio file, got {file_type}")
 

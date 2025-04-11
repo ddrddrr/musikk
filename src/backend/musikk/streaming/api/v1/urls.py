@@ -11,11 +11,17 @@ from streaming.api.v1.views import (
     SongCollectionListView,
     SongQueueAppendRandomView,
     SongQueueRetrieveView,
+    SongCollectionDetailView,
 )
 
 urlpatterns = [
     path("songs/", SongListView.as_view(), name="song-list"),
     path("collections/", SongCollectionListView.as_view(), name="collection-list"),
+    path(
+        "collections/<uuid:uuid>",
+        SongCollectionDetailView.as_view(),
+        name="collection-detail",
+    ),
     path("song-queue/", SongQueueRetrieveView.as_view(), name="song-queue-retrieve"),
     path(
         "song-queue/append-random",

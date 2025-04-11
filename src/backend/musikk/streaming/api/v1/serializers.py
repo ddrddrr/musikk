@@ -8,9 +8,19 @@ from streaming.songs import BaseSong, SongCollectionSong
 
 
 class SongSerializer(BaseModelSerializer):
+    mpd = serializers.SerializerMethodField()
+
     class Meta:
         model = BaseSong
         fields = BaseModelSerializer.Meta.fields + ["title", "description", "mpd"]
+
+    # TODO: probably make a model method, change _ to -
+    def get_mpd(self, obj):
+        return (
+            settings.DJANGO_BASE_URL
+            + settings.MEDIA_URL
+            + f"audio_content/{obj.uuid}/{obj.uuid}.mpd"
+        )
 
 
 class SongCollectionSerializerBasic(BaseModelSerializer):
@@ -18,7 +28,7 @@ class SongCollectionSerializerBasic(BaseModelSerializer):
         model = SongCollection
         fields = BaseModelSerializer.Meta.fields + [
             "title",
-            # "image",
+            "image",
         ]
 
 

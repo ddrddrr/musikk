@@ -10,6 +10,7 @@ from decouple import config, Csv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
+DJANGO_BASE_URL = config("DJANGO_BASE_URL", default="http://localhost:8000")
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = config("SECRET_KEY", default="musikk-secret-key")
@@ -20,10 +21,18 @@ DEBUG = config("DEBUG", default=False, cast=bool)
 ALLOWED_HOSTS = config(
     "DJANGO_ALLOWED_HOSTS", default="localhost,127.0.0.1", cast=Csv()
 )
+# TODO: change to dev/prod variants
+# CORS_ALLOWED_ORIGINS = config(
+#     "CORS_ALLOWED_ORIGINS",
+#     default="http://localhost:5173,http://localhost:8000,http://127.0.0.1:5173,http://127.0.0.1:8000",
+#     cast=Csv(),
+# )
+CORS_ALLOW_ALL_ORIGINS: bool = True
+# CORS_URLS_REGEX = r"^*media*$"
 
 # Application definition
-
 INSTALLED_APPS = [
+    "corsheaders",
     "jazzmin",
     "django.contrib.admin",
     "django.contrib.auth",
@@ -31,19 +40,21 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    # "django.contrib.sites",
+    "django.contrib.sites",
     "users.apps.UsersConfig",
     "streaming.apps.StreamingConfig",
     "recommendations.apps.RecommendationsConfig",
     "base.apps.BaseConfig",
-    # "api.apps.ApiConfig",
+    "api.apps.ApiConfig",
     "django_filters",
+    "django_extensions",
     "rest_framework",
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
