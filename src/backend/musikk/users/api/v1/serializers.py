@@ -1,3 +1,7 @@
+from django.contrib.auth import password_validation
+from rest_framework import serializers
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
 from base.serializers import BaseModelSerializer
 from streaming.api.v1.serializers import (
     SongCollectionSerializerBasic,
@@ -16,7 +20,6 @@ class BaseUserSerializer(BaseModelSerializer):
             "last_name",
             "display_name",
             "avatar",
-            "is_admin",
         ]
 
 
@@ -32,3 +35,46 @@ class StreamingUserSerializer(BaseUserSerializer):
             "created_playlists",
             "song_queue",
         ]
+
+
+class ResetPasswordSerializer(serializers.ModelSerializer):
+    password_main = serializers.CharField(write_only=True)
+    password_repeat = serializers.CharField(write_only=True)
+    logout = serializers.BooleanField(
+        default=True, initial=True
+    )  # Indicates whether to logout all when password is updated
+
+    class Meta:
+        model = BaseUser
+        fields = ["password_main", "password_repeat", "logout"]
+
+    def validate(self, data):
+        password_main = data.get("password_main")
+        password_repeat = data.get("password_repeat")
+
+        if password_main != password_repeat:
+            raise serializers.ValidationError(
+                {"password_repeat": "The passwords don't match."}
+            )
+
+        return data
+
+    def validate_password_main(self, password):
+        password_validation.validate_password(password, self.instance)
+
+        return password
+
+    def update(self, instance, validated_data):
+        instance.set_password(validated_data["password_main"])
+        instance.save()
+        return instance
+
+
+class TokenPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+        token["uuid"] = str(user.uuid)
+        token["email"] = user.email
+        token["display_name"] = user.display_name
+        return token

@@ -17,6 +17,7 @@ class SongSerializer(BaseModelSerializer):
         fields = BaseModelSerializer.Meta.fields + [
             "title",
             "image",
+            "audio",
             "description",
             "mpd",
         ]
@@ -30,23 +31,24 @@ class SongSerializer(BaseModelSerializer):
         )
 
     def create(self, validated_data):
-        res = FlacOnly.convert_song(validated_data["audio"])
-        instance = BaseSong(**validated_data).save()
+        res = FlacOnly.convert_song(validated_data.pop("audio"))
+        instance = BaseSong(**validated_data)
         instance.mpd = res.manifests["mpd_path"]
-        instance.content_path = res.content_path
-
-        return instance.save()
+        instance.content_path = res.song_content_path
+        instance.save()
+        return instance
 
     def update(self, instance, validated_data):
-        if validated_data["audio"]:
-            res = FlacOnly.convert_song(validated_data["audio"])
+        if audio := validated_data.pop("audio", None):
+            res = FlacOnly.convert_song(audio)
             instance.mpd = res.manifests["mpd_path"]
-            instance.content_path = res.content_path
+            instance.content_path = res.song_content_path
 
         instance.title = validated_data.get("title", instance.title)
         instance.description = validated_data.get("description", instance.description)
         instance.image = validated_data.get("image", instance.image)
-        return instance.save()
+        instance.save()
+        return instance
 
 
 class SongCollectionSerializerBasic(BaseModelSerializer):

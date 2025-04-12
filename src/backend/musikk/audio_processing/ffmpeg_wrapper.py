@@ -145,7 +145,7 @@ class FFMPEGWrapper:
         shutil.rmtree(song_content_path)
 
 
-FlacOnly = FFMPEGWrapper()
+FlacOnly = FFMPEGWrapper().add_converter(FLAC_CONVERTER)
 Full = (
     FFMPEGWrapper()
     .add_converter(FLAC_CONVERTER)

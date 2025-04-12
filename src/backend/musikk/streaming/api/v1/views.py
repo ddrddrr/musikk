@@ -1,6 +1,8 @@
+from urllib import request
+
 from rest_framework.views import APIView
 from rest_framework.mixins import CreateModelMixin, ListModelMixin
-from rest_framework.generics import ListAPIView, GenericAPIView
+from rest_framework.generics import ListAPIView, GenericAPIView, RetrieveAPIView
 from rest_framework.response import Response
 from rest_framework import status
 
@@ -28,9 +30,10 @@ class SongListCreateView(ListModelMixin, CreateModelMixin, GenericAPIView):
 
     def perform_create(self, serializer):
         song = serializer.save()
-        user: ContentOwner = self.request.user
-        user.owned_songs.add(song)
-        user.save()
+        if isinstance(self.request.user, ContentOwner):
+            user: ContentOwner = self.request.user
+            user.owned_songs.add(song)
+            user.save()
 
 
 class SongCollectionListView(ListAPIView):

@@ -4,6 +4,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 import os
+from datetime import timedelta
 from pathlib import Path
 
 from decouple import config, Csv
@@ -40,15 +41,17 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "django.contrib.sites",
+    ##
     "users.apps.UsersConfig",
     "streaming.apps.StreamingConfig",
     "recommendations.apps.RecommendationsConfig",
     "base.apps.BaseConfig",
     "api.apps.ApiConfig",
+    ##
     "django_filters",
     "django_extensions",
     "rest_framework",
+    "rest_framework_simplejwt",
 ]
 
 MIDDLEWARE = [
@@ -83,6 +86,16 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "musikk.wsgi.application"
 
+# REST
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "users.tokens.UUIDJWTAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
+    ],
+}
+SIMPLE_JWT = {
+    "TOKEN_OBTAIN_SERIALIZER": "users.api.v1.serializers.TokenPairSerializer",
+}
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 DATABASES = {

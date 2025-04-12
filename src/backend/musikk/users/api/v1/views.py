@@ -1,17 +1,52 @@
-from rest_framework.generics import RetrieveAPIView
+from django.http import Http404
+from rest_framework.generics import RetrieveAPIView, UpdateAPIView
+from rest_framework import request
+from rest_framework import status
+from rest_framework.response import Response
 
-from users.api.v1.serializers import BaseUserSerializer, StreamingUserSerializer
+from users.api.v1.serializers import (
+    BaseUserSerializer,
+    StreamingUserSerializer,
+    ResetPasswordSerializer,
+)
+from users.tokens import password_reset_token_generator
+from users.user_base import BaseUser
 
 
 class BaseUserRetrieveView(RetrieveAPIView):
+    lookup_field = "uuid"
     serializer_class = BaseUserSerializer
-
-    def get_object(self):
-        return self.request.user
+    queryset = BaseUser.objects.all()
 
 
 class StreamingUserRetrieveView(RetrieveAPIView):
+    lookup_field = "uuid"
     serializer_class = StreamingUserSerializer
 
     def get_object(self):
         return self.request.user.streaminguser
+
+
+class ResetPasswordView(UpdateAPIView):
+    lookup_field = "uuid"
+    queryset = BaseUser.objects.all()
+    serializer_class = ResetPasswordSerializer
+    http_method_names = ["patch"]
+
+    def partial_update(self, request: request.Request, token: str, **kwargs):
+        try:
+            user = self.get_object()
+        except Http404:
+            user = None
+
+        if not password_reset_token_generator.check_token(user=user, token=token):
+            return Response(
+                {"detail": "UUID or token are invalid, or the token is expired."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        serializer = self.get_serializer(instance=user, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
