@@ -1,9 +1,9 @@
 from rest_framework.views import APIView
-from rest_framework.generics import ListAPIView, RetrieveAPIView, CreateAPIView
+from rest_framework.mixins import CreateModelMixin, ListModelMixin
+from rest_framework.generics import ListAPIView, GenericAPIView
 from rest_framework.response import Response
 from rest_framework import status
 
-from audio_processing.ffmpeg_wrapper import FFMPEGWrapper, FlacOnly
 from streaming.api.v1.serializers import (
     SongSerializer,
     SongCollectionSerializerBasic,
@@ -16,16 +16,18 @@ from streaming.songs import BaseSong
 from users.users_extended import StreamingUser, ContentOwner
 
 
-class SongListView(ListAPIView):
+class SongListCreateView(ListModelMixin, CreateModelMixin, GenericAPIView):
     queryset = BaseSong.objects.all()
     serializer_class = SongSerializer
 
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
 
-class SongCreateView(CreateAPIView):
-    serializer_class = SongSerializer
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
 
     def perform_create(self, serializer):
-        song = super().perform_create(serializer)
+        song = serializer.save()
         user: ContentOwner = self.request.user
         user.owned_songs.add(song)
         user.save()

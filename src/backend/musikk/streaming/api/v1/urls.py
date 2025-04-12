@@ -7,15 +7,15 @@
 from django.urls import path
 
 from streaming.api.v1.views import (
-    SongListView,
     SongCollectionListView,
     SongQueueAppendRandomView,
     SongQueueRetrieveView,
     SongCollectionDetailView,
+    SongListCreateView,
 )
 
 urlpatterns = [
-    path("songs/", SongListView.as_view(), name="song-list"),
+    path("songs/", SongListCreateView.as_view(), name="song-list-create"),
     path("collections/", SongCollectionListView.as_view(), name="collection-list"),
     path(
         "collections/<uuid:uuid>",
