@@ -33,6 +33,7 @@ class BaseSongAdmin(admin.ModelAdmin):
     fields = [
         "file",
         "title",
+        "content_path",
         "mpd",
         "description",
         "image",
@@ -42,6 +43,7 @@ class BaseSongAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
         if song_repr := form.cleaned_data.get("file"):
             obj.mpd = song_repr.manifests["mpd_path"]
+            obj.content_path = song_repr.content_path
             obj.uuid = song_repr.uuid_
         super().save_model(request, obj, form, change)
 

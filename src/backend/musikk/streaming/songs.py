@@ -29,7 +29,13 @@ class BaseSong(BaseModel):
     dislike_count = models.IntegerField(default=0, blank=True)
 
     # hashtags = ...
-
+    content_path = models.CharField(
+        default="",
+        blank=True,
+        max_length=settings.MAX_PATH_LENGTH,
+        help_text="Path to the directory with all song files.",
+        # editable=False,
+    )
     mpd = models.CharField(
         default="",
         blank=True,

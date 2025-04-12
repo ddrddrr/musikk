@@ -34,8 +34,8 @@ class TestFFMPEGWrapper(TestCase):
 
         ret = ffmpeg.convert_song(self.audio_1)
         assert ret
-        assert ret.get("mpd_path")
-        assert Path(ret["mpd_path"]).exists()
+        assert ret.manifests["mpd_path"]
+        assert Path(ret.manifests["mpd_path"]).exists()
 
     def test_convert_multiple_encoders(self):
         ffmpeg = (
@@ -46,8 +46,8 @@ class TestFFMPEGWrapper(TestCase):
         )
         ret = ffmpeg.convert_song(self.audio_1)
         assert ret
-        assert ret.get("mpd_path")
-        assert Path(ret["mpd_path"]).exists()
+        assert ret.manifests["mpd_path"]
+        assert Path(ret.manifests["mpd_path"]).exists()
 
     # TODO: check that mpd has the correct structure
     # @classmethod

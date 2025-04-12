@@ -1,6 +1,7 @@
 from django.conf import settings
 from rest_framework import serializers
 
+from audio_processing.ffmpeg_wrapper import FlacOnly
 from base.serializers import BaseModelSerializer
 from streaming.song_collections import SongCollection, Playlist
 from streaming.song_queue import SongQueue, SongQueueNode
@@ -8,11 +9,17 @@ from streaming.songs import BaseSong, SongCollectionSong
 
 
 class SongSerializer(BaseModelSerializer):
-    mpd = serializers.SerializerMethodField()
+    mpd = serializers.SerializerMethodField(read_only=True)
+    audio = serializers.FileField(write_only=True)
 
     class Meta:
         model = BaseSong
-        fields = BaseModelSerializer.Meta.fields + ["title", "description", "mpd"]
+        fields = BaseModelSerializer.Meta.fields + [
+            "title",
+            "image",
+            "description",
+            "mpd",
+        ]
 
     # TODO: probably make a model method, change _ to -
     def get_mpd(self, obj):
@@ -21,6 +28,25 @@ class SongSerializer(BaseModelSerializer):
             + settings.MEDIA_URL
             + f"audio_content/{obj.uuid}/{obj.uuid}.mpd"
         )
+
+    def create(self, validated_data):
+        res = FlacOnly.convert_song(validated_data["audio"])
+        instance = BaseSong(**validated_data).save()
+        instance.mpd = res.manifests["mpd_path"]
+        instance.content_path = res.content_path
+
+        return instance.save()
+
+    def update(self, instance, validated_data):
+        if validated_data["audio"]:
+            res = FlacOnly.convert_song(validated_data["audio"])
+            instance.mpd = res.manifests["mpd_path"]
+            instance.content_path = res.content_path
+
+        instance.title = validated_data.get("title", instance.title)
+        instance.description = validated_data.get("description", instance.description)
+        instance.image = validated_data.get("image", instance.image)
+        return instance.save()
 
 
 class SongCollectionSerializerBasic(BaseModelSerializer):
