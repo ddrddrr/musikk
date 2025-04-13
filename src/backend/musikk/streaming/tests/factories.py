@@ -1,8 +1,10 @@
 import factory
 
 from base.tests.factories import BaseModelFactory
-from streaming.songs import BaseSong
+from streaming.models import BaseSong, SongCollection
 from streaming.song_queue import SongQueue, SongQueueNode
+import os
+import random
 
 fake = factory.Faker
 
@@ -12,7 +14,30 @@ class BaseSongFactory(BaseModelFactory):
         model = BaseSong
 
     title = fake("name")
-    description = fake("text")
-    mpd = fake("file_path", extension="mpd")
-    # image = factory.django.ImageField()
+    description = fake("paragraph")
+    mpd = None
+    image = None
     # metadata = factory.SubFactory()
+
+
+class SongCollectionFactory(BaseModelFactory):
+    class Meta:
+        model = SongCollection
+
+    title = fake("name")
+    description = fake("paragraph")
+    image = None
+
+    @factory.post_generation
+    def songs(self, create, extracted, **kwargs):
+        if not create:
+            return
+
+        songs_count = kwargs.pop("songs_count", 0)
+
+        if extracted:
+            for song in extracted:
+                self.songs.add(song)
+        else:
+            for _ in range(songs_count):
+                self.songs.add(BaseSongFactory())

@@ -45,7 +45,9 @@ class FFMPEGWrapper:
         return self
 
     # TODO: remove raw file when not in debug?
-    def convert_song(self, song: bytes | BytesIO) -> SongRepresentation:
+    def convert_song(
+        self, song: bytes | BytesIO | InMemoryUploadedFile | TemporaryUploadedFile
+    ) -> SongRepresentation:
         # TODO: improve handling
         if not song:
             raise ValueError("No song provided")
@@ -73,8 +75,8 @@ class FFMPEGWrapper:
             if ffmpeg_result.returncode != 0:
                 raise Exception(
                     f"ffmpeg could not process input file."
-                    "\nError: {ffmpeg_result.stderr}"
-                    "\nInput args: {ffmpeg_result.args}"
+                    f"\nError: {ffmpeg_result.stderr}"
+                    f"\nInput args: {ffmpeg_result.args}"
                 )
 
             return SongRepresentation(

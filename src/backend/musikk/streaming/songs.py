@@ -1,5 +1,7 @@
 from django.conf import settings
 from django.db import models
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
 
 from base.models import BaseModel
 from musikk.utils import image_path, delete_dir_for_file
@@ -45,6 +47,9 @@ class BaseSong(BaseModel):
         # editable=False,
     )
 
+    # TODO: django is kinda weird with deletes on relation
+    #  so probably add a scheduled task for cleanup instead
+    #  (check uuid -> doesn't exist -> delete)
     def delete(self, using=None, keep_parents=False):
         if self.mpd:
             delete_dir_for_file(self.mpd)
@@ -70,3 +75,8 @@ class SongCollectionSong(BaseModel):
 
     def __str__(self):
         return self.song.title
+
+
+@receiver(post_delete, sender=BaseSong)
+def base_song_cleanup(sender, instance, **kwargs):
+    instance.cleanup()  # or whatever logic you need

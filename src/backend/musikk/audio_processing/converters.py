@@ -37,7 +37,7 @@ class AudioConverter:
 
 
 FLAC_CONVERTER = AudioConverter("flac", "dash")
-OPUS_CONVERTER = AudioConverter("libopus", "dash").set_bitrates([96, 160, 320])
+OPUS_CONVERTER = AudioConverter("libopus", "dash").set_bitrates([96, 160, 256])
 AACHEv2_CONVERTER = (
     AudioConverter("libfdk_aac", "dash")
     .set_bitrates([24])
