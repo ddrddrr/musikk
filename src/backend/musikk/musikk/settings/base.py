@@ -163,4 +163,3 @@ AUDIO_CONTENT_PATH = config("AUDIO_CONTENT_PATH", default="/tmp/media/musikk_aud
 
 # MISC
 MAX_PATH_LENGTH = os.pathconf("/", "PC_PATH_MAX")
-DEFAULT_SONG_QUEUE_SIZE = config("DEFAULT_SONG_QUEUE_SIZE", cast=int, default=10)

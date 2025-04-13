@@ -1,5 +1,7 @@
-from django.conf import settings
+import random
+
 from django.db import models
+from django.db import transaction
 
 from base.models import BaseModel
 from streaming.song_collections import SongCollection
@@ -46,6 +48,10 @@ class SongQueueNode(BaseModel):
         else:
             self.tail = self.prev
 
+        if self is self.song_queue.add_after:
+            self.song_queue.add_after = None
+            self.song_queue.save()
+
         self.save()
         return super().delete(using, keep_parents)
 
@@ -55,7 +61,10 @@ class SongQueueManager(models.Manager):
     pass
 
 
+# TODO: make transactions more fine-grained
 class SongQueue(BaseModel):
+    default_size = 30
+
     objects = SongQueueManager()
     head = models.OneToOneField(
         SongQueueNode,
@@ -63,6 +72,16 @@ class SongQueue(BaseModel):
         null=True,
         on_delete=models.SET_NULL,
         related_name="+",
+    )
+    add_after = models.OneToOneField(
+        SongQueueNode,
+        default=None,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        help_text="The node after which the songs will be appended when `Add To Queue` is used. "
+        "If the song/collection is appended, equal to this song/last song in collection."
+        "Otherwise is equal to `head`.",
     )
     tail = models.OneToOneField(
         SongQueueNode,
@@ -75,98 +94,76 @@ class SongQueue(BaseModel):
     song_count = models.IntegerField(default=0)
 
     # TODO: wrap all in transactions?
-    def add_song(
-        self,
-        song: BaseSong,
-        before: SongQueueNode = None,
-        after: SongQueueNode = None,
-    ) -> SongQueueNode | None:
-        node = SongQueueNode.objects.create(song=song, song_queue=self)
+    def add_song(self, song: BaseSong, to_end=True) -> SongQueueNode | None:
+        with transaction.atomic():
+            node = SongQueueNode.objects.create(song=song, song_queue=self)
 
-        if before:
-            return self.add_node_before(node, before)
-        elif after:
-            return self.add_node_after(node, after)
-        else:
-            self.append_node(node)
+            if to_end:
+                self.append_node(node)
+            else:
+                after = self.add_after if self.add_after else self.head
+                self.add_node_after(node, after)
 
-        self.song_count += 1
-        self.save()
-        return node
+            self.song_count += 1
+            self.save()
+            return node
 
-    def append_collection_songs(self, collection: SongCollection):
-        # TODO: implement, maybe also add after head?
-        raise NotImplementedError()
-
-    # TODO: implement
-    # from likedsongs --> filter on likedsongs id
-    # total random --> all available songs in the sys
-    # radom on hastags --> all available with hashtag
-    def append_random_songs(
-        self, size: int = settings.DEFAULT_SONG_QUEUE_SIZE, where: str = ""
+    def add_collection_songs(
+        self, collection: SongCollection, to_end=True
     ) -> list[SongQueueNode]:
-        query = (
-            f"SELECT * FROM {BaseSong._meta.db_table} TABLESAMPLE SYSTEM_ROWS({size})"
-        )
-        query = query + where
-        songs = BaseSong.objects.raw(query)
-        return [self.add_song(song) for song in songs]
+        with transaction.atomic():
+            nodes = []
+            for song in collection.songs.all():
+                self.add_song(song, to_end=to_end)
+                nodes.append(song)
 
-    def add_node_before(
-        self, node: SongQueueNode, target: SongQueueNode
-    ) -> SongQueueNode:
-        node.next = target
-        node.prev = target.prev
-
-        if target.prev:
-            target.prev.next = node
-            target.prev.next.save()
-        else:
-            self.head = node
-        target.prev = node
-
-        node.save()
-        target.save()
-        self.save()
-        return node
+            return nodes
 
     def add_node_after(
         self, node: SongQueueNode, target: SongQueueNode
     ) -> SongQueueNode:
-        node.next = target.next
-        node.prev = target
+        with transaction.atomic():
+            if target is self.tail:
+                return self.append_node(node)
 
-        if target.next:
-            target.next.prev = node
-            target.next.prev.save()
-        else:
-            self.tail = node
-        target.next = node
+            node.next = target.next
+            node.prev = target
 
-        node.save()
-        target.save()
-        self.save()
-        return node
+            if target.next:
+                target.next.prev = node
+                target.next.save()
+                self.add_after = node
+            else:
+                self.tail = node
+            target.next = node
+
+            target.save()
+            node.save()
+            self.save()
+            return node
 
     def append_node(self, node: SongQueueNode) -> SongQueueNode:
-        if self.song_count == 0:
-            self.head = node
-        else:
-            tail = self.tail
-            tail.next = node
-            node.prev = tail
-            tail.save()
-        self.tail = node
-        node.is_tail = True
+        with transaction.atomic():
+            if self.song_count == 0:
+                self.head = node
+            else:
+                tail = self.tail
+                tail.next = node
+                node.prev = tail
+                tail.save()
+            self.tail = node
 
-        node.save()
-        self.save()
-        return node
+            node.save()
+            self.save()
+            return node
 
     def delete_node(self, node: SongQueueNode) -> bool:
         # TODO: probably a try-catch block and return based on its res
-        node.delete()
-        return True
+        with transaction.atomic():
+            node.delete()
+            self.song_count -= 1
+            self.save()
+            return True
 
     # TODO: test and refactor
     def swap_nodes(self, node1: SongQueueNode, node2: SongQueueNode) -> bool:
@@ -208,3 +205,28 @@ class SongQueue(BaseModel):
         node2.save()
 
         return True
+
+    # TODO: implement, complete the table approach
+    # from likedsongs --> filter on likedsongs id
+    # total random --> all available songs in the sys
+    # radom on hastags --> all available with hashtag
+    def append_random_songs(
+        self,
+        amount: int = default_size,
+    ) -> list[SongQueueNode]:
+        # query = (
+        #     f"SELECT * FROM {BaseSong._meta.db_table} TABLESAMPLE SYSTEM_ROWS({size})"
+        # )
+        # query = query + where
+        if amount < self.song_count:
+            return []
+        with transaction.atomic():
+            qs = BaseSong.objects.all()
+            songs = random.choices(qs, k=min(amount, len(qs)))
+            return [self.add_song(song) for song in songs]
+
+    def apply(self, func: callable) -> None:
+        current = self.head
+        while current:
+            func(current)
+            current = current.next

@@ -75,8 +75,3 @@ class SongCollectionSong(BaseModel):
 
     def __str__(self):
         return self.song.title
-
-
-@receiver(post_delete, sender=BaseSong)
-def base_song_cleanup(sender, instance, **kwargs):
-    instance.cleanup()  # or whatever logic you need

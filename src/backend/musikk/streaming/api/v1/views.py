@@ -1,5 +1,3 @@
-from urllib import request
-
 from rest_framework.views import APIView
 from rest_framework.mixins import CreateModelMixin, ListModelMixin
 from rest_framework.generics import ListAPIView, GenericAPIView, RetrieveAPIView
@@ -53,6 +51,22 @@ class SongQueueRetrieveView(RetrieveAPIView):
 
     def get_object(self):
         return self.request.user.song_queue
+
+
+class SongQueueAddSongView(APIView):
+    def post(self, request, *args, **kwargs):
+        song_queue: SongQueue = request.user.song_queue
+        song = BaseSong.objects.get(request.data["uuid"])
+        song_queue.add_song(song, to_end=False)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class SongQueueAddCollectionView(APIView):
+    def post(self, request, *args, **kwargs):
+        song_queue: SongQueue = request.user.song_queue
+        collection = SongCollection.objects.get(request.data["uuid"])
+        song_queue.add_collection_songs(collection, to_end=False)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class SongQueueAppendRandomView(APIView):

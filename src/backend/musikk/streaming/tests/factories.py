@@ -15,7 +15,7 @@ class BaseSongFactory(BaseModelFactory):
 
     title = fake("name")
     description = fake("paragraph")
-    mpd = None
+    mpd = ""
     image = None
     # metadata = factory.SubFactory()
 

@@ -56,6 +56,7 @@ class SongCollectionSerializerBasic(BaseModelSerializer):
         model = SongCollection
         fields = BaseModelSerializer.Meta.fields + [
             "title",
+            "description",
             "image",
         ]
 
@@ -72,7 +73,7 @@ class SongCollectionSerializerDetailed(BaseModelSerializer):
         song_collection_songs = SongCollectionSong.objects.filter(song_collection=obj)
         return [
             {
-                **SongSerializer(song.song).data,
+                **SongSerializer(song.song, context=self.context).data,
                 "position": song.position,
             }
             for song in song_collection_songs
