@@ -1,12 +1,8 @@
-from django.contrib.auth.tokens import (
-    PasswordResetTokenGenerator as DjangoPwdResetTokenGenerator,
-)
-from django.conf import settings
+from django.contrib.auth import get_user_model
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-password_reset_token_generator = DjangoPwdResetTokenGenerator()
-User = settings.AUTH_USER_MODEL
+User = get_user_model()
 
 
 class UUIDJWTAuthentication(JWTAuthentication):

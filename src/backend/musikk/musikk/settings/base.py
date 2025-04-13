@@ -94,6 +94,8 @@ REST_FRAMEWORK = {
     ],
 }
 SIMPLE_JWT = {
+    "USER_ID_FIELD": "uuid",
+    "USER_ID_CLAIM": "uuid",
     "TOKEN_OBTAIN_SERIALIZER": "users.api.v1.serializers.TokenPairSerializer",
 }
 # Database

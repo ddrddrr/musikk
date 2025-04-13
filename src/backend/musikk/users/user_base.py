@@ -6,7 +6,7 @@ from django.urls.base import reverse
 
 from base.models import BaseModel
 from musikk.utils import image_path
-from users.tokens import password_reset_token_generator
+from users.utils import password_reset_token_generator
 
 
 class BaseUser(BaseModel, AbstractUser):

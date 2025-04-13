@@ -9,8 +9,8 @@ from users.api.v1.serializers import (
     StreamingUserSerializer,
     ResetPasswordSerializer,
 )
-from users.tokens import password_reset_token_generator
 from users.user_base import BaseUser
+from users.utils import password_reset_token_generator
 
 
 class BaseUserRetrieveView(RetrieveAPIView):

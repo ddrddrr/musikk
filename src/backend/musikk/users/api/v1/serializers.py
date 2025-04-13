@@ -74,7 +74,6 @@ class TokenPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
-        token["uuid"] = str(user.uuid)
         token["email"] = user.email
         token["display_name"] = user.display_name
         return token
