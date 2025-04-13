@@ -7,7 +7,7 @@ import {
 import {ReactQueryDevtools} from '@tanstack/react-query-devtools'
 
 import './index.css'
-import {App} from './App.tsx'
+import {App} from '@/components/app/App.tsx'
 
 const queryClient = new QueryClient()
 createRoot(document.getElementById('root')!).render(

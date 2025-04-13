@@ -1,12 +1,16 @@
-import {useEffect, useRef} from 'react';
+
+
+import { useEffect, useRef } from "react";
 // @ts-expect-error, see shaka docs
-import shaka from 'shaka-player';
+import shaka from "shaka-player";
 
 interface PlayerProps {
     url: string | null;
+    onDurationChange?: (duration: number) => void;
+    onTimeUpdate?: (currentTime: number) => void;
 }
 
-export function Player({url}: PlayerProps) {
+export function Player({ url, onDurationChange, onTimeUpdate }: PlayerProps) {
     const audioRef = useRef<HTMLAudioElement>(null);
     const playerRef = useRef<shaka.Player | null>(null);
 
@@ -14,7 +18,7 @@ export function Player({url}: PlayerProps) {
         shaka.polyfill.installAll();
 
         if (!shaka.Player.isBrowserSupported()) {
-            console.error('Shaka Player not supported');
+            console.error("Shaka Player not supported");
             return;
         }
 
@@ -40,7 +44,7 @@ export function Player({url}: PlayerProps) {
                     await player.load(url);
                     await audio.play();
                 } catch (err) {
-                    console.error('Error during playback:', err);
+                    console.error("Error during playback:", err);
                 }
             } else {
                 try {
@@ -48,7 +52,7 @@ export function Player({url}: PlayerProps) {
                     audio.pause();
                     audio.currentTime = 0;
                 } catch (err) {
-                    console.warn('Error stopping playback:', err);
+                    console.warn("Error stopping playback:", err);
                 }
             }
         };
@@ -56,5 +60,27 @@ export function Player({url}: PlayerProps) {
         handlePlayback();
     }, [url]);
 
-    return <audio ref={audioRef} controls/>;
+    const handleLoadedMetadata = () => {
+        const audio = audioRef.current;
+        if (audio && onDurationChange) {
+            onDurationChange(audio.duration);
+        }
+    };
+
+    const handleTimeUpdate = () => {
+        const audio = audioRef.current;
+        if (audio && onTimeUpdate) {
+            onTimeUpdate(audio.currentTime);
+        }
+    };
+
+    return (
+        <audio
+            ref={audioRef}
+            controls
+            className="w-full"
+            onLoadedMetadata={handleLoadedMetadata}
+            onTimeUpdate={handleTimeUpdate}
+        />
+    );
 }

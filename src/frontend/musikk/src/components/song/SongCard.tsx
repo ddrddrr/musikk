@@ -1,3 +1,7 @@
+
+
+import { Play, Pause } from "lucide-react";
+
 interface SongCardProps {
     title: string;
     artist: string;
@@ -6,18 +10,16 @@ interface SongCardProps {
 }
 
 export function SongCard(props: SongCardProps) {
-    const isPlaying = props.isPlaying;
+    const { title, artist, isPlaying, onClick } = props;
 
     return (
-        <div className="flex items-center space-x-4 bg-main-gray p-3 rounded shadow hover:bg-main-red transition">
+        <div className="flex items-center justify-between">
             <div className="flex flex-col">
-                <span className="font-semibold">{props.title}</span>
-                <span className="text-sm text-gray-600">{props.artist}</span>
+                <p className="text-gray-800 font-semibold">{title}</p>
+                <p className="text-gray-600 text-sm">{artist}</p>
             </div>
-            <button
-                onClick={props.onClick}
-            >
-                {isPlaying ? "pause" : "play"}
+            <button onClick={onClick} className="p-2 rounded-full hover:bg-gray-300">
+                {isPlaying ? <Pause size={20} /> : <Play size={20} />}
             </button>
         </div>
     );

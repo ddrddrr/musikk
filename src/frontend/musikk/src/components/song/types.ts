@@ -3,6 +3,6 @@ export interface ISong {
     title: string
     artist: string
     mpd: string
-    image?: string,
+    image?: string
+    duration?: number
 }
-
