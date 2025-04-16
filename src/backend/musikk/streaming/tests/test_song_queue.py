@@ -4,7 +4,7 @@ from django.test import TestCase
 from streaming.models import SongQueue, SongQueueNode, BaseSong
 from streaming.tests.factories import BaseSongFactory, SongCollectionFactory
 
-SONG_COUNT = 3
+SONG_COUNT = 5
 
 
 class TestSongQueue(TestCase):
@@ -17,7 +17,7 @@ class TestSongQueue(TestCase):
         song_queue = SongQueue.objects.create()
         song = self.songs[0]
 
-        song_queue.add_song(song)
+        song_queue.add_song(song, action=SongQueue.AddAction.APPEND)
         self.assertTrue(song_queue.head)
         self.assertTrue(song_queue.tail)
         self.assertTrue(song_queue.head.song is song)
@@ -32,7 +32,10 @@ class TestSongQueue(TestCase):
     def test_append_multiple_to_empty(self):
         song_queue = SongQueue.objects.create()
 
-        [song_queue.add_song(song) for song in self.songs]
+        [
+            song_queue.add_song(song, action=SongQueue.AddAction.APPEND)
+            for song in self.songs
+        ]
 
         self.assertTrue(song_queue.song_count == len(self.songs))
         self.assertTrue(song_queue.head)
@@ -52,10 +55,10 @@ class TestSongQueue(TestCase):
         song_queue = SongQueue.objects.create()
 
         for song in self.songs:
-            song_queue.add_song(song)
+            song_queue.add_song(song, action=SongQueue.AddAction.APPEND)
 
         new_song = BaseSongFactory.create()
-        song_queue.add_song(new_song, to_end=False)
+        song_queue.add_song(new_song, action=SongQueue.AddAction.ADD)
 
         head = song_queue.head
         self.assertEqual(head.song, self.songs[0])
@@ -70,11 +73,11 @@ class TestSongQueue(TestCase):
         song_queue = SongQueue.objects.create()
 
         for song in self.songs:
-            song_queue.add_song(song)
+            song_queue.add_song(song, action=SongQueue.AddAction.APPEND)
 
         new_songs = BaseSongFactory.create_batch(3)
         for song in new_songs:
-            song_queue.add_song(song, to_end=False)
+            song_queue.add_song(song, action=SongQueue.AddAction.ADD)
 
         current = song_queue.head
         expected_order = [self.songs[0]] + new_songs + self.songs[1:]
@@ -90,7 +93,9 @@ class TestSongQueue(TestCase):
 
         collection = SongCollectionFactory()
         csongs = collection.songs.all()
-        added_nodes = song_queue.add_collection_songs(collection)
+        added_nodes = song_queue.add_collection(
+            collection, action=SongQueue.AddAction.APPEND
+        )
 
         self.assertEqual(sorted([n.song for n in added_nodes]), sorted(list(csongs)))
         self.assertEqual(song_queue.song_count, len(csongs))
@@ -100,3 +105,61 @@ class TestSongQueue(TestCase):
             self.assertIsNotNone(current)
             self.assertEqual(current.song, expected_song)
             current = current.next
+
+    def test_set_head_empty(self):
+        song_queue = SongQueue.objects.create()
+        song = self.songs[0]
+
+        song_queue.add_song(song, action=SongQueue.AddAction.CHANGE_HEAD)
+
+        self.assertEqual(song_queue.song_count, 1)
+        self.assertEqual(song_queue.head.song, song)
+        self.assertEqual(song_queue.tail.song, song)
+        self.assertIsNone(song_queue.head.prev)
+        self.assertIsNone(song_queue.head.next)
+
+    def test_set_head_non_empty(self):
+        song_queue = SongQueue.objects.create()
+
+        for song in self.songs:
+            song_queue.add_song(song, action=SongQueue.AddAction.APPEND)
+
+        new_song = BaseSongFactory.create()
+        song_queue.add_song(new_song, action=SongQueue.AddAction.CHANGE_HEAD)
+
+        self.assertEqual(song_queue.song_count, len(self.songs))
+        self.assertEqual(song_queue.head.song, new_song)
+        self.assertEqual(song_queue.head.next.song, self.songs[1])
+        self.assertEqual(song_queue.tail.song, self.songs[-1])
+
+    def test_set_head_with_add_after_set(self):
+        song_queue = SongQueue.objects.create()
+
+        for song in self.songs:
+            song_queue.add_song(song, action=SongQueue.AddAction.APPEND)
+
+        song_queue.add_after = song_queue.head.next
+
+        new_head = BaseSongFactory.create()
+        n1 = song_queue.add_song(new_head, action=SongQueue.AddAction.CHANGE_HEAD)
+
+        inserted_song = BaseSongFactory.create()
+        n2 = song_queue.add_song(inserted_song, action=SongQueue.AddAction.ADD)
+
+        self.assertEqual(song_queue.song_count, len(self.songs) + 1)
+        self.assertEqual(song_queue.head.song, new_head)
+        self.assertEqual(song_queue.head.next.next.song, inserted_song)
+        self.assertEqual(song_queue.head.next.prev.song, new_head)
+
+    def test_set_head_only_added_after_nodes(self):
+        song_queue = SongQueue.objects.create()
+
+        for song in self.songs:
+            song_queue.add_song(song, action=SongQueue.AddAction.ADD)
+
+        new_head = BaseSongFactory.create()
+        n1 = song_queue.add_song(new_head, action=SongQueue.AddAction.CHANGE_HEAD)
+
+        self.assertEqual(song_queue.song_count, len(self.songs))
+        self.assertEqual(song_queue.head.song, new_head)
+        self.assertEqual(song_queue.head.next.prev.song, new_head)

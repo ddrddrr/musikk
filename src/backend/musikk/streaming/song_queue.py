@@ -10,7 +10,9 @@ from streaming.songs import BaseSong
 
 class SongQueueNode(BaseModel):
     song = models.ForeignKey("streaming.BaseSong", on_delete=models.CASCADE)
-    song_queue = models.ForeignKey("streaming.SongQueue", on_delete=models.CASCADE)
+    song_queue = models.ForeignKey(
+        "streaming.SongQueue", on_delete=models.CASCADE, related_name="nodes"
+    )
 
     # TODO: add proper processing for on_delete
     next = models.OneToOneField(
@@ -28,32 +30,26 @@ class SongQueueNode(BaseModel):
         related_name="+",
     )
 
-    def __iter__(self):
-        current = self.head
-        while current:
-            yield current
-            current = current.next
-
     # TODO: add error handling in order not to lose objects
     def delete(self, using=None, keep_parents=False):
-        if self.prev:
-            self.prev.next = self.next
-            self.prev.save()
-        else:
-            self.head = self.next
+        with transaction.atomic():
+            if self.prev:
+                self.prev.next = self.next
+                self.prev.save()
+            else:
+                self.song_queue.head = self.next
 
-        if self.next:
-            self.next.prev = self.prev
-            self.next.save()
-        else:
-            self.tail = self.prev
+            if self.next:
+                self.next.prev = self.prev
+                self.next.save()
+            else:
+                self.song_queue.tail = self.prev
 
-        if self is self.song_queue.add_after:
-            self.song_queue.add_after = None
+            if self is self.song_queue.add_after:
+                self.song_queue.add_after = self.prev
+
             self.song_queue.save()
-
-        self.save()
-        return super().delete(using, keep_parents)
+            return super().delete(using, keep_parents)
 
 
 class SongQueueManager(models.Manager):
@@ -63,6 +59,17 @@ class SongQueueManager(models.Manager):
 
 # TODO: make transactions more fine-grained
 class SongQueue(BaseModel):
+    class AddAction:
+        """
+        `CHANGE_HEAD` removes the current head and sets it to the provided song
+        `ADD` uses `song_queue.add_after` to figure out, where to add the song
+        `APPEND` appends the song to the end
+        """
+
+        CHANGE_HEAD = "change_head"
+        ADD = "add"
+        APPEND = "append"
+
     default_size = 30
 
     objects = SongQueueManager()
@@ -94,37 +101,65 @@ class SongQueue(BaseModel):
     song_count = models.IntegerField(default=0)
 
     # TODO: wrap all in transactions?
-    def add_song(self, song: BaseSong, to_end=True) -> SongQueueNode | None:
+    def add_song(
+        self, song: BaseSong, action: str = AddAction.ADD
+    ) -> SongQueueNode | None:
         with transaction.atomic():
             node = SongQueueNode.objects.create(song=song, song_queue=self)
 
-            if to_end:
-                self.append_node(node)
-            else:
-                after = self.add_after if self.add_after else self.head
-                self.add_node_after(node, after)
+            match action:
+                case self.AddAction.CHANGE_HEAD:
+                    self._set_head(node)
+                case self.AddAction.APPEND:
+                    self._append_node(node)
+                case self.AddAction.ADD:
+                    after = self.add_after if self.add_after else self.head
+                    if after is None:
+                        self._set_head(node)
+                    else:
+                        self._add_node_after(node, after)
+                case _:
+                    raise f"Got an unknown add action type {action} for `add_song` action"
 
-            self.song_count += 1
             self.save()
             return node
 
-    def add_collection_songs(
-        self, collection: SongCollection, to_end=True
+    def add_collection(
+        self, collection: SongCollection, action=AddAction.ADD
     ) -> list[SongQueueNode]:
         with transaction.atomic():
             nodes = []
-            for song in collection.songs.all():
-                self.add_song(song, to_end=to_end)
-                nodes.append(song)
+            match action:
+                case self.AddAction.CHANGE_HEAD:
+                    for song in reversed(collection.ordered_songs()):
+                        self.add_song(song, action=action)
+                        nodes.append(song)
+                case self.AddAction.APPEND | self.AddAction.ADD:
+                    for song in collection.ordered_songs():
+                        self.add_song(song, action=action)
+                        nodes.append(song)
+                case _:
+                    raise ValueError(
+                        f"Got an unknown add action type {action} for `add_collection_songs` action"
+                    )
 
             return nodes
 
-    def add_node_after(
+    def clear(self):
+        # doesn't call `delete` of the individual nodes, safe
+        self.nodes.all().delete()
+        with transaction.atomic():
+            self.head, self.tail, self.add_after = None, None, None
+            self.song_count = 0
+            self.save()
+
+    def _add_node_after(
         self, node: SongQueueNode, target: SongQueueNode
     ) -> SongQueueNode:
+        """Used for enqueueing"""
         with transaction.atomic():
             if target is self.tail:
-                return self.append_node(node)
+                return self._append_node(node)
 
             node.next = target.next
             node.prev = target
@@ -132,19 +167,51 @@ class SongQueue(BaseModel):
             if target.next:
                 target.next.prev = node
                 target.next.save()
-                self.add_after = node
             else:
                 self.tail = node
+
             target.next = node
+            self.add_after = node
+            self.song_count += 1
 
             target.save()
             node.save()
             self.save()
             return node
 
-    def append_node(self, node: SongQueueNode) -> SongQueueNode:
+    def _set_head(self, node: SongQueueNode) -> SongQueueNode:
+        """Used when play is clicked"""
         with transaction.atomic():
-            if self.song_count == 0:
+            if self.is_empty():
+                self.head = node
+                self.tail = node
+                self.song_count += 1
+            else:
+                second = self.head.next
+                SongQueueNode.objects.filter(uuid=self.head.uuid).delete()
+                if second:
+                    node.next = second
+                    second.prev = node
+                    second.save()
+                else:
+                    self.tail = node  # only one node was in the queue
+
+                self.head = node
+
+            # if was empty - increase
+            # if deleted - increase to account for the deleted one
+            node.save()
+            self.save()
+
+            return node
+
+    def _append_node(self, node: SongQueueNode) -> SongQueueNode:
+        """
+        Warning: should be used only for appending to the end!
+        Does not update the `add_after` attr.
+        """
+        with transaction.atomic():
+            if self.is_empty():
                 self.head = node
             else:
                 tail = self.tail
@@ -152,6 +219,7 @@ class SongQueue(BaseModel):
                 node.prev = tail
                 tail.save()
             self.tail = node
+            self.song_count += 1
 
             node.save()
             self.save()
@@ -162,49 +230,9 @@ class SongQueue(BaseModel):
         with transaction.atomic():
             node.delete()
             self.song_count -= 1
+            print(self.head)
             self.save()
             return True
-
-    # TODO: test and refactor
-    def swap_nodes(self, node1: SongQueueNode, node2: SongQueueNode) -> bool:
-        node1_prev, node1_next = node1.prev, node1.next
-        node2_prev, node2_next = node2.prev, node2.next
-
-        if node1.next == node2:  # node1 is immediately before node2
-            node1.next, node2.prev = node2_next, node1_prev
-            node2.next, node1.prev = node1, node2
-        elif node2.next == node1:  # node2 is immediately before node1
-            node2.next, node1.prev = node1_next, node2_prev
-            node1.next, node2.prev = node2, node1
-        else:  # non-adjacent
-            node1.prev, node1.next = node2_prev, node2_next
-            node2.prev, node2.next = node1_prev, node1_next
-
-        if node1.prev:
-            node1.prev.next = node1
-        else:
-            self.head = node1
-
-        if node1.next:
-            node1.next.prev = node1
-        else:
-            self.tail = node1
-
-        if node2.prev:
-            node2.prev.next = node2
-        else:
-            self.head = node2
-
-        if node2.next:
-            node2.next.prev = node2
-        else:
-            self.tail = node2
-
-        self.save()
-        node1.save()
-        node2.save()
-
-        return True
 
     # TODO: implement, complete the table approach
     # from likedsongs --> filter on likedsongs id
@@ -223,7 +251,10 @@ class SongQueue(BaseModel):
         with transaction.atomic():
             qs = BaseSong.objects.all()
             songs = random.choices(qs, k=min(amount, len(qs)))
-            return [self.add_song(song) for song in songs]
+            return [self.add_song(song, action=self.AddAction.APPEND) for song in songs]
+
+    def is_empty(self):
+        return self.head is None
 
     def apply(self, func: callable) -> None:
         current = self.head

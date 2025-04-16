@@ -1,5 +1,9 @@
+from enum import Enum
+
+from django.core.exceptions import PermissionDenied
 from django.http import Http404
-from rest_framework.generics import RetrieveAPIView, UpdateAPIView
+from rest_framework.generics import RetrieveAPIView, UpdateAPIView, CreateAPIView
+from rest_framework.views import APIView
 from rest_framework import request
 from rest_framework import status
 from rest_framework.response import Response
@@ -26,6 +30,24 @@ class StreamingUserRetrieveView(RetrieveAPIView):
     def get_object(self):
         return self.request.user.streaminguser
 
+
+class UserCreateView(APIView):
+    def create(self, request, *args, **kwargs):
+        if not request.user.is_anonymous:
+            return Response(
+                status=status.HTTP_405_METHOD_NOT_ALLOWED,
+                data={"error": "Logout before creating a new account."},
+            )
+
+        role = request.data["role"]
+        user_data = request.data["userData"]
+        user = BaseUserSerializer(data=user_data)
+        if not user.is_valid():
+            return Response(status=status.HTTP_400_BAD_REQUEST, data=user.errors)
+        user.save()
+        #
+        # match role:
+        #     case ...
 
 class ResetPasswordView(UpdateAPIView):
     lookup_field = "uuid"

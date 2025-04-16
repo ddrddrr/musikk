@@ -2,6 +2,7 @@ from django.db import models
 
 from base.models import BaseModel
 from musikk.utils import image_path
+from streaming.songs import SongCollectionSong
 
 
 class SongCollectionMetadata(BaseModel):
@@ -20,6 +21,14 @@ class SongCollection(BaseModel):
     metadata = models.OneToOneField(
         SongCollectionMetadata, on_delete=models.CASCADE, null=True, blank=True
     )
+
+    def ordered_songs(self):
+        return (
+            sc.song
+            for sc in SongCollectionSong.objects.filter(song_collection=self)
+            .order_by("position")
+            .select_related("song")
+        )
 
     def __str__(self):
         return self.title

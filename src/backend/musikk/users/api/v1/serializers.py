@@ -12,6 +12,8 @@ from users.users_extended import StreamingUser
 
 
 class BaseUserSerializer(BaseModelSerializer):
+    password = serializers.CharField(write_only=True)
+
     class Meta:
         model = BaseUser
         fields = [
@@ -20,6 +22,7 @@ class BaseUserSerializer(BaseModelSerializer):
             "last_name",
             "display_name",
             "avatar",
+            "password",
         ]
 
 
@@ -40,13 +43,10 @@ class StreamingUserSerializer(BaseUserSerializer):
 class ResetPasswordSerializer(serializers.ModelSerializer):
     password_main = serializers.CharField(write_only=True)
     password_repeat = serializers.CharField(write_only=True)
-    logout = serializers.BooleanField(
-        default=True, initial=True
-    )  # Indicates whether to logout all when password is updated
 
     class Meta:
         model = BaseUser
-        fields = ["password_main", "password_repeat", "logout"]
+        fields = ["password_main", "password_repeat"]
 
     def validate(self, data):
         password_main = data.get("password_main")

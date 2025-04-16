@@ -8,10 +8,15 @@ from django.urls import path
 
 from streaming.api.v1.views import (
     SongCollectionListView,
-    SongQueueAppendRandomView,
+    SongQueueRemoveNodeView,
+    SongQueueAppendRandomSongsView,
     SongQueueRetrieveView,
+    SongQueueAddSongView,
+    SongQueueAddCollectionView,
     SongCollectionDetailView,
     SongListCreateView,
+    SongQueueSetSongHeadView,
+    SongQueueSetCollectionHeadView,
 )
 
 urlpatterns = [
@@ -22,10 +27,40 @@ urlpatterns = [
         SongCollectionDetailView.as_view(),
         name="collection-detail",
     ),
-    path("song-queue/", SongQueueRetrieveView.as_view(), name="song-queue-retrieve"),
+    path("song-queue", SongQueueRetrieveView.as_view(), name="song-queue-retrieve"),
+    path(
+        "song-queue/add-song/<uuid:uuid>",
+        SongQueueAddSongView.as_view(),
+        name="song-queue-add-song",
+    ),
+    path(
+        "song-queue/add-collection/<uuid:uuid>",
+        SongQueueAddCollectionView.as_view(),
+        name="song-queue-add-collection",
+    ),
+    path(
+        "song-queue/set-head/<uuid:uuid>",
+        SongQueueSetSongHeadView.as_view(),
+        name="song-queue-set-head",
+    ),
+    path(
+        "song-queue/set-head-song/<uuid:uuid>",
+        SongQueueSetSongHeadView.as_view(),
+        name="song-queue-set-head-song",
+    ),
+    path(
+        "song-queue/set-head-collection/<uuid:uuid>",
+        SongQueueSetCollectionHeadView.as_view(),
+        name="song-queue-set-head-collection",
+    ),
+    path(
+        "song-queue/remove-node/<uuid:uuid>",
+        SongQueueRemoveNodeView.as_view(),
+        name="song-queue-remove-node",
+    ),
     path(
         "song-queue/append-random",
-        SongQueueAppendRandomView.as_view(),
+        SongQueueAppendRandomSongsView.as_view(),
         name="song-queue-append-random",
     ),
 ]
