@@ -114,8 +114,9 @@ class SongQueue(BaseModel):
                     self._append_node(node)
                 case self.AddAction.ADD:
                     after = self.add_after if self.add_after else self.head
-                    if after is None:
+                    if after is None:  # no queued songs
                         self._set_head(node)
+                        self.add_after = node
                     else:
                         self._add_node_after(node, after)
                 case _:
@@ -128,21 +129,35 @@ class SongQueue(BaseModel):
         self, collection: SongCollection, action=AddAction.ADD
     ) -> list[SongQueueNode]:
         with transaction.atomic():
+            if not (songs := collection.ordered_songs()):
+                return []
+
             nodes = []
+            old_add_after = self.add_after
             match action:
                 case self.AddAction.CHANGE_HEAD:
-                    for song in reversed(collection.ordered_songs()):
-                        self.add_song(song, action=action)
-                        nodes.append(song)
+                    new_head = self.add_song(
+                        songs[0], action=self.AddAction.CHANGE_HEAD
+                    )
+                    nodes.append(new_head)
+
+                    if len(songs) > 1:
+                        self.add_after = new_head
+                        for song in songs[1:]:
+                            node = self.add_song(song, action=self.AddAction.ADD)
+                            nodes.append(node)
+                        self.add_after = old_add_after
+                        self.save()
+
                 case self.AddAction.APPEND | self.AddAction.ADD:
-                    for song in collection.ordered_songs():
+                    for song in songs:
                         self.add_song(song, action=action)
                         nodes.append(song)
                 case _:
                     raise ValueError(
                         f"Got an unknown add action type {action} for `add_collection_songs` action"
                     )
-
+            self.apply(lambda x: print(x.song))
             return nodes
 
     def clear(self):
@@ -159,20 +174,21 @@ class SongQueue(BaseModel):
         """Used for enqueueing"""
         with transaction.atomic():
             if target is self.tail:
-                return self._append_node(node)
-
-            node.next = target.next
-            node.prev = target
-
-            if target.next:
-                target.next.prev = node
-                target.next.save()
+                self._append_node(node)
             else:
-                self.tail = node
+                node.next = target.next
+                node.prev = target
 
-            target.next = node
+                if target.next:
+                    target.next.prev = node
+                    target.next.save()
+                else:
+                    self.tail = node
+
+                target.next = node
+                self.song_count += 1
+
             self.add_after = node
-            self.song_count += 1
 
             target.save()
             node.save()
@@ -198,8 +214,6 @@ class SongQueue(BaseModel):
 
                 self.head = node
 
-            # if was empty - increase
-            # if deleted - increase to account for the deleted one
             node.save()
             self.save()
 

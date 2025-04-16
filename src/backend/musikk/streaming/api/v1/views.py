@@ -14,7 +14,6 @@ from streaming.api.v1.serializers import (
 from streaming.song_collections import SongCollection
 from streaming.song_queue import SongQueue, SongQueueNode
 from streaming.songs import BaseSong
-from users.user_base import BaseUser
 from users.users_extended import StreamingUser, ContentOwner
 
 
@@ -137,3 +136,13 @@ class SongQueueRemoveNodeView(APIView):
             status=status.HTTP_403_FORBIDDEN,
             data={"error": "Node does not belong to this user's queue."},
         )
+
+
+class SongQueueClearView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        user: StreamingUser = request.user.streaminguser
+        song_queue: SongQueue = user.song_queue
+        song_queue.clear()
+        return Response(status=status.HTTP_204_NO_CONTENT)

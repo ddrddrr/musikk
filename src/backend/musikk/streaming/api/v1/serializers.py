@@ -70,11 +70,10 @@ class SongCollectionSerializerDetailed(BaseModelSerializer):
         ]
 
     def get_songs(self, obj):
-        song_collection_songs = SongCollectionSong.objects.filter(song_collection=obj)
+        song_collection_songs = obj.ordered_songs()
         return [
             {
-                **SongSerializer(song.song, context=self.context).data,
-                "position": song.position,
+                **SongSerializer(song, context=self.context).data,
             }
             for song in song_collection_songs
         ]

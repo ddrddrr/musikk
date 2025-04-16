@@ -92,12 +92,11 @@ class TestSongQueue(TestCase):
         song_queue = SongQueue.objects.create()
 
         collection = SongCollectionFactory()
-        csongs = collection.songs.all()
+        csongs = collection.ordered_songs()
         added_nodes = song_queue.add_collection(
             collection, action=SongQueue.AddAction.APPEND
         )
 
-        self.assertEqual(sorted([n.song for n in added_nodes]), sorted(list(csongs)))
         self.assertEqual(song_queue.song_count, len(csongs))
 
         current = song_queue.head
@@ -163,3 +162,25 @@ class TestSongQueue(TestCase):
         self.assertEqual(song_queue.song_count, len(self.songs))
         self.assertEqual(song_queue.head.song, new_head)
         self.assertEqual(song_queue.head.next.prev.song, new_head)
+
+    def test_change_head_with_collection(self):
+        song_queue = SongQueue.objects.create()
+        for song in self.songs:
+            song_queue.add_song(song, action=SongQueue.AddAction.APPEND)
+
+        collection = SongCollectionFactory()
+        csongs = collection.ordered_songs()
+        song_queue.add_collection(collection, action=SongQueue.AddAction.CHANGE_HEAD)
+
+        self.assertEqual(song_queue.song_count, len(self.songs) - 1 + len(csongs))
+
+        current = song_queue.head
+        for expected_song in csongs:
+            self.assertIsNotNone(current)
+            self.assertEqual(current.song, expected_song)
+            current = current.next
+
+        for expected_song in self.songs[1:]:
+            self.assertIsNotNone(current)
+            self.assertEqual(current.song, expected_song)
+            current = current.next

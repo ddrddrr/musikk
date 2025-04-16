@@ -17,6 +17,7 @@ from streaming.api.v1.views import (
     SongListCreateView,
     SongQueueSetSongHeadView,
     SongQueueSetCollectionHeadView,
+    SongQueueClearView,
 )
 
 urlpatterns = [
@@ -57,6 +58,11 @@ urlpatterns = [
         "song-queue/remove-node/<uuid:uuid>",
         SongQueueRemoveNodeView.as_view(),
         name="song-queue-remove-node",
+    ),
+    path(
+        "song-queue/clear",
+        SongQueueClearView.as_view(),
+        name="song-queue-clear",
     ),
     path(
         "song-queue/append-random",

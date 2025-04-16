@@ -9,6 +9,7 @@ from faker import Faker
 
 from audio_processing.ffmpeg_wrapper import Full
 from streaming.models import BaseSong, SongCollection
+from streaming.songs import SongCollectionSong
 
 fake = Faker()
 
@@ -78,5 +79,10 @@ class Command(BaseCommand):
                         image=File(i, name=os.path.basename(random_image)),
                     )
                     s = random.choices(songs, k=random.randint(1, len(songs)))
-                    collection.songs.add(*s)
+                    for idx, song in enumerate(s):
+                        SongCollectionSong.objects.create(
+                            song=song,
+                            song_collection=collection,
+                            position=idx,  # or omit if handled automatically in `save()`
+                        )
                     collection.save()

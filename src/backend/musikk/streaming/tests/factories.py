@@ -2,9 +2,8 @@ import factory
 
 from base.tests.factories import BaseModelFactory
 from streaming.models import BaseSong, SongCollection
-from streaming.song_queue import SongQueue, SongQueueNode
-import os
-import random
+
+from streaming.songs import SongCollectionSong
 
 fake = factory.Faker
 
@@ -33,11 +32,11 @@ class SongCollectionFactory(BaseModelFactory):
         if not create:
             return
 
-        songs_count = kwargs.pop("songs_count", 0)
+        songs_count = kwargs.pop("songs_count", 3)
+        songs = extracted or [BaseSongFactory() for _ in range(songs_count)]
 
-        if extracted:
-            for song in extracted:
-                self.songs.add(song)
-        else:
-            for _ in range(songs_count):
-                self.songs.add(BaseSongFactory())
+        for i, song in enumerate(songs):
+            SongCollectionSong.objects.create(
+                song=song,
+                song_collection=self,
+            )

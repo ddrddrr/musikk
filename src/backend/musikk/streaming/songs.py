@@ -1,7 +1,5 @@
 from django.conf import settings
 from django.db import models
-from django.db.models.signals import post_delete
-from django.dispatch import receiver
 
 from base.models import BaseModel
 from musikk.utils import image_path, delete_dir_for_file
@@ -72,6 +70,16 @@ class SongCollectionSong(BaseModel):
     position = models.IntegerField(
         default=None, null=True, help_text="The order of the song in the collection."
     )
+
+    def save(self, *args, **kwargs):
+        if self.position is None and self.song_collection:
+            last = (
+                SongCollectionSong.objects.filter(song_collection=self.song_collection)
+                .order_by("-position")
+                .first()
+            )
+            self.position = 0 if last is None else (last.position or 0) + 1
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.song.title
