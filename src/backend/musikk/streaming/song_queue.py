@@ -160,10 +160,30 @@ class SongQueue(BaseModel):
             self.apply(lambda x: print(x.song))
             return nodes
 
+    def shift_head(self, to: SongQueueNode) -> SongQueueNode | None:
+        if self.is_empty():
+            return None
+        with transaction.atomic():
+            delete_nodes = []
+            curr = self.head
+            while curr is not to and curr is not None:
+                delete_nodes.append(curr)
+                curr = curr.next
+            if curr:
+                if self.add_after in delete_nodes:
+                    self.add_after = None
+                ncount = len(delete_nodes)
+                SongQueueNode.objects.filter(
+                    uuid__in=[n.uuid for n in delete_nodes]
+                ).delete()
+                self.song_count -= ncount
+            self.head = curr
+            self.save()
+
     def clear(self):
         # doesn't call `delete` of the individual nodes, safe
-        self.nodes.all().delete()
         with transaction.atomic():
+            self.nodes.all().delete()
             self.head, self.tail, self.add_after = None, None, None
             self.song_count = 0
             self.save()

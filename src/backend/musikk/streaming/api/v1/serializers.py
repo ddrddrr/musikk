@@ -94,8 +94,18 @@ class SongQueueNodeSerializer(BaseModelSerializer):
 
 
 class SongQueueSerializer(BaseModelSerializer):
-    nodes = SongQueueNodeSerializer(many=True)
+    nodes = serializers.SerializerMethodField()
 
     class Meta:
         model = SongQueue
         fields = BaseModelSerializer.Meta.fields + ["nodes", "head", "tail"]
+
+    def get_nodes(self, obj):
+        nodes = []
+        curr = obj.head
+        while curr:
+            nodes.append(SongQueueNodeSerializer(curr).data)
+            if curr == obj.tail:
+                break
+            curr = curr.next
+        return nodes

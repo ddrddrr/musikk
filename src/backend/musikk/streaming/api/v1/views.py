@@ -146,3 +146,17 @@ class SongQueueClearView(APIView):
         song_queue: SongQueue = user.song_queue
         song_queue.clear()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class SongQueueShiftHeadView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        user: StreamingUser = request.user.streaminguser
+        song_queue: SongQueue = user.song_queue
+        if not song_queue.is_empty():
+            shift_to_node = song_queue.head.next
+            if node_uuid := kwargs.get("uuid"):
+                shift_to_node = SongQueueNode.objects.filter(uuid=node_uuid)
+            song_queue.shift_head(to=shift_to_node)
+        return Response(status=status.HTTP_204_NO_CONTENT)

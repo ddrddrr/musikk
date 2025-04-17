@@ -18,6 +18,7 @@ from streaming.api.v1.views import (
     SongQueueSetSongHeadView,
     SongQueueSetCollectionHeadView,
     SongQueueClearView,
+    SongQueueShiftHeadView,
 )
 
 urlpatterns = [
@@ -68,5 +69,15 @@ urlpatterns = [
         "song-queue/append-random",
         SongQueueAppendRandomSongsView.as_view(),
         name="song-queue-append-random",
+    ),
+    path(
+        "song-queue/shift-head",
+        SongQueueShiftHeadView.as_view(),
+        name="song-queue-shift-head",
+    ),
+    path(
+        "song-queue/shift-head/<uuid:uuid>",
+        SongQueueShiftHeadView.as_view(),
+        name="song-queue-shift-head-to",
     ),
 ]
