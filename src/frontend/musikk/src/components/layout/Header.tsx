@@ -2,20 +2,26 @@ import { Button } from "@/components/ui/button";
 import { Home, Settings, Upload, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-interface NavigationProps {
+interface HeaderProps {
     title?: string;
 }
 
-export function Navigation({ title = "Musikk" }: NavigationProps) {
+export function Header({ title = "Music Player" }: HeaderProps) {
     const navigate = useNavigate();
 
     return (
         <div className="flex justify-between p-4 bg-red-600 text-white">
+            <div className="flex-1">
+                <Button variant="ghost" className="text-white hover:text-gray-200 p-0" onClick={() => navigate("/")}>
+                    <Home className="w-5 h-5 mr-1" />
+                    Home
+                </Button>
+            </div>
             <div className="flex-1 flex justify-center">
                 <h1 className="text-xl font-bold">{title}</h1>
             </div>
             <div className="flex-1 flex justify-end gap-4">
-                <button className="hover:underline flex items-center" onClick={() => navigate("/")}>
+                <button className="hover:underline flex items-center">
                     <Home className="w-4 h-4 mr-1" />
                     *home*
                 </button>

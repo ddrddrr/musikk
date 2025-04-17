@@ -1,12 +1,14 @@
-import {ISong} from "@/components/song/types.ts";
+import { ISong } from "@/components/song/types.ts";
 
 export interface ISongCollection {
     uuid: string;
-    title: string,
-    image?: string,
+    title: string;
+    description: string;
+    // creators: string[];
+    image?: string;
 }
 
 export interface ISongCollectionDetailed extends ISongCollection {
-    songs: ISong[],
-    description: string,
+    songs: ISong[];
+    description: string;
 }

@@ -1,28 +1,30 @@
+import { useQueue, useQueueChangeAPI } from "@/hooks/useQueueAPI.ts";
+import { PlaybackContext } from "@/providers/playbackContext.ts";
+import { useContext, useEffect, useMemo, useRef } from "react";
 
-
-import { useEffect, useRef } from "react";
 // @ts-expect-error, see shaka docs
 import shaka from "shaka-player";
 
 interface PlayerProps {
-    url: string | null;
     onDurationChange?: (duration: number) => void;
     onTimeUpdate?: (currentTime: number) => void;
 }
 
-export function Player({ url, onDurationChange, onTimeUpdate }: PlayerProps) {
+export function Player({ onDurationChange, onTimeUpdate }: PlayerProps) {
+    const { queue } = useQueue();
+    const { isPlaying } = useContext(PlaybackContext);
+    const useShiftHeadMutation = useQueueChangeAPI();
     const audioRef = useRef<HTMLAudioElement>(null);
     const playerRef = useRef<shaka.Player | null>(null);
+
+    const url = useMemo(() => {
+        return queue?.head ? queue.nodes[0].song?.mpd : null;
+    }, [queue?.head]);
 
     useEffect(() => {
         shaka.polyfill.installAll();
 
-        if (!shaka.Player.isBrowserSupported()) {
-            console.error("Shaka Player not supported");
-            return;
-        }
-
-        const player = new shaka.Player(); // no mediaElement here
+        const player = new shaka.Player();
         playerRef.current = player;
 
         return () => {
@@ -34,23 +36,23 @@ export function Player({ url, onDurationChange, onTimeUpdate }: PlayerProps) {
     useEffect(() => {
         const handlePlayback = async () => {
             const player = playerRef.current;
-            const audio = audioRef.current;
+            const audioElem = audioRef.current;
 
-            if (!player || !audio) return;
+            if (!player || !audioElem) return;
 
             if (url) {
                 try {
-                    await player.attach(audio);
+                    await player.attach(audioElem);
                     await player.load(url);
-                    await audio.play();
+                    await audioElem.play();
                 } catch (err) {
                     console.error("Error during playback:", err);
                 }
             } else {
                 try {
                     await player.unload();
-                    audio.pause();
-                    audio.currentTime = 0;
+                    audioElem.pause();
+                    audioElem.currentTime = 0;
                 } catch (err) {
                     console.warn("Error stopping playback:", err);
                 }
@@ -59,6 +61,17 @@ export function Player({ url, onDurationChange, onTimeUpdate }: PlayerProps) {
 
         handlePlayback();
     }, [url]);
+
+    useEffect(() => {
+        const audio = audioRef.current;
+        if (!audio) return;
+
+        if (isPlaying) {
+            audio.play().catch(console.warn);
+        } else {
+            audio.pause();
+        }
+    }, [isPlaying]);
 
     const handleLoadedMetadata = () => {
         const audio = audioRef.current;
@@ -81,6 +94,7 @@ export function Player({ url, onDurationChange, onTimeUpdate }: PlayerProps) {
             className="w-full"
             onLoadedMetadata={handleLoadedMetadata}
             onTimeUpdate={handleTimeUpdate}
+            onEnded={() => useShiftHeadMutation.mutate({ action: "shift" })}
         />
     );
 }

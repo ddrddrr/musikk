@@ -1,4 +1,4 @@
-import { refreshAccessToken } from "@/auth/login.ts";
+import { refreshAccessToken } from "@/auth/authentication.ts";
 import axios from "axios";
 import Cookies from "js-cookie";
 

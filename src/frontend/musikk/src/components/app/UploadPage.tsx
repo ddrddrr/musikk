@@ -1,4 +1,4 @@
-import { Navigation } from "@/components/layout/Navigation.tsx";
+import { Header } from "@/components/layout/Header.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import { SongUploadForm } from "@/components/upload/SongUploadForm.tsx";
 import { ChevronLeft } from "lucide-react";
@@ -8,7 +8,7 @@ export function UploadPage() {
     const navigate = useNavigate();
     return (
         <div className="flex flex-col h-screen bg-gray-200">
-            <Navigation />
+            <Header />
 
             <div className="flex-1 bg-red-600 p-4 overflow-y-auto">
                 <div className="max-w-2xl mx-auto">

@@ -4,5 +4,4 @@ export interface ISong {
     artist: string
     mpd: string
     image?: string
-    duration?: number
 }

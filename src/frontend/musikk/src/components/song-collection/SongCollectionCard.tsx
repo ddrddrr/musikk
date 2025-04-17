@@ -1,16 +1,13 @@
-import { Card, CardContent } from "@/components/ui/card";
 import type { ISongCollection } from "@/components/song-collection/types";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface SongCollectionCardProps {
     collection: ISongCollection;
     setSelectedCollection: (collection: ISongCollection) => void;
 }
 
-export function SongCollectionCard(
-    { collection, setSelectedCollection }: SongCollectionCardProps,
-) {
+export function SongCollectionCard({ collection, setSelectedCollection }: SongCollectionCardProps) {
     const { uuid, title, image } = collection;
-
     const handleClick = () => {
         setSelectedCollection(collection);
     };

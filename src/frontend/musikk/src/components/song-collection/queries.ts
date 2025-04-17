@@ -8,6 +8,6 @@ export async function fetchCollectionList(): Promise<ISongCollectionDetailed[]> 
 }
 
 export async function fetchCollectionDetailed(collectionUUID: string): Promise<ISongCollectionDetailed> {
-    const response = await api.get(CollectionURLs.collectionDetailed(collectionUUID));
+    const response = await api.get(CollectionURLs.collectionDetail(collectionUUID));
     return response.data;
 }

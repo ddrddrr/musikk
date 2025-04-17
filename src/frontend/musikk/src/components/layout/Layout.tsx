@@ -1,20 +1,16 @@
-"use client"
+import type React from "react";
 
-import type React from "react"
-
-import {Navigation} from "./Navigation"
+import { Header } from "./Header.tsx";
 
 interface LayoutProps {
-    children: React.ReactNode
+    children: React.ReactNode;
 }
 
-export function Layout({children}: LayoutProps) {
+export function Layout({ children }: LayoutProps) {
     return (
         <div className="flex flex-col h-screen bg-gray-200">
-            <Navigation/>
-
-            {/* Main Content */}
+            <Header />
             <div className="flex flex-1 overflow-hidden">{children}</div>
         </div>
-    )
+    );
 }
