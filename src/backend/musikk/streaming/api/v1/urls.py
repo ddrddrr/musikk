@@ -8,18 +8,12 @@ from django.urls import path
 
 from streaming.api.v1.views import (
     SongCollectionListView,
-    SongQueueRemoveNodeView,
-    SongQueueAppendRandomSongsView,
-    SongQueueRetrieveView,
-    SongQueueAddSongView,
-    SongQueueAddCollectionView,
     SongCollectionDetailView,
     SongListCreateView,
-    SongQueueSetSongHeadView,
-    SongQueueSetCollectionHeadView,
-    SongQueueClearView,
-    SongQueueShiftHeadView,
 )
+from streaming.api.v1.song_queue_views import SongQueueRetrieveView, SongQueueAddSongView, SongQueueAddCollectionView, \
+    SongQueueSetSongHeadView, SongQueueSetCollectionHeadView, SongQueueAppendRandomSongsView, SongQueueRemoveNodeView, \
+    SongQueueClearView, SongQueueShiftHeadView
 
 urlpatterns = [
     path("songs/", SongListCreateView.as_view(), name="song-list-create"),

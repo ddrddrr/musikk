@@ -1,5 +1,6 @@
 from django.db import models
 
+from streaming.song_collections import UserHistory
 from streaming.song_queue import SongQueue
 from users.user_base import BaseUser
 
@@ -26,10 +27,18 @@ class StreamingUser(BaseUser):
         null=True,
         on_delete=models.DO_NOTHING,
     )
+    history = models.OneToOneField(
+        "streaming.UserHistory",
+        related_name="user",
+        null=True,
+        on_delete=models.DO_NOTHING,
+    )
 
     def save(self, *args, **kwargs):
         if not self.song_queue:
             self.song_queue = SongQueue.objects.create()
+        if not self.history:
+            self.history = UserHistory.objects.create()
         super().save(*args, **kwargs)
 
 

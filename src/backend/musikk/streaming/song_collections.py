@@ -1,7 +1,9 @@
+from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 
 from base.models import BaseModel
 from musikk.utils import image_path
+from streaming.models import Stream
 from streaming.songs import SongCollectionSong, BaseSong
 
 
@@ -21,6 +23,7 @@ class SongCollection(BaseModel):
     metadata = models.OneToOneField(
         SongCollectionMetadata, on_delete=models.CASCADE, null=True, blank=True
     )
+    streams = GenericRelation(Stream)
 
     def ordered_songs(self) -> list[BaseSong]:
         return [
@@ -32,6 +35,15 @@ class SongCollection(BaseModel):
 
     def __str__(self):
         return self.title
+
+
+class UserHistory(SongCollection):
+    def save(self, *args, **kwargs):
+        self.title = "history"
+        self.description = ""
+        self.image = None
+        self.metadata = None
+        super().save(*args, **kwargs)
 
 
 class Playlist(SongCollection):

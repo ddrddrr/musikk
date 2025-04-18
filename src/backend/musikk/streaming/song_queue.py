@@ -2,10 +2,11 @@ import random
 
 from django.db import models
 from django.db import transaction
+from django.db.models.aggregates import Max
 
 from base.models import BaseModel
 from streaming.song_collections import SongCollection
-from streaming.songs import BaseSong
+from streaming.songs import BaseSong, SongCollectionSong
 
 
 class SongQueueNode(BaseModel):
@@ -72,7 +73,6 @@ class SongQueue(BaseModel):
 
     default_size = 30
 
-    objects = SongQueueManager()
     head = models.OneToOneField(
         SongQueueNode,
         default=None,
@@ -99,6 +99,8 @@ class SongQueue(BaseModel):
     )
     # INFO: used instead of calling `COUNT()`, as this is accessed frequently
     song_count = models.IntegerField(default=0)
+
+    objects = SongQueueManager()
 
     # TODO: wrap all in transactions?
     def add_song(
@@ -160,24 +162,37 @@ class SongQueue(BaseModel):
             self.apply(lambda x: print(x.song))
             return nodes
 
-    def shift_head(self, to: SongQueueNode) -> SongQueueNode | None:
+    def shift_head_forward(self, to: SongQueueNode) -> SongQueueNode | None:
         if self.is_empty():
             return None
         with transaction.atomic():
-            delete_nodes = []
+            shifted_nodes = []
             curr = self.head
             while curr is not to and curr is not None:
-                delete_nodes.append(curr)
+                shifted_nodes.append(curr)
                 curr = curr.next
             if curr:
-                if self.add_after in delete_nodes:
+                if self.add_after in shifted_nodes:
                     self.add_after = None
-                ncount = len(delete_nodes)
-                SongQueueNode.objects.filter(
-                    uuid__in=[n.uuid for n in delete_nodes]
-                ).delete()
-                self.song_count -= ncount
+                self.song_count -= len(shifted_nodes)
+
+            SongCollectionSong.create(
+                song_collection=self.user.history,
+                song=self.head.song,
+            )
+
             self.head = curr
+            self.save()
+
+    def shift_head_backwards(self) -> SongQueueNode | None:
+        if not self.head or not self.head.prev:
+            return None
+        with transaction.atomic():
+            self.head = self.head.prev
+            SongCollectionSong.create(
+                song_collection=self.user.history,
+                song=self.head.song,
+            )
             self.save()
 
     def clear(self):
@@ -224,7 +239,6 @@ class SongQueue(BaseModel):
                 self.song_count += 1
             else:
                 second = self.head.next
-                SongQueueNode.objects.filter(uuid=self.head.uuid).delete()
                 if second:
                     node.next = second
                     second.prev = node
@@ -232,6 +246,7 @@ class SongQueue(BaseModel):
                 else:
                     self.tail = node  # only one node was in the queue
 
+                self.head.next = node
                 self.head = node
 
             node.save()

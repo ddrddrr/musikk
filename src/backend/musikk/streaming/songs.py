@@ -1,8 +1,10 @@
 from django.conf import settings
+from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 
 from base.models import BaseModel
 from musikk.utils import image_path, delete_dir_for_file
+from streaming.models import Stream
 
 
 class SongMetadata(BaseModel):
@@ -25,6 +27,8 @@ class BaseSong(BaseModel):
         null=True,
         blank=True,
     )
+    streams = GenericRelation(Stream)
+
     like_count = models.IntegerField(default=0, blank=True)
     dislike_count = models.IntegerField(default=0, blank=True)
 
@@ -70,6 +74,9 @@ class SongCollectionSong(BaseModel):
     position = models.IntegerField(
         default=None, null=True, help_text="The order of the song in the collection."
     )
+
+    class Meta:
+        ordering = ("position",)
 
     def save(self, *args, **kwargs):
         if self.position is None and self.song_collection:
