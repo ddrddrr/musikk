@@ -11,9 +11,18 @@ from streaming.api.v1.views import (
     SongCollectionDetailView,
     SongListCreateView,
 )
-from streaming.api.v1.song_queue_views import SongQueueRetrieveView, SongQueueAddSongView, SongQueueAddCollectionView, \
-    SongQueueSetSongHeadView, SongQueueSetCollectionHeadView, SongQueueAppendRandomSongsView, SongQueueRemoveNodeView, \
-    SongQueueClearView, SongQueueShiftHeadView
+from streaming.api.v1.song_queue_views import (
+    SongQueueRetrieveView,
+    SongQueueAddSongView,
+    SongQueueAddCollectionView,
+    SongQueueSetSongHeadView,
+    SongQueueSetCollectionHeadView,
+    SongQueueAppendRandomSongsView,
+    SongQueueRemoveNodeView,
+    SongQueueClearView,
+    SongQueueShiftHeadView,
+    SongQueueShiftHeadBackwardsView,
+)
 
 urlpatterns = [
     path("songs/", SongListCreateView.as_view(), name="song-list-create"),
@@ -68,6 +77,11 @@ urlpatterns = [
         "song-queue/shift-head",
         SongQueueShiftHeadView.as_view(),
         name="song-queue-shift-head",
+    ),
+    path(
+        "song-queue/shift-head-backwards",
+        SongQueueShiftHeadBackwardsView.as_view(),
+        name="song-queue-shift-head-backwards",
     ),
     path(
         "song-queue/shift-head/<uuid:uuid>",

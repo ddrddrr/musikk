@@ -122,3 +122,14 @@ class SongQueueShiftHeadView(APIView):
                 shift_to_node = SongQueueNode.objects.filter(uuid=node_uuid)
             song_queue.shift_head_forward(to=shift_to_node)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class SongQueueShiftHeadBackwardsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        user: StreamingUser = request.user.streaminguser
+        song_queue: SongQueue = user.song_queue
+        if not song_queue.is_empty():
+            song_queue.shift_head_backwards()
+        return Response(status=status.HTTP_204_NO_CONTENT)

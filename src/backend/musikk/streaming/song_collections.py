@@ -3,7 +3,7 @@ from django.db import models
 
 from base.models import BaseModel
 from musikk.utils import image_path
-from streaming.models import Stream
+from streaming.stream import Stream
 from streaming.songs import SongCollectionSong, BaseSong
 
 

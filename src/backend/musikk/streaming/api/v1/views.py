@@ -3,7 +3,6 @@ from rest_framework.generics import (
     ListAPIView,
     GenericAPIView,
     RetrieveAPIView,
-    CreateAPIView,
 )
 from rest_framework.permissions import IsAuthenticated
 

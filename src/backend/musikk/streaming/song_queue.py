@@ -2,7 +2,6 @@ import random
 
 from django.db import models
 from django.db import transaction
-from django.db.models.aggregates import Max
 
 from base.models import BaseModel
 from streaming.song_collections import SongCollection
@@ -176,7 +175,8 @@ class SongQueue(BaseModel):
                     self.add_after = None
                 self.song_count -= len(shifted_nodes)
 
-            SongCollectionSong.create(
+            print("creating history song")
+            SongCollectionSong.objects.create(
                 song_collection=self.user.history,
                 song=self.head.song,
             )
@@ -189,7 +189,7 @@ class SongQueue(BaseModel):
             return None
         with transaction.atomic():
             self.head = self.head.prev
-            SongCollectionSong.create(
+            SongCollectionSong.objects.create(
                 song_collection=self.user.history,
                 song=self.head.song,
             )

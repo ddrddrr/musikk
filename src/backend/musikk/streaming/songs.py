@@ -4,7 +4,7 @@ from django.db import models
 
 from base.models import BaseModel
 from musikk.utils import image_path, delete_dir_for_file
-from streaming.models import Stream
+from streaming.stream import Stream
 
 
 class SongMetadata(BaseModel):
