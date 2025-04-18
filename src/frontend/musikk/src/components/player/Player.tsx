@@ -12,7 +12,7 @@ interface PlayerProps {
 
 export function Player({ onDurationChange, onTimeUpdate }: PlayerProps) {
     const { queue } = useQueue();
-    const { isPlaying } = useContext(PlaybackContext);
+    const { isPlaying, setIsPlaying } = useContext(PlaybackContext);
     const useShiftHeadMutation = useQueueChangeAPI();
     const audioRef = useRef<HTMLAudioElement>(null);
     const playerRef = useRef<shaka.Player | null>(null);
@@ -34,34 +34,35 @@ export function Player({ onDurationChange, onTimeUpdate }: PlayerProps) {
     }, []);
 
     useEffect(() => {
-        const handlePlayback = async () => {
+        const initSong = async () => {
             const player = playerRef.current;
-            const audioElem = audioRef.current;
+            const audio = audioRef.current;
 
-            if (!player || !audioElem) return;
+            if (!player || !audio) return;
 
             if (url) {
                 try {
-                    await player.attach(audioElem);
+                    await player.attach(audio);
                     await player.load(url);
-                    await audioElem.play();
                 } catch (err) {
                     console.error("Error during playback:", err);
                 }
             } else {
                 try {
                     await player.unload();
-                    audioElem.pause();
-                    audioElem.currentTime = 0;
+                    audio.pause();
+                    audio.currentTime = 0;
                 } catch (err) {
                     console.warn("Error stopping playback:", err);
                 }
             }
         };
 
-        handlePlayback();
+        initSong();
     }, [url]);
 
+    // TODO: when url changes, we need to wait for the new data to load
+    //  and only then play somehow
     useEffect(() => {
         const audio = audioRef.current;
         if (!audio) return;
@@ -73,19 +74,24 @@ export function Player({ onDurationChange, onTimeUpdate }: PlayerProps) {
         }
     }, [isPlaying]);
 
-    const handleLoadedMetadata = () => {
+    function handleLoadedMetadata() {
         const audio = audioRef.current;
         if (audio && onDurationChange) {
             onDurationChange(audio.duration);
         }
-    };
+    }
 
-    const handleTimeUpdate = () => {
+    function handleTimeUpdate() {
         const audio = audioRef.current;
         if (audio && onTimeUpdate) {
             onTimeUpdate(audio.currentTime);
         }
-    };
+    }
+
+    function handleOnEnded() {
+        useShiftHeadMutation.mutate({ action: "shift" });
+        setIsPlaying(true);
+    }
 
     return (
         <audio
@@ -94,7 +100,7 @@ export function Player({ onDurationChange, onTimeUpdate }: PlayerProps) {
             className="w-full"
             onLoadedMetadata={handleLoadedMetadata}
             onTimeUpdate={handleTimeUpdate}
-            onEnded={() => useShiftHeadMutation.mutate({ action: "shift" })}
+            onEnded={handleOnEnded}
         />
     );
 }

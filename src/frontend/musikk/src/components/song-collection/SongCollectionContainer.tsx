@@ -21,10 +21,16 @@ export function SongCollectionContainer({ collection, onBackClick }: SongCollect
         queryFn: () => fetchCollectionDetailed(collection.uuid),
     });
 
-    if (isPending) return <div></div>;
+    if (isPending)
+        return (
+            <div className="min-h-[400px] flex items-center justify-center">
+                <div className="w-8 h-8 border-4 border-black border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        );
+
     if (error)
         return (
-            <div className="text-white text-center p-4 bg-red-500 rounded-md border-2 border-black">
+            <div className="text-white text-center p-6 bg-red-500 rounded-lg border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
                 An error has occurred: {error.message}
             </div>
         );
@@ -32,31 +38,31 @@ export function SongCollectionContainer({ collection, onBackClick }: SongCollect
     const songs = data.songs;
 
     return (
-        <div>
-            <div className="flex items-center justify-between mb-4">
+        <div className="space-y-6 max-w-4xl mx-auto p-4">
+            <div className="flex items-center justify-between">
                 <Button
                     variant="ghost"
                     onClick={onBackClick}
-                    className="flex items-center text-black hover:text-gray-700 hover:bg-gray-200"
+                    className="flex items-center text-black hover:text-gray-700 hover:bg-gray-200 border-2 border-black rounded-lg shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform active:translate-y-1 active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
                 >
                     <ChevronLeft className="mr-1" /> Back
                 </Button>
-                <h2 className="text-xl font-bold text-black">{collection.title}</h2>
-                <div className="w-6"></div>
+                <h2 className="text-2xl font-bold text-black">{collection.title}</h2>
+                <div className="w-24"></div>
             </div>
 
-            <div className="flex items-center bg-white p-4 rounded-md border-2 border-black">
+            <div className="flex items-center bg-white p-6 rounded-lg border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
                 <img
                     src={collection.image || "/placeholder.svg?height=100&width=100"}
                     alt={collection.title}
-                    className="w-24 h-24 object-cover border-2 border-black"
+                    className="w-32 h-32 object-cover border-2 border-black rounded-lg shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
                 />
-                <div className="ml-4 flex-1">
-                    <p className="text-lg font-bold">{collection.title}</p>
-                    {data.description && <p className="text-sm text-gray-600 mt-1">{data.description}</p>}
+                <div className="ml-6 flex-1">
+                    <p className="text-xl font-bold">{collection.title}</p>
+                    {data.description && <p className="text-gray-600 mt-2 line-clamp-2">{data.description}</p>}
                 </div>
-                <div className="flex gap-1">
-                    <div className="bg-red-500 hover:bg-red-600 text-white border-2 border-black rounded-full h-10 w-10 p-0 flex items-center justify-center">
+                <div className="flex gap-3">
+                    <div className="bg-red-500 hover:bg-red-600 text-white border-2 border-black rounded-lg h-12 w-12 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform hover:-translate-y-1 active:translate-y-1 active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] p-0 flex items-center justify-center">
                         <SongCollectionPlayButton collection={data} />
                     </div>
                     <Button
@@ -68,28 +74,31 @@ export function SongCollectionContainer({ collection, onBackClick }: SongCollect
                             })
                         }
                         disabled={addToQueueMutation.isPending}
-                        className="bg-gray-200 hover:bg-gray-300 text-black border-2 border-black rounded-full h-10 w-10 p-0 flex items-center justify-center"
+                        className="bg-gray-200 hover:bg-gray-300 text-black border-2 border-black rounded-lg h-12 w-12 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform hover:-translate-y-1 active:translate-y-1 active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] p-0 flex items-center justify-center"
                     >
-                        <BetweenHorizonalStart size={18} />
+                        <BetweenHorizonalStart size={20} />
                     </Button>
                 </div>
             </div>
 
-            <div className="flex items-center justify-between mb-2">
-                <h3 className="text-black font-bold">Songs • {songs.length}</h3>
+            <div className="flex items-center justify-between px-2">
+                <h3 className="text-black text-lg font-bold">Songs • {songs.length}</h3>
             </div>
 
             {songs.length > 0 ? (
                 <ul className="space-y-4" role="list">
                     {songs.map((song, index) => (
-                        <li key={`${song.uuid}-${index}`} className="bg-gray-200 p-4 rounded-md border-2 border-black">
+                        <li
+                            key={`${song.uuid}-${index}`}
+                            className="bg-white p-4 rounded-md border border-gray-200 transition-colors hover:bg-gray-50"
+                        >
                             <SongCard song={song} />
                         </li>
                     ))}
                 </ul>
             ) : (
-                <div className="text-center py-8 text-gray-700 bg-white rounded-md border-2 border-black">
-                    <p>No songs in this collection</p>
+                <div className="text-center py-12 text-gray-700 bg-white rounded-lg border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                    <p className="font-medium">No songs in this collection</p>
                 </div>
             )}
         </div>

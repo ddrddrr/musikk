@@ -13,6 +13,7 @@ export const QueueURLs = {
     setHeadCollection: (songUUID: string) => `${BASE_URL}/song-queue/set-head-collection/${songUUID}`,
     shiftHead: `${BASE_URL}/song-queue/shift-head`,
     shiftHeadTo: (nodeUUID: string) => `${BASE_URL}/song-queue/shift-head/${nodeUUID}`,
+    shiftHeadBackwards: `${BASE_URL}/song-queue/shift-head-backwards`,
     removeNode: (nodeUUID: string) => `${BASE_URL}/song-queue/remove-node/${nodeUUID}`,
     clearQueue: `${BASE_URL}/song-queue/clear`,
     appendRandom: `${BASE_URL}/song-queue/append-random`,

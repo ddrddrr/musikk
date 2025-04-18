@@ -16,8 +16,6 @@ export function useCollectionPlayback({ isPlaying, setIsPlaying }: UseCollection
             setIsPlaying(!isPlaying);
             return;
         }
-        console.log("aboba")
-
         if (collection.songs.length === 0) return;
 
         addToQueueMutation.mutate({ type: "collection", item: collection, action: "setHead" });

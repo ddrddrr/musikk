@@ -32,9 +32,6 @@ export function SongUploadForm() {
 
     const mutation = useMutation({
         mutationFn: uploadSong,
-        onSuccess: () => {
-            console.log("Upload done");
-        },
     });
 
     const onSubmit = async (values: z.infer<typeof FormSchema>) => {

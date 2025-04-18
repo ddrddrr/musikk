@@ -6,6 +6,7 @@ import {
     setHeadCollection,
     setHeadSong,
     shiftHead,
+    shiftHeadBackwards,
 } from "@/components/song-queue/mutations.ts";
 import { getSongQueue } from "@/components/song-queue/queries.ts";
 import type { ISong } from "@/components/song/types.ts";
@@ -75,18 +76,24 @@ type ClearQueueAction = {
 type ShiftHeadQueueAction = {
     action: "shift";
 };
+type ShiftHeadBackQueueAction = {
+    action: "shift-back";
+};
 
-type QueueChangeInput = ClearQueueAction | ShiftHeadQueueAction;
+type QueueChangeInput = ClearQueueAction | ShiftHeadQueueAction | ShiftHeadBackQueueAction;
 
 export function useQueueChangeAPI() {
     const { onSuccess, onError } = useQueueMutationHandlers();
 
+    // когда ласт трек дослушан - clear queue
     function handleQueueChangeAction(input: QueueChangeInput): Promise<unknown> {
         switch (input.action) {
             case "clear":
                 return clearQueue();
             case "shift":
                 return shiftHead();
+            case "shift-back":
+                return shiftHeadBackwards();
             default:
                 return Promise.reject(new Error("Invalid action"));
         }

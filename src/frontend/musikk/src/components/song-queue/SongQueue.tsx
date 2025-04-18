@@ -28,17 +28,23 @@ export function SongQueue() {
     }, [queue?.head, setPlayingSong, setPlayingCollection]);
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-6">
             <SongDisplay song={queue?.head ? queue.nodes[0].song : null} />
 
             <div className="space-y-4">
                 {nodes.length > 0 ? (
                     <>
-                        <ul className="space-y-4 pr-2" role="list">
-                            {" "}
+                        <ul className="space-y-3 pr-2 custom-scrollbar" role="list">
                             {nodes.map((node) => (
-                                <li key={node.uuid} className="bg-gray-200 p-4 rounded-md border-2 border-black w-full">
-                                    <SongCard song={node.song} />
+                                <li key={node.uuid} className="bg-white p-4 rounded-md border border-black/20 w-full">
+                                    <SongCard
+                                        song={node.song}
+                                        showImage={false}
+                                        showAddToQueueButton={false}
+                                        playButtonSize={14}
+                                        playButtonClass="p-1 w-8 h-8"
+                                        addButtonClass="p-1 w-8 h-8"
+                                    />
                                 </li>
                             ))}
                         </ul>
@@ -46,15 +52,15 @@ export function SongQueue() {
                         <Button
                             onClick={() => clearQueueMutation.mutate({ action: "clear" })}
                             variant="destructive"
-                            className="w-full bg-red-600 hover:bg-red-700 text-white border-2 border-black"
+                            className="w-full bg-red-500 hover:bg-red-600 text-white border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all hover:-translate-y-[2px]"
                         >
                             <Trash2 className="w-4 h-4 mr-2" />
                             Clear Queue
                         </Button>
                     </>
                 ) : (
-                    <div className="text-center py-6 bg-gray-100 rounded-md border-2 border-gray-300">
-                        <p className="text-gray-500">Queue is empty</p>
+                    <div className="text-center py-6 bg-white rounded-md border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                        <p className="text-gray-600">Queue is empty</p>
                     </div>
                 )}
             </div>

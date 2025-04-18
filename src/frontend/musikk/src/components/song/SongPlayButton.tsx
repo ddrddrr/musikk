@@ -6,27 +6,26 @@ import { useContext } from "react";
 
 interface SongPlayButtonProps {
     song: ISong;
+    className?: string;
+    iconSize?: number; // size for the play/pause icon
 }
 
-export function SongPlayButton({ song }: SongPlayButtonProps) {
+export function SongPlayButton({ song, className = "", iconSize = 18 }: SongPlayButtonProps) {
     const { isPlaying } = useContext(PlaybackContext);
     const { handleSongPlayClick, playingSong } = useContext(PlayingSongContext);
 
     const isThisPlaying = isPlaying && song.uuid === playingSong?.uuid;
 
     const renderPlayPauseIcon = () => {
-        if (!(song.uuid === playingSong?.uuid)) return <Play size={18} />;
-        return isThisPlaying ? <Pause size={18} /> : <Play size={18} />;
+        if (!(song.uuid === playingSong?.uuid)) return <Play size={iconSize} />;
+        return isThisPlaying ? <Pause size={iconSize} /> : <Play size={iconSize} />;
     };
 
     return (
         <button
-            className="bg-red-600 hover:bg-red-700 text-white border-2 border-black p-2 rounded-full flex items-center justify-center"
-            onClick={() => {
-                if (handleSongPlayClick) {
-                    handleSongPlayClick(song);
-                }
-            }}
+            className={`bg-red-600 hover:bg-red-700 text-white border-2 border-black flex items-center justify-center rounded-full ${className}`}
+            style={{ width: iconSize * 2, height: iconSize * 2 }}
+            onClick={() => handleSongPlayClick?.(song)}
         >
             {renderPlayPauseIcon()}
         </button>

@@ -9,14 +9,16 @@ import { useContext, useEffect, useRef, useState } from "react";
 interface PlayerBarProps {
     duration: number;
     time: number;
+    seeking: boolean;
+    setSeeking: (s: boolean) => void;
 }
 
 export function PlayerBar({ duration, time }: PlayerBarProps) {
     const { playingSong } = useContext(PlayingSongContext);
-    const useShiftHeadMutation = useQueueChangeAPI();
     const [volume, setVolume] = useState(100);
     const [seeking, setSeeking] = useState(false);
     const [seekTime, setSeekTime] = useState(0);
+    const useShiftHeadMutation = useQueueChangeAPI();
     const audioRef = useRef<HTMLAudioElement | null>(null);
 
     useEffect(() => {
@@ -39,15 +41,18 @@ export function PlayerBar({ duration, time }: PlayerBarProps) {
     };
 
     const handleSeek = (value: number[]) => {
-        setSeekTime(value[0]);
         setSeeking(true);
+        setSeekTime(value[0]);
     };
 
     const handleSeekCommit = () => {
         if (audioRef.current) {
             audioRef.current.currentTime = seekTime;
         }
-        setSeeking(false);
+        // helps with little stutter on seek
+        setTimeout(() => {
+            setSeeking(false);
+        }, 100);
     };
 
     const displayTime = seeking ? seekTime : time;
@@ -108,7 +113,12 @@ export function PlayerBar({ duration, time }: PlayerBarProps) {
                         </div>
 
                         <div className="flex items-center gap-4">
-                            <Button variant="ghost" size="icon" className="text-gray-700 hover:text-black">
+                            <Button
+                                onClick={() => useShiftHeadMutation.mutate({ action: "shift-back" })}
+                                variant="ghost"
+                                size="icon"
+                                className="text-gray-700 hover:text-black"
+                            >
                                 <SkipBack size={24} />
                             </Button>
 

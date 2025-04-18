@@ -25,6 +25,10 @@ export async function shiftHeadTo(nodeUUID: string) {
     await api.post(QueueURLs.shiftHeadTo(nodeUUID));
 }
 
+export async function shiftHeadBackwards() {
+    await api.post(QueueURLs.shiftHeadBackwards);
+}
+
 export async function removeNode(nodeUUID: string) {
     await api.post(QueueURLs.removeNode(nodeUUID));
 }

@@ -16,8 +16,7 @@ export function CenterColumn({ selectedCollection, onBackClick }: CenterColumnPr
                 ) : (
                     <div className="flex items-center justify-center h-full">
                         <div className="text-center p-8 text-white bg-red-500 rounded-md max-w-md border-2 border-black">
-                            <p className="text-xl mb-4">Welcome to Music Player</p>
-                            <p>Select a collection from the left to start playing music</p>
+                            <p className="text-xl">Welcome:)</p>
                         </div>
                     </div>
                 )}

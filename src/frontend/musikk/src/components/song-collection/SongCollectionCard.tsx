@@ -6,6 +6,7 @@ interface SongCollectionCardProps {
     setSelectedCollection: (collection: ISongCollection) => void;
 }
 
+// TODO: create a modified version for the queue(make text here longer, there shorter)
 export function SongCollectionCard({ collection, setSelectedCollection }: SongCollectionCardProps) {
     const { uuid, title, image } = collection;
     const handleClick = () => {
