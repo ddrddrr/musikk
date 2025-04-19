@@ -1,9 +1,11 @@
+import { CommentObjectType } from "@/components/comments/types.ts";
+
 const BASE_URL = import.meta.env.VITE_API_BASE_URL + "/api/v1";
 
 export const SongURLs = {
     songList: `${BASE_URL}/songs`,
     songDetail: (songUUID: string) => `${BASE_URL}/songs/${songUUID}`,
-    songUpload: `${BASE_URL}/songs`,
+    songCreate: `${BASE_URL}/songs`,
 };
 export const QueueURLs = {
     queue: `${BASE_URL}/song-queue`,
@@ -21,6 +23,11 @@ export const QueueURLs = {
 export const CollectionURLs = {
     collectionList: `${BASE_URL}/collections`,
     collectionDetail: (collectionUUID: string) => `${BASE_URL}/collections/${collectionUUID}`,
+};
+export const CommentURLs = {
+    commentList: (objType: CommentObjectType, objUUID: string) =>
+        `${BASE_URL}/comments/?obj-type=${objType}&obj-uuid=${objUUID}`,
+    commentCreate: `${BASE_URL}/comments/`,
 };
 export const UserUrls = {
     userDetail: (userUUID: string) => `${BASE_URL}/users/${userUUID}`,

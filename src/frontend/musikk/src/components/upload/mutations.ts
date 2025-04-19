@@ -20,7 +20,7 @@ export async function uploadSong(song: ISongUpload) {
         formData.append("image", song.image);
     }
 
-    const response = await api.post(SongURLs.songUpload, formData, {
+    const response = await api.post(SongURLs.songCreate, formData, {
         headers: {
             "Content-Type": "multipart/form-data",
         },

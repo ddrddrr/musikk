@@ -1,8 +1,8 @@
 import { Player } from "@/components/player/Player.tsx";
 import { PlayerBar } from "@/components/player/PlayerBar.tsx";
-import { useState } from "react";
+import { memo, useState } from "react";
 
-export function PlayerBox() {
+export const PlayerBox = memo(function PlayerBox() {
     const [duration, setDuration] = useState(0);
     const [time, setTime] = useState(0);
     const [seeking, setSeeking] = useState(false);
@@ -22,4 +22,4 @@ export function PlayerBox() {
             </div>
         </div>
     );
-}
+});

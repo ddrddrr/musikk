@@ -19,6 +19,7 @@ const loginSchema = z.object({
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
+// TODO: add signup logic
 export function LoginPage() {
     const navigate = useNavigate();
     const location = useLocation();
@@ -81,7 +82,6 @@ export function LoginPage() {
                                 )}
                             />
 
-                            {/* Password */}
                             <FormField
                                 control={form.control}
                                 name="password"
@@ -116,7 +116,6 @@ export function LoginPage() {
                                 )}
                             />
 
-                            {/* Submit */}
                             <Button
                                 type="submit"
                                 className="w-full bg-red-600 hover:bg-red-700 text-white border-2 border-black p-6"
@@ -151,7 +150,6 @@ export function LoginPage() {
                                 )}
                             </Button>
 
-                            {/* Error Message */}
                             {message && (
                                 <div className="p-3 bg-red-100 border-2 border-red-400 text-red-700 rounded">
                                     <p>{message}</p>
