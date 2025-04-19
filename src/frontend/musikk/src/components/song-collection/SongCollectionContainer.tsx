@@ -68,11 +68,14 @@ export function SongCollectionContainer({
                 )}
             </div>
 
-            {showComments && (
-                <div className="w-1/2 pl-2">
-                    <CommentBox objType="collection" objUUID={collection.uuid} />
-                </div>
-            )}
+            {/* Animated Comment Section */}
+            <div
+                className={`w-1/2 pl-2 transition-all duration-500 ease-in-out transform ${
+                    showComments ? "opacity-100 translate-x-0" : "opacity-0 translate-x-8"
+                }`}
+            >
+                {showComments && <CommentBox objType="collection" objUUID={collection.uuid} />}
+            </div>
         </div>
     );
 }

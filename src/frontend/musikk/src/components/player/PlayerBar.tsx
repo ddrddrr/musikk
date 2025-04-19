@@ -57,11 +57,11 @@ export function PlayerBar({ duration, time }: PlayerBarProps) {
 
     const displayTime = seeking ? seekTime : time;
     return (
-        <div className="bg-white p-4 rounded-none border-t border-black">
+        <div className="bg-white py-2 px-3 rounded-none border-t border-black">
             {playingSong ? (
-                <div className="space-y-4">
-                    <div className="flex items-center gap-4">
-                        <div className="w-16 h-16 flex-shrink-0 border-2 border-black">
+                <div className="space-y-2">
+                    <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 flex-shrink-0 border-2 border-black">
                             {playingSong.image ? (
                                 <img
                                     src={playingSong.image}
@@ -76,17 +76,17 @@ export function PlayerBar({ duration, time }: PlayerBarProps) {
                         </div>
 
                         <div className="flex-1">
-                            <div className="bg-gray-200 p-2 border-2 border-black mb-2">
-                                <p className="font-bold truncate">{playingSong.title}</p>
+                            <div className="bg-gray-200 p-1.5 border-2 border-black mb-1">
+                                <p className="font-bold truncate text-sm">{playingSong.title}</p>
                             </div>
-                            <div className="bg-gray-200 p-2 border-2 border-black">
-                                <p className="text-sm truncate">{playingSong.artist}</p>
+                            <div className="bg-gray-200 p-1.5 border-2 border-black">
+                                <p className="text-xs truncate">{playingSong.artist}</p>
                             </div>
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-2">
-                        <span className="text-sm w-10 text-right">{formatTime(displayTime)}</span>
+                    <div className="flex items-center gap-1">
+                        <span className="text-xs w-8 text-right">{formatTime(displayTime)}</span>
                         <Slider
                             value={[displayTime]}
                             min={0}
@@ -96,30 +96,30 @@ export function PlayerBar({ duration, time }: PlayerBarProps) {
                             onValueCommit={handleSeekCommit}
                             className="flex-1 cursor-pointer"
                         />
-                        <span className="text-sm w-10">{formatTime(duration)}</span>
+                        <span className="text-xs w-8">{formatTime(duration)}</span>
                     </div>
 
-                    <div className="flex justify-between items-center gap-4">
-                        <div className="flex items-center gap-2">
-                            <Volume2 size={18} />
+                    <div className="flex justify-between items-center gap-3">
+                        <div className="flex items-center gap-1">
+                            <Volume2 size={16} />
                             <Slider
                                 value={[volume]}
                                 min={0}
                                 max={100}
                                 step={1}
                                 onValueChange={(value) => setVolume(value[0])}
-                                className="w-24 cursor-pointer"
+                                className="w-20 cursor-pointer"
                             />
                         </div>
 
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-3">
                             <Button
                                 onClick={() => useShiftHeadMutation.mutate({ action: "shift-back" })}
                                 variant="ghost"
                                 size="icon"
                                 className="text-gray-700 hover:text-black"
                             >
-                                <SkipBack size={24} />
+                                <SkipBack size={20} />
                             </Button>
 
                             <PlayerPlayButton />
@@ -130,14 +130,14 @@ export function PlayerBar({ duration, time }: PlayerBarProps) {
                                 size="icon"
                                 className="text-gray-700 hover:text-black"
                             >
-                                <SkipForward size={24} />
+                                <SkipForward size={20} />
                             </Button>
                         </div>
                     </div>
                 </div>
             ) : (
-                <div className="text-center py-4">
-                    <p className="text-gray-500">Select a song to play</p>
+                <div className="text-center py-2">
+                    <p className="text-gray-500 text-xs">Select a song to play</p>
                 </div>
             )}
         </div>
