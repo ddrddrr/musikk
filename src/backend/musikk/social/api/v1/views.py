@@ -6,8 +6,6 @@ from rest_framework.response import Response
 
 from social.api.v1.serializers import CommentSerializer
 from social.models import Comment
-from streaming.song_collections import SongCollection
-from streaming.songs import BaseSong
 
 
 class CommentListCreateView(CreateModelMixin, GenericAPIView):
@@ -16,28 +14,18 @@ class CommentListCreateView(CreateModelMixin, GenericAPIView):
     queryset = Comment.objects.all()
 
     def get(self, request, *args, **kwargs):
-        obj_type = request.query_params.get("obj_type")
-        obj_uuid = request.query_params.get("uuid")
+        obj_type = request.query_params.get("obj-type")
+        obj_uuid = request.query_params.get("obj-uuid")
 
         if not obj_type or not obj_uuid:
-            raise ValidationError("Both obj_type and uuid are required")
+            raise ValidationError("Both obj_type and obj_uuid are required")
 
-        match obj_type:
-            case "collection":
-                model = SongCollection
-            case "song":
-                model = BaseSong
-            case _:
-                raise ValidationError(f"Invalid obj_type provided: {obj_type}")
-
-        try:
-            obj = model.objects.get(uuid=obj_uuid)
-        except model.DoesNotExist:
-            raise ValidationError(f"No object found with uuid: {obj_uuid}")
-
-        comments = Comment.objects.filter(parent=obj)
-        serializer = self.get_serializer(comments, many=True)
+        related_instance = Comment.lookup_related_instance(obj_type, obj_uuid)
+        serializer = self.get_serializer(related_instance.comments, many=True)
         return Response(serializer.data)
 
     def post(self, request, *args, **kwargs):
+        request.data["user"] = request.user.pk
+        request.data["obj_type"] = request.data.get("obj-type")
+        request.data["obj_uuid"] = request.data.get("obj-uuid")
         return self.create(request, *args, **kwargs)
