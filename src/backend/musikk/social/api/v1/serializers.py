@@ -30,7 +30,6 @@ class CommentSerializer(BaseModelSerializer):
         return obj.user.display_name if obj.user else None
 
     def create(self, validated_data):
-        print("!!!!" + "\n".join([f"{k}:{v}" for (k, v) in validated_data.items()]))
         obj_type = validated_data.pop("obj_type")
         obj_uuid = validated_data.pop("obj_uuid")
         related_instance = Comment.lookup_related_instance(obj_type, obj_uuid)

@@ -49,6 +49,8 @@ INSTALLED_APPS = [
     "api.apps.ApiConfig",
     "social.apps.SocialConfig",
     ##
+    "daphne",
+    "django_eventstream",
     "django_filters",
     "django_extensions",
     "rest_framework",
@@ -93,12 +95,18 @@ REST_FRAMEWORK = {
         "users.tokens.UUIDJWTAuthentication",
         "rest_framework.authentication.SessionAuthentication",
     ],
+    "DEFAULT_RENDERER_CLASSES": [
+        "rest_framework.renderers.JSONRenderer",
+        "rest_framework.renderers.BrowsableAPIRenderer",
+        "django_eventstream.renderers.SSEEventRenderer",
+    ],
 }
 SIMPLE_JWT = {
     "USER_ID_FIELD": "uuid",
     "USER_ID_CLAIM": "uuid",
     "TOKEN_OBTAIN_SERIALIZER": "users.api.v1.serializers.TokenPairSerializer",
 }
+EVENTSTREAM_STORAGE_CLASS = "django_eventstream.storage.DjangoModelStorage"
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 DATABASES = {
