@@ -3,6 +3,7 @@ from django.db import models
 
 from base.models import BaseModel
 from musikk.utils import image_path
+from social.models import Comment
 from streaming.stream import Stream
 from streaming.songs import SongCollectionSong, BaseSong
 
@@ -23,7 +24,9 @@ class SongCollection(BaseModel):
     metadata = models.OneToOneField(
         SongCollectionMetadata, on_delete=models.CASCADE, null=True, blank=True
     )
+
     streams = GenericRelation(Stream)
+    comments = GenericRelation(Comment)
 
     def ordered_songs(self) -> list[BaseSong]:
         return [

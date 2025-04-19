@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "recommendations.apps.RecommendationsConfig",
     "base.apps.BaseConfig",
     "api.apps.ApiConfig",
+    "social.apps.SocialConfig",
     ##
     "django_filters",
     "django_extensions",
