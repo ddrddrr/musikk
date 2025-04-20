@@ -5,7 +5,7 @@ export interface IComment {
     content: string;
     username: string | null;
     date_added: Date;
-    parent: UUID;
+    parent: UUID | null;
     is_deleted: boolean;
 }
 

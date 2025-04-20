@@ -28,6 +28,7 @@ export const CommentURLs = {
     commentList: (objType: CommentObjectType, objUUID: string) =>
         `${BASE_URL}/comments/?obj-type=${objType}&obj-uuid=${objUUID}`,
     commentCreate: `${BASE_URL}/comments/`,
+    eventsBase: `${BASE_URL}/comments/events/`,
 };
 export const UserUrls = {
     userDetail: (userUUID: string) => `${BASE_URL}/users/${userUUID}`,

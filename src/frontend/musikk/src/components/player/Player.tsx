@@ -17,6 +17,13 @@ export function Player({ onDurationChange, onTimeUpdate }: PlayerProps) {
     const audioRef = useRef<HTMLAudioElement>(null);
     const playerRef = useRef<shaka.Player | null>(null);
 
+    const isPlayingRef = useRef(isPlaying);
+
+    // had to use dark magic :(
+    useEffect(() => {
+        isPlayingRef.current = isPlaying;
+    }, [isPlaying]);
+
     const url = useMemo(() => {
         return queue?.head ? queue.nodes[0].song?.mpd : null;
     }, [queue?.head]);
@@ -34,7 +41,7 @@ export function Player({ onDurationChange, onTimeUpdate }: PlayerProps) {
     }, []);
 
     useEffect(() => {
-        const initSong = async () => {
+        const initPlayback = async () => {
             const player = playerRef.current;
             const audio = audioRef.current;
 
@@ -44,6 +51,11 @@ export function Player({ onDurationChange, onTimeUpdate }: PlayerProps) {
                 try {
                     await player.attach(audio);
                     await player.load(url);
+                    if (isPlayingRef.current) {
+                        await audio.play().catch(console.warn);
+                    } else {
+                        audio.pause();
+                    }
                 } catch (err) {
                     console.error("Error during playback:", err);
                 }
@@ -58,7 +70,7 @@ export function Player({ onDurationChange, onTimeUpdate }: PlayerProps) {
             }
         };
 
-        initSong();
+        initPlayback();
     }, [url]);
 
     // TODO: when url changes, we need to wait for the new data to load

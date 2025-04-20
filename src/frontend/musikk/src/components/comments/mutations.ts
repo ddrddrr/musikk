@@ -6,12 +6,15 @@ interface IAddCommentParams {
     objType: CommentObjectType;
     objUUID: string;
     content: string;
+    replyToUUID: string | undefined;
 }
 
-export async function addComment({ objType, objUUID, content }: IAddCommentParams) {
-    await api.post(CommentURLs.commentCreate, {
+export async function addComment({ objType, objUUID, content, replyToUUID }: IAddCommentParams) {
+    const data = {
         "obj-type": objType,
         "obj-uuid": objUUID,
         content,
-    });
+        parent: replyToUUID,
+    };
+    await api.post(CommentURLs.commentCreate, data);
 }

@@ -22,6 +22,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "dashjs": "^5.0.0",
+    "eventsource": "^3.0.6",
     "js-cookie": "^3.0.5",
     "lucide-react": "^0.487.0",
     "react": "^19.1.0",

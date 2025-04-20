@@ -20,7 +20,6 @@ const FormSchema = z.object({
     songs: z.array(SongSchema),
 });
 
-// TODO: add dropzone support
 export function SongUploadForm() {
     const form = useForm({
         resolver: zodResolver(FormSchema),
@@ -65,7 +64,7 @@ export function SongUploadForm() {
     };
 
     return (
-        <div className="max-h-screen overflow-y-auto">
+        <div className="max-h-screen overflow-y-auto p-4">
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                     {fields.map((field, index) => (
@@ -73,16 +72,16 @@ export function SongUploadForm() {
                             key={field.id}
                             className={`bg-white p-6 rounded-md border-2 border-black space-y-4 ${
                                 fieldStatuses[index] ? "border-green-600" : "border-red-600"
-                            }`}
+                            } shadow-lg`}
                         >
                             <FormField
                                 control={form.control}
                                 name={`songs.${index}.title`}
                                 render={({ field }) => (
                                     <FormItem className="space-y-2">
-                                        <FormLabel className="text-lg font-bold">Title</FormLabel>
+                                        <FormLabel className="text-lg font-bold text-black">Title</FormLabel>
                                         <FormControl>
-                                            <div className="bg-gray-200 p-2 border-2 border-black">
+                                            <div className="bg-gray-200 p-2 border-2 border-black rounded-md">
                                                 <Input
                                                     {...field}
                                                     className="border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 p-0"
@@ -99,9 +98,9 @@ export function SongUploadForm() {
                                 name={`songs.${index}.description`}
                                 render={({ field }) => (
                                     <FormItem className="space-y-2">
-                                        <FormLabel className="text-lg font-bold">Description</FormLabel>
+                                        <FormLabel className="text-lg font-bold text-black">Description</FormLabel>
                                         <FormControl>
-                                            <div className="bg-gray-200 p-2 border-2 border-black">
+                                            <div className="bg-gray-200 p-2 border-2 border-black rounded-md">
                                                 <Input
                                                     {...field}
                                                     className="border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 p-0"
@@ -119,9 +118,9 @@ export function SongUploadForm() {
                                     name={`songs.${index}.audio`}
                                     render={({ field: { onChange, value } }) => (
                                         <FormItem className="space-y-2">
-                                            <FormLabel className="text-lg font-bold">Audio File</FormLabel>
+                                            <FormLabel className="text-lg font-bold text-black">Audio File</FormLabel>
                                             <FormControl>
-                                                <div className="bg-gray-200 p-2 border-2 border-black">
+                                                <div className="bg-gray-200 p-4 border-2 border-black rounded-md">
                                                     <label className="flex items-center cursor-pointer">
                                                         <span className="px-3 py-2 bg-red-600 text-white rounded mr-2">
                                                             Choose file
@@ -147,10 +146,10 @@ export function SongUploadForm() {
                                     name={`songs.${index}.image`}
                                     render={({ field: { onChange, value, ...rest } }) => (
                                         <FormItem className="space-y-2">
-                                            <FormLabel className="text-lg font-bold">Cover Image</FormLabel>
+                                            <FormLabel className="text-lg font-bold text-black">Cover Image</FormLabel>
                                             <div className="flex gap-4">
                                                 <FormControl className="flex-1">
-                                                    <div className="bg-gray-200 p-2 border-2 border-black">
+                                                    <div className="bg-gray-200 p-4 border-2 border-black rounded-md">
                                                         <label className="flex items-center cursor-pointer">
                                                             <span className="px-3 py-2 bg-red-600 text-white rounded mr-2">
                                                                 Choose file
@@ -172,17 +171,6 @@ export function SongUploadForm() {
                                                         </label>
                                                     </div>
                                                 </FormControl>
-                                                <div className="w-16 h-16 flex-shrink-0 border-2 border-black flex items-center justify-center bg-gray-200">
-                                                    {previewUrls[index] ? (
-                                                        <img
-                                                            src={previewUrls[index] || "/placeholder.svg"}
-                                                            alt="Preview"
-                                                            className="w-full h-full object-cover"
-                                                        />
-                                                    ) : (
-                                                        <span className="text-gray-400 text-2xl">♪</span>
-                                                    )}
-                                                </div>
                                             </div>
                                             <FormMessage className="text-red-600" />
                                         </FormItem>
@@ -192,7 +180,7 @@ export function SongUploadForm() {
                             <Button
                                 variant="destructive"
                                 onClick={() => remove(index)}
-                                className="bg-red-600 hover:bg-red-700 text-white border-2 border-black"
+                                className="bg-red-600 hover:bg-red-700 text-white border-2 border-black rounded-md shadow-md"
                             >
                                 Remove Song
                             </Button>
@@ -203,7 +191,7 @@ export function SongUploadForm() {
                         <Button
                             type="button"
                             onClick={() => append({ title: "", description: "" })}
-                            className="flex-1 bg-gray-200 text-black hover:bg-gray-300 border-2 border-black"
+                            className="flex-1 bg-gray-200 text-black hover:bg-gray-300 border-2 border-black rounded-md shadow-md"
                         >
                             Add Song
                         </Button>
@@ -211,7 +199,7 @@ export function SongUploadForm() {
                         <Button
                             type="submit"
                             disabled={mutation.isPending}
-                            className="flex-1 bg-red-600 hover:bg-red-700 text-white border-2 border-black"
+                            className="flex-1 bg-red-600 hover:bg-red-700 text-white border-2 border-black rounded-md shadow-md"
                         >
                             {mutation.isPending ? (
                                 <span className="flex items-center">
