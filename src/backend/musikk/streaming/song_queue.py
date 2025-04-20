@@ -175,7 +175,6 @@ class SongQueue(BaseModel):
                     self.add_after = None
                 self.song_count -= len(shifted_nodes)
 
-            print("creating history song")
             SongCollectionSong.objects.create(
                 song_collection=self.user.history,
                 song=self.head.song,
@@ -239,6 +238,8 @@ class SongQueue(BaseModel):
                 self.song_count += 1
             else:
                 second = self.head.next
+                self.head.next = node
+                self.head.save()
                 if second:
                     node.next = second
                     second.prev = node
@@ -246,7 +247,6 @@ class SongQueue(BaseModel):
                 else:
                     self.tail = node  # only one node was in the queue
 
-                self.head.next = node
                 self.head = node
 
             node.save()

@@ -2,13 +2,15 @@ from rest_framework import serializers
 
 from base.serializers import BaseModelSerializer
 from social.models import Comment
-from users.api.v1.serializers import BaseUserSerializer
 
 
 class CommentSerializer(BaseModelSerializer):
     username = serializers.SerializerMethodField(read_only=True)
     obj_type = serializers.CharField(write_only=True)
     obj_uuid = serializers.UUIDField(write_only=True)
+    parent = serializers.UUIDField(
+        source="parent.uuid", required=False, allow_null=True
+    )
 
     class Meta(BaseModelSerializer.Meta):
         model = Comment
@@ -35,5 +37,5 @@ class CommentSerializer(BaseModelSerializer):
         related_instance = Comment.lookup_related_instance(obj_type, obj_uuid)
 
         parent_uuid = validated_data.pop("parent", None)
-        parent = Comment.objects.get(uuid=parent_uuid) if parent_uuid else None
+        parent = Comment.objects.get(uuid=parent_uuid["uuid"]) if parent_uuid else None
         return related_instance.comments.create(parent=parent, **validated_data)

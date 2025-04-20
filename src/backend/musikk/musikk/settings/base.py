@@ -4,9 +4,9 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 import os
-from datetime import timedelta
 from pathlib import Path
 
+from corsheaders.defaults import default_headers
 from decouple import config, Csv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -23,18 +23,25 @@ ALLOWED_HOSTS = config(
     "DJANGO_ALLOWED_HOSTS", default="localhost,127.0.0.1", cast=Csv()
 )
 # TODO: change to dev/prod variants
-# CORS_ALLOWED_ORIGINS = config(
-#     "CORS_ALLOWED_ORIGINS",
-#     default="http://localhost:5173,http://localhost:8000,http://127.0.0.1:5173,http://127.0.0.1:8000",
-#     cast=Csv(),
-# )
-CORS_ALLOW_ALL_ORIGINS: bool = True
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://localhost:8000",
+]
 # CORS_URLS_REGEX = r"^*media*$"
 
+CORS_ALLOW_HEADERS = (
+    *default_headers,
+    "Bearer",
+    "Last-Event-ID",
+    "Access-Control-Allow-Origin",
+    "Access-Control-Allow-Credentials",
+)
 # Application definition
 INSTALLED_APPS = [
     "corsheaders",
     "jazzmin",
+    "daphne",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -48,8 +55,8 @@ INSTALLED_APPS = [
     "base.apps.BaseConfig",
     "api.apps.ApiConfig",
     "social.apps.SocialConfig",
+    "notifications.apps.NotificationsConfig",
     ##
-    "daphne",
     "django_eventstream",
     "django_filters",
     "django_extensions",
@@ -88,7 +95,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "musikk.wsgi.application"
-
+ASGI_APPLICATION = "musikk.asgi.application"
 # REST
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
@@ -169,6 +176,27 @@ AUTH_USER_MODEL = "users.BaseUser"
 MEDIA_ROOT = config("MEDIA_ROOT", default="/tmp/media/musikk_media")
 MEDIA_URL = "media/"
 AUDIO_CONTENT_PATH = config("AUDIO_CONTENT_PATH", default="/tmp/media/musikk_audio")
+
+# LOGS
+# settings.py
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "level": "DEBUG",
+            "class": "logging.StreamHandler",
+        },
+    },
+    "loggers": {
+        "django_eventstream": {
+            "handlers": ["console"],
+            "level": "DEBUG",
+            "propagate": True,
+        },
+    },
+}
 
 # MISC
 MAX_PATH_LENGTH = os.pathconf("/", "PC_PATH_MAX")
