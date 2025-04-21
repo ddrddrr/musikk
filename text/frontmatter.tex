@@ -1,15 +1,36 @@
-\section*{Prohlášení} Prohlašuji, že tato práce je mým původním autorským dílem,
-které jsem vypracoval samostatně. Všechny zdroje, prameny a literaturu, které
-jsem při vypracování používal nebo z~nich čerpal, v~práci řádně cituji
-s~uvedením úplného odkazu na příslušný zdroj.
+\section*{Declaration}
+Hereby I declare that this thesis is my original authorial work, which I have worked out on my own. All
+sources, references, and literature used or excerpted during elaboration of this work are properly cited and
+listed in complete reference to the due source.
+\\
+%TODO: add formatting
+During the preparation of this thesis, these AI tools were used:
+- ChatGPT for debugging and small code corrections.
+- V0 for the initial styling config and layout.
+I declare that they were used in accordance with the principles of academic integrity.\\
+I checked the content and took full responsibility for it.
 
 \vfill\noindent
-\textbf{Vedoucí práce:} Tvá babka   % XXX
+\textbf{Thesis Advisor:} Mgr. Luděk Bártek, Ph.D
 \cleardoublepage
 
-\section*{Poděkování} % XXX
-\cleardoublepage
+\section*{Abstract}
+This bachelor's thesis implements a music streaming platform
+with additional social features - live comment sections for songs and playlists,
+discussion forums, additional possibilities for interaction with the followed users etc.
 
-\section*{Shrnutí} % XXX
+A study is made beforehand in order to determine what users expect from the application;
+comparison and exploration of different existing platforms is presented in order
+to give a better insight into the market of similar applications.
 
-\subsection*{Klíčová slova} % XXX
+The thesis leverages existing backend and frontend frameworks, such as Django and React, for the
+actual handling of the underlying data, logical processes and the interface of the platform.
+In addition, modern audio representation and streaming solutions,
+such as MPEG-DASH and HLS are used.
+In order for the application to feel responsive, Server Sent Events are added to provide
+two-way communication between the client and the server - this ensures that
+individual interactions are always synchronized with other users and instances of the program.
+
+
+\subsection*{Keywords}
+Audio Streaming, Python, Django, React, MPEG-DASH, SSE
