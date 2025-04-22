@@ -1,8 +1,8 @@
 \chapter{Implementation Planning}
-This section provides an insight into the technology choices used to implement the application.
-In addition, UML diagrams are provided as a high-level overview of the system.
+This section provides an insight into the high-level technology choices used to implement the application.
+In addition, UML diagrams are provided as an overview of the system.
 
-The created platform is built using the Model-View-Controller\cite{11} architectural pattern.
+The created platform is built using the Model-View-Controller\cite{mvc} architectural pattern.
 It is split into three major parts:
 - Backend. Implements all of the data-related logic and processing.
 - API. Is responsible for transferring the data to the frontend and receiving commands from it.
@@ -15,58 +15,141 @@ It has support for all the needed instruments, such as calling external processe
 file handling, and executing asynchronous code. Moreover, it has a flexible and straightforward
 syntax allowing for rapid development.
 As this project is mostly IO-driven and most of the processor-heavy operations are offloaded to external processes,
-i.e. no thread programming is used, Python's performance limitations\cite{12} will not have such a drastic effect.
+i.e. no thread programming is used, Python's performance limitations\cite{gil} will not have such a drastic effect.
 
 \subsection{Framework Comparison}
 
-Currently there are 3 well-developed and widely-used WEB frameworks available for Python:
+Currently, there are 3 well-developed and widely-used WEB frameworks available for Python:
 
 \begin{itemize}
-    \item \textbf{FastAPI.} \\
+    \item \textbf{FastAPI} \\
     'FastAPI is a modern, fast (high-performance), web framework for building APIs
-    with Python based on standard Python type hints.'~\cite{13}. \\
+    with Python, based on standard Python type hints.'~\cite{fastapi}. \\
     This framework offers a lightweight approach to API declaration, without adding almost no overhead.
     It has the best integration with API documentation standards such as
     Open API and API representation tools, e.g. Swagger.
 
-    However, it is relatively new and barebones; given the requirements and the fact that
-    still not many extra packages are available -
-    a lot of custom code would have to be written on top, which is a disadvantage for this project.
+    However, it is relatively new and basic; given the requirements and the fact that
+    few additional packages are available - a lot of custom code would have
+    to be written on top, which is a disadvantage for this specific project.
 
-    \item \textbf{Flask.} \\
-    Flask is a micro framework based on the WSGI interface.
-    It is well suited for smaller apps and takes a lean approach when it comes to choosing the components
-    that will be used with it - most of the additional functionality is written by the community
-    and is distributed as external packages.
+    \item \textbf{Flask} \\
+    Flask is a micro-framework built on the WSGI interface.
+    It is well-suited for smaller applications and follows a minimalist philosophy
+    in selecting components that are used.\cite{flask} Most additional functionality is provided by
+    the community and distributed as external packages.
 
-    One of the main problems with Flask is that it does not integrate well enough with the ASGI
-    interface which is practically necessary for proper handling of Server-Client path of communication.
-    Moreover, using external packages for every almost bit of additional functionality can potentially be a security risk.
+    One of the main downsides of Flask is that it does not integrate well enough with the ASGI
+    interface which is necessary for proper handling of Server-Client path of communication.
+    Moreover, strongly relying on external packages can pose potential security risks.
 
-    \item \textbf{Django.} \\
+    \item \textbf{Django} \\
     Django is a 'batteries-included' framework, in a sense that almost everything -
     from access control and database management to API routing and admin interface,
-    is a part of it. Moreover, it has an extensive ecosystem with support for e.g. REST-style API
-    design via \texttt{django-rest-framework}, different methods of Authentication,
-    even different transfer protocols, such as websockets and Server Sent Events are available
-    via the \texttt{django-channels} package and others that build on top of it.
+    is a part of it.\cite{django} Additionally, it has an extensive ecosystem with support for e.g. REST-style API
+    design via \texttt{django-rest-framework}\cite{drf}; different methods of Authentication;
+    various transfer protocols, such as websockets and Server Sent Events are available
+    via the \texttt{django-channels}\cite{django_channels} package.
 
-    Some of the notable drawback are its opinionated design choices and the size of the application,
-    as this framework includes a lot of parts that possibly will not be used.
+    Some of the notable drawbacks include its opinionated design choices and the size of the application,
+    as it includes a lot of parts that may not be used.
 \end{itemize}
 
-Out of those three frameworks Django is the most suitable for the task.
-The application will heavily rely on the database,
-frontend will be written in React, hence a JSON-based API will be implemented,
-moreover Django has a proper support for ASGI-based servers.
+Of the three frameworks Django is the most suitable one.
+Most of the application logic will be handled by the backend, heavily utilizing
+Django's ORM for most database tasks. On top of that, a JSON-based API can be easily written
+using `django-rest-framework`, simplifying communication with the frontend.
 
-\subsection{Audio Representation and Streaming}
 
-\subsection{Database}
+\section{API}
+%TODO
 
-\subsection{Authorization}
+
+\section{Audio Transfer}
+
+Audio playback can be tackled in numerous ways:
+
+\begin{itemize}
+    \item \textbf{Basic Download}\\
+    The audio file is downloaded in its entirety before playback begins.
+    Once the download is complete, the user can listen to the file offline.
+    This method typically requires significant storage space and time to download,
+    especially for larger audio files.
+
+    \item \textbf{Progressive Download}\\
+    The audio file begins to play after a portion of the file
+    has been downloaded. As the playback continues, more of the file is downloaded
+    in the background. This method allows for quicker access to the content
+    compared to basic downloading, but still requires enough data to be buffered at the start or during seeking.
+
+    \item \textbf{Streaming}\\
+    Audio is transmitted over the internet in real-time, without needing
+    to be downloaded. The user can start listening almost immediately while the audio is being
+    sent from a remote server. This method doesn’t require local storage and is
+    ideal for accessing content on demand, but it depends on a stable internet connection.
+    Additionally, modern streaming protocols support adaptive streaming, allowing the audio file
+    to be delivered in multiple representations. Different bitrates and codecs can be
+    selected based on the network conditions or device capabilities, providing an optimized experience.
+    Furthermore, seeking can be more accurate because streaming protocols divide the data into
+    smaller, discrete chunks, allowing for quicker access to specific points in the audio.
+
+    \item \textbf{Peer to Peer}\\
+    In P2P audio streaming, audio data is shared directly between users'
+    devices, rather than being served from a central server.
+    Each user acts as both a client and a server, contributing to and consuming
+    data. This method can reduce server load and improve access speed,
+    but it relies heavily on user participation and network conditions.
+\end{itemize}
+
+Although basic and progressive download methods are much simpler in implementation,
+streaming has many invaluable benefits, allowing for smooth playback in different
+conditions and better audio representation techniques. P2P is also not suitable
+in the current case, as the files must be on users' machines, which can lead
+to various problems — from delays for clients located far away from the source of the audio
+to problematic enforcement of possible DRM (anti-piracy) protection.
+
+
+\section{Database}
+% TODO: postgres, maria, sqlite etc
+
+
+\section{Authentication}
+
+\begin{itemize}
+    \item \textbf{Basic Authentication} \\
+    Basic Authentication works by sending a username and password with each request,
+    typically encoded in base64.\cite{basic_auth} It is simple to implement, making it suitable for
+    small, internal applications. However, it incorporates credentials in every request,
+    making it prone to security risks if not used over HTTPS. Moreover, It lacks session management,
+    limiting scalability in modern applications.
+
+    \item \textbf{Session Authentication} \\
+    Session authentication creates a session after the user logs in, with session
+    data stored on the server and the client storing a session ID in a cookie.
+    It makes authentication management centralized, which can enhance security compared to Basic Authentication.
+    However, it can be vulnerable to session hijacking if cookies are not properly protected
+    and can face scalability issues in distributed systems.\cite{session_auth}
+
+    \item \textbf{JWT (JSON Web Token)} \\
+    JWT is a compact, URL-safe method of representing claims between two parties.\cite{jwt}
+    It is an example of stateless authentication where tokens all the needed information for user authentication
+    and any additional custom payload which can be utilized for e.g. role management.
+    They provide a flexible and scalable way to implement secure authentication.
+    However, if not properly managed (e.g., using long expiration times), they can become security risks,
+    as compromised tokens may be used for extended periods.
+
+    \item \textbf{OAuth 2.0} \\
+    OAuth 2.0 is an authorization framework that allows third-party applications to access resources
+    on behalf of the user, without exposing user credentials.\cite{oauth2} It requires the user to have an account
+    with a company that owns a resource server(e.g. Google, Facebook\ldots). This is a proper mean of
+    authorization, however, it must be used in congestion with other regular methods.
+\end{itemize}
+
+% TODO: explain why jwt wins
 
 \subsection{Server-Client Communication}
+% TODO: polling, websockets, sse etc.
 
 
 \section{Frontend}
+%TODO compare frameworks, explain react choice
