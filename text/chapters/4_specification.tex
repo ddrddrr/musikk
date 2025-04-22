@@ -1,15 +1,91 @@
-%! Author = mazda
-%! Date = 21.04.2025
+\chapter{Specification}
+In this chapter the general outline of the application is specified via functional and non-functional requirements.
+Some of the features are based on the feedback from the survey and short in-person interviews,
+while others are based on the analysis of the existing platforms.
+The individual requirements are ordered based on the 'MoSCoW' criteria, i.e. from most to least important.
 
-% Preamble
-\documentclass[11pt]{article}
+% TODO: content-owner stuff
+\section{Important Terms}
 
-% Packages
-\usepackage{amsmath}
+Below is the list of important terms that will be appearing throughout the requirements section.
 
-% Document
-\begin{document}
+\begin{itemize}
+    \item \textbf{Anonymous User} – A User which is not yet registered in the system or has not logged in.
+    \item \textbf{Song} – An object representing an individual audio object.
+    \item \textbf{Song Collection} – Represents a container that holds multiple Songs.
+    \item \textbf{Playback} – A process during which the user is receiving audio information.
+    \item \textbf{Playback Item} – A Song or a Song Collection.
+    \item \textbf{Playback Queue} – A list of Playback Items.
+    \item \textbf{Comment} – A small piece of text provided by the User input usually placed under a specific object to which it refers.
+    \item \textbf{Reply Comment} – The same as Comment, but must be created in relation to another, 'parent' Comment.
+    \item \textbf{User Profile} – An object which encompasses all of the information related to a specific User.
+    \item \textbf{Forum} – A standalone list of User Comments. Has a unique name.
+\end{itemize}
 
 
+\section{Functional Requirements}
 
-\end{document}
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{|p{12cm}|p{3cm}|}
+        \hline
+        \textbf{Requirement}                                                                                                                                            & \textbf{Priority} \\
+        \hline
+        The system shall support over-the-net audio Playback.                                                                                                           & Must Have         \\
+        \hline
+        The system shall provide a way to control the audio Playback. That includes shifting the Playback backward and forward, stopping the playback. & Must Have \\
+        \hline
+        The system shall provide a way to show Playback Items.                                                                                                          & Must Have         \\
+        \hline
+        The system shall support new Playback Item addition.                                                                                                            & Must Have         \\
+        \hline
+        The system shall provide a way to enqueue Playback Items and the means to manipulate the Playback Queue. & Must Have \\
+        \hline
+        The system shall have individual User Profiles.                                                                                                                 & Must Have         \\
+        \hline
+        The system shall allow Anonymous Users to create a User Profile and log in to the system using email and password. & Must Have \\
+        \hline
+        The system shall allow Users to change their User Profile information.                                                                                          & Must Have         \\
+        \hline
+        The system shall differentiate presented content based on the User. That includes Songs and Song Collections, User Profile information and other related items. & Must Have \\
+        \hline
+        The system shall provide a way for Users to add Comments under Song Collections, Songs and other related items. & Must Have \\
+        \hline
+        The system shall provide a Forum system. Forums shall be able to be created by Users. Forum Comments must be able to embed Playback Items. & Must Have \\
+        \hline
+        The system shall provide a way for Users to create relations to other Users. All of the Comment-related systems shall be filtered on that User relations. & Must Have \\
+        \hline
+        The system shall make it possible to create Reply Comments for Comments.                                                                                        & Should Have       \\
+        \hline
+        The system shall provide a notification system for Reply Comments and other appropriate items.                                                                                              & Should Have       \\
+        \hline
+        The system shall make it possible to filter Playback Items based on the User relations. & Should Have \\
+        \hline
+        The system shall provide chat capabilities.                                                                                                                     & Could Have        \\
+        \hline
+    \end{tabular}
+    \caption{Functional Requirements}
+\end{table}
+
+
+\section{Non-functional Requirements}
+
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{|p{12cm}|p{3cm}|}
+        \hline
+        \textbf{Requirement}                                                                                                                                                               & \textbf{Priority} \\
+        \hline
+        The system shall provide access to its contents only to authorized Users. The only exception shall be the 'Log In/Sign Up' page. & Must Have \\
+        \hline
+        The system shall store and transport sensible user information only in safe manners. & Must Have \\
+        \hline
+        The system shall, in case of failure, remain rendered on the screen and show the appropriate non-technical message to the User. & Must Have \\
+        \hline
+        The system shall render new available information without refreshing the content page. That includes new Comments, Playback Items, updated Playback Queue and other related items. & Must Have \\
+        \hline
+        The system shall synchronize Playback across multiple devices.                                                                                                                     & Should Have       \\
+        \hline
+    \end{tabular}
+    \caption{Non-functional Requirements}
+\end{table}

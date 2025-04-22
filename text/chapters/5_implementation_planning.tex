@@ -1,15 +1,72 @@
-%! Author = mazda
-%! Date = 21.04.2025
+\chapter{Implementation Planning}
+This section provides an insight into the technology choices used to implement the application.
+In addition, UML diagrams are provided as a high-level overview of the system.
 
-% Preamble
-\documentclass[11pt]{article}
-
-% Packages
-\usepackage{amsmath}
-
-% Document
-\begin{document}
+The created platform is built using the Model-View-Controller\cite{11} architectural pattern.
+It is split into three major parts:
+- Backend. Implements all of the data-related logic and processing.
+- API. Is responsible for transferring the data to the frontend and receiving commands from it.
+- Frontend. Presents the data to the User and accepts his commands.
 
 
+\section{Backend}
+Python was chosen as the main language for the Backend part of the application.
+It has support for all the needed instruments, such as calling external processes,
+file handling, and executing asynchronous code. Moreover, it has a flexible and straightforward
+syntax allowing for rapid development.
+As this project is mostly IO-driven and most of the processor-heavy operations are offloaded to external processes,
+i.e. no thread programming is used, Python's performance limitations\cite{12} will not have such a drastic effect.
 
-\end{document}
+\subsection{Framework Comparison}
+
+Currently there are 3 well-developed and widely-used WEB frameworks available for Python:
+
+\begin{itemize}
+    \item \textbf{FastAPI.} \\
+    'FastAPI is a modern, fast (high-performance), web framework for building APIs
+    with Python based on standard Python type hints.'~\cite{13}. \\
+    This framework offers a lightweight approach to API declaration, without adding almost no overhead.
+    It has the best integration with API documentation standards such as
+    Open API and API representation tools, e.g. Swagger.
+
+    However, it is relatively new and barebones; given the requirements and the fact that
+    still not many extra packages are available -
+    a lot of custom code would have to be written on top, which is a disadvantage for this project.
+
+    \item \textbf{Flask.} \\
+    Flask is a micro framework based on the WSGI interface.
+    It is well suited for smaller apps and takes a lean approach when it comes to choosing the components
+    that will be used with it - most of the additional functionality is written by the community
+    and is distributed as external packages.
+
+    One of the main problems with Flask is that it does not integrate well enough with the ASGI
+    interface which is practically necessary for proper handling of Server-Client path of communication.
+    Moreover, using external packages for every almost bit of additional functionality can potentially be a security risk.
+
+    \item \textbf{Django.} \\
+    Django is a 'batteries-included' framework, in a sense that almost everything -
+    from access control and database management to API routing and admin interface,
+    is a part of it. Moreover, it has an extensive ecosystem with support for e.g. REST-style API
+    design via \texttt{django-rest-framework}, different methods of Authentication,
+    even different transfer protocols, such as websockets and Server Sent Events are available
+    via the \texttt{django-channels} package and others that build on top of it.
+
+    Some of the notable drawback are its opinionated design choices and the size of the application,
+    as this framework includes a lot of parts that possibly will not be used.
+\end{itemize}
+
+Out of those three frameworks Django is the most suitable for the task.
+The application will heavily rely on the database,
+frontend will be written in React, hence a JSON-based API will be implemented,
+moreover Django has a proper support for ASGI-based servers.
+
+\subsection{Audio Representation and Streaming}
+
+\subsection{Database}
+
+\subsection{Authorization}
+
+\subsection{Server-Client Communication}
+
+
+\section{Frontend}
