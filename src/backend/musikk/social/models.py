@@ -11,7 +11,7 @@ from base.models import BaseModel
 
 
 class Comment(BaseModel):
-    AvailableModelsMap = {
+    MODEL_TYPE_MAP = {
         "collection": "streaming.SongCollection",
         "song": "streaming.BaseSong",
     }
@@ -38,13 +38,25 @@ class Comment(BaseModel):
         self.content = ""
         self.save()
 
+    @classmethod
+    def get_model_from_type(cls, obj_type: str):
+        try:
+            return apps.get_model(cls.MODEL_TYPE_MAP[obj_type])
+        except KeyError:
+            raise ValidationError(f"Invalid obj_type provided: {obj_type}")
+
+    @classmethod
+    def get_type_from_model(cls, obj) -> str | None:
+        model_label = f"{obj._meta.app_label}.{obj.__class__.__name__}"
+        return next(
+            (key for key, value in cls.MODEL_TYPE_MAP.items() if value == model_label),
+            None,
+        )
+
     @staticmethod
     def lookup_related_instance(obj_type: str, obj_uuid: str | UUID):
-        if not (model := Comment.AvailableModelsMap.get(obj_type)):
-            raise ValidationError(f"Invalid obj_type provided: {obj_type}")
-        model = apps.get_model(model)
+        model = Comment.get_model_from_type(obj_type)
         try:
-            obj = model.objects.get(uuid=obj_uuid)
+            return model.objects.get(uuid=obj_uuid)
         except model.DoesNotExist:
             raise ValidationError(f"No object found with uuid: {obj_uuid}")
-        return obj

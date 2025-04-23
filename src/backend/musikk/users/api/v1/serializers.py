@@ -14,9 +14,9 @@ from users.users_extended import StreamingUser
 class BaseUserSerializer(BaseModelSerializer):
     password = serializers.CharField(write_only=True)
 
-    class Meta:
+    class Meta(BaseModelSerializer.Meta):
         model = BaseUser
-        fields = [
+        fields = BaseModelSerializer.Meta.fields + [
             "email",
             "first_name",
             "last_name",

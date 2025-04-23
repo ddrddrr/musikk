@@ -5,6 +5,17 @@ from base.models import BaseModel
 from social.models import Comment
 
 
+class ReplyNotificationManager(models.Manager):
+    def create(self, **kwargs):
+        obj = super().create(**kwargs)
+        send_event(
+            f"notifications/replies/events/{obj.orig_comment.user.uuid}",
+            "message",
+            {"invalidate": ""},
+        )
+        return obj
+
+
 class ReplyNotification(BaseModel):
     orig_comment = models.ForeignKey(
         Comment, null=True, related_name="+", on_delete=models.SET_NULL
@@ -17,9 +28,4 @@ class ReplyNotification(BaseModel):
     class Meta:
         ordering = ["-date_added"]
 
-
-class ReplyNotificationManager(models.Manager):
-    def create(self, **kwargs):
-        obj = super().create(**kwargs)
-        send_event(f"notifications/events", "message", {"new_reply": ""})
-        return obj
+    objects = ReplyNotificationManager()

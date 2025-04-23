@@ -32,3 +32,8 @@ class BaseModelSerializer(UUIDRelatedModelSerializerMixin, serializers.ModelSeri
     class Meta:
         model = BaseModel
         fields = ["uuid", "date_added", "date_modified"]
+        extra_kwargs = {
+            "uuid": {"read_only": True},
+            "date_added": {"read_only": True},
+            "date_modified": {"read_only": True},
+        }

@@ -5,6 +5,7 @@ from rest_framework.routers import DefaultRouter
 from notifications.api.v1.views import (
     ReplyNotificationListView,
     ReplyNotificationEventViewSet,
+    ReplyNotificationSetReadView,
 )
 
 router = DefaultRouter()
@@ -21,5 +22,11 @@ urlpatterns = [
         "notifications/replies",
         ReplyNotificationListView.as_view(),
         name="notifications-replies-list",
+    ),
+    # TODO: make generic(changing is_read only)
+    path(
+        "notifications",
+        ReplyNotificationSetReadView.as_view(),
+        name="notifications-set-read",
     ),
 ]

@@ -1,11 +1,11 @@
 from base.serializers import BaseModelSerializer
 from notifications.models import ReplyNotification
-from social.api.v1.serializers import CommentSerializer
+from social.api.v1.serializers import CommentReadSerializer
 
 
 class ReplyNotificationSerializer(BaseModelSerializer):
-    orig_comment = CommentSerializer(read_only=True)
-    reply_comment = CommentSerializer(read_only=True)
+    orig_comment = CommentReadSerializer(read_only=True)
+    reply_comment = CommentReadSerializer(read_only=True)
 
     class Meta(BaseModelSerializer.Meta):
         model = ReplyNotification

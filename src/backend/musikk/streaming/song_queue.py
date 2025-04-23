@@ -158,7 +158,6 @@ class SongQueue(BaseModel):
                     raise ValueError(
                         f"Got an unknown add action type {action} for `add_collection_songs` action"
                     )
-            self.apply(lambda x: print(x.song))
             return nodes
 
     def shift_head_forward(self, to: SongQueueNode) -> SongQueueNode | None:
@@ -279,7 +278,6 @@ class SongQueue(BaseModel):
         with transaction.atomic():
             node.delete()
             self.song_count -= 1
-            print(self.head)
             self.save()
             return True
 
