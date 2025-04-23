@@ -1,13 +1,8 @@
 import { fetchCollectionList } from "@/components/song-collection/queries.ts";
 import { SongCollectionCard } from "@/components/song-collection/SongCollectionCard";
-import type { ISongCollection } from "@/components/song-collection/types";
 import { useQuery } from "@tanstack/react-query";
 
-interface LeftColumnProps {
-    setSelectedCollection: (collection: ISongCollection) => void;
-}
-
-export function LeftColumn({ setSelectedCollection }: LeftColumnProps) {
+export function LeftColumn() {
     const { isPending, error, data } = useQuery({
         queryKey: ["collectionList"],
         queryFn: fetchCollectionList,
@@ -28,7 +23,7 @@ export function LeftColumn({ setSelectedCollection }: LeftColumnProps) {
                 <ul className="space-y-6" role="list">
                     {collections.map((collection) => (
                         <li key={collection.uuid}>
-                            <SongCollectionCard collection={collection} setSelectedCollection={setSelectedCollection} />
+                            <SongCollectionCard collection={collection} />
                         </li>
                     ))}
                 </ul>

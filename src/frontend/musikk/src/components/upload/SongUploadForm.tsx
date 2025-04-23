@@ -1,233 +1,84 @@
+import Spinner from "@/components/common/Spinner";
 import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { uploadSong } from "@/components/upload/mutations.ts";
+import { Form } from "@/components/ui/form";
+import { uploadSong } from "@/components/upload/mutations";
+import SongFields from "@/components/upload/SongFields";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { Upload } from "lucide-react";
 import { useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
-import { z } from "zod";
-
-const SongSchema = z.object({
-    title: z.string().min(1),
-    audio: z.instanceof(File).optional(),
-    description: z.string().min(0),
-    image: z.instanceof(File).optional(),
-});
-
-const FormSchema = z.object({
-    songs: z.array(SongSchema),
-});
+import { FormSchema, SongFormValues } from "./types";
 
 export function SongUploadForm() {
-    const form = useForm({
+    const form = useForm<SongFormValues>({
         resolver: zodResolver(FormSchema),
-        defaultValues: { songs: [{ title: "", description: "", audio: undefined }] },
+        defaultValues: { songs: [{ title: "", description: "" }] },
     });
-    const { fields, append, remove } = useFieldArray({ control: form.control, name: "songs" });
-    const [fieldStatuses, setFieldStatuses] = useState<Record<number, boolean>>({});
-    const [previewUrls, setPreviewUrls] = useState<Record<number, string>>({});
-
-    const mutation = useMutation({
-        mutationFn: uploadSong,
+    const { fields, append, remove } = useFieldArray({
+        control: form.control,
+        name: "songs",
     });
 
-    const onSubmit = async (values: z.infer<typeof FormSchema>) => {
-        const newStatuses: Record<number, boolean> = { ...fieldStatuses };
+    const [statuses, setStatuses] = useState<Record<number, boolean>>({});
 
+    const mutation = useMutation({ mutationFn: uploadSong });
+
+    const onSubmit = async (values: SongFormValues) => {
+        const newStatuses = { ...statuses };
         await Promise.allSettled(
-            values.songs.map(async (song, index) => {
-                if (fieldStatuses[index]) return; // already uploaded successfully
-
+            values.songs.map(async (song, i) => {
+                if (statuses[i]) return;
                 try {
                     if (!song.audio) {
-                        newStatuses[index] = false;
+                        newStatuses[i] = false;
                         return;
                     }
                     await mutation.mutateAsync(song);
-                    newStatuses[index] = true;
+                    newStatuses[i] = true;
                 } catch {
-                    newStatuses[index] = false;
+                    newStatuses[i] = false;
                 }
             }),
         );
-
-        setFieldStatuses(newStatuses);
-    };
-
-    const handleImageChange = (index: number, file?: File) => {
-        if (file) {
-            const url = URL.createObjectURL(file);
-            setPreviewUrls((prev) => ({ ...prev, [index]: url }));
-        }
+        setStatuses(newStatuses);
     };
 
     return (
         <div className="max-h-screen overflow-y-auto p-4">
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                    {fields.map((field, index) => (
-                        <div
-                            key={field.id}
-                            className={`bg-white p-6 rounded-md border-2 border-black space-y-4 ${
-                                fieldStatuses[index] ? "border-green-600" : "border-red-600"
-                            } shadow-lg`}
-                        >
-                            <FormField
-                                control={form.control}
-                                name={`songs.${index}.title`}
-                                render={({ field }) => (
-                                    <FormItem className="space-y-2">
-                                        <FormLabel className="text-lg font-bold text-black">Title</FormLabel>
-                                        <FormControl>
-                                            <div className="bg-gray-200 p-2 border-2 border-black rounded-md">
-                                                <Input
-                                                    {...field}
-                                                    className="border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 p-0"
-                                                    placeholder="Enter song title"
-                                                />
-                                            </div>
-                                        </FormControl>
-                                        <FormMessage className="text-red-600" />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name={`songs.${index}.description`}
-                                render={({ field }) => (
-                                    <FormItem className="space-y-2">
-                                        <FormLabel className="text-lg font-bold text-black">Description</FormLabel>
-                                        <FormControl>
-                                            <div className="bg-gray-200 p-2 border-2 border-black rounded-md">
-                                                <Input
-                                                    {...field}
-                                                    className="border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 p-0"
-                                                    placeholder="Enter song description"
-                                                />
-                                            </div>
-                                        </FormControl>
-                                        <FormMessage className="text-red-600" />
-                                    </FormItem>
-                                )}
-                            />
-                            <div className="grid grid-cols-2 gap-4">
-                                <FormField
-                                    control={form.control}
-                                    name={`songs.${index}.audio`}
-                                    render={({ field: { onChange, value } }) => (
-                                        <FormItem className="space-y-2">
-                                            <FormLabel className="text-lg font-bold text-black">Audio File</FormLabel>
-                                            <FormControl>
-                                                <div className="bg-gray-200 p-4 border-2 border-black rounded-md">
-                                                    <label className="flex items-center cursor-pointer">
-                                                        <span className="px-3 py-2 bg-red-600 text-white rounded mr-2">
-                                                            Choose file
-                                                        </span>
-                                                        <span className="truncate text-sm">
-                                                            {value?.name ?? "No file selected"}
-                                                        </span>
-                                                        <Input
-                                                            type="file"
-                                                            accept="audio/*"
-                                                            onChange={(e) => onChange(e.target.files?.[0])}
-                                                            className="hidden"
-                                                        />
-                                                    </label>
-                                                </div>
-                                            </FormControl>
-                                            <FormMessage className="text-red-600" />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name={`songs.${index}.image`}
-                                    render={({ field: { onChange, value, ...rest } }) => (
-                                        <FormItem className="space-y-2">
-                                            <FormLabel className="text-lg font-bold text-black">Cover Image</FormLabel>
-                                            <div className="flex gap-4">
-                                                <FormControl className="flex-1">
-                                                    <div className="bg-gray-200 p-4 border-2 border-black rounded-md">
-                                                        <label className="flex items-center cursor-pointer">
-                                                            <span className="px-3 py-2 bg-red-600 text-white rounded mr-2">
-                                                                Choose file
-                                                            </span>
-                                                            <span className="truncate text-sm">
-                                                                {value?.name ?? "No file selected"}
-                                                            </span>
-                                                            <Input
-                                                                type="file"
-                                                                accept="image/*"
-                                                                onChange={(e) => {
-                                                                    const file = e.target.files?.[0];
-                                                                    onChange(file);
-                                                                    handleImageChange(index, file);
-                                                                }}
-                                                                className="hidden"
-                                                                {...rest}
-                                                            />
-                                                        </label>
-                                                    </div>
-                                                </FormControl>
-                                            </div>
-                                            <FormMessage className="text-red-600" />
-                                        </FormItem>
-                                    )}
-                                />
-                            </div>
-                            <Button
-                                variant="destructive"
-                                onClick={() => remove(index)}
-                                className="bg-red-600 hover:bg-red-700 text-white border-2 border-black rounded-md shadow-md"
-                            >
-                                Remove Song
-                            </Button>
-                        </div>
+                    {fields.map((_, i) => (
+                        <SongFields
+                            key={i}
+                            index={i}
+                            control={form.control}
+                            isSuccess={statuses[i]}
+                            onRemove={() => remove(i)}
+                        />
                     ))}
 
                     <div className="flex gap-4">
                         <Button
                             type="button"
                             onClick={() => append({ title: "", description: "" })}
-                            className="flex-1 bg-gray-200 text-black hover:bg-gray-300 border-2 border-black rounded-md shadow-md"
+                            className="flex-1 bg-gray-200 border-2 border-black"
                         >
                             Add Song
                         </Button>
-
                         <Button
                             type="submit"
                             disabled={mutation.isPending}
-                            className="flex-1 bg-red-600 hover:bg-red-700 text-white border-2 border-black rounded-md shadow-md"
+                            className="flex-1 bg-red-600 text-white border-2 border-black"
                         >
                             {mutation.isPending ? (
-                                <span className="flex items-center">
-                                    <svg
-                                        className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <circle
-                                            className="opacity-25"
-                                            cx="12"
-                                            cy="12"
-                                            r="10"
-                                            stroke="currentColor"
-                                            strokeWidth="4"
-                                        ></circle>
-                                        <path
-                                            className="opacity-75"
-                                            fill="currentColor"
-                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                        ></path>
-                                    </svg>
+                                <span className="flex items-center gap-2">
+                                    <Spinner />
                                     Uploading...
                                 </span>
                             ) : (
-                                <span className="flex items-center justify-center">
-                                    <Upload className="mr-2" />
+                                <span className="flex items-center gap-2">
+                                    <Upload />
                                     Upload All
                                 </span>
                             )}

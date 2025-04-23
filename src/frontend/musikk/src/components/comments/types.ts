@@ -7,6 +7,8 @@ export interface IComment {
     date_added: Date;
     parent: UUID | null;
     is_deleted: boolean;
+    obj_type: CommentObjectType | null;
+    obj_uuid: UUID | null;
 }
 
 export type CommentObjectType = "collection" | "song";

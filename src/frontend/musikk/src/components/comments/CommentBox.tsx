@@ -4,18 +4,17 @@ import { fetchCommentList } from "@/components/comments/queries";
 import { CommentObjectType, IComment } from "@/components/comments/types";
 import { CommentURLs } from "@/config/endpoints";
 import { UUID } from "@/config/types";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
+import { useQueryInvalidateEvent } from "@/hooks/useEvent.ts";
+import { useQuery } from "@tanstack/react-query";
+import { memo, useEffect, useRef, useState } from "react";
 
 interface CommentBoxProps {
     objType: CommentObjectType;
     objUUID: UUID;
 }
 
-export function CommentBox({ objType, objUUID }: CommentBoxProps) {
+export const CommentBox = memo(function CommentBox({ objType, objUUID }: CommentBoxProps) {
     const [replyTo, setReplyTo] = useState<IComment | undefined>(undefined);
-
-    const queryClient = useQueryClient();
     const { isPending, error, data } = useQuery({
         queryKey: ["comments", objUUID],
         queryFn: () => fetchCommentList(objType, objUUID),
@@ -28,16 +27,13 @@ export function CommentBox({ objType, objUUID }: CommentBoxProps) {
         }
     }, [data]);
 
-    useEffect(() => {
-        const es = new EventSource(CommentURLs.eventsBase + `${objUUID}/`);
-        es.addEventListener("message", (event) => {
-            const data = JSON.parse(event.data);
-            if ("invalidate" in data) {
-                queryClient.invalidateQueries({ queryKey: ["comments", objUUID] });
-            }
-        });
-        return () => es.close();
-    }, [queryClient, objUUID]);
+    useQueryInvalidateEvent({
+        eventUrl: CommentURLs.eventsBase + `${objUUID}/`,
+        eventMsg: "invalidate",
+        queryKey: ["comments", objUUID],
+        deps: [objUUID],
+        isEnabled: true,
+    });
 
     if (isPending) {
         return (
@@ -65,4 +61,4 @@ export function CommentBox({ objType, objUUID }: CommentBoxProps) {
             </div>
         </div>
     );
-}
+});

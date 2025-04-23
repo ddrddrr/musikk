@@ -1,26 +1,25 @@
 import { CommentBox } from "@/components/comments/CommentBox";
 import { fetchCollectionDetailed } from "@/components/song-collection/queries";
 import { SongCollectionHeader } from "@/components/song-collection/SongCollectionHeader";
-import type { ISongCollection } from "@/components/song-collection/types";
 import { SongCard } from "@/components/song/SongCard";
+import { UUID } from "@/config/types.ts";
 import { useQuery } from "@tanstack/react-query";
+import { useMatch, useNavigate } from "react-router-dom";
 
 interface SongCollectionContainerProps {
-    collection: ISongCollection;
-    onBackClick: () => void;
-    showComments: boolean;
-    toggleComments: () => void;
+    collectionUUID: UUID;
 }
 
-export function SongCollectionContainer({
-    collection,
-    onBackClick,
-    showComments,
-    toggleComments,
-}: SongCollectionContainerProps) {
+export function SongCollectionContainer({ collectionUUID }: SongCollectionContainerProps) {
+    const navigate = useNavigate();
+    const showComments = Boolean(useMatch("/collection/:uuid/comments"));
+    const toggleComments = () => {
+        navigate(showComments ? `/collection/${collectionUUID}` : `/collection/${collectionUUID}/comments`);
+    };
+
     const { isPending, error, data } = useQuery({
-        queryKey: [collection.uuid],
-        queryFn: () => fetchCollectionDetailed(collection.uuid),
+        queryKey: [collectionUUID],
+        queryFn: () => fetchCollectionDetailed(collectionUUID),
     });
 
     if (isPending)
@@ -44,7 +43,6 @@ export function SongCollectionContainer({
             <div className={showComments ? "w-1/2 pr-2" : "space-y-4"}>
                 <SongCollectionHeader
                     collection={data}
-                    onBackClick={onBackClick}
                     showComments={showComments}
                     toggleComments={toggleComments}
                     songsCount={songs.length}
@@ -68,13 +66,12 @@ export function SongCollectionContainer({
                 )}
             </div>
 
-            {/* Animated Comment Section */}
             <div
                 className={`w-1/2 pl-2 transition-all duration-500 ease-in-out transform ${
                     showComments ? "opacity-100 translate-x-0" : "opacity-0 translate-x-8"
                 }`}
             >
-                {showComments && <CommentBox objType="collection" objUUID={collection.uuid} />}
+                {showComments && <CommentBox objType="collection" objUUID={collectionUUID} />}
             </div>
         </div>
     );

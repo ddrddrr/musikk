@@ -1,29 +1,29 @@
+import { NotificationWrapper } from "@/components/notifications/NotificationWrapper.tsx";
 import { Button } from "@/components/ui/button";
 import { Upload } from "lucide-react";
+import { memo } from "react";
 import { useNavigate } from "react-router-dom";
 
-export function Header() {
+export const Header = memo(function Header() {
     const navigate = useNavigate();
 
     return (
-        <div className="flex justify-between p-4 bg-red-600 text-white">
+        <div className="flex justify-between p-4 bg-red-600 text-white relative">
             <div className="flex-1">
-                <Button variant="ghost" className="text-white hover:text-gray-200 p-0" onClick={() => navigate("/")}>
+                <Button variant="ghost" className="text-white" onClick={() => navigate("/")}>
                     *home*
                 </Button>
             </div>
             <div className="flex-1 flex justify-center">
                 <h1 className="text-xl font-bold">Musikk</h1>
             </div>
-            <div className="flex-1 flex justify-end gap-4">
-                <button className="hover:underline flex items-center">
-                    {/*<User className="w-4 h-4 mr-1" />*/}
-                    *profile*
-                </button>
-                <button onClick={() => navigate("/settings")} className="hover:underline flex items-center">
-                    {/*<Settings className="w-4 h-4 mr-1" />*/}
+            <div className="flex-1 flex justify-end gap-4 items-center">
+                <NotificationWrapper />
+
+                <Button variant="ghost" className="text-white" onClick={() => navigate("/settings")}>
                     *settings*
-                </button>
+                </Button>
+
                 <Button
                     variant="outline"
                     size="sm"
@@ -36,4 +36,4 @@ export function Header() {
             </div>
         </div>
     );
-}
+});

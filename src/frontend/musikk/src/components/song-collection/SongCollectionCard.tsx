@@ -1,21 +1,19 @@
 import type { ISongCollection } from "@/components/song-collection/types";
 import { Card, CardContent } from "@/components/ui/card";
+import { useNavigate } from "react-router-dom";
 
 interface SongCollectionCardProps {
     collection: ISongCollection;
-    setSelectedCollection: (collection: ISongCollection) => void;
 }
 
 // TODO: create a modified version for the queue(make text here longer, there shorter)
-export function SongCollectionCard({ collection, setSelectedCollection }: SongCollectionCardProps) {
+export function SongCollectionCard({ collection }: SongCollectionCardProps) {
+    const navigate = useNavigate();
     const { uuid, title, image } = collection;
-    const handleClick = () => {
-        setSelectedCollection(collection);
-    };
 
     return (
         <Card
-            onClick={handleClick}
+            onClick={() => navigate(`/collection/${uuid}/`)}
             key={uuid}
             className="cursor-pointer
             transition-all duration-200

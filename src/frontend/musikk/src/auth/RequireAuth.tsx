@@ -1,8 +1,12 @@
 import Cookies from "js-cookie";
-import { JSX } from "react";
+import { ReactNode } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 
-export function RequireAuth({ children }: { children: JSX.Element }) {
+interface RequireAuthProps {
+    children: ReactNode;
+}
+
+export function RequireAuth({ children }: RequireAuthProps) {
     const location = useLocation();
 
     if (!Cookies.get("refresh")) {

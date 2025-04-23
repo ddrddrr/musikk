@@ -3,9 +3,9 @@ import { CommentObjectType } from "@/components/comments/types.ts";
 const BASE_URL = import.meta.env.VITE_API_BASE_URL + "/api/v1";
 
 export const SongURLs = {
-    songList: `${BASE_URL}/songs`,
-    songDetail: (songUUID: string) => `${BASE_URL}/songs/${songUUID}`,
-    songCreate: `${BASE_URL}/songs`,
+    songList: `${BASE_URL}/songs/`,
+    songDetail: (songUUID: string) => `${BASE_URL}/songs/${songUUID}/`,
+    songCreate: `${BASE_URL}/songs/`,
 };
 export const QueueURLs = {
     queue: `${BASE_URL}/song-queue`,
@@ -30,8 +30,13 @@ export const CommentURLs = {
     commentCreate: `${BASE_URL}/comments/`,
     eventsBase: `${BASE_URL}/comments/events/`,
 };
+export const NotificationURLs = {
+    notificationsSetRead: `${BASE_URL}/notifications`,
+    replyNotificationList: `${BASE_URL}/notifications/replies`,
+    replyEvents: (userUUID: string) => `${BASE_URL}/notifications/replies/events/${userUUID}`,
+};
 export const UserUrls = {
-    userDetail: (userUUID: string) => `${BASE_URL}/users/${userUUID}`,
+    userDetail: (userUUID: string) => `${BASE_URL}/user/${userUUID}`,
     tokenGet: `${BASE_URL}/token/`,
     tokenRefresh: `${BASE_URL}/token/refresh/`,
 };

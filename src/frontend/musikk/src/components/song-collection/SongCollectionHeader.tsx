@@ -2,11 +2,10 @@ import { SongCollectionPlayButton } from "@/components/song-collection/SongColle
 import { ISongCollectionDetailed } from "@/components/song-collection/types.ts";
 import { Button } from "@/components/ui/button";
 import { useQueueAddAPI } from "@/hooks/useQueueAPI.ts";
-import { BetweenHorizonalStart, ChevronLeft } from "lucide-react";
+import { BetweenHorizonalStart } from "lucide-react";
 
 interface SongCollectionHeaderProps {
     collection: ISongCollectionDetailed;
-    onBackClick: () => void;
     showComments: boolean;
     toggleComments: () => void;
     songsCount: number;
@@ -14,7 +13,6 @@ interface SongCollectionHeaderProps {
 
 export function SongCollectionHeader({
     collection,
-    onBackClick,
     showComments,
     toggleComments,
     songsCount,
@@ -24,15 +22,6 @@ export function SongCollectionHeader({
     return (
         <>
             <div className="flex items-center justify-between">
-                <Button
-                    variant="ghost"
-                    onClick={onBackClick}
-                    className={`flex items-center text-black hover:text-gray-700 hover:bg-gray-200 border-2 border-black rounded-lg shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-y-1 active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] ${
-                        showComments ? "h-8 px-2 text-sm" : "h-12 px-4"
-                    }`}
-                >
-                    <ChevronLeft className="mr-1 h-4 w-4" /> Back
-                </Button>
                 <h2 className={`text-2xl font-bold text-blac ${showComments ? "text-xl" : ""}`}>{collection.title}</h2>
                 <div className="w-24"></div>
             </div>
