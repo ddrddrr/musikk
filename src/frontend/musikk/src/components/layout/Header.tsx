@@ -1,6 +1,6 @@
 import { NotificationWrapper } from "@/components/notifications/NotificationWrapper.tsx";
 import { Button } from "@/components/ui/button";
-import { Upload } from "lucide-react";
+import { Cog, Disc3, Upload } from "lucide-react";
 import { memo } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -11,7 +11,7 @@ export const Header = memo(function Header() {
         <div className="flex justify-between p-4 bg-red-600 text-white relative">
             <div className="flex-1">
                 <Button variant="ghost" className="text-white" onClick={() => navigate("/")}>
-                    *home*
+                    <Disc3 />
                 </Button>
             </div>
             <div className="flex-1 flex justify-center">
@@ -21,7 +21,7 @@ export const Header = memo(function Header() {
                 <NotificationWrapper />
 
                 <Button variant="ghost" className="text-white" onClick={() => navigate("/settings")}>
-                    *settings*
+                    <Cog />
                 </Button>
 
                 <Button

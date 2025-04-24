@@ -11,7 +11,7 @@ interface NotificationOverlayProps {
     setNotReadUUIDs: (uuids: UUID[]) => void;
 }
 
-// TODO: close overlay when clicked on "go to reply" button
+// TODO: open on the actual reply instead of the section when "go to..." is clicked
 interface NotificationOverlayProps {
     notifications: IReplyNotification[];
     notReadUUIDs: UUID[];
@@ -65,7 +65,7 @@ export const NotificationOverlay = memo(function NotificationOverlay({
                                         navigate(`/collection/${notification.reply_comment.obj_uuid}/comments`)
                                     }
                                 >
-                                    Go to reply
+                                    Go to reply section
                                 </button>
                                 <span className="text-xs text-gray-600">
                                     {new Date(notification.date_added).toLocaleString(undefined, {

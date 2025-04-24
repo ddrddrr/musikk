@@ -57,6 +57,7 @@ export function useEvent({ eventUrl, onEvent, deps, isEnabled }: useEventProps) 
         createEventSource();
 
         return () => {
+            console.log("deleted eventsource", es?.url);
             es?.close();
         };
     }, [eventUrl, onEvent, navigate, ...deps, isEnabled]);

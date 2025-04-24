@@ -50,7 +50,7 @@ type AddCollectionAction = {
 type QueueAddInput = AddSongAction | AddCollectionAction;
 
 export function useQueueAddAPI() {
-    const { onSuccess, onError } = useQueueMutationHandlers();
+    // const { onSuccess, onError } = useQueueMutationHandlers();
 
     function handleQueueAddAction(input: QueueAddInput): Promise<unknown> {
         switch (input.type) {
@@ -65,8 +65,8 @@ export function useQueueAddAPI() {
 
     return useMutation<unknown, Error, QueueAddInput>({
         mutationFn: handleQueueAddAction,
-        onSuccess,
-        onError,
+        // onSuccess,
+        // onError,
     });
 }
 
@@ -83,9 +83,8 @@ type ShiftHeadBackQueueAction = {
 type QueueChangeInput = ClearQueueAction | ShiftHeadQueueAction | ShiftHeadBackQueueAction;
 
 export function useQueueChangeAPI() {
-    const { onSuccess, onError } = useQueueMutationHandlers();
+    // const { onSuccess, onError } = useQueueMutationHandlers();
 
-    // когда ласт трек дослушан - clear queue
     function handleQueueChangeAction(input: QueueChangeInput): Promise<unknown> {
         switch (input.action) {
             case "clear":
@@ -101,7 +100,7 @@ export function useQueueChangeAPI() {
 
     return useMutation<unknown, Error, QueueChangeInput>({
         mutationFn: handleQueueChangeAction,
-        onSuccess,
-        onError,
+        // onSuccess,
+        // onError,
     });
 }

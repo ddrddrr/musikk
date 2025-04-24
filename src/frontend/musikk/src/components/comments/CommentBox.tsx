@@ -26,7 +26,7 @@ export const CommentBox = memo(function CommentBox({ objType, objUUID }: Comment
             commentsContainerRef.current.scrollTop = commentsContainerRef.current.scrollHeight;
         }
     }, [data]);
-
+    // TODO: make objUUID a different dep, which doesn't change, otherwise this reestablishes conn too often
     useQueryInvalidateEvent({
         eventUrl: CommentURLs.eventsBase + `${objUUID}/`,
         eventMsg: "invalidate",

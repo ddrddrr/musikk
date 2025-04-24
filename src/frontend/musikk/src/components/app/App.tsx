@@ -7,8 +7,9 @@ import { SettingsPage } from "@/components/app/SettingsPage.tsx";
 import { UploadPage } from "@/components/app/UploadPage.tsx";
 import { PlaybackProvider } from "@/providers/PlaybackProvider.tsx";
 import { UserProvider } from "@/providers/UserProvider.tsx";
+import { memo } from "react";
 
-export function App() {
+export const App = memo(function App() {
     return (
         <BrowserRouter>
             <UserProvider>
@@ -45,4 +46,4 @@ export function App() {
             </UserProvider>
         </BrowserRouter>
     );
-}
+});

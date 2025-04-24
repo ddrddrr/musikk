@@ -5,21 +5,21 @@ import { useQueue, useQueueChangeAPI } from "@/hooks/useQueueAPI.ts";
 import { PlayingCollectionContext } from "@/providers/playingCollectionContext.ts";
 import { PlayingSongContext } from "@/providers/playingSongContext.ts";
 import { Trash2 } from "lucide-react";
-import { useContext, useEffect } from "react";
+import { memo, useContext, useEffect } from "react";
 
-// TODO: implement SSE for multi-device updates
-export function SongQueue() {
+export const SongQueue = memo(function SongQueue() {
     const clearQueueMutation = useQueueChangeAPI();
     const { queue } = useQueue();
-    const { setPlayingSong } = useContext(PlayingSongContext);
+    const { playingSong, setPlayingSong } = useContext(PlayingSongContext);
     const { setPlayingCollection } = useContext(PlayingCollectionContext);
-
-    const nodes = queue?.nodes ?? [];
 
     useEffect(() => {
         if (setPlayingSong && setPlayingCollection) {
             if (queue?.head) {
-                setPlayingSong(queue.nodes[0].song);
+                const headSong = queue.nodes[0].song;
+                if (playingSong?.uuid !== headSong.uuid) {
+                    setPlayingSong(headSong);
+                }
             } else {
                 setPlayingSong(null);
                 setPlayingCollection(null);
@@ -27,6 +27,7 @@ export function SongQueue() {
         }
     }, [queue?.head, setPlayingSong, setPlayingCollection]);
 
+    const nodes = queue?.nodes ?? [];
     return (
         <div className="space-y-6">
             <SongDisplay song={queue?.head ? queue.nodes[0].song : null} />
@@ -66,4 +67,4 @@ export function SongQueue() {
             </div>
         </div>
     );
-}
+});

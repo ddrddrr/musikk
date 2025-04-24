@@ -19,6 +19,7 @@ export const QueueURLs = {
     removeNode: (nodeUUID: string) => `${BASE_URL}/song-queue/remove-node/${nodeUUID}`,
     clearQueue: `${BASE_URL}/song-queue/clear`,
     appendRandom: `${BASE_URL}/song-queue/append-random`,
+    queueEvents: `${BASE_URL}/song-queue/events`,
 };
 export const CollectionURLs = {
     collectionList: `${BASE_URL}/collections`,
