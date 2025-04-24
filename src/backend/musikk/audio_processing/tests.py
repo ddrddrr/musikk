@@ -1,9 +1,7 @@
 import os
 from pathlib import Path
-import shutil
 
 from django.test import TestCase
-from django.conf import settings
 
 from audio_processing.ffmpeg_wrapper import FFMPEGWrapper
 from audio_processing.converters import (
@@ -14,8 +12,8 @@ from audio_processing.converters import (
 
 # settings.AUDIO_CONTENT_PATH = "/tmp/musikk_tests"
 
-AUDIO_PATH_1 = os.path.expanduser("~/studies/musikk/sample-9s.wav")
-AUDIO_PATH_2 = os.path.expanduser("~/studies/musikk/sample-6s.wav")
+AUDIO_PATH_1 = os.path.expanduser("~/studies/musikk/samples/sample-9s.wav")
+AUDIO_PATH_2 = os.path.expanduser("~/studies/musikk/samples/sample-6s.wav")
 
 
 class TestFFMPEGWrapper(TestCase):
@@ -36,6 +34,7 @@ class TestFFMPEGWrapper(TestCase):
         assert ret
         assert ret.manifests["mpd_path"]
         assert Path(ret.manifests["mpd_path"]).exists()
+        FFMPEGWrapper._cleanup(ret.song_content_path)
 
     def test_convert_multiple_encoders(self):
         ffmpeg = (
@@ -48,6 +47,7 @@ class TestFFMPEGWrapper(TestCase):
         assert ret
         assert ret.manifests["mpd_path"]
         assert Path(ret.manifests["mpd_path"]).exists()
+        FFMPEGWrapper._cleanup(ret.song_content_path)
 
     # TODO: check that mpd has the correct structure
     # @classmethod

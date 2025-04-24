@@ -1,4 +1,3 @@
-import os.path
 import shutil
 import uuid
 from io import BytesIO
@@ -16,6 +15,30 @@ from audio_processing.converters import (
     AACHEv2_CONVERTER,
     OPUS_CONVERTER,
 )
+from audio_processing.exceptions import ConversionError
+
+# 2GB, which approx. corresponds to a 32bit, 48khz, stereo, 90min wav file
+MAX_FILE_SIZE = (((2**3) ** 10) ** 2) ** 3
+ALLOWED_FILE_TYPES = [  # lossless for now
+    "wav",
+    "vnd.wav",
+    "x-wav",
+    "bwf",
+    "flac",
+    "flac",
+    "alac",
+    "m4a",
+    "alac",
+    "aiff",
+    "aif",
+    "aiff",
+    "ape",
+    "ape",
+    "mka",
+    "mka",
+    "wv",
+    "wavpack",
+]
 
 
 class SongRepresentation:
@@ -28,7 +51,7 @@ class SongRepresentation:
         self.uuid_ = uuid_
 
 
-# TODO: add cleanup logic in case of failures
+# TODO: allow for mp3?
 class FFMPEGWrapper:
     def __init__(
         self,
@@ -44,7 +67,6 @@ class FFMPEGWrapper:
         self.converters.append(converter)
         return self
 
-    # TODO: remove raw file when not in debug?
     def convert_song(
         self, song: bytes | BytesIO | InMemoryUploadedFile | TemporaryUploadedFile
     ) -> SongRepresentation:
@@ -84,10 +106,10 @@ class FFMPEGWrapper:
                 uuid_=song_uuid,
                 song_content_path=song_content_path,
             )
-        except Exception:
+        except Exception as ex:
             if self.cleanup:
                 self._cleanup(song_content_path=song_content_path)
-            raise
+            raise ConversionError from ex
 
     def input_file_args(self, song_path: Path) -> list[str]:
         return ["ffmpeg", "-i", str(song_path)]
@@ -122,17 +144,26 @@ class FFMPEGWrapper:
 
         return song_content_path
 
-    # TODO: move somwehere else?
+    # TODO: remove saved raw file when not in debug?
     def _prepare_song_file(
         self,
         song: bytes | BytesIO | InMemoryUploadedFile | TemporaryUploadedFile,
         song_content_path: Path,
     ) -> Path:
+        # TODO: rewrite to use bytesio instead of reading full into memory as bytes
         if not isinstance(song, bytes):
             song = song.read()
-        file_type = magic.Magic(mime=True).from_buffer(song)
+
+        size = len(song)
+        if size > MAX_FILE_SIZE:
+            raise ValueError(f"Max audio file size exceeded. Actual size {size}")
+
+        file_type = magic.from_buffer(song, mime=True)
         if not file_type.startswith("audio/"):
-            raise ValueError(f"Expected audio file, got {file_type}")
+            raise ValueError(f"Expected audio file, got {file_type}.")
+
+        if not file_type.removeprefix("audio/") in ALLOWED_FILE_TYPES:
+            raise ValueError(f"Invalid audio format, got {file_type}.")
 
         extension = file_type.split("/")[-1]
         song_path = song_content_path / f"raw.{extension}"

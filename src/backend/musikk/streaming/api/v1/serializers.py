@@ -3,11 +3,9 @@ from rest_framework import serializers
 
 from audio_processing.ffmpeg_wrapper import FlacOnly
 from base.serializers import BaseModelSerializer
-from streaming.models import Stream
 from streaming.song_collections import SongCollection, Playlist
 from streaming.song_queue import SongQueue, SongQueueNode
-from streaming.songs import BaseSong, SongCollectionSong
-from users.users_extended import StreamingUser
+from streaming.songs import BaseSong
 
 
 class SongSerializer(BaseModelSerializer):
@@ -132,5 +130,3 @@ class SongQueueSerializer(BaseModelSerializer):
 #         user = StreamingUser.objects.get(uuid=user_uuid)
 #
 #         return super().create(validated_data)
-
-
