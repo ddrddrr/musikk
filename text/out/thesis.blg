@@ -1,35 +1,39 @@
 [0] Config.pm:308> INFO - This is Biber 2.20
 [0] Config.pm:311> INFO - Logfile is 'thesis.blg'
-[29] biber-darwin:340> INFO - === Tue Apr 22, 2025, 21:06:51
-[36] Biber.pm:420> INFO - Reading 'thesis.bcf'
-[69] Biber.pm:994> INFO - Found 20 citekeys in bib section 0
-[76] Biber.pm:4463> INFO - Processing section 0
-[81] Biber.pm:4654> INFO - Looking for bibtex file 'bibliography.bib' for section 0
-[81] bibtex.pm:1713> INFO - LaTeX decoding ...
-[86] bibtex.pm:1519> INFO - Found BibTeX data source '/Users/mazda/studies/musikk/text/bibliography.bib'
-[132] UCollate.pm:68> INFO - Overriding locale 'en-US' defaults 'normalization = NFD' with 'normalization = prenormalized'
-[132] UCollate.pm:68> INFO - Overriding locale 'en-US' defaults 'variable = shifted' with 'variable = non-ignorable'
-[132] Biber.pm:4283> INFO - Sorting list 'none/global//global/global/global' of type 'entry' with template 'none' and locale 'en-US'
-[132] Biber.pm:4289> INFO - No sort tailoring available for locale 'en-US'
-[139] bbl.pm:676> INFO - Writing 'thesis.bbl' with encoding 'UTF-8'
-[142] bbl.pm:779> INFO - Output to thesis.bbl
-[143] Biber.pm:131> WARN - online entry 'music_stats_2024' (/Users/mazda/studies/musikk/text/bibliography.bib): Invalid format 'date' of date field 'date' - ignoring
-[143] Biber.pm:131> WARN - online entry 'spotify_jam' (/Users/mazda/studies/musikk/text/bibliography.bib): Invalid format 'date' of date field 'date' - ignoring
-[143] Biber.pm:131> WARN - online entry 'spotify_recs' (/Users/mazda/studies/musikk/text/bibliography.bib): Invalid format 'date' of date field 'date' - ignoring
-[143] Biber.pm:131> WARN - online entry 'spotify_friend_activ' (/Users/mazda/studies/musikk/text/bibliography.bib): Invalid format 'date' of date field 'date' - ignoring
-[143] Biber.pm:131> WARN - online entry 'spotify_party_1' (/Users/mazda/studies/musikk/text/bibliography.bib): Invalid format 'date' of date field 'date' - ignoring
-[143] Biber.pm:131> WARN - online entry 'spotify_party_2' (/Users/mazda/studies/musikk/text/bibliography.bib): Invalid format 'date' of date field 'date' - ignoring
-[143] Biber.pm:131> WARN - online entry 'sc_reactions' (/Users/mazda/studies/musikk/text/bibliography.bib): Invalid format 'date' of date field 'date' - ignoring
-[143] Biber.pm:131> WARN - online entry 'sc_reposts' (/Users/mazda/studies/musikk/text/bibliography.bib): Invalid format 'date' of date field 'date' - ignoring
-[143] Biber.pm:131> WARN - online entry 'mvc' (/Users/mazda/studies/musikk/text/bibliography.bib): Invalid format 'date' of date field 'date' - ignoring
-[143] Biber.pm:131> WARN - online entry 'gil' (/Users/mazda/studies/musikk/text/bibliography.bib): Invalid format 'date' of date field 'date' - ignoring
-[143] Biber.pm:131> WARN - online entry 'fastapi' (/Users/mazda/studies/musikk/text/bibliography.bib): Invalid format 'date' of date field 'date' - ignoring
-[143] Biber.pm:131> WARN - online entry 'flask' (/Users/mazda/studies/musikk/text/bibliography.bib): Invalid format 'date' of date field 'date' - ignoring
-[143] Biber.pm:131> WARN - online entry 'django' (/Users/mazda/studies/musikk/text/bibliography.bib): Invalid format 'date' of date field 'date' - ignoring
-[143] Biber.pm:131> WARN - online entry 'drf' (/Users/mazda/studies/musikk/text/bibliography.bib): Invalid format 'date' of date field 'date' - ignoring
-[143] Biber.pm:131> WARN - online entry 'django_channels' (/Users/mazda/studies/musikk/text/bibliography.bib): Invalid format 'date' of date field 'date' - ignoring
-[143] Biber.pm:131> WARN - online entry 'basic_auth' (/Users/mazda/studies/musikk/text/bibliography.bib): Invalid format 'date' of date field 'date' - ignoring
-[143] Biber.pm:131> WARN - online entry 'session_auth' (/Users/mazda/studies/musikk/text/bibliography.bib): Invalid format 'date' of date field 'date' - ignoring
-[143] Biber.pm:131> WARN - online entry 'jwt' (/Users/mazda/studies/musikk/text/bibliography.bib): Invalid format 'date' of date field 'date' - ignoring
-[143] Biber.pm:131> WARN - online entry 'oauth2' (/Users/mazda/studies/musikk/text/bibliography.bib): Invalid format 'date' of date field 'date' - ignoring
-[143] Biber.pm:133> INFO - WARNINGS: 19
+[33] biber-darwin:340> INFO - === Thu Apr 24, 2025, 13:24:42
+[42] Biber.pm:420> INFO - Reading 'thesis.bcf'
+[78] Biber.pm:994> INFO - Found 24 citekeys in bib section 0
+[86] Biber.pm:4463> INFO - Processing section 0
+[91] Biber.pm:4654> INFO - Looking for bibtex file 'bibliography.bib' for section 0
+[92] bibtex.pm:1713> INFO - LaTeX decoding ...
+[98] bibtex.pm:1519> INFO - Found BibTeX data source '/Users/mazda/studies/musikk/text/bibliography.bib'
+[157] UCollate.pm:68> INFO - Overriding locale 'en-US' defaults 'variable = shifted' with 'variable = non-ignorable'
+[157] UCollate.pm:68> INFO - Overriding locale 'en-US' defaults 'normalization = NFD' with 'normalization = prenormalized'
+[157] Biber.pm:4283> INFO - Sorting list 'none/global//global/global/global' of type 'entry' with template 'none' and locale 'en-US'
+[157] Biber.pm:4289> INFO - No sort tailoring available for locale 'en-US'
+[166] bbl.pm:676> INFO - Writing 'thesis.bbl' with encoding 'UTF-8'
+[170] bbl.pm:779> INFO - Output to thesis.bbl
+[170] Biber.pm:131> WARN - online entry 'music_stats_2024' (/Users/mazda/studies/musikk/text/bibliography.bib): Invalid format 'date' of date field 'date' - ignoring
+[170] Biber.pm:131> WARN - online entry 'spotify_jam' (/Users/mazda/studies/musikk/text/bibliography.bib): Invalid format 'date' of date field 'date' - ignoring
+[170] Biber.pm:131> WARN - online entry 'spotify_recs' (/Users/mazda/studies/musikk/text/bibliography.bib): Invalid format 'date' of date field 'date' - ignoring
+[170] Biber.pm:131> WARN - online entry 'spotify_friend_activ' (/Users/mazda/studies/musikk/text/bibliography.bib): Invalid format 'date' of date field 'date' - ignoring
+[170] Biber.pm:131> WARN - online entry 'spotify_party_1' (/Users/mazda/studies/musikk/text/bibliography.bib): Invalid format 'date' of date field 'date' - ignoring
+[170] Biber.pm:131> WARN - online entry 'spotify_party_2' (/Users/mazda/studies/musikk/text/bibliography.bib): Invalid format 'date' of date field 'date' - ignoring
+[170] Biber.pm:131> WARN - online entry 'sc_comments' (/Users/mazda/studies/musikk/text/bibliography.bib): Invalid format 'date' of date field 'date' - ignoring
+[170] Biber.pm:131> WARN - online entry 'sc_reactions' (/Users/mazda/studies/musikk/text/bibliography.bib): Invalid format 'date' of date field 'date' - ignoring
+[170] Biber.pm:131> WARN - online entry 'sc_reposts' (/Users/mazda/studies/musikk/text/bibliography.bib): Invalid format 'date' of date field 'date' - ignoring
+[170] Biber.pm:131> WARN - online entry 'ryt' (/Users/mazda/studies/musikk/text/bibliography.bib): Invalid format 'date' of date field 'date' - ignoring
+[170] Biber.pm:131> WARN - online entry '2step' (/Users/mazda/studies/musikk/text/bibliography.bib): Invalid format 'date' of date field 'date' - ignoring
+[170] Biber.pm:131> WARN - online entry 'inst_audio' (/Users/mazda/studies/musikk/text/bibliography.bib): Invalid format 'date' of date field 'date' - ignoring
+[170] Biber.pm:131> WARN - online entry 'mvc' (/Users/mazda/studies/musikk/text/bibliography.bib): Invalid format 'date' of date field 'date' - ignoring
+[170] Biber.pm:131> WARN - online entry 'gil' (/Users/mazda/studies/musikk/text/bibliography.bib): Invalid format 'date' of date field 'date' - ignoring
+[170] Biber.pm:131> WARN - online entry 'fastapi' (/Users/mazda/studies/musikk/text/bibliography.bib): Invalid format 'date' of date field 'date' - ignoring
+[170] Biber.pm:131> WARN - online entry 'flask' (/Users/mazda/studies/musikk/text/bibliography.bib): Invalid format 'date' of date field 'date' - ignoring
+[170] Biber.pm:131> WARN - online entry 'django' (/Users/mazda/studies/musikk/text/bibliography.bib): Invalid format 'date' of date field 'date' - ignoring
+[170] Biber.pm:131> WARN - online entry 'drf' (/Users/mazda/studies/musikk/text/bibliography.bib): Invalid format 'date' of date field 'date' - ignoring
+[170] Biber.pm:131> WARN - online entry 'django_channels' (/Users/mazda/studies/musikk/text/bibliography.bib): Invalid format 'date' of date field 'date' - ignoring
+[170] Biber.pm:131> WARN - online entry 'basic_auth' (/Users/mazda/studies/musikk/text/bibliography.bib): Invalid format 'date' of date field 'date' - ignoring
+[170] Biber.pm:131> WARN - online entry 'session_auth' (/Users/mazda/studies/musikk/text/bibliography.bib): Invalid format 'date' of date field 'date' - ignoring
+[171] Biber.pm:131> WARN - online entry 'jwt' (/Users/mazda/studies/musikk/text/bibliography.bib): Invalid format 'date' of date field 'date' - ignoring
+[171] Biber.pm:131> WARN - online entry 'oauth2' (/Users/mazda/studies/musikk/text/bibliography.bib): Invalid format 'date' of date field 'date' - ignoring
+[171] Biber.pm:133> INFO - WARNINGS: 23

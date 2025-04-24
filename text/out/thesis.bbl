@@ -212,7 +212,7 @@
       \endverb
       \warn{\item online entry 'spotify_party_2' (/Users/mazda/studies/musikk/text/bibliography.bib): Invalid format 'date' of date field 'date' - ignoring}
     \endentry
-    \entry{sc_reactions}{online}{}{}
+    \entry{sc_comments}{online}{}{}
       \name{author}{1}{}{%
         {{hash=02bd92faa38aaa6cc0ea75e59937a1ef}{%
            family={author},
@@ -227,6 +227,34 @@
       \strng{authorfullhash}{02bd92faa38aaa6cc0ea75e59937a1ef}
       \strng{authorfullhashraw}{02bd92faa38aaa6cc0ea75e59937a1ef}
       \field{extraname}{7}
+      \field{sortinit}{8}
+      \field{sortinithash}{a231b008ebf0ecbe0b4d96dcc159445f}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{title}
+      \verb{urlraw}
+      \verb https://help.soundcloud.com/hc/en-us/articles/115003566008-Commenting-basics
+      \endverb
+      \verb{url}
+      \verb https://help.soundcloud.com/hc/en-us/articles/115003566008-Commenting-basics
+      \endverb
+      \warn{\item online entry 'sc_comments' (/Users/mazda/studies/musikk/text/bibliography.bib): Invalid format 'date' of date field 'date' - ignoring}
+    \endentry
+    \entry{sc_reactions}{online}{}{}
+      \name{author}{1}{}{%
+        {{hash=02bd92faa38aaa6cc0ea75e59937a1ef}{%
+           family={author},
+           familyi={a\bibinitperiod}}}%
+      }
+      \strng{namehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{fullhash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{fullhashraw}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{bibnamehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{authorbibnamehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{authornamehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{authorfullhash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{authorfullhashraw}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \field{extraname}{8}
       \field{sortinit}{8}
       \field{sortinithash}{a231b008ebf0ecbe0b4d96dcc159445f}
       \field{labelnamesource}{author}
@@ -254,7 +282,7 @@
       \strng{authornamehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
       \strng{authorfullhash}{02bd92faa38aaa6cc0ea75e59937a1ef}
       \strng{authorfullhashraw}{02bd92faa38aaa6cc0ea75e59937a1ef}
-      \field{extraname}{8}
+      \field{extraname}{9}
       \field{sortinit}{9}
       \field{sortinithash}{0a5ebc79d83c96b6579069544c73c7d4}
       \field{labelnamesource}{author}
@@ -267,6 +295,90 @@
       \verb https://help.soundcloud.com/hc/en-us/articles/115003567488-Reposting-tracks-or-playlists
       \endverb
       \warn{\item online entry 'sc_reposts' (/Users/mazda/studies/musikk/text/bibliography.bib): Invalid format 'date' of date field 'date' - ignoring}
+    \endentry
+    \entry{ryt}{online}{}{}
+      \name{author}{1}{}{%
+        {{hash=02bd92faa38aaa6cc0ea75e59937a1ef}{%
+           family={author},
+           familyi={a\bibinitperiod}}}%
+      }
+      \strng{namehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{fullhash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{fullhashraw}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{bibnamehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{authorbibnamehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{authornamehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{authorfullhash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{authorfullhashraw}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \field{extraname}{10}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{title}
+      \verb{urlraw}
+      \verb https://rateyourmusic.com/discover
+      \endverb
+      \verb{url}
+      \verb https://rateyourmusic.com/discover
+      \endverb
+      \warn{\item online entry 'ryt' (/Users/mazda/studies/musikk/text/bibliography.bib): Invalid format 'date' of date field 'date' - ignoring}
+    \endentry
+    \entry{2step}{online}{}{}
+      \name{author}{1}{}{%
+        {{hash=02bd92faa38aaa6cc0ea75e59937a1ef}{%
+           family={author},
+           familyi={a\bibinitperiod}}}%
+      }
+      \strng{namehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{fullhash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{fullhashraw}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{bibnamehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{authorbibnamehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{authornamehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{authorfullhash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{authorfullhashraw}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \field{extraname}{11}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{title}
+      \verb{urlraw}
+      \verb http://www.2step.ru/
+      \endverb
+      \verb{url}
+      \verb http://www.2step.ru/
+      \endverb
+      \warn{\item online entry '2step' (/Users/mazda/studies/musikk/text/bibliography.bib): Invalid format 'date' of date field 'date' - ignoring}
+    \endentry
+    \entry{inst_audio}{online}{}{}
+      \name{author}{1}{}{%
+        {{hash=02bd92faa38aaa6cc0ea75e59937a1ef}{%
+           family={author},
+           familyi={a\bibinitperiod}}}%
+      }
+      \strng{namehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{fullhash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{fullhashraw}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{bibnamehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{authorbibnamehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{authornamehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{authorfullhash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{authorfullhashraw}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \field{extraname}{12}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{title}
+      \verb{urlraw}
+      \verb https://help.instagram.com/664508917489819?helpref=faq_content
+      \endverb
+      \verb{url}
+      \verb https://help.instagram.com/664508917489819?helpref=faq_content
+      \endverb
+      \warn{\item online entry 'inst_audio' (/Users/mazda/studies/musikk/text/bibliography.bib): Invalid format 'date' of date field 'date' - ignoring}
     \endentry
     \entry{mvc}{online}{}{}
       \name{author}{1}{}{%
@@ -282,7 +394,7 @@
       \strng{authornamehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
       \strng{authorfullhash}{02bd92faa38aaa6cc0ea75e59937a1ef}
       \strng{authorfullhashraw}{02bd92faa38aaa6cc0ea75e59937a1ef}
-      \field{extraname}{9}
+      \field{extraname}{13}
       \field{sortinit}{1}
       \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
       \field{labelnamesource}{author}
@@ -310,7 +422,7 @@
       \strng{authornamehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
       \strng{authorfullhash}{02bd92faa38aaa6cc0ea75e59937a1ef}
       \strng{authorfullhashraw}{02bd92faa38aaa6cc0ea75e59937a1ef}
-      \field{extraname}{10}
+      \field{extraname}{14}
       \field{sortinit}{1}
       \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
       \field{labelnamesource}{author}
@@ -338,7 +450,7 @@
       \strng{authornamehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
       \strng{authorfullhash}{02bd92faa38aaa6cc0ea75e59937a1ef}
       \strng{authorfullhashraw}{02bd92faa38aaa6cc0ea75e59937a1ef}
-      \field{extraname}{11}
+      \field{extraname}{15}
       \field{sortinit}{1}
       \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
       \field{labelnamesource}{author}
@@ -393,7 +505,7 @@
       \strng{authornamehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
       \strng{authorfullhash}{02bd92faa38aaa6cc0ea75e59937a1ef}
       \strng{authorfullhashraw}{02bd92faa38aaa6cc0ea75e59937a1ef}
-      \field{extraname}{12}
+      \field{extraname}{16}
       \field{sortinit}{1}
       \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
       \field{labelnamesource}{author}
@@ -421,7 +533,7 @@
       \strng{authornamehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
       \strng{authorfullhash}{02bd92faa38aaa6cc0ea75e59937a1ef}
       \strng{authorfullhashraw}{02bd92faa38aaa6cc0ea75e59937a1ef}
-      \field{extraname}{13}
+      \field{extraname}{17}
       \field{sortinit}{1}
       \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
       \field{labelnamesource}{author}
@@ -449,7 +561,7 @@
       \strng{authornamehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
       \strng{authorfullhash}{02bd92faa38aaa6cc0ea75e59937a1ef}
       \strng{authorfullhashraw}{02bd92faa38aaa6cc0ea75e59937a1ef}
-      \field{extraname}{14}
+      \field{extraname}{18}
       \field{sortinit}{1}
       \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
       \field{labelnamesource}{author}
@@ -477,9 +589,9 @@
       \strng{authornamehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
       \strng{authorfullhash}{02bd92faa38aaa6cc0ea75e59937a1ef}
       \strng{authorfullhashraw}{02bd92faa38aaa6cc0ea75e59937a1ef}
-      \field{extraname}{15}
-      \field{sortinit}{1}
-      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{extraname}{19}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
       \field{title}{title}
@@ -505,9 +617,9 @@
       \strng{authornamehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
       \strng{authorfullhash}{02bd92faa38aaa6cc0ea75e59937a1ef}
       \strng{authorfullhashraw}{02bd92faa38aaa6cc0ea75e59937a1ef}
-      \field{extraname}{16}
-      \field{sortinit}{1}
-      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{extraname}{20}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
       \field{title}{title}
@@ -533,9 +645,9 @@
       \strng{authornamehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
       \strng{authorfullhash}{02bd92faa38aaa6cc0ea75e59937a1ef}
       \strng{authorfullhashraw}{02bd92faa38aaa6cc0ea75e59937a1ef}
-      \field{extraname}{17}
-      \field{sortinit}{1}
-      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{extraname}{21}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
       \field{title}{title}
@@ -561,7 +673,7 @@
       \strng{authornamehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
       \strng{authorfullhash}{02bd92faa38aaa6cc0ea75e59937a1ef}
       \strng{authorfullhashraw}{02bd92faa38aaa6cc0ea75e59937a1ef}
-      \field{extraname}{18}
+      \field{extraname}{22}
       \field{sortinit}{2}
       \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
       \field{labelnamesource}{author}
