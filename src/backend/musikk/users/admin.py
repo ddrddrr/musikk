@@ -1,10 +1,8 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 
 from users.models import BaseUser
-
-from django.contrib.auth.forms import UserChangeForm
 
 
 class BaseUserChangeForm(UserChangeForm):
@@ -15,36 +13,43 @@ class BaseUserChangeForm(UserChangeForm):
             "email",
             "first_name",
             "last_name",
+            "avatar",
         ]
 
 
 class BaseUserCreationForm(UserCreationForm):
     class Meta:
         model = BaseUser
-        fields = ["display_name", "email", "first_name", "last_name"]
+        fields = [
+            "display_name",
+            "email",
+            "first_name",
+            "last_name",
+            "avatar",
+        ]
 
 
 @admin.register(BaseUser)
 class BaseUserAdmin(UserAdmin):
     add_form = BaseUserCreationForm
     form = BaseUserChangeForm
-
     model = BaseUser
+
     list_display = (
         "email",
         "first_name",
         "last_name",
         "display_name",
-        "is_staff",
         "is_active",
         "is_admin",
+        "is_superuser",
         "uuid",
     )
-    list_filter = (
-        "email",
-        "is_staff",
-        "is_active",
-    )
+    list_filter = ("is_active", "is_admin", "is_superuser", "groups")
+    search_fields = ("email", "first_name", "last_name", "display_name")
+    ordering = ("email",)
+    list_display_links = ("email",)
+
     fieldsets = (
         (None, {"fields": ("email", "password")}),
         (
@@ -56,14 +61,15 @@ class BaseUserAdmin(UserAdmin):
             {
                 "fields": (
                     "is_active",
-                    "is_staff",
                     "is_admin",
+                    "is_superuser",
                     "groups",
                     "user_permissions",
                 )
             },
         ),
-        ("Important dates", {"fields": ("last_login", "date_joined")}),
+        ("Important dates", {"fields": ("last_login",)}),
+        ("Other", {"fields": ("uuid",)}),
     )
 
     add_fieldsets = (
@@ -76,12 +82,12 @@ class BaseUserAdmin(UserAdmin):
                     "display_name",
                     "first_name",
                     "last_name",
+                    "avatar",
                     "password1",
                     "password2",
                 ),
             },
         ),
     )
-    search_fields = ("email",)
-    ordering = ("email",)
-    list_display_links = ("email",)
+
+    readonly_fields = ("uuid", "last_login")

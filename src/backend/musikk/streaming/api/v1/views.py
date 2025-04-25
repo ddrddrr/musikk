@@ -7,7 +7,7 @@ from rest_framework.generics import (
 from rest_framework.permissions import IsAuthenticated
 
 from streaming.api.v1.serializers import (
-    SongSerializer,
+    BaseSongSerializer,
     SongCollectionSerializerBasic,
     SongCollectionSerializerDetailed,
 )
@@ -19,7 +19,7 @@ from users.users_extended import ContentOwner
 class SongListCreateView(ListModelMixin, CreateModelMixin, GenericAPIView):
     permission_classes = [IsAuthenticated]
     queryset = BaseSong.objects.all()
-    serializer_class = SongSerializer
+    serializer_class = BaseSongSerializer
 
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)

@@ -1,5 +1,4 @@
 from django.core.management.base import BaseCommand, CommandError
-from django.utils.crypto import get_random_string
 from faker import Faker
 
 from users.models import StreamingUser, Artist, Label
@@ -19,15 +18,14 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument(
-            "user_type", type=str, help="User type: `streaming`, `artist`, or `label`"
+            "--type", type=str, help="User type: `streaming`, `artist`, or `label`"
         )
         parser.add_argument("--email", type=str, help="Email address of the new user")
 
     def handle(self, *args, **options):
-        user_type = options["user_type"].lower()
-        email = options.get("email")
-        if not email:
-            email = fake.ascii_email()
+        user_type = options["type"].lower()
+        email = options.get("email") or fake.ascii_email()
+
         if user_type not in USER_CLASSES:
             raise CommandError(
                 f"Invalid user_type. Choose from: {', '.join(USER_CLASSES.keys())}"
@@ -39,7 +37,6 @@ class Command(BaseCommand):
         user = UserClass.objects.create_user(
             email=email,
             password=password,
-            username=email,
         )
 
         self.stdout.write(

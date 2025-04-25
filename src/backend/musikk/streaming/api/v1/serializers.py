@@ -8,7 +8,7 @@ from streaming.song_queue import SongQueue, SongQueueNode
 from streaming.songs import BaseSong
 
 
-class SongSerializer(BaseModelSerializer):
+class BaseSongSerializer(BaseModelSerializer):
     mpd = serializers.SerializerMethodField(read_only=True)
     audio = serializers.FileField(write_only=True)
 
@@ -73,7 +73,7 @@ class SongCollectionSerializerDetailed(BaseModelSerializer):
         song_collection_songs = obj.ordered_songs()
         return [
             {
-                **SongSerializer(song, context=self.context).data,
+                **BaseSongSerializer(song, context=self.context).data,
             }
             for song in song_collection_songs
         ]
@@ -86,7 +86,7 @@ class PlaylistSerializerBasic(SongCollectionSerializerBasic):
 
 
 class SongQueueNodeSerializer(BaseModelSerializer):
-    song = SongSerializer()
+    song = BaseSongSerializer()
 
     class Meta:
         model = SongQueueNode
@@ -95,7 +95,7 @@ class SongQueueNodeSerializer(BaseModelSerializer):
     def get_song(self, obj):
         song = obj.song()
         return {
-            **SongSerializer(song, context=self.context).data,
+            **BaseSongSerializer(song, context=self.context).data,
         }
 
 
