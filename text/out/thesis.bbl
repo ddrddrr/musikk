@@ -352,7 +352,7 @@
       \endverb
       \warn{\item online entry '2step' (/Users/mazda/studies/musikk/text/bibliography.bib): Invalid format 'date' of date field 'date' - ignoring}
     \endentry
-    \entry{inst_audio}{online}{}{}
+    \entry{thewire}{online}{}{}
       \name{author}{1}{}{%
         {{hash=02bd92faa38aaa6cc0ea75e59937a1ef}{%
            family={author},
@@ -367,6 +367,34 @@
       \strng{authorfullhash}{02bd92faa38aaa6cc0ea75e59937a1ef}
       \strng{authorfullhashraw}{02bd92faa38aaa6cc0ea75e59937a1ef}
       \field{extraname}{12}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{title}
+      \verb{urlraw}
+      \verb https://www.thewire.co.uk/home/
+      \endverb
+      \verb{url}
+      \verb https://www.thewire.co.uk/home/
+      \endverb
+      \warn{\item online entry 'thewire' (/Users/mazda/studies/musikk/text/bibliography.bib): Invalid format 'date' of date field 'date' - ignoring}
+    \endentry
+    \entry{inst_audio}{online}{}{}
+      \name{author}{1}{}{%
+        {{hash=02bd92faa38aaa6cc0ea75e59937a1ef}{%
+           family={author},
+           familyi={a\bibinitperiod}}}%
+      }
+      \strng{namehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{fullhash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{fullhashraw}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{bibnamehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{authorbibnamehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{authornamehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{authorfullhash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{authorfullhashraw}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \field{extraname}{13}
       \field{sortinit}{1}
       \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
       \field{labelnamesource}{author}
@@ -394,7 +422,7 @@
       \strng{authornamehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
       \strng{authorfullhash}{02bd92faa38aaa6cc0ea75e59937a1ef}
       \strng{authorfullhashraw}{02bd92faa38aaa6cc0ea75e59937a1ef}
-      \field{extraname}{13}
+      \field{extraname}{14}
       \field{sortinit}{1}
       \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
       \field{labelnamesource}{author}
@@ -422,7 +450,7 @@
       \strng{authornamehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
       \strng{authorfullhash}{02bd92faa38aaa6cc0ea75e59937a1ef}
       \strng{authorfullhashraw}{02bd92faa38aaa6cc0ea75e59937a1ef}
-      \field{extraname}{14}
+      \field{extraname}{15}
       \field{sortinit}{1}
       \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
       \field{labelnamesource}{author}
@@ -450,7 +478,7 @@
       \strng{authornamehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
       \strng{authorfullhash}{02bd92faa38aaa6cc0ea75e59937a1ef}
       \strng{authorfullhashraw}{02bd92faa38aaa6cc0ea75e59937a1ef}
-      \field{extraname}{15}
+      \field{extraname}{16}
       \field{sortinit}{1}
       \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
       \field{labelnamesource}{author}
@@ -463,33 +491,6 @@
       \verb https://fastapi.tiangolo.com/
       \endverb
       \warn{\item online entry 'fastapi' (/Users/mazda/studies/musikk/text/bibliography.bib): Invalid format 'date' of date field 'date' - ignoring}
-    \endentry
-    \entry{flask}{online}{}{}
-      \name{author}{1}{}{%
-        {{hash=319c3206a7f10c17c3b9116d4a957646}{%
-           family={flask},
-           familyi={f\bibinitperiod}}}%
-      }
-      \strng{namehash}{319c3206a7f10c17c3b9116d4a957646}
-      \strng{fullhash}{319c3206a7f10c17c3b9116d4a957646}
-      \strng{fullhashraw}{319c3206a7f10c17c3b9116d4a957646}
-      \strng{bibnamehash}{319c3206a7f10c17c3b9116d4a957646}
-      \strng{authorbibnamehash}{319c3206a7f10c17c3b9116d4a957646}
-      \strng{authornamehash}{319c3206a7f10c17c3b9116d4a957646}
-      \strng{authorfullhash}{319c3206a7f10c17c3b9116d4a957646}
-      \strng{authorfullhashraw}{319c3206a7f10c17c3b9116d4a957646}
-      \field{sortinit}{1}
-      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
-      \field{labelnamesource}{author}
-      \field{labeltitlesource}{title}
-      \field{title}{title}
-      \verb{urlraw}
-      \verb https://flask.palletsprojects.com/en/stable/
-      \endverb
-      \verb{url}
-      \verb https://flask.palletsprojects.com/en/stable/
-      \endverb
-      \warn{\item online entry 'flask' (/Users/mazda/studies/musikk/text/bibliography.bib): Invalid format 'date' of date field 'date' - ignoring}
     \endentry
     \entry{django}{online}{}{}
       \name{author}{1}{}{%
@@ -505,7 +506,7 @@
       \strng{authornamehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
       \strng{authorfullhash}{02bd92faa38aaa6cc0ea75e59937a1ef}
       \strng{authorfullhashraw}{02bd92faa38aaa6cc0ea75e59937a1ef}
-      \field{extraname}{16}
+      \field{extraname}{17}
       \field{sortinit}{1}
       \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
       \field{labelnamesource}{author}
@@ -533,7 +534,7 @@
       \strng{authornamehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
       \strng{authorfullhash}{02bd92faa38aaa6cc0ea75e59937a1ef}
       \strng{authorfullhashraw}{02bd92faa38aaa6cc0ea75e59937a1ef}
-      \field{extraname}{17}
+      \field{extraname}{18}
       \field{sortinit}{1}
       \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
       \field{labelnamesource}{author}
@@ -561,7 +562,7 @@
       \strng{authornamehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
       \strng{authorfullhash}{02bd92faa38aaa6cc0ea75e59937a1ef}
       \strng{authorfullhashraw}{02bd92faa38aaa6cc0ea75e59937a1ef}
-      \field{extraname}{18}
+      \field{extraname}{19}
       \field{sortinit}{1}
       \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
       \field{labelnamesource}{author}
@@ -574,6 +575,61 @@
       \verb https://channels.readthedocs.io/en/latest/
       \endverb
       \warn{\item online entry 'django_channels' (/Users/mazda/studies/musikk/text/bibliography.bib): Invalid format 'date' of date field 'date' - ignoring}
+    \endentry
+    \entry{flask}{online}{}{}
+      \name{author}{1}{}{%
+        {{hash=319c3206a7f10c17c3b9116d4a957646}{%
+           family={flask},
+           familyi={f\bibinitperiod}}}%
+      }
+      \strng{namehash}{319c3206a7f10c17c3b9116d4a957646}
+      \strng{fullhash}{319c3206a7f10c17c3b9116d4a957646}
+      \strng{fullhashraw}{319c3206a7f10c17c3b9116d4a957646}
+      \strng{bibnamehash}{319c3206a7f10c17c3b9116d4a957646}
+      \strng{authorbibnamehash}{319c3206a7f10c17c3b9116d4a957646}
+      \strng{authornamehash}{319c3206a7f10c17c3b9116d4a957646}
+      \strng{authorfullhash}{319c3206a7f10c17c3b9116d4a957646}
+      \strng{authorfullhashraw}{319c3206a7f10c17c3b9116d4a957646}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{title}
+      \verb{urlraw}
+      \verb https://flask.palletsprojects.com/en/stable/
+      \endverb
+      \verb{url}
+      \verb https://flask.palletsprojects.com/en/stable/
+      \endverb
+      \warn{\item online entry 'flask' (/Users/mazda/studies/musikk/text/bibliography.bib): Invalid format 'date' of date field 'date' - ignoring}
+    \endentry
+    \entry{sqlite}{online}{}{}
+      \name{author}{1}{}{%
+        {{hash=02bd92faa38aaa6cc0ea75e59937a1ef}{%
+           family={author},
+           familyi={a\bibinitperiod}}}%
+      }
+      \strng{namehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{fullhash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{fullhashraw}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{bibnamehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{authorbibnamehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{authornamehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{authorfullhash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{authorfullhashraw}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \field{extraname}{20}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{title}
+      \verb{urlraw}
+      \verb https://www.sqlite.org/about.html
+      \endverb
+      \verb{url}
+      \verb https://www.sqlite.org/about.html
+      \endverb
+      \warn{\item online entry 'sqlite' (/Users/mazda/studies/musikk/text/bibliography.bib): Invalid format 'date' of date field 'date' - ignoring}
     \endentry
     \entry{basic_auth}{online}{}{}
       \name{author}{1}{}{%
@@ -589,7 +645,7 @@
       \strng{authornamehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
       \strng{authorfullhash}{02bd92faa38aaa6cc0ea75e59937a1ef}
       \strng{authorfullhashraw}{02bd92faa38aaa6cc0ea75e59937a1ef}
-      \field{extraname}{19}
+      \field{extraname}{21}
       \field{sortinit}{2}
       \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
       \field{labelnamesource}{author}
@@ -617,7 +673,7 @@
       \strng{authornamehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
       \strng{authorfullhash}{02bd92faa38aaa6cc0ea75e59937a1ef}
       \strng{authorfullhashraw}{02bd92faa38aaa6cc0ea75e59937a1ef}
-      \field{extraname}{20}
+      \field{extraname}{22}
       \field{sortinit}{2}
       \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
       \field{labelnamesource}{author}
@@ -645,7 +701,7 @@
       \strng{authornamehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
       \strng{authorfullhash}{02bd92faa38aaa6cc0ea75e59937a1ef}
       \strng{authorfullhashraw}{02bd92faa38aaa6cc0ea75e59937a1ef}
-      \field{extraname}{21}
+      \field{extraname}{23}
       \field{sortinit}{2}
       \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
       \field{labelnamesource}{author}
@@ -673,7 +729,7 @@
       \strng{authornamehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
       \strng{authorfullhash}{02bd92faa38aaa6cc0ea75e59937a1ef}
       \strng{authorfullhashraw}{02bd92faa38aaa6cc0ea75e59937a1ef}
-      \field{extraname}{22}
+      \field{extraname}{24}
       \field{sortinit}{2}
       \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
       \field{labelnamesource}{author}

@@ -1,37 +1,50 @@
 \chapter{Implementation Planning}
-This section provides an insight into the high-level technology choices used to implement the application.
+This section provides an insight into the high-level technology choices behind the application.
 In addition, UML diagrams are provided as an overview of the system.
 
-The created platform is built using the Model-View-Controller\cite{mvc} architectural pattern.
+The created platform is built using the Model-View-Controller \cite{mvc} architectural pattern.
 It is split into three major parts:
-- Backend. Implements all of the data-related logic and processing.
-- API. Is responsible for transferring the data to the frontend and receiving commands from it.
-- Frontend. Presents the data to the User and accepts his commands.
+\begin{itemize}
+    \item \textbf{Backend.} Implements all the data-related logic and processing.
+    \item \textbf{API.} Is responsible for transferring the data to the frontend and receiving commands from it.
+    \item \textbf{Frontend.} Presents the data to the User and accepts his commands.
+\end{itemize}
 
 
 \section{Backend}
 Python was chosen as the main language for the Backend part of the application.
-It has support for all the needed instruments, such as calling external processes,
-file handling, and executing asynchronous code. Moreover, it has a flexible and straightforward
+It has support for all the needed instruments, such as external processes calls,
+file handling, and asynchronous code execution. Moreover, it has a flexible and straightforward
 syntax allowing for rapid development.
 As this project is mostly IO-driven and most of the processor-heavy operations are offloaded to external processes,
 i.e. no thread programming is used, Python's performance limitations\cite{gil} will not have such a drastic effect.
 
 \subsection{Framework Comparison}
-
 Currently, there are 3 well-developed and widely-used WEB frameworks available for Python:
 
 \begin{itemize}
     \item \textbf{FastAPI} \\
     'FastAPI is a modern, fast (high-performance), web framework for building APIs
     with Python, based on standard Python type hints.'~\cite{fastapi}. \\
-    This framework offers a lightweight approach to API declaration, without adding almost no overhead.
+    This framework provides a lightweight approach to API declaration, without adding almost no overhead.
     It has the best integration with API documentation standards such as
     Open API and API representation tools, e.g. Swagger.
 
     However, it is relatively new and basic; given the requirements and the fact that
     few additional packages are available - a lot of custom code would have
     to be written on top, which is a disadvantage for this specific project.
+
+    \item \textbf{Django} \\
+    Django is a 'batteries-included' framework, in a sense that almost everything -
+    from access control and database management to API routing and admin interface,
+    is a part of it.\cite{django}
+    Additionally, Django offers an extensive ecosystem, including support for RESTful API design through
+    \texttt{django-rest-framework}\cite{drf}, various authentication methods,
+    and multiple data transfer protocols. Real-time communication, such as WebSockets and Server-Sent Events,
+    is supported via the \texttt{django-channels}\cite{django_channels} package.
+
+    Some of the notable drawbacks include its opinionated design choices and the size of the application,
+    as it includes a lot of parts that may not be used.
 
     \item \textbf{Flask} \\
     Flask is a micro-framework built on the WSGI interface.
@@ -42,27 +55,45 @@ Currently, there are 3 well-developed and widely-used WEB frameworks available f
     One of the main downsides of Flask is that it does not integrate well enough with the ASGI
     interface which is necessary for proper handling of Server-Client path of communication.
     Moreover, strongly relying on external packages can pose potential security risks.
-
-    \item \textbf{Django} \\
-    Django is a 'batteries-included' framework, in a sense that almost everything -
-    from access control and database management to API routing and admin interface,
-    is a part of it.\cite{django} Additionally, it has an extensive ecosystem with support for e.g. REST-style API
-    design via \texttt{django-rest-framework}\cite{drf}; different methods of Authentication;
-    various transfer protocols, such as websockets and Server Sent Events are available
-    via the \texttt{django-channels}\cite{django_channels} package.
-
-    Some of the notable drawbacks include its opinionated design choices and the size of the application,
-    as it includes a lot of parts that may not be used.
 \end{itemize}
 
 Of the three frameworks Django is the most suitable one.
 Most of the application logic will be handled by the backend, heavily utilizing
-Django's ORM for most database tasks. On top of that, a JSON-based API can be easily written
+Django's ORM for most database tasks. On top of that, a JSON-based API can be implemented
 using `django-rest-framework`, simplifying communication with the frontend.
 
+\subsection{Database}
+Below is the comparison of the databases that Django framework supports.
+It is worth to mention, that two other databases can be used as well - Oracle and MySQL.
+However, Oracle is ruled out due to its commercial licence, and MySQL is not considered, because
+MariaDB is fully compatible with it, while providing enhancements of top of it.
 
-\section{API}
-%TODO
+
+\begin{itemize}
+    \item \textbf{SQLite} \\
+    'SQLite is an embedded SQL database engine.
+    Unlike most other SQL databases, SQLite does not have a separate
+    server process. SQLite reads and writes directly to ordinary disk
+    files.'\cite{sqlite}. As the result of SQLite's architecture it is suitable
+    in situations, where a simple storage is needed and write operations are limited.
+    This deems this database
+
+    \item \textbf{PostgreSQL} \\
+    PostgreSQL is a traditional object-relational database that is de-facto standard in most
+    modern application. It offers a lot of supplementary features, such as complex data types,
+    proper replication and logging, full text search and many others. Django has the best support for it,
+    adding a lot of wrappers for Postgre's custom logic.
+
+    \item \textbf{MariaDB} \\
+    ...
+\end{itemize}
+
+
+\section{Frontend}
+
+- React
+- Svelte
+- Vue
 
 
 \section{Audio Transfer}
@@ -109,31 +140,28 @@ to various problems — from delays for clients located far away from the source
 to problematic enforcement of possible DRM (anti-piracy) protection.
 
 
-\section{Database}
-% TODO: postgres, maria, sqlite etc
-
-
 \section{Authentication}
-
+There are many different methods of authentication available, but only the ones suitable for
+WEB applications are considered below:
 \begin{itemize}
     \item \textbf{Basic Authentication} \\
     Basic Authentication works by sending a username and password with each request,
-    typically encoded in base64.\cite{basic_auth} It is simple to implement, making it suitable for
-    small, internal applications. However, it incorporates credentials in every request,
-    making it prone to security risks if not used over HTTPS. Moreover, It lacks session management,
-    limiting scalability in modern applications.
+    typically encoded in base64.\cite{basic_auth} It is simple to configure, and it can work well for
+    e.g. communication between internal services. However, it incorporates credentials in every request,
+    making it prone to security risks in client-server systems, if not used over HTTPS.
+    Moreover, It lacks session management, limiting scalability.
 
     \item \textbf{Session Authentication} \\
     Session authentication creates a session after the user logs in, with session
     data stored on the server and the client storing a session ID in a cookie.
     It makes authentication management centralized, which can enhance security compared to Basic Authentication.
     However, it can be vulnerable to session hijacking if cookies are not properly protected
-    and can face scalability issues in distributed systems.\cite{session_auth}
+    and can greatly increase the load on the database.\cite{session_auth}
 
     \item \textbf{JWT (JSON Web Token)} \\
     JWT is a compact, URL-safe method of representing claims between two parties.\cite{jwt}
-    It is an example of stateless authentication where tokens all the needed information for user authentication
-    and any additional custom payload which can be utilized for e.g. role management.
+    It is an example of stateless authentication where token has all the needed information for user authentication.
+    It can also carry additional custom payload which, for instance, can be utilized for role management.
     They provide a flexible and scalable way to implement secure authentication.
     However, if not properly managed (e.g., using long expiration times), they can become security risks,
     as compromised tokens may be used for extended periods.
@@ -145,11 +173,9 @@ to problematic enforcement of possible DRM (anti-piracy) protection.
     authorization, however, it must be used in congestion with other regular methods.
 \end{itemize}
 
-% TODO: explain why jwt wins
+JWT tokens were chosen as the main method of authentication. They are easy to set up, behave well when the
+application scales horizontally and, most importantly, do not use the database to manage authentication details.
+
 
 \section{Server-Client Communication}
 % TODO: polling, websockets, sse etc.
-
-
-\section{Frontend}
-%TODO compare frameworks, explain react choice
