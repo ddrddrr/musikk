@@ -1,6 +1,6 @@
-import { IUser } from "@/components/login/types.ts";
 import { UserContext } from "@/providers/userContext.ts";
 import { ReactNode, useState } from "react";
+import { IUser } from "@/components/user/types.ts";
 
 interface UserProviderProps {
     children: ReactNode;

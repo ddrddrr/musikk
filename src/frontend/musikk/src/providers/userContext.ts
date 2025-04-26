@@ -1,5 +1,5 @@
-import { IUser } from "@/components/login/types.ts";
 import { createContext } from "react";
+import { IUser } from "@/components/user/types.ts";
 
 interface UserContextType {
     user: IUser | null;

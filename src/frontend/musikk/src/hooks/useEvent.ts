@@ -12,8 +12,6 @@ interface useEventProps {
     isEnabled: boolean;
 }
 
-// TODO: make notification events subscribe on home page mount
-
 export function useEvent({ eventUrl, onEvent, deps, isEnabled }: useEventProps) {
     const navigate = useNavigate();
     // pain...

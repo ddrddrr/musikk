@@ -41,3 +41,6 @@ export const UserUrls = {
     tokenGet: `${BASE_URL}/token/`,
     tokenRefresh: `${BASE_URL}/token/refresh/`,
 };
+export const SearchUrls = {
+    searchMain: (query: string) => `${BASE_URL}/search?q=${query}`,
+};
