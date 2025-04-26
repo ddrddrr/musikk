@@ -1,6 +1,5 @@
 from django.urls import path
-from django.urls.conf import include
-from rest_framework.routers import DefaultRouter
+
 
 from streaming.api.v1.views import (
     SongCollectionListView,
@@ -19,17 +18,9 @@ from streaming.api.v1.song_queue_views import (
     SongQueueClearView,
     SongQueueShiftHeadView,
     SongQueueShiftHeadBackwardsView,
-    SongQueueEventViewSet,
 )
 
-router = DefaultRouter()
-router.register(
-    r"song-queue/events",
-    SongQueueEventViewSet,
-    basename="song-queue-events",
-)
 urlpatterns = [
-    path("", include(router.urls)),
     path("songs/", SongListCreateView.as_view(), name="song-list-create"),
     path("collections/", SongCollectionListView.as_view(), name="collection-list"),
     path(

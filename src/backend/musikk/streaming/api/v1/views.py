@@ -9,6 +9,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 
+from sse.config import EventChannels
+from sse.events import send_invalidate_event
 from streaming.api.v1.serializers import (
     BaseSongSerializer,
     SongCollectionSerializerBasic,
@@ -55,12 +57,19 @@ class LikedSongsAddView(APIView):
     permission_classes = [IsAuthenticated]
 
     def patch(self, request, *args, **kwargs):
-        user = request.user.streaming_user
-        song_uuid = request.data["uuid"]
-        if not song_uuid or not (song := BaseSong.object.filter(uuid=song_uuid)):
+        user = request.user.streaminguser
+        song_uuid = kwargs["uuid"]
+        if not song_uuid or not (song := BaseSong.objects.filter(uuid=song_uuid)):
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
-        SongCollectionSong.objects.create(song=song, song_collection=user.liked_songs)
+        SongCollectionSong.objects.create(
+            song=song[0], song_collection=user.liked_songs
+        )
+
+        # doing a refetch for the queue is easier than traversing nodes and checking, whether the song is in the queue
+        send_invalidate_event(EventChannels.user_events(user.uuid), ["queue"])
+        send_invalidate_event(EventChannels.user_events(user.uuid), ["openCollection"])
+        send_invalidate_event(EventChannels.user_events(user.uuid), ["likedSongs"])
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 

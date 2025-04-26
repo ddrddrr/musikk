@@ -5,12 +5,13 @@ from audio_processing.ffmpeg_wrapper import FlacOnly
 from base.serializers import BaseModelSerializer
 from streaming.song_collections import SongCollection, Playlist
 from streaming.song_queue import SongQueue, SongQueueNode
-from streaming.songs import BaseSong
+from streaming.songs import BaseSong, SongCollectionSong
 
 
 class BaseSongSerializer(BaseModelSerializer):
     mpd = serializers.SerializerMethodField(read_only=True)
     audio = serializers.FileField(write_only=True)
+    is_liked = serializers.SerializerMethodField(read_only=True, allow_null=True)
 
     class Meta:
         model = BaseSong
@@ -20,6 +21,7 @@ class BaseSongSerializer(BaseModelSerializer):
             "audio",
             "description",
             "mpd",
+            "is_liked",
         ]
 
     # TODO: probably make a model method, change _ to -
@@ -29,6 +31,13 @@ class BaseSongSerializer(BaseModelSerializer):
             + settings.MEDIA_URL
             + f"audio_content/{obj.uuid}/{obj.uuid}.mpd"
         )
+
+    def get_is_liked(self, obj):
+        if user := self.context["request"].user.streaminguser:
+            return SongCollectionSong.objects.filter(
+                song=obj, song_collection=user.liked_songs
+            ).exists()
+        return None
 
     def create(self, validated_data):
         res = FlacOnly.convert_song(validated_data.pop("audio"))

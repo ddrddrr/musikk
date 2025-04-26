@@ -1,13 +1,13 @@
-from enum import Enum
-
-from django.core.exceptions import PermissionDenied
 from django.http import Http404
 from rest_framework.generics import RetrieveAPIView, UpdateAPIView, CreateAPIView
 from rest_framework.views import APIView
 from rest_framework import request
 from rest_framework import status
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from django_eventstream.viewsets import EventsViewSet
 
+from sse.config import EventChannels
 from users.api.v1.serializers import (
     BaseUserSerializer,
     StreamingUserSerializer,
@@ -49,6 +49,7 @@ class UserCreateView(APIView):
         # match role:
         #     case ...
 
+
 class ResetPasswordView(UpdateAPIView):
     lookup_field = "uuid"
     queryset = BaseUser.objects.all()
@@ -72,3 +73,14 @@ class ResetPasswordView(UpdateAPIView):
         serializer.save()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class UserEventViewSet(EventsViewSet):
+    permission_classes = [IsAuthenticated]
+
+    def list(self, request):
+        ch = EventChannels.user_events(self.request.user.uuid)
+        # no need to add the channel to the existing list, as it is
+        # request scoped, i.e. every user gets its own channel
+        self.channels = [ch]
+        return super().list(request)

@@ -2,12 +2,12 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
-from django_eventstream import send_event
-from django_eventstream.viewsets import EventsViewSet
 
 from notifications.models import ReplyNotification
 from social.api.v1.serializers import CommentReadSerializer, CommentWriteSerializer
 from social.models import Comment
+from sse.config import EventChannels
+from sse.events import send_invalidate_event
 
 
 class CommentListCreateView(GenericAPIView):
@@ -32,9 +32,10 @@ class CommentListCreateView(GenericAPIView):
 
     def post(self, request, *args, **kwargs):
         data = request.data.copy()
+        user = request.user
         data["obj_type"] = data.pop("obj-type")
         data["obj_uuid"] = data.pop("obj-uuid")
-        data["user"] = request.user.pk
+        data["user"] = user.pk
 
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
@@ -47,20 +48,12 @@ class CommentListCreateView(GenericAPIView):
             )
 
         if obj.content_object:
-            send_event(
-                f"comments/events/{data['obj_uuid']}", "message", {"invalidate": ""}
+            send_invalidate_event(
+                EventChannels.user_events(user.uuid),
+                ["comments", data["obj_uuid"]],
             )
 
         read_serializer = CommentReadSerializer(
             obj, context=self.get_serializer_context()
         )
         return Response(read_serializer.data, status=201)
-
-
-class CommentEventViewSet(EventsViewSet):
-    permission_classes = [IsAuthenticated]
-
-    def list(self, request, uuid=None):
-        if uuid:
-            self.channels = [f"comments/events/{uuid}"]
-        return super().list(request)

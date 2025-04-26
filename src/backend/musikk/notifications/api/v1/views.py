@@ -26,12 +26,3 @@ class ReplyNotificationSetReadView(GenericAPIView):
         notif_uuids = self.request.data["uuids"]
         ReplyNotification.objects.filter(uuid__in=notif_uuids).update(is_read=True)
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-class ReplyNotificationEventViewSet(EventsViewSet):
-    permission_classes = [IsAuthenticated]
-
-    def list(self, request, uuid=None):
-        if uuid:
-            self.channels = [f"notifications/replies/events/{uuid}"]
-        return super().list(request)

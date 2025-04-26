@@ -10,15 +10,15 @@ from streaming.api.v1.serializers import (
 )
 from streaming.models import BaseSong, SongCollection
 from users.api.v1.serializers import BaseUserSerializer
-from users.models import BaseUser, Artist
-from users.users_extended import StreamingUser
+from users.models import Artist, StreamingUser
+
 
 TRIGRAM_SIMILARITY_THRESHOLD = 0.3
 MAX_RESULTS = 10
 
 
 class SearchView(APIView):
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
         query = request.query_params.get("q", "").strip()
