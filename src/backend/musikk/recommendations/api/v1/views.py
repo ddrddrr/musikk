@@ -10,41 +10,48 @@ from streaming.api.v1.serializers import (
 )
 from streaming.models import BaseSong, SongCollection
 from users.api.v1.serializers import BaseUserSerializer
-from users.models import BaseUser
+from users.models import BaseUser, Artist
+from users.users_extended import StreamingUser
 
 TRIGRAM_SIMILARITY_THRESHOLD = 0.3
-MAX_RES_COUNT = 10
-
-
-def search_objects(model, query, field_name):
-    return (
-        model.objects.annotate(similarity=TrigramSimilarity(field_name, query))
-        .filter(similarity__gt=TRIGRAM_SIMILARITY_THRESHOLD)
-        .order_by("-similarity")[:MAX_RES_COUNT]
-    )
+MAX_RESULTS = 10
 
 
 class SearchView(APIView):
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
-        query = request.query_params.get("q", "")
+        query = request.query_params.get("q", "").strip()
         if not query:
             return Response(status=status.HTTP_204_NO_CONTENT)
 
-        songs = search_objects(BaseSong, query, "title")
-        collections = search_objects(SongCollection, query, "title")
-        users = search_objects(BaseUser, query, "display_name")
+        data = {
+            "songs": self.search(BaseSong, query, "title", BaseSongSerializer),
+            "collections": self.search(
+                SongCollection, query, "title", SongCollectionSerializerBasic
+            ),
+            "users": self.search(
+                StreamingUser,
+                query,
+                "display_name",
+                BaseUserSerializer,
+                extra_filters={"artist": None},
+            ),
+            "artists": self.search(Artist, query, "display_name", BaseUserSerializer),
+        }
 
-        songs_data = BaseSongSerializer(songs, many=True).data
-        collections_data = SongCollectionSerializerBasic(collections, many=True).data
-        users_data = BaseUserSerializer(users, many=True).data if users else []
+        return Response(data=data, status=status.HTTP_200_OK)
 
-        return Response(
-            status=status.HTTP_200_OK,
-            data={
-                "songs": songs_data,
-                "collections": collections_data,
-                "users": users_data,
-            },
-        )
+    def search(
+        self, model, query, field_name, serializer_class, extra_filters=None
+    ) -> list:
+        qs = model.objects.annotate(similarity=TrigramSimilarity(field_name, query))
+
+        if extra_filters:
+            qs = qs.filter(**extra_filters)
+
+        qs = qs.filter(similarity__gt=TRIGRAM_SIMILARITY_THRESHOLD).order_by(
+            "-similarity"
+        )[:MAX_RESULTS]
+
+        return serializer_class(qs, many=True, context={"request": self.request}).data

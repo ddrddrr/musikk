@@ -6,6 +6,7 @@ from streaming.api.v1.views import (
     SongCollectionListView,
     SongCollectionDetailView,
     SongListCreateView,
+    LikedSongsAddView,
 )
 from streaming.api.v1.song_queue_views import (
     SongQueueRetrieveView,
@@ -35,6 +36,11 @@ urlpatterns = [
         "collections/<uuid:uuid>",
         SongCollectionDetailView.as_view(),
         name="collection-detail",
+    ),
+    path(
+        "liked-songs/add-song/<uuid:uuid>",
+        LikedSongsAddView.as_view(),
+        name="liked-songs-add",
     ),
     path("song-queue", SongQueueRetrieveView.as_view(), name="song-queue-retrieve"),
     path(
