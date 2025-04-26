@@ -19,28 +19,29 @@ export const QueueURLs = {
     removeNode: (nodeUUID: string) => `${BASE_URL}/song-queue/remove-node/${nodeUUID}`,
     clearQueue: `${BASE_URL}/song-queue/clear`,
     appendRandom: `${BASE_URL}/song-queue/append-random`,
-    queueEvents: `${BASE_URL}/song-queue/events`,
 };
 export const CollectionURLs = {
     collectionList: `${BASE_URL}/collections`,
     collectionDetail: (collectionUUID: string) => `${BASE_URL}/collections/${collectionUUID}`,
+    likedSongsAddSong: (songUUID: string) => `${BASE_URL}/liked-songs/add-song/${songUUID}`,
 };
 export const CommentURLs = {
     commentList: (objType: CommentObjectType, objUUID: string) =>
         `${BASE_URL}/comments/?obj-type=${objType}&obj-uuid=${objUUID}`,
     commentCreate: `${BASE_URL}/comments/`,
-    eventsBase: `${BASE_URL}/comments/events/`,
 };
 export const NotificationURLs = {
     notificationsSetRead: `${BASE_URL}/notifications`,
     replyNotificationList: `${BASE_URL}/notifications/replies`,
-    replyEvents: (userUUID: string) => `${BASE_URL}/notifications/replies/events/${userUUID}`,
 };
-export const UserUrls = {
+export const UserURLs = {
     userDetail: (userUUID: string) => `${BASE_URL}/user/${userUUID}`,
     tokenGet: `${BASE_URL}/token/`,
     tokenRefresh: `${BASE_URL}/token/refresh/`,
 };
-export const SearchUrls = {
+export const SearchURLs = {
     searchMain: (query: string) => `${BASE_URL}/search?q=${query}`,
+};
+export const EventURLs = {
+    userEvents: `${BASE_URL}/events/user`,
 };

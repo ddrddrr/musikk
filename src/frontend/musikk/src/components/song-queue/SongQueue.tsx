@@ -37,14 +37,13 @@ export const SongQueue = memo(function SongQueue() {
                     <>
                         <ul className="space-y-3 pr-2 custom-scrollbar" role="list">
                             {nodes.map((node) => (
-                                <li key={node.uuid} className="bg-white p-4 rounded-md border border-black/20 w-full">
+                                <li key={node.uuid} className="bg-white p-4 rounded-sm border border-black/20 w-full">
                                     <SongCard
                                         song={node.song}
                                         showImage={false}
                                         showAddToQueueButton={false}
-                                        playButtonSize={14}
-                                        playButtonClass="p-1 w-8 h-8"
-                                        addButtonClass="p-1 w-8 h-8"
+                                        buttonSize={14}
+                                        buttonClass="p-1 w-8 h-8"
                                     />
                                 </li>
                             ))}
@@ -60,7 +59,7 @@ export const SongQueue = memo(function SongQueue() {
                         </Button>
                     </>
                 ) : (
-                    <div className="text-center py-6 bg-white rounded-md border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                    <div className="text-center py-6 bg-white rounded-sm border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
                         <p className="text-gray-600">Queue is empty</p>
                     </div>
                 )}

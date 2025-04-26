@@ -1,4 +1,4 @@
-import { UserUrls } from "@/config/endpoints.ts";
+import { UserURLs } from "@/config/endpoints.ts";
 import axios from "axios";
 import Cookies from "js-cookie";
 
@@ -24,7 +24,7 @@ export async function login(email: string, password: string): Promise<undefined>
         return refreshAccessToken();
     }
 
-    const res = await axios.post<FullToken>(UserUrls.tokenGet, { email, password });
+    const res = await axios.post<FullToken>(UserURLs.tokenGet, { email, password });
     const { access, refresh } = res.data;
     setTokenCookie("access", access, ACCESS_EXPIRY);
     setTokenCookie("refresh", refresh, REFRESH_EXPIRY);
@@ -37,6 +37,6 @@ export async function refreshAccessToken(): Promise<undefined> {
         return;
     }
 
-    const res = await axios.post<{ access: string }>(UserUrls.tokenRefresh, { refresh: refreshToken });
+    const res = await axios.post<{ access: string }>(UserURLs.tokenRefresh, { refresh: refreshToken });
     setTokenCookie("access", res.data.access, ACCESS_EXPIRY); // 5 minutes
 }

@@ -33,9 +33,9 @@ export const NotificationOverlay = memo(function NotificationOverlay({
         if (!isOpen && notReadUUIDs.length > 0) {
             setNotificationsReadMutation.mutate({ notificationUUIDs: notReadUUIDs });
             setNotReadUUIDs([]);
-            client.invalidateQueries({ queryKey: ["replyNotifications"] });
+            client.invalidateQueries({ queryKey: ["notifications"] });
         }
-    }, [isOpen, notReadUUIDs]);
+    }, [client, isOpen, notReadUUIDs]);
 
     return (
         <div className="p-4 transition-opacity duration-200 ease-in-out max-h-96 overflow-y-auto">

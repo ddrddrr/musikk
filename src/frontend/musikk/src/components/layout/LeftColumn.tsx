@@ -28,7 +28,7 @@ export function LeftColumn() {
                     ))}
                 </ul>
             ) : (
-                <div className="text-center py-8 text-white bg-red-500 rounded-md border-2 border-black">
+                <div className="text-center py-8 text-white bg-red-500 rounded-sm border-2 border-black">
                     <p>No song collections found</p>
                 </div>
             )}

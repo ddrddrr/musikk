@@ -7,13 +7,32 @@ import { useNavigate } from "react-router-dom";
 
 interface useEventProps {
     eventUrl: string;
-    onEvent: (MessageEvent: MessageEvent) => void;
     deps: any[];
     isEnabled: boolean;
 }
 
-export function useEvent({ eventUrl, onEvent, deps, isEnabled }: useEventProps) {
+type IEventInvalidate = {
+    invalidate: any[];
+};
+
+// TODO: add playback events
+
+export function useEvent({ eventUrl, deps, isEnabled }: useEventProps) {
     const navigate = useNavigate();
+    const client = useQueryClient();
+
+    const handleEvent = useCallback(
+        function handleEvent(event: MessageEvent) {
+            const data: IEventInvalidate = JSON.parse(event.data);
+            if (data) {
+                if ("invalidate" in data) {
+                    client.invalidateQueries({ queryKey: data.invalidate });
+                }
+            }
+        },
+        [client],
+    );
+
     // pain...
     useEffect(() => {
         if (!isEnabled) return;
@@ -32,8 +51,7 @@ export function useEvent({ eventUrl, onEvent, deps, isEnabled }: useEventProps) 
                             },
                         }),
                 });
-                console.log("created eventsrouce", eventUrl);
-                es.addEventListener("message", onEvent);
+                es.addEventListener("message", handleEvent);
                 es.addEventListener("error", async (e: any) => {
                     // handle tokens
                     if (e?.status === 401 || e?.target?.readyState === EventSource.CLOSED) {
@@ -58,40 +76,5 @@ export function useEvent({ eventUrl, onEvent, deps, isEnabled }: useEventProps) 
             console.log("deleted eventsource", es?.url);
             es?.close();
         };
-    }, [eventUrl, onEvent, navigate, ...deps, isEnabled]);
-}
-
-interface useQueryInvalidateEventProps {
-    eventUrl: string;
-    eventMsg: string;
-    queryKey: any[];
-    deps: any[];
-    isEnabled: boolean;
-}
-
-export function useQueryInvalidateEvent({
-    eventUrl,
-    eventMsg,
-    queryKey,
-    deps,
-    isEnabled,
-}: useQueryInvalidateEventProps) {
-    const client = useQueryClient();
-
-    const handleEvent = useCallback(
-        (event: MessageEvent) => {
-            const data = JSON.parse(event.data);
-            if (eventMsg in data) {
-                client.invalidateQueries({ queryKey });
-            }
-        },
-        [eventMsg, client, queryKey],
-    );
-
-    useEvent({
-        eventUrl,
-        onEvent: handleEvent,
-        deps: [...deps, client],
-        isEnabled,
-    });
+    }, [eventUrl, navigate, ...deps, isEnabled]);
 }

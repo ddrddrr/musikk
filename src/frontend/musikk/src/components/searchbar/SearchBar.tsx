@@ -21,7 +21,7 @@ export function SearchBar() {
         return () => clearTimeout(handler);
     }, [query]);
 
-    const { isPending, isLoading, isSuccess, error, data } = useQuery({
+    const { isPending, isSuccess, error, data } = useQuery({
         queryKey: ["searchbar", debouncedQuery],
         queryFn: () => performSearch(debouncedQuery),
         enabled: !!debouncedQuery.trim(), // don't make a request for an empty query

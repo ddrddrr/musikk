@@ -17,7 +17,7 @@ export default function SongFields({
 }) {
     return (
         <div
-            className={`bg-white p-6 rounded-md border-2 ${
+            className={`bg-white p-6 rounded-sm border-2 ${
                 isSuccess ? "border-green-600" : "border-red-600"
             } space-y-4`}
         >

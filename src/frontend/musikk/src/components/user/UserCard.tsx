@@ -13,9 +13,9 @@ export function UserCard({ user }: UserCardProps) {
 
     return (
         <Card className="w-fit p-2 flex items-center gap-2">
-            <Avatar className="rounded-md w-10 h-10">
+            <Avatar className="rounded-sm w-10 h-10">
                 <AvatarImage src={avatar} alt={display_name} className="object-cover" />
-                <AvatarFallback className="rounded-md">
+                <AvatarFallback className="rounded-sm">
                     {first_name[0]}
                     {last_name[0]}
                 </AvatarFallback>

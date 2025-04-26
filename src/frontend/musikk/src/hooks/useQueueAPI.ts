@@ -10,7 +10,7 @@ import {
 } from "@/components/song-queue/mutations.ts";
 import { getSongQueue } from "@/components/song-queue/queries.ts";
 import type { ISong } from "@/components/song/types.ts";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
 export function useQueue() {
     const { isPending, error, data, isFetching } = useQuery({
@@ -19,20 +19,6 @@ export function useQueue() {
     });
     const queue = data;
     return { isPending, error, queue, isFetching };
-}
-
-function useQueueMutationHandlers() {
-    const queryClient = useQueryClient();
-
-    const onSuccess = () => {
-        queryClient.invalidateQueries({ queryKey: ["queue"] });
-    };
-
-    const onError = (err: unknown) => {
-        console.error("Mutation error", err);
-    };
-
-    return { onSuccess, onError };
 }
 
 // typescript doesn't allow for interface type matching
@@ -50,8 +36,6 @@ type AddCollectionAction = {
 type QueueAddInput = AddSongAction | AddCollectionAction;
 
 export function useQueueAddAPI() {
-    // const { onSuccess, onError } = useQueueMutationHandlers();
-
     function handleQueueAddAction(input: QueueAddInput): Promise<unknown> {
         switch (input.type) {
             case "song":
@@ -65,8 +49,6 @@ export function useQueueAddAPI() {
 
     return useMutation<unknown, Error, QueueAddInput>({
         mutationFn: handleQueueAddAction,
-        // onSuccess,
-        // onError,
     });
 }
 
@@ -83,8 +65,6 @@ type ShiftHeadBackQueueAction = {
 type QueueChangeInput = ClearQueueAction | ShiftHeadQueueAction | ShiftHeadBackQueueAction;
 
 export function useQueueChangeAPI() {
-    // const { onSuccess, onError } = useQueueMutationHandlers();
-
     function handleQueueChangeAction(input: QueueChangeInput): Promise<unknown> {
         switch (input.action) {
             case "clear":
@@ -100,7 +80,5 @@ export function useQueueChangeAPI() {
 
     return useMutation<unknown, Error, QueueChangeInput>({
         mutationFn: handleQueueChangeAction,
-        // onSuccess,
-        // onError,
     });
 }

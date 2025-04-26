@@ -2,7 +2,7 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/comp
 import { Input } from "@/components/ui/input";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
-import { Control, FieldValues } from "react-hook-form";
+import { Control } from "react-hook-form";
 
 type Props = {
     control: Control;

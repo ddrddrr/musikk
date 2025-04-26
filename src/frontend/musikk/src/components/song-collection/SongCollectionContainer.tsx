@@ -18,7 +18,7 @@ export function SongCollectionContainer({ collectionUUID }: SongCollectionContai
     };
 
     const { isPending, error, data } = useQuery({
-        queryKey: [collectionUUID],
+        queryKey: ["openCollection", collectionUUID],
         queryFn: () => fetchCollectionDetailed(collectionUUID),
     });
 
@@ -53,7 +53,7 @@ export function SongCollectionContainer({ collectionUUID }: SongCollectionContai
                         {songs.map((song, index) => (
                             <li
                                 key={`${song.uuid}-${index}`}
-                                className="bg-white p-4 rounded-md border border-gray-200 transition-colors hover:bg-gray-50"
+                                className="bg-white p-4 rounded-sm border border-gray-200 transition-colors hover:bg-gray-50"
                             >
                                 <SongCard song={song} />
                             </li>

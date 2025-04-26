@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Cog, Disc3, Upload } from "lucide-react";
 import { memo } from "react";
 import { useNavigate } from "react-router-dom";
+import { NotificationBox } from "@/components/notifications/NotificationBox.tsx";
 
 export const Header = memo(function Header() {
     const navigate = useNavigate();
@@ -25,7 +26,7 @@ export const Header = memo(function Header() {
 
 
             <div className="flex-1 flex justify-end gap-4 items-center">
-                <NotificationWrapper />
+                <NotificationBox />
 
                 <Button variant="ghost" className="text-white" onClick={() => navigate("/settings")}>
                     <Cog />
@@ -34,7 +35,7 @@ export const Header = memo(function Header() {
                 <Button
                     variant="outline"
                     size="sm"
-                    className="border-2 border-black text-white bg-transparent hover:bg-red-700"
+                    className="border-2 border-black rounded-sm text-white bg-transparent hover:bg-red-700"
                     onClick={() => navigate("/upload")}
                 >
                     <Upload className="w-4 h-4 mr-1" />

@@ -21,11 +21,6 @@ export function SongCollectionHeader({
 
     return (
         <>
-            <div className="flex items-center justify-between">
-                <h2 className={`text-2xl font-bold text-blac ${showComments ? "text-xl" : ""}`}>{collection.title}</h2>
-                <div className="w-24"></div>
-            </div>
-
             <div className="flex items-center bg-white p-6 rounded-lg border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all duration-300 ease-in-out">
                 <img
                     src={collection.image || "/placeholder.svg?height=100&width=100"}
@@ -44,9 +39,9 @@ export function SongCollectionHeader({
                 </div>
                 <div className="flex gap-3">
                     <div
-                        className={`bg-red-500 hover:bg-red-600 text-white border-2
-                         border-black rounded-lg shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]
-                           p-0 flex items-center justify-center ${showComments ? "h-8 w-8" : "h-12 w-12"}`}
+                        className={`border-2 border-black rounded-lg shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-0 flex items-center justify-center ${
+                            showComments ? "h-8 w-8" : "h-12 w-12"
+                        }`}
                     >
                         <SongCollectionPlayButton collection={collection} />
                     </div>

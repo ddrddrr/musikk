@@ -10,7 +10,7 @@ export default function ImageField({ index, control }: { index: number; control:
                 <FormItem>
                     <FormLabel>Cover Image</FormLabel>
                     <FormControl>
-                        <div className="bg-gray-200 p-4 border-2 border-black rounded-md">
+                        <div className="bg-gray-200 p-4 border-2 border-black rounded-sm">
                             <label className="flex items-center cursor-pointer">
                                 <span className="px-3 py-2 bg-red-600 text-white rounded mr-2">Choose file</span>
                                 <span className="truncate text-sm">{value?.name ?? "No file selected"}</span>

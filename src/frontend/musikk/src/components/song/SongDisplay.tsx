@@ -7,7 +7,7 @@ interface SongDisplayProps {
 export function SongDisplay({ song }: SongDisplayProps) {
     if (!song) {
         return (
-            <div className="text-center p-4 bg-gray-100 border border-gray-300 rounded-md mb-4">
+            <div className="text-center p-4 bg-gray-100 border border-gray-300 rounded-sm mb-4">
                 <p className="text-gray-500">No song playing</p>
             </div>
         );
@@ -20,10 +20,10 @@ export function SongDisplay({ song }: SongDisplayProps) {
                     <img
                         src={song.image}
                         alt={song.title}
-                        className="w-full h-full object-cover border border-black rounded-md"
+                        className="w-full h-full object-cover border border-black rounded-sm"
                     />
                 ) : (
-                    <div className="w-full h-full bg-gray-100 flex items-center justify-center border border-black rounded-md">
+                    <div className="w-full h-full bg-gray-100 flex items-center justify-center border border-black rounded-sm">
                         <span className="text-gray-400 text-3xl">♪</span>
                     </div>
                 )}

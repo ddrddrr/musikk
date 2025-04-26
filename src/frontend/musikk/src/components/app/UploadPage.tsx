@@ -11,7 +11,7 @@ export function UploadPage() {
                 <div className="max-w-2xl mx-auto">
                     <BackButton to="/" label="Back to Music" />
 
-                    <div className="bg-white p-6 rounded-md border-2 border-black">
+                    <div className="bg-white p-6 rounded-sm border-2 border-black">
                         <h1 className="text-2xl font-bold mb-6 text-center">Upload New Song</h1>
                         <SongUploadForm />
                     </div>

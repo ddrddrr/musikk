@@ -2,9 +2,7 @@ import { CommentForm } from "@/components/comments/CommentForm";
 import { CommentList } from "@/components/comments/CommentList";
 import { fetchCommentList } from "@/components/comments/queries";
 import { CommentObjectType, IComment } from "@/components/comments/types";
-import { CommentURLs } from "@/config/endpoints";
 import { UUID } from "@/config/types";
-import { useQueryInvalidateEvent } from "@/hooks/useEvent.ts";
 import { useQuery } from "@tanstack/react-query";
 import { memo, useEffect, useRef, useState } from "react";
 
@@ -26,14 +24,6 @@ export const CommentBox = memo(function CommentBox({ objType, objUUID }: Comment
             commentsContainerRef.current.scrollTop = commentsContainerRef.current.scrollHeight;
         }
     }, [data]);
-    // TODO: make objUUID a different dep, which doesn't change, otherwise this reestablishes conn too often
-    useQueryInvalidateEvent({
-        eventUrl: CommentURLs.eventsBase + `${objUUID}/`,
-        eventMsg: "invalidate",
-        queryKey: ["comments", objUUID],
-        deps: [objUUID],
-        isEnabled: true,
-    });
 
     if (isPending) {
         return (

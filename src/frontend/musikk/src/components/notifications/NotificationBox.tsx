@@ -7,18 +7,13 @@ import { useQuery } from "@tanstack/react-query";
 import { Sparkle } from "lucide-react";
 import { memo, useEffect, useMemo, useState } from "react";
 
-interface NotificationBoxProps {
-    isUserReady: boolean;
-}
-
-export const NotificationBox = memo(function NotificationBox({ isUserReady }: NotificationBoxProps) {
+export const NotificationBox = memo(function NotificationBox() {
     const [notReadUUIDs, setNotReadUUIDs] = useState<UUID[]>([]);
     const [isOpen, setIsOpen] = useState(false);
 
     const { isPending, error, data } = useQuery({
-        queryKey: ["replyNotifications"],
+        queryKey: ["notifications"],
         queryFn: fetchReplyNotificationList,
-        enabled: isUserReady,
     });
 
     const unreadUUIDs = useMemo(() => {
@@ -32,7 +27,6 @@ export const NotificationBox = memo(function NotificationBox({ isUserReady }: No
 
     if (isPending) return <div className="text-center text-sm p-4">Loading...</div>;
     if (error) return <div className="text-center text-sm text-red-500 p-4">Error: {error.message}</div>;
-    if (!isUserReady) return <div className="p-4 text-sm text-gray-500">User not loaded</div>;
 
     return (
         <Popover open={isOpen} onOpenChange={setIsOpen}>

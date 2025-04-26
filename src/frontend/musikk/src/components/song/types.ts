@@ -4,4 +4,5 @@ export interface ISong {
     artist: string;
     mpd: string;
     image?: string;
+    is_liked?: boolean;
 }

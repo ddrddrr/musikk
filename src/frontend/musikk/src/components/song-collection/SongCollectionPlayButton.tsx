@@ -1,6 +1,7 @@
-import { ISongCollectionDetailed } from "@/components/song-collection/types.ts";
-import { PlaybackContext } from "@/providers/playbackContext.ts";
-import { PlayingCollectionContext } from "@/providers/playingCollectionContext.ts";
+import { ISongCollectionDetailed } from "@/components/song-collection/types";
+import { Button } from "@/components/ui/button";
+import { PlaybackContext } from "@/providers/playbackContext";
+import { PlayingCollectionContext } from "@/providers/playingCollectionContext";
 import { Pause, Play } from "lucide-react";
 import { useContext } from "react";
 
@@ -17,16 +18,17 @@ export function SongCollectionPlayButton({ collection }: SongCollectionPlayButto
         if (!playingCollection) return <Play size={18} />;
         return isThisPlaying ? <Pause size={18} /> : <Play size={18} />;
     };
+
     return (
-        <button
-            className="bg-red-500 hover:bg-red-600   rounded-full"
+        <Button
+            className="bg-red-600 hover:bg-red-700 text-white h-full w-full"
             onClick={() => {
                 if (handleCollectionPlayClick) {
                     handleCollectionPlayClick(collection);
                 }
             }}
         >
-            {renderPlayPauseIcon()}{" "}
-        </button>
+            {renderPlayPauseIcon()}
+        </Button>
     );
 }
