@@ -9,10 +9,8 @@ from rest_framework.views import APIView
 
 from sse.config import EventChannels
 from sse.events import send_invalidate_event
-from streaming.api.v1.serializers import SongQueueSerializer
-from streaming.song_collections import SongCollection
-from streaming.song_queue import SongQueue, SongQueueNode
-from streaming.songs import BaseSong
+from streaming.api.v1.serializers_song_queue import SongQueueSerializer
+from streaming.models import BaseSong, SongQueue, SongQueueNode, SongCollection
 from users.users_extended import StreamingUser
 
 

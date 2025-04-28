@@ -15,6 +15,7 @@ class SongMetadata(BaseModel):
     )
 
 
+# TODO: when a single song is created via view, make a playlist for it
 # TODO: add hashtags
 class BaseSong(BaseModel):
     title = models.CharField(max_length=128)
@@ -27,12 +28,14 @@ class BaseSong(BaseModel):
         null=True,
         blank=True,
     )
+    draft = models.BooleanField(default=False)
+
     streams = GenericRelation(Stream)
+    # hashtags = ...
 
     like_count = models.IntegerField(default=0, blank=True)
     dislike_count = models.IntegerField(default=0, blank=True)
 
-    # hashtags = ...
     content_path = models.CharField(
         default="",
         blank=True,
@@ -64,6 +67,17 @@ class BaseSong(BaseModel):
 
     def __str__(self):
         return self.title
+
+
+class SongAuthor(BaseModel):
+    song = models.ForeignKey(BaseSong, on_delete=models.CASCADE)
+    author = models.ForeignKey("users.Artist", null=True, on_delete=models.SET_NULL)
+    author_priority = models.IntegerField(
+        default=0, help_text="Priority in which the author will be displayed."
+    )
+
+    class Meta:
+        ordering = ("author_priority",)
 
 
 class SongCollectionSong(BaseModel):

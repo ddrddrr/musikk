@@ -10,7 +10,7 @@ from django_eventstream.viewsets import EventsViewSet
 from sse.config import EventChannels
 from users.api.v1.serializers import (
     BaseUserSerializer,
-    StreamingUserSerializer,
+    # StreamingUserSerializer,
     ResetPasswordSerializer,
 )
 from users.user_base import BaseUser
@@ -23,12 +23,12 @@ class BaseUserRetrieveView(RetrieveAPIView):
     queryset = BaseUser.objects.all()
 
 
-class StreamingUserRetrieveView(RetrieveAPIView):
-    lookup_field = "uuid"
-    serializer_class = StreamingUserSerializer
-
-    def get_object(self):
-        return self.request.user.streaminguser
+# class StreamingUserRetrieveView(RetrieveAPIView):
+#     lookup_field = "uuid"
+#     serializer_class = StreamingUserSerializer
+#
+#     def get_object(self):
+#         return self.request.user.streaminguser
 
 
 class UserCreateView(APIView):

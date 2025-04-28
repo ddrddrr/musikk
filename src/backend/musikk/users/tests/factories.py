@@ -1,5 +1,6 @@
 import factory
 from users.models import BaseUser
+from users.users_extended import StreamingUser
 
 fake = factory.Faker
 
@@ -14,3 +15,8 @@ class BaseUserFactory(factory.django.DjangoModelFactory):
     display_name = fake("user_name")
     avatar = None
     is_admin = fake("boolean")
+
+
+class StreamingUserFactory(BaseUserFactory):
+    class Meta:
+        model = StreamingUser

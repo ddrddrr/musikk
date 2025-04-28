@@ -1,14 +1,21 @@
 from django.db import models
 
-from streaming.song_collections import UserHistory
+from streaming.song_collections import UserHistory, SongCollection, LikedSongs
 from streaming.song_queue import SongQueue
 from users.user_base import BaseUser
+
+
+class StreamingUserManager(models.Manager):
+    def create(self, **kwargs):
+        instance = self.model(**kwargs)
+        instance.save()
+        return instance
 
 
 class StreamingUser(BaseUser):
     # TODO: add method to initialize liked_songs
     liked_songs = models.OneToOneField(
-        "streaming.SongCollection",
+        "streaming.LikedSongs",
         related_name="liked_by",
         null=True,
         on_delete=models.SET_NULL,
@@ -16,10 +23,6 @@ class StreamingUser(BaseUser):
     followed_song_collections = models.ManyToManyField(
         "streaming.SongCollection",
         related_name="followers",
-    )
-    created_playlists = models.ManyToManyField(
-        "streaming.Playlist",
-        related_name="creators",
     )
     song_queue = models.OneToOneField(
         "streaming.SongQueue",
@@ -35,11 +38,15 @@ class StreamingUser(BaseUser):
     )
 
     def save(self, *args, **kwargs):
+        if not self.liked_songs:
+            self.liked_songs = LikedSongs.objects.create()
         if not self.song_queue:
             self.song_queue = SongQueue.objects.create()
         if not self.history:
             self.history = UserHistory.objects.create()
         super().save(*args, **kwargs)
+
+    objects = StreamingUserManager()
 
 
 class ContentOwner(models.Model):

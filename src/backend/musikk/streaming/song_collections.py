@@ -24,6 +24,7 @@ class SongCollection(BaseModel):
     metadata = models.OneToOneField(
         SongCollectionMetadata, on_delete=models.CASCADE, null=True, blank=True
     )
+    private = models.BooleanField(default=False)
 
     streams = GenericRelation(Stream)
     comments = GenericRelation(Comment)
@@ -42,10 +43,21 @@ class SongCollection(BaseModel):
 
 class UserHistory(SongCollection):
     def save(self, *args, **kwargs):
-        self.title = "history"
+        self.title = "History"
         self.description = ""
         self.image = None
         self.metadata = None
+        self.private = True
+        super().save(*args, **kwargs)
+
+
+class LikedSongs(SongCollection):
+    def save(self, *args, **kwargs):
+        self.title = "Liked Songs"
+        self.description = ""
+        self.image = None
+        self.metadata = None
+        self.private = True
         super().save(*args, **kwargs)
 
 
@@ -55,3 +67,16 @@ class Playlist(SongCollection):
 
 class Album(SongCollection):
     year_released = models.IntegerField(default=None, null=True, blank=True)
+
+
+class SongCollectionAuthor(BaseModel):
+    song_collection = models.ForeignKey(SongCollection, on_delete=models.CASCADE)
+    author = models.ForeignKey(
+        "users.StreamingUser", null=True, on_delete=models.SET_NULL
+    )
+    author_priority = models.IntegerField(
+        default=0, help_text="Priority in which the authors will be displayed."
+    )
+
+    class Meta:
+        ordering = ("author_priority",)

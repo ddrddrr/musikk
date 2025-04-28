@@ -1,13 +1,16 @@
 from django.urls import path
 
-
 from streaming.api.v1.views import (
-    SongCollectionListView,
+    SongDetailView,
+    SongCollectionLatestView,
     SongCollectionDetailView,
-    SongListCreateView,
-    LikedSongsAddView,
+    SongCollectionUserView,
+    SongCollectionCreateView,
+    SongCollectionAddLikedView,
+    SongCreateView,
+    SongAddLikedVIew,
 )
-from streaming.api.v1.song_queue_views import (
+from streaming.api.v1.views_song_queue import (
     SongQueueRetrieveView,
     SongQueueAddSongView,
     SongQueueAddCollectionView,
@@ -21,16 +24,30 @@ from streaming.api.v1.song_queue_views import (
 )
 
 urlpatterns = [
-    path("songs/", SongListCreateView.as_view(), name="song-list-create"),
-    path("collections/", SongCollectionListView.as_view(), name="collection-list"),
+    path("songs/<uuid:uuid>", SongDetailView.as_view(), name="song-detail"),
+    path("songs", SongCreateView.as_view(), name="songs-upload"),
+    path("collections", SongCollectionCreateView.as_view(), name="collection-create"),
+    path(
+        "collections/latest", SongCollectionLatestView.as_view(), name="collection-list"
+    ),
+    path(
+        "collections/personal",
+        SongCollectionUserView.as_view(),
+        name="collection-user-list",
+    ),
     path(
         "collections/<uuid:uuid>",
         SongCollectionDetailView.as_view(),
         name="collection-detail",
     ),
     path(
+        "collections/<uuid:uuid>/like",
+        SongCollectionAddLikedView.as_view(),
+        name="collection-add-liked",
+    ),
+    path(
         "liked-songs/add-song/<uuid:uuid>",
-        LikedSongsAddView.as_view(),
+        SongAddLikedVIew.as_view(),
         name="liked-songs-add",
     ),
     path("song-queue", SongQueueRetrieveView.as_view(), name="song-queue-retrieve"),
