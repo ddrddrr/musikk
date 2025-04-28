@@ -1,4 +1,3 @@
-import { NotificationWrapper } from "@/components/notifications/NotificationWrapper.tsx";
 import { SearchBarWrapper } from "@/components/searchbar/SearchBarWrapper.tsx";
 import { Button } from "@/components/ui/button";
 import { Cog, Disc3, Upload } from "lucide-react";

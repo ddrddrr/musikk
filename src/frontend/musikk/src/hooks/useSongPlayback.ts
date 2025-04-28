@@ -1,4 +1,4 @@
-import { ISong } from "@/components/song/types.ts";
+import { ISong } from "@/components/songs/types.ts";
 import { useQueueAddAPI } from "@/hooks/useQueueAPI.ts";
 import { useState } from "react";
 

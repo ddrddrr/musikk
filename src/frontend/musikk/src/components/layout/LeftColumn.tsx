@@ -1,11 +1,11 @@
-import { fetchCollectionList } from "@/components/song-collection/queries.ts";
-import { SongCollectionCard } from "@/components/song-collection/SongCollectionCard";
+import { fetchCollectionsPersonal } from "@/components/song-collections/queries.ts";
+import { SongCollectionCard } from "@/components/song-collections/SongCollectionCard";
 import { useQuery } from "@tanstack/react-query";
 
 export function LeftColumn() {
     const { isPending, error, data } = useQuery({
-        queryKey: ["collectionList"],
-        queryFn: fetchCollectionList,
+        queryKey: ["collectionsPersonal"],
+        queryFn: fetchCollectionsPersonal,
     });
     const collections = data;
     if (isPending) return <div className="flex items-center justify-center h-screen bg-gray-200">Loading...</div>;
@@ -18,17 +18,17 @@ export function LeftColumn() {
 
     return (
         <div className="w-1/5 bg-red-600 p-4 overflow-y-auto border-r border-red-700">
-            <h2 className="text-xl font-bold text-white mb-4 text-center">Collections</h2>
+            <h2 className="text-xl font-bold text-white mb-4 text-center">Your stuff</h2>
             {collections && collections.length > 0 ? (
                 <ul className="space-y-6" role="list">
                     {collections.map((collection) => (
                         <li key={collection.uuid}>
-                            <SongCollectionCard collection={collection} />
+                            <SongCollectionCard collection={collection} size={"big"} />
                         </li>
                     ))}
                 </ul>
             ) : (
-                <div className="text-center py-8 text-white bg-red-500 rounded-sm border-2 border-black">
+                <div className="text-center py-8 text-white bg-red-600 rounded-sm border-2 border-black">
                     <p>No song collections found</p>
                 </div>
             )}

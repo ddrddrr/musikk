@@ -1,4 +1,4 @@
-import type { ISong } from "@/components/song/types.ts";
+import type { ISong } from "@/components/songs/types.ts";
 
 interface SongDisplayProps {
     song: ISong | null;

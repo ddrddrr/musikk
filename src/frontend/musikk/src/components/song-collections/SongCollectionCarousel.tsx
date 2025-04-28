@@ -1,0 +1,38 @@
+import { SongCollectionCard } from "@/components/song-collections/SongCollectionCard";
+import { ISongCollection } from "@/components/song-collections/types.ts";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+
+interface SongCollectionsCarouselProps {
+    collections: ISongCollection[];
+    title: string;
+}
+
+export function SongCollectionsCarousel({ collections, title }: SongCollectionsCarouselProps) {
+    return (
+        <div className="w-9/10 mx-auto px-4">
+            <h2 className="text-xl font-bold mb-4 text-black">{title}</h2>
+            <div className="relative">
+                <Carousel
+                    opts={{
+                        align: "start",
+                        loop: true,
+                    }}
+                    className="w-full"
+                >
+                    <CarouselContent className="-ml-2 md:-ml-4">
+                        {collections.map((collection) => (
+                            <CarouselItem
+                                key={collection.uuid}
+                                className="pl-2 md:pl-4 basis-1/2 md:basis-1/3 lg:basis-1/5"
+                            >
+                                <SongCollectionCard collection={collection} size="medium" />
+                            </CarouselItem>
+                        ))}
+                    </CarouselContent>
+                    <CarouselPrevious />
+                    <CarouselNext />
+                </Carousel>
+            </div>
+        </div>
+    );
+}

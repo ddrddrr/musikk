@@ -1,7 +1,7 @@
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 
-export default function AudioField({ index, control }: { index: number; control: any }) {
+export function AudioField({ index, control }: { index: number; control: any }) {
     return (
         <FormField
             control={control}

@@ -1,4 +1,4 @@
-import { ISong } from "@/components/song/types.ts";
+import { ISong } from "@/components/songs/types.ts";
 import { createContext, Dispatch, SetStateAction } from "react";
 
 export interface PlayingSongContextProps {

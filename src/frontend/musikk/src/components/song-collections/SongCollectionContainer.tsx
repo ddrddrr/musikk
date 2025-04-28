@@ -1,7 +1,7 @@
 import { CommentBox } from "@/components/comments/CommentBox";
-import { fetchCollectionDetailed } from "@/components/song-collection/queries";
-import { SongCollectionHeader } from "@/components/song-collection/SongCollectionHeader";
-import { SongCard } from "@/components/song/SongCard";
+import { fetchCollectionDetailed } from "@/components/song-collections/queries";
+import { SongCollectionHeader } from "@/components/song-collections/SongCollectionHeader";
+import { SongContainer } from "@/components/songs/SongContainer.tsx";
 import { UUID } from "@/config/types.ts";
 import { useQuery } from "@tanstack/react-query";
 import { useMatch, useNavigate } from "react-router-dom";
@@ -31,13 +31,12 @@ export function SongCollectionContainer({ collectionUUID }: SongCollectionContai
 
     if (error)
         return (
-            <div className="text-white text-center p-6 bg-red-500 rounded-lg border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+            <div className="text-white text-center p-6 bg-red-600 rounded-lg border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
                 An error has occurred: {error.message}
             </div>
         );
 
     const songs = data.songs;
-
     return (
         <div className={`flex gap-4 ${showComments ? "flex-row" : "flex-col"} max-w-4xl mx-auto p-4`}>
             <div className={showComments ? "w-1/2 pr-2" : "space-y-4"}>
@@ -55,7 +54,7 @@ export function SongCollectionContainer({ collectionUUID }: SongCollectionContai
                                 key={`${song.uuid}-${index}`}
                                 className="bg-white p-4 rounded-sm border border-gray-200 transition-colors hover:bg-gray-50"
                             >
-                                <SongCard song={song} />
+                                <SongContainer song={song} />
                             </li>
                         ))}
                     </ul>

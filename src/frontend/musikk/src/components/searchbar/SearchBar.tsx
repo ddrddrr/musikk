@@ -4,8 +4,8 @@ import { Input } from "@/components/ui/input";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
-import { SongCollectionCard } from "@/components/song-collection/SongCollectionCard";
-import { SongCard } from "@/components/song/SongCard";
+import { SongCollectionCard } from "@/components/song-collections/SongCollectionCard";
+import { SongContainer } from "@/components/songs/SongContainer.tsx";
 import { UserCard } from "@/components/user/UserCard";
 
 const QUERY_TIMEOUT = 300;
@@ -49,7 +49,7 @@ export function SearchBar() {
                                 <h3 className="text-sm font-semibold mb-2">Songs</h3>
                                 <div className="space-y-2">
                                     {data.songs.map((song) => (
-                                        <SongCard key={song.uuid} song={song} />
+                                        <SongContainer key={song.uuid} song={song} />
                                     ))}
                                 </div>
                             </div>

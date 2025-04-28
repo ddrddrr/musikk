@@ -1,10 +1,11 @@
-import { ISong } from "@/components/song/types.ts";
+import { ISong } from "@/components/songs/types.ts";
+import { IUser } from "@/components/user/types.ts";
 
 export interface ISongCollection {
     uuid: string;
     title: string;
     description: string;
-    // creators: string[];
+    authors: IUser[];
     image?: string;
 }
 

@@ -1,4 +1,4 @@
-import { ISong } from "@/components/song/types.ts";
+import { ISong } from "@/components/songs/types.ts";
 import { Button } from "@/components/ui/button.tsx";
 import { PlaybackContext } from "@/providers/playbackContext.ts";
 import { PlayingSongContext } from "@/providers/playingSongContext.ts";

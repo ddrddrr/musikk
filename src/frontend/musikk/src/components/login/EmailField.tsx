@@ -6,7 +6,7 @@ type Props = {
     control: Control;
 };
 
-export default function EmailField({ control }: Props) {
+export function EmailField({ control }: Props) {
     return (
         <FormField
             control={control}

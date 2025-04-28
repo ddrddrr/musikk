@@ -1,10 +1,10 @@
-import { SongAddToLikedButton } from "@/components/song/SongAddToLikedButton.tsx";
-import { SongPlayButton } from "@/components/song/SongPlayButton";
-import { ISong } from "@/components/song/types";
+import { SongAddToLikedButton } from "@/components/songs/SongAddToLikedButton.tsx";
+import { SongPlayButton } from "@/components/songs/SongPlayButton";
+import { ISong } from "@/components/songs/types";
 import { useQueueAddAPI } from "@/hooks/useQueueAPI";
 import { BetweenHorizonalStart } from "lucide-react";
 
-interface SongCardProps {
+interface SongContainerProps {
     song: ISong;
     buttonSize?: number;
     buttonClass?: string;
@@ -13,14 +13,14 @@ interface SongCardProps {
     showAddToQueueButton?: boolean;
 }
 
-export function SongCard({
+export function SongContainer({
     song,
     buttonSize = 20,
     buttonClass = "p-2",
     titleMaxWidth = "max-w-[200px]",
     showImage = true,
     showAddToQueueButton = true,
-}: SongCardProps) {
+}: SongContainerProps) {
     const addToQueueMutation = useQueueAddAPI();
     return (
         <div className="flex items-center justify-between w-full h-full">

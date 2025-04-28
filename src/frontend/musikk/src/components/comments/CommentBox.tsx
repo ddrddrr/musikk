@@ -35,7 +35,7 @@ export const CommentBox = memo(function CommentBox({ objType, objUUID }: Comment
 
     if (error) {
         return (
-            <div className="text-white text-center p-6 bg-red-500 rounded-lg border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+            <div className="text-white text-center p-6 bg-red-600 rounded-lg border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
                 An error has occurred: {error.message}
             </div>
         );

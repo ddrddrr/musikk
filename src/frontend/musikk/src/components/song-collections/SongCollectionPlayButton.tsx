@@ -1,4 +1,4 @@
-import { ISongCollectionDetailed } from "@/components/song-collection/types";
+import { ISongCollectionDetailed } from "@/components/song-collections/types";
 import { Button } from "@/components/ui/button";
 import { PlaybackContext } from "@/providers/playbackContext";
 import { PlayingCollectionContext } from "@/providers/playingCollectionContext";

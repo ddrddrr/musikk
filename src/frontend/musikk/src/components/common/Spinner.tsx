@@ -1,4 +1,4 @@
-export default function Spinner() {
+export function Spinner() {
     return (
         <span className="flex items-center justify-center">
             <svg

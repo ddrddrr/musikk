@@ -1,5 +1,5 @@
 import { addToLikedSongs } from "@/components/liked-songs/mutations";
-import { ISong } from "@/components/song/types";
+import { ISong } from "@/components/songs/types";
 import { Button } from "@/components/ui/button";
 import { useMutation } from "@tanstack/react-query";
 import { Check, Plus } from "lucide-react";

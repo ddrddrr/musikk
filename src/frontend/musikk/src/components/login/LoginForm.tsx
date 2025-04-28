@@ -10,9 +10,9 @@ import { useForm } from "react-hook-form";
 import { useLocation, useNavigate } from "react-router-dom";
 import * as z from "zod";
 
-import Spinner from "@/components/common/Spinner";
-import EmailField from "@/components/login/EmailField";
-import PasswordField from "@/components/login/PasswordField";
+import {Spinner} from "@/components/common/Spinner";
+import { EmailField } from "@/components/login/EmailField";
+import { PasswordField } from "@/components/login/PasswordField";
 import { fetchUser } from "@/components/login/queries.ts";
 import { IJWTPayload } from "@/components/login/types.ts";
 import { UserContext } from "@/providers/userContext.ts";
@@ -25,7 +25,7 @@ const loginSchema = z.object({
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
-export default function LoginForm() {
+export function LoginForm() {
     const navigate = useNavigate();
     const location = useLocation();
     const [loading, setLoading] = useState(false);

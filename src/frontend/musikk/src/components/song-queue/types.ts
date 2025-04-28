@@ -1,4 +1,4 @@
-import { ISong } from "@/components/song/types.ts";
+import { ISong } from "@/components/songs/types.ts";
 import { UUID } from "@/config/types.ts";
 
 export interface ISongQueueNode {

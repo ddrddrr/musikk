@@ -1,4 +1,4 @@
-import { ISongCollectionDetailed } from "@/components/song-collection/types.ts";
+import { ISongCollectionDetailed } from "@/components/song-collections/types.ts";
 import { createContext, Dispatch, SetStateAction } from "react";
 
 export interface PlayingCollectionContextProps {

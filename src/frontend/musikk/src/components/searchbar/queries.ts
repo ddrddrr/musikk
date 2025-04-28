@@ -1,5 +1,5 @@
-import { ISongCollection } from "@/components/song-collection/types.ts";
-import { ISong } from "@/components/song/types.ts";
+import { ISongCollection } from "@/components/song-collections/types.ts";
+import { ISong } from "@/components/songs/types.ts";
 import { IUser } from "@/components/user/types.ts";
 import { api } from "@/config/axiosConf.ts";
 import { SearchURLs } from "@/config/endpoints.ts";

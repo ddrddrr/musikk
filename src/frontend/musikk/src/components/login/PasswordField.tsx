@@ -8,7 +8,7 @@ type Props = {
     control: Control;
 };
 
-export default function PasswordField({ control }: Props) {
+export function PasswordField({ control }: Props) {
     const [showPassword, setShowPassword] = useState(false);
 
     return (

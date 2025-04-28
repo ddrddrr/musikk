@@ -6,5 +6,5 @@ interface IAddToLikedSongsParams {
 }
 
 export async function addToLikedSongs({ songUUID }: IAddToLikedSongsParams) {
-    await api.patch(CollectionURLs.likedSongsAddSong(songUUID));
+    await api.post(CollectionURLs.likedSongsAddSong(songUUID));
 }

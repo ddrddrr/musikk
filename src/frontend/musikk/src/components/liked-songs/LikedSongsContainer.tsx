@@ -1,6 +1,6 @@
-import { fetchCollectionDetailed } from "@/components/song-collection/queries.ts";
-import { SongCollectionPlayButton } from "@/components/song-collection/SongCollectionPlayButton.tsx";
-import { SongCard } from "@/components/song/SongCard.tsx";
+import { fetchCollectionDetailed } from "@/components/song-collections/queries.ts";
+import { SongCollectionPlayButton } from "@/components/song-collections/SongCollectionPlayButton.tsx";
+import { SongContainer } from "@/components/songs/SongContainer.tsx";
 import { UUID } from "@/config/types.ts";
 import { useQuery } from "@tanstack/react-query";
 
@@ -23,7 +23,7 @@ export function LikedSongsContainer({ collectionUUID }: LikedSongsContainerProps
 
     if (error)
         return (
-            <div className="text-white text-center p-6 bg-red-500 rounded-lg border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+            <div className="text-white text-center p-6 bg-red-600 rounded-lg border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
                 An error has occurred: {error.message}
             </div>
         );
@@ -60,7 +60,7 @@ export function LikedSongsContainer({ collectionUUID }: LikedSongsContainerProps
                             key={`${song.uuid}-${index}`}
                             className="bg-white p-4 rounded-sm border border-gray-200 transition-colors hover:bg-gray-50"
                         >
-                            <SongCard song={song} />
+                            <SongContainer song={song} />
                         </li>
                     ))}
                 </ul>

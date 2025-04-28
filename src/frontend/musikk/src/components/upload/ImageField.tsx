@@ -1,12 +1,12 @@
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 
-export default function ImageField({ index, control }: { index: number; control: any }) {
+export function ImageField({ name, control }: { name: string; control: any }) {
     return (
         <FormField
             control={control}
-            name={`songs.${index}.image`}
-            render={({ field: { onChange, value, ...rest } }) => (
+            name={name}
+            render={({ field: { onChange, value } }) => (
                 <FormItem>
                     <FormLabel>Cover Image</FormLabel>
                     <FormControl>
@@ -17,12 +17,8 @@ export default function ImageField({ index, control }: { index: number; control:
                                 <Input
                                     type="file"
                                     accept="image/*"
-                                    onChange={(e) => {
-                                        const file = e.target.files?.[0];
-                                        onChange(file);
-                                    }}
                                     className="hidden"
-                                    {...rest}
+                                    onChange={(e) => onChange(e.target.files?.[0])}
                                 />
                             </label>
                         </div>

@@ -1,5 +1,5 @@
-import { SongCollectionPlayButton } from "@/components/song-collection/SongCollectionPlayButton.tsx";
-import { ISongCollectionDetailed } from "@/components/song-collection/types.ts";
+import { SongCollectionPlayButton } from "@/components/song-collections/SongCollectionPlayButton.tsx";
+import { ISongCollectionDetailed } from "@/components/song-collections/types.ts";
 import { Button } from "@/components/ui/button";
 import { useQueueAddAPI } from "@/hooks/useQueueAPI.ts";
 import { BetweenHorizonalStart } from "lucide-react";

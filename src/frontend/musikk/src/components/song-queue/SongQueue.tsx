@@ -1,5 +1,5 @@
-import { SongCard } from "@/components/song/SongCard.tsx";
-import { SongDisplay } from "@/components/song/SongDisplay.tsx";
+import { SongContainer } from "@/components/songs/SongContainer.tsx";
+import { SongDisplay } from "@/components/songs/SongDisplay.tsx";
 import { Button } from "@/components/ui/button";
 import { useQueue, useQueueChangeAPI } from "@/hooks/useQueueAPI.ts";
 import { PlayingCollectionContext } from "@/providers/playingCollectionContext.ts";
@@ -38,7 +38,7 @@ export const SongQueue = memo(function SongQueue() {
                         <ul className="space-y-3 pr-2 custom-scrollbar" role="list">
                             {nodes.map((node) => (
                                 <li key={node.uuid} className="bg-white p-4 rounded-sm border border-black/20 w-full">
-                                    <SongCard
+                                    <SongContainer
                                         song={node.song}
                                         showImage={false}
                                         showAddToQueueButton={false}
