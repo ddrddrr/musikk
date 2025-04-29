@@ -24,6 +24,7 @@ from streaming.api.v1.serializers_song_collection import (
 from streaming.api.v1.serializers_song import BaseSongCreateSerializer
 from streaming.api.v1.serializers_song_collection import SongCollectionCreateSerializer
 from streaming.models import BaseSong, SongCollectionSong, SongCollection
+from streaming.song_collections import SongCollectionAuthor
 
 
 class SongDetailView(RetrieveAPIView):
@@ -73,6 +74,52 @@ class SongCollectionAddLikedView(APIView):
         collection_uuid = kwargs["uuid"]
         collection = get_object_or_404(SongCollection, uuid=collection_uuid)
         user.followed_song_collections.add(collection)
+
+
+class SongCollectionRemoveSong(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, *args, **kwargs):
+        user = request.user.streaminguser
+        collection = get_object_or_404(SongCollection, uuid=kwargs["collection_uuid"])
+        if not SongCollectionAuthor.objects.filter(
+            song_collection=collection, author=user
+        ).exists():
+            return Response(
+                status=status.HTTP_403_FORBIDDEN,
+                data={
+                    f"The user {user.uuid} is not an author of collection {collection.uuid}."
+                },
+            )
+        sc_song = get_object_or_404(
+            SongCollectionSong,
+            song_collection=collection,
+            song__uuid=kwargs["song_uuid"],
+        )
+        sc_song.song.delete()  # deletes the sc_song as well
+        return Response(
+            status=status.HTTP_200_OK, data={"removed": kwargs["song_uuid"]}
+        )
+
+
+class SongCollectionAddSong(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        user = request.user.streaminguser
+        collection = get_object_or_404(SongCollection, uuid=kwargs["collection_uuid"])
+        if not SongCollectionAuthor.objects.filter(
+            song_collection=collection, author=user
+        ).exists():
+            return Response(
+                status=status.HTTP_403_FORBIDDEN,
+                data={
+                    f"The user {user.uuid} is not an author of collection {collection.uuid}."
+                },
+            )
+        song = get_object_or_404(BaseSong, uuid=kwargs["song_uuid"])
+        SongCollectionSong.objects.create(song=song, song_collection=collection)
+        return Response(status=status.HTTP_200_OK, data={"added": kwargs["song_uuid"]})
 
 
 class SongCreateView(APIView):
@@ -184,7 +231,7 @@ class SongCollectionCreateView(APIView):
         return Response({"collection": out}, status=201)
 
 
-class SongAddLikedVIew(APIView):
+class SongAddLikedView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):

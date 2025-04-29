@@ -7,6 +7,8 @@ from base.models import BaseModel
 from streaming.song_collections import SongCollection
 from streaming.songs import BaseSong, SongCollectionSong
 
+# TODO: maybe can be reduced to a songcollection...??
+
 
 class SongQueueNode(BaseModel):
     song = models.ForeignKey("streaming.BaseSong", on_delete=models.CASCADE)
@@ -187,10 +189,12 @@ class SongQueue(BaseModel):
             return None
         with transaction.atomic():
             self.head = self.head.prev
+
             SongCollectionSong.objects.create(
                 song_collection=self.user.history,
                 song=self.head.song,
             )
+
             self.save()
 
     def clear(self):

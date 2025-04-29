@@ -8,7 +8,9 @@ from streaming.api.v1.views import (
     SongCollectionCreateView,
     SongCollectionAddLikedView,
     SongCreateView,
-    SongAddLikedVIew,
+    SongAddLikedView,
+    SongCollectionRemoveSong,
+    SongCollectionAddSong,
 )
 from streaming.api.v1.views_song_queue import (
     SongQueueRetrieveView,
@@ -27,6 +29,16 @@ urlpatterns = [
     path("songs/<uuid:uuid>", SongDetailView.as_view(), name="song-detail"),
     path("songs", SongCreateView.as_view(), name="songs-upload"),
     path("collections", SongCollectionCreateView.as_view(), name="collection-create"),
+    path(
+        "collections/<uuid:collection_uuid>/songs/<uuid:song_uuid>",
+        SongCollectionRemoveSong.as_view(),
+        name="collection-remove-song",
+    ),
+    path(
+        "collections/<uuid:collection_uuid>/songs/<uuid:song_uuid>",
+        SongCollectionAddSong.as_view(),
+        name="collection-add-song",
+    ),
     path(
         "collections/latest", SongCollectionLatestView.as_view(), name="collection-list"
     ),
@@ -47,7 +59,7 @@ urlpatterns = [
     ),
     path(
         "liked-songs/add-song/<uuid:uuid>",
-        SongAddLikedVIew.as_view(),
+        SongAddLikedView.as_view(),
         name="liked-songs-add",
     ),
     path("song-queue", SongQueueRetrieveView.as_view(), name="song-queue-retrieve"),
@@ -60,11 +72,6 @@ urlpatterns = [
         "song-queue/add-collection/<uuid:uuid>",
         SongQueueAddCollectionView.as_view(),
         name="song-queue-add-collection",
-    ),
-    path(
-        "song-queue/set-head/<uuid:uuid>",
-        SongQueueSetSongHeadView.as_view(),
-        name="song-queue-set-head",
     ),
     path(
         "song-queue/set-head-song/<uuid:uuid>",

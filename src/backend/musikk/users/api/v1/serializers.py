@@ -24,9 +24,9 @@ class BaseUserSerializer(BaseModelSerializer):
             "password",
         ]
 
-#
 # class StreamingUserSerializer(BaseUserSerializer):
-#     followed_song_collections = SongCollectionSerializerBasic(many=True, required=False)
+#     # followed_song_collections = SongCollectionSerializerBasic(many=True, required=False)
+#
 #     # created_playlists = PlaylistSerializerBasic(many=True, required=False)
 #
 #     class Meta:
@@ -34,7 +34,7 @@ class BaseUserSerializer(BaseModelSerializer):
 #         fields = BaseUserSerializer.Meta.fields + [
 #             "liked_songs",
 #             "followed_song_collections",
-#             "created_playlists",
+#             # "created_playlists",
 #             "song_queue",
 #         ]
 
