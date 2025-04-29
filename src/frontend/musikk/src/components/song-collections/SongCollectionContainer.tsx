@@ -1,22 +1,25 @@
 import { CommentBox } from "@/components/comments/CommentBox";
+import { collectionRemoveSong } from "@/components/song-collections/mutations.ts";
 import { fetchCollectionDetailed } from "@/components/song-collections/queries";
 import { SongCollectionHeader } from "@/components/song-collections/SongCollectionHeader";
 import { SongContainer } from "@/components/songs/SongContainer.tsx";
 import { UUID } from "@/config/types.ts";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useMatch, useNavigate } from "react-router-dom";
 
 interface SongCollectionContainerProps {
     collectionUUID: UUID;
+    enableComments: boolean;
 }
 
-export function SongCollectionContainer({ collectionUUID }: SongCollectionContainerProps) {
+export function SongCollectionContainer({ collectionUUID, enableComments = true }: SongCollectionContainerProps) {
     const navigate = useNavigate();
     const showComments = Boolean(useMatch("/collection/:uuid/comments"));
     const toggleComments = () => {
         navigate(showComments ? `/collection/${collectionUUID}` : `/collection/${collectionUUID}/comments`);
     };
 
+    const removeSongMutation = useMutation({ mutationFn: collectionRemoveSong });
     const { isPending, error, data } = useQuery({
         queryKey: ["openCollection", collectionUUID],
         queryFn: () => fetchCollectionDetailed(collectionUUID),
@@ -54,7 +57,7 @@ export function SongCollectionContainer({ collectionUUID }: SongCollectionContai
                                 key={`${song.uuid}-${index}`}
                                 className="bg-white p-4 rounded-sm border border-gray-200 transition-colors hover:bg-gray-50"
                             >
-                                <SongContainer song={song} />
+                                <SongContainer song={song} collectionUUID={collectionUUID} />
                             </li>
                         ))}
                     </ul>

@@ -13,10 +13,10 @@ import * as z from "zod";
 import {Spinner} from "@/components/common/Spinner";
 import { EmailField } from "@/components/login/EmailField";
 import { PasswordField } from "@/components/login/PasswordField";
-import { fetchUser } from "@/components/login/queries.ts";
 import { IJWTPayload } from "@/components/login/types.ts";
 import { UserContext } from "@/providers/userContext.ts";
 import Cookies from "js-cookie";
+import { fetchUser } from "@/components/user/queries.ts";
 
 const loginSchema = z.object({
     email: z.string().min(3, "This field is required!"),

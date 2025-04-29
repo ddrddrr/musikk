@@ -25,6 +25,11 @@ export const CollectionURLs = {
     collectionLatest: `${BASE_URL}/collections/latest`,
     collectionPersonal: `${BASE_URL}/collections/personal`,
     collectionDetail: (collectionUUID: string) => `${BASE_URL}/collections/${collectionUUID}`,
+    collectionAddToLiked: (collectionUUID: string) => `${BASE_URL}/collections/${collectionUUID}/like`,
+    collectionAddSong: (collectionUUID: string, songUUID: string) =>
+        `${BASE_URL}/collections/${collectionUUID}/songs/${songUUID}`,
+    collectionRemoveSong: (collectionUUID: string, songUUID: string) =>
+        `${BASE_URL}/collections/${collectionUUID}/songs/${songUUID}`,
     likedSongsAddSong: (songUUID: string) => `${BASE_URL}/liked-songs/add-song/${songUUID}`,
 };
 export const CommentURLs = {
