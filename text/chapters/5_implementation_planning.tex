@@ -38,7 +38,7 @@ Currently, there are 3 well-developed and widely-used WEB frameworks available f
     Django is a 'batteries-included' framework, in a sense that almost everything -
     from access control and database management to API routing and admin interface,
     is a part of it.\cite{django}
-    Additionally, Django offers an extensive ecosystem, including support for RESTful API design through
+    Additionally, Django offers an extensive ecosystem, including support for RESTful APIs through
     \texttt{django-rest-framework}\cite{drf}, various authentication methods,
     and multiple data transfer protocols. Real-time communication, such as WebSockets and Server-Sent Events,
     is supported via the \texttt{django-channels}\cite{django_channels} package.
@@ -66,38 +66,60 @@ using `django-rest-framework`, simplifying communication with the frontend.
 Below is the comparison of the databases that Django framework supports.
 It is worth to mention, that two other databases can be used as well - Oracle and MySQL.
 However, Oracle is ruled out due to its commercial licence, and MySQL is not considered, because
-MariaDB is fully compatible with it, while providing enhancements of top of it.
-
+MariaDB is fully compatible with it, while providing multiple enhancements.
 
 \begin{itemize}
     \item \textbf{SQLite} \\
     'SQLite is an embedded SQL database engine.
     Unlike most other SQL databases, SQLite does not have a separate
     server process. SQLite reads and writes directly to ordinary disk
-    files.'\cite{sqlite}. As the result of SQLite's architecture it is suitable
+    files.'\cite{sqlite}. As the result of SQLite's design it is suitable
     in situations, where a simple storage is needed and write operations are limited.
-    This deems this database
+    It is lightweight, but is struggles in high workload situations; many issues can arise
+    in architectures with a sharded database placed on multiple servers.
 
     \item \textbf{PostgreSQL} \\
-    PostgreSQL is a traditional object-relational database that is de-facto standard in most
-    modern application. It offers a lot of supplementary features, such as complex data types,
-    proper replication and logging, full text search and many others. Django has the best support for it,
-    adding a lot of wrappers for Postgre's custom logic.
+    PostgreSQL is a traditional object-relational database that is almost fully compatible with the SQL standard
+    and is a de-facto standard in most modern application. It offers a lot of supplementary features,
+    such as complex data types, proper replication and logging, full text search and many others.
+    In addition to that, PostgreSQL provides many extensions which can tailor the database to any specific application.
+    \cite{postgres}
+    Django has the best support for it, adding a lot of wrappers for Postgre's custom logic.\cite{django_postgres}
 
     \item \textbf{MariaDB} \\
-    ...
+    MariaDB is a fork of MySQL which adds several advanced features and performance optimizations.
+    One of the prominent aspects of this database are its pluggable storage engine architecture,
+    which allows you to choose different engine per table for the needed workload.\cite{mariadb}
+    If set up right, it can also be lightweight and use less system resources than PostgreSQL.
+    However, it is not fully in line with the SQL standard -
+    e.g. limited ALTER statements and GROUP BY handling\cite{dbfunctions}.
+    And as a consequence of its lesser acceptance\cite{dbrank},
+    the community support for the non-MySQL parts of the database is not as broad.
 \end{itemize}
+Three main points secured PostgreSQL as the database of choice:
+\begin{enumerate}
+    \item More advanced full text search functionality (discussed in ...) compared to MariaDB.
+    \item Integrated Django wrappers around PostgreSQL, which greatly reduce the amount of handwritten SQL.
+    \item Superior syntax, command-line interface, and error handling/messages.
+\end{enumerate}
 
 
 \section{Frontend}
+Contrary to popular belief, JavaScript is not the only language, in which the user interface part
+of the service can be written. Rust, Python and even C could be used to create a working UI.
+However, it comes with a lot of drawbacks - they are not directly supported by the browsers, which
+means that the code has to be complied to WebAssembly. This adds
+additional overhead to the development cycle, introduces new toolchains that add another level of
+complexity and more often than not results in bigger bundle(hence, download) sizes.
+That is why the Frontend of the application is written in JavaScript and only JS frameworks are
+compared.
 
-- React
+- React.
 - Svelte
 - Vue
 
 
 \section{Audio Transfer}
-
 Audio playback can be tackled in numerous ways:
 
 \begin{itemize}
@@ -178,4 +200,13 @@ application scales horizontally and, most importantly, do not use the database t
 
 
 \section{Server-Client Communication}
-% TODO: polling, websockets, sse etc.
+As it was pointed out before, the communication in the application is going to be two-way.
+Because this is a WEB-application, techniques such as Webhooks, gRPC, Pub/Sub and
+others that are not directly supported by browsers will not be discussed. Traditional polling is not discussed due
+to the performance limitations and its inefficiency. P2P techniques(e.g. WebRTC DataChannels) will not be listed,
+because the architecture of the application is client-server, not peer-to-peer.
+
+- Long-Polling
+- Server Sent Events
+- Websockets
+- WebWorkers Push API

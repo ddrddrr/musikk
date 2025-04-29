@@ -14,7 +14,9 @@
 \contentsline {subsection}{\numberline {5.1.1}Framework Comparison}{11}{subsection.5.1.1}%
 \contentsline {subsection}{\numberline {5.1.2}Database}{12}{subsection.5.1.2}%
 \contentsline {section}{\numberline {5.2}Frontend}{13}{section.5.2}%
-\contentsline {section}{\numberline {5.3}Audio Transfer}{13}{section.5.3}%
-\contentsline {section}{\numberline {5.4}Authentication}{14}{section.5.4}%
-\contentsline {section}{\numberline {5.5}Server-Client Communication}{15}{section.5.5}%
-\contentsline {chapter}{Sources}{16}{chapter*.6}%
+\contentsline {section}{\numberline {5.3}Audio Transfer}{14}{section.5.3}%
+\contentsline {section}{\numberline {5.4}Authentication}{15}{section.5.4}%
+\contentsline {section}{\numberline {5.5}Server-Client Communication}{16}{section.5.5}%
+\contentsline {chapter}{\numberline {6}Implementation}{17}{chapter.6}%
+\contentsline {chapter}{\numberline {7}Summary and Conclusion}{18}{chapter.7}%
+\contentsline {chapter}{Sources}{19}{chapter*.6}%

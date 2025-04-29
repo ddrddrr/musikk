@@ -631,7 +631,7 @@
       \endverb
       \warn{\item online entry 'sqlite' (/Users/mazda/studies/musikk/text/bibliography.bib): Invalid format 'date' of date field 'date' - ignoring}
     \endentry
-    \entry{basic_auth}{online}{}{}
+    \entry{postgres}{online}{}{}
       \name{author}{1}{}{%
         {{hash=02bd92faa38aaa6cc0ea75e59937a1ef}{%
            family={author},
@@ -646,6 +646,146 @@
       \strng{authorfullhash}{02bd92faa38aaa6cc0ea75e59937a1ef}
       \strng{authorfullhashraw}{02bd92faa38aaa6cc0ea75e59937a1ef}
       \field{extraname}{21}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{title}
+      \verb{urlraw}
+      \verb https://www.postgresql.org/about/
+      \endverb
+      \verb{url}
+      \verb https://www.postgresql.org/about/
+      \endverb
+      \warn{\item online entry 'postgres' (/Users/mazda/studies/musikk/text/bibliography.bib): Invalid format 'date' of date field 'date' - ignoring}
+    \endentry
+    \entry{django_postgres}{online}{}{}
+      \name{author}{1}{}{%
+        {{hash=02bd92faa38aaa6cc0ea75e59937a1ef}{%
+           family={author},
+           familyi={a\bibinitperiod}}}%
+      }
+      \strng{namehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{fullhash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{fullhashraw}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{bibnamehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{authorbibnamehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{authornamehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{authorfullhash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{authorfullhashraw}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \field{extraname}{22}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{title}
+      \verb{urlraw}
+      \verb https://docs.djangoproject.com/en/5.2/ref/contrib/postgres/
+      \endverb
+      \verb{url}
+      \verb https://docs.djangoproject.com/en/5.2/ref/contrib/postgres/
+      \endverb
+      \warn{\item online entry 'django_postgres' (/Users/mazda/studies/musikk/text/bibliography.bib): Invalid format 'date' of date field 'date' - ignoring}
+    \endentry
+    \entry{mariadb}{online}{}{}
+      \name{author}{1}{}{%
+        {{hash=02bd92faa38aaa6cc0ea75e59937a1ef}{%
+           family={author},
+           familyi={a\bibinitperiod}}}%
+      }
+      \strng{namehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{fullhash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{fullhashraw}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{bibnamehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{authorbibnamehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{authornamehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{authorfullhash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{authorfullhashraw}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \field{extraname}{23}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{title}
+      \verb{urlraw}
+      \verb https://mariadb.org/about/
+      \endverb
+      \verb{url}
+      \verb https://mariadb.org/about/
+      \endverb
+      \warn{\item online entry 'mariadb' (/Users/mazda/studies/musikk/text/bibliography.bib): Invalid format 'date' of date field 'date' - ignoring}
+    \endentry
+    \entry{dbfunctions}{online}{}{}
+      \name{author}{1}{}{%
+        {{hash=02bd92faa38aaa6cc0ea75e59937a1ef}{%
+           family={author},
+           familyi={a\bibinitperiod}}}%
+      }
+      \strng{namehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{fullhash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{fullhashraw}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{bibnamehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{authorbibnamehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{authornamehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{authorfullhash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{authorfullhashraw}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \field{extraname}{24}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{title}
+      \verb{urlraw}
+      \verb https://www.sql-workbench.eu/dbms_comparison.html
+      \endverb
+      \verb{url}
+      \verb https://www.sql-workbench.eu/dbms_comparison.html
+      \endverb
+      \warn{\item online entry 'dbfunctions' (/Users/mazda/studies/musikk/text/bibliography.bib): Invalid format 'date' of date field 'date' - ignoring}
+    \endentry
+    \entry{dbrank}{online}{}{}
+      \name{author}{1}{}{%
+        {{hash=02bd92faa38aaa6cc0ea75e59937a1ef}{%
+           family={author},
+           familyi={a\bibinitperiod}}}%
+      }
+      \strng{namehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{fullhash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{fullhashraw}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{bibnamehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{authorbibnamehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{authornamehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{authorfullhash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{authorfullhashraw}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \field{extraname}{25}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{title}
+      \verb{urlraw}
+      \verb https://db-engines.com/en/ranking
+      \endverb
+      \verb{url}
+      \verb https://db-engines.com/en/ranking
+      \endverb
+      \warn{\item online entry 'dbrank' (/Users/mazda/studies/musikk/text/bibliography.bib): Invalid format 'date' of date field 'date' - ignoring}
+    \endentry
+    \entry{basic_auth}{online}{}{}
+      \name{author}{1}{}{%
+        {{hash=02bd92faa38aaa6cc0ea75e59937a1ef}{%
+           family={author},
+           familyi={a\bibinitperiod}}}%
+      }
+      \strng{namehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{fullhash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{fullhashraw}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{bibnamehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{authorbibnamehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{authornamehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{authorfullhash}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \strng{authorfullhashraw}{02bd92faa38aaa6cc0ea75e59937a1ef}
+      \field{extraname}{26}
       \field{sortinit}{2}
       \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
       \field{labelnamesource}{author}
@@ -673,7 +813,7 @@
       \strng{authornamehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
       \strng{authorfullhash}{02bd92faa38aaa6cc0ea75e59937a1ef}
       \strng{authorfullhashraw}{02bd92faa38aaa6cc0ea75e59937a1ef}
-      \field{extraname}{22}
+      \field{extraname}{27}
       \field{sortinit}{2}
       \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
       \field{labelnamesource}{author}
@@ -701,7 +841,7 @@
       \strng{authornamehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
       \strng{authorfullhash}{02bd92faa38aaa6cc0ea75e59937a1ef}
       \strng{authorfullhashraw}{02bd92faa38aaa6cc0ea75e59937a1ef}
-      \field{extraname}{23}
+      \field{extraname}{28}
       \field{sortinit}{2}
       \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
       \field{labelnamesource}{author}
@@ -729,9 +869,9 @@
       \strng{authornamehash}{02bd92faa38aaa6cc0ea75e59937a1ef}
       \strng{authorfullhash}{02bd92faa38aaa6cc0ea75e59937a1ef}
       \strng{authorfullhashraw}{02bd92faa38aaa6cc0ea75e59937a1ef}
-      \field{extraname}{24}
-      \field{sortinit}{2}
-      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{extraname}{29}
+      \field{sortinit}{3}
+      \field{sortinithash}{ad6fe7482ffbd7b9f99c9e8b5dccd3d7}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
       \field{title}{title}
