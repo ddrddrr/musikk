@@ -40,7 +40,8 @@ export function SongCollectionCard({ collection, size = "medium" }: SongCollecti
         <Card
             onClick={() => navigate(`/collection/${uuid}/`)}
             key={uuid}
-            className={`cursor-pointer transition-all duration-200 py-0 border-2 border-black rounded-sm overflow-hidden bg-gray-50 ${sizes.card}`}
+            className={`cursor-pointer transition-all duration-200 py-0 
+            border-2 border-black rounded-sm overflow-hidden bg-gray-50 ${sizes.card}`}
         >
             <CardContent className="p-0">
                 {image ? (

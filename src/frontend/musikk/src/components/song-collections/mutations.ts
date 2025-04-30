@@ -11,6 +11,14 @@ export async function collectionAddSong({ collectionUUID, songUUID }: ICollectio
     await api.post(CollectionURLs.collectionAddSong(collectionUUID, songUUID));
 }
 
+interface ICollectionAddToLikedParams {
+    collectionUUID: UUID;
+}
+
+export async function collectionAddToLiked({ collectionUUID }: ICollectionAddToLikedParams): Promise<void> {
+    await api.post(CollectionURLs.collectionAddToLiked(collectionUUID));
+}
+
 interface ICollectionRemoveSongParams {
     collectionUUID: UUID;
     songUUID: UUID;

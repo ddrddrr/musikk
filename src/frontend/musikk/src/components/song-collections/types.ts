@@ -7,6 +7,7 @@ export interface ISongCollection {
     description: string;
     authors: IUser[];
     image?: string;
+    is_liked?: boolean;
 }
 
 export interface ISongCollectionDetailed extends ISongCollection {

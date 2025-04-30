@@ -1,33 +1,39 @@
-import { ISong } from "@/components/songs/types";
 import { Button } from "@/components/ui/button";
 import { useMutation } from "@tanstack/react-query";
 import { Check, Plus } from "lucide-react";
-import { addToLikedSongs } from "@/components/collections/mutations.ts";
+import { collectionAddToLiked } from "./mutations";
+import { ISongCollection } from "./types";
 
-interface SongCardProps {
-    song: ISong;
-    className?: string;
-    size?: number;
+interface CollectionAddToLikedButtonProps {
+    collection: ISongCollection;
+    showComments: boolean;
 }
 
-export function SongAddToLikedButton({ song, className = "", size = 18 }: SongCardProps) {
-    const addToLikedSongsMutation = useMutation({ mutationFn: addToLikedSongs });
+export function CollectionAddToLikedButton({ collection, showComments }: CollectionAddToLikedButtonProps) {
+    const collectionAddToLikedMutation = useMutation({ mutationFn: collectionAddToLiked });
+    const sizeClass = showComments ? "h-8 w-8" : "h-12 w-12";
 
     const renderAddIcon = () => {
-        return song.is_liked ? <Check size={size} /> : <Plus size={size} />;
+        return collection.is_liked ? <Check size={20} /> : <Plus size={20} />;
     };
 
-    function handleClick(song: ISong) {
-        if (song.is_liked) {
+    function handleClick(collection: ISongCollection) {
+        if (collection.is_liked) {
             return; // remove from liked
         }
-        addToLikedSongsMutation.mutate({ songUUID: song.uuid });
+        collectionAddToLikedMutation.mutate({ collectionUUID: collection.uuid });
     }
 
     return (
         <Button
-            onClick={() => handleClick(song)}
-            className={`bg-gray-200 hover:bg-gray-300 text-black rounded-sm flex items-center justify-center ${className}`}
+            onClick={() => handleClick(collection)}
+            className={`
+        bg-gray-200 hover:bg-gray-300 text-black
+        border-2 border-black rounded-lg
+        shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]
+        p-0 flex items-center justify-center
+        ${sizeClass}
+      `}
         >
             {renderAddIcon()}
         </Button>

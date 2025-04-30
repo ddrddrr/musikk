@@ -1,25 +1,25 @@
 import { CommentBox } from "@/components/comments/CommentBox";
-import { collectionRemoveSong } from "@/components/song-collections/mutations.ts";
 import { fetchCollectionDetailed } from "@/components/song-collections/queries";
 import { SongCollectionHeader } from "@/components/song-collections/SongCollectionHeader";
 import { SongContainer } from "@/components/songs/SongContainer.tsx";
 import { UUID } from "@/config/types.ts";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { UserCollectionsContext } from "@/providers/userCollectionsContext.ts";
+import { useQuery } from "@tanstack/react-query";
+import { useContext } from "react";
 import { useMatch, useNavigate } from "react-router-dom";
 
 interface SongCollectionContainerProps {
     collectionUUID: UUID;
-    enableComments: boolean;
 }
 
-export function SongCollectionContainer({ collectionUUID, enableComments = true }: SongCollectionContainerProps) {
+export function SongCollectionContainer({ collectionUUID }: SongCollectionContainerProps) {
     const navigate = useNavigate();
-    const showComments = Boolean(useMatch("/collection/:uuid/comments"));
+    const { liked_songs } = useContext(UserCollectionsContext);
+    let showComments = Boolean(useMatch("/collection/:uuid/comments"));
     const toggleComments = () => {
         navigate(showComments ? `/collection/${collectionUUID}` : `/collection/${collectionUUID}/comments`);
     };
 
-    const removeSongMutation = useMutation({ mutationFn: collectionRemoveSong });
     const { isPending, error, data } = useQuery({
         queryKey: ["openCollection", collectionUUID],
         queryFn: () => fetchCollectionDetailed(collectionUUID),
@@ -40,14 +40,17 @@ export function SongCollectionContainer({ collectionUUID, enableComments = true 
         );
 
     const songs = data.songs;
+    const notIsLikedSongs = data?.uuid !== liked_songs?.uuid;
+    showComments = showComments && notIsLikedSongs;
     return (
         <div className={`flex gap-4 ${showComments ? "flex-row" : "flex-col"} max-w-4xl mx-auto p-4`}>
             <div className={showComments ? "w-1/2 pr-2" : "space-y-4"}>
                 <SongCollectionHeader
                     collection={data}
-                    showComments={showComments}
                     toggleComments={toggleComments}
                     songsCount={songs.length}
+                    notIsLikedSongs={notIsLikedSongs}
+                    showComments={showComments}
                 />
 
                 {songs.length > 0 ? (

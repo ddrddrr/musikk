@@ -79,9 +79,9 @@ export function PlayerBar({ duration, time }: PlayerBarProps) {
                             <div className="bg-gray-200 p-1.5 border-2 border-black mb-1">
                                 <p className="font-bold truncate text-sm">{playingSong.title}</p>
                             </div>
-                            <div className="bg-gray-200 p-1.5 border-2 border-black">
-                                <p className="text-xs truncate">{playingSong.artist}</p>
-                            </div>
+                            {/*<div className="bg-gray-200 p-1.5 border-2 border-black">*/}
+                            {/*    <p className="text-xs truncate">{playingSong.artist}</p>*/}
+                            {/*</div>*/}
                         </div>
                     </div>
 
@@ -137,7 +137,7 @@ export function PlayerBar({ duration, time }: PlayerBarProps) {
                 </div>
             ) : (
                 <div className="text-center py-2">
-                    <p className="text-gray-500 text-xs">Select a song to play</p>
+                    <p className="text-gray-500 text-xs">Select something to play</p>
                 </div>
             )}
         </div>

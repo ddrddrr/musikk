@@ -7,7 +7,12 @@ export async function fetchCollectionsLatest(): Promise<ISongCollection[]> {
     return response.data;
 }
 
-export async function fetchCollectionsPersonal(): Promise<ISongCollection[]> {
+interface IFetchCollectionsPersonalParams {
+    liked_songs: ISongCollection;
+    followed_collections: ISongCollection[];
+}
+
+export async function fetchCollectionsPersonal(): Promise<IFetchCollectionsPersonalParams> {
     const response = await api.get(CollectionURLs.collectionPersonal);
     return response.data;
 }
