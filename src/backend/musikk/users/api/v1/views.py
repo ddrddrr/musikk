@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from django_eventstream.viewsets import EventsViewSet
 
 from sse.config import EventChannels
-from users.api.v1.serializers import (
+from users.api.v1.serializers_base import (
     BaseUserSerializer,
     # StreamingUserSerializer,
     ResetPasswordSerializer,

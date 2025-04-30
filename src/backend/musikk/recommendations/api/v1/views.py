@@ -9,7 +9,7 @@ from streaming.api.v1.serializers_song import (
 )
 from streaming.api.v1.serializers_song_collection import SongCollectionSerializerBasic
 from streaming.models import BaseSong, SongCollection
-from users.api.v1.serializers import BaseUserSerializer
+from users.api.v1.serializers_base import BaseUserSerializer
 from users.models import Artist, StreamingUser
 
 

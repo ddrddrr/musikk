@@ -1,19 +1,26 @@
+from django.core.exceptions import ValidationError
 from rest_framework import serializers
 
 from base.serializers import BaseModelSerializer
 from streaming.api.v1.serializers_song import BaseSongSerializer
 from streaming.song_collections import SongCollection, Playlist, SongCollectionAuthor
 from streaming.songs import SongCollectionSong, BaseSong
-from users.api.v1.serializers import BaseUserSerializer
+from users.api.v1.serializers_base import BaseUserSerializer
 from users.users_extended import StreamingUser
 
 
 class SongCollectionSerializerBasic(BaseModelSerializer):
     authors = serializers.SerializerMethodField(read_only=True, allow_null=True)
+    is_liked = serializers.SerializerMethodField(read_only=True, allow_null=True)
 
     class Meta:
         model = SongCollection
-        fields = BaseModelSerializer.Meta.fields + ["title", "image", "authors"]
+        fields = BaseModelSerializer.Meta.fields + [
+            "title",
+            "image",
+            "authors",
+            "is_liked",
+        ]
         extra_kwargs = BaseModelSerializer.Meta.extra_kwargs | {
             "title": {"read_only": True},
             "description": {"read_only": True},
@@ -27,6 +34,12 @@ class SongCollectionSerializerBasic(BaseModelSerializer):
         users = [scauthor.author for scauthor in scauthors]
 
         return BaseUserSerializer(users, many=True, context=self.context).data
+
+    def get_is_liked(self, obj):
+        if user := self.context["request"].user.streaminguser:
+            return user.followed_song_collections.filter(pk=obj.pk).exists()
+
+        raise ValidationError("User must be provided.")
 
 
 class SongCollectionSerializerDetailed(SongCollectionSerializerBasic):

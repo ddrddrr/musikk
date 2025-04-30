@@ -1,10 +1,11 @@
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from rest_framework import serializers
 
 from audio_processing.ffmpeg_wrapper import FlacOnly
 from base.serializers import BaseModelSerializer
 from streaming.songs import BaseSong, SongCollectionSong, SongAuthor
-from users.api.v1.serializers import BaseUserSerializer
+from users.api.v1.serializers_base import BaseUserSerializer
 from users.users_extended import Artist
 
 
@@ -37,7 +38,7 @@ class BaseSongSerializer(BaseModelSerializer):
             return SongCollectionSong.objects.filter(
                 song=obj, song_collection=user.liked_songs
             ).exists()
-        return None
+        raise ValidationError("User must be provided.")
 
     def get_authors(self, obj):
         sauthors = SongAuthor.objects.filter(song=obj).select_related("author")

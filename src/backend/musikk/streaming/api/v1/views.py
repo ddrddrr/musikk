@@ -46,15 +46,28 @@ class SongCollectionLatestView(ListAPIView):
 
 
 class SongCollectionUserView(APIView):
+    """Returns `liked_songs` and `followed_collections` of a `StreamingUser`"""
+
     permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
         user = self.request.user.streaminguser
         followed_collections_qs = user.streaminguser.followed_song_collections.all()
-        data = SongCollectionSerializerBasic(
-            [user.liked_songs] + list(followed_collections_qs), many=True
+        liked_songs = SongCollectionSerializerBasic(
+            user.liked_songs, context={"request": request}
         ).data
-        return Response(status=status.HTTP_200_OK, data=data)
+        followed_collections = SongCollectionSerializerBasic(
+            list(followed_collections_qs),
+            context={"request": request},
+            many=True,
+        ).data
+        return Response(
+            status=status.HTTP_200_OK,
+            data={
+                "liked_songs": liked_songs,
+                "followed_collections": followed_collections,
+            },
+        )
 
 
 class SongCollectionDetailView(RetrieveAPIView):
@@ -74,6 +87,11 @@ class SongCollectionAddLikedView(APIView):
         collection_uuid = kwargs["uuid"]
         collection = get_object_or_404(SongCollection, uuid=collection_uuid)
         user.followed_song_collections.add(collection)
+        send_invalidate_event(EventChannels.user_events(user.uuid), ["openCollection"])
+        send_invalidate_event(
+            EventChannels.user_events(user.uuid), ["collectionsPersonal"]
+        )
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class SongCollectionRemoveSong(APIView):
@@ -97,6 +115,7 @@ class SongCollectionRemoveSong(APIView):
             song__uuid=kwargs["song_uuid"],
         )
         sc_song.song.delete()  # deletes the sc_song as well
+        send_invalidate_event(EventChannels.user_events(user.uuid), ["openCollection"])
         return Response(
             status=status.HTTP_200_OK, data={"removed": kwargs["song_uuid"]}
         )

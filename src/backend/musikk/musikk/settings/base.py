@@ -112,7 +112,7 @@ REST_FRAMEWORK = {
 SIMPLE_JWT = {
     "USER_ID_FIELD": "uuid",
     "USER_ID_CLAIM": "uuid",
-    "TOKEN_OBTAIN_SERIALIZER": "users.api.v1.serializers.TokenPairSerializer",
+    "TOKEN_OBTAIN_SERIALIZER": "users.api.v1.serializers_base.TokenPairSerializer",
 }
 EVENTSTREAM_STORAGE_CLASS = "django_eventstream.storage.DjangoModelStorage"
 # Database

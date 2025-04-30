@@ -1,6 +1,11 @@
 from django.db import models
 
-from streaming.song_collections import UserHistory, SongCollection, LikedSongs
+from streaming.song_collections import (
+    UserHistory,
+    SongCollection,
+    LikedSongs,
+    SongCollectionAuthor,
+)
 from streaming.song_queue import SongQueue
 from users.user_base import BaseUser
 
@@ -45,6 +50,9 @@ class StreamingUser(BaseUser):
         if not self.history:
             self.history = UserHistory.objects.create()
         super().save(*args, **kwargs)
+        SongCollectionAuthor.objects.create(
+            song_collection=self.liked_songs, author=self
+        )
 
     objects = StreamingUserManager()
 
