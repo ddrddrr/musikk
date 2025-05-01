@@ -9,7 +9,6 @@ import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } 
 import { useMutation } from "@tanstack/react-query";
 import { BetweenHorizonalStart, Trash2 } from "lucide-react";
 import { memo } from "react";
-
 interface SongContainerProps {
     song: ISong;
     collectionUUID?: UUID;

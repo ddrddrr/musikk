@@ -7,16 +7,16 @@ import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import { useContext, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import * as z from "zod";
 
-import {Spinner} from "@/components/common/Spinner";
-import { EmailField } from "@/components/login/EmailField";
-import { PasswordField } from "@/components/login/PasswordField";
-import { IJWTPayload } from "@/components/login/types.ts";
+import { Spinner } from "@/components/common/Spinner";
+import { EmailField } from "@/components/signup-login/EmailField";
+import { PasswordField } from "@/components/signup-login/PasswordField";
+import { IJWTPayload } from "@/components/signup-login/types.ts";
+import { fetchUser } from "@/components/user/queries.ts";
 import { UserContext } from "@/providers/userContext.ts";
 import Cookies from "js-cookie";
-import { fetchUser } from "@/components/user/queries.ts";
 
 const loginSchema = z.object({
     email: z.string().min(3, "This field is required!"),
@@ -27,7 +27,6 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 export function LoginForm() {
     const navigate = useNavigate();
-    const location = useLocation();
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState("");
     const { setUser } = useContext(UserContext);
@@ -44,7 +43,7 @@ export function LoginForm() {
             const decodedToken = jwtDecode<IJWTPayload>(Cookies.get("access"));
             const user = await fetchUser(decodedToken.uuid);
             setUser(user);
-            navigate(location.state || "/");
+            navigate("/");
         } catch (error) {
             const resMessage = axios.isAxiosError(error)
                 ? error.response?.data?.message || error.message
@@ -78,10 +77,13 @@ export function LoginForm() {
 
                     <div className="text-center">
                         <p>
-                            Don't have an account?{" "}
-                            <a href="#" className="text-red-600 hover:underline">
+                            Don't have an account?{"   "}
+                            <Button
+                                onClick={() => navigate("/signup")}
+                                className="w-30 bg-red-600 hover:bg-red-700 text-white border-2 border-black p-4"
+                            >
                                 Sign up
-                            </a>
+                            </Button>
                         </p>
                     </div>
                 </form>

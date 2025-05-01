@@ -41,8 +41,10 @@ export const NotificationURLs = {
     notificationsSetRead: `${BASE_URL}/notifications`,
     replyNotificationList: `${BASE_URL}/notifications/replies`,
 };
+// TODO: add logout view
 export const UserURLs = {
-    userDetail: (userUUID: string) => `${BASE_URL}/user/${userUUID}`,
+    userDetail: (userUUID: string) => `${BASE_URL}/users/${userUUID}`,
+    userCreate: `${BASE_URL}/users`,
     tokenGet: `${BASE_URL}/token/`,
     tokenRefresh: `${BASE_URL}/token/refresh/`,
 };

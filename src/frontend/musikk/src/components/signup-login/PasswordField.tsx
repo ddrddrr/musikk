@@ -24,7 +24,7 @@ export function PasswordField({ control }: Props) {
                         <div className="relative bg-gray-200 p-2 border-2 border-black">
                             <Input
                                 type={showPassword ? "text" : "password"}
-                                placeholder="Enter your password"
+                                placeholder="Enter Password"
                                 {...field}
                                 className="border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 p-0 pr-10"
                             />
