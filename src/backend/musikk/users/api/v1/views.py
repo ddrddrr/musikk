@@ -10,8 +10,11 @@ from django_eventstream.viewsets import EventsViewSet
 from sse.config import EventChannels
 from users.api.v1.serializers_base import (
     BaseUserSerializer,
-    # StreamingUserSerializer,
     ResetPasswordSerializer,
+)
+from users.api.v1.serializers_extended import (
+    StreamingUserCreateSerializer,
+    ArtistCreateSerializer,
 )
 from users.user_base import BaseUser
 from users.utils import password_reset_token_generator
@@ -23,31 +26,30 @@ class BaseUserRetrieveView(RetrieveAPIView):
     queryset = BaseUser.objects.all()
 
 
-# class StreamingUserRetrieveView(RetrieveAPIView):
-#     lookup_field = "uuid"
-#     serializer_class = StreamingUserSerializer
-#
-#     def get_object(self):
-#         return self.request.user.streaminguser
-
-
 class UserCreateView(APIView):
-    def create(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         if not request.user.is_anonymous:
             return Response(
-                status=status.HTTP_405_METHOD_NOT_ALLOWED,
+                status=status.HTTP_403_FORBIDDEN,
                 data={"error": "Logout before creating a new account."},
             )
 
-        role = request.data["role"]
-        user_data = request.data["userData"]
-        user = BaseUserSerializer(data=user_data)
-        if not user.is_valid():
-            return Response(status=status.HTTP_400_BAD_REQUEST, data=user.errors)
-        user.save()
-        #
-        # match role:
-        #     case ...
+        user_role = request.data.pop("userRole")
+        match user_role:
+            case "StreamingUser":
+                s = StreamingUserCreateSerializer(data=request.data)
+            case "Artist":
+                s = ArtistCreateSerializer(data=request.data)
+            case _:
+                return Response(
+                    status=status.HTTP_400_BAD_REQUEST,
+                    data={"error": f"Invalid user role {user_role}."},
+                )
+
+        if not s.is_valid():
+            return Response(status=status.HTTP_400_BAD_REQUEST, data=s.errors)
+        s.save()
+        return Response(status=status.HTTP_201_CREATED)
 
 
 class ResetPasswordView(UpdateAPIView):

@@ -1,23 +1,22 @@
+from django.contrib.auth.base_user import BaseUserManager
 from django.db import models
 
 from streaming.song_collections import (
     UserHistory,
-    SongCollection,
     LikedSongs,
     SongCollectionAuthor,
 )
 from streaming.song_queue import SongQueue
-from users.user_base import BaseUser
+from users.user_base import BaseUser, UserManager
 
 
-class StreamingUserManager(models.Manager):
-    def create(self, **kwargs):
-        instance = self.model(**kwargs)
-        instance.save()
-        return instance
+class StreamingUserManager(UserManager):
+    pass
 
 
 class StreamingUser(BaseUser):
+    bio = models.TextField(max_length=2000, default="")
+
     # TODO: add method to initialize liked_songs
     liked_songs = models.OneToOneField(
         "streaming.LikedSongs",
@@ -67,8 +66,12 @@ class ContentOwner(models.Model):
     )
 
 
+class ArtistManager(UserManager):
+    pass
+
+
 class Artist(ContentOwner, StreamingUser):
-    bio = models.TextField(max_length=2000)
+    objects = ArtistManager()
 
 
 class Label(ContentOwner, BaseUser):

@@ -1,20 +1,28 @@
-# from streaming.api.v1.serializers_song_collection import SongCollectionSerializerBasic
-# from streaming.api.v1.serializers_song_queue import SongQueueSerializer
-# from users.api.v1.serializers_base import BaseUserSerializer
-# from users.users_extended import StreamingUser
-#
-#
-# class StreamingUserSerializer(BaseUserSerializer):
-#     liked_songs = SongCollectionSerializerBasic(read_only=True)
-#     followed_song_collections = SongCollectionSerializerBasic(many=True, required=False)
-#     song_queue = SongQueueSerializer(read_only=True)
-#     # created_playlists = PlaylistSerializerBasic(many=True, required=False)
-#
-#     class Meta:
-#         model = StreamingUser
-#         fields = BaseUserSerializer.Meta.fields + [
-#             "liked_songs",
-#             "followed_song_collections",
-#             "song_queue",
-#             # "created_playlists",
-#         ]
+from rest_framework import serializers
+
+from users.api.v1.serializers_base import BaseUserSerializer
+from users.user_base import BaseUser
+from users.users_extended import StreamingUser, Artist
+
+
+class StreamingUserCreateSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)
+    email = serializers.EmailField(write_only=True)
+
+    class Meta:
+        model = StreamingUser
+        fields = ["email", "password"]
+
+    def create(self, validated_data):
+        user = StreamingUser.objects.create_user(**validated_data)
+        return user
+
+
+class ArtistCreateSerializer(StreamingUserCreateSerializer):
+    class Meta:
+        model = Artist
+        fields = StreamingUserCreateSerializer.Meta.fields
+
+    def create(self, validated_data):
+        user = Artist.objects.create_user(**validated_data)
+        return user

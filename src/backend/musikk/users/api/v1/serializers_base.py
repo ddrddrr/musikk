@@ -7,8 +7,6 @@ from users.user_base import BaseUser
 
 
 class BaseUserSerializer(BaseModelSerializer):
-    password = serializers.CharField(write_only=True)
-
     class Meta(BaseModelSerializer.Meta):
         model = BaseUser
         fields = BaseModelSerializer.Meta.fields + [
@@ -17,7 +15,6 @@ class BaseUserSerializer(BaseModelSerializer):
             "last_name",
             "display_name",
             "avatar",
-            "password",
         ]
 
 
