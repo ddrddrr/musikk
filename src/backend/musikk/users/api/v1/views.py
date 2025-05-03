@@ -1,5 +1,10 @@
 from django.http import Http404
-from rest_framework.generics import RetrieveAPIView, UpdateAPIView, CreateAPIView
+from rest_framework.generics import (
+    RetrieveAPIView,
+    UpdateAPIView,
+    CreateAPIView,
+    RetrieveUpdateAPIView,
+)
 from rest_framework.views import APIView
 from rest_framework import request
 from rest_framework import status
@@ -8,6 +13,7 @@ from rest_framework.permissions import IsAuthenticated
 from django_eventstream.viewsets import EventsViewSet
 
 from sse.config import EventChannels
+from sse.events import send_invalidate_event
 from users.api.v1.serializers_base import (
     BaseUserSerializer,
     ResetPasswordSerializer,
@@ -20,10 +26,17 @@ from users.user_base import BaseUser
 from users.utils import password_reset_token_generator
 
 
-class BaseUserRetrieveView(RetrieveAPIView):
+class UserRetrieveUpdateView(RetrieveUpdateAPIView):
     lookup_field = "uuid"
-    serializer_class = BaseUserSerializer
     queryset = BaseUser.objects.all()
+    serializer_class = BaseUserSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_update(self, serializer):
+        super().perform_update(serializer)
+        send_invalidate_event(
+            EventChannels.user_events(self.request.user.uuid), ["user"]
+        )
 
 
 class UserCreateView(APIView):

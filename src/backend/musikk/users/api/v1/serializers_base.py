@@ -11,11 +11,13 @@ class BaseUserSerializer(BaseModelSerializer):
         model = BaseUser
         fields = BaseModelSerializer.Meta.fields + [
             "email",
-            "first_name",
-            "last_name",
+            "bio",
             "display_name",
             "avatar",
         ]
+        extra_kwargs = {
+            "email": {"read_only": True},
+        }
 
 
 class ResetPasswordSerializer(serializers.ModelSerializer):

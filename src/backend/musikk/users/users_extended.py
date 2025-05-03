@@ -15,8 +15,6 @@ class StreamingUserManager(UserManager):
 
 
 class StreamingUser(BaseUser):
-    bio = models.TextField(max_length=2000, default="")
-
     # TODO: add method to initialize liked_songs
     liked_songs = models.OneToOneField(
         "streaming.LikedSongs",

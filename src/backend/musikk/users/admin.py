@@ -11,8 +11,7 @@ class BaseUserChangeForm(UserChangeForm):
         fields = [
             "display_name",
             "email",
-            "first_name",
-            "last_name",
+            "bio",
             "avatar",
         ]
 
@@ -23,8 +22,7 @@ class BaseUserCreationForm(UserCreationForm):
         fields = [
             "display_name",
             "email",
-            "first_name",
-            "last_name",
+            "bio",
             "avatar",
         ]
 
@@ -37,16 +35,15 @@ class BaseUserAdmin(UserAdmin):
 
     list_display = (
         "email",
-        "first_name",
-        "last_name",
         "display_name",
+        "bio",
         "is_active",
         "is_admin",
         "is_superuser",
         "uuid",
     )
     list_filter = ("is_active", "is_admin", "is_superuser", "groups")
-    search_fields = ("email", "first_name", "last_name", "display_name")
+    search_fields = ("email", "display_name")
     ordering = ("email",)
     list_display_links = ("email",)
 
@@ -54,7 +51,7 @@ class BaseUserAdmin(UserAdmin):
         (None, {"fields": ("email", "password")}),
         (
             "Personal info",
-            {"fields": ("first_name", "last_name", "display_name", "avatar")},
+            {"fields": ("bio", "display_name", "avatar")},
         ),
         (
             "Permissions",
@@ -80,8 +77,6 @@ class BaseUserAdmin(UserAdmin):
                 "fields": (
                     "email",
                     "display_name",
-                    "first_name",
-                    "last_name",
                     "avatar",
                     "password1",
                     "password2",

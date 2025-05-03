@@ -27,6 +27,76 @@ from streaming.models import BaseSong, SongCollectionSong, SongCollection
 from streaming.song_collections import SongCollectionAuthor
 
 
+class SongAddLikedView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        user = request.user.streaminguser
+
+        song_uuid = kwargs["uuid"]
+        song = get_object_or_404(BaseSong, uuid=song_uuid)
+        SongCollectionSong.objects.create(song=song, song_collection=user.liked_songs)
+
+        # doing a refetch for the queue is easier than traversing nodes and checking, whether the song is in the queue
+        send_invalidate_event(EventChannels.user_events(user.uuid), ["queue"])
+        send_invalidate_event(EventChannels.user_events(user.uuid), ["openCollection"])
+        send_invalidate_event(EventChannels.user_events(user.uuid), ["likedSongs"])
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class SongCreateView(APIView):
+    """
+    { authors: [UUID], songs: [ { key: 'song_0', title, description }, ... ] }
+    + song_{i}_audio, song_{i}_image.
+    """
+
+    parser_classes = [MultiPartParser, FormParser]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        raw = request.data.get("info")
+        if not raw:
+            return Response(
+                {"detail": "Missing info payload"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        info = json.loads(raw)
+        authors = info.get("authors") or [str(request.user.streaminguser.uuid)]
+        songs = info.get("songs", [])
+
+        succeeded, failed = [], []
+
+        for i, song in enumerate(songs):
+            key = song.get("key")
+            song_data = {
+                # TODO: make title compulsory
+                "title": song["title"],
+                "description": song.get("description", ""),
+                "audio": request.FILES.get(f"{key}_audio"),
+                "image": request.FILES.get(f"{key}_image"),
+                "authors": authors,
+            }
+            serializer = BaseSongCreateSerializer(data=song_data)
+            try:
+                serializer.is_valid(raise_exception=True)
+                instance = serializer.save()
+                instance.draft = True  # handled when collection is created
+                instance.save(update_fields=["draft"])
+                succeeded.append({"uuid": str(instance.uuid), "key": key})
+            except serializers.ValidationError as exc:
+                failed.append({"key": key, "errors": exc.detail})
+            except Exception as exc:
+                failed.append({"key": key, "errors": [str(exc)]})
+
+        if failed:
+            response_status = status.HTTP_400_BAD_REQUEST
+        else:
+            response_status = status.HTTP_201_CREATED
+        return Response(
+            {"succeeded": succeeded, "failed": failed}, status=response_status
+        )
+
+
 class SongDetailView(RetrieveAPIView):
     lookup_field = "uuid"
     permission_classes = [IsAuthenticated]
@@ -45,7 +115,7 @@ class SongCollectionLatestView(ListAPIView):
         return qs
 
 
-class SongCollectionUserView(APIView):
+class SongCollectionPersonalView(APIView):
     """Returns `liked_songs` and `followed_collections` of a `StreamingUser`"""
 
     permission_classes = [IsAuthenticated]
@@ -53,6 +123,9 @@ class SongCollectionUserView(APIView):
     def get(self, request, *args, **kwargs):
         user = self.request.user.streaminguser
         followed_collections_qs = user.streaminguser.followed_song_collections.all()
+        history = SongCollectionSerializerBasic(
+            user.history, context={"request": request}
+        ).data
         liked_songs = SongCollectionSerializerBasic(
             user.liked_songs, context={"request": request}
         ).data
@@ -64,6 +137,7 @@ class SongCollectionUserView(APIView):
         return Response(
             status=status.HTTP_200_OK,
             data={
+                "history": history,
                 "liked_songs": liked_songs,
                 "followed_collections": followed_collections,
             },
@@ -141,59 +215,6 @@ class SongCollectionAddSong(APIView):
         return Response(status=status.HTTP_200_OK, data={"added": kwargs["song_uuid"]})
 
 
-class SongCreateView(APIView):
-    """
-    { authors: [UUID], songs: [ { key: 'song_0', title, description }, ... ] }
-    + song_{i}_audio, song_{i}_image.
-    """
-
-    parser_classes = [MultiPartParser, FormParser]
-    permission_classes = [IsAuthenticated]
-
-    def post(self, request, *args, **kwargs):
-        raw = request.data.get("info")
-        if not raw:
-            return Response(
-                {"detail": "Missing info payload"}, status=status.HTTP_400_BAD_REQUEST
-            )
-
-        info = json.loads(raw)
-        authors = info.get("authors") or [str(request.user.streaminguser.uuid)]
-        songs = info.get("songs", [])
-
-        succeeded, failed = [], []
-
-        for i, song in enumerate(songs):
-            key = song.get("key")
-            song_data = {
-                # TODO: make title compulsory
-                "title": song["title"],
-                "description": song.get("description", ""),
-                "audio": request.FILES.get(f"{key}_audio"),
-                "image": request.FILES.get(f"{key}_image"),
-                "authors": authors,
-            }
-            serializer = BaseSongCreateSerializer(data=song_data)
-            try:
-                serializer.is_valid(raise_exception=True)
-                instance = serializer.save()
-                instance.draft = True  # handled when collection is created
-                instance.save(update_fields=["draft"])
-                succeeded.append({"uuid": str(instance.uuid), "key": key})
-            except serializers.ValidationError as exc:
-                failed.append({"key": key, "errors": exc.detail})
-            except Exception as exc:
-                failed.append({"key": key, "errors": [str(exc)]})
-
-        if failed:
-            response_status = status.HTTP_400_BAD_REQUEST
-        else:
-            response_status = status.HTTP_201_CREATED
-        return Response(
-            {"succeeded": succeeded, "failed": failed}, status=response_status
-        )
-
-
 class SongCollectionCreateView(APIView):
     """
     { title, description, image?, private, authors: [UUID], songs: [UUID,...] }
@@ -248,23 +269,6 @@ class SongCollectionCreateView(APIView):
             collection, context={"request": request}
         ).data
         return Response({"collection": out}, status=201)
-
-
-class SongAddLikedView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def post(self, request, *args, **kwargs):
-        user = request.user.streaminguser
-
-        song_uuid = kwargs["uuid"]
-        song = get_object_or_404(BaseSong, uuid=song_uuid)
-        SongCollectionSong.objects.create(song=song, song_collection=user.liked_songs)
-
-        # doing a refetch for the queue is easier than traversing nodes and checking, whether the song is in the queue
-        send_invalidate_event(EventChannels.user_events(user.uuid), ["queue"])
-        send_invalidate_event(EventChannels.user_events(user.uuid), ["openCollection"])
-        send_invalidate_event(EventChannels.user_events(user.uuid), ["likedSongs"])
-        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 # TODO: streams will be needed for statistics, not for history

@@ -4,7 +4,7 @@ from streaming.api.v1.views import (
     SongDetailView,
     SongCollectionLatestView,
     SongCollectionDetailView,
-    SongCollectionUserView,
+    SongCollectionPersonalView,
     SongCollectionCreateView,
     SongCollectionAddLikedView,
     SongCreateView,
@@ -44,7 +44,7 @@ urlpatterns = [
     ),
     path(
         "collections/personal",
-        SongCollectionUserView.as_view(),
+        SongCollectionPersonalView.as_view(),
         name="collection-user-list",
     ),
     path(
