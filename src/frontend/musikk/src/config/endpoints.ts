@@ -45,6 +45,7 @@ export const NotificationURLs = {
 export const UserURLs = {
     userDetail: (userUUID: string) => `${BASE_URL}/users/${userUUID}`,
     userCreate: `${BASE_URL}/users`,
+    userUpdate: (userUUID: string) => `${BASE_URL}/users/${userUUID}`,
     tokenGet: `${BASE_URL}/token/`,
     tokenRefresh: `${BASE_URL}/token/refresh/`,
 };

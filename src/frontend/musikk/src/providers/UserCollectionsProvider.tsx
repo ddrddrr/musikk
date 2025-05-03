@@ -14,6 +14,7 @@ export function UserCollectionsProvider({ children }: UserCollectionsProviderPro
     });
     console.log(data);
     const contextValue = {
+        history: data?.history ?? null,
         liked_songs: data?.liked_songs ?? null,
         followed_collections: data?.followed_collections ?? null,
     };

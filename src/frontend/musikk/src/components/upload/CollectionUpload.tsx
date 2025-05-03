@@ -2,7 +2,7 @@ import { Spinner } from "@/components/common/Spinner";
 import { Button } from "@/components/ui/button";
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { ImageField } from "@/components/upload/ImageField";
+import { ImageField } from "@/components/common/ImageField.tsx";
 import { SongFields } from "@/components/upload/SongFields";
 import { CollectionFormValues } from "@/components/upload/types";
 import { useUpload } from "@/components/upload/useUpload";
@@ -120,7 +120,7 @@ export function CollectionUpload({ form, fields, append, remove }: CollectionUpl
                     )}
                 />
 
-                <ImageField name="image" control={form.control} />
+                <ImageField name="image" />
             </div>
 
             <div className="text-xl font-semibold">Songs</div>
@@ -128,7 +128,6 @@ export function CollectionUpload({ form, fields, append, remove }: CollectionUpl
                 <SongFields
                     key={f.id}
                     index={i}
-                    control={form.control}
                     isSuccess={statuses[i]?.success === true}
                     errorMsg={statuses[i]?.errorMsg}
                     onRemove={() => remove(i)}

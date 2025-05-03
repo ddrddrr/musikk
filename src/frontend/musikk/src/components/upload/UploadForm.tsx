@@ -4,7 +4,6 @@ import { CollectionUpload } from "@/components/upload/CollectionUpload";
 import { SongUpload } from "@/components/upload/SongUpload";
 import { CollectionFormValues, FormSchema } from "@/components/upload/types";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 
 export function UploadForm() {

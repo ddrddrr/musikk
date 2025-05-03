@@ -1,3 +1,4 @@
+import { ProfileForm } from "@/components/user/ProfileForm.tsx";
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
 
@@ -11,8 +12,14 @@ export function SettingsPage() {
         if (Cookies.get("refresh")) {
             Cookies.remove("refresh");
         }
+        localStorage.removeItem("user");
         navigate("/login");
     }
 
-    return <button onClick={logout}>logout</button>;
+    return (
+        <>
+            <button onClick={logout}>logout</button>
+            <ProfileForm />
+        </>
+    );
 }

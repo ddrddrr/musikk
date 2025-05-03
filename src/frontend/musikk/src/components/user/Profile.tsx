@@ -1,21 +1,22 @@
-import { useQuery } from "@tanstack/react-query";
-import { fetchCommentList } from "@/components/comments/queries.ts";
+import { Avatar, AvatarImage } from "@/components/ui/avatar.tsx";
+import { UserContext } from "@/providers/userContext.ts";
+import { useContext } from "react";
 
-export function Profile(){
-    const  { isPending, error, data } = useQuery({
-        queryKey: ["comments", objUUID],
-        queryFn: () => fetchCommentList(objType, objUUID),
-    });
-    return(
-        <div></div>
-        // avatar
-        // display name
-        // possible real name
-        // recetnly played tracks
-        // liked songs
-        // added playlists
-        // friends
-        // feed, where a user can add tracks/albums and comments for them
-        // edit button which takes to the edit profile form
-    )
+export function Profile() {
+    const { user } = useContext(UserContext);
+    if (!user) return null;
+    // add router, make it /users/<uuid>
+    return (
+        <>
+            <Avatar className="rounded-sm w-10 h-10">
+                <AvatarImage src={user?.avatar} alt={user?.display_name} className="object-cover" />
+            </Avatar>
+            <div>{user.display_name}</div>
+            <div>{user.bio}</div>
+            {/*onclick - open profile edit popover*/}
+            <button></button>
+            {/*// display name // recently played tracks // friends // feed, where a user can add tracks/albums and*/}
+            {/*comments for them // edit button which takes to the edit profile form*/}
+        </>
+    );
 }

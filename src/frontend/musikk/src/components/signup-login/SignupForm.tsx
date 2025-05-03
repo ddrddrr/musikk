@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 
 import { Spinner } from "@/components/common/Spinner";
@@ -44,7 +44,6 @@ export function SignUpForm() {
     });
 
     const onSubmit = (values: SignUpFormValues) => {
-        console.log("signup values:", values);
         setMessage("");
         mutate(values);
     };
@@ -53,8 +52,8 @@ export function SignUpForm() {
         <CardContent>
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-6">
-                    <EmailField control={form.control} />
-                    <PasswordField control={form.control} />
+                    <EmailField />
+                    <PasswordField />
                     <FormField
                         control={form.control}
                         name="userRole"

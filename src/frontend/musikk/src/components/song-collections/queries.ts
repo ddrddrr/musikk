@@ -8,6 +8,7 @@ export async function fetchCollectionsLatest(): Promise<ISongCollection[]> {
 }
 
 interface IFetchCollectionsPersonalParams {
+    history: ISongCollection;
     liked_songs: ISongCollection;
     followed_collections: ISongCollection[];
 }

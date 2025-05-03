@@ -1,7 +1,9 @@
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useFormContext } from "react-hook-form";
 
-export function AudioField({ index, control }: { index: number; control: any }) {
+export function AudioField({ index }: { index: number }) {
+    const { control } = useFormContext();
     return (
         <FormField
             control={control}

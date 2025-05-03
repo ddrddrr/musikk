@@ -1,12 +1,9 @@
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Control } from "react-hook-form";
+import { useFormContext } from "react-hook-form";
 
-type Props = {
-    control: Control;
-};
-
-export function EmailField({ control }: Props) {
+export function EmailField() {
+    const { control } = useFormContext();
     return (
         <FormField
             control={control}

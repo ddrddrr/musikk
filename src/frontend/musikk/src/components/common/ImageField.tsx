@@ -1,14 +1,16 @@
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form.tsx";
+import { Input } from "@/components/ui/input.tsx";
+import { useFormContext } from "react-hook-form";
 
-export function ImageField({ name, control }: { name: string; control: any }) {
+export function ImageField({ name }: { name: string }) {
+    const { control } = useFormContext();
     return (
         <FormField
             control={control}
             name={name}
             render={({ field: { onChange, value } }) => (
                 <FormItem>
-                    <FormLabel>Cover Image</FormLabel>
+                    <FormLabel>Image</FormLabel>
                     <FormControl>
                         <div className="bg-gray-200 p-4 border-2 border-black rounded-sm">
                             <label className="flex items-center cursor-pointer">

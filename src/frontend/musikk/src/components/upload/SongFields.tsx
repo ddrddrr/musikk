@@ -1,24 +1,24 @@
 import { Button } from "@/components/ui/button";
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useFormContext } from "react-hook-form";
 import { AudioField } from "./AudioField";
-import { ImageField } from "./ImageField";
+import { ImageField } from "../common/ImageField.tsx";
 
 export function SongFields({
     index,
-    control,
     onRemove,
     isSuccess,
     errorMsg,
     hideRemove,
 }: {
     index: number;
-    control: any;
     onRemove: () => void;
     isSuccess: boolean;
     errorMsg?: string;
     hideRemove?: boolean;
 }) {
+    const { control } = useFormContext();
     const borderClass = isSuccess ? "border-green-600" : errorMsg ? "border-red-600" : "border-gray-300";
 
     return (
@@ -52,8 +52,8 @@ export function SongFields({
             />
 
             <div className="grid grid-cols-2 gap-4">
-                <AudioField index={index} control={control} />
-                <ImageField name={`songs.${index}.image`} control={control} />
+                <AudioField index={index} />
+                <ImageField name={`songs.${index}.image`} />
             </div>
 
             {errorMsg && <div className="text-red-600">{errorMsg}</div>}

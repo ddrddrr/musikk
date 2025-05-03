@@ -2,24 +2,19 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/comp
 import { Input } from "@/components/ui/input";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
-import { Control } from "react-hook-form";
+import { useFormContext } from "react-hook-form";
 
-type Props = {
-    control: Control;
-};
-
-export function PasswordField({ control }: Props) {
+export function PasswordField() {
     const [showPassword, setShowPassword] = useState(false);
-
+    const { control } = useFormContext();
+    console.log(control)
     return (
         <FormField
             control={control}
             name="password"
             render={({ field }) => (
                 <FormItem className="space-y-2">
-                    <div className="flex items-center justify-between">
-                        <FormLabel className="text-lg font-bold">Password</FormLabel>
-                    </div>
+                    <FormLabel className="text-lg font-bold">Password</FormLabel>
                     <FormControl>
                         <div className="relative bg-gray-200 p-2 border-2 border-black">
                             <Input

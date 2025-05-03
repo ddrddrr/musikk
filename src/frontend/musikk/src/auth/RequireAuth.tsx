@@ -10,6 +10,7 @@ export function RequireAuth({ children }: RequireAuthProps) {
     const location = useLocation();
 
     if (!Cookies.get("refresh")) {
+        localStorage.removeItem("user");
         return <Navigate to="/login" state={{ from: location }} replace />;
     }
 
