@@ -12,7 +12,8 @@ from users.api.v1.views import (
     UserEventViewSet,
     UserCreateView,
     UserRetrieveUpdateView,
-    AcceptToFriendsView,
+    UserFriendsView,
+    UserFriendsAcceptView,
 )
 
 router = DefaultRouter()
@@ -30,8 +31,13 @@ urlpatterns = [
         name="user-update-retrieve",
     ),
     path(
-        "users/accept-friend/<uuid:uuid>",
-        AcceptToFriendsView.as_view(),
+        "users/friends",
+        UserFriendsView.as_view(),
+        name="user-friends",
+    ),
+    path(
+        "users/friends/<uuid:uuid>",
+        UserFriendsAcceptView.as_view(),
         name="accept-to-friends",
     ),
     path("token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),

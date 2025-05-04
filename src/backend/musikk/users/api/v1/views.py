@@ -7,12 +7,13 @@ from rest_framework.generics import (
     get_object_or_404,
 )
 from rest_framework.views import APIView
-from rest_framework import request
-from rest_framework import status
+from rest_framework import request, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.mixins import ListModelMixin
 from django_eventstream.viewsets import EventsViewSet
 
+from notifications.api.v1.serializers import FriendRequestNotificationSerializer
 from notifications.models import FriendRequestNotification
 from sse.config import EventChannels
 from sse.events import send_invalidate_event
@@ -25,6 +26,7 @@ from users.api.v1.serializers_extended import (
     ArtistCreateSerializer,
 )
 from users.user_base import BaseUser
+from users.users_extended import StreamingUser
 from users.utils import password_reset_token_generator
 
 
@@ -93,16 +95,28 @@ class ResetPasswordView(UpdateAPIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class AcceptToFriendsView(APIView):
+class UserFriendsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        user = request.user.streaminguser
+        friends = BaseUserSerializer(user.friends.all(), many=True).data
+        return Response(status=status.HTTP_200_OK, data={"friends": friends})
+
+
+class UserFriendsAcceptView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
         user = request.user.streaminguser
-        sender_uuid = request.kwargs.get("uuid")
+        sender_uuid = kwargs.get("uuid")
+        sender = get_object_or_404(StreamingUser, uuid=sender_uuid)
         get_object_or_404(
-            FriendRequestNotification, sender_uuid=sender_uuid, receiver__uuid=user.uuid
+            FriendRequestNotification,
+            sender=sender,
+            receiver=user,
         )
-        user.friends.add(sender_uuid)
+        user.friends.add(sender)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 

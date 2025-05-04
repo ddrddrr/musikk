@@ -5,26 +5,35 @@ from notifications.models import ReplyNotification, FriendRequestNotification
 from social.api.v1.serializers import CommentRetrieveSerializer
 
 
-class ReplyNotificationSerializer(BaseModelSerializer):
+class BaseNotificationSerializer(BaseModelSerializer):
+    is_read = serializers.BooleanField(default=False)
+
+    class Meta(BaseModelSerializer.Meta):
+        fields = BaseModelSerializer.Meta.fields + [
+            "is_read",
+        ]
+
+
+class ReplyNotificationSerializer(BaseNotificationSerializer):
     orig_comment = CommentRetrieveSerializer(read_only=True)
     reply_comment = CommentRetrieveSerializer(read_only=True)
 
-    class Meta(BaseModelSerializer.Meta):
+    class Meta(BaseNotificationSerializer.Meta):
         model = ReplyNotification
-        fields = BaseModelSerializer.Meta.fields + [
+        fields = BaseNotificationSerializer.Meta.fields + [
             "orig_comment",
             "reply_comment",
             "is_read",
         ]
 
 
-class FriendRequestNotificationSerializer(BaseModelSerializer):
+class FriendRequestNotificationSerializer(BaseNotificationSerializer):
     sender = serializers.SerializerMethodField()
     receiver = serializers.SerializerMethodField()
 
-    class Meta(BaseModelSerializer.Meta):
+    class Meta(BaseNotificationSerializer.Meta):
         model = FriendRequestNotification
-        fields = BaseModelSerializer.Meta.fields + ["sender", "receiver"]
+        fields = BaseNotificationSerializer.Meta.fields + ["sender", "receiver"]
 
     def get_sender(self, obj):
         return {"uuid": obj.sender.uuid, "display_name": obj.sender.display_name}

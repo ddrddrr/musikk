@@ -6,6 +6,10 @@ from sse.config import EventChannels
 from sse.events import send_invalidate_event
 
 
+class Notification(BaseModel):
+    is_read = models.BooleanField(default=False)
+
+
 class ReplyNotificationManager(models.Manager):
     def create(self, **kwargs):
         obj = super().create(**kwargs)
@@ -15,14 +19,13 @@ class ReplyNotificationManager(models.Manager):
         return obj
 
 
-class ReplyNotification(BaseModel):
+class ReplyNotification(Notification):
     orig_comment = models.ForeignKey(
         Comment, null=True, related_name="+", on_delete=models.SET_NULL
     )
     reply_comment = models.ForeignKey(
         Comment, related_name="+", on_delete=models.CASCADE
     )
-    is_read = models.BooleanField(default=False)
 
     class Meta:
         ordering = ["-date_added"]
@@ -41,7 +44,7 @@ class FriendRequestNotificationManager(models.Manager):
 
 # click add to friends --> call view to create friend notif --> send notif(via event)
 # click accept friend --> call view to add the sender to reciever's friend(and visa versa)
-class FriendRequestNotification(BaseModel):
+class FriendRequestNotification(Notification):
     sender = models.ForeignKey(
         "users.StreamingUser", on_delete=models.CASCADE, related_name="+"
     )

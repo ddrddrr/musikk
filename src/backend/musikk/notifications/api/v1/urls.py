@@ -1,27 +1,26 @@
 from django.urls import path
 
 from notifications.api.v1.views import (
-    NotificationListView,
-    ReplyNotificationSetReadView,
+    NotificationsPersonalListUpdateView,
     FriendRequestNotificationCreateView,
+    NotificationDeleteView,
 )
 
 
 urlpatterns = [
     path(
         "notifications",
-        NotificationListView.as_view(),
-        name="notifications-list",
-    ),
-    # TODO: make generic(changing is_read only)
-    path(
-        "notifications/replies",
-        ReplyNotificationSetReadView.as_view(),
-        name="notifications-set-read",
+        NotificationsPersonalListUpdateView.as_view(),
+        name="notifications-list-update",
     ),
     path(
-        "notifications/friend-requests",
+        "notifications/friend-requests/<uuid:uuid>",
         FriendRequestNotificationCreateView.as_view(),
         name="notifications-friend-request-create",
+    ),
+    path(
+        "notifications/<uuid:uuid>",
+        NotificationDeleteView.as_view(),
+        name="notifications-delete",
     ),
 ]
