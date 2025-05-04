@@ -4,6 +4,7 @@ from rest_framework.generics import (
     UpdateAPIView,
     CreateAPIView,
     RetrieveUpdateAPIView,
+    get_object_or_404,
 )
 from rest_framework.views import APIView
 from rest_framework import request
@@ -12,6 +13,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django_eventstream.viewsets import EventsViewSet
 
+from notifications.models import FriendRequestNotification
 from sse.config import EventChannels
 from sse.events import send_invalidate_event
 from users.api.v1.serializers_base import (
@@ -34,8 +36,9 @@ class UserRetrieveUpdateView(RetrieveUpdateAPIView):
 
     def perform_update(self, serializer):
         super().perform_update(serializer)
+        user_uuid = self.request.user.uuid
         send_invalidate_event(
-            EventChannels.user_events(self.request.user.uuid), ["user"]
+            EventChannels.user_events(user_uuid), ["user", str(user_uuid)]
         )
 
 
@@ -87,6 +90,19 @@ class ResetPasswordView(UpdateAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class AcceptToFriendsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        user = request.user.streaminguser
+        sender_uuid = request.kwargs.get("uuid")
+        get_object_or_404(
+            FriendRequestNotification, sender_uuid=sender_uuid, receiver__uuid=user.uuid
+        )
+        user.friends.add(sender_uuid)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 

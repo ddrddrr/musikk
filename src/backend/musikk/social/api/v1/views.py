@@ -4,7 +4,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
 from notifications.models import ReplyNotification
-from social.api.v1.serializers import CommentReadSerializer, CommentWriteSerializer
+from social.api.v1.serializers import CommentRetrieveSerializer, CommentCreateSerializer
 from social.models import Comment
 from sse.config import EventChannels
 from sse.events import send_invalidate_event
@@ -16,8 +16,8 @@ class CommentListCreateView(GenericAPIView):
 
     def get_serializer_class(self):
         if self.request.method == "POST":
-            return CommentWriteSerializer
-        return CommentReadSerializer
+            return CommentCreateSerializer
+        return CommentRetrieveSerializer
 
     def get(self, request, *args, **kwargs):
         obj_type = request.query_params.get("obj-type")
@@ -53,7 +53,7 @@ class CommentListCreateView(GenericAPIView):
                 ["comments", data["obj_uuid"]],
             )
 
-        read_serializer = CommentReadSerializer(
+        read_serializer = CommentRetrieveSerializer(
             obj, context=self.get_serializer_context()
         )
         return Response(read_serializer.data, status=201)

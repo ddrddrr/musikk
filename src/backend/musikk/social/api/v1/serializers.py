@@ -4,7 +4,7 @@ from base.serializers import BaseModelSerializer
 from social.models import Comment
 
 
-class CommentWriteSerializer(BaseModelSerializer):
+class CommentCreateSerializer(BaseModelSerializer):
     obj_type = serializers.CharField()
     obj_uuid = serializers.CharField()
     parent = serializers.UUIDField(required=False, allow_null=True)
@@ -32,7 +32,7 @@ class CommentWriteSerializer(BaseModelSerializer):
         return related_instance.comments.create(parent=parent, **validated_data)
 
 
-class CommentReadSerializer(BaseModelSerializer):
+class CommentRetrieveSerializer(BaseModelSerializer):
     username = serializers.SerializerMethodField()
     obj_type = serializers.SerializerMethodField()
     obj_uuid = serializers.SerializerMethodField()

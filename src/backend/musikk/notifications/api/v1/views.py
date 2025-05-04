@@ -1,21 +1,32 @@
-from rest_framework.generics import ListAPIView, UpdateAPIView, GenericAPIView
+from rest_framework.generics import (
+    GenericAPIView,
+    get_object_or_404,
+)
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 
-from notifications.api.v1.serializers import ReplyNotificationSerializer
-from notifications.models import ReplyNotification
-from django_eventstream.viewsets import EventsViewSet
+from notifications.api.v1.serializers import (
+    ReplyNotificationSerializer,
+    FriendRequestNotificationSerializer,
+)
+from notifications.models import ReplyNotification, FriendRequestNotification
+
+from users.users_extended import StreamingUser
 
 
-class ReplyNotificationListView(ListAPIView):
+class NotificationListView(GenericAPIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = ReplyNotificationSerializer
-    queryset = ReplyNotification.objects.all()
 
-    def get_queryset(self):
-        user = self.request.user
-        return ReplyNotification.objects.filter(orig_comment__user=user)
+    def get(self, request, *args, **kwargs):
+        user = self.request.user.streaminguser
+        replies = ReplyNotificationSerializer(
+            ReplyNotification.objects.filter(orig_comment__user=user), many=True
+        ).data
+        friend_requests = FriendRequestNotificationSerializer(
+            FriendRequestNotification.objects.filter(receiver=user), many=True
+        ).data
+        return Response({"replies": replies, "friend_requests": friend_requests})
 
 
 class ReplyNotificationSetReadView(GenericAPIView):
@@ -25,4 +36,17 @@ class ReplyNotificationSetReadView(GenericAPIView):
     def patch(self, request, *args, **kwargs):
         notif_uuids = self.request.data["uuids"]
         ReplyNotification.objects.filter(uuid__in=notif_uuids).update(is_read=True)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class FriendRequestNotificationCreateView(GenericAPIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        user = self.request.user.streaminguser
+        receiver_uuid = self.request.data["uuid"]
+        receiver = get_object_or_404(StreamingUser, uuid=receiver_uuid)
+
+        FriendRequestNotification.objects.create(sender=user, receiver=receiver)
+
         return Response(status=status.HTTP_204_NO_CONTENT)

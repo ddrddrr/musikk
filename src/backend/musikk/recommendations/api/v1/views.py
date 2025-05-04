@@ -35,7 +35,7 @@ class SearchView(APIView):
                 query,
                 "display_name",
                 BaseUserSerializer,
-                extra_filters={"artist": None},
+                extra_filters={"artist": None},  # users who are not artists
             ),
             "artists": self.search(Artist, query, "display_name", BaseUserSerializer),
         }

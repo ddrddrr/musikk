@@ -14,8 +14,13 @@ class StreamingUserManager(UserManager):
     pass
 
 
+# sendfriendrequest --> create notif with button
+
+
+# symmetrical false for followers(artist)
 class StreamingUser(BaseUser):
-    # TODO: add method to initialize liked_songs
+    friends = models.ManyToManyField("self")
+
     liked_songs = models.OneToOneField(
         "streaming.LikedSongs",
         related_name="liked_by",
