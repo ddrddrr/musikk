@@ -8,6 +8,7 @@ interface PerformSearchResponse {
     songs: ISong[];
     collections: ISongCollection[];
     users: IUser[];
+    artists: IUser[];
 }
 
 export async function performSearch(query: string): Promise<PerformSearchResponse> {

@@ -1,5 +1,5 @@
 import { BackButton } from "@/components/common/BackButton.tsx";
-import { Header } from "@/components/layout/Header.tsx";
+import { Header } from "@/components/layout/header/Header.tsx";
 import { UploadForm } from "@/components/upload/UploadForm.tsx";
 
 export function UploadPage() {

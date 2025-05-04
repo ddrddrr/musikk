@@ -73,8 +73,6 @@ export function Player({ onDurationChange, onTimeUpdate }: PlayerProps) {
         initPlayback();
     }, [url]);
 
-    // TODO: when url changes, we need to wait for the new data to load
-    //  and only then play somehow
     useEffect(() => {
         const audio = audioRef.current;
         if (!audio) return;

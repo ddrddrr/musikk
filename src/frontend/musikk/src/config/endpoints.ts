@@ -39,12 +39,15 @@ export const CommentURLs = {
 };
 export const NotificationURLs = {
     notificationsSetRead: `${BASE_URL}/notifications`,
-    replyNotificationList: `${BASE_URL}/notifications/replies`,
+    notificationsList: `${BASE_URL}/notifications`,
+    friendRequestCreate: (receiverUUID: string) => `${BASE_URL}/notifications/friend-requests/${receiverUUID}`,
+    notificationsDelete: (notificationUUID: string) => `${BASE_URL}/notifications/${notificationUUID}`,
 };
-// TODO: add logout view
 export const UserURLs = {
     userDetail: (userUUID: string) => `${BASE_URL}/users/${userUUID}`,
     userCreate: `${BASE_URL}/users`,
+    userFriends: `${BASE_URL}/users/friends`,
+    userFriendsAccept: (senderUUID: string) => `${BASE_URL}/users/friends/${senderUUID}`,
     userUpdate: (userUUID: string) => `${BASE_URL}/users/${userUUID}`,
     tokenGet: `${BASE_URL}/token/`,
     tokenRefresh: `${BASE_URL}/token/refresh/`,

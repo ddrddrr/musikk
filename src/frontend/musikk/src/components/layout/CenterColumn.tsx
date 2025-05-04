@@ -1,6 +1,7 @@
 import { Feed } from "@/components/layout/Feed";
 import { PlayerBox } from "@/components/player/PlayerBox";
 import { SongCollectionContainer } from "@/components/song-collections/SongCollectionContainer";
+import { ProfilePage } from "@/components/user/ProfilePage";
 import { Route, Routes, useParams } from "react-router-dom";
 
 export function CenterColumn() {
@@ -10,6 +11,7 @@ export function CenterColumn() {
                 <Routes>
                     <Route path="/" element={<Feed />} />
                     <Route path="collection/:uuid/*" element={<SongCollectionContainerWrapper />} />
+                    <Route path="users/:uuid" element={<ProfilePage />} />
                 </Routes>
             </div>
             <PlayerBox />
@@ -19,8 +21,6 @@ export function CenterColumn() {
 
 function SongCollectionContainerWrapper() {
     const { uuid } = useParams();
-
     if (!uuid) return null;
-
     return <SongCollectionContainer collectionUUID={uuid} />;
 }

@@ -70,6 +70,17 @@ export function SearchBar() {
                             </div>
                         )}
 
+                        {data.artists.length > 0 && (
+                            <div>
+                                <h3 className="text-sm font-semibold mb-2">Artists</h3>
+                                <div className="space-y-2">
+                                    {data.artists.map((artist) => (
+                                        <UserCard key={artist.uuid} user={artist} />
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
                         {data.users.length > 0 && (
                             <div>
                                 <h3 className="text-sm font-semibold mb-2">Users</h3>

@@ -34,6 +34,8 @@ export async function refreshAccessToken(): Promise<undefined> {
     const refreshToken = Cookies.get("refresh");
     if (!refreshToken) {
         console.warn("No refresh token found.");
+        localStorage.removeItem("user");
+        window.location.href = "/login";
         return;
     }
 

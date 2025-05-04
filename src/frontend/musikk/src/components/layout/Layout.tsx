@@ -1,6 +1,6 @@
 import React, { memo } from "react";
 
-import { Header } from "./Header.tsx";
+import { Header } from "./header/Header.tsx";
 
 interface LayoutProps {
     children: React.ReactNode;

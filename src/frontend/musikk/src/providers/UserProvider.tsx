@@ -15,7 +15,7 @@ export const UserProvider = ({ children }: UserProviderProps) => {
     const userUUID = token ? jwtDecode<IJWTPayload>(token).uuid : undefined;
 
     const { data } = useQuery({
-        queryKey: ["user"],
+        queryKey: ["user", userUUID],
         queryFn: async () => {
             const accessToken = Cookies.get("access");
             if (!accessToken) {
