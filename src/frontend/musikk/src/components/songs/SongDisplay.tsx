@@ -1,7 +1,7 @@
 import type { ISong } from "@/components/songs/types.ts";
 
 interface SongDisplayProps {
-    song: ISong | null;
+    song: ISong | undefined;
 }
 
 export function SongDisplay({ song }: SongDisplayProps) {
@@ -12,6 +12,8 @@ export function SongDisplay({ song }: SongDisplayProps) {
             </div>
         );
     }
+
+    const authors = song.authors.map((author) => author.display_name).join(", ");
 
     return (
         <div className="flex flex-col items-center gap-3 mb-4">
@@ -29,8 +31,8 @@ export function SongDisplay({ song }: SongDisplayProps) {
                 )}
             </div>
             <div className="w-full text-center">
+                <p className="text-xs text-gray-500 truncate">{authors}</p>
                 <p className="font-bold truncate">{song.title}</p>
-                <p className="text-sm text-gray-600 truncate">{song.artist}</p>
             </div>
         </div>
     );

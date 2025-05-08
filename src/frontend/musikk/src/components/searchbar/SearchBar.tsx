@@ -49,7 +49,7 @@ export function SearchBar() {
                                 <h3 className="text-sm font-semibold mb-2">Songs</h3>
                                 <div className="space-y-2">
                                     {data.songs.map((song) => (
-                                        <SongContainer key={song.uuid} song={song} />
+                                        <SongContainer key={song.uuid} collectionSong={song} />
                                     ))}
                                 </div>
                             </div>

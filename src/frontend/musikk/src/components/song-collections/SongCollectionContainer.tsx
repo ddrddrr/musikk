@@ -14,16 +14,21 @@ interface SongCollectionContainerProps {
 
 export function SongCollectionContainer({ collectionUUID }: SongCollectionContainerProps) {
     const navigate = useNavigate();
-    const { liked_songs } = useContext(UserCollectionsContext);
+    const { liked_songs, history } = useContext(UserCollectionsContext);
     let showComments = Boolean(useMatch("/collection/:uuid/comments"));
-    const toggleComments = () => {
-        navigate(showComments ? `/collection/${collectionUUID}` : `/collection/${collectionUUID}/comments`);
-    };
 
-    const { isPending, error, data } = useQuery({
+    const {
+        isPending,
+        error,
+        data: collection,
+    } = useQuery({
         queryKey: ["openCollection", collectionUUID],
         queryFn: () => fetchCollectionDetailed(collectionUUID),
     });
+
+    const toggleComments = () => {
+        navigate(showComments ? `/collection/${collectionUUID}` : `/collection/${collectionUUID}/comments`);
+    };
 
     if (isPending)
         return (
@@ -39,28 +44,29 @@ export function SongCollectionContainer({ collectionUUID }: SongCollectionContai
             </div>
         );
 
-    const songs = data.songs;
-    const notIsLikedSongs = data?.uuid !== liked_songs?.uuid;
-    showComments = showComments && notIsLikedSongs;
+    const songs = collection.songs;
+    const notPersonalCollection = collection?.uuid !== liked_songs?.uuid && collection?.uuid !== history?.uuid;
+    showComments = showComments && notPersonalCollection;
+
     return (
         <div className={`flex gap-4 ${showComments ? "flex-row" : "flex-col"} max-w-4xl mx-auto p-4`}>
             <div className={showComments ? "w-1/2 pr-2" : "space-y-4"}>
                 <SongCollectionHeader
-                    collection={data}
+                    collection={collection}
                     toggleComments={toggleComments}
                     songsCount={songs.length}
-                    notIsLikedSongs={notIsLikedSongs}
+                    notPersonalCollection={notPersonalCollection}
                     showComments={showComments}
                 />
 
                 {songs.length > 0 ? (
                     <ul className="space-y-4" role="list">
-                        {songs.map((song, index) => (
+                        {songs.map((collectionSong, index) => (
                             <li
-                                key={`${song.uuid}-${index}`}
+                                key={`${collectionSong.uuid}-${index}`}
                                 className="bg-white p-4 rounded-sm border border-gray-200 transition-colors hover:bg-gray-50"
                             >
-                                <SongContainer song={song} collectionUUID={collectionUUID} />
+                                <SongContainer collectionSong={collectionSong} />
                             </li>
                         ))}
                     </ul>

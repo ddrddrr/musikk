@@ -14,7 +14,6 @@ export function UserAvatar({ src, alt, size = "md" }: UserAvatarProps) {
         lg: "w-24 h-24",
     }[size];
 
-    console.log(src)
     if (src) {
         return (
             <Avatar className={sizeClasses}>

@@ -10,7 +10,7 @@ interface SongCollectionHeaderProps {
     showComments: boolean;
     toggleComments: () => void;
     songsCount: number;
-    notIsLikedSongs: boolean;
+    notPersonalCollection: boolean;
 }
 
 export const SongCollectionHeader = memo(function SongCollectionHeader({
@@ -18,8 +18,10 @@ export const SongCollectionHeader = memo(function SongCollectionHeader({
     showComments,
     toggleComments,
     songsCount,
-    notIsLikedSongs,
+    notPersonalCollection,
 }: SongCollectionHeaderProps) {
+    const authors = collection.authors.map((author) => author.display_name).join(", ");
+
     return (
         <>
             <div
@@ -27,15 +29,21 @@ export const SongCollectionHeader = memo(function SongCollectionHeader({
                    border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]
                    transition-all duration-300 ease-in-out"
             >
-                <img
-                    src={collection.image || "/placeholder.svg?height=100&width=100"}
-                    alt={collection.title}
-                    className={`object-cover border-2 border-black rounded-lg ${
-                        showComments ? "scale-75 w-24 h-24" : "scale-100 w-32 h-32"
-                    }`}
-                />
+                {collection.image ? (
+                    <img
+                        src={collection.image}
+                        alt={""}
+                        className={`object-cover border-2 border-black rounded-lg ${
+                            showComments ? "scale-75 w-24 h-24" : "scale-100 w-32 h-32"
+                        }`}
+                    />
+                ) : (
+                    <div>♫</div>
+                )}
+
                 <div className="ml-6 flex-1">
-                    <p className={`text-xl font-bold ${showComments ? "text-lg" : "text-xl"}`}>{collection.title}</p>
+                    <p className="text-sm text-gray-500 truncate">{authors}</p>
+                    <p className={`font-bold ${showComments ? "text-lg" : "text-xl"}`}>{collection.title}</p>
                     {collection.description && (
                         <p className={`text-gray-600 mt-2 line-clamp-2 ${showComments ? "text-sm" : "text-base"}`}>
                             {collection.description}
@@ -44,7 +52,7 @@ export const SongCollectionHeader = memo(function SongCollectionHeader({
                 </div>
                 <div className="flex gap-3">
                     <SongCollectionPlayButton collection={collection} showComments={showComments} />
-                    {notIsLikedSongs && (
+                    {notPersonalCollection && (
                         <CollectionAddToLikedButton collection={collection} showComments={showComments} />
                     )}
                     <CollectionAddToQueueButton collection={collection} showComments={showComments} />
@@ -55,7 +63,7 @@ export const SongCollectionHeader = memo(function SongCollectionHeader({
                 <h3 className="text-black text-lg font-bold transition-all duration-300 ease-in-out">
                     Songs • {songsCount}
                 </h3>
-                {notIsLikedSongs && (
+                {notPersonalCollection && (
                     <Button
                         onClick={toggleComments}
                         className={`bg-blue-500 hover:bg-blue-600 text-white border-2 border-black rounded-lg 

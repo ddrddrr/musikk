@@ -15,7 +15,7 @@ const setTokenCookie = (key: string, value: string, expiresInMs: number) => {
     Cookies.set(key, value, { path: "/", expires: expiryDate });
 };
 
-// TODO: rewrite django views, set refresh with HTTP-Only header
+// TODO: rewrite django views, set refresh with HTTP-Only header, don't store in cookie
 export async function login(email: string, password: string): Promise<undefined> {
     if (Cookies.get("access")) {
         return;

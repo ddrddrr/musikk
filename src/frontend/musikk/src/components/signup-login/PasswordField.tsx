@@ -7,7 +7,6 @@ import { useFormContext } from "react-hook-form";
 export function PasswordField() {
     const [showPassword, setShowPassword] = useState(false);
     const { control } = useFormContext();
-    console.log(control)
     return (
         <FormField
             control={control}

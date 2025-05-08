@@ -37,7 +37,9 @@ const sizeClasses = {
 export function SongCard({ song, size = "medium" }: SongCardProps) {
     const navigate = useNavigate();
     const sizes = sizeClasses[size];
-    const { uuid, title, artist, image } = song;
+    const { uuid, title, authors, image } = song;
+
+    const authorNames = authors.map((a) => a.display_name).join(", ");
 
     return (
         <Card
@@ -54,8 +56,8 @@ export function SongCard({ song, size = "medium" }: SongCardProps) {
                     </div>
                 )}
                 <div className={`bg-gray-200 border-t-2 border-black ${sizes.padding}`}>
+                    <p className={`truncate text-gray-600 ${sizes.artist}`}>{authorNames}</p>
                     <p className={`font-bold truncate ${sizes.title}`}>{title}</p>
-                    <p className={`text-gray-600 truncate ${sizes.artist}`}>{artist}</p>
                 </div>
             </CardContent>
         </Card>

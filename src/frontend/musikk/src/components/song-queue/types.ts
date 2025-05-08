@@ -1,16 +1,13 @@
-import { ISong } from "@/components/songs/types.ts";
+import { IBaseModel } from "@/components/common/types.ts";
+import { ISongCollectionSong } from "@/components/song-collections/types.ts";
 import { UUID } from "@/config/types.ts";
 
-export interface ISongQueueNode {
-    uuid: UUID;
-    song: ISong;
+export interface ISongQueueNode extends IBaseModel {
+    collection_song: ISongCollectionSong;
     prev: UUID | null;
     next: UUID | null;
 }
 
-export interface ISongQueue {
-    uuid: UUID;
+export interface ISongQueue extends IBaseModel {
     nodes: ISongQueueNode[];
-    head: UUID | null;
-    tail: UUID | null;
 }

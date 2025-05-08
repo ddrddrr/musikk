@@ -1,5 +1,6 @@
-import { PlaybackContext } from "@/playback/playbackContext.ts";
+import { useQueue } from "@/hooks/useQueueAPI.ts";
 import { usePlaybackRetrieveQuery } from "@/playback/queries.ts";
+import { PlaybackContext } from "@/providers/playbackContext.ts";
 import { ReactNode } from "react";
 
 interface PlaybackProviderProps {
@@ -7,10 +8,18 @@ interface PlaybackProviderProps {
 }
 
 export function PlaybackProvider({ children }: PlaybackProviderProps) {
-    const playbackRetrieveQuery = usePlaybackRetrieveQuery();
+    const { data: playback } = usePlaybackRetrieveQuery();
+    const { data: queue } = useQueue();
+
+    const head = queue?.nodes?.length > 0 ? queue.nodes[0].collection_song : undefined;
 
     return (
-        <PlaybackContext.Provider value={{ playbackState: playbackRetrieveQuery.data }}>
+        <PlaybackContext.Provider
+            value={{
+                playbackState: playback,
+                playingCollectionSong: head,
+            }}
+        >
             {children}
         </PlaybackContext.Provider>
     );

@@ -1,18 +1,18 @@
 import { login } from "@/auth/authentication";
+import { Spinner } from "@/components/common/Spinner";
+import { EmailField } from "@/components/signup-login/EmailField";
+import { PasswordField } from "@/components/signup-login/PasswordField";
 import { Button } from "@/components/ui/button";
 import { CardContent } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
+import { useRegisterPlaybackDeviceMutation } from "@/playback/mutations.ts";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import * as z from "zod";
-
-import { Spinner } from "@/components/common/Spinner";
-import { EmailField } from "@/components/signup-login/EmailField";
-import { PasswordField } from "@/components/signup-login/PasswordField";
-import { useQueryClient } from "@tanstack/react-query";
 
 const loginSchema = z.object({
     email: z.string().min(5, "Email is required."),
@@ -23,6 +23,7 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 export function LoginForm() {
     const navigate = useNavigate();
     const client = useQueryClient();
+    const registerPlaybackDeviceMutation = useRegisterPlaybackDeviceMutation();
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState("");
 
@@ -36,6 +37,8 @@ export function LoginForm() {
         try {
             await login(values.email, values.password);
             client.invalidateQueries({ queryKey: ["user"] });
+            const device = await registerPlaybackDeviceMutation.mutateAsync();
+            localStorage.setItem("deviceID", device.uuid);
             navigate("/");
         } catch (error) {
             const resMessage = axios.isAxiosError(error)

@@ -6,8 +6,6 @@ import { LoginPage } from "@/components/app/LoginPage.tsx";
 import { SettingsPage } from "@/components/app/SettingsPage.tsx";
 import { SignUpPage } from "@/components/app/SignupPage.tsx";
 import { UploadPage } from "@/components/app/UploadPage.tsx";
-import { PlaybackProvider } from "@/providers/PlaybackProvider.tsx";
-import { UserCollectionsProvider } from "@/providers/UserCollectionsProvider.tsx";
 import { UserProvider } from "@/providers/UserProvider.tsx";
 import { memo } from "react";
 
@@ -19,13 +17,9 @@ export const App = memo(function App() {
                     <Route
                         path="/*"
                         element={
-                            <PlaybackProvider>
-                                <UserCollectionsProvider>
-                                    <RequireAuth>
-                                        <HomePage />
-                                    </RequireAuth>
-                                </UserCollectionsProvider>
-                            </PlaybackProvider>
+                            <RequireAuth>
+                                <HomePage />
+                            </RequireAuth>
                         }
                     />
                     <Route

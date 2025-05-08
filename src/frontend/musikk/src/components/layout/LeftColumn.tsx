@@ -3,17 +3,20 @@ import { UserCollectionsContext } from "@/providers/userCollectionsContext.ts";
 import { useContext, useMemo } from "react";
 
 export function LeftColumn() {
-    const { liked_songs, followed_collections } = useContext(UserCollectionsContext);
+    const { liked_songs, history, followed_collections } = useContext(UserCollectionsContext);
 
     const collections = useMemo(() => {
-        const followed = Array.isArray(followed_collections) ? followed_collections : [];
+        let all = Array.isArray(followed_collections) ? followed_collections : [];
 
-        if (liked_songs != null) {
-            return [liked_songs, ...followed];
+        if (history != null) {
+            all = [history, ...all];
         }
-
-        return followed;
-    }, [liked_songs, followed_collections]);
+        if (liked_songs != null) {
+            all = [liked_songs, ...all];
+        }
+        
+        return all;
+    }, [liked_songs, history, followed_collections]);
 
     return (
         <div className="w-1/5 bg-red-600 p-4 overflow-y-auto border-r border-red-700">

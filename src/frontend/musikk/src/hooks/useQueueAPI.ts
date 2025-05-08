@@ -1,4 +1,4 @@
-import type { ISongCollection } from "@/components/song-collections/types.ts";
+import type { ISongCollection, ISongCollectionSong } from "@/components/song-collections/types.ts";
 import {
     addCollection,
     addSong,
@@ -9,16 +9,14 @@ import {
     shiftHeadBackwards,
 } from "@/components/song-queue/mutations.ts";
 import { getSongQueue } from "@/components/song-queue/queries.ts";
-import type { ISong } from "@/components/songs/types.ts";
+import { ISongQueue } from "@/components/song-queue/types.ts";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 export function useQueue() {
-    const { isPending, error, data, isFetching } = useQuery({
+    return useQuery<ISongQueue>({
         queryKey: ["queue"],
         queryFn: getSongQueue,
     });
-    const queue = data;
-    return { isPending, error, queue, isFetching };
 }
 
 // typescript doesn't allow for interface type matching
@@ -26,7 +24,7 @@ export function useQueue() {
 type AddSongAction = {
     type: "song";
     action: "add" | "setHead";
-    item: ISong;
+    item: ISongCollectionSong;
 };
 type AddCollectionAction = {
     type: "collection";
@@ -47,8 +45,8 @@ export function useQueueAddAPI() {
         }
     }
 
-    return useMutation<unknown, Error, QueueAddInput>({
-        mutationFn: handleQueueAddAction,
+    return useMutation({
+        mutationFn: (input: QueueAddInput) => handleQueueAddAction(input),
     });
 }
 

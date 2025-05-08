@@ -12,6 +12,7 @@ const sizeClasses = {
         card: "w-full",
         image: "aspect-square",
         title: "text-sm",
+        authors: "text-xs",
         icon: "text-xl",
         padding: "p-1",
     },
@@ -19,6 +20,7 @@ const sizeClasses = {
         card: "w-full",
         image: "aspect-square",
         title: "text-base",
+        authors: "text-sm",
         icon: "text-2xl",
         padding: "p-2",
     },
@@ -26,6 +28,7 @@ const sizeClasses = {
         card: "w-full",
         image: "aspect-square",
         title: "text-xl",
+        authors: "text-base",
         icon: "text-3xl",
         padding: "p-3",
     },
@@ -33,8 +36,10 @@ const sizeClasses = {
 
 export function SongCollectionCard({ collection, size = "medium" }: SongCollectionCardProps) {
     const navigate = useNavigate();
-    const { uuid, title, image } = collection;
+    const { uuid, title, image, authors } = collection;
     const sizes = sizeClasses[size];
+
+    const authorNames = authors.map((a) => a.display_name).join(", ");
 
     return (
         <Card
@@ -52,6 +57,7 @@ export function SongCollectionCard({ collection, size = "medium" }: SongCollecti
                     </div>
                 )}
                 <div className={`bg-gray-200 border-t-2 border-black ${sizes.padding}`}>
+                    <p className={`truncate text-gray-600 ${sizes.authors}`}>{authorNames}</p>
                     <p className={`font-bold truncate ${sizes.title}`}>{title}</p>
                 </div>
             </CardContent>

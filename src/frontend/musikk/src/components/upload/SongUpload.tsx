@@ -70,7 +70,6 @@ export function SongUpload({ form, fields, append, remove }: SongUploadProps) {
                 <SongFields
                     key={f.id}
                     index={i}
-                    control={form.control}
                     isSuccess={statuses[i]?.success === true}
                     errorMsg={statuses[i]?.errorMsg}
                     hideRemove

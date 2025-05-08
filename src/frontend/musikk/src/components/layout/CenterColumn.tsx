@@ -1,5 +1,4 @@
 import { Feed } from "@/components/layout/Feed";
-import { PlayerBox } from "@/components/player/PlayerBox";
 import { SongCollectionContainer } from "@/components/song-collections/SongCollectionContainer";
 import { ProfilePage } from "@/components/user/ProfilePage";
 import { Route, Routes, useParams } from "react-router-dom";
@@ -14,7 +13,6 @@ export function CenterColumn() {
                     <Route path="users/:uuid" element={<ProfilePage />} />
                 </Routes>
             </div>
-            <PlayerBox />
         </div>
     );
 }

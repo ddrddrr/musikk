@@ -1,36 +1,59 @@
-import { useContext } from "react";
-import { PlaybackContext } from "@/providers/playbackContext.ts";
-import { usePlaybackActivateMutation, usePlaybackStopMutation } from "@/playback/mutations.ts";
+import { ISongCollection, ISongCollectionSong } from "@/components/song-collections/types.ts";
 import { useQueueAddAPI } from "@/hooks/useQueueAPI.ts";
-import { ISongCollectionSong } from "@/components/song-collections/types.ts";
+import { usePlaybackActivateMutation, usePlaybackStopMutation } from "@/playback/mutations.ts";
+import { PlaybackContext } from "@/providers/playbackContext.ts";
+import { useContext } from "react";
 
-export function useControlPlayback() {
-    const { playbackState, playingCollectionSong } = useContext(PlaybackContext);
+export function useHandlePlay() {
+    const { playbackState } = useContext(PlaybackContext);
     const playbackActivateMutation = usePlaybackActivateMutation();
     const playbackStopMutation = usePlaybackStopMutation();
     const addToQueueMutation = useQueueAddAPI();
 
-    const isThisPlaying = playbackState?.is_playing && collectionSong.uuid === playingCollectionSong?.song.uuid;
-
-    function handleSongPlayClick(collectionSong: ISongCollectionSong) {
+    async function handlePlay({
+        newCollection,
+        newSong,
+    }: {
+        newCollection?: ISongCollection;
+        newSong?: ISongCollectionSong;
+    } = {}) {
         const deviceID = localStorage.getItem("deviceID");
         if (!deviceID) return;
 
-        const isPlaying = playbackState?.is_playing;
-        const isDifferentDevice = deviceID !== playbackState?.active_device?.uuid;
+        if (newCollection || newSong) {
+            if (newCollection) {
+                try {
+                    await addToQueueMutation.mutateAsync({
+                        type: "collection",
+                        item: newCollection,
+                        action: "setHead",
+                    });
+                } catch (error) {
+                    console.error("Queue add failed", error);
+                    return;
+                }
+            } else if (newSong) {
+                try {
+                    await addToQueueMutation.mutateAsync({
+                        type: "song",
+                        item: newSong,
+                        action: "setHead",
+                    });
+                } catch (error) {
+                    console.error("Queue add failed", error);
+                    return;
+                }
+            }
+            playbackActivateMutation.mutate({ deviceID });
+            return;
+        }
 
-        if (!isPlaying || isDifferentDevice) {
+        if (playbackState?.is_playing) {
+            playbackStopMutation.mutate();
+        } else {
             playbackActivateMutation.mutate({ deviceID });
         }
-
-        if (!isPlaying && !isThisPlaying) {
-            addToQueueMutation.mutate({
-                type: "song",
-                item: collectionSong,
-                action: "setHead",
-            });
-        } else {
-            playbackStopMutation.mutate();
-        }
     }
+
+    return handlePlay;
 }

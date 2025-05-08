@@ -12,7 +12,6 @@ export function UserCollectionsProvider({ children }: UserCollectionsProviderPro
         queryKey: ["collectionsPersonal"],
         queryFn: fetchCollectionsPersonal,
     });
-    console.log(data);
     const contextValue = {
         history: data?.history ?? null,
         liked_songs: data?.liked_songs ?? null,

@@ -4,7 +4,6 @@ const BASE_URL = import.meta.env.VITE_API_BASE_URL + "/api/v1";
 
 export const SongURLs = {
     songList: `${BASE_URL}/songs`,
-    songDetail: (songUUID: string) => `${BASE_URL}/songs/${songUUID}`,
     songsCreate: `${BASE_URL}/songs`,
 };
 export const QueueURLs = {
@@ -28,8 +27,8 @@ export const CollectionURLs = {
     collectionAddToLiked: (collectionUUID: string) => `${BASE_URL}/collections/${collectionUUID}/like`,
     collectionAddSong: (collectionUUID: string, songUUID: string) =>
         `${BASE_URL}/collections/${collectionUUID}/songs/${songUUID}`,
-    collectionRemoveSong: (collectionUUID: string, songUUID: string) =>
-        `${BASE_URL}/collections/${collectionUUID}/songs/${songUUID}`,
+    collectionRemoveSong: (collectionUUID: string, songCollectionSongUUID: string) =>
+        `${BASE_URL}/collections/${collectionUUID}/songs/${songCollectionSongUUID}`,
     likedSongsAddSong: (songUUID: string) => `${BASE_URL}/liked-songs/add-song/${songUUID}`,
 };
 export const CommentURLs = {
@@ -57,4 +56,10 @@ export const SearchURLs = {
 };
 export const EventURLs = {
     userEvents: `${BASE_URL}/events/user`,
+};
+export const PlaybackURLs = {
+    retrieve: `${BASE_URL}/playback`,
+    activate: `${BASE_URL}/playback/activate`,
+    stop: `${BASE_URL}/playback/stop`,
+    registerDevice: `${BASE_URL}/playback-device`,
 };

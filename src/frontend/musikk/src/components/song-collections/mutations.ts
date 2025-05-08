@@ -21,9 +21,9 @@ export async function collectionAddToLiked({ collectionUUID }: ICollectionAddToL
 
 interface ICollectionRemoveSongParams {
     collectionUUID: UUID;
-    songUUID: UUID;
+    songCollectionSongUUID: UUID;
 }
 
-export async function collectionRemoveSong({ collectionUUID, songUUID }: ICollectionRemoveSongParams) {
-    await api.delete(CollectionURLs.collectionAddSong(collectionUUID, songUUID));
+export async function collectionRemoveSong({ collectionUUID, songCollectionSongUUID }: ICollectionRemoveSongParams) {
+    await api.delete(CollectionURLs.collectionRemoveSong(collectionUUID, songCollectionSongUUID));
 }
