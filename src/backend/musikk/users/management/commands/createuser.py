@@ -1,45 +1,23 @@
 from django.core.management.base import BaseCommand, CommandError
-from faker import Faker
-
-from users.models import StreamingUser, Artist, Label
-
-fake = Faker()
-
-
-USER_CLASSES = {
-    "streaming": StreamingUser,
-    "artist": Artist,
-    "label": Label,
-}
+from users.management.helpers import create_user_with_password
 
 
 class Command(BaseCommand):
     help = "Creates a user of a given type and prints their password"
 
     def add_arguments(self, parser):
-        parser.add_argument(
-            "--type", type=str, help="User type: `streaming`, `artist`, or `label`"
-        )
-        parser.add_argument("--email", type=str, help="Email address of the new user")
+        parser.add_argument("--type", required=True, type=str)
+        parser.add_argument("--email", type=str)
 
     def handle(self, *args, **options):
-        user_type = options["type"].lower()
-        email = options.get("email") or fake.ascii_email()
-
-        if user_type not in USER_CLASSES:
-            raise CommandError(
-                f"Invalid user_type. Choose from: {', '.join(USER_CLASSES.keys())}"
+        try:
+            user, password = create_user_with_password(
+                user_type=options["type"], email=options.get("email")
             )
-
-        password = fake.password(length=10, special_chars=True, digits=True)
-        UserClass = USER_CLASSES[user_type]
-
-        user = UserClass.objects.create_user(
-            email=email,
-            password=password,
-        )
+        except ValueError as e:
+            raise CommandError(str(e))
 
         self.stdout.write(
-            self.style.SUCCESS(f"{user_type.capitalize()} created: {email}")
+            self.style.SUCCESS(f"{user.__class__.__name__} created: {user.email}")
         )
         self.stdout.write(self.style.WARNING(f"Password: {password}"))

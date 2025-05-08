@@ -1,6 +1,6 @@
 import factory
 from users.models import BaseUser
-from users.users_extended import StreamingUser
+from users.users_extended import StreamingUser, Artist
 
 fake = factory.Faker
 
@@ -18,3 +18,8 @@ class BaseUserFactory(factory.django.DjangoModelFactory):
 class StreamingUserFactory(BaseUserFactory):
     class Meta:
         model = StreamingUser
+
+
+class ArtistFactory(StreamingUserFactory):
+    class Meta:
+        model = Artist

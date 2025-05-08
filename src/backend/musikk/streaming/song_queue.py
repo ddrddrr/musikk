@@ -7,11 +7,9 @@ from base.models import BaseModel
 from streaming.song_collections import SongCollection
 from streaming.songs import BaseSong, SongCollectionSong
 
-# TODO: maybe can be reduced to a songcollection...??
-
 
 class SongQueueNode(BaseModel):
-    song = models.ForeignKey("streaming.BaseSong", on_delete=models.CASCADE)
+    song = models.ForeignKey("streaming.SongCollectionSong", on_delete=models.CASCADE)
     song_queue = models.ForeignKey(
         "streaming.SongQueue", on_delete=models.CASCADE, related_name="nodes"
     )
@@ -105,7 +103,7 @@ class SongQueue(BaseModel):
 
     # TODO: wrap all in transactions?
     def add_song(
-        self, song: BaseSong, action: str = AddAction.ADD
+        self, song: SongCollectionSong, action: str = AddAction.ADD
     ) -> SongQueueNode | None:
         with transaction.atomic():
             node = SongQueueNode.objects.create(song=song, song_queue=self)
@@ -132,7 +130,8 @@ class SongQueue(BaseModel):
         self, collection: SongCollection, action=AddAction.ADD
     ) -> list[SongQueueNode]:
         with transaction.atomic():
-            if not (songs := collection.ordered_songs()):
+            songs = collection.songs_links.all()
+            if len(songs) == 0:
                 return []
 
             nodes = []
@@ -178,7 +177,7 @@ class SongQueue(BaseModel):
 
             SongCollectionSong.objects.create(
                 song_collection=self.user.history,
-                song=self.head.song,
+                song=self.head.song.song,
             )
 
             self.head = curr
@@ -192,7 +191,7 @@ class SongQueue(BaseModel):
 
             SongCollectionSong.objects.create(
                 song_collection=self.user.history,
-                song=self.head.song,
+                song=self.head.song.song,
             )
 
             self.save()

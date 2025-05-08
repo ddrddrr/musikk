@@ -6,9 +6,11 @@ from rest_framework.permissions import IsAuthenticated
 
 from streaming.api.v1.serializers_song import (
     BaseSongSerializer,
+    SongCollectionSongSerializer,
 )
 from streaming.api.v1.serializers_song_collection import SongCollectionSerializerBasic
 from streaming.models import BaseSong, SongCollection
+from streaming.songs import SongCollectionSong
 from users.api.v1.serializers_base import BaseUserSerializer
 from users.models import Artist, StreamingUser
 
@@ -26,7 +28,9 @@ class SearchView(APIView):
             return Response(status=status.HTTP_204_NO_CONTENT)
 
         data = {
-            "songs": self.search(BaseSong, query, "title", BaseSongSerializer),
+            "songs": self.search(
+                SongCollectionSong, query, "song__title", SongCollectionSongSerializer
+            ),
             "collections": self.search(
                 SongCollection, query, "title", SongCollectionSerializerBasic
             ),

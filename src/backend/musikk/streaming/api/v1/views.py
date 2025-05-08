@@ -14,9 +14,6 @@ from rest_framework.response import Response
 
 from sse.config import EventChannels
 from sse.events import send_invalidate_event
-from streaming.api.v1.serializers_song import (
-    BaseSongSerializer,
-)
 from streaming.api.v1.serializers_song_collection import (
     SongCollectionSerializerBasic,
     SongCollectionSerializerDetailed,
@@ -24,7 +21,6 @@ from streaming.api.v1.serializers_song_collection import (
 from streaming.api.v1.serializers_song import BaseSongCreateSerializer
 from streaming.api.v1.serializers_song_collection import SongCollectionCreateSerializer
 from streaming.models import BaseSong, SongCollectionSong, SongCollection
-from streaming.song_collections import SongCollectionAuthor
 
 
 class SongAddLikedView(APIView):
@@ -33,15 +29,17 @@ class SongAddLikedView(APIView):
     def post(self, request, *args, **kwargs):
         user = request.user.streaminguser
 
-        song_uuid = kwargs["uuid"]
-        song = get_object_or_404(BaseSong, uuid=song_uuid)
-        SongCollectionSong.objects.create(song=song, song_collection=user.liked_songs)
+        scs_uuid = kwargs["collection_song_uuid"]
+        scs = get_object_or_404(SongCollectionSong, uuid=scs_uuid)
+        song = SongCollectionSong.objects.create(
+            song=scs.song, song_collection=user.liked_songs
+        )
 
         # doing a refetch for the queue is easier than traversing nodes and checking, whether the song is in the queue
         send_invalidate_event(EventChannels.user_events(user.uuid), ["queue"])
         send_invalidate_event(EventChannels.user_events(user.uuid), ["openCollection"])
         send_invalidate_event(EventChannels.user_events(user.uuid), ["likedSongs"])
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_200_OK, data={"collection_song": song})
 
 
 class SongCreateView(APIView):
@@ -69,7 +67,6 @@ class SongCreateView(APIView):
         for i, song in enumerate(songs):
             key = song.get("key")
             song_data = {
-                # TODO: make title compulsory
                 "title": song["title"],
                 "description": song.get("description", ""),
                 "audio": request.FILES.get(f"{key}_audio"),
@@ -97,20 +94,12 @@ class SongCreateView(APIView):
         )
 
 
-class SongDetailView(RetrieveAPIView):
-    lookup_field = "uuid"
-    permission_classes = [IsAuthenticated]
-    queryset = BaseSong.objects.all()
-    serializer_class = BaseSongSerializer
-
-
 class SongCollectionLatestView(ListAPIView):
     permission_classes = [IsAuthenticated]
     queryset = SongCollection.objects.all()
     serializer_class = SongCollectionSerializerBasic
 
     def get_queryset(self):
-        # TODO: filter out history/liked songs etc.
         qs = super().get_queryset().exclude(private=True).order_by("-date_added")[:20]
         return qs
 
@@ -122,6 +111,7 @@ class SongCollectionPersonalView(APIView):
 
     def get(self, request, *args, **kwargs):
         user = self.request.user.streaminguser
+
         followed_collections_qs = user.streaminguser.followed_song_collections.all()
         history = SongCollectionSerializerBasic(
             user.history, context={"request": request}
@@ -134,6 +124,7 @@ class SongCollectionPersonalView(APIView):
             context={"request": request},
             many=True,
         ).data
+
         return Response(
             status=status.HTTP_200_OK,
             data={
@@ -174,45 +165,50 @@ class SongCollectionRemoveSong(APIView):
     def delete(self, request, *args, **kwargs):
         user = request.user.streaminguser
         collection = get_object_or_404(SongCollection, uuid=kwargs["collection_uuid"])
-        if not SongCollectionAuthor.objects.filter(
-            song_collection=collection, author=user
-        ).exists():
+        if (
+            collection.id not in (user.liked_songs.id, user.history.id)
+        ) and collection not in user.authored_collections_link.all():
             return Response(
                 status=status.HTTP_403_FORBIDDEN,
                 data={
                     f"The user {user.uuid} is not an author of collection {collection.uuid}."
                 },
             )
+
+        scs_uuid = kwargs["collection_song_uuid"]
         sc_song = get_object_or_404(
             SongCollectionSong,
             song_collection=collection,
-            song__uuid=kwargs["song_uuid"],
+            uuid=scs_uuid,
         )
-        sc_song.song.delete()  # deletes the sc_song as well
+        sc_song.delete()
         send_invalidate_event(EventChannels.user_events(user.uuid), ["openCollection"])
         return Response(
-            status=status.HTTP_200_OK, data={"removed": kwargs["song_uuid"]}
+            status=status.HTTP_200_OK,
+            data={"removed": scs_uuid},
         )
 
 
+# TODO: rewrite, as scs_uuid will be passed
 class SongCollectionAddSong(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
         user = request.user.streaminguser
         collection = get_object_or_404(SongCollection, uuid=kwargs["collection_uuid"])
-        if not SongCollectionAuthor.objects.filter(
-            song_collection=collection, author=user
-        ).exists():
+        if (
+            collection.id not in (user.liked_songs.id, user.history.id)
+        ) and collection not in user.authored_collections_link.all():
             return Response(
                 status=status.HTTP_403_FORBIDDEN,
                 data={
                     f"The user {user.uuid} is not an author of collection {collection.uuid}."
                 },
             )
-        song = get_object_or_404(BaseSong, uuid=kwargs["song_uuid"])
+        scs_uuid = kwargs["collection_song_uuid"]
+        song = get_object_or_404(SongCollectionSong, uuid=scs_uuid)
         SongCollectionSong.objects.create(song=song, song_collection=collection)
-        return Response(status=status.HTTP_200_OK, data={"added": kwargs["song_uuid"]})
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class SongCollectionCreateView(APIView):

@@ -1,22 +1,21 @@
 from rest_framework import serializers
 
 from base.serializers import BaseModelSerializer
-from streaming.api.v1.serializers_song import BaseSongSerializer
+from streaming.api.v1.serializers_song import (
+    SongCollectionSongSerializer,
+)
 from streaming.song_queue import SongQueue, SongQueueNode
 
 
 class SongQueueNodeSerializer(BaseModelSerializer):
-    song = BaseSongSerializer()
+    collection_song = serializers.SerializerMethodField()
 
     class Meta:
         model = SongQueueNode
-        fields = BaseModelSerializer.Meta.fields + ["song", "prev", "next"]
+        fields = BaseModelSerializer.Meta.fields + ["collection_song", "prev", "next"]
 
-    def get_song(self, obj):
-        song = obj.song()
-        return {
-            **BaseSongSerializer(song, context=self.context).data,
-        }
+    def get_collection_song(self, obj):
+        return SongCollectionSongSerializer(obj.song, context=self.context).data
 
 
 class SongQueueSerializer(BaseModelSerializer):

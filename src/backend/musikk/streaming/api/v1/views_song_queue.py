@@ -1,7 +1,7 @@
 from functools import partial
 
 from rest_framework import status
-from rest_framework.generics import RetrieveAPIView
+from rest_framework.generics import RetrieveAPIView, get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -10,7 +10,8 @@ from rest_framework.views import APIView
 from sse.config import EventChannels
 from sse.events import send_invalidate_event
 from streaming.api.v1.serializers_song_queue import SongQueueSerializer
-from streaming.models import BaseSong, SongQueue, SongQueueNode, SongCollection
+from streaming.models import SongQueue, SongQueueNode, SongCollection
+from streaming.songs import SongCollectionSong
 from users.users_extended import StreamingUser
 
 
@@ -35,7 +36,7 @@ class SongQueueRetrieveView(SongQueueBaseView, RetrieveAPIView):
 class SongQueueAddSongView(SongQueueBaseView):
     def post(self, request, *args, **kwargs):
         song_queue = self.get_song_queue(request)
-        song = BaseSong.objects.get(uuid=kwargs["uuid"])
+        song = SongCollectionSong.objects.get(uuid=kwargs["uuid"])
         song_queue.add_song(song=song, action=SongQueue.AddAction.ADD)
         send_invalidate_event(EventChannels.user_events(self.request.user.uuid))
 
@@ -55,7 +56,7 @@ class SongQueueAddCollectionView(SongQueueBaseView):
 class SongQueueSetSongHeadView(SongQueueBaseView):
     def post(self, request, *args, **kwargs):
         song_queue = self.get_song_queue(request)
-        song = BaseSong.objects.get(uuid=kwargs["uuid"])
+        song = SongCollectionSong.objects.get(uuid=kwargs["uuid"])
         song_queue.add_song(song=song, action=SongQueue.AddAction.CHANGE_HEAD)
         send_invalidate_event(EventChannels.user_events(self.request.user.uuid))
 
@@ -113,9 +114,10 @@ class SongQueueShiftHeadView(SongQueueBaseView):
     def post(self, request, *args, **kwargs):
         song_queue = self.get_song_queue(request)
         if not song_queue.is_empty():
-            shift_to_node = song_queue.head.next
             if node_uuid := kwargs.get("uuid"):
-                shift_to_node = SongQueueNode.objects.filter(uuid=node_uuid).first()
+                shift_to_node = get_object_or_404(SongQueueNode, uuid=node_uuid)
+            else:
+                shift_to_node = song_queue.head.next
             song_queue.shift_head_forward(to=shift_to_node)
             send_invalidate_event(EventChannels.user_events(self.request.user.uuid))
 

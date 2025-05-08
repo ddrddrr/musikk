@@ -26,6 +26,9 @@ class SongCollection(BaseModel):
     )
     private = models.BooleanField(default=False)
 
+    authors = models.ManyToManyField(
+        "users.StreamingUser", through="streaming.SongCollectionAuthor"
+    )
     streams = GenericRelation(Stream)
     comments = GenericRelation(Comment)
 
@@ -70,9 +73,14 @@ class Album(SongCollection):
 
 
 class SongCollectionAuthor(BaseModel):
-    song_collection = models.ForeignKey(SongCollection, on_delete=models.CASCADE)
+    song_collection = models.ForeignKey(
+        SongCollection, on_delete=models.CASCADE, related_name="author_links"
+    )
     author = models.ForeignKey(
-        "users.StreamingUser", null=True, on_delete=models.SET_NULL
+        "users.StreamingUser",
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="authored_collections_link",
     )
     author_priority = models.IntegerField(
         default=0, help_text="Priority in which the authors will be displayed."

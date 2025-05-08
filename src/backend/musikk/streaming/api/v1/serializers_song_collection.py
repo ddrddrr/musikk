@@ -2,7 +2,10 @@ from django.core.exceptions import ValidationError
 from rest_framework import serializers
 
 from base.serializers import BaseModelSerializer
-from streaming.api.v1.serializers_song import BaseSongSerializer
+from streaming.api.v1.serializers_song import (
+    BaseSongSerializer,
+    SongCollectionSongSerializer,
+)
 from streaming.song_collections import SongCollection, Playlist, SongCollectionAuthor
 from streaming.songs import SongCollectionSong, BaseSong
 from users.api.v1.serializers_base import BaseUserSerializer
@@ -58,13 +61,9 @@ class SongCollectionSerializerDetailed(SongCollectionSerializerBasic):
         }
 
     def get_songs(self, obj):
-        song_collection_songs = obj.ordered_songs()
-        return [
-            {
-                **BaseSongSerializer(song, context=self.context).data,
-            }
-            for song in song_collection_songs
-        ]
+        return SongCollectionSongSerializer(
+            obj.songs_links.all(), context=self.context, many=True
+        ).data
 
 
 class SongCollectionCreateSerializer(serializers.ModelSerializer):

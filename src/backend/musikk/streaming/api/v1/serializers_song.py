@@ -87,3 +87,15 @@ class BaseSongCreateSerializer(serializers.ModelSerializer):
         instance.image = validated_data.get("image", instance.image)
         instance.save()
         return instance
+
+
+class SongCollectionSongSerializer(BaseModelSerializer):
+    song = serializers.SerializerMethodField()
+
+    class Meta:
+        model = SongCollectionSong
+        # song_collection will be its uuid
+        fields = BaseModelSerializer.Meta.fields + ["song", "song_collection"]
+
+    def get_song(self, obj):
+        return BaseSongSerializer(obj.song, context=self.context).data

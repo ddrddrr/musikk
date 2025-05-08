@@ -1,7 +1,6 @@
 from django.urls import path
 
 from streaming.api.v1.views import (
-    SongDetailView,
     SongCollectionLatestView,
     SongCollectionDetailView,
     SongCollectionPersonalView,
@@ -11,6 +10,12 @@ from streaming.api.v1.views import (
     SongAddLikedView,
     SongCollectionRemoveSong,
     SongCollectionAddSong,
+)
+from streaming.api.v1.views_playback import (
+    PlaybackRetrieveView,
+    PlaybackActivateView,
+    PlaybackStopView,
+    RegisterPlaybackDevice,
 )
 from streaming.api.v1.views_song_queue import (
     SongQueueRetrieveView,
@@ -26,7 +31,6 @@ from streaming.api.v1.views_song_queue import (
 )
 
 urlpatterns = [
-    path("songs/<uuid:uuid>", SongDetailView.as_view(), name="song-detail"),
     path("songs", SongCreateView.as_view(), name="songs-upload"),
     path("collections", SongCollectionCreateView.as_view(), name="collection-create"),
     path(
@@ -113,4 +117,8 @@ urlpatterns = [
         SongQueueShiftHeadView.as_view(),
         name="song-queue-shift-head-to",
     ),
+    path("playback", PlaybackRetrieveView.as_view(), name="playback-retrieve"),
+    path("playback/activate", PlaybackActivateView.as_view(), name="playback-activate"),
+    path("playback/stop", PlaybackStopView.as_view(), name="playback-stop"),
+    path("playback-device", RegisterPlaybackDevice.as_view(), name="playback-device"),
 ]

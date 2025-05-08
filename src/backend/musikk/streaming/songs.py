@@ -30,9 +30,10 @@ class BaseSong(BaseModel):
     )
     draft = models.BooleanField(default=False)
 
+    authors = models.ManyToManyField("users.Artist", through="streaming.SongAuthor")
+
     streams = GenericRelation(Stream)
     # hashtags = ...
-
     like_count = models.IntegerField(default=0, blank=True)
     dislike_count = models.IntegerField(default=0, blank=True)
 
@@ -70,8 +71,15 @@ class BaseSong(BaseModel):
 
 
 class SongAuthor(BaseModel):
-    song = models.ForeignKey(BaseSong, on_delete=models.CASCADE)
-    author = models.ForeignKey("users.Artist", null=True, on_delete=models.SET_NULL)
+    song = models.ForeignKey(
+        BaseSong, on_delete=models.CASCADE, related_name="author_links"
+    )
+    author = models.ForeignKey(
+        "users.Artist",
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="authored_song_links",
+    )
     author_priority = models.IntegerField(
         default=0, help_text="Priority in which the author will be displayed."
     )
@@ -81,9 +89,15 @@ class SongAuthor(BaseModel):
 
 
 class SongCollectionSong(BaseModel):
-    song = models.ForeignKey(BaseSong, on_delete=models.CASCADE)
+    song = models.ForeignKey(
+        BaseSong, on_delete=models.CASCADE, related_name="collection_links"
+    )
     song_collection = models.ForeignKey(
-        "streaming.SongCollection", on_delete=models.CASCADE, blank=False, null=True
+        "streaming.SongCollection",
+        on_delete=models.CASCADE,
+        blank=False,
+        null=True,
+        related_name="songs_links",
     )
     position = models.IntegerField(
         default=None, null=True, help_text="The order of the song in the collection."

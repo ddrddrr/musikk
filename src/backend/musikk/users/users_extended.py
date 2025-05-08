@@ -1,10 +1,9 @@
-from django.contrib.auth.base_user import BaseUserManager
 from django.db import models
 
+from streaming.models import PlaybackState
 from streaming.song_collections import (
     UserHistory,
     LikedSongs,
-    SongCollectionAuthor,
 )
 from streaming.song_queue import SongQueue
 from users.user_base import BaseUser, UserManager
@@ -14,47 +13,47 @@ class StreamingUserManager(UserManager):
     pass
 
 
-# sendfriendrequest --> create notif with button
-
-
-# symmetrical false for followers(artist)
+# TODO: set symmetrical false for followers(artist) when added
 class StreamingUser(BaseUser):
     friends = models.ManyToManyField("self")
-
-    liked_songs = models.OneToOneField(
-        "streaming.LikedSongs",
-        related_name="liked_by",
-        null=True,
-        on_delete=models.SET_NULL,
+    playback_state = models.OneToOneField(
+        "streaming.PlaybackState", on_delete=models.PROTECT
     )
+
     followed_song_collections = models.ManyToManyField(
         "streaming.SongCollection",
         related_name="followers",
+    )
+    liked_songs = models.OneToOneField(
+        "streaming.LikedSongs",
+        related_name="user",
+        null=True,
+        on_delete=models.PROTECT,
     )
     song_queue = models.OneToOneField(
         "streaming.SongQueue",
         related_name="user",
         null=True,
-        on_delete=models.DO_NOTHING,
+        on_delete=models.PROTECT,
     )
     history = models.OneToOneField(
         "streaming.UserHistory",
         related_name="user",
         null=True,
-        on_delete=models.DO_NOTHING,
+        on_delete=models.PROTECT,
     )
 
     def save(self, *args, **kwargs):
-        if not self.liked_songs:
+        if not getattr(self, "liked_songs", None):
             self.liked_songs = LikedSongs.objects.create()
-        if not self.song_queue:
+        if not getattr(self, "song_queue", None):
             self.song_queue = SongQueue.objects.create()
-        if not self.history:
+        if not getattr(self, "history", None):
             self.history = UserHistory.objects.create()
+        if not getattr(self, "playback_state", None):
+            self.playback_state = PlaybackState.objects.create()
+
         super().save(*args, **kwargs)
-        SongCollectionAuthor.objects.create(
-            song_collection=self.liked_songs, author=self
-        )
 
     objects = StreamingUserManager()
 
