@@ -8,7 +8,6 @@ from django.db import transaction
 from faker import Faker
 
 from users.management.helpers import create_user_with_password
-from users.models import StreamingUser, Artist
 from streaming.models import BaseSong, SongCollection, SongCollectionAuthor
 from streaming.songs import SongAuthor, SongCollectionSong
 from audio_processing.ffmpeg_wrapper import Full
@@ -93,15 +92,22 @@ class Command(BaseCommand):
                     )
                     songs.append(song)
 
+            collection_types = [
+                SongCollection.CollectionType.PLAYLIST,
+                SongCollection.CollectionType.ALBUM,
+            ]
+
             for _ in range(collection_count):
                 if not songs:
                     break
                 random_image = get_random_file_path(SAMPLES_PATH, [".jpg", ".png"])
                 with open(random_image, "rb") as i:
+                    collection_type = random.choice(collection_types)
                     collection = SongCollection.objects.create(
                         title=fake.bs().title(),
                         description=fake.text(max_nb_chars=512),
                         image=File(i, name=os.path.basename(random_image)),
+                        type=collection_type,
                     )
                     selected_songs = random.sample(
                         songs, k=random.randint(1, len(songs))
@@ -112,8 +118,7 @@ class Command(BaseCommand):
                         )
 
                     authors = random.sample(
-                        artist_objs,
-                        k=random.randint(1, len(artist_objs)),
+                        artist_objs, k=random.randint(1, len(artist_objs))
                     )
                     for priority, author in enumerate(authors):
                         SongCollectionAuthor.objects.create(
@@ -123,5 +128,5 @@ class Command(BaseCommand):
                         )
                         author.owned_song_collections.add(collection)
                     print(
-                        f"Created collection '{collection.title}' with {len(selected_songs)} songs and authors {[a.email for a in authors]}"
+                        f"Created {collection.type} '{collection.title}' with {len(selected_songs)} songs and authors {[a.email for a in authors]}"
                     )

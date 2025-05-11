@@ -28,11 +28,20 @@ class SearchView(APIView):
             return Response(status=status.HTTP_204_NO_CONTENT)
 
         data = {
-            "songs": self.search(
-                SongCollectionSong, query, "song__title", SongCollectionSongSerializer
+            "songs": self._songs(query),
+            "albums": self.search(
+                SongCollection,
+                query,
+                "title",
+                SongCollectionSerializerBasic,
+                extra_filters={"type": "album"},
             ),
-            "collections": self.search(
-                SongCollection, query, "title", SongCollectionSerializerBasic
+            "playlists": self.search(
+                SongCollection,
+                query,
+                "title",
+                SongCollectionSerializerBasic,
+                extra_filters={"type": "playlist"},
             ),
             "users": self.search(
                 StreamingUser,
@@ -59,3 +68,16 @@ class SearchView(APIView):
         )[:MAX_RESULTS]
 
         return serializer_class(qs, many=True, context={"request": self.request}).data
+
+    def _songs(self, query):
+        matching_songs = (
+            BaseSong.objects.annotate(similarity=TrigramSimilarity("title", query))
+            .filter(similarity__gt=TRIGRAM_SIMILARITY_THRESHOLD)
+            .order_by("-similarity")[:MAX_RESULTS]
+        )
+
+        sc_songs = SongCollectionSong.objects.filter(song__in=matching_songs)
+
+        return SongCollectionSongSerializer(
+            sc_songs, many=True, context={"request": self.request}
+        ).data

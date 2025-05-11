@@ -15,6 +15,11 @@ class SongCollectionMetadata(BaseModel):
 
 
 class SongCollection(BaseModel):
+    class CollectionType(models.TextChoices):
+        PLAYLIST = "playlist", "Playlist"
+        ALBUM = "album", "Album"
+
+    type = models.CharField(choices=CollectionType.choices)
     songs = models.ManyToManyField(
         "streaming.BaseSong", through="streaming.SongCollectionSong"
     )
@@ -62,14 +67,6 @@ class LikedSongs(SongCollection):
         self.metadata = None
         self.private = True
         super().save(*args, **kwargs)
-
-
-class Playlist(SongCollection):
-    pass
-
-
-class Album(SongCollection):
-    year_released = models.IntegerField(default=None, null=True, blank=True)
 
 
 class SongCollectionAuthor(BaseModel):

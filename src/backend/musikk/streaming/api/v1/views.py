@@ -29,9 +29,9 @@ class SongAddLikedView(APIView):
     def post(self, request, *args, **kwargs):
         user = request.user.streaminguser
 
-        scs_uuid = kwargs["collection_song_uuid"]
+        scs_uuid = kwargs["uuid"]
         scs = get_object_or_404(SongCollectionSong, uuid=scs_uuid)
-        song = SongCollectionSong.objects.create(
+        SongCollectionSong.objects.create(
             song=scs.song, song_collection=user.liked_songs
         )
 
@@ -39,7 +39,7 @@ class SongAddLikedView(APIView):
         send_invalidate_event(EventChannels.user_events(user.uuid), ["queue"])
         send_invalidate_event(EventChannels.user_events(user.uuid), ["openCollection"])
         send_invalidate_event(EventChannels.user_events(user.uuid), ["likedSongs"])
-        return Response(status=status.HTTP_200_OK, data={"collection_song": song})
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class SongCreateView(APIView):
@@ -175,7 +175,7 @@ class SongCollectionRemoveSong(APIView):
                 },
             )
 
-        scs_uuid = kwargs["collection_song_uuid"]
+        scs_uuid = kwargs["song_uuid"]
         sc_song = get_object_or_404(
             SongCollectionSong,
             song_collection=collection,
@@ -205,7 +205,7 @@ class SongCollectionAddSong(APIView):
                     f"The user {user.uuid} is not an author of collection {collection.uuid}."
                 },
             )
-        scs_uuid = kwargs["collection_song_uuid"]
+        scs_uuid = kwargs["song_uuid"]
         song = get_object_or_404(SongCollectionSong, uuid=scs_uuid)
         SongCollectionSong.objects.create(song=song, song_collection=collection)
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -213,7 +213,7 @@ class SongCollectionAddSong(APIView):
 
 class SongCollectionCreateView(APIView):
     """
-    { title, description, image?, private, authors: [UUID], songs: [UUID,...] }
+    { title, description, image?, private, authors: [UUID], songs: [UUID,...], type }
     """
 
     parser_classes = [MultiPartParser, FormParser]
@@ -247,6 +247,7 @@ class SongCollectionCreateView(APIView):
             "image": request.FILES.get("image"),
             "authors": authors,
             "songs": songs,
+            "type": data.get("type"),
         }
         serializer = SongCollectionCreateSerializer(
             data=payload, context={"request": request}

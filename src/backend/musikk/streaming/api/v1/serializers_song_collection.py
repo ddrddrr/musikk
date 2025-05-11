@@ -3,10 +3,9 @@ from rest_framework import serializers
 
 from base.serializers import BaseModelSerializer
 from streaming.api.v1.serializers_song import (
-    BaseSongSerializer,
     SongCollectionSongSerializer,
 )
-from streaming.song_collections import SongCollection, Playlist, SongCollectionAuthor
+from streaming.song_collections import SongCollection, SongCollectionAuthor
 from streaming.songs import SongCollectionSong, BaseSong
 from users.api.v1.serializers_base import BaseUserSerializer
 from users.users_extended import StreamingUser
@@ -23,6 +22,7 @@ class SongCollectionSerializerBasic(BaseModelSerializer):
             "image",
             "authors",
             "is_liked",
+            "type",
         ]
         extra_kwargs = BaseModelSerializer.Meta.extra_kwargs | {
             "title": {"read_only": True},
@@ -69,16 +69,13 @@ class SongCollectionSerializerDetailed(SongCollectionSerializerBasic):
 class SongCollectionCreateSerializer(serializers.ModelSerializer):
     authors = serializers.ListField(child=serializers.UUIDField(), write_only=True)
     songs = serializers.ListField(child=serializers.UUIDField(), write_only=True)
+    type = serializers.ChoiceField(
+        choices=SongCollection.CollectionType.choices, required=True, write_only=True
+    )
 
     class Meta:
         model = SongCollection
-        fields = [
-            "authors",
-            "songs",
-            "title",
-            "description",
-            "image",
-        ]
+        fields = ["authors", "songs", "title", "description", "image", "type"]
 
     def create(self, validated_data):
         authors = validated_data.pop("authors")
@@ -94,9 +91,3 @@ class SongCollectionCreateSerializer(serializers.ModelSerializer):
                 author=author, song_collection=collection, author_priority=i
             )
         return collection
-
-
-class PlaylistSerializerBasic(SongCollectionSerializerBasic):
-    class Meta:
-        model = Playlist
-        fields = SongCollectionSerializerBasic.Meta.fields + []
