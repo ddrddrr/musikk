@@ -42,6 +42,7 @@ export async function createCollection(payload: {
     const formData = new FormData();
     formData.append("title", payload.title);
     formData.append("private", String(payload.private));
+    formData.append("type", "album");
     payload.songs.forEach((uuid) => formData.append("songs", uuid));
 
     if (payload.description) formData.append("description", payload.description);

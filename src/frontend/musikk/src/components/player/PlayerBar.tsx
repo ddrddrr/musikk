@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { useQueueChangeAPI } from "@/hooks/useQueueAPI.ts";
 import { PlaybackContext } from "@/providers/playbackContext.ts";
-import { SkipBack, SkipForward, Volume2 } from "lucide-react";
+import { ListMusic, SkipBack, SkipForward, Volume2 } from "lucide-react";
 import { useContext, useEffect, useRef, useState } from "react";
 
 interface PlayerBarProps {
@@ -11,12 +11,12 @@ interface PlayerBarProps {
     time: number;
     seeking: boolean;
     setSeeking: (s: boolean) => void;
+    setIsQueueOpen: (c: boolean) => void;
 }
 
-export function PlayerBar({ duration, time }: PlayerBarProps) {
+export function PlayerBar({ duration, time, seeking, setSeeking, setIsQueueOpen }: PlayerBarProps) {
     const { playingCollectionSong } = useContext(PlaybackContext);
     const [volume, setVolume] = useState(100);
-    const [seeking, setSeeking] = useState(false);
     const [seekTime, setSeekTime] = useState(0);
     const useShiftHeadMutation = useQueueChangeAPI();
     const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -98,13 +98,13 @@ export function PlayerBar({ duration, time }: PlayerBarProps) {
                             <span className="text-xs">{formatTime(duration)}</span>
                         </div>
 
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1">
                             <Button
                                 onClick={() => useShiftHeadMutation.mutate({ action: "shift-back" })}
                                 variant="ghost"
                                 size="icon"
                             >
-                                <SkipBack size={20} />
+                                <SkipBack className="size-5" strokeWidth="2" />
                             </Button>
                             <PlayerPlayButton />
                             <Button
@@ -112,7 +112,7 @@ export function PlayerBar({ duration, time }: PlayerBarProps) {
                                 variant="ghost"
                                 size="icon"
                             >
-                                <SkipForward size={20} />
+                                <SkipForward className="size-5" strokeWidth="2" />
                             </Button>
                         </div>
 
@@ -128,8 +128,8 @@ export function PlayerBar({ duration, time }: PlayerBarProps) {
                             />
                         </div>
 
-                        <Button variant="ghost" size="icon">
-                            <span className="text-sm">≡</span>
+                        <Button variant="ghost" size="icon" onClick={() => setIsQueueOpen((prev) => !prev)}>
+                            <ListMusic />
                         </Button>
                     </div>
                 </div>

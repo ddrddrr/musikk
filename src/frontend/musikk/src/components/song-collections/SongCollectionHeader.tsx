@@ -25,41 +25,58 @@ export const SongCollectionHeader = memo(function SongCollectionHeader({
     return (
         <>
             <div
-                className="flex items-center bg-white p-6 rounded-lg 
+                className={`flex items-start bg-white p-6 rounded-lg 
                    border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]
-                   transition-all duration-300 ease-in-out"
+                   transition-all duration-300 ease-in-out ${showComments ? "flex-col sm:flex-row gap-4" : "flex-row"}`}
             >
                 {collection.image ? (
                     <img
                         src={collection.image}
-                        alt={""}
+                        alt=""
                         className={`object-cover border-2 border-black rounded-lg ${
-                            showComments ? "scale-75 w-24 h-24" : "scale-100 w-32 h-32"
+                            showComments ? "scale-100 w-24 h-24" : "scale-100 w-32 h-32"
                         }`}
                     />
                 ) : (
                     <div>♫</div>
                 )}
 
-                <div className="ml-6 flex-1">
-                    <p className="text-sm text-gray-500 truncate">{authors}</p>
-                    <p className={`font-bold ${showComments ? "text-lg" : "text-xl"}`}>{collection.title}</p>
-                    {collection.description && (
-                        <p className={`text-gray-600 mt-2 line-clamp-2 ${showComments ? "text-sm" : "text-base"}`}>
-                            {collection.description}
-                        </p>
+                <div className="ml-0 sm:ml-6 flex-1 min-w-0">
+                    {showComments ? (
+                        <div className="mb-2">
+                            <p className="font-bold text-sm truncate">{collection.title}</p>
+                            <div className="flex gap-3 mt-2">
+                                <SongCollectionPlayButton collection={collection} showComments={showComments} />
+                                {notPersonalCollection && (
+                                    <CollectionAddToLikedButton collection={collection} showComments={showComments} />
+                                )}
+                                <CollectionAddToQueueButton collection={collection} showComments={showComments} />
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="flex items-center justify-between">
+                            <div className="min-w-0">
+                                <p className="text-sm text-gray-500 truncate">{authors}</p>
+                                <p className="font-bold text-xl">{collection.title}</p>
+                                {collection.description && (
+                                    <p className="text-gray-600 mt-2 line-clamp-2 text-base">
+                                        {collection.description}
+                                    </p>
+                                )}
+                            </div>
+                            <div className="flex gap-3 ml-6 flex-shrink-0">
+                                <SongCollectionPlayButton collection={collection} showComments={showComments} />
+                                {notPersonalCollection && (
+                                    <CollectionAddToLikedButton collection={collection} showComments={showComments} />
+                                )}
+                                <CollectionAddToQueueButton collection={collection} showComments={showComments} />
+                            </div>
+                        </div>
                     )}
-                </div>
-                <div className="flex gap-3">
-                    <SongCollectionPlayButton collection={collection} showComments={showComments} />
-                    {notPersonalCollection && (
-                        <CollectionAddToLikedButton collection={collection} showComments={showComments} />
-                    )}
-                    <CollectionAddToQueueButton collection={collection} showComments={showComments} />
                 </div>
             </div>
 
-            <div className="flex items-center justify-between px-2">
+            <div className="flex items-center justify-between px-2 mt-2">
                 <h3 className="text-black text-lg font-bold transition-all duration-300 ease-in-out">
                     Songs • {songsCount}
                 </h3>

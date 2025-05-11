@@ -44,22 +44,26 @@ export function SearchBar() {
 
                 {shouldShowResults && data && (
                     <div className="space-y-4">
-                        {data.songs.length > 0 && (
+                        {data.songs?.length > 0 && (
                             <div>
                                 <h3 className="text-sm font-semibold mb-2">Songs</h3>
                                 <div className="space-y-2">
                                     {data.songs.map((song) => (
-                                        <SongContainer key={song.uuid} collectionSong={song} />
+                                        <SongContainer
+                                            buttonSize={30}
+                                            key={song.uuid}
+                                            collectionSong={song}
+                                        />
                                     ))}
                                 </div>
                             </div>
                         )}
 
-                        {data.collections.length > 0 && (
+                        {data.albums?.length > 0 && (
                             <div>
-                                <h3 className="text-sm font-semibold mb-2">Collections</h3>
+                                <h3 className="text-sm font-semibold mb-2">Albums</h3>
                                 <div className="grid grid-cols-2 gap-2">
-                                    {data.collections.map((collection) => (
+                                    {data.albums.map((collection) => (
                                         <SongCollectionCard
                                             key={collection.uuid}
                                             collection={collection}
@@ -70,7 +74,22 @@ export function SearchBar() {
                             </div>
                         )}
 
-                        {data.artists.length > 0 && (
+                        {data.playlists?.length > 0 && (
+                            <div>
+                                <h3 className="text-sm font-semibold mb-2">Playlists</h3>
+                                <div className="grid grid-cols-2 gap-2">
+                                    {data.playlists.map((collection) => (
+                                        <SongCollectionCard
+                                            key={collection.uuid}
+                                            collection={collection}
+                                            size="small"
+                                        />
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {data.artists?.length > 0 && (
                             <div>
                                 <h3 className="text-sm font-semibold mb-2">Artists</h3>
                                 <div className="space-y-2">
@@ -81,7 +100,7 @@ export function SearchBar() {
                             </div>
                         )}
 
-                        {data.users.length > 0 && (
+                        {data.users?.length > 0 && (
                             <div>
                                 <h3 className="text-sm font-semibold mb-2">Users</h3>
                                 <div className="space-y-2">
@@ -92,9 +111,12 @@ export function SearchBar() {
                             </div>
                         )}
 
-                        {!data.songs.length && !data.collections.length && !data.users.length && (
-                            <div className="py-2 text-center text-sm text-gray-500">No results found</div>
-                        )}
+                        {!data.songs?.length &&
+                            !data.playlists?.length &&
+                            !data.albums?.length &&
+                            !data.users?.length && (
+                                <div className="py-2 text-center text-sm text-gray-500">No results found</div>
+                            )}
                     </div>
                 )}
             </div>

@@ -1,5 +1,6 @@
-import { Layout } from "@/components/layout/Layout.tsx";
+import { Header } from "@/components/layout/header/Header.tsx";
 import { MainContent } from "@/components/layout/MainContent.tsx";
+import { PlayerBox } from "@/components/player/PlayerBox.tsx";
 import { Toaster } from "@/components/ui/sonner";
 import { EventURLs } from "@/config/endpoints.ts";
 import { useEvent } from "@/hooks/useEvent.ts";
@@ -20,10 +21,12 @@ export const HomePage = memo(function HomePage() {
     return (
         <PlaybackProvider>
             <UserCollectionsProvider>
-                <Layout>
+                <div className="flex flex-col h-screen bg-gray-200">
+                    <Header />
                     <MainContent />
                     <Toaster />
-                </Layout>
+                    <PlayerBox />
+                </div>
             </UserCollectionsProvider>
         </PlaybackProvider>
     );

@@ -11,19 +11,21 @@ interface SongPlayButtonProps {
     size?: number;
 }
 
-export function SongPlayButton({ collectionSong, className = "", size = 18 }: SongPlayButtonProps) {
+export function SongPlayButton({ collectionSong, className = "", size = 20 }: SongPlayButtonProps) {
     const { playbackState, playingCollectionSong } = useContext(PlaybackContext);
     const handlePlay = useHandlePlay();
 
     const isThisChosen = collectionSong.uuid === playingCollectionSong?.uuid;
 
     const renderPlayPauseIcon = () => {
-        return playbackState?.is_playing && isThisChosen ? <Pause size={size} /> : <Play size={size} />;
+        const iconSize = Math.floor(size * 0.6);
+        return playbackState?.is_playing && isThisChosen ? <Pause size={iconSize} /> : <Play size={iconSize} />;
     };
 
     return (
         <Button
-            className={`bg-red-600 hover:bg-red-700 text-white border-2 border-black flex items-center justify-center rounded-sm ${className}`}
+            style={{ width: size, height: size }}
+            className={`bg-red-600 hover:bg-red-700 text-white border-2 border-black flex items-center justify-center rounded-sm p-0 ${className}`}
             onClick={() => (isThisChosen ? handlePlay() : handlePlay({ newSong: collectionSong }))}
         >
             {renderPlayPauseIcon()}

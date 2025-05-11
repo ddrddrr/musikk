@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button.tsx";
 import { useHandlePlay } from "@/hooks/useHandlePlay.ts";
 import { PlaybackContext } from "@/providers/playbackContext.ts";
 import { Pause, Play } from "lucide-react";
@@ -13,11 +14,11 @@ export function PlayerPlayButton() {
     };
 
     return (
-        <button
-            className="bg-red-600 hover:bg-red-700 text-white border-2 border-black p-2 rounded-full flex items-center justify-center"
+        <Button
+            className={`bg-red-600 hover:bg-red-700 text-white border-2 border-black flex items-center justify-center rounded-sm`}
             onClick={() => handlePlay()}
         >
             {renderPlayPauseIcon()}
-        </button>
+        </Button>
     );
 }

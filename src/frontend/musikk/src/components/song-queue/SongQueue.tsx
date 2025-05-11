@@ -1,51 +1,44 @@
-import { SongContainer } from "@/components/songs/SongContainer.tsx";
-import { SongDisplay } from "@/components/songs/SongDisplay.tsx";
+import { SongContainer } from "@/components/songs/SongContainer";
+import { SongDisplay } from "@/components/songs/SongDisplay";
 import { Button } from "@/components/ui/button";
-import { useQueue, useQueueChangeAPI } from "@/hooks/useQueueAPI.ts";
+import { useQueue, useQueueChangeAPI } from "@/hooks/useQueueAPI";
 import { Trash2 } from "lucide-react";
-import { memo } from "react";
 
-export const SongQueue = memo(function SongQueue() {
+export function SongQueue() {
     const clearQueueMutation = useQueueChangeAPI();
     const { data: queue } = useQueue();
-
     const nodes = queue?.nodes ?? [];
+    const currentSong = queue?.nodes[0]?.collection_song?.song;
+
     return (
-        <div className="space-y-6">
-            <div className="space-y-4">
-                {nodes.length > 0 ? (
-                    <>
-                        <SongDisplay song={queue?.nodes[0].collection_song.song} />
+        <div className="flex w-full h-full">
+            <div className="w-1/2 flex flex-col items-center justify-center p-8 border-r border-black">
+                <SongDisplay song={currentSong} />
+            </div>
 
-                        <ul className="space-y-3 pr-2 custom-scrollbar" role="list">
-                            {nodes.map((node) => (
-                                <li key={node.uuid} className="bg-white p-4 rounded-sm border border-black/20 w-full">
-                                    <SongContainer
-                                        collectionSong={node.collection_song}
-                                        showImage={false}
-                                        showAddToQueueButton={false}
-                                        buttonSize={14}
-                                        buttonClass="p-1 w-8 h-8"
-                                    />
-                                </li>
-                            ))}
-                        </ul>
+            <div className="w-1/2 flex flex-col relative">
+                <div className="p-8 overflow-y-auto flex-1">
+                    <h2 className="text-2xl font-bold mb-4">Queue</h2>
+                    <ul className="space-y-3">
+                        {nodes.map((node) => (
+                            <li key={node.uuid}>
+                                <SongContainer collectionSong={node.collection_song} showAddToQueueButton={false} />
+                            </li>
+                        ))}
+                    </ul>
+                </div>
 
-                        <Button
-                            onClick={() => clearQueueMutation.mutate({ action: "clear" })}
-                            variant="destructive"
-                            className="w-full bg-red-500 hover:bg-red-600 text-white border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all hover:-translate-y-[2px]"
-                        >
-                            <Trash2 className="w-4 h-4 mr-2" />
-                            Clear Queue
-                        </Button>
-                    </>
-                ) : (
-                    <div className="text-center py-6 bg-white rounded-sm border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                        <p className="text-gray-600">Queue is empty</p>
-                    </div>
-                )}
+                <div className="p-4 border-t border-black bg-white">
+                    <Button
+                        onClick={() => clearQueueMutation.mutate({ action: "clear" })}
+                        variant="destructive"
+                        className="w-full"
+                    >
+                        <Trash2 className="w-4 h-4 mr-2" />
+                        Clear Queue
+                    </Button>
+                </div>
             </div>
         </div>
     );
-});
+}

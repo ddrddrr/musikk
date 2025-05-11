@@ -5,7 +5,8 @@ import { SearchURLs } from "@/config/endpoints.ts";
 
 interface PerformSearchResponse {
     songs: ISongCollectionSong[];
-    collections: ISongCollection[];
+    playlists: ISongCollection[];
+    albums: ISongCollection[];
     users: IUser[];
     artists: IUser[];
 }

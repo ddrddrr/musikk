@@ -1,12 +1,11 @@
 import { collectionRemoveSong } from "@/components/song-collections/mutations.ts";
 import { ISongCollectionSong } from "@/components/song-collections/types.ts";
 import { SongAddToLikedButton } from "@/components/songs/SongAddToLikedButton.tsx";
+import { SongAddToQueueButton } from "@/components/songs/SongAddToQueueButton.tsx";
 import { SongPlayButton } from "@/components/songs/SongPlayButton";
-import { Button } from "@/components/ui/button.tsx";
-import { useQueueAddAPI } from "@/hooks/useQueueAPI";
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from "@radix-ui/react-context-menu";
 import { useMutation } from "@tanstack/react-query";
-import { BetweenHorizonalStart, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { memo } from "react";
 
 interface SongContainerProps {
@@ -20,13 +19,12 @@ interface SongContainerProps {
 
 export const SongContainer = memo(function SongContainer({
     collectionSong,
-    buttonSize = 20,
+    buttonSize = 40,
     buttonClass = "p-2",
-    titleMaxWidth = "max-w-[200px]",
+    titleMaxWidth = "max-w",
     showImage = true,
     showAddToQueueButton = true,
 }: SongContainerProps) {
-    const addToQueueMutation = useQueueAddAPI();
     const collectionRemoveSongMutation = useMutation({ mutationFn: collectionRemoveSong });
 
     const song = collectionSong.song;
@@ -50,7 +48,7 @@ export const SongContainer = memo(function SongContainer({
                                 </div>
                             ))}
 
-                        <div className="flex flex-col">
+                        <div className="flex flex-col min-w-0">
                             <p className={`font-bold text-sm text-black truncate ${titleMaxWidth}`}>{song.title}</p>
                             <p className={`text-xs text-gray-600 truncate ${titleMaxWidth}`}>{authors}</p>
                         </div>
@@ -64,19 +62,11 @@ export const SongContainer = memo(function SongContainer({
                             className={buttonClass}
                         />
                         {showAddToQueueButton && (
-                            <Button
-                                onClick={() =>
-                                    addToQueueMutation.mutate({
-                                        type: "song",
-                                        item: collectionSong,
-                                        action: "add",
-                                    })
-                                }
-                                disabled={addToQueueMutation.isPending}
-                                className="bg-gray-200 hover:bg-gray-300 text-black border-2 border-black rounded-lg p-0 flex items-center justify-center"
-                            >
-                                <BetweenHorizonalStart size={buttonSize} />
-                            </Button>
+                            <SongAddToQueueButton
+                                collectionSong={collectionSong}
+                                size={buttonSize}
+                                className={buttonClass}
+                            />
                         )}
                     </div>
                 </div>

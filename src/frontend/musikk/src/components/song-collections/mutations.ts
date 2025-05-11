@@ -27,3 +27,11 @@ interface ICollectionRemoveSongParams {
 export async function collectionRemoveSong({ collectionUUID, songCollectionSongUUID }: ICollectionRemoveSongParams) {
     await api.delete(CollectionURLs.collectionRemoveSong(collectionUUID, songCollectionSongUUID));
 }
+
+export interface IAddToLikedSongsParams {
+    collectionSongUUID: UUID;
+}
+
+export async function addToLikedSongs({ collectionSongUUID }: IAddToLikedSongsParams) {
+    await api.post(CollectionURLs.likedSongsAddSong(collectionSongUUID));
+}
