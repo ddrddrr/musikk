@@ -9,9 +9,10 @@ import { toast } from "sonner";
 
 interface UserCardProps {
     user: IUser;
+    onClick?: (u: IUser) => void;
 }
 
-export function UserCard({ user }: UserCardProps) {
+export function UserCard({ user, onClick = undefined }: UserCardProps) {
     const navigate = useNavigate();
     const friendRequestMutation = useFriendRequestMutation();
 
@@ -22,10 +23,18 @@ export function UserCard({ user }: UserCardProps) {
         toast("Friend request sent.");
     }
 
+    function handleOnClick(u: IUser) {
+        if (onClick) {
+            onClick(u);
+        } else {
+            navigate(`/users/${u.uuid}`);
+        }
+    }
+
     return (
         <ContextMenu>
             <ContextMenuTrigger asChild>
-                <Card onClick={() => navigate(`/users/${user.uuid}`)} className="w-fit p-2 flex items-center gap-2">
+                <Card onClick={() => handleOnClick(user)} className="w-fit p-2 flex items-center gap-2">
                     <Avatar className="rounded-sm w-10 h-10">
                         <AvatarImage src={avatar} alt={display_name} className="object-cover" />
                     </Avatar>

@@ -5,45 +5,54 @@ import { useNavigate } from "react-router-dom";
 interface SongCardProps {
     collectionSong: ISongCollectionSong;
     size?: "small" | "medium" | "big";
+    onClick?: (s: ISongCollectionSong) => void;
 }
 
 const sizeClasses = {
     small: {
-        card: "w-full",
-        image: "aspect-square",
+        card: "w-25",
+        image: "h-20",
         title: "text-sm",
-        artist: "text-xs italic",
+        authors: "text-xs",
         icon: "text-xl",
         padding: "p-1",
     },
     medium: {
-        card: "w-full",
-        image: "aspect-square",
+        card: "w-35",
+        image: "h-35",
         title: "text-base",
-        artist: "text-base italic",
+        authors: "text-sm",
         icon: "text-2xl",
         padding: "p-2",
     },
     big: {
-        card: "w-full",
-        image: "aspect-square",
+        card: "w-60",
+        image: "h-60",
         title: "text-xl",
-        artist: "text-base italic",
+        authors: "text-base",
         icon: "text-3xl",
         padding: "p-3",
     },
 };
 
-export function SongCard({ collectionSong, size = "medium" }: SongCardProps) {
+export function SongCard({ collectionSong, size = "medium", onClick = undefined }: SongCardProps) {
     const navigate = useNavigate();
     const sizes = sizeClasses[size];
     const { uuid, title, authors, image } = collectionSong.song;
 
     const authorNames = authors.map((a) => a.display_name).join(", ");
 
+    function handleClick(s: ISongCollectionSong) {
+        if (onClick) {
+            onClick(s);
+        } else {
+            navigate(`/song/${s.uuid}/`);
+        }
+    }
+
     return (
         <Card
-            onClick={() => navigate(`/song/${uuid}/`)}
+            onClick={() => handleClick(collectionSong)}
             key={uuid}
             className={`cursor-pointer transition-all duration-200 py-0 border-2 border-black rounded-sm overflow-hidden bg-gray-50 ${sizes.card}`}
         >
@@ -56,7 +65,7 @@ export function SongCard({ collectionSong, size = "medium" }: SongCardProps) {
                     </div>
                 )}
                 <div className={`bg-gray-200 border-t-2 border-black ${sizes.padding}`}>
-                    <p className={`truncate text-gray-600 ${sizes.artist}`}>{authorNames}</p>
+                    <p className={`truncate text-gray-600 ${sizes.authors}`}>{authorNames}</p>
                     <p className={`font-bold truncate ${sizes.title}`}>{title}</p>
                 </div>
             </CardContent>

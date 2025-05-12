@@ -5,12 +5,12 @@ import { useNavigate } from "react-router-dom";
 interface SongCollectionCardProps {
     collection: ISongCollection;
     size?: "small" | "medium" | "big";
-    enableOnClick?: boolean;
+    onClick?: (c: ISongCollection) => void;
 }
 
 const sizeClasses = {
     small: {
-        card: "w-20",
+        card: "w-25",
         image: "h-20",
         title: "text-sm",
         authors: "text-xs",
@@ -19,7 +19,7 @@ const sizeClasses = {
     },
     medium: {
         card: "w-35",
-        image: "h-35",
+        image: "h-30",
         title: "text-base",
         authors: "text-sm",
         icon: "text-2xl",
@@ -27,7 +27,7 @@ const sizeClasses = {
     },
     big: {
         card: "w-60",
-        image: "h-60",
+        image: "h-55",
         title: "text-xl",
         authors: "text-base",
         icon: "text-3xl",
@@ -35,22 +35,24 @@ const sizeClasses = {
     },
 };
 
-export function SongCollectionCard({ collection, size = "medium", enableOnClick = true }: SongCollectionCardProps) {
+export function SongCollectionCard({ collection, size = "medium", onClick = undefined }: SongCollectionCardProps) {
     const navigate = useNavigate();
     const { uuid, title, image, authors } = collection;
     const sizes = sizeClasses[size];
 
     const authorNames = authors.map((a) => a.display_name).join(", ");
 
-    function handleOnClick() {
-        if (enableOnClick) {
-            navigate(`/collection/${uuid}/`);
+    function handleOnClick(collection: ISongCollection) {
+        if (onClick) {
+            onClick(collection);
+        } else {
+            navigate(`/collection/${collection.uuid}/`);
         }
     }
 
     return (
         <Card
-            onClick={handleOnClick}
+            onClick={() => handleOnClick(collection)}
             key={uuid}
             className={`cursor-pointer transition-all duration-200 py-0 
             border-2 border-black rounded-sm overflow-hidden bg-gray-50 ${sizes.card}`}

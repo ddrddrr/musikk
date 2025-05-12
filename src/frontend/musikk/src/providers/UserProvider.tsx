@@ -22,14 +22,12 @@ export const UserProvider = ({ children }: UserProviderProps) => {
                 return undefined;
             }
             const decodedToken = jwtDecode<IJWTPayload>(accessToken);
-            return await fetchUser(decodedToken.uuid);
+            const res = await fetchUser(decodedToken.uuid);
+            localStorage.setItem("user", JSON.stringify(res));
+            return res;
         },
         enabled: Boolean(userUUID),
     });
-
-    useEffect(() => {
-        if (data) localStorage.setItem("user", JSON.stringify(data));
-    }, [data]);
 
     return <UserContext.Provider value={{ user: data }}>{children}</UserContext.Provider>;
 };
