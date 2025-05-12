@@ -1,16 +1,9 @@
 from django.urls import path
 
-from streaming.api.v1.views import (
-    SongCollectionLatestView,
-    SongCollectionDetailView,
-    SongCollectionPersonalView,
-    SongCollectionCreateView,
-    SongCollectionAddLikedView,
-    SongCreateView,
-    SongAddLikedView,
-    SongCollectionRemoveSong,
-    SongCollectionAddSong,
-)
+from streaming.api.v1.views_song import SongAddLikedView, SongCreateView, SongCollectionSongRetrieveView
+from streaming.api.v1.views_collection import SongCollectionLatestView, SongCollectionPersonalView, \
+    SongCollectionDetailView, SongCollectionAddLikedView, SongCollectionRemoveSong, SongCollectionAddSong, \
+    SongCollectionCreateView
 from streaming.api.v1.views_playback import (
     PlaybackRetrieveView,
     PlaybackActivateView,
@@ -32,6 +25,7 @@ from streaming.api.v1.views_song_queue import (
 
 urlpatterns = [
     path("songs", SongCreateView.as_view(), name="songs-upload"),
+    path("songs/<uuid:uuid>", SongCollectionSongRetrieveView.as_view(), name="song-retrieve"),
     path("collections", SongCollectionCreateView.as_view(), name="collection-create"),
     path(
         "collections/<uuid:collection_uuid>/songs/<uuid:song_uuid>",
@@ -53,6 +47,11 @@ urlpatterns = [
     ),
     path(
         "collections/<uuid:uuid>",
+        SongCollectionDetailView.as_view(),
+        name="collection-retrieve",
+    ),
+    path(
+        "collections/detail/<uuid:uuid>",
         SongCollectionDetailView.as_view(),
         name="collection-detail",
     ),

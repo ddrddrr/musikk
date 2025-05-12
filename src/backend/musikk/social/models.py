@@ -10,24 +10,44 @@ from django.db import models
 from base.models import BaseModel
 
 
-class Comment(BaseModel):
-    MODEL_TYPE_MAP = {
+def on_content_type_delete(collector, field, sub_objs, using):
+    for publication in sub_objs:
+        if publication.type == Publication.PublicationType.COMMENT:
+            publication.is_deleted = True
+            publication.content = ""
+            publication.save()
+        else:
+            publication.content_type = None
+            publication.object_id = None
+            publication.content_object = None
+            publication.save()
+
+
+class Publication(BaseModel):
+    class PublicationType(models.TextChoices):
+        COMMENT = "comment", "Comment"  # on collections
+        POST = "post", "Post"  # user feed
+
+    RELATED_MODEL_TYPE_MAP = {
+        "user": "users.StreamingUser",
         "collection": "streaming.SongCollection",
-        "song": "streaming.BaseSong",
+        "song": "streaming.SongCollectionSong",
     }
 
+    type = models.CharField(choices=PublicationType.choices)
     content = models.CharField(max_length=255)
-    # TODO: change cascade to set default
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL
     )
     parent = models.ForeignKey(
-        "self", null=True, blank=True, related_name="replies", on_delete=models.CASCADE
+        "self", null=True, blank=True, related_name="replies", on_delete=models.SET_NULL
     )
     is_deleted = models.BooleanField(default=False)
 
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    object_id = models.PositiveIntegerField()
+    content_type = models.ForeignKey(
+        ContentType, null=True, blank=True, on_delete=on_content_type_delete
+    )
+    object_id = models.PositiveIntegerField(null=True, blank=True)
     content_object = GenericForeignKey()
 
     class Meta:
@@ -38,10 +58,17 @@ class Comment(BaseModel):
         self.content = ""
         self.save()
 
+    def get_root(self):
+        post = self
+        while post.parent is not None:
+            post = post.parent
+
+        return post
+
     @classmethod
     def get_model_from_type(cls, obj_type: str):
         try:
-            return apps.get_model(cls.MODEL_TYPE_MAP[obj_type])
+            return apps.get_model(cls.RELATED_MODEL_TYPE_MAP[obj_type])
         except KeyError:
             raise ValidationError(f"Invalid obj_type provided: {obj_type}")
 
@@ -49,13 +76,17 @@ class Comment(BaseModel):
     def get_type_from_model(cls, obj) -> str | None:
         model_label = f"{obj._meta.app_label}.{obj.__class__.__name__}"
         return next(
-            (key for key, value in cls.MODEL_TYPE_MAP.items() if value == model_label),
+            (
+                key
+                for key, value in cls.RELATED_MODEL_TYPE_MAP.items()
+                if value == model_label
+            ),
             None,
         )
 
     @staticmethod
     def lookup_related_instance(obj_type: str, obj_uuid: str | UUID):
-        model = Comment.get_model_from_type(obj_type)
+        model = Publication.get_model_from_type(obj_type)
         try:
             return model.objects.get(uuid=obj_uuid)
         except model.DoesNotExist:

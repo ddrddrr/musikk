@@ -3,7 +3,7 @@ from django.db import models
 
 from base.models import BaseModel
 from musikk.utils import image_path
-from social.models import Comment
+from social.models import Publication
 from streaming.stream import Stream
 from streaming.songs import SongCollectionSong, BaseSong
 
@@ -35,7 +35,7 @@ class SongCollection(BaseModel):
         "users.StreamingUser", through="streaming.SongCollectionAuthor"
     )
     streams = GenericRelation(Stream)
-    comments = GenericRelation(Comment)
+    comments = GenericRelation(Publication, limit_choices_to={"type": "comment"})
 
     def ordered_songs(self) -> list[BaseSong]:
         return [

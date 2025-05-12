@@ -6,7 +6,7 @@ from faker import Faker
 
 from users.tests.factories import BaseUserFactory, StreamingUserFactory
 from streaming.tests.factories import BaseSongFactory
-from streaming.api.v1.views import SongCollectionCreateView
+from streaming.api.v1.views_collection import SongCollectionCreateView
 from streaming.models import SongCollection
 from streaming.song_collections import SongCollectionAuthor
 

@@ -1,7 +1,7 @@
 from django.db import models
 
 from base.models import BaseModel
-from social.models import Comment
+from social.models import Publication
 from sse.config import EventChannels
 from sse.events import send_invalidate_event
 
@@ -21,10 +21,10 @@ class ReplyNotificationManager(models.Manager):
 
 class ReplyNotification(Notification):
     orig_comment = models.ForeignKey(
-        Comment, null=True, related_name="+", on_delete=models.SET_NULL
+        Publication, null=True, related_name="+", on_delete=models.SET_NULL
     )
     reply_comment = models.ForeignKey(
-        Comment, related_name="+", on_delete=models.CASCADE
+        Publication, related_name="+", on_delete=models.CASCADE
     )
 
     class Meta:

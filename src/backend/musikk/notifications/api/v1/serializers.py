@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from base.serializers import BaseModelSerializer
 from notifications.models import ReplyNotification, FriendRequestNotification
-from social.api.v1.serializers import CommentRetrieveSerializer
+from social.api.v1.serializers import PublicationRetrieveSerializer
 
 
 class BaseNotificationSerializer(BaseModelSerializer):
@@ -15,8 +15,8 @@ class BaseNotificationSerializer(BaseModelSerializer):
 
 
 class ReplyNotificationSerializer(BaseNotificationSerializer):
-    orig_comment = CommentRetrieveSerializer(read_only=True)
-    reply_comment = CommentRetrieveSerializer(read_only=True)
+    orig_comment = PublicationRetrieveSerializer(read_only=True)
+    reply_comment = PublicationRetrieveSerializer(read_only=True)
 
     class Meta(BaseNotificationSerializer.Meta):
         model = ReplyNotification
