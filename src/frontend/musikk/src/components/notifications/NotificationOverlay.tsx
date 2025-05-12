@@ -1,6 +1,6 @@
 import { useDeleteNotificationMutation } from "@/components/notifications/mutations.ts";
 import { NotificationListParams } from "@/components/notifications/queries.ts";
-import { IFriendRequestNotification } from "@/components/notifications/types.ts";
+import { IFriendRequestNotification, IReplyNotification } from "@/components/notifications/types.ts";
 import { Button } from "@/components/ui/button.tsx";
 import { useAddToFriendsMutation } from "@/components/user/mutations.tsx";
 import { memo } from "react";
@@ -24,6 +24,14 @@ export const NotificationOverlay = memo(function NotificationOverlay({ notificat
         }
     }
 
+    function handleNavigateReplyClick(notification: IReplyNotification) {
+        if (notification.reply_comment.type == "post") {
+            navigate(`/users/${notification.reply_comment.root_user_uuid}`);
+        } else {
+            navigate(`/collection/${notification.reply_comment.obj_uuid}/comments`);
+        }
+    }
+
     const { replies = [], friend_requests = [] } = notifications;
     const allNotifications = [
         ...replies.map((n) => ({ ...n, _type: "reply" as const })),
@@ -39,7 +47,7 @@ export const NotificationOverlay = memo(function NotificationOverlay({ notificat
                             className={`border border-black rounded-lg p-3 ${notification.is_read ? "bg-gray-50" : "bg-yellow-100"}`}
                         >
                             <div className="font-semibold text-sm">
-                                Reply: {notification.reply_comment.username ?? "Anonymous"}
+                                Reply: {notification.reply_comment.display_name ?? "Anonymous"}
                             </div>
                             <div className="text-xs text-gray-600 mt-1">{notification.orig_comment.content}</div>
                             <div className="text-sm text-gray-800 mt-2">{notification.reply_comment.content}</div>
@@ -52,11 +60,9 @@ export const NotificationOverlay = memo(function NotificationOverlay({ notificat
                                 </span>
                                 <Button
                                     className="text-xs px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
-                                    onClick={() =>
-                                        navigate(`/collection/${notification.reply_comment.obj_uuid}/comments`)
-                                    }
+                                    onClick={() => handleNavigateReplyClick(notification)}
                                 >
-                                    Go to reply section
+                                    Go to reply
                                 </Button>
                             </div>
                         </div>

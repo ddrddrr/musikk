@@ -5,7 +5,7 @@ import { memo } from "react";
 
 export const MainContent = memo(function MainContent() {
     return (
-        <div className="flex w-full h-screen">
+        <div className="flex w-full h-full">
             <LeftColumn />
             <CenterColumn />
             <RightColumn />

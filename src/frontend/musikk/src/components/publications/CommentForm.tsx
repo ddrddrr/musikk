@@ -1,6 +1,6 @@
-import { commentSchema } from "@/components/comments/commentFormSchema";
-import { addComment } from "@/components/comments/mutations";
-import { CommentObjectType, IComment } from "@/components/comments/types";
+import { commentSchema } from "@/components/publications/schemas.ts";
+import { commentCreate } from "@/components/publications/mutations";
+import { PublicationObjectType, IPublication } from "@/components/publications/types";
 import { UUID } from "@/config/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
@@ -10,10 +10,10 @@ import { z } from "zod";
 type CommentFormData = z.infer<typeof commentSchema>;
 
 interface CommentFormDataProps {
-    objType: CommentObjectType;
+    objType: PublicationObjectType;
     objUUID: UUID;
-    replyTo?: IComment;
-    setReplyTo?: (comment?: IComment) => void;
+    replyTo?: IPublication;
+    setReplyTo?: (comment?: IPublication) => void;
 }
 
 export function CommentForm({ objType, objUUID, replyTo, setReplyTo }: CommentFormDataProps) {
@@ -27,7 +27,7 @@ export function CommentForm({ objType, objUUID, replyTo, setReplyTo }: CommentFo
     });
 
     const addCommentMutation = useMutation({
-        mutationFn: addComment,
+        mutationFn: commentCreate,
         onSuccess: () => {
             reset();
             setReplyTo?.(undefined);
@@ -51,7 +51,7 @@ export function CommentForm({ objType, objUUID, replyTo, setReplyTo }: CommentFo
             {replyTo && (
                 <div className="text-xs text-gray-600 border border-blue-300 bg-blue-100 p-2 mb-2 rounded flex justify-between items-start">
                     <div className="truncate max-w-xs">
-                        <div className="font-medium truncate">{replyTo.username || "Anonymous"}</div>
+                        <div className="font-medium truncate">{replyTo.display_name || "Anonymous"}</div>
                         <div className="italic truncate">{replyTo.content}</div>
                     </div>
                     <button

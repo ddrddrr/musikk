@@ -1,9 +1,9 @@
-import { ISong } from "@/components/songs/types";
+import { ISongCollectionSong } from "@/components/song-collections/types.ts";
 import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 
 interface SongCardProps {
-    song: ISong;
+    collectionSong: ISongCollectionSong;
     size?: "small" | "medium" | "big";
 }
 
@@ -34,10 +34,10 @@ const sizeClasses = {
     },
 };
 
-export function SongCard({ song, size = "medium" }: SongCardProps) {
+export function SongCard({ collectionSong, size = "medium" }: SongCardProps) {
     const navigate = useNavigate();
     const sizes = sizeClasses[size];
-    const { uuid, title, authors, image } = song;
+    const { uuid, title, authors, image } = collectionSong.song;
 
     const authorNames = authors.map((a) => a.display_name).join(", ");
 

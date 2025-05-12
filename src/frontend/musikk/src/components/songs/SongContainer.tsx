@@ -13,8 +13,15 @@ interface SongContainerProps {
     buttonSize?: number;
     buttonClass?: string;
     titleMaxWidth?: string;
-    showImage?: boolean;
-    showAddToQueueButton?: boolean;
+    renderItems?: Partial<RenderItems>;
+}
+
+interface RenderItems {
+    image: boolean;
+    addToQueueButton: boolean;
+    addToLikedButton: boolean;
+    playButton: boolean;
+    contextMenu: boolean;
 }
 
 export const SongContainer = memo(function SongContainer({
@@ -22,60 +29,64 @@ export const SongContainer = memo(function SongContainer({
     buttonSize = 40,
     buttonClass = "p-2",
     titleMaxWidth = "max-w",
-    showImage = true,
-    showAddToQueueButton = true,
+    renderItems = {},
 }: SongContainerProps) {
     const collectionRemoveSongMutation = useMutation({ mutationFn: collectionRemoveSong });
+
+    const {
+        image = true,
+        addToQueueButton = true,
+        addToLikedButton = true,
+        playButton = true,
+        contextMenu = true,
+    } = renderItems;
 
     const song = collectionSong.song;
     const authors = song.authors.map((a) => a.display_name).join(", ");
 
-    return (
-        <ContextMenu>
-            <ContextMenuTrigger asChild>
-                <div className="flex items-center justify-between w-full h-full overflow-hidden">
-                    <div className="flex items-center gap-3 min-w-0">
-                        {showImage &&
-                            (song.image ? (
-                                <img
-                                    src={song.image}
-                                    alt=""
-                                    className="w-10 h-10 object-cover rounded-sm border border-black"
-                                />
-                            ) : (
-                                <div className="w-10 h-10 bg-gray-200 flex items-center justify-center rounded-sm border border-black">
-                                    <span className="text-gray-400 text-xl">♪</span>
-                                </div>
-                            ))}
-
-                        <div className="flex flex-col min-w-0">
-                            <p className={`font-bold text-sm text-black truncate ${titleMaxWidth}`}>{song.title}</p>
-                            <p className={`text-xs text-gray-600 truncate ${titleMaxWidth}`}>{authors}</p>
-                        </div>
-                    </div>
-
-                    <div className="flex items-center gap-2 shrink-0">
-                        <SongPlayButton collectionSong={collectionSong} size={buttonSize} className={buttonClass} />
-                        <SongAddToLikedButton
-                            collectionSong={collectionSong}
-                            size={buttonSize}
-                            className={buttonClass}
+    const content = (
+        <div className="flex items-center justify-between w-full h-full overflow-hidden">
+            <div className="flex items-center gap-3 min-w-0">
+                {image &&
+                    (song.image ? (
+                        <img
+                            src={song.image}
+                            alt=""
+                            className="w-10 h-10 object-cover rounded-sm border border-black"
                         />
-                        {showAddToQueueButton && (
-                            <SongAddToQueueButton
-                                collectionSong={collectionSong}
-                                size={buttonSize}
-                                className={buttonClass}
-                            />
-                        )}
-                    </div>
+                    ) : (
+                        <div className="w-10 h-10 bg-gray-200 flex items-center justify-center rounded-sm border border-black">
+                            <span className="text-gray-400 text-xl">♪</span>
+                        </div>
+                    ))}
+
+                <div className="flex flex-col min-w-0">
+                    <p className={`font-bold text-sm text-black truncate ${titleMaxWidth}`}>{song.title}</p>
+                    <p className={`text-xs text-gray-600 truncate ${titleMaxWidth}`}>{authors}</p>
                 </div>
-            </ContextMenuTrigger>
+            </div>
+
+            <div className="flex items-center gap-2 shrink-0">
+                {playButton && (
+                    <SongPlayButton collectionSong={collectionSong} size={buttonSize} className={buttonClass} />
+                )}
+                {addToLikedButton && (
+                    <SongAddToLikedButton collectionSong={collectionSong} size={buttonSize} className={buttonClass} />
+                )}
+                {addToQueueButton && (
+                    <SongAddToQueueButton collectionSong={collectionSong} size={buttonSize} className={buttonClass} />
+                )}
+            </div>
+        </div>
+    );
+
+    return contextMenu ? (
+        <ContextMenu>
+            <ContextMenuTrigger asChild>{content}</ContextMenuTrigger>
 
             <ContextMenuContent className="w-48 bg-white rounded-sm border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] py-1">
                 <ContextMenuItem
-                    className="flex items-center px-3 py-2 text-sm text-black 
-                        hover:bg-gray-100 transition-colors"
+                    className="flex items-center px-3 py-2 text-sm text-black hover:bg-gray-100 transition-colors"
                     onSelect={() =>
                         collectionRemoveSongMutation.mutate({
                             collectionUUID: collectionSong.song_collection,
@@ -88,5 +99,7 @@ export const SongContainer = memo(function SongContainer({
                 </ContextMenuItem>
             </ContextMenuContent>
         </ContextMenu>
+    ) : (
+        content
     );
 });

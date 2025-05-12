@@ -1,4 +1,4 @@
-import { CommentBox } from "@/components/comments/CommentBox";
+import { CommentBox } from "@/components/publications/CommentBox";
 import { fetchCollectionDetailed } from "@/components/song-collections/queries";
 import { SongCollectionHeader } from "@/components/song-collections/SongCollectionHeader";
 import { SongContainer } from "@/components/songs/SongContainer.tsx";

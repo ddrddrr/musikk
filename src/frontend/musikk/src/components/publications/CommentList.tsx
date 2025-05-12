@@ -1,10 +1,10 @@
-import { Comment } from "@/components/comments/Comment";
-import { IComment } from "@/components/comments/types";
+import { Comment } from "@/components/publications/Comment";
+import { IPublication } from "@/components/publications/types";
 
 interface CommentListProps {
-    comments: IComment[];
-    replyTo?: IComment;
-    setReplyTo: (comment: IComment) => void;
+    comments: IPublication[];
+    replyTo?: IPublication;
+    setReplyTo: (comment: IPublication) => void;
 }
 
 export function CommentList({ comments, replyTo, setReplyTo }: CommentListProps) {

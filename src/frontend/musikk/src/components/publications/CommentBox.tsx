@@ -1,18 +1,18 @@
-import { CommentForm } from "@/components/comments/CommentForm";
-import { CommentList } from "@/components/comments/CommentList";
-import { fetchCommentList } from "@/components/comments/queries";
-import { CommentObjectType, IComment } from "@/components/comments/types";
+import { CommentForm } from "@/components/publications/CommentForm";
+import { CommentList } from "@/components/publications/CommentList";
+import { fetchCommentList } from "@/components/publications/queries";
+import { PublicationObjectType, IPublication } from "@/components/publications/types";
 import { UUID } from "@/config/types";
 import { useQuery } from "@tanstack/react-query";
 import { memo, useEffect, useRef, useState } from "react";
 
 interface CommentBoxProps {
-    objType: CommentObjectType;
+    objType: PublicationObjectType;
     objUUID: UUID;
 }
 
 export const CommentBox = memo(function CommentBox({ objType, objUUID }: CommentBoxProps) {
-    const [replyTo, setReplyTo] = useState<IComment | undefined>(undefined);
+    const [replyTo, setReplyTo] = useState<IPublication | undefined>(undefined);
     const { isPending, error, data } = useQuery({
         queryKey: ["comments", objUUID],
         queryFn: () => fetchCommentList(objType, objUUID),

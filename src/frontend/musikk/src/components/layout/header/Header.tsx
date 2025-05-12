@@ -1,6 +1,6 @@
 import { NavigateToProfileButton } from "@/components/layout/header/NavigateToProfileButton";
 import { NotificationBox } from "@/components/notifications/NotificationBox";
-import { SearchBarWrapper } from "@/components/searchbar/SearchBarWrapper";
+import { SearchBar } from "@/components/search/SearchBar.tsx";
 import { Button } from "@/components/ui/button";
 import { Cog, Disc3, Upload } from "lucide-react";
 import { memo } from "react";
@@ -19,7 +19,7 @@ export const Header = memo(function Header() {
 
             <div className="flex-1 flex justify-center items-center">
                 <div className="flex items-center space-x-2">
-                    <SearchBarWrapper />
+                    <SearchBar />
                     <h1 className="text-xl font-bold">Musikk</h1>
                 </div>
             </div>

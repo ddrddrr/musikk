@@ -1,15 +1,29 @@
+import { IAttachment } from "@/components/publications/types";
+import { SearchWindow } from "@/components/search/SearchWindow";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Search } from "lucide-react";
-import { SearchBar } from "./SearchBar";
+import { useState } from "react";
 
-export function SearchBarWrapper() {
+interface SearchBarProps {
+    onItemSelect?: (obj: IAttachment) => void;
+    placeholder?: string;
+}
+
+export function SearchBar({ onItemSelect, placeholder = "Lookin' for something?" }: SearchBarProps) {
+    const [open, setOpen] = useState(false);
+
+    const handleSelect = (item: IAttachment) => {
+        onItemSelect?.(item);
+        setOpen(false);
+    };
+
     return (
         <div className="relative max-w-sm mx-4">
-            <Popover>
+            <Popover open={open} onOpenChange={setOpen}>
                 <PopoverTrigger asChild>
                     <button className="flex items-center w-full bg-white hover:bg-white/90 transition-colors rounded-full px-4 py-2 text-left text-sm text-black">
                         <Search className="w-4 h-4 mr-2" />
-                        <span className="opacity-70">Lookin' for something?</span>
+                        <span className="opacity-70">{placeholder}</span>
                     </button>
                 </PopoverTrigger>
                 <PopoverContent
@@ -17,7 +31,7 @@ export function SearchBarWrapper() {
                     align="center"
                 >
                     <div className="p-4">
-                        <SearchBar />
+                        <SearchWindow onItemSelect={handleSelect} />
                     </div>
                 </PopoverContent>
             </Popover>

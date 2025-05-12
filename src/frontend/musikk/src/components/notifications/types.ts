@@ -1,4 +1,4 @@
-import { IComment } from "@/components/comments/types.ts";
+import { IPublication } from "@/components/publications/types.ts";
 import { UUID } from "@/config/types.ts";
 
 interface INotification {
@@ -9,8 +9,8 @@ interface INotification {
 
 export interface IReplyNotification extends INotification {
     uuid: UUID;
-    orig_comment: IComment;
-    reply_comment: IComment;
+    orig_comment: IPublication;
+    reply_comment: IPublication;
 }
 
 export interface IFriendRequestNotification extends INotification {

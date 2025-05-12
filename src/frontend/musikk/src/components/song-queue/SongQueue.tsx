@@ -22,7 +22,10 @@ export function SongQueue() {
                     <ul className="space-y-3">
                         {nodes.map((node) => (
                             <li key={node.uuid}>
-                                <SongContainer collectionSong={node.collection_song} showAddToQueueButton={false} />
+                                <SongContainer
+                                    collectionSong={node.collection_song}
+                                    renderItems={{ addToQueueButton: false }}
+                                />
                             </li>
                         ))}
                     </ul>
