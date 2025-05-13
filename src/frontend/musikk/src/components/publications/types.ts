@@ -23,7 +23,3 @@ export interface IAttachment {
     repr: string;
     image?: string;
 }
-
-export interface IPost extends IPublication {
-    children: IPost[];
-}

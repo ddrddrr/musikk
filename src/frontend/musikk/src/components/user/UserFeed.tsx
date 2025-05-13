@@ -1,11 +1,11 @@
 import { PostForm } from "@/components/publications/PostForm";
 import { PostTree } from "@/components/publications/PostTree";
-import { useUserPostsFetchQuery } from "@/components/publications/queries";
+import { useUserPostsQuery } from "@/components/publications/queries";
 import { Card, CardContent } from "@/components/ui/card";
 import { UUID } from "@/config/types";
 
 export function UserFeed({ userUUID }: { userUUID: UUID }) {
-    const { data: posts, isPending, error } = useUserPostsFetchQuery(userUUID);
+    const { data: posts, isPending, error } = useUserPostsQuery(userUUID);
 
     if (error) {
         return <div className="text-red-500 text-center">Failed to load posts.</div>;

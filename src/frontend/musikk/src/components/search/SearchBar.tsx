@@ -7,9 +7,14 @@ import { useState } from "react";
 interface SearchBarProps {
     onItemSelect?: (obj: IAttachment) => void;
     placeholder?: string;
+    songMode?: "container" | "card";
 }
 
-export function SearchBar({ onItemSelect, placeholder = "Lookin' for something?" }: SearchBarProps) {
+export function SearchBar({
+    onItemSelect,
+    placeholder = "Lookin' for something?",
+    songMode = "container",
+}: SearchBarProps) {
     const [open, setOpen] = useState(false);
 
     const handleSelect = (item: IAttachment) => {
@@ -31,7 +36,7 @@ export function SearchBar({ onItemSelect, placeholder = "Lookin' for something?"
                     align="center"
                 >
                     <div className="p-4">
-                        <SearchWindow onItemSelect={handleSelect} />
+                        <SearchWindow onItemSelect={handleSelect} songMode={songMode} />
                     </div>
                 </PopoverContent>
             </Popover>

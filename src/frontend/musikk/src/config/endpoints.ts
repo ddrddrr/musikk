@@ -10,14 +10,14 @@ export const SongURLs = {
 };
 export const QueueURLs = {
     queue: `${BASE_URL}/song-queue`,
-    addSong: (songUUID: string) => `${BASE_URL}/song-queue/add-song/${songUUID}`,
-    addCollection: (collectionUUID: string) => `${BASE_URL}/song-queue/add-collection/${collectionUUID}`,
-    setHeadSong: (songUUID: string) => `${BASE_URL}/song-queue/set-head-song/${songUUID}`,
-    setHeadCollection: (songUUID: string) => `${BASE_URL}/song-queue/set-head-collection/${songUUID}`,
+    addSong: (songUUID: UUID) => `${BASE_URL}/song-queue/add-song/${songUUID}`,
+    addCollection: (collectionUUID: UUID) => `${BASE_URL}/song-queue/add-collection/${collectionUUID}`,
+    setHeadSong: (songUUID: UUID) => `${BASE_URL}/song-queue/set-head-song/${songUUID}`,
+    setHeadCollection: (songUUID: UUID) => `${BASE_URL}/song-queue/set-head-collection/${songUUID}`,
     shiftHead: `${BASE_URL}/song-queue/shift-head`,
-    shiftHeadTo: (nodeUUID: string) => `${BASE_URL}/song-queue/shift-head/${nodeUUID}`,
+    shiftHeadTo: (nodeUUID: UUID) => `${BASE_URL}/song-queue/shift-head/${nodeUUID}`,
     shiftHeadBackwards: `${BASE_URL}/song-queue/shift-head-backwards`,
-    removeNode: (nodeUUID: string) => `${BASE_URL}/song-queue/remove-node/${nodeUUID}`,
+    removeNode: (nodeUUID: UUID) => `${BASE_URL}/song-queue/remove-node/${nodeUUID}`,
     clearQueue: `${BASE_URL}/song-queue/clear`,
     appendRandom: `${BASE_URL}/song-queue/append-random`,
 };
@@ -25,35 +25,40 @@ export const CollectionURLs = {
     collectionCreate: `${BASE_URL}/collections`,
     collectionLatest: `${BASE_URL}/collections/latest`,
     collectionPersonal: `${BASE_URL}/collections/personal`,
-    collectionRetrieve: (collectionUUID: string) => `${BASE_URL}/collections/${collectionUUID}`,
-    collectionDetail: (collectionUUID: string) => `${BASE_URL}/collections/detail/${collectionUUID}`,
-    collectionAddToLiked: (collectionUUID: string) => `${BASE_URL}/collections/${collectionUUID}/like`,
-    collectionAddSong: (collectionUUID: string, songUUID: string) =>
+    collectionRetrieve: (collectionUUID: UUID) => `${BASE_URL}/collections/${collectionUUID}`,
+    collectionDetail: (collectionUUID: UUID) => `${BASE_URL}/collections/detail/${collectionUUID}`,
+    collectionAddToLiked: (collectionUUID: UUID) => `${BASE_URL}/collections/${collectionUUID}/like`,
+    collectionAddSong: (collectionUUID: UUID, songUUID: UUID) =>
         `${BASE_URL}/collections/${collectionUUID}/songs/${songUUID}`,
-    collectionRemoveSong: (collectionUUID: string, songCollectionSongUUID: string) =>
+    collectionRemoveSong: (collectionUUID: UUID, songCollectionSongUUID: UUID) =>
         `${BASE_URL}/collections/${collectionUUID}/songs/${songCollectionSongUUID}`,
-    likedSongsAddSong: (songUUID: string) => `${BASE_URL}/liked-songs/add-song/${songUUID}`,
+    likedSongsAddSong: (songUUID: UUID) => `${BASE_URL}/liked-songs/add-song/${songUUID}`,
 };
 export const CommentURLs = {
-    commentList: (objType: PublicationObjectType, objUUID: string) => `${BASE_URL}/comments/${objType}/${objUUID}`,
-    commentCreate: (objType: PublicationObjectType, objUUID: string) => `${BASE_URL}/comments/${objType}/${objUUID}`,
+    commentList: (objType: PublicationObjectType, objUUID: UUID) => `${BASE_URL}/comments/${objType}/${objUUID}`,
+    commentCreate: (objType: PublicationObjectType, objUUID: UUID) => `${BASE_URL}/comments/${objType}/${objUUID}`,
 };
 export const PostURLs = {
-    userPostCreate: (userUUID: string) => `${BASE_URL}/posts/users/${userUUID}`,
-    userPostList: (userUUID: string) => `${BASE_URL}/posts/users/${userUUID}`,
+    postCreate: `${BASE_URL}/posts`,
+    userPostList: (userUUID: UUID) => `${BASE_URL}/posts/users/${userUUID}`,
+    postRetrieve: (postUUID: UUID) => `${BASE_URL}/posts/${postUUID}`,
+    postChildrenList: (postUUID: UUID) => `${BASE_URL}/posts/${postUUID}/children`,
+    postLatestFollowedList: `${BASE_URL}/posts/latest`,
 };
 export const NotificationURLs = {
     notificationsSetRead: `${BASE_URL}/notifications`,
     notificationsList: `${BASE_URL}/notifications`,
-    friendRequestCreate: (receiverUUID: string) => `${BASE_URL}/notifications/friend-requests/${receiverUUID}`,
-    notificationsDelete: (notificationUUID: string) => `${BASE_URL}/notifications/${notificationUUID}`,
+    friendRequestCreate: (receiverUUID: UUID) => `${BASE_URL}/notifications/friend-requests/${receiverUUID}`,
+    notificationsDelete: (notificationUUID: UUID) => `${BASE_URL}/notifications/${notificationUUID}`,
 };
 export const UserURLs = {
-    userDetail: (userUUID: string) => `${BASE_URL}/users/${userUUID}`,
+    userDetail: (userUUID: UUID) => `${BASE_URL}/users/${userUUID}`,
     userCreate: `${BASE_URL}/users`,
-    userFriends: `${BASE_URL}/users/friends`,
-    userFriendsAccept: (senderUUID: string) => `${BASE_URL}/users/friends/${senderUUID}`,
-    userUpdate: (userUUID: string) => `${BASE_URL}/users/${userUUID}`,
+    userFriends: (userUUID: UUID) => `${BASE_URL}/users/${userUUID}/friends`,
+    userFriendsAccept: (userUUID: UUID, senderUUID: UUID) => `${BASE_URL}/users/${userUUID}/friends/${senderUUID}`,
+    userUpdate: (userUUID: UUID) => `${BASE_URL}/users/${userUUID}`,
+    artistFollowersList: (artistUUID: UUID) => `${BASE_URL}/users/artists/${artistUUID}/followers`,
+    artistFollowersCreate: (artistUUID: UUID) => `${BASE_URL}/users/artists/${artistUUID}/followers`,
     tokenGet: `${BASE_URL}/token/`,
     tokenRefresh: `${BASE_URL}/token/refresh/`,
 };

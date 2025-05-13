@@ -19,7 +19,6 @@ export async function commentCreate({ objType, objUUID, content, replyToUUID }: 
 }
 
 interface IUserPostCreateParams {
-    userUUID: string;
     objType?: PublicationObjectType;
     objUUID?: string;
     content: string;
@@ -35,7 +34,7 @@ export function useUserPostCreateMutation() {
                 obj_uuid: params.objUUID,
                 parent: params.replyToUUID,
             };
-            api.post(PostURLs.userPostCreate(params.userUUID), data);
+            api.post(PostURLs.postCreate, data);
         },
     });
 }
