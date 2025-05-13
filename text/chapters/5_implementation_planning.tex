@@ -1,67 +1,81 @@
 \chapter{Implementation Planning}\label{chap:planning}
 
-This section provides an insight into the high-level technology choices behind the application.
+This section explains the high-level technology choices behind the application.
 In addition, UML diagrams are provided as an overview of the system.
 
-The created platform is built using the Model-View-Controller \cite{mvc} architectural pattern.
-It is split into three major parts:
+The created platform is built using the Model-View-Controller \cite{mvc} architectural pattern
+and is split into three major parts:
 \begin{itemize}
     \item \textbf{Backend.} Implements all the data-related logic and processing.
     \item \textbf{API.} Is responsible for transferring the data to the frontend and receiving commands from it.
-    \item \textbf{Frontend.} Presents the data to the User and accepts his commands.
+    \item \textbf{Frontend.} Presents the data to the User and accepts their commands.
 \end{itemize}
 
 
 \section{Backend}
-Python was chosen as the main language for the Backend part of the application.
-It has support for all the needed instruments, such as external processes calls,
+Python\cite{python} was chosen as the main language for this part of the application.
+It has support for all the needed instruments, such as external process calls,
 file handling, and asynchronous code execution. Moreover, it has a flexible and straightforward
 syntax allowing for rapid development.
 As this project is mostly IO-driven and most of the processor-heavy operations are offloaded to external processes,
 i.e. no thread programming is used, Python's performance limitations\cite{gil} will not have such a drastic effect.
+
+In order to avoid errors related to building the system from the ground-up
+and shorten the time of the development, it was decided that a framework would be used.
 
 \subsection{Framework Comparison}
 Currently, there are 3 well-developed and widely-used WEB frameworks available for Python:
 
 \begin{itemize}
     \item \textbf{FastAPI} \\
-    'FastAPI is a modern, fast (high-performance), web framework for building APIs
-    with Python, based on standard Python type hints.'~\cite{fastapi}. \\
-    This framework provides a lightweight approach to API declaration, without adding almost no overhead.
-    It has the best integration with API documentation standards such as
-    Open API and API representation tools, e.g. Swagger.
+    FastAPI is a comparably quick framework that can be on par in terms of speed with frameworks from other languages,
+    such as NodeJS or Go~\cite{fastapi}.
+    As the official website states:
+    \begin{quote}
+        'FastAPI is a modern, fast (high-performance), web framework for building APIs
+        with Python, based on standard Python type hints.'~\cite{fastapi}. \\
+    \end{quote}
+    On top of that, it offers full integration with API documentation standards such as
+    Open API, and API representation tools, e.g. Swagger.
 
     However, it is relatively new and basic; given the requirements and the fact that
-    few additional packages are available - a lot of custom code would have
+    few additional packages are available for this framework - lots of custom code would have
     to be written on top, which is a disadvantage for this specific project.
 
     \item \textbf{Django} \\
     Django is a 'batteries-included' framework, in a sense that almost everything -
     from access control and database management to API routing and admin interface,
     is a part of it.\cite{django}
-    Additionally, Django offers an extensive ecosystem, including support for RESTful APIs through
+    Additionally, Django offers an extensive ecosystem, including support for REST APIs through
     \texttt{django-rest-framework}\cite{drf}, various authentication methods,
-    and multiple data transfer protocols. Real-time communication, such as WebSockets and Server-Sent Events,
+    and multiple data transfer protocols. Even two-way communication, such as WebSockets and Server-Sent Events,
     is supported via the \texttt{django-channels}\cite{django_channels} package.
 
-    Some of the notable drawbacks include its opinionated design choices and the size of the application,
-    as it includes a lot of parts that may not be used.
+    Some of the notable drawbacks include its opinionated design choices, due to which it can be hard to add custom logic.
+    In addition, the size and speed of the application can be worse than in the FastAPI case,
+    as this framework includes a lot of parts that may not be used but still bloat and slow down the system.
 
     \item \textbf{Flask} \\
     Flask is a micro-framework built on the WSGI interface.
     It is well-suited for smaller applications and follows a minimalist philosophy
     in selecting components that are used.\cite{flask} Most additional functionality is provided by
-    the community and distributed as external packages.
+    the community and is distributed as external packages.
 
     One of the main downsides of Flask is that it does not integrate well enough with the ASGI
-    interface which is necessary for proper handling of Server-Client path of communication.
+    interface which is necessary for the proper handling of the Server-Client communication part.
     Moreover, strongly relying on external packages can pose potential security risks.
 \end{itemize}
 
-Of the three frameworks Django is the most suitable one.
+Of the three frameworks Django is the more suitable one.
 Most of the application logic will be handled by the backend, heavily utilizing
-Django's ORM for most database tasks. On top of that, a JSON-based API can be implemented
-using `django-rest-framework`, simplifying communication with the frontend.
+Django's ORM for most database tasks, greatly simplifying the development. For other frameworks a separate library would
+have been needed to be used, such as SQLAlchemy\cite{sqlalchemy}.
+On top of that, a JSON-based API could be implemented using `django-rest-framework`,
+which would significantly reduce the amount of boilerplate code needed for the application.
+And lastly, Django has the biggest community acceptance, which can be verified, for example, by looking at the
+StackOverflow\cite{stackoverflow} search results for individual frameworks.\cite{so_fastapi},\cite{so_django},\cite{so_flask}
+
+Being established what will be used for the backend application logic, the database had to be chosen next.
 
 \subsection{Database}
 Below is the comparison of the databases that Django framework supports.
@@ -71,19 +85,22 @@ MariaDB is fully compatible with it, while providing multiple enhancements.
 
 \begin{itemize}
     \item \textbf{SQLite} \\
-    'SQLite is an embedded SQL database engine.
-    Unlike most other SQL databases, SQLite does not have a separate
-    server process. SQLite reads and writes directly to ordinary disk
-    files.'\cite{sqlite}. As the result of SQLite's design it is suitable
-    in situations, where a simple storage is needed and write operations are limited.
-    It is lightweight, but is struggles in high workload situations; many issues can arise
-    in architectures with a sharded database placed on multiple servers.
+    \begin{quote}
+        'SQLite is an embedded SQL database engine.
+        Unlike most other SQL databases, SQLite does not have a separate
+        server process. SQLite reads and writes directly to ordinary disk
+        files.'\cite{sqlite}.
+    \end{quote}
+    As the result of SQLite's design it is suitable
+    in situations, where simple storage is needed and write operations are limited.
+    Moreover, as SQLite stores all information in a file on a disk, future scalability could be an issue;
+    changing the database mid-way is often hard.
 
     \item \textbf{PostgreSQL} \\
     PostgreSQL is a traditional object-relational database that is almost fully compatible with the SQL standard
     and is a de-facto standard in most modern application. It offers a lot of supplementary features,
-    such as complex data types, proper replication and logging, full text search and many others.
-    In addition to that, PostgreSQL provides many extensions which can tailor the database to any specific application.
+    such as complex data types, proper replication and logging, full text search, and many others.
+    In addition to that, PostgreSQL provides extensions which can fit the database to the specific application.
     \cite{postgres}
     Django has the best support for it, adding a lot of wrappers for Postgre's custom logic.\cite{django_postgres}
 
@@ -93,13 +110,14 @@ MariaDB is fully compatible with it, while providing multiple enhancements.
     which allows you to choose different engine per table for the needed workload.\cite{mariadb}
     If set up right, it can also be lightweight and use less system resources than PostgreSQL.
     However, it is not fully in line with the SQL standard -
-    e.g. limited ALTER statements and GROUP BY handling\cite{dbfunctions}.
+    e.g. limited ALTER statements and GROUP BY handling\cite{dbfunctions} which often lead to unexpected time losses
+    with debugging.
     And as a consequence of its lesser acceptance\cite{dbrank},
     the community support for the non-MySQL parts of the database is not as broad.
 \end{itemize}
 Three main points secured PostgreSQL as the database of choice:
 \begin{enumerate}
-    \item More advanced full text search functionality (discussed in ...) compared to MariaDB.
+    \item More advanced full text search functionality compared to SQLite and MariaDB.
     \item Integrated Django wrappers around PostgreSQL, which greatly reduce the amount of handwritten SQL.
     \item Superior syntax, command-line interface, and error handling/messages.
 \end{enumerate}
@@ -107,17 +125,57 @@ Three main points secured PostgreSQL as the database of choice:
 
 \section{Frontend}
 Contrary to popular belief, JavaScript is not the only language, in which the user interface part
-of the service can be written. Rust, Python and even C could be used to create a working UI.
-However, it comes with a lot of drawbacks - they are not directly supported by the browsers, which
-means that the code has to be complied to WebAssembly. This adds
+of the service can be written. Rust, Python and even C could be used to create the frontend of the application.
+However, these languages are not directly supported by the browsers, which
+means that the code has to be complied to WebAssembly first. This adds
 additional overhead to the development cycle, introduces new toolchains that add another level of
-complexity and more often than not results in bigger bundle(hence, download) sizes.
+complexity and more often than not results in bigger bundle(hence - download) sizes.
 That is why the Frontend of the application is written in JavaScript and only JS frameworks are
 compared.
 
-- React.
-- Svelte
-- Vue
+Modern JavaScript development is dominated by three main frameworks: React, Vue, and Svelte.\cite{webstats}
+Each of them introduces a different approach to building frontend applications and comes with its own set of trade-offs.
+
+\begin{itemize}
+    \item \textbf{React} \\
+    React is a JavaScript library developed by Facebook for building interactive user interfaces.
+    It relies heavily on component-based architecture and promotes a declarative way of designing views.\cite{react}
+
+    One of React’s strengths lies in its ecosystem and long-term stability.
+    It is supported by a wide range of third-party packages, developer tools, and documentation.
+    Additionally, React is well-maintained by a large team and a lot of examples of working, deployed applications can be found.
+
+    However, one of the main benefits and drawbacks at the same time is its virtual DOM abstraction.
+    It introduces an additional processing layer which, while optimizing updates,
+    can become less efficient than compiled approaches in specific scenarios.
+
+    \item \textbf{Vue} \\
+    Vue aims to combine the best aspects of React and Angular,
+    offering a simpler learning curve and more opinionated design choices.\cite{vue}
+    It features two-way binding, directives, and an intuitive templating syntax,
+    which can lead to faster initial development.
+
+    Vue's ecosystem includes built-in solutions for routing and state management,
+    which simplifies architectural decisions.
+    The ecosystem, while active, is smaller than React’s, and large-scale adoption remains limited.\cite{webstats}
+    That often leads to the implementation of features that are already present in the React ecosystem.
+    \item \textbf{Svelte} \\
+    Svelte introduces a different approach by compiling components at build time into JavaScript code,
+    removing the need for a virtual DOM.\cite{svelte}
+
+    As a result, Svelte offers smaller bundle sizes and faster runtime performance for simpler apps.
+    It also provides a clean and concise syntax that minimizes boilerplate.
+    Despite this, Svelte is still a younger framework with limited tooling and fewer mature libraries.
+    Its compile-time model can also introduce hidden complexity, especially when debugging or integrating with external
+    JS code.
+\end{itemize}
+
+While all three frameworks offer modern development patterns and are capable of being used in production applications,
+React was chosen.
+Its maturity, extensive ecosystem, and widespread adoption help with the development speed.
+Despite some verbosity and a steeper learning curve for advanced concepts,
+React’s component model, community support,
+and alignment with industry standards make it the most suitable option for the frontend part of this application.
 
 
 \section{Audio Transfer}
@@ -201,13 +259,53 @@ application scales horizontally and, most importantly, do not use the database t
 
 
 \section{Server-Client Communication}
-As it was pointed out before, the communication in the application is going to be two-way.
+As it was pointed out before, the communication in the application is going to be bi-directional.
 Because this is a WEB-application, techniques such as Webhooks, gRPC, Pub/Sub and
-others that are not directly supported by browsers will not be discussed. Traditional polling is not discussed due
-to the performance limitations and its inefficiency. P2P techniques(e.g. WebRTC DataChannels) will not be listed,
+others, that are not directly supported by browsers, will not be discussed. Traditional polling is also not mentioned due
+to the performance limitations and its inefficiency. P2P techniques(e.g. WebRTC) will not be listed,
 because the architecture of the application is client-server, not peer-to-peer.
 
-- Long-Polling
-- Server Sent Events
-- Websockets
-- WebWorkers Push API
+\begin{itemize}
+    \item \textbf{Long-Polling} \\
+    Long-polling is a technique where the client sends a request and waits until the server responds,
+    potentially holding the request open for an extended period.
+    Once a response is received, the client immediately issues another request.
+    While this method works in environments where other techniques are not available,
+    it introduces unnecessary overhead by repeatedly opening and closing HTTP connections.
+    It also increases server load under high traffic, proving not to be suitable for the logic that will be outlined
+    in \ref{chapter:implementation.}
+
+    \item \textbf{Server-Sent Events (SSE)} \\
+    SSE is a one-way communication protocol that allows the server to push updates to the client over a
+    single HTTP connection. It is simpler to implement, works over standard HTTP/1.1, which helps with debugging,
+    and is supported by most modern browsers.\cite{sse}
+    SSE is limited to server-to-client communication, but for applications where the client initiates
+    most of the interactions, this limitation is not critical. In addition, it is easy to set up using the
+    \texttt{django-evenstream}\cite{django_sse} package that allows to integrate
+    SSE with regular \texttt{django-rest-framework} components.
+
+    \item \textbf{WebSockets} \\
+    WebSockets provide full-duplex communication over a single persistent TCP connection.
+    This method allows messages to be sent both ways at any moment and is optimal for real-time applications\cite{websockets}.
+    However, implementing WebSockets requires additional infrastructure and logic for
+    managing connections and message routing. In the case of Django, support for WebSockets is realized via
+    \texttt{django-channels} package but all of the communication handling still has to be implemented by the developer,
+    which leads to a prolonged development times.
+
+    Furthermore, WebSocket traffic is not always reliably supported in all environments.
+    Firewalls and corporate proxies may block or degrade persistent TCP connections,
+    which can affect delivery or availability.
+
+    \item \textbf{Web Workers Push API} \\
+    This technique allows background scripts in the browser(service workers) to receive push notifications from the server,
+    even when the web page is not active.\cite{pushapi} While useful for notification systems, were message
+    delivery time does not play a big role,
+    it is not suitable for interaction that require an immediate response.
+\end{itemize}
+
+Although WebSockets offer the most complete solution for real-time two-way communication and are well-suited
+for the target architecture, the complexity of their setup in Django makes them less practical in development.
+Therefore, Server-Sent Events were chosen as the communication method.
+SSE provides adequate performance and responsiveness for the expected interaction model while reducing implementation overhead.
+
+
