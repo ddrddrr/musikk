@@ -7,6 +7,8 @@ from users.user_base import BaseUser
 
 
 class BaseUserSerializer(BaseModelSerializer):
+    role = serializers.SerializerMethodField(read_only=True)
+
     class Meta(BaseModelSerializer.Meta):
         model = BaseUser
         fields = BaseModelSerializer.Meta.fields + [
@@ -14,10 +16,19 @@ class BaseUserSerializer(BaseModelSerializer):
             "bio",
             "display_name",
             "avatar",
+            "role",
         ]
         extra_kwargs = {
             "email": {"read_only": True},
         }
+
+    def get_role(self, obj):
+        role = "baseuser"
+        if getattr(obj, "streaminguser", None):
+            role = "streaminguser"
+            if getattr(obj.streaminguser, "artist", None):
+                role = "artist"
+        return role
 
 
 class ResetPasswordSerializer(serializers.ModelSerializer):

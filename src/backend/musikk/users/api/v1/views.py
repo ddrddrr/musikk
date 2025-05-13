@@ -26,7 +26,7 @@ from users.api.v1.serializers_extended import (
     ArtistCreateSerializer,
 )
 from users.user_base import BaseUser
-from users.users_extended import StreamingUser
+from users.users_extended import StreamingUser, Artist
 from users.utils import password_reset_token_generator
 
 
@@ -84,7 +84,7 @@ class ResetPasswordView(UpdateAPIView):
 
         if not password_reset_token_generator.check_token(user=user, token=token):
             return Response(
-                {"detail": "UUID or token are invalid, or the token is expired."},
+                {"detail": "UUID or token are invalid."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -99,24 +99,77 @@ class UserFriendsView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
-        user = request.user.streaminguser
-        friends = BaseUserSerializer(user.friends.all(), many=True).data
-        return Response(status=status.HTTP_200_OK, data={"friends": friends})
+        user = get_object_or_404(StreamingUser, uuid=kwargs["uuid"])
+        friends = BaseUserSerializer(
+            user.friends.all(), many=True, context={"request": request}
+        ).data
+        return Response(status=status.HTTP_200_OK, data=friends)
 
 
-class UserFriendsAcceptView(APIView):
+class UserFollowedView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        user = get_object_or_404(StreamingUser, uuid=kwargs["uuid"])
+        followed = BaseUserSerializer(
+            user.followed.all(), many=True, context={"request": request}
+        ).data
+        return Response(status=status.HTTP_200_OK, data=followed)
+
+
+class UserFriendsCreateDeleteView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
-        user = request.user.streaminguser
-        sender_uuid = kwargs.get("uuid")
-        sender = get_object_or_404(StreamingUser, uuid=sender_uuid)
+        user = get_object_or_404(StreamingUser, uuid=kwargs.get("user_uuid"))
+        sender = get_object_or_404(StreamingUser, uuid=kwargs.get("friend_uuid"))
         get_object_or_404(
             FriendRequestNotification,
             sender=sender,
             receiver=user,
         )
         user.friends.add(sender)
+        send_invalidate_event(
+            EventChannels.user_events(user.uuid), ["user", "friends", str(user.uuid)]
+        )
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def delete(self, request, *args, **kwargs):
+        user = get_object_or_404(StreamingUser, uuid=kwargs.get("user_uuid"))
+        friend = get_object_or_404(StreamingUser, uuid=kwargs.get("friend_uuid"))
+        user.friends.remove(friend)
+        send_invalidate_event(
+            EventChannels.user_events(user.uuid), ["user", "friends", str(user.uuid)]
+        )
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class ArtistFollowersView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        artist = request.user.streaminguser.artist
+        followers = BaseUserSerializer(
+            artist.followers.all(), many=True, context={"request": request}
+        ).data
+        return Response(status=status.HTTP_200_OK, data=followers)
+
+    def post(self, request, *args, **kwargs):
+        artist = get_object_or_404(Artist, uuid=kwargs.get("uuid"))
+        user = request.user.streaminguser
+        user.followed.add(artist)
+        send_invalidate_event(
+            EventChannels.user_events(user.uuid), ["user", "followed", str(user.uuid)]
+        )
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def delete(self, request, *args, **kwargs):
+        artist = get_object_or_404(Artist, uuid=kwargs.get("uuid"))
+        user = request.user.streaminguser
+        user.followed.remove(artist)
+        send_invalidate_event(
+            EventChannels.user_events(user.uuid), ["user", "followed", str(user.uuid)]
+        )
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 

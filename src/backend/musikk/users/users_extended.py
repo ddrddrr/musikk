@@ -14,9 +14,10 @@ class StreamingUserManager(UserManager):
     pass
 
 
-# TODO: set symmetrical false for followers(artist) when added
 class StreamingUser(BaseUser):
     friends = models.ManyToManyField("self")
+    followed = models.ManyToManyField("users.Artist", related_name="followers")
+
     playback_state = models.OneToOneField(
         "streaming.PlaybackState", on_delete=models.PROTECT
     )
