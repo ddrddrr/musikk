@@ -24,6 +24,7 @@ export function ProfileForm() {
             bio: user?.bio,
         },
     });
+
     const mutation = useUserUpdateMutation();
 
     const onSubmit = (values: ProfileFormValues) => {
@@ -45,21 +46,24 @@ export function ProfileForm() {
     if (!user) return null;
 
     return (
-        <>
-            <Avatar className="rounded-sm w-10 h-10">
-                <AvatarImage src={user.avatar} alt={user.display_name} className="object-cover" />
-            </Avatar>
+        <div className="max-w-xl mx-auto space-y-6 bg-white p-6 rounded-2xl">
+            <div className="flex items-center space-x-4">
+                <Avatar className="rounded-md w-12 h-12">
+                    <AvatarImage src={user.avatar} alt={user.display_name} className="object-cover" />
+                </Avatar>
+                <div className="text-lg font-medium">{user.display_name}</div>
+            </div>
 
             <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
                     <FormField
                         control={form.control}
                         name="display_name"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Display Name</FormLabel>
+                                <FormLabel className="text-sm font-semibold">Display Name</FormLabel>
                                 <FormControl>
-                                    <Input {...field} />
+                                    <Input {...field} className="mt-1" />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -71,9 +75,13 @@ export function ProfileForm() {
                         name="bio"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Your Bio</FormLabel>
+                                <FormLabel className="text-sm font-semibold">Your Bio</FormLabel>
                                 <FormControl>
-                                    <Textarea {...field} className="resize-none max-h-40 overflow-y-auto" />
+                                    <Textarea
+                                        {...field}
+                                        className="mt-1 resize-none max-h-40 overflow-y-auto"
+                                        rows={4}
+                                    />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -82,16 +90,16 @@ export function ProfileForm() {
 
                     <ImageField name="avatar" />
 
-                    <div className="mt-4">
-                        <Button type="submit" disabled={mutation.isPending}>
-                            {mutation.isPending ? "Sending…" : "Send"}
+                    <div className="pt-2">
+                        <Button type="submit" disabled={mutation.isPending} className="w-full">
+                            {mutation.isPending ? "Sending…" : "Save Changes"}
                         </Button>
                     </div>
 
-                    {errorMessage && <p className="mt-2 text-sm text-red-600">{errorMessage}</p>}
-                    {successMessage && <p className="mt-2 text-sm text-green-600">{successMessage}</p>}
+                    {errorMessage && <p className="mt-2 text-sm text-red-600 text-center">{errorMessage}</p>}
+                    {successMessage && <p className="mt-2 text-sm text-green-600 text-center">{successMessage}</p>}
                 </form>
             </Form>
-        </>
+        </div>
     );
 }

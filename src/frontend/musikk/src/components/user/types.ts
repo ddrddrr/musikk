@@ -7,6 +7,7 @@ export interface IUser {
     display_name: string;
     avatar: URL;
     bio: string;
+    role: "streaminguser" | "artist";
 }
 
 export const ProfileFormSchema = z.object({

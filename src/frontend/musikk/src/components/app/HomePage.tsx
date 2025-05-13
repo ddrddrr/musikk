@@ -6,6 +6,7 @@ import { EventURLs } from "@/config/endpoints.ts";
 import { useEvent } from "@/hooks/useEvent.ts";
 import { PlaybackProvider } from "@/providers/PlaybackProvider.tsx";
 import { UserCollectionsProvider } from "@/providers/UserCollectionsProvider.tsx";
+import { UserConnectionsProvider } from "@/providers/UserConnectionsProvider.tsx";
 import { UserContext } from "@/providers/userContext.ts";
 import { memo, useContext, useMemo } from "react";
 
@@ -21,12 +22,14 @@ export const HomePage = memo(function HomePage() {
     return (
         <PlaybackProvider>
             <UserCollectionsProvider>
-                <div className="flex flex-col h-screen bg-gray-200">
-                    <Header />
-                    <MainContent />
-                    <Toaster />
-                    <PlayerBox />
-                </div>
+                <UserConnectionsProvider>
+                    <div className="flex flex-col h-screen bg-gray-200">
+                        <Header />
+                        <MainContent />
+                        <Toaster />
+                        <PlayerBox />
+                    </div>
+                </UserConnectionsProvider>
             </UserCollectionsProvider>
         </PlaybackProvider>
     );

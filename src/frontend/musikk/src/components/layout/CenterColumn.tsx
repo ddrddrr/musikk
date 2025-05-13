@@ -1,5 +1,6 @@
 import { Feed } from "@/components/layout/Feed";
 import { SongCollectionContainer } from "@/components/song-collections/SongCollectionContainer";
+import { Connections } from "@/components/user/Connections.tsx";
 import { ProfilePage } from "@/components/user/ProfilePage";
 import { Route, Routes, useParams } from "react-router-dom";
 
@@ -11,6 +12,7 @@ export function CenterColumn() {
                     <Route path="/" element={<Feed />} />
                     <Route path="collection/:uuid/*" element={<SongCollectionContainerWrapper />} />
                     <Route path="users/:uuid" element={<ProfilePage />} />
+                    <Route path="users/:uuid/connections" element={<Connections />} />
                 </Routes>
             </div>
         </div>

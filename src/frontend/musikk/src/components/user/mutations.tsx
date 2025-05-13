@@ -34,10 +34,39 @@ export function useFriendRequestMutation() {
     });
 }
 
+interface AddToFriendsParams {
+    userUUID: UUID;
+    senderUUID: UUID;
+}
+
 export function useAddToFriendsMutation() {
     return useMutation({
-        mutationFn: async (senderUUID: UUID) => {
-            return await api.post(UserURLs.userFriendsAccept(senderUUID));
+        mutationFn: async ({ userUUID, senderUUID }: AddToFriendsParams) => {
+            return await api.post(UserURLs.userFriendsAccept(userUUID, senderUUID));
+        },
+    });
+}
+
+export function useDeleteFriendMutation() {
+    return useMutation({
+        mutationFn: async ({ userUUID, senderUUID }: AddToFriendsParams) => {
+            return await api.delete(UserURLs.userFriendsDelete(userUUID, senderUUID));
+        },
+    });
+}
+
+export function useFollowArtistMutation() {
+    return useMutation({
+        mutationFn: async (artistUUID: UUID) => {
+            return await api.post(UserURLs.followArtist(artistUUID));
+        },
+    });
+}
+
+export function useRemoveFollowedArtistMutation() {
+    return useMutation({
+        mutationFn: async (artistUUID: UUID) => {
+            return await api.delete(UserURLs.removeFollowedArtist(artistUUID));
         },
     });
 }

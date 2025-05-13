@@ -36,7 +36,8 @@ export function LoginForm() {
         setLoading(true);
         try {
             await login(values.email, values.password);
-            client.refetchQueries({ queryKey: ["user"] });
+
+            client.fetchQuery({ queryKey: ["user"] });
             const device = await registerPlaybackDeviceMutation.mutateAsync();
             localStorage.setItem("deviceID", device.uuid);
             navigate("/");

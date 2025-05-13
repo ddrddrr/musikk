@@ -43,7 +43,8 @@ export const PostURLs = {
     userPostList: (userUUID: UUID) => `${BASE_URL}/posts/users/${userUUID}`,
     postRetrieve: (postUUID: UUID) => `${BASE_URL}/posts/${postUUID}`,
     postChildrenList: (postUUID: UUID) => `${BASE_URL}/posts/${postUUID}/children`,
-    postLatestFollowedList: `${BASE_URL}/posts/latest`,
+    postLatestFollowedList: `${BASE_URL}/posts/followed/latest`,
+    postLatestFriendsList: `${BASE_URL}/posts/friends/latest`,
 };
 export const NotificationURLs = {
     notificationsSetRead: `${BASE_URL}/notifications`,
@@ -55,10 +56,13 @@ export const UserURLs = {
     userDetail: (userUUID: UUID) => `${BASE_URL}/users/${userUUID}`,
     userCreate: `${BASE_URL}/users`,
     userFriends: (userUUID: UUID) => `${BASE_URL}/users/${userUUID}/friends`,
+    userFollowed: (userUUID: UUID) => `${BASE_URL}/users/${userUUID}/followed`,
     userFriendsAccept: (userUUID: UUID, senderUUID: UUID) => `${BASE_URL}/users/${userUUID}/friends/${senderUUID}`,
+    userFriendsDelete: (userUUID: UUID, senderUUID: UUID) => `${BASE_URL}/users/${userUUID}/friends/${senderUUID}`,
     userUpdate: (userUUID: UUID) => `${BASE_URL}/users/${userUUID}`,
     artistFollowersList: (artistUUID: UUID) => `${BASE_URL}/users/artists/${artistUUID}/followers`,
-    artistFollowersCreate: (artistUUID: UUID) => `${BASE_URL}/users/artists/${artistUUID}/followers`,
+    followArtist: (artistUUID: UUID) => `${BASE_URL}/users/artists/${artistUUID}/followers`,
+    removeFollowedArtist: (artistUUID: UUID) => `${BASE_URL}/users/artists/${artistUUID}/followers`,
     tokenGet: `${BASE_URL}/token/`,
     tokenRefresh: `${BASE_URL}/token/refresh/`,
 };

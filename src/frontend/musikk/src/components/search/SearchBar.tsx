@@ -18,7 +18,8 @@ export function SearchBar({
     const [open, setOpen] = useState(false);
 
     const handleSelect = (item: IAttachment) => {
-        onItemSelect?.(item);
+        if (!onItemSelect) return;
+        onItemSelect(item);
         setOpen(false);
     };
 
@@ -36,7 +37,7 @@ export function SearchBar({
                     align="center"
                 >
                     <div className="p-4">
-                        <SearchWindow onItemSelect={handleSelect} songMode={songMode} />
+                        <SearchWindow onItemSelect={onItemSelect ? handleSelect : undefined} songMode={songMode} />
                     </div>
                 </PopoverContent>
             </Popover>

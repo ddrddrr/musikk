@@ -1,4 +1,4 @@
-import { NavigateToProfileButton } from "@/components/layout/header/NavigateToProfileButton";
+import { ProfileDropdown } from "@/components/layout/header/ProfileDropdown.tsx";
 import { NotificationBox } from "@/components/notifications/NotificationBox";
 import { SearchBar } from "@/components/search/SearchBar.tsx";
 import { Button } from "@/components/ui/button";
@@ -25,7 +25,7 @@ export const Header = memo(function Header() {
             </div>
 
             <div className="flex-1 flex justify-end items-center gap-4">
-                <NavigateToProfileButton />
+                <ProfileDropdown />
 
                 <NotificationBox />
 

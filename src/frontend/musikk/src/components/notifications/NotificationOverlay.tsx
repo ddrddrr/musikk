@@ -17,7 +17,10 @@ export const NotificationOverlay = memo(function NotificationOverlay({ notificat
 
     async function handleAddToFriends(notification: IFriendRequestNotification) {
         try {
-            await addToFriendsMutation.mutateAsync(notification.sender.uuid);
+            await addToFriendsMutation.mutateAsync({
+                userUUID: notification.receiver.uuid,
+                senderUUID: notification.sender.uuid,
+            });
             deleteNotificationMutation.mutate(notification.uuid);
         } catch (error) {
             console.error("Failed to add to friends:", error);

@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 
 import { IAttachment } from "@/components/publications/types.ts";
 import { SongCollectionCard } from "@/components/song-collections/SongCollectionCard";
-import { ISongCollection, ISongCollectionSong } from "@/components/song-collections/types.ts";
+import { ISongCollection } from "@/components/song-collections/types.ts";
 import { SongCard } from "@/components/songs/SongCard.tsx";
 import { SongContainer } from "@/components/songs/SongContainer.tsx";
 import { UserCard } from "@/components/user/UserCard.tsx";
@@ -35,21 +35,10 @@ export function SearchWindow({ onItemSelect, songMode = "card" }: SearchWindowPr
         enabled: !!debouncedQuery.trim(),
     });
 
-    const handleSelect = (obj: IAttachment) => {
-        if (onItemSelect) onItemSelect(obj);
-    };
+    const shouldShowResults = debouncedQuery.trim().length > 0 && isSuccess;
 
     const renderSongs = () => {
         if (!data?.songs?.length) return null;
-
-        function handleSongClick(s: ISongCollectionSong) {
-            handleSelect({
-                objType: "song",
-                objUUID: s.uuid,
-                repr: s.song.title,
-                image: s.song.image,
-            });
-        }
 
         const containerClass = songMode === "card" ? "grid grid-cols-2 gap-2" : "space-y-2";
 
@@ -57,20 +46,25 @@ export function SearchWindow({ onItemSelect, songMode = "card" }: SearchWindowPr
             <div>
                 <h3 className="text-sm font-semibold mb-2">Songs</h3>
                 <div className={containerClass}>
-                    {data.songs.map((song) =>
-                        songMode === "container" ? (
-                            <div key={song.uuid} onClick={() => handleSongClick(song)} className="cursor-pointer">
+                    {data.songs.map((song) => {
+                        const onClick = onItemSelect
+                            ? () =>
+                                  onItemSelect({
+                                      objType: "song",
+                                      objUUID: song.uuid,
+                                      repr: song.song.title,
+                                      image: song.song.image,
+                                  })
+                            : undefined;
+
+                        return songMode === "container" ? (
+                            <div key={song.uuid} onClick={onClick} className={onClick ? "cursor-pointer" : ""}>
                                 <SongContainer collectionSong={song} buttonSize={30} />
                             </div>
                         ) : (
-                            <SongCard
-                                key={song.uuid}
-                                collectionSong={song}
-                                size="small"
-                                onClick={() => handleSongClick(song)}
-                            />
-                        ),
-                    )}
+                            <SongCard key={song.uuid} collectionSong={song} size="small" onClick={onClick} />
+                        );
+                    })}
                 </div>
             </div>
         );
@@ -78,6 +72,7 @@ export function SearchWindow({ onItemSelect, songMode = "card" }: SearchWindowPr
 
     const renderCollections = (label: string, items: ISongCollection[]) => {
         if (!items?.length) return null;
+
         return (
             <div>
                 <h3 className="text-sm font-semibold mb-2">{label}</h3>
@@ -87,13 +82,16 @@ export function SearchWindow({ onItemSelect, songMode = "card" }: SearchWindowPr
                             key={collection.uuid}
                             collection={collection}
                             size="small"
-                            onClick={() =>
-                                handleSelect({
-                                    objType: "collection",
-                                    objUUID: collection.uuid,
-                                    repr: collection.title,
-                                    image: collection.image,
-                                })
+                            onClick={
+                                onItemSelect
+                                    ? () =>
+                                          onItemSelect({
+                                              objType: "collection",
+                                              objUUID: collection.uuid,
+                                              repr: collection.title,
+                                              image: collection.image,
+                                          })
+                                    : undefined
                             }
                         />
                     ))}
@@ -113,13 +111,16 @@ export function SearchWindow({ onItemSelect, songMode = "card" }: SearchWindowPr
                         <UserCard
                             key={user.uuid}
                             user={user}
-                            onClick={() =>
-                                handleSelect({
-                                    objType: "user",
-                                    objUUID: user.uuid,
-                                    repr: user.display_name,
-                                    image: user.avatar,
-                                })
+                            onClick={
+                                onItemSelect
+                                    ? () =>
+                                          onItemSelect({
+                                              objType: "user",
+                                              objUUID: user.uuid,
+                                              repr: user.display_name,
+                                              image: user.avatar,
+                                          })
+                                    : undefined
                             }
                         />
                     ))}
@@ -127,8 +128,6 @@ export function SearchWindow({ onItemSelect, songMode = "card" }: SearchWindowPr
             </div>
         );
     };
-
-    const shouldShowResults = debouncedQuery.trim().length > 0 && isSuccess;
 
     return (
         <div className="w-full space-y-4">
