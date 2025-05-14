@@ -23,9 +23,11 @@ export const HomePage = memo(function HomePage() {
         <PlaybackProvider>
             <UserCollectionsProvider>
                 <UserConnectionsProvider>
-                    <div className="flex flex-col h-screen bg-gray-200">
+                    <div className="h-screen flex flex-col bg-gray-200">
                         <Header />
-                        <MainContent />
+                        <div className="flex flex-1 overflow-hidden">
+                            <MainContent />
+                        </div>
                         <Toaster />
                         <PlayerBox />
                     </div>

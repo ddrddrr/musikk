@@ -43,8 +43,7 @@ export const PostURLs = {
     userPostList: (userUUID: UUID) => `${BASE_URL}/posts/users/${userUUID}`,
     postRetrieve: (postUUID: UUID) => `${BASE_URL}/posts/${postUUID}`,
     postChildrenList: (postUUID: UUID) => `${BASE_URL}/posts/${postUUID}/children`,
-    postLatestFollowedList: `${BASE_URL}/posts/followed/latest`,
-    postLatestFriendsList: `${BASE_URL}/posts/friends/latest`,
+    postLatestList: `${BASE_URL}/posts/latest`,
 };
 export const NotificationURLs = {
     notificationsSetRead: `${BASE_URL}/notifications`,

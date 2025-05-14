@@ -38,13 +38,3 @@ export function usePostFetchQuery(postUUID: UUID) {
         queryKey: ["posts", postUUID],
     });
 }
-
-export function usePostLatestFollowedQuery() {
-    return useQuery<IPublication[]>({
-        queryFn: async () => {
-            const res = await api.get(PostURLs.postLatestFollowedList);
-            return res.data;
-        },
-        queryKey: ["posts", "latest"],
-    });
-}

@@ -126,3 +126,8 @@
         @apply bg-background text-foreground;
     }
 }
+
+* {
+    scrollbar-width: thin;
+    scrollbar-color: lightgrey white;
+}

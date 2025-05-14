@@ -13,7 +13,6 @@ export function SettingsPage() {
             if (Cookies.get("refresh")) {
                 Cookies.remove("refresh");
             }
-            localStorage.removeItem("user");
             navigate("/login");
         },
         [navigate],

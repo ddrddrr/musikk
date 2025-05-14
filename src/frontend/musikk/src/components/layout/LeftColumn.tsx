@@ -19,7 +19,7 @@ export function LeftColumn() {
     }, [liked_songs, history, followed_collections]);
 
     return (
-        <div className="w-1/5 bg-red-600 p-4 pb-40 overflow-y-auto border-r border-red-700">
+        <div className="w-1/5 bg-red-600 p-4 pb-40 overflow-y-auto">
             <h2 className="text-xl font-bold text-white mb-4 text-center">Your stuff</h2>
 
             {collections.length > 0 ? (

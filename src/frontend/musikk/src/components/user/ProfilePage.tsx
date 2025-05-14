@@ -3,7 +3,7 @@ import { Dialog, DialogClose, DialogContent, DialogHeader, DialogTitle, DialogTr
 import { ProfileForm } from "@/components/user/ProfileForm";
 import { fetchUser } from "@/components/user/queries";
 import { UserAvatar } from "@/components/user/UserAvatar.tsx";
-import { UserFeed } from "@/components/user/UserFeed.tsx";
+import { UserPosts } from "@/components/user/UserPosts.tsx";
 import { useUserUUID } from "@/hooks/useUserUUID.ts";
 import { UserContext } from "@/providers/userContext.ts";
 import { useQuery } from "@tanstack/react-query";
@@ -61,7 +61,7 @@ export function ProfilePage() {
                 </div>
             </div>
             <div className="mt-8 w-full">
-                <UserFeed userUUID={uuid} />
+                <UserPosts userUUID={uuid} />
             </div>
         </div>
     );

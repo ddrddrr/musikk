@@ -2,7 +2,7 @@ import { ProfileDropdown } from "@/components/layout/header/ProfileDropdown.tsx"
 import { NotificationBox } from "@/components/notifications/NotificationBox";
 import { SearchBar } from "@/components/search/SearchBar.tsx";
 import { Button } from "@/components/ui/button";
-import { Cog, Disc3, Upload } from "lucide-react";
+import { Cog, Disc3, MessageSquareText, Upload } from "lucide-react";
 import { memo } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -14,6 +14,9 @@ export const Header = memo(function Header() {
             <div className="flex-none">
                 <Button variant="ghost" className="text-white" onClick={() => navigate("/")}>
                     <Disc3 />
+                </Button>
+                <Button variant="ghost" className="text-white" onClick={() => navigate("/feed")}>
+                    <MessageSquareText />
                 </Button>
             </div>
 

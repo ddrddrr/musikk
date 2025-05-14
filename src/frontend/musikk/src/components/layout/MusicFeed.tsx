@@ -2,7 +2,7 @@ import { fetchCollectionsLatest } from "@/components/song-collections/queries.ts
 import { SongCollectionsCarousel } from "@/components/song-collections/SongCollectionCarousel";
 import { useQuery } from "@tanstack/react-query";
 
-export function Feed() {
+export function MusicFeed() {
     const {
         isPending: collectionsPending,
         error: collectionsError,
