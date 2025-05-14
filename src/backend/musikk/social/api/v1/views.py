@@ -1,10 +1,12 @@
 from rest_framework.views import APIView
-from rest_framework.generics import get_object_or_404, RetrieveAPIView
+from rest_framework.generics import get_object_or_404, RetrieveAPIView, ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
+from django_filters import rest_framework as filters
 
 from notifications.models import ReplyNotification
+from social.api.v1.filters import PublicationFilter
 from social.api.v1.serializers import (
     PublicationRetrieveSerializer,
     PublicationCreateSerializer,
@@ -97,12 +99,16 @@ class PostUserListView(APIView):
     def get(self, request, *args, **kwargs):
         user = get_object_or_404(StreamingUser, uuid=kwargs["uuid"])
 
-        roots = Publication.objects.filter(
-            type="post", user=user, parent__isnull=True
-        ).order_by("-date_added")
+        roots = PublicationRetrieveSerializer(
+            Publication.objects.filter(
+                type="post", user=user, parent__isnull=True
+            ).order_by("-date_added"),
+            many=True,
+            context={"request": request},
+        ).data
         return Response(
             status=status.HTTP_200_OK,
-            data=PublicationRetrieveSerializer(roots, many=True).data,
+            data=roots,
         )
 
 
@@ -115,43 +121,24 @@ class PostChildrenListView(APIView):
                 type="post", parent__uuid=kwargs["uuid"]
             ).order_by("-date_added"),
             many=True,
+            context={"request": request},
         ).data
         return Response(status=status.HTTP_200_OK, data=children)
 
 
-class PostsLatestFollowedView(APIView):
+class PostsLatestView(ListAPIView):
     permission_classes = [IsAuthenticated]
-    post_count = 50
+    serializer_class = PublicationRetrieveSerializer
+    queryset = Publication.objects.all()
+    filter_backends = [filters.DjangoFilterBackend]
+    filterset_class = PublicationFilter
+    default_amount = 50
 
-    def get(self, request, *args, **kwargs):
-        user = request.user.streaminguser
-        followed_posts = PublicationRetrieveSerializer(
-            Publication.objects.filter(user__in=user.followed.all()).order_by(
-                "-date_added"
-            )[:50],
-            many=True,
-        ).data
-
-        return Response(
-            status=status.HTTP_200_OK,
-            data=followed_posts,
-        )
-
-
-class PostsLatestFriendsView(APIView):
-    permission_classes = [IsAuthenticated]
-    post_count = 50
-
-    def get(self, request, *args, **kwargs):
-        user = request.user.streaminguser
-        friend_posts = PublicationRetrieveSerializer(
-            Publication.objects.filter(user__in=user.friends.all()).order_by(
-                "-date_added"
-            )[:50],
-            many=True,
-        ).data
-
-        return Response(
-            status=status.HTTP_200_OK,
-            data=friend_posts,
+    def get_filterset(self, *args, **kwargs):
+        query_params = self.request.query_params.copy()
+        if "amount" not in query_params:
+            query_params["amount"] = 50
+        kwargs["data"] = query_params
+        return self.filterset_class(
+            *args, request=self.request, queryset=self.get_queryset(), **kwargs
         )

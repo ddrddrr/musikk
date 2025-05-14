@@ -4,7 +4,7 @@ from social.api.v1.views import (
     CommentsListCreateView,
     PostCreateView,
     PostUserListView,
-    PostsLatestFollowedView,
+    PostsLatestView,
     PostChildrenListView,
     PostRetrieveView,
 )
@@ -28,13 +28,8 @@ urlpatterns = [
         name="post-children-list",
     ),
     path(
-        "posts/followed/latest",
-        PostsLatestFollowedView.as_view(),
-        name="post-followed-latest",
-    ),
-    path(
-        "posts/friends/latest",
-        PostsLatestFollowedView.as_view(),
+        "posts/latest",
+        PostsLatestView.as_view(),
         name="post-friends-latest",
     ),
 ]
