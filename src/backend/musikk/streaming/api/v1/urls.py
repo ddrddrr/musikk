@@ -1,9 +1,24 @@
 from django.urls import path
 
-from streaming.api.v1.views_song import SongAddLikedView, SongCreateView, SongCollectionSongRetrieveView
-from streaming.api.v1.views_collection import SongCollectionLatestView, SongCollectionPersonalView, \
-    SongCollectionDetailView, SongCollectionAddLikedView, SongCollectionRemoveSong, SongCollectionAddSong, \
-    SongCollectionCreateView
+from streaming.api.v1.views import (
+    ConnectionsLatestListenedView,
+    ConnectionsLatestAddedView,
+)
+from streaming.api.v1.views_song import (
+    SongAddLikedView,
+    SongCreateView,
+    SongCollectionSongRetrieveView,
+)
+from streaming.api.v1.views_collection import (
+    SongCollectionLatestView,
+    SongCollectionPersonalView,
+    SongCollectionDetailView,
+    SongCollectionAddLikedView,
+    SongCollectionRemoveSong,
+    SongCollectionAddSong,
+    SongCollectionCreateView,
+    AlbumBySongView,
+)
 from streaming.api.v1.views_playback import (
     PlaybackRetrieveView,
     PlaybackActivateView,
@@ -23,9 +38,22 @@ from streaming.api.v1.views_song_queue import (
     SongQueueShiftHeadBackwardsView,
 )
 
-urlpatterns = [
+song_urls = [
     path("songs", SongCreateView.as_view(), name="songs-upload"),
-    path("songs/<uuid:uuid>", SongCollectionSongRetrieveView.as_view(), name="song-retrieve"),
+    path(
+        "liked-songs/add-song/<uuid:uuid>",
+        SongAddLikedView.as_view(),
+        name="liked-songs-add",
+    ),
+    path(
+        "songs/<uuid:uuid>",
+        SongCollectionSongRetrieveView.as_view(),
+        name="song-retrieve",
+    ),
+    path("songs/<uuid:uuid>/album", AlbumBySongView.as_view(), name="album-by-song"),
+]
+
+collection_urls = [
     path("collections", SongCollectionCreateView.as_view(), name="collection-create"),
     path(
         "collections/<uuid:collection_uuid>/songs/<uuid:song_uuid>",
@@ -41,7 +69,7 @@ urlpatterns = [
         "collections/latest", SongCollectionLatestView.as_view(), name="collection-list"
     ),
     path(
-        "collections/personal",
+        "collections/personal/<uuid:uuid>",
         SongCollectionPersonalView.as_view(),
         name="collection-user-list",
     ),
@@ -60,11 +88,9 @@ urlpatterns = [
         SongCollectionAddLikedView.as_view(),
         name="collection-add-liked",
     ),
-    path(
-        "liked-songs/add-song/<uuid:uuid>",
-        SongAddLikedView.as_view(),
-        name="liked-songs-add",
-    ),
+]
+
+song_queue_urls = [
     path("song-queue", SongQueueRetrieveView.as_view(), name="song-queue-retrieve"),
     path(
         "song-queue/add-song/<uuid:uuid>",
@@ -91,11 +117,7 @@ urlpatterns = [
         SongQueueRemoveNodeView.as_view(),
         name="song-queue-remove-node",
     ),
-    path(
-        "song-queue/clear",
-        SongQueueClearView.as_view(),
-        name="song-queue-clear",
-    ),
+    path("song-queue/clear", SongQueueClearView.as_view(), name="song-queue-clear"),
     path(
         "song-queue/append-random",
         SongQueueAppendRandomSongsView.as_view(),
@@ -116,8 +138,28 @@ urlpatterns = [
         SongQueueShiftHeadView.as_view(),
         name="song-queue-shift-head-to",
     ),
+]
+
+playback_urls = [
     path("playback", PlaybackRetrieveView.as_view(), name="playback-retrieve"),
     path("playback/activate", PlaybackActivateView.as_view(), name="playback-activate"),
     path("playback/stop", PlaybackStopView.as_view(), name="playback-stop"),
     path("playback-device", RegisterPlaybackDevice.as_view(), name="playback-device"),
 ]
+
+friend_activity_urls = [
+    path(
+        "friend-activity/latest-added",
+        ConnectionsLatestAddedView.as_view(),
+        name="friend-activity-latest-added",
+    ),
+    path(
+        "friend-activity/active-songs",
+        ConnectionsLatestListenedView.as_view(),
+        name="friend-activity-list",
+    ),
+]
+
+urlpatterns = (
+    song_urls + collection_urls + song_queue_urls + playback_urls + friend_activity_urls
+)

@@ -42,8 +42,6 @@ class FriendRequestNotificationManager(models.Manager):
         return obj
 
 
-# click add to friends --> call view to create friend notif --> send notif(via event)
-# click accept friend --> call view to add the sender to reciever's friend(and visa versa)
 class FriendRequestNotification(Notification):
     sender = models.ForeignKey(
         "users.StreamingUser", on_delete=models.CASCADE, related_name="+"

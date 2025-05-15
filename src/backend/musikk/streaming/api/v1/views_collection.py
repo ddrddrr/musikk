@@ -6,33 +6,42 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.exceptions import NotFound
 
 from sse.config import EventChannels
 from sse.events import send_invalidate_event
-
-from streaming.api.v1.serializers_song_collection import SongCollectionSerializerBasic, \
-    SongCollectionSerializerDetailed, SongCollectionCreateSerializer
+from streaming.api.v1.serializers_song_collection import (
+    SongCollectionSerializerBasic,
+    SongCollectionSerializerDetailed,
+    SongCollectionCreateSerializer,
+)
 from streaming.song_collections import SongCollection
 from streaming.songs import SongCollectionSong, BaseSong
+from users.users_extended import StreamingUser
 
 
 class SongCollectionLatestView(ListAPIView):
     permission_classes = [IsAuthenticated]
     queryset = SongCollection.objects.all()
     serializer_class = SongCollectionSerializerBasic
+    amount = 50
 
     def get_queryset(self):
-        qs = super().get_queryset().exclude(private=True).order_by("-date_added")[:20]
+        qs = (
+            super()
+            .get_queryset()
+            .exclude(private=True)
+            .order_by("-date_added")[: self.amount]
+        )
         return qs
 
 
 class SongCollectionPersonalView(APIView):
-    """Returns `liked_songs` and `followed_collections` of a `StreamingUser`"""
-
     permission_classes = [IsAuthenticated]
+    serializer_class = SongCollectionSerializerBasic
 
     def get(self, request, *args, **kwargs):
-        user = self.request.user.streaminguser
+        user = get_object_or_404(StreamingUser, uuid=kwargs.get("uuid"))
 
         followed_collections_qs = user.streaminguser.followed_song_collections.all()
         history = SongCollectionSerializerBasic(
@@ -193,3 +202,22 @@ class SongCollectionCreateView(APIView):
             collection, context={"request": request}
         ).data
         return Response({"collection": out}, status=201)
+
+
+class AlbumBySongView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        scs_uuid = kwargs["uuid"]
+        scs = get_object_or_404(SongCollectionSong, uuid=scs_uuid)
+        album_song = SongCollectionSong.objects.filter(
+            song_collection__type="album", song__uuid=scs.song.uuid
+        )
+        if not album_song:
+            raise NotFound(f"Album for song {scs.song.uuid} not found.")
+
+        album = get_object_or_404(
+            SongCollection, type="album", uuid=album_song[0].song_collection.uuid
+        )
+        album = SongCollectionSerializerBasic(album, context={"request": request}).data
+        return Response(status=status.HTTP_200_OK, data=album)

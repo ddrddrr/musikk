@@ -38,7 +38,10 @@ class SongAddLikedView(APIView):
         # doing a refetch for the queue is easier than traversing nodes and checking, whether the song is in the queue
         send_invalidate_event(EventChannels.user_events(user.uuid), ["queue"])
         send_invalidate_event(EventChannels.user_events(user.uuid), ["openCollection"])
-        send_invalidate_event(EventChannels.user_events(user.uuid), ["likedSongs"])
+        send_invalidate_event(
+            EventChannels.user_events(user.uuid),
+            ["friend-activity", "listening", user.uuid],
+        )
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 

@@ -1,14 +1,15 @@
 from django_filters import rest_framework as filters
+
 from social.models import Publication
 
 
 class PublicationFilter(filters.FilterSet):
     connection = filters.CharFilter(method="filter_connection_type")
-    amount = filters.NumberFilter(method="filter_amount")
+    amount = filters.NumberFilter(method="filter_count")
 
     class Meta:
         model = Publication
-        fields = ["connection", "amount"]
+        fields = ["connection"]
 
     def filter_connection_type(self, queryset, name, value):
         user = self.request.user.streaminguser
@@ -16,13 +17,10 @@ class PublicationFilter(filters.FilterSet):
             case "friends":
                 return queryset.filter(user__in=user.friends.all()).order_by(
                     "-date_added"
-                )
+                )[:50],
             case "followed":
                 return queryset.filter(user__in=user.followed.all()).order_by(
                     "-date_added"
-                )
+                )[:50],
             case _:
                 return queryset.none()
-
-    def filter_amount(self, queryset, name, value):
-        return queryset[:value]

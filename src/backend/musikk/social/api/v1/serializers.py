@@ -3,6 +3,7 @@ from rest_framework import serializers
 
 from base.serializers import BaseModelSerializer
 from social.models import Publication
+from users.api.v1.serializers_base import BaseUserSerializer
 
 
 class PublicationCreateSerializer(BaseModelSerializer):
@@ -66,7 +67,7 @@ class PublicationRetrieveSerializer(BaseModelSerializer):
     parent = serializers.UUIDField(
         source="parent.uuid", allow_null=True, read_only=True
     )
-    user_uuid = serializers.UUIDField(source="user.uuid", read_only=True)
+    user = BaseUserSerializer(read_only=True)
     root_user_uuid = serializers.SerializerMethodField(allow_null=True, read_only=True)
 
     class Meta(BaseModelSerializer.Meta):
@@ -74,7 +75,7 @@ class PublicationRetrieveSerializer(BaseModelSerializer):
         fields = BaseModelSerializer.Meta.fields + [
             "content",
             "display_name",
-            "user_uuid",
+            "user",
             "parent",
             "is_deleted",
             "obj_type",

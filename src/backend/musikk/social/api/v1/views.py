@@ -26,7 +26,7 @@ class CommentsListCreateView(APIView):
 
         related_instance = Publication.lookup_related_instance(obj_type, obj_uuid)
         comments = PublicationRetrieveSerializer(
-            related_instance.comments.all(), many=True
+            related_instance.comments.all(), many=True, context={"request": request}
         ).data
         return Response(status=status.HTTP_200_OK, data=comments)
 
