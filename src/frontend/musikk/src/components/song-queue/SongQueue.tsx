@@ -12,7 +12,7 @@ export function SongQueue() {
 
     return (
         <div className="flex w-full h-full">
-            <div className="w-1/2 flex flex-col items-center justify-center p-8 border-r border-black">
+            <div className="w-1/2 flex flex-col items-start justify-start p-8 border-r border-black">
                 <SongDisplay song={currentSong} />
             </div>
 
@@ -24,7 +24,6 @@ export function SongQueue() {
                             <li key={node.uuid}>
                                 <SongContainer
                                     collectionSong={node.collection_song}
-                                    renderItems={{ addToQueueButton: false }}
                                 />
                             </li>
                         ))}

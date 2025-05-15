@@ -1,3 +1,4 @@
+import { CollectionContextMenu } from "@/components/song-collections/CollectionContextMenu.tsx";
 import type { ISongCollection } from "@/components/song-collections/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
@@ -51,25 +52,27 @@ export function SongCollectionCard({ collection, size = "medium", onClick = unde
     }
 
     return (
-        <Card
-            onClick={() => handleOnClick(collection)}
-            key={uuid}
-            className={`cursor-pointer transition-all duration-200 py-0 
+        <CollectionContextMenu collection={collection}>
+            <Card
+                onClick={() => handleOnClick(collection)}
+                key={uuid}
+                className={`cursor-pointer transition-all duration-200 py-0 
             border-2 border-black rounded-sm overflow-hidden bg-gray-50 ${sizes.card}`}
-        >
-            <CardContent className="p-0">
-                {image ? (
-                    <img src={image} alt={title} className={`w-full ${sizes.image} object-cover`} />
-                ) : (
-                    <div className={`w-full ${sizes.image} bg-gray-200 flex items-center justify-center`}>
-                        <span className={`text-gray-400 ${sizes.icon}`}>♪</span>
+            >
+                <CardContent className="p-0">
+                    {image ? (
+                        <img src={image} alt={title} className={`w-full ${sizes.image} object-cover`} />
+                    ) : (
+                        <div className={`w-full ${sizes.image} bg-gray-200 flex items-center justify-center`}>
+                            <span className={`text-gray-400 ${sizes.icon}`}>♪</span>
+                        </div>
+                    )}
+                    <div className={`bg-gray-200 border-t-2 border-black ${sizes.padding}`}>
+                        <p className={`truncate text-gray-600 ${sizes.authors}`}>{authorNames}</p>
+                        <p className={`font-bold truncate ${sizes.title}`}>{title}</p>
                     </div>
-                )}
-                <div className={`bg-gray-200 border-t-2 border-black ${sizes.padding}`}>
-                    <p className={`truncate text-gray-600 ${sizes.authors}`}>{authorNames}</p>
-                    <p className={`font-bold truncate ${sizes.title}`}>{title}</p>
-                </div>
-            </CardContent>
-        </Card>
+                </CardContent>
+            </Card>
+        </CollectionContextMenu>
     );
 }

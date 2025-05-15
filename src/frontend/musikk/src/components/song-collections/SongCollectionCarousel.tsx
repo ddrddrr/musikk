@@ -7,9 +7,9 @@ interface SongCollectionsCarouselProps {
     title: string;
 }
 
-export function SongCollectionsCarousel({ collections, title }: SongCollectionsCarouselProps) {
+export function SongCollectionCarousel({ collections, title }: SongCollectionsCarouselProps) {
     return (
-        <div className="w-9/10 mx-auto px-4">
+        <div className="w-9/10 mx-auto">
             <h2 className="text-xl font-bold mb-4 text-black">{title}</h2>
             <div className="relative">
                 <Carousel
@@ -19,11 +19,11 @@ export function SongCollectionsCarousel({ collections, title }: SongCollectionsC
                     }}
                     className="w-full"
                 >
-                    <CarouselContent className="-ml-2 md:-ml-4">
+                    <CarouselContent className="-ml-0">
                         {collections.map((collection) => (
                             <CarouselItem
                                 key={collection.uuid}
-                                className="pl-2 md:pl-4 basis-1/2 md:basis-1/3 lg:basis-1/5"
+                                className="pl-2 md:pl-4 basis-1/2 md:basis-1/3 lg:basis-1/4"
                             >
                                 <SongCollectionCard collection={collection} size="medium" />
                             </CarouselItem>

@@ -1,4 +1,5 @@
 import { IPublication } from "@/components/publications/types";
+import { UserIdentifier } from "@/components/user/UserIdentifier.tsx";
 
 interface CommentProps {
     comment: IPublication;
@@ -17,9 +18,7 @@ export function Comment({ comment, setReplyTo, repliedTo, parent }: CommentProps
                 </div>
             )}
             <div className="flex items-center justify-between mb-1">
-                <span className="text-[10px] font-medium text-black truncate max-w-[50%]">
-                    {comment.display_name || "Anonymous"}
-                </span>
+                <UserIdentifier user={comment.user} />
                 <span className="text-[10px] text-gray-600 truncate text-right max-w-[50%]">
                     {new Date(comment.date_added).toLocaleString("en-US", {
                         dateStyle: "medium",

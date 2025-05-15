@@ -7,6 +7,7 @@ export const SongURLs = {
     songList: `${BASE_URL}/songs`,
     songsCreate: `${BASE_URL}/songs`,
     songRetrieve: (songUUID: UUID) => `${BASE_URL}/songs/${songUUID}`,
+    albumBySong: (songUUID: UUID) => `${BASE_URL}/songs/${songUUID}/album`,
 };
 export const QueueURLs = {
     queue: `${BASE_URL}/song-queue`,
@@ -24,7 +25,7 @@ export const QueueURLs = {
 export const CollectionURLs = {
     collectionCreate: `${BASE_URL}/collections`,
     collectionLatest: `${BASE_URL}/collections/latest`,
-    collectionPersonal: `${BASE_URL}/collections/personal`,
+    collectionPersonal: (userUUID: UUID) => `${BASE_URL}/collections/personal/${userUUID}`,
     collectionRetrieve: (collectionUUID: UUID) => `${BASE_URL}/collections/${collectionUUID}`,
     collectionDetail: (collectionUUID: UUID) => `${BASE_URL}/collections/detail/${collectionUUID}`,
     collectionAddToLiked: (collectionUUID: UUID) => `${BASE_URL}/collections/${collectionUUID}/like`,
@@ -76,4 +77,8 @@ export const PlaybackURLs = {
     activate: `${BASE_URL}/playback/activate`,
     stop: `${BASE_URL}/playback/stop`,
     registerDevice: `${BASE_URL}/playback-device`,
+};
+export const FriendActivityURLs = {
+    listeningToList: `${BASE_URL}/friend-activity/active-songs`,
+    latestAddedList: `${BASE_URL}/friend-activity/latest-added`,
 };

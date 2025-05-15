@@ -10,6 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { fetchUser } from "@/components/user/queries.ts";
 import { UserCard } from "@/components/user/UserCard.tsx";
+import { UserIdentifier } from "@/components/user/UserIdentifier.tsx";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronDown, ChevronUp } from "lucide-react";
@@ -86,7 +87,8 @@ export function PostTree({ publication, depth = 0 }: PostTreeProps) {
                     {obj && renderCardContent()}
 
                     <div className="flex items-center gap-2">
-                        <div className="text-xs font-medium">{publication.display_name || "Anonymous"}</div>
+                        {/*<div className="text-xs font-medium">{publication.display_name || "Anonymous"}</div>*/}
+                        <UserIdentifier user={publication.user} />
                         <div className="text-[10px] text-muted-foreground">
                             {new Date(publication.date_added).toLocaleString("en-US", {
                                 dateStyle: "short",

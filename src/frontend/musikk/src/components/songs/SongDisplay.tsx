@@ -1,4 +1,5 @@
 import type { ISong } from "@/components/songs/types.ts";
+import { UserIdentifier } from "@/components/user/UserIdentifier.tsx";
 
 interface SongDisplayProps {
     song: ISong | undefined;
@@ -13,26 +14,28 @@ export function SongDisplay({ song }: SongDisplayProps) {
         );
     }
 
-    const authors = song.authors.map((author) => author.display_name).join(", ");
-
     return (
-        <div className="flex flex-col items-center gap-3 mb-4">
-            <div className="w-full aspect-square max-w-[150px] mx-auto">
+        <div className="flex flex-col items-start gap-3 mb-4">
+            <div className="w-full aspect-square max-w-2/5">
                 {song.image ? (
                     <img
                         src={song.image}
                         alt={song.title}
-                        className="w-full h-full object-cover border border-black rounded-sm"
+                        className="w-full h-full items-start justify-start object-cover border border-black rounded-sm"
                     />
                 ) : (
-                    <div className="w-full h-full bg-gray-100 flex items-center justify-center border border-black rounded-sm">
+                    <div className="w-full h-full bg-gray-100 flex items-start justify-start border border-black rounded-sm">
                         <span className="text-gray-400 text-3xl">♪</span>
                     </div>
                 )}
             </div>
-            <div className="w-full text-center">
-                <p className="text-xs text-gray-500 truncate">{authors}</p>
-                <p className="font-bold truncate">{song.title}</p>
+            <div className="w-full text-start">
+                <div className="flex flex-wrap gap-2 items-center mb-1">
+                    {song.authors.map((author) => (
+                        <UserIdentifier key={author.uuid} user={author} />
+                    ))}
+                </div>
+                <p className="text-xl font-bold truncate">{song.title}</p>
             </div>
         </div>
     );

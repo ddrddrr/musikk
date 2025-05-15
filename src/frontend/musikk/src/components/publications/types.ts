@@ -1,4 +1,5 @@
 import { IBaseModel } from "@/components/common/types.ts";
+import { IUser } from "@/components/user/types.ts";
 import { UUID } from "@/config/types.ts";
 
 export type PublicationType = "comment" | "post";
@@ -6,7 +7,7 @@ export type PublicationType = "comment" | "post";
 export interface IPublication extends IBaseModel {
     content: string;
     display_name: string | null;
-    user_uuid: UUID;
+    user: IUser;
     parent: UUID | null;
     is_deleted: boolean;
     obj_type: PublicationObjectType | null;

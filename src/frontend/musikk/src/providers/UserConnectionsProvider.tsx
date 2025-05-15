@@ -1,16 +1,16 @@
 import { useUserFollowedQuery, useUserFriendsQuery } from "@/components/user/queries.ts";
+import { useUserUUID } from "@/hooks/useUserUUID.ts";
 import { UserConnectionsContext } from "@/providers/userConnectionsContext.tsx";
-import { UserContext } from "@/providers/userContext.ts";
-import { ReactNode, useContext } from "react";
+import { ReactNode } from "react";
 
 interface UserConnectionsProviderProps {
     children: ReactNode;
 }
 
 export function UserConnectionsProvider({ children }: UserConnectionsProviderProps) {
-    const { user } = useContext(UserContext);
-    const { isPending: friendsPending, data: friends } = useUserFriendsQuery(user?.uuid, !!user?.uuid);
-    const { isPending: followedPending, data: followed } = useUserFollowedQuery(user?.uuid, !!user?.uuid);
+    const userUUID = useUserUUID();
+    const { isPending: friendsPending, data: friends } = useUserFriendsQuery(userUUID, !!userUUID);
+    const { isPending: followedPending, data: followed } = useUserFollowedQuery(userUUID, !!userUUID);
 
     return (
         <UserConnectionsContext.Provider

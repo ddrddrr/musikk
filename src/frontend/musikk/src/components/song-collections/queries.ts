@@ -14,8 +14,8 @@ interface IFetchCollectionsPersonalParams {
     followed_collections: ISongCollection[];
 }
 
-export async function fetchCollectionsPersonal(): Promise<IFetchCollectionsPersonalParams> {
-    const response = await api.get(CollectionURLs.collectionPersonal);
+export async function fetchCollectionsPersonal(userUUID: UUID): Promise<IFetchCollectionsPersonalParams> {
+    const response = await api.get(CollectionURLs.collectionPersonal(userUUID));
     return response.data;
 }
 

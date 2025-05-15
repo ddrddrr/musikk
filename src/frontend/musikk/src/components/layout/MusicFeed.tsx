@@ -1,5 +1,6 @@
+import { LatestAdded } from "@/components/friend-activity/LatestAdded.tsx";
 import { fetchCollectionsLatest } from "@/components/song-collections/queries.ts";
-import { SongCollectionsCarousel } from "@/components/song-collections/SongCollectionCarousel";
+import { SongCollectionCarousel } from "@/components/song-collections/SongCollectionCarousel";
 import { useQuery } from "@tanstack/react-query";
 
 export function MusicFeed() {
@@ -11,27 +12,19 @@ export function MusicFeed() {
         queryKey: ["newCollections"],
         queryFn: () => fetchCollectionsLatest(),
     });
-    // const {
-    //     isPending: songsPending,
-    //     error: songsError,
-    //     data: songs,
-    // } = useQuery({
-    //     queryKey: ["newSongs"],
-    //     queryFn: () => fetchSongList(),
-    // });
 
-    if (collectionsPending ) {
+    if (collectionsPending) {
         return <div>Loading...</div>;
     }
 
-    if (collectionsError ) {
+    if (collectionsError) {
         return <div>Something went wrong.</div>;
     }
 
     return (
         <div className="flex flex-col gap-8">
-            {collections && <SongCollectionsCarousel collections={collections} title="New Collections" />}
-            {/*{songs && <SongCarousel songs={songs} title="Latest Songs" />}*/}
+            {collections && <SongCollectionCarousel collections={collections} title="New Collections" />}
+            <LatestAdded />
         </div>
     );
 }

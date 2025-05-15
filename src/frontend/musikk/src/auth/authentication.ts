@@ -28,6 +28,7 @@ export async function login(email: string, password: string): Promise<undefined>
     const { access, refresh } = res.data;
     setTokenCookie("access", access, ACCESS_EXPIRY);
     setTokenCookie("refresh", refresh, REFRESH_EXPIRY);
+    window.dispatchEvent(new Event("token-updated"));
 }
 
 export async function refreshAccessToken(): Promise<undefined> {

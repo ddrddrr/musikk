@@ -1,15 +1,15 @@
+import { ISongCollectionSong } from "@/components/song-collections/types.ts";
 import { SongCard } from "@/components/songs/SongCard.tsx";
-import { ISong } from "@/components/songs/types.ts";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 
 interface SongCarouselProps {
-    songs: ISong[];
+    songs: ISongCollectionSong[];
     title: string;
 }
 
 export function SongCarousel({ songs, title }: SongCarouselProps) {
     return (
-        <div className="w-9/10 mx-auto px-4">
+        <div className="w-9/10 mx-auto">
             <h2 className="text-xl font-bold mb-4 text-black">{title}</h2>
             <div className="relative">
                 <Carousel
@@ -20,10 +20,10 @@ export function SongCarousel({ songs, title }: SongCarouselProps) {
                     className="w-full"
                 >
                     <CarouselPrevious />
-                    <CarouselContent className="-ml-2 md:-ml-4">
+                    <CarouselContent className="-ml-0">
                         {songs.map((song) => (
-                            <CarouselItem key={song.uuid} className="pl-2 md:pl-4 basis-1/2 md:basis-1/3 lg:basis-1/5">
-                                <SongCard song={song} size={"medium"} />
+                            <CarouselItem key={song.uuid} className="pl-2 md:pl-4 basis-1/2 md:basis-1/3 lg:basis-1/4">
+                                <SongCard collectionSong={song} size={"medium"} />
                             </CarouselItem>
                         ))}
                     </CarouselContent>

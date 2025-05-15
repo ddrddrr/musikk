@@ -5,13 +5,13 @@ import { fetchUser } from "@/components/user/queries";
 import { UserAvatar } from "@/components/user/UserAvatar.tsx";
 import { UserPosts } from "@/components/user/UserPosts.tsx";
 import { useUserUUID } from "@/hooks/useUserUUID.ts";
-import { UserContext } from "@/providers/userContext.ts";
 import { useQuery } from "@tanstack/react-query";
-import { useContext } from "react";
 import { useParams } from "react-router-dom";
 
 export function ProfilePage() {
     const { uuid } = useParams<{ uuid: string }>();
+    const currUserUUID = useUserUUID();
+
     const {
         isLoading,
         isError,
@@ -19,9 +19,8 @@ export function ProfilePage() {
     } = useQuery({
         queryKey: ["user", uuid],
         queryFn: () => fetchUser(uuid!),
-        enabled: Boolean(uuid),
+        enabled: !!uuid,
     });
-    const currUserUUID = useUserUUID();
 
     if (isLoading) {
         return <div className="p-8 text-center">Loading profile…</div>;
@@ -31,7 +30,7 @@ export function ProfilePage() {
         return <div className="p-8 text-center text-red-600">Error loading profile.</div>;
     }
 
-    if (!user) {
+    if (!user || !uuid) {
         return null;
     }
 

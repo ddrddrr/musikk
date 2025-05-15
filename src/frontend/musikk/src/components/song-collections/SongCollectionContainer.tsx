@@ -3,6 +3,7 @@ import { fetchCollectionDetailed } from "@/components/song-collections/queries";
 import { SongCollectionHeader } from "@/components/song-collections/SongCollectionHeader";
 import { SongContainer } from "@/components/songs/SongContainer.tsx";
 import { UUID } from "@/config/types.ts";
+import { useUserUUID } from "@/hooks/useUserUUID.ts";
 import { UserCollectionsContext } from "@/providers/userCollectionsContext.ts";
 import { useQuery } from "@tanstack/react-query";
 import { useContext } from "react";
@@ -14,8 +15,9 @@ interface SongCollectionContainerProps {
 
 export function SongCollectionContainer({ collectionUUID }: SongCollectionContainerProps) {
     const navigate = useNavigate();
+    const currUserUUID = useUserUUID();
     const { liked_songs, history } = useContext(UserCollectionsContext);
-    let showComments = Boolean(useMatch("/collection/:uuid/comments"));
+    let showComments = !!useMatch("/collection/:uuid/comments");
 
     const {
         isPending,
@@ -47,6 +49,7 @@ export function SongCollectionContainer({ collectionUUID }: SongCollectionContai
     const songs = collection.songs;
     const notPersonalCollection = collection?.uuid !== liked_songs?.uuid && collection?.uuid !== history?.uuid;
     showComments = showComments && notPersonalCollection;
+    const removeFromPlaylistCtxBtn = !!currUserUUID && collection?.authors.map((a) => a.uuid).includes(currUserUUID);
 
     return (
         <div className={`flex gap-4 ${showComments ? "flex-row" : "flex-col"} max-w-4xl mx-auto p-4`}>
@@ -66,7 +69,10 @@ export function SongCollectionContainer({ collectionUUID }: SongCollectionContai
                                 key={`${collectionSong.uuid}-${index}`}
                                 className="bg-white p-4 rounded-sm border border-gray-200 transition-colors hover:bg-gray-50"
                             >
-                                <SongContainer collectionSong={collectionSong} />
+                                <SongContainer
+                                    collectionSong={collectionSong}
+                                    renderItems={{ removeFromPlaylistCtxBtn }}
+                                />
                             </li>
                         ))}
                     </ul>

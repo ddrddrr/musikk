@@ -104,8 +104,8 @@ export function UserCard({ user, size = "medium", onClick }: UserCardProps) {
                         className="flex items-center px-3 py-2 text-sm text-black hover:bg-gray-100 transition-colors"
                         onSelect={() =>
                             isFriend
-                                ? friendRequestMutation.mutate(user.uuid)
-                                : deleteFriendMutation.mutate(currUserUUID, user.uuid)
+                                ? deleteFriendMutation.mutate(currUserUUID, user.uuid)
+                                : friendRequestMutation.mutate(user.uuid)
                         }
                     >
                         <MoreHorizontal className="w-4 h-4 mr-2" />

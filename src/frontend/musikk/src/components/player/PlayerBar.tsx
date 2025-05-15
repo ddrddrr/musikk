@@ -61,8 +61,8 @@ export function PlayerBar({ duration, time, seeking, setSeeking, setIsQueueOpen 
 
     return (
         <div className="bg-white border-t border-black px-4 py-2">
-            {playingSong ? (
-                <div className="flex items-center justify-between w-full gap-4">
+            <div className="flex items-center justify-between w-full gap-4">
+                {playingSong && (
                     <div className="flex items-center gap-3 min-w-0">
                         <div className="w-14 h-14 border-2 border-black flex-shrink-0">
                             {playingSong.image ? (
@@ -82,62 +82,58 @@ export function PlayerBar({ duration, time, seeking, setSeeking, setIsQueueOpen 
                             <p className="text-xs text-gray-600 truncate">{authorNames}</p>
                         </div>
                     </div>
+                )}
 
-                    <div className="flex items-center gap-4 flex-1 justify-end min-w-0">
-                        <div className="flex items-center gap-1 basis-1/2 min-w-0 max-w-[350px]">
-                            <span className="text-xs text-right">{formatTime(displayTime)}</span>
-                            <Slider
-                                value={[displayTime]}
-                                min={0}
-                                max={duration || 100}
-                                step={1}
-                                onValueChange={handleSeek}
-                                onValueCommit={handleSeekCommit}
-                                className="flex-1 cursor-pointer"
-                            />
-                            <span className="text-xs">{formatTime(duration)}</span>
-                        </div>
+                <div className="flex items-center gap-4 flex-1 justify-end min-w-0">
+                    <div className="flex items-center gap-1 basis-1/2 min-w-0 max-w-[350px]">
+                        <span className="text-xs text-right">{formatTime(displayTime)}</span>
+                        <Slider
+                            value={[displayTime]}
+                            min={0}
+                            max={duration || 100}
+                            step={1}
+                            onValueChange={handleSeek}
+                            onValueCommit={handleSeekCommit}
+                            className="flex-1 cursor-pointer"
+                        />
+                        <span className="text-xs">{formatTime(duration)}</span>
+                    </div>
 
-                        <div className="flex items-center gap-1">
-                            <Button
-                                onClick={() => useShiftHeadMutation.mutate({ action: "shift-back" })}
-                                variant="ghost"
-                                size="icon"
-                            >
-                                <SkipBack className="size-5" strokeWidth="2" />
-                            </Button>
-                            <PlayerPlayButton />
-                            <Button
-                                onClick={() => useShiftHeadMutation.mutate({ action: "shift" })}
-                                variant="ghost"
-                                size="icon"
-                            >
-                                <SkipForward className="size-5" strokeWidth="2" />
-                            </Button>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                            <Volume2 size={16} />
-                            <Slider
-                                value={[volume]}
-                                min={0}
-                                max={100}
-                                step={1}
-                                onValueChange={(value) => setVolume(value[0])}
-                                className="w-30 cursor-pointer"
-                            />
-                        </div>
-
-                        <Button variant="ghost" size="icon" onClick={() => setIsQueueOpen((prev) => !prev)}>
-                            <ListMusic />
+                    <div className="flex items-center gap-1">
+                        <Button
+                            onClick={() => useShiftHeadMutation.mutate({ action: "shift-back" })}
+                            variant="ghost"
+                            size="icon"
+                        >
+                            <SkipBack className="size-5" strokeWidth="2" />
+                        </Button>
+                        <PlayerPlayButton />
+                        <Button
+                            onClick={() => useShiftHeadMutation.mutate({ action: "shift" })}
+                            variant="ghost"
+                            size="icon"
+                        >
+                            <SkipForward className="size-5" strokeWidth="2" />
                         </Button>
                     </div>
+
+                    <div className="flex items-center gap-2">
+                        <Volume2 size={16} />
+                        <Slider
+                            value={[volume]}
+                            min={0}
+                            max={100}
+                            step={1}
+                            onValueChange={(value) => setVolume(value[0])}
+                            className="w-30 cursor-pointer"
+                        />
+                    </div>
+
+                    <Button variant="ghost" size="icon" onClick={() => setIsQueueOpen((prev) => !prev)}>
+                        <ListMusic />
+                    </Button>
                 </div>
-            ) : (
-                <div className="text-center py-2">
-                    <p className="text-gray-500 text-xs">Select something to play</p>
-                </div>
-            )}
+            </div>
         </div>
     );
 }
