@@ -6,7 +6,6 @@ from streaming.api.v1.views_song_queue import *
 from users.api.v1.serializers_base import BaseUserSerializer
 
 
-# [{user: ..., song:...}
 class ConnectionsLatestListenedView(APIView):
     permission_classes = [IsAuthenticated]
 

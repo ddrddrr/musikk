@@ -1,4 +1,5 @@
 from django.urls import path
+from rest_framework.permissions import AllowAny
 
 from streaming.api.v1.views import (
     ConnectionsLatestListenedView,
@@ -20,10 +21,10 @@ from streaming.api.v1.views_collection import (
     AlbumBySongView,
 )
 from streaming.api.v1.views_playback import (
-    PlaybackRetrieveView,
-    PlaybackActivateView,
-    PlaybackStopView,
-    RegisterPlaybackDevice,
+    PlaybackDeviceView,
+    PlaybackDeviceActivateView,
+    PlaybackStateView,
+    PlaybackDeviceDeleteView,
 )
 from streaming.api.v1.views_song_queue import (
     SongQueueRetrieveView,
@@ -141,10 +142,25 @@ song_queue_urls = [
 ]
 
 playback_urls = [
-    path("playback", PlaybackRetrieveView.as_view(), name="playback-retrieve"),
-    path("playback/activate", PlaybackActivateView.as_view(), name="playback-activate"),
-    path("playback/stop", PlaybackStopView.as_view(), name="playback-stop"),
-    path("playback-device", RegisterPlaybackDevice.as_view(), name="playback-device"),
+    path("playback", PlaybackStateView.as_view(), name="playback-state"),
+    path(
+        "playback-device",
+        PlaybackDeviceView.as_view(),
+        name="playback-device-register",
+    ),
+    path(
+        "playback-device/<uuid:uuid>/activate",
+        PlaybackDeviceActivateView.as_view(),
+        name="playback-device-activate",
+    ),
+    path(
+        "playback-device/<uuid:uuid>/delete",
+        PlaybackDeviceDeleteView.as_view(
+            authentication_classes=[],
+            permission_classes=[AllowAny],
+        ),
+        name="playback-device-delete",
+    ),
 ]
 
 friend_activity_urls = [

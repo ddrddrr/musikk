@@ -19,5 +19,6 @@ class PlaybackState(BaseModel):
 
 
 class PlaybackDevice(BaseModel):
+    name = models.CharField(max_length=255)
     is_active = models.BooleanField(default=False)
     playback_state = models.ForeignKey(PlaybackState, on_delete=models.CASCADE)

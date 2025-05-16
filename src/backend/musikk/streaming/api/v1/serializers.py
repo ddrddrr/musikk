@@ -10,18 +10,23 @@ from streaming.models import PlaybackState, PlaybackDevice
 class PlaybackDeviceSerializer(BaseModelSerializer):
     class Meta:
         model = PlaybackDevice
-        fields = BaseModelSerializer.Meta.fields + ["is_active"]
+        fields = BaseModelSerializer.Meta.fields + ["is_active", "name"]
 
 
 class PlaybackStateSerializer(BaseModelSerializer):
-    active_device = serializers.SerializerMethodField(allow_null=True)
+    active_device = serializers.SerializerMethodField()
+    devices = serializers.SerializerMethodField()
 
     class Meta:
         model = PlaybackState
         fields = BaseModelSerializer.Meta.fields + [
             "active_device",
+            "devices",
             "is_playing",
         ]
 
+    def get_devices(self, obj):
+        return PlaybackDeviceSerializer(obj.playbackdevice_set.all(), many=True).data
+
     def get_active_device(self, obj):
-        return obj.active_device()
+        return PlaybackDeviceSerializer(obj.active_device()).data
