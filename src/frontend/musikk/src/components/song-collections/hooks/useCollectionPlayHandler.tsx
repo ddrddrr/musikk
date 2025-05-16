@@ -1,5 +1,5 @@
 import { ISongCollection } from "@/components/song-collections/types";
-import { useHandlePlay } from "@/hooks/useHandlePlay.ts";
+import { useHandlePlay } from "@/playback/hooks/useHandlePlay.ts";
 import { PlaybackContext } from "@/providers/playbackContext";
 import { useCallback, useContext } from "react";
 

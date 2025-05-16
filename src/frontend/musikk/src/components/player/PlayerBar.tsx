@@ -1,3 +1,4 @@
+import { ChangeActiveDeviceDropdown } from "@/components/player/ChangeActiveDeviceDropdown.tsx";
 import { PlayerPlayButton } from "@/components/player/PlayerPlayButton.tsx";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
@@ -15,7 +16,7 @@ interface PlayerBarProps {
 }
 
 export function PlayerBar({ duration, time, seeking, setSeeking, setIsQueueOpen }: PlayerBarProps) {
-    const { playingCollectionSong } = useContext(PlaybackContext);
+    const { playingCollectionSong, isThisDeviceActive } = useContext(PlaybackContext);
     const [volume, setVolume] = useState(100);
     const [seekTime, setSeekTime] = useState(0);
     const useShiftHeadMutation = useQueueChangeAPI();
@@ -85,19 +86,21 @@ export function PlayerBar({ duration, time, seeking, setSeeking, setIsQueueOpen 
                 )}
 
                 <div className="flex items-center gap-4 flex-1 justify-end min-w-0">
-                    <div className="flex items-center gap-1 basis-1/2 min-w-0 max-w-[350px]">
-                        <span className="text-xs text-right">{formatTime(displayTime)}</span>
-                        <Slider
-                            value={[displayTime]}
-                            min={0}
-                            max={duration || 100}
-                            step={1}
-                            onValueChange={handleSeek}
-                            onValueCommit={handleSeekCommit}
-                            className="flex-1 cursor-pointer"
-                        />
-                        <span className="text-xs">{formatTime(duration)}</span>
-                    </div>
+                    {isThisDeviceActive && (
+                        <div className="flex items-center gap-1 basis-1/2 min-w-0 max-w-[350px]">
+                            <span className="text-xs text-right">{formatTime(displayTime)}</span>
+                            <Slider
+                                value={[displayTime]}
+                                min={0}
+                                max={duration || 100}
+                                step={1}
+                                onValueChange={handleSeek}
+                                onValueCommit={handleSeekCommit}
+                                className="flex-1 cursor-pointer"
+                            />
+                            <span className="text-xs">{formatTime(duration)}</span>
+                        </div>
+                    )}
 
                     <div className="flex items-center gap-1">
                         <Button
@@ -117,21 +120,25 @@ export function PlayerBar({ duration, time, seeking, setSeeking, setIsQueueOpen 
                         </Button>
                     </div>
 
-                    <div className="flex items-center gap-2">
-                        <Volume2 size={16} />
-                        <Slider
-                            value={[volume]}
-                            min={0}
-                            max={100}
-                            step={1}
-                            onValueChange={(value) => setVolume(value[0])}
-                            className="w-30 cursor-pointer"
-                        />
-                    </div>
+                    {isThisDeviceActive && (
+                        <div className="flex items-center gap-2">
+                            <Volume2 size={16} />
+                            <Slider
+                                value={[volume]}
+                                min={0}
+                                max={100}
+                                step={1}
+                                onValueChange={(value) => setVolume(value[0])}
+                                className="w-30 cursor-pointer"
+                            />
+                        </div>
+                    )}
 
                     <Button variant="ghost" size="icon" onClick={() => setIsQueueOpen((prev) => !prev)}>
                         <ListMusic />
                     </Button>
+
+                    <ChangeActiveDeviceDropdown />
                 </div>
             </div>
         </div>

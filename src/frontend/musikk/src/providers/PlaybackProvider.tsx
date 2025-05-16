@@ -1,7 +1,8 @@
+import { useCurrentDevice } from "@/hooks/useCurrentDevice.ts";
 import { useQueue } from "@/hooks/useQueueAPI.ts";
 import { usePlaybackRetrieveQuery } from "@/playback/queries.ts";
 import { PlaybackContext } from "@/providers/playbackContext.ts";
-import { ReactNode } from "react";
+import { ReactNode, useMemo } from "react";
 
 interface PlaybackProviderProps {
     children: ReactNode;
@@ -10,14 +11,19 @@ interface PlaybackProviderProps {
 export function PlaybackProvider({ children }: PlaybackProviderProps) {
     const { data: playback } = usePlaybackRetrieveQuery();
     const { data: queue } = useQueue();
+    const { deviceID } = useCurrentDevice();
 
     const head = queue?.nodes?.length > 0 ? queue.nodes[0].collection_song : undefined;
+    const isThisDeviceActive = useMemo(() => {
+        return !!deviceID && !!playback?.active_device?.uuid && deviceID == playback?.active_device?.uuid;
+    }, [deviceID, playback?.active_device]);
 
     return (
         <PlaybackContext.Provider
             value={{
                 playbackState: playback,
                 playingCollectionSong: head,
+                isThisDeviceActive,
             }}
         >
             {children}

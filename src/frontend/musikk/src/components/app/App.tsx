@@ -8,8 +8,10 @@ import { SignUpPage } from "@/components/app/SignupPage.tsx";
 import { UploadPage } from "@/components/app/UploadPage.tsx";
 import { UserProvider } from "@/providers/UserProvider.tsx";
 import { memo } from "react";
+import { useHandleLoadUnload } from "@/hooks/useHandleLoadUnload.tsx";
 
 export const App = memo(function App() {
+    useHandleLoadUnload()
     return (
         <BrowserRouter>
             <UserProvider>

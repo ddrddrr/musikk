@@ -1,4 +1,5 @@
 import { useQueueChangeAPI } from "@/hooks/useQueueAPI.ts";
+import { usePlaybackStateMutation } from "@/playback/mutations.ts";
 import { PlaybackContext } from "@/providers/playbackContext.ts";
 import { useContext, useEffect, useMemo, useRef } from "react";
 
@@ -11,13 +12,12 @@ interface PlayerProps {
 }
 
 export function Player({ onDurationChange, onTimeUpdate }: PlayerProps) {
-    const { playbackState, playingCollectionSong } = useContext(PlaybackContext);
+    const { isThisDeviceActive, playbackState, playingCollectionSong } = useContext(PlaybackContext);
+    const playbackStateMutation = usePlaybackStateMutation();
     const useShiftHeadMutation = useQueueChangeAPI();
     const audioRef = useRef<HTMLAudioElement>(null);
     const playerRef = useRef<shaka.Player | null>(null);
-
     const isAudioReadyRef = useRef(false);
-    const isPlaying = playbackState?.is_playing;
 
     const url = useMemo(() => {
         return playingCollectionSong?.song.mpd;
@@ -33,6 +33,13 @@ export function Player({ onDurationChange, onTimeUpdate }: PlayerProps) {
             playerRef.current = null;
         };
     }, []);
+
+    // stop playback on refresh/first mount due to browser restrictions on autoplay
+    // useEffect(() => {
+    //     if (isThisDeviceActive) {
+    //         playbackStateMutation.mutate({ isPlaying: false });
+    //     }
+    // }, [isThisDeviceActive]);
 
     useEffect(() => {
         const initPlayback = async () => {
@@ -71,14 +78,16 @@ export function Player({ onDurationChange, onTimeUpdate }: PlayerProps) {
         let timeoutId: NodeJS.Timeout;
 
         const tryPlay = () => {
-            if (isAudioReadyRef.current) {
-                if (isPlaying) {
-                    audio.play().catch(console.warn);
+            if (isThisDeviceActive) {
+                if (isAudioReadyRef.current) {
+                    if (playbackState?.is_playing) {
+                        audio.play().catch(console.warn);
+                    } else {
+                        audio.pause();
+                    }
                 } else {
-                    audio.pause();
+                    timeoutId = setTimeout(tryPlay, 100);
                 }
-            } else {
-                timeoutId = setTimeout(tryPlay, 100);
             }
         };
 
@@ -87,7 +96,7 @@ export function Player({ onDurationChange, onTimeUpdate }: PlayerProps) {
         return () => {
             clearTimeout(timeoutId);
         };
-    }, [url, isPlaying]);
+    }, [url, isThisDeviceActive, playbackState?.is_playing]);
 
     function handleLoadedMetadata() {
         const audio = audioRef.current;

@@ -1,13 +1,14 @@
 import { ISongCollection, ISongCollectionSong } from "@/components/song-collections/types.ts";
+import { useCurrentDevice } from "@/hooks/useCurrentDevice.ts";
 import { useQueueAddAPI } from "@/hooks/useQueueAPI.ts";
-import { usePlaybackActivateMutation, usePlaybackStopMutation } from "@/playback/mutations.ts";
+import { usePlaybackStateMutation } from "@/playback/mutations.ts";
 import { PlaybackContext } from "@/providers/playbackContext.ts";
 import { useContext } from "react";
 
 export function useHandlePlay() {
     const { playbackState } = useContext(PlaybackContext);
-    const playbackActivateMutation = usePlaybackActivateMutation();
-    const playbackStopMutation = usePlaybackStopMutation();
+    const { deviceID } = useCurrentDevice();
+    const playbackStateMutation = usePlaybackStateMutation();
     const addToQueueMutation = useQueueAddAPI();
 
     async function handlePlay({
@@ -17,41 +18,36 @@ export function useHandlePlay() {
         newCollection?: ISongCollection;
         newSong?: ISongCollectionSong;
     } = {}) {
-        const deviceID = localStorage.getItem("deviceID");
         if (!deviceID) return;
 
         if (newCollection || newSong) {
-            if (newCollection) {
-                try {
+            try {
+                if (newCollection) {
                     await addToQueueMutation.mutateAsync({
                         type: "collection",
                         item: newCollection,
                         action: "setHead",
                     });
-                } catch (error) {
-                    console.error("Queue add failed", error);
-                    return;
-                }
-            } else if (newSong) {
-                try {
+                } else if (newSong) {
                     await addToQueueMutation.mutateAsync({
                         type: "song",
                         item: newSong,
                         action: "setHead",
                     });
-                } catch (error) {
-                    console.error("Queue add failed", error);
-                    return;
                 }
+            } catch (error) {
+                console.error("Queue add failed", error);
+                return;
             }
-            playbackActivateMutation.mutate({ deviceID });
+
+            playbackStateMutation.mutate({ isPlaying: true });
             return;
         }
 
         if (playbackState?.is_playing) {
-            playbackStopMutation.mutate();
+            playbackStateMutation.mutate({ isPlaying: false });
         } else {
-            playbackActivateMutation.mutate({ deviceID });
+            playbackStateMutation.mutate({ isPlaying: true });
         }
     }
 

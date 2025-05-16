@@ -1,9 +1,13 @@
+import { useCurrentDevice } from "@/hooks/useCurrentDevice.ts";
+import { useDeletePDMutation } from "@/playback/mutations.ts";
 import Cookies from "js-cookie";
 import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
 export function SettingsPage() {
     const navigate = useNavigate();
+    const deleteDeviceMutation = useDeletePDMutation();
+    const { deviceID } = useCurrentDevice();
 
     const logout = useCallback(
         function logout() {
@@ -13,9 +17,10 @@ export function SettingsPage() {
             if (Cookies.get("refresh")) {
                 Cookies.remove("refresh");
             }
+            if (deviceID) deleteDeviceMutation.mutate(deviceID);
             navigate("/login");
         },
-        [navigate],
+        [deleteDeviceMutation, deviceID, navigate],
     );
 
     return (

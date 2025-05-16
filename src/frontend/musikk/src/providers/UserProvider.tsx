@@ -12,13 +12,8 @@ export const UserProvider = ({ children }: UserProviderProps) => {
     const userUUID = useUserUUID();
 
     const { data } = useQuery({
-        queryKey: ["user"],
-        queryFn: async () => {
-            if (!userUUID) {
-                return undefined;
-            }
-            return await fetchUser(userUUID);
-        },
+        queryKey: ["user", userUUID],
+        queryFn: userUUID ? () => fetchUser(userUUID) : undefined,
         enabled: !!userUUID,
     });
 

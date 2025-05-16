@@ -21,7 +21,7 @@ export function UserPosts({ userUUID }: { userUUID: UUID }) {
                 <Card className="border-2 border-black shadow-md">
                     <CardContent className="p-4 space-y-3">
                         <h2 className="text-lg font-semibold">Add a Post :)</h2>
-                        <PostForm userUUID={userUUID} />
+                        <PostForm />
                     </CardContent>
                 </Card>
             )}

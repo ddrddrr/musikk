@@ -16,7 +16,7 @@ import { JSX } from "react";
 interface SongContextMenuProps {
     children: JSX.Element | JSX.Element[];
     song: ISongCollectionSong;
-    renderRemoveFromPlaylist: boolean;
+    renderRemoveFromPlaylist?: boolean;
 }
 
 export function SongContextMenu({ children, song, renderRemoveFromPlaylist = false }: SongContextMenuProps) {

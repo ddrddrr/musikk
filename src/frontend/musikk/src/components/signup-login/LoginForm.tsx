@@ -5,7 +5,8 @@ import { PasswordField } from "@/components/signup-login/PasswordField";
 import { Button } from "@/components/ui/button";
 import { CardContent } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
-import { useRegisterPlaybackDeviceMutation } from "@/playback/mutations.ts";
+import { useCurrentDevice } from "@/hooks/useCurrentDevice.ts";
+import { useRegisterPDMutation } from "@/playback/mutations.ts";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
@@ -23,7 +24,8 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 export function LoginForm() {
     const navigate = useNavigate();
     const client = useQueryClient();
-    const registerPlaybackDeviceMutation = useRegisterPlaybackDeviceMutation();
+    const registerPDMutation = useRegisterPDMutation();
+    const { saveDevice } = useCurrentDevice();
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState("");
 
@@ -38,8 +40,8 @@ export function LoginForm() {
             await login(values.email, values.password);
 
             client.fetchQuery({ queryKey: ["user"] });
-            const device = await registerPlaybackDeviceMutation.mutateAsync();
-            localStorage.setItem("deviceID", device.uuid);
+            const device = await registerPDMutation.mutateAsync();
+            saveDevice(device);
             navigate("/");
         } catch (error) {
             const resMessage = axios.isAxiosError(error)

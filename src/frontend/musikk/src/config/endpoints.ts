@@ -74,9 +74,10 @@ export const EventURLs = {
 };
 export const PlaybackURLs = {
     retrieve: `${BASE_URL}/playback`,
-    activate: `${BASE_URL}/playback/activate`,
-    stop: `${BASE_URL}/playback/stop`,
+    setState: `${BASE_URL}/playback`,
     registerDevice: `${BASE_URL}/playback-device`,
+    deleteDevice: (deviceUUID: UUID) => `${BASE_URL}/playback-device/${deviceUUID}/delete`,
+    setDeviceActive: (deviceUUID: UUID) => `${BASE_URL}/playback-device/${deviceUUID}/activate`,
 };
 export const FriendActivityURLs = {
     listeningToList: `${BASE_URL}/friend-activity/active-songs`,
