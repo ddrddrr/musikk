@@ -19,18 +19,26 @@ export function SongCollectionCarousel({ collections, title }: SongCollectionsCa
                     }}
                     className="w-full"
                 >
-                    <CarouselContent className="-ml-0">
-                        {collections.map((collection) => (
-                            <CarouselItem
-                                key={collection.uuid}
-                                className="pl-2 md:pl-4 basis-1/2 md:basis-1/3 lg:basis-1/4"
-                            >
-                                <SongCollectionCard collection={collection} size="medium" />
-                            </CarouselItem>
-                        ))}
+                    <CarouselContent className="-ml-0 min-h-[120px] flex items-center justify-center">
+                        {collections.length > 0 ? (
+                            collections.map((collection) => (
+                                <CarouselItem
+                                    key={collection.uuid}
+                                    className="pl-2 md:pl-4 basis-1/2 md:basis-1/3 lg:basis-1/4"
+                                >
+                                    <SongCollectionCard collection={collection} size="medium" />
+                                </CarouselItem>
+                            ))
+                        ) : (
+                            <div className="text-center text-gray-500 w-full">No collections available</div>
+                        )}
                     </CarouselContent>
-                    <CarouselPrevious />
-                    <CarouselNext />
+                    {collections.length > 0 && (
+                        <>
+                            <CarouselPrevious />
+                            <CarouselNext />
+                        </>
+                    )}
                 </Carousel>
             </div>
         </div>

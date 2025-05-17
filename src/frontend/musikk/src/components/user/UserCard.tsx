@@ -98,13 +98,13 @@ export function UserCard({ user, size = "medium", onClick }: UserCardProps) {
                     </CardContent>
                 </Card>
             </ContextMenuTrigger>
-            {user.uuid !== currUserUUID && user.role === "streaminguser" && (
+            {!!currUserUUID && user.uuid !== currUserUUID && user.role === "streaminguser" && (
                 <ContextMenuContent className="w-48 bg-white rounded-sm border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] py-1">
                     <ContextMenuItem
                         className="flex items-center px-3 py-2 text-sm text-black hover:bg-gray-100 transition-colors"
                         onSelect={() =>
                             isFriend
-                                ? deleteFriendMutation.mutate(currUserUUID, user.uuid)
+                                ? deleteFriendMutation.mutate({ userUUID: currUserUUID, senderUUID: user.uuid })
                                 : friendRequestMutation.mutate(user.uuid)
                         }
                     >

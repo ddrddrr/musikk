@@ -1,5 +1,4 @@
 import { useQueueChangeAPI } from "@/hooks/useQueueAPI.ts";
-import { usePlaybackStateMutation } from "@/playback/mutations.ts";
 import { PlaybackContext } from "@/providers/playbackContext.ts";
 import { useContext, useEffect, useMemo, useRef } from "react";
 
@@ -13,7 +12,6 @@ interface PlayerProps {
 
 export function Player({ onDurationChange, onTimeUpdate }: PlayerProps) {
     const { isThisDeviceActive, playbackState, playingCollectionSong } = useContext(PlaybackContext);
-    const playbackStateMutation = usePlaybackStateMutation();
     const useShiftHeadMutation = useQueueChangeAPI();
     const audioRef = useRef<HTMLAudioElement>(null);
     const playerRef = useRef<shaka.Player | null>(null);

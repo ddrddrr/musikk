@@ -46,7 +46,9 @@ export const SongCollectionHeader = memo(function SongCollectionHeader({
                         <div className="mb-2">
                             <p className="font-bold text-sm truncate">{collection.title}</p>
                             <div className="flex gap-3 mt-2">
-                                <SongCollectionPlayButton collection={collection} showComments={showComments} />
+                                {songsCount > 0 && (
+                                    <SongCollectionPlayButton collection={collection} showComments={showComments} />
+                                )}
                                 {notPersonalCollection && (
                                     <CollectionAddToLikedButton collection={collection} showComments={showComments} />
                                 )}
@@ -65,7 +67,9 @@ export const SongCollectionHeader = memo(function SongCollectionHeader({
                                 )}
                             </div>
                             <div className="flex gap-3 ml-6 flex-shrink-0">
-                                <SongCollectionPlayButton collection={collection} showComments={showComments} />
+                                {songsCount > 0 && (
+                                    <SongCollectionPlayButton collection={collection} showComments={showComments} />
+                                )}
                                 {notPersonalCollection && (
                                     <CollectionAddToLikedButton collection={collection} showComments={showComments} />
                                 )}

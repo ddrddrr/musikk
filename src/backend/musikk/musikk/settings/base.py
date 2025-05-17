@@ -7,10 +7,11 @@ import os
 from pathlib import Path
 
 from corsheaders.defaults import default_headers
-from decouple import config, Csv
+from decouple import Csv, config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
+
 DJANGO_BASE_URL = config("DJANGO_BASE_URL", default="http://localhost:8000")
 
 # SECURITY WARNING: keep the secret key used in production secret!
@@ -161,6 +162,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
@@ -179,7 +181,6 @@ MEDIA_URL = "media/"
 AUDIO_CONTENT_PATH = config("AUDIO_CONTENT_PATH", default="/tmp/media/musikk_audio")
 
 # LOGS
-# settings.py
 
 LOGGING = {
     "version": 1,

@@ -9,11 +9,10 @@ import { FieldArrayWithId, UseFormReturn } from "react-hook-form";
 interface SongUploadProps {
     form: UseFormReturn<CollectionFormValues>;
     fields: FieldArrayWithId<CollectionFormValues, "songs", "id">[];
-    append: (song: CollectionFormValues["songs"][number]) => void;
     remove: (index: number) => void;
 }
 
-export function SongUpload({ form, fields, append, remove }: SongUploadProps) {
+export function SongUpload({ form, fields, remove }: SongUploadProps) {
     const { statuses, createSongsMutation, createCollectionMutation, changeSongStatuses } = useUpload();
 
     useEffect(() => {

@@ -1,7 +1,6 @@
 import { PlaybackURLs } from "@/config/endpoints.ts";
 import { useCurrentDevice } from "@/hooks/useCurrentDevice.ts";
 import { useRegisterPDMutation } from "@/playback/mutations.ts";
-import { sleep } from "@/utils/debugMisc.ts";
 import Cookies from "js-cookie";
 import { useEffect, useRef } from "react";
 

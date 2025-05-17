@@ -1,0 +1,53 @@
+services:
+  server:
+    build: ./src/backend/
+    depends_on:
+      - database
+    ports:
+      - "8000:8000"
+    volumes:
+      - django_static:/app/staticfiles
+      - django_media:/app/media
+    env_file:
+      - src/backend/musikk/.env
+
+  database:
+    image: postgres:17
+    ports:
+      - "5432:5432"
+    env_file:
+      - src/backend/musikk/.env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  client:
+    build: ./src/frontend
+    ports:
+      - "5173:5173"
+    env_file:
+      - src/frontend/musikk/.env
+    volumes:
+      - react_build:/build
+
+  caddy:
+    image: caddy:2.10.0-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./src/backend/Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+      - react_build:/var/www/frontend
+      - django_static:/app/staticfiles
+      - django_media:/app/media
+
+
+volumes:
+  postgres_data:
+  caddy_data:
+  caddy_config:
+  django_static:
+  django_media:
+  react_build:

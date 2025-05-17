@@ -1,0 +1,12 @@
+./src/frontend/musikk/node_modules
+./src/frontend/musikk/build
+./src/frontend/musikk/dist
+./src/frontend/musikk/.env.example
+./src/frontend/Dockerfile
+./src/backend/Dockerfile
+
+.env.example
+.git
+.gitignore
+.dockerignore
+docker-compose*

@@ -63,7 +63,11 @@ celerybeat-schedule
 
 # dotenv
 .env
-
+.env.prod
+.env.dev
+**/.env
+**/.env.prod
+**/.env.dev
 # virtualenv
 venv/
 ENV/
@@ -80,3 +84,6 @@ ENV/
 pyvenv.cfg
 .venv
 pip-selfcheck.json
+
+# text
+text/charts

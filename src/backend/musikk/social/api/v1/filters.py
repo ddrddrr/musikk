@@ -17,10 +17,10 @@ class PublicationFilter(filters.FilterSet):
             case "friends":
                 return queryset.filter(user__in=user.friends.all()).order_by(
                     "-date_added"
-                )[:50],
+                )[:50]
             case "followed":
                 return queryset.filter(user__in=user.followed.all()).order_by(
                     "-date_added"
-                )[:50],
+                )[:50]
             case _:
                 return queryset.none()

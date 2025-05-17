@@ -12,7 +12,7 @@ interface PlayerBarProps {
     time: number;
     seeking: boolean;
     setSeeking: (s: boolean) => void;
-    setIsQueueOpen: (c: boolean) => void;
+    setIsQueueOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export function PlayerBar({ duration, time, seeking, setSeeking, setIsQueueOpen }: PlayerBarProps) {
@@ -134,7 +134,7 @@ export function PlayerBar({ duration, time, seeking, setSeeking, setIsQueueOpen 
                         </div>
                     )}
 
-                    <Button variant="ghost" size="icon" onClick={() => setIsQueueOpen((prev) => !prev)}>
+                    <Button variant="ghost" size="icon" onClick={() => setIsQueueOpen((prev: boolean) => !prev)}>
                         <ListMusic />
                     </Button>
 

@@ -1,1 +1,0 @@
-from musikk.settings.dev import *

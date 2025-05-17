@@ -39,7 +39,7 @@ export function UploadForm() {
                 {isCollectionMode ? (
                     <CollectionUpload form={form} fields={fields} append={append} remove={remove} />
                 ) : (
-                    <SongUpload form={form} fields={fields} append={append} remove={remove} />
+                    <SongUpload form={form} fields={fields} remove={remove} />
                 )}
             </Form>
         </div>

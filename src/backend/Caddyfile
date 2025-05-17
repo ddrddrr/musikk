@@ -1,0 +1,15 @@
+musikk.stream {
+    root /var/www/frontend
+    file_server
+
+    handle_path /static/* {
+        root /app/staticfiles
+        file_server
+    }
+    handle_path /media/* {
+        root /app/media
+        file_server
+    }
+
+    reverse_proxy /api/* server:8000
+}

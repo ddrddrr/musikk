@@ -46,10 +46,12 @@ export function CollectionUpload({ form, fields, append, remove }: CollectionUpl
 
             fields.forEach((_, i) => {
                 const key = `song_${i}`;
+                // @ts-ignore
                 const ok = succeeded.find((s) => s.key === key);
                 if (ok) {
                     changeSongStatuses(i, { success: true, uuid: ok.uuid });
                 } else {
+                    // @ts-ignore
                     const err = failed.find((f) => f.key === key);
                     changeSongStatuses(i, {
                         success: false,
@@ -59,6 +61,7 @@ export function CollectionUpload({ form, fields, append, remove }: CollectionUpl
             });
 
             if (failed.length) return;
+            // @ts-ignore
             songUUIDs = succeeded.map((s) => s.uuid);
         }
 

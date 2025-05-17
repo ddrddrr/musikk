@@ -13,7 +13,7 @@ export function UserCollectionsProvider({ children }: UserCollectionsProviderPro
 
     const { data } = useQuery({
         queryKey: ["collectionsPersonal"],
-        queryFn: () => fetchCollectionsPersonal(userUUID),
+        queryFn: userUUID ? () => fetchCollectionsPersonal(userUUID) : undefined,
         enabled: !!userUUID,
     });
     const contextValue = {

@@ -19,15 +19,26 @@ export function SongCarousel({ songs, title }: SongCarouselProps) {
                     }}
                     className="w-full"
                 >
-                    <CarouselPrevious />
-                    <CarouselContent className="-ml-0">
-                        {songs.map((song) => (
-                            <CarouselItem key={song.uuid} className="pl-2 md:pl-4 basis-1/2 md:basis-1/3 lg:basis-1/4">
-                                <SongCard collectionSong={song} size={"medium"} />
-                            </CarouselItem>
-                        ))}
+                    <CarouselContent className="-ml-0 min-h-[120px] flex items-center justify-center">
+                        {songs.length > 0 ? (
+                            songs.map((song) => (
+                                <CarouselItem
+                                    key={song.uuid}
+                                    className="pl-2 md:pl-4 basis-1/2 md:basis-1/3 lg:basis-1/4"
+                                >
+                                    <SongCard collectionSong={song} size={"medium"} />
+                                </CarouselItem>
+                            ))
+                        ) : (
+                            <div className="text-center text-gray-500 w-full">No songs available</div>
+                        )}
                     </CarouselContent>
-                    <CarouselNext />
+                    {songs.length > 0 && (
+                        <>
+                            <CarouselPrevious />
+                            <CarouselNext />
+                        </>
+                    )}
                 </Carousel>
             </div>
         </div>
