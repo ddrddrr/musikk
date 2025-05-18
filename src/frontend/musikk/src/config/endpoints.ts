@@ -1,7 +1,7 @@
 import { PublicationObjectType } from "@/components/publications/types.ts";
 import { UUID } from "@/config/types.ts";
 
-const BASE_URL = import.meta.env.API_BASE_URL + "/api/v1";
+const BASE_URL = import.meta.env.VITE_API_BASE_URL + "/api/v1";
 
 export const SongURLs = {
     songList: `${BASE_URL}/songs`,

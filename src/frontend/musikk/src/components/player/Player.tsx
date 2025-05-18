@@ -17,9 +17,14 @@ export function Player({ onDurationChange, onTimeUpdate }: PlayerProps) {
     const playerRef = useRef<shaka.Player | null>(null);
     const isAudioReadyRef = useRef(false);
 
+    const isSafari = useMemo(() => {
+        return /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    }, []);
+
     const url = useMemo(() => {
-        return playingCollectionSong?.song.mpd;
-    }, [playingCollectionSong]);
+        if (!playingCollectionSong) return undefined;
+        return isSafari ? playingCollectionSong.song.m3u8 : playingCollectionSong.song.mpd;
+    }, [playingCollectionSong, isSafari]);
 
     useEffect(() => {
         shaka.polyfill.installAll();
@@ -31,13 +36,6 @@ export function Player({ onDurationChange, onTimeUpdate }: PlayerProps) {
             playerRef.current = null;
         };
     }, []);
-
-    // stop playback on refresh/first mount due to browser restrictions on autoplay
-    // useEffect(() => {
-    //     if (isThisDeviceActive) {
-    //         playbackStateMutation.mutate({ isPlaying: false });
-    //     }
-    // }, [isThisDeviceActive]);
 
     useEffect(() => {
         const initPlayback = async () => {
