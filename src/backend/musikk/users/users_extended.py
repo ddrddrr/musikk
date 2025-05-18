@@ -60,24 +60,27 @@ class StreamingUser(BaseUser):
     objects = StreamingUserManager()
 
 
-class ContentOwner(models.Model):
-    class Meta:
-        abstract = True
-
-    owned_songs = models.ManyToManyField("streaming.BaseSong")
-    owned_song_collections = models.ManyToManyField(
-        "streaming.SongCollection",
-    )
+# class ContentOwner(models.Model):
+#     class Meta:
+#         abstract = True
+#
+#     owned_songs = models.ManyToManyField("streaming.BaseSong")
+#     owned_song_collections = models.ManyToManyField(
+#         "streaming.SongCollection",
+#     )
 
 
 class ArtistManager(UserManager):
     pass
 
 
-class Artist(ContentOwner, StreamingUser):
+class Artist(StreamingUser):
     objects = ArtistManager()
 
-
-class Label(ContentOwner, BaseUser):
-    artists = models.ManyToManyField("users.Artist", related_name="labels")
-    # TODO: methods which operate over content of all artists under the label
+# class Artist(ContentOwner, StreamingUser):
+#     objects = ArtistManager()
+#
+#
+# class Label(ContentOwner, BaseUser):
+#     artists = models.ManyToManyField("users.Artist", related_name="labels")
+#     # TODO: methods which operate over content of all artists under the label

@@ -1,19 +1,18 @@
 from faker import Faker
 
-from users.models import StreamingUser, Artist, Label
+from users.models import StreamingUser, Artist
 
 fake = Faker()
 
 USER_CLASSES = {
     "streaming": StreamingUser,
     "artist": Artist,
-    "label": Label,
 }
 
 
 def create_user_with_password(
     user_type: str, email: str = None
-) -> tuple[StreamingUser | Artist | Label, str]:
+) -> tuple[StreamingUser | Artist]:
     user_type = user_type.lower()
     if user_type not in USER_CLASSES:
         raise ValueError(f"Invalid user type: {user_type}")

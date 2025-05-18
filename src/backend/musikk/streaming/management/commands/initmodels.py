@@ -10,7 +10,7 @@ from faker import Faker
 from users.management.helpers import create_user_with_password
 from streaming.models import BaseSong, SongCollection, SongCollectionAuthor
 from streaming.songs import SongAuthor, SongCollectionSong
-from audio_processing.ffmpeg_wrapper import Full
+from audio_processing.ffmpeg_wrapper import Full, StreamingProtocol
 
 fake = Faker()
 SAMPLES_PATH = os.path.expanduser("~/studies/musikk/samples")
@@ -70,12 +70,10 @@ class Command(BaseCommand):
                         title=fake.catch_phrase(),
                         description=fake.text(max_nb_chars=512),
                         image=File(i, name=os.path.basename(random_image)),
-                        like_count=fake.pyint(0, 10000),
-                        dislike_count=fake.pyint(0, 10000),
                     )
                     print(f"Converting audio for song '{song.title}'")
                     res = Full.convert_song(m)
-                    song.mpd = res.manifests["mpd_path"]
+                    song.mpd = res.manifests[StreamingProtocol.DASH]
                     song.uuid = res.uuid_
                     song.save()
 
@@ -86,7 +84,6 @@ class Command(BaseCommand):
                         SongAuthor.objects.create(
                             song=song, author=artist, author_priority=priority
                         )
-                        artist.owned_songs.add(song)
                     print(
                         f"Created song '{song.title}' with authors {[a.email for a in song_authors]}"
                     )
@@ -126,7 +123,6 @@ class Command(BaseCommand):
                             author=author,
                             author_priority=priority,
                         )
-                        author.owned_song_collections.add(collection)
                     print(
                         f"Created {collection.type} '{collection.title}' with {len(selected_songs)} songs and authors {[a.email for a in authors]}"
                     )

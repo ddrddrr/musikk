@@ -2,9 +2,8 @@ from typing import Self
 
 
 class AudioConverter:
-    def __init__(self, encoder: str, protocol: str):
+    def __init__(self, encoder: str):
         self.encoder = encoder
-        self.protocol = protocol
         self.bitrates: list[int] = []
         self.extras: list[str] = []
 
@@ -36,10 +35,14 @@ class AudioConverter:
         return commands
 
 
-FLAC_CONVERTER = AudioConverter("flac", "dash")
-OPUS_CONVERTER = AudioConverter("libopus", "dash").set_bitrates([96, 160, 256])
+FLAC_CONVERTER = AudioConverter("flac")
+OPUS_CONVERTER = AudioConverter("libopus").set_bitrates([96, 160, 256])
 AACHEv2_CONVERTER = (
-    AudioConverter("libfdk_aac", "dash")
+    AudioConverter(
+        "libfdk_aac",
+    )
     .set_bitrates([24])
     .set_extras(["-profile", "aac_he_v2"])
 )
+
+AAC_CONVERTER = AudioConverter("libfdk_aac").set_bitrates([96, 160, 320])

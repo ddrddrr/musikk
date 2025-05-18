@@ -46,11 +46,6 @@ class SongAddLikedView(APIView):
 
 
 class SongCreateView(APIView):
-    """
-    { authors: [UUID], songs: [ { key: 'song_0', title, description }, ... ] }
-    + song_{i}_audio, song_{i}_image.
-    """
-
     parser_classes = [MultiPartParser, FormParser]
     permission_classes = [IsAuthenticated]
 

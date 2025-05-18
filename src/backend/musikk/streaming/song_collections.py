@@ -4,14 +4,14 @@ from django.db import models
 from base.models import BaseModel
 from musikk.utils import image_path
 from social.models import Publication
-from streaming.stream import Stream
+# from streaming.stream import Stream
 from streaming.songs import SongCollectionSong, BaseSong
 
 
-class SongCollectionMetadata(BaseModel):
-    extras = models.TextField(
-        max_length=2048, help_text="Any extra information from the author."
-    )
+# class SongCollectionMetadata(BaseModel):
+#     extras = models.TextField(
+#         max_length=2048, help_text="Any extra information from the author."
+#     )
 
 
 class SongCollection(BaseModel):
@@ -26,15 +26,15 @@ class SongCollection(BaseModel):
     title = models.CharField(max_length=128)
     description = models.TextField(max_length=512, blank=True, default="")
     image = models.ImageField(upload_to=image_path, null=True, blank=True)
-    metadata = models.OneToOneField(
-        SongCollectionMetadata, on_delete=models.CASCADE, null=True, blank=True
-    )
+    # metadata = models.OneToOneField(
+    #     SongCollectionMetadata, on_delete=models.CASCADE, null=True, blank=True
+    # )
     private = models.BooleanField(default=False)
 
     authors = models.ManyToManyField(
         "users.StreamingUser", through="streaming.SongCollectionAuthor"
     )
-    streams = GenericRelation(Stream)
+    # streams = GenericRelation(Stream)
     comments = GenericRelation(Publication, limit_choices_to={"type": "comment"})
 
     def ordered_songs(self) -> list[BaseSong]:

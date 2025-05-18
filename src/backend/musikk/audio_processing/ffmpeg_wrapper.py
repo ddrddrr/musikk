@@ -1,5 +1,6 @@
 import shutil
 import uuid
+from enum import Enum
 from io import BytesIO
 from pathlib import Path
 import subprocess
@@ -14,6 +15,7 @@ from audio_processing.converters import (
     FLAC_CONVERTER,
     AACHEv2_CONVERTER,
     OPUS_CONVERTER,
+    AAC_CONVERTER,
 )
 from audio_processing.exceptions import ConversionError
 
@@ -41,13 +43,17 @@ ALLOWED_FILE_TYPES = [  # lossless for now
 ]
 
 
+class StreamingProtocol(Enum):
+    DASH = "dash"
+    HLS = "hls"
+
+
 class SongRepresentation:
     def __init__(
         self, manifests: dict, uuid_: uuid.UUID, song_content_path: str | Path
     ):
-        # TODO: make also a class or a named tuple
         self.song_content_path = song_content_path
-        self.manifests = manifests  # {"mpd_path": ..., "m3u8_path":...}
+        self.manifests: dict[StreamingProtocol, str] = manifests
         self.uuid_ = uuid_
 
 
@@ -59,12 +65,15 @@ class FFMPEGWrapper:
         cleanup: bool = True,
     ):
         assert audio_content_path is not None, "audio_content_path must be a Path"
-        self.audio_content_path = Path(audio_content_path)
-        self.converters: list[AudioConverter] = []
-        self.cleanup = cleanup
 
-    def add_converter(self, converter: AudioConverter) -> Self:
-        self.converters.append(converter)
+        self.audio_content_path = Path(audio_content_path)
+        self.cleanup = cleanup
+        self.converter_map: dict[StreamingProtocol, list[AudioConverter]] = {}
+
+    def add_converter(
+        self, protocol: StreamingProtocol, converter: AudioConverter
+    ) -> Self:
+        self.converter_map.setdefault(protocol, []).append(converter)
         return self
 
     def convert_song(
@@ -73,7 +82,7 @@ class FFMPEGWrapper:
         # TODO: improve handling
         if not song:
             raise ValueError("No song provided")
-        if not self.converters:
+        if not self.converter_map:
             raise Exception("No converters to use")
 
         song_uuid = uuid.uuid4()
@@ -83,26 +92,31 @@ class FFMPEGWrapper:
                 song=song, song_content_path=song_content_path
             )
 
-            command = (
-                self.input_file_args(song_path)
-                + self.converter_args()
-                + self.output_type_args()
-            )
-            mpd_path = self.mpd_path(
-                song_uuid=song_uuid, song_content_path=song_content_path
-            )
-            command.append(mpd_path)
-
-            ffmpeg_result = subprocess.run(command, capture_output=True, text=True)
-            if ffmpeg_result.returncode != 0:
-                raise Exception(
-                    f"ffmpeg could not process input file."
-                    f"\nError: {ffmpeg_result.stderr}"
-                    f"\nInput args: {ffmpeg_result.args}"
+            manifests = {}
+            for protocol in self.converter_map.keys():
+                command = (
+                    self.input_file_args(song_path)
+                    + self.converter_args(protocol)
+                    + self.output_type_args(protocol)
                 )
+                output_path = self.output_path(
+                    protocol=protocol,
+                    song_uuid=song_uuid,
+                    song_content_path=song_content_path,
+                )
+                command.append(output_path)
+
+                ffmpeg_result = subprocess.run(command, capture_output=True, text=True)
+                if ffmpeg_result.returncode != 0:
+                    raise Exception(
+                        f"ffmpeg could not process input file."
+                        f"\nError: {ffmpeg_result.stderr}"
+                        f"\nInput args: {ffmpeg_result.args}"
+                    )
+                manifests[protocol] = output_path
 
             return SongRepresentation(
-                manifests={"mpd_path": mpd_path},
+                manifests=manifests,
                 uuid_=song_uuid,
                 song_content_path=song_content_path,
             )
@@ -114,16 +128,33 @@ class FFMPEGWrapper:
     def input_file_args(self, song_path: Path) -> list[str]:
         return ["ffmpeg", "-i", str(song_path)]
 
-    def output_type_args(self) -> list[str]:
-        return ["-f", "dash"]
+    def output_type_args(self, protocol) -> list[str]:
+        if protocol == StreamingProtocol.DASH:
+            return ["-f", "dash"]
+        elif protocol == StreamingProtocol.HLS:
+            return [
+                "-f",
+                "hls",
+                "-hls_playlist_type",
+                "vod",  # makes playlist const
+            ]
+        else:
+            raise ValueError(f"Unsupported protocol: {protocol}")
 
-    def mpd_path(self, song_uuid: uuid.UUID, song_content_path: Path) -> str:
-        return str(song_content_path / f"{song_uuid}.mpd")
+    def output_path(
+        self, protocol, song_uuid: uuid.UUID, song_content_path: Path
+    ) -> str:
+        if protocol == StreamingProtocol.DASH:
+            return str(song_content_path / f"{song_uuid}.mpd")
+        elif protocol == StreamingProtocol.HLS:
+            return str(song_content_path / f"{song_uuid}.m3u8")
+        else:
+            raise ValueError(f"Unsupported protocol: {protocol}")
 
-    def converter_args(self) -> list[str]:
+    def converter_args(self, protocol) -> list[str]:
         channel_input = 0
         commands = []
-        for converter in self.converters:
+        for converter in self.converter_map[protocol]:
             ffmpeg_command = converter.construct_ffmpeg_command(channel_input)
             for sublist in ffmpeg_command:
                 commands.extend(sublist)
@@ -178,10 +209,12 @@ class FFMPEGWrapper:
         shutil.rmtree(song_content_path)
 
 
-FlacOnly = FFMPEGWrapper().add_converter(FLAC_CONVERTER)
+FlacOnly = FFMPEGWrapper().add_converter(StreamingProtocol.DASH, FLAC_CONVERTER)
 Full = (
     FFMPEGWrapper()
-    .add_converter(FLAC_CONVERTER)
-    .add_converter(AACHEv2_CONVERTER)
-    .add_converter(OPUS_CONVERTER)
+    .add_converter(StreamingProtocol.DASH, FLAC_CONVERTER)
+    .add_converter(StreamingProtocol.DASH, AACHEv2_CONVERTER)
+    .add_converter(StreamingProtocol.DASH, OPUS_CONVERTER)
+    .add_converter(StreamingProtocol.HLS, AAC_CONVERTER)
+    .add_converter(StreamingProtocol.HLS, AACHEv2_CONVERTER)
 )

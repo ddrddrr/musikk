@@ -4,15 +4,17 @@ from django.db import models
 
 from base.models import BaseModel
 from musikk.utils import image_path, delete_dir_for_file
-from streaming.stream import Stream
+
+# from streaming.stream import Stream
 
 
-class SongMetadata(BaseModel):
-    written_by = models.CharField(max_length=64)
-    performed_by = models.CharField(max_length=64)
-    extras = models.TextField(
-        max_length=2000, help_text="Any extra information from the author."
-    )
+# class SongMetadata(BaseModel):
+#     written_by = models.CharField(max_length=64)
+#     performed_by = models.CharField(max_length=64)
+#     extras = models.TextField(
+#         max_length=2000, help_text="Any extra information from the author."
+#     )
+#
 
 
 # TODO: when a single song is created via view, make a playlist for it
@@ -21,27 +23,27 @@ class BaseSong(BaseModel):
     title = models.CharField(max_length=128)
     description = models.TextField(max_length=512, blank=True, default="")
     image = models.ImageField(upload_to=image_path, null=True, blank=True)
-    metadata = models.OneToOneField(
-        SongMetadata,
-        on_delete=models.SET_NULL,
-        related_name="song",
-        null=True,
-        blank=True,
-    )
+    # metadata = models.OneToOneField(
+    #     SongMetadata,
+    #     on_delete=models.SET_NULL,
+    #     related_name="song",
+    #     null=True,
+    #     blank=True,
+    # )
     draft = models.BooleanField(default=False)
 
     authors = models.ManyToManyField("users.Artist", through="streaming.SongAuthor")
 
-    streams = GenericRelation(Stream)
+    # streams = GenericRelation(Stream)
     # hashtags = ...
-    like_count = models.IntegerField(default=0, blank=True)
-    dislike_count = models.IntegerField(default=0, blank=True)
+    # TODO: add rating system
 
     content_path = models.CharField(
         default="",
         blank=True,
         max_length=settings.MAX_PATH_LENGTH,
         help_text="Path to the directory with all song files.",
+        # TODO: uncomment when figured out how to show in change template in admin
         # editable=False,
     )
     mpd = models.CharField(
@@ -49,8 +51,12 @@ class BaseSong(BaseModel):
         blank=True,
         max_length=settings.MAX_PATH_LENGTH,
         help_text="Path to the mpd file representing the song.",
-        # TODO: uncomment when figured out how to show in change template in admin
-        # editable=False,
+    )
+    m3u8 = models.CharField(
+        default="",
+        blank=True,
+        max_length=settings.MAX_PATH_LENGTH,
+        help_text="Path to the m3u8 file representing the song.",
     )
 
     # TODO: django is kinda weird with deletes on relation
@@ -63,8 +69,6 @@ class BaseSong(BaseModel):
 
     def is_available(self) -> bool:
         return self.mpd is not None
-
-    # m3u8 = ...
 
     def __str__(self):
         return self.title
