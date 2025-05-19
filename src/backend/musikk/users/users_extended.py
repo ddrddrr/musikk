@@ -77,6 +77,7 @@ class ArtistManager(UserManager):
 class Artist(StreamingUser):
     objects = ArtistManager()
 
+
 # class Artist(ContentOwner, StreamingUser):
 #     objects = ArtistManager()
 #

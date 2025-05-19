@@ -30,6 +30,7 @@ from users.users_extended import StreamingUser, Artist
 from users.utils import password_reset_token_generator
 
 
+# TODO: improve update view, so that user could change only his credentials
 class UserRetrieveUpdateView(RetrieveUpdateAPIView):
     lookup_field = "uuid"
     queryset = BaseUser.objects.all()

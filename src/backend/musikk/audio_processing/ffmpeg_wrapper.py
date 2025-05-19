@@ -212,7 +212,7 @@ class FFMPEGWrapper:
 FlacOnly = FFMPEGWrapper().add_converter(StreamingProtocol.DASH, FLAC_CONVERTER)
 Full = (
     FFMPEGWrapper()
-    .add_converter(StreamingProtocol.DASH, FLAC_CONVERTER)
+    # .add_converter(StreamingProtocol.DASH, FLAC_CONVERTER)
     .add_converter(StreamingProtocol.DASH, AACHEv2_CONVERTER)
     .add_converter(StreamingProtocol.DASH, OPUS_CONVERTER)
     .add_converter(StreamingProtocol.HLS, AAC_CONVERTER)

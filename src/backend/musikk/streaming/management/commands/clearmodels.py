@@ -1,7 +1,10 @@
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
-from streaming.models import BaseSong, SongCollection
+from streaming.models import (
+    BaseSong,
+    SongCollection,
+)
 from users.user_base import BaseUser
 
 
