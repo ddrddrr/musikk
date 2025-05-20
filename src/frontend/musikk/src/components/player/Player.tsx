@@ -64,7 +64,7 @@ export function Player({ onDurationChange, onTimeUpdate }: PlayerProps) {
             }
         };
         initPlayback();
-    }, [url, queueHead]);
+    }, [queueHead?.uuid, url]);
 
     useEffect(() => {
         const audio = audioRef.current;
@@ -73,7 +73,7 @@ export function Player({ onDurationChange, onTimeUpdate }: PlayerProps) {
         let timeoutId: NodeJS.Timeout;
 
         const tryPlay = () => {
-            if (isThisDeviceActive) {
+            if (queueHead && isThisDeviceActive) {
                 if (isAudioReadyRef.current) {
                     if (playbackState?.is_playing) {
                         audio.play().catch(console.warn);
@@ -91,7 +91,27 @@ export function Player({ onDurationChange, onTimeUpdate }: PlayerProps) {
         return () => {
             clearTimeout(timeoutId);
         };
-    }, [url, queueHead, isThisDeviceActive, playbackState?.is_playing]);
+    }, [queueHead?.uuid, isThisDeviceActive, playbackState?.is_playing]);
+
+    useEffect(() => {
+        const audio = audioRef.current;
+        if (!audio) return;
+
+        const interval = setInterval(() => {
+            if (
+                isThisDeviceActive &&
+                queueHead &&
+                isAudioReadyRef.current &&
+                !audio.ended &&
+                audio.duration - audio.currentTime < 0.5 &&
+                !audio.paused
+            ) {
+                handleOnEnded(); // manually call it
+            }
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, [queueHead?.uuid, isThisDeviceActive]);
 
     function handleLoadedMetadata() {
         const audio = audioRef.current;

@@ -6,10 +6,8 @@ export interface ActiveDevice {
     name: string;
 }
 
-// register device on login, delete on page unload, register on page load?
 export function useCurrentDevice() {
     const saveDevice = useCallback(function saveDevice(device: ActiveDevice) {
-
         localStorage.setItem("deviceID", device.uuid);
         localStorage.setItem("deviceName", device.name);
     }, []);
@@ -20,8 +18,8 @@ export function useCurrentDevice() {
     }, []);
 
     return {
-        deviceID: localStorage.getItem("deviceID"),
-        deviceName: localStorage.getItem("deviceName"),
+        getDeviceID: () => localStorage.getItem("deviceID"),
+        getDeviceName: () => localStorage.getItem("deviceName"),
         saveDevice,
         deleteDevice,
     };

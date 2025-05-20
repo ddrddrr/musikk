@@ -6,8 +6,8 @@ import { PlaybackContext } from "@/providers/playbackContext.ts";
 import { useContext } from "react";
 
 export function useHandlePlay() {
-    const { playbackState } = useContext(PlaybackContext);
-    const { deviceID } = useCurrentDevice();
+    const { queueHead, playbackState } = useContext(PlaybackContext);
+    const { getDeviceID } = useCurrentDevice();
     const playbackStateMutation = usePlaybackStateMutation();
     const addToQueueMutation = useQueueAddAPI();
 
@@ -18,7 +18,7 @@ export function useHandlePlay() {
         newCollection?: ISongCollection;
         newSong?: ISongCollectionSong;
     } = {}) {
-        if (!deviceID) return;
+        if (!getDeviceID()) return;
 
         if (newCollection || newSong) {
             try {
@@ -44,10 +44,12 @@ export function useHandlePlay() {
             return;
         }
 
-        if (playbackState?.is_playing) {
-            playbackStateMutation.mutate({ isPlaying: false });
-        } else {
-            playbackStateMutation.mutate({ isPlaying: true });
+        if (queueHead) {
+            if (playbackState?.is_playing) {
+                playbackStateMutation.mutate({ isPlaying: false });
+            } else {
+                playbackStateMutation.mutate({ isPlaying: true });
+            }
         }
     }
 

@@ -7,8 +7,8 @@ import { useNavigate } from "react-router-dom";
 export function SettingsPage() {
     const navigate = useNavigate();
     const deleteDeviceMutation = useDeletePDMutation();
-    const { deviceID } = useCurrentDevice();
-
+    const { getDeviceID } = useCurrentDevice();
+    const deviceID = getDeviceID();
     const logout = useCallback(
         function logout() {
             if (Cookies.get("access")) {

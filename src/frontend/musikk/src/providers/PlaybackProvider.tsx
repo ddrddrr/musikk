@@ -11,12 +11,12 @@ interface PlaybackProviderProps {
 export function PlaybackProvider({ children }: PlaybackProviderProps) {
     const { data: playback } = usePlaybackRetrieveQuery();
     const { data: queue } = useQueue();
-    const { deviceID } = useCurrentDevice();
-
+    const { getDeviceID } = useCurrentDevice();
+    const deviceID = getDeviceID();
     const head = queue?.nodes?.length && queue?.nodes?.length > 0 ? queue.nodes[0] : undefined;
     const isThisDeviceActive = useMemo(() => {
         return !!deviceID && !!playback?.active_device?.uuid && deviceID == playback?.active_device?.uuid;
-    }, [deviceID, playback?.active_device]);
+    }, [playback, deviceID, playback?.active_device]);
 
     return (
         <PlaybackContext.Provider

@@ -87,7 +87,7 @@ export function PlayerBar({ duration, time, seeking, setSeeking, setIsQueueOpen 
                 )}
 
                 <div className="flex items-center gap-4 flex-1 justify-end min-w-0">
-                    {isThisDeviceActive && (
+                    {isThisDeviceActive && playingCollectionSong && (
                         <div className="flex items-center gap-1 basis-1/2 min-w-0 max-w-[350px]">
                             <span className="text-xs text-right">{formatTime(displayTime)}</span>
                             <Slider
