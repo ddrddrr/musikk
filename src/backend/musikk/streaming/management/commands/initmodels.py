@@ -29,9 +29,9 @@ def get_random_file_path(directory, extensions=None) -> str:
 class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument("--users", type=int, default=2)
-        parser.add_argument("--artists", type=int, default=5)
-        parser.add_argument("--songs", type=int, default=15)
-        parser.add_argument("--collections", type=int, default=5)
+        parser.add_argument("--artists", type=int, default=3)
+        parser.add_argument("--songs", type=int, default=7)
+        parser.add_argument("--collections", type=int, default=3)
 
     def handle(self, *args, **options):
         users_count = options["users"]

@@ -14,7 +14,7 @@ class PlaybackDeviceSerializer(BaseModelSerializer):
 
 
 class PlaybackStateSerializer(BaseModelSerializer):
-    active_device = serializers.SerializerMethodField()
+    active_device = serializers.SerializerMethodField(allow_null=True)
     devices = serializers.SerializerMethodField()
 
     class Meta:

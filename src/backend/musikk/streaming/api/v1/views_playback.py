@@ -36,6 +36,7 @@ class PlaybackDeviceView(APIView):
                 pd.save()
                 user.playback_state.is_active = False
                 user.playback_state.save()
+                send_invalidate_event(EventChannels.user_events(user.uuid), ["playback"])
 
         return Response(
             status=status.HTTP_201_CREATED, data=PlaybackDeviceSerializer(pd).data

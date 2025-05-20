@@ -20,7 +20,7 @@ from audio_processing.converters import (
 from audio_processing.exceptions import ConversionError
 
 # 2GB, which approx. corresponds to a 32bit, 48khz, stereo, 90min wav file
-MAX_FILE_SIZE = (((2**3) ** 10) ** 2) ** 3
+MAX_FILE_SIZE = (((2 ** 3) ** 10) ** 2) ** 3
 ALLOWED_FILE_TYPES = [  # lossless for now
     "wav",
     "vnd.wav",
@@ -50,7 +50,7 @@ class StreamingProtocol(Enum):
 
 class SongRepresentation:
     def __init__(
-        self, manifests: dict, uuid_: uuid.UUID, song_content_path: str | Path
+            self, manifests: dict, uuid_: uuid.UUID, song_content_path: str | Path
     ):
         self.song_content_path = song_content_path
         self.manifests: dict[StreamingProtocol, str] = manifests
@@ -60,9 +60,9 @@ class SongRepresentation:
 # TODO: allow for mp3?
 class FFMPEGWrapper:
     def __init__(
-        self,
-        audio_content_path: str | Path = settings.AUDIO_CONTENT_PATH,
-        cleanup: bool = True,
+            self,
+            audio_content_path: str | Path = settings.AUDIO_CONTENT_PATH,
+            cleanup: bool = True,
     ):
         assert audio_content_path is not None, "audio_content_path must be a Path"
 
@@ -71,13 +71,13 @@ class FFMPEGWrapper:
         self.converter_map: dict[StreamingProtocol, list[AudioConverter]] = {}
 
     def add_converter(
-        self, protocol: StreamingProtocol, converter: AudioConverter
+            self, protocol: StreamingProtocol, converter: AudioConverter
     ) -> Self:
         self.converter_map.setdefault(protocol, []).append(converter)
         return self
 
     def convert_song(
-        self, song: bytes | BytesIO | InMemoryUploadedFile | TemporaryUploadedFile
+            self, song: bytes | BytesIO | InMemoryUploadedFile | TemporaryUploadedFile
     ) -> SongRepresentation:
         # TODO: improve handling
         if not song:
@@ -95,9 +95,9 @@ class FFMPEGWrapper:
             manifests = {}
             for protocol in self.converter_map.keys():
                 command = (
-                    self.input_file_args(song_path)
-                    + self.converter_args(protocol)
-                    + self.output_type_args(protocol)
+                        self.input_file_args(song_path)
+                        + self.converter_args(protocol)
+                        + self.output_type_args(protocol)
                 )
                 output_path = self.output_path(
                     protocol=protocol,
@@ -130,7 +130,7 @@ class FFMPEGWrapper:
 
     def output_type_args(self, protocol) -> list[str]:
         if protocol == StreamingProtocol.DASH:
-            return ["-f", "dash"]
+            return ["-f", "dash", "-adaptation_sets", "id=0, streams=a"]
         elif protocol == StreamingProtocol.HLS:
             return [
                 "-f",
@@ -142,7 +142,7 @@ class FFMPEGWrapper:
             raise ValueError(f"Unsupported protocol: {protocol}")
 
     def output_path(
-        self, protocol, song_uuid: uuid.UUID, song_content_path: Path
+            self, protocol, song_uuid: uuid.UUID, song_content_path: Path
     ) -> str:
         if protocol == StreamingProtocol.DASH:
             return str(song_content_path / f"{song_uuid}.mpd")
@@ -177,9 +177,9 @@ class FFMPEGWrapper:
 
     # TODO: remove saved raw file when not in debug?
     def _prepare_song_file(
-        self,
-        song: bytes | BytesIO | InMemoryUploadedFile | TemporaryUploadedFile,
-        song_content_path: Path,
+            self,
+            song: bytes | BytesIO | InMemoryUploadedFile | TemporaryUploadedFile,
+            song_content_path: Path,
     ) -> Path:
         # TODO: rewrite to use bytesio instead of reading full into memory as bytes
         if not isinstance(song, bytes):

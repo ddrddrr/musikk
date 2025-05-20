@@ -86,8 +86,8 @@ class SongQueue(BaseModel):
         on_delete=models.SET_NULL,
         related_name="+",
         help_text="The node after which the songs will be appended when `Add To Queue` is used. "
-        "If the song/collection is appended, equal to this song/last song in collection."
-        "Otherwise is equal to `head`.",
+                  "If the song/collection is appended, equal to this song/last song in collection."
+                  "Otherwise is equal to `head`.",
     )
     tail = models.OneToOneField(
         SongQueueNode,
@@ -103,7 +103,7 @@ class SongQueue(BaseModel):
 
     # TODO: wrap all in transactions?
     def add_song(
-        self, song: SongCollectionSong, action: str = AddAction.ADD
+            self, song: SongCollectionSong, action: str = AddAction.ADD
     ) -> SongQueueNode | None:
         with transaction.atomic():
             node = SongQueueNode.objects.create(song=song, song_queue=self)
@@ -127,7 +127,7 @@ class SongQueue(BaseModel):
             return node
 
     def add_collection(
-        self, collection: SongCollection, action=AddAction.ADD
+            self, collection: SongCollection, action=AddAction.ADD
     ) -> list[SongQueueNode]:
         with transaction.atomic():
             songs = collection.songs_links.all()
@@ -161,12 +161,16 @@ class SongQueue(BaseModel):
                     )
             return nodes
 
-    def shift_head_forward(self, to: SongQueueNode) -> SongQueueNode | None:
+    def shift_head_forward(self, to: SongQueueNode | None) -> None:
         if self.is_empty():
-            return None
+            return
         with transaction.atomic():
             shifted_nodes = []
             curr = self.head
+
+            if to is None:
+                return self._shift_head_to_next()
+
             while curr is not to and curr is not None:
                 shifted_nodes.append(curr)
                 curr = curr.next
@@ -183,11 +187,30 @@ class SongQueue(BaseModel):
             self.head = curr
             self.save()
 
+    def _shift_head_to_next(self) -> None:
+        with transaction.atomic():
+            head_next = self.head.next
+            if head_next is None:
+                self.clear()
+                return
+
+            self.song_count -= 1
+            self.head = head_next
+            self.save()
+
+            SongCollectionSong.objects.create(
+                song_collection=self.user.history,
+                song=self.head.song.song,
+            )
+
+            return None
+
     def shift_head_backwards(self) -> SongQueueNode | None:
         if not self.head or not self.head.prev:
             return None
         with transaction.atomic():
             self.head = self.head.prev
+            self.song_count += 1
 
             SongCollectionSong.objects.create(
                 song_collection=self.user.history,
@@ -205,7 +228,7 @@ class SongQueue(BaseModel):
             self.save()
 
     def _add_node_after(
-        self, node: SongQueueNode, target: SongQueueNode
+            self, node: SongQueueNode, target: SongQueueNode
     ) -> SongQueueNode:
         """Used for enqueueing"""
         with transaction.atomic():
@@ -284,13 +307,14 @@ class SongQueue(BaseModel):
             self.save()
             return True
 
-    # TODO: implement, complete the table approach
-    # from likedsongs --> filter on likedsongs id
-    # total random --> all available songs in the sys
-    # radom on hastags --> all available with hashtag
+        # TODO: implement, complete the table approach
+        # from likedsongs --> filter on likedsongs id
+        # total random --> all available songs in the sys
+        # radom on hastags --> all available with hashtag
+
     def append_random_songs(
-        self,
-        amount: int = default_size,
+            self,
+            amount: int = default_size,
     ) -> list[SongQueueNode]:
         # query = (
         #     f"SELECT * FROM {BaseSong._meta.db_table} TABLESAMPLE SYSTEM_ROWS({size})"

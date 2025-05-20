@@ -12,8 +12,8 @@ from audio_processing.converters import (
 
 # settings.AUDIO_CONTENT_PATH = "/tmp/musikk_tests"
 
-AUDIO_PATH_1 = os.path.expanduser("~/studies/musikk/samples/sample-9s.wav")
-AUDIO_PATH_2 = os.path.expanduser("~/studies/musikk/samples/sample-6s.wav")
+AUDIO_PATH_1 = os.path.expanduser("~/studies/musikk/samples/NHU05011023.wav")
+AUDIO_PATH_2 = os.path.expanduser("~/studies/musikk/samples/Home-Odyssey-01Intro.flac")
 
 
 class TestFFMPEGWrapper(TestCase):
