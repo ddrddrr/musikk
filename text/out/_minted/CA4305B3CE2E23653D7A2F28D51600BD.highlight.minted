@@ -1,0 +1,8 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+ffmpeg\PYG{+w}{ }\PYGZhy{}i\PYG{+w}{ }*input\PYG{+w}{ }file\PYG{+w}{ }path*
+\PYG{+w}{    }\PYGZhy{}map\PYG{+w}{ }\PYG{l+m}{0}:a\PYG{+w}{ }\PYGZhy{}c:a:0\PYG{+w}{ }libfdk\PYGZus{}aac\PYG{+w}{ }\PYGZhy{}profile\PYG{+w}{ }aac\PYGZus{}he\PYGZus{}v2\PYG{+w}{ }\PYGZhy{}b:a\PYG{+w}{ }24k
+\PYG{+w}{    }\PYGZhy{}map\PYG{+w}{ }\PYG{l+m}{0}:a\PYG{+w}{ }\PYGZhy{}c:a:1\PYG{+w}{ }libopus\PYG{+w}{ }\PYGZhy{}b:a\PYG{+w}{ }96k
+\PYG{+w}{    }\PYGZhy{}map\PYG{+w}{ }\PYG{l+m}{0}:a\PYG{+w}{ }\PYGZhy{}c:a:2\PYG{+w}{ }libopus\PYG{+w}{ }\PYGZhy{}b:a\PYG{+w}{ }160k
+\PYG{+w}{    }\PYGZhy{}map\PYG{+w}{ }\PYG{l+m}{0}:a\PYG{+w}{ }\PYGZhy{}c:a:3\PYG{+w}{ }libopus\PYG{+w}{ }\PYGZhy{}b:a\PYG{+w}{ }256k
+\PYG{+w}{    }\PYGZhy{}f\PYG{+w}{ }dash\PYG{+w}{ }*output\PYG{+w}{ }file\PYG{+w}{ }path\PYG{+w}{ }\PYG{k}{for}\PYG{+w}{ }manifest*
+\end{MintedVerbatim}

@@ -1,0 +1,12 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+    \PYG{k}{class}\PYG{+w}{ }\PYG{n+nc}{UserFriendsCreateDeleteView}\PYG{p}{(}\PYG{n}{APIView}\PYG{p}{)}\PYG{p}{:}
+    \PYG{o}{.}\PYG{o}{.}\PYG{o}{.}
+    \PYG{k}{def}\PYG{+w}{ }\PYG{n+nf}{post}\PYG{p}{(}\PYG{n+nb+bp}{self}\PYG{p}{,} \PYG{n}{request}\PYG{p}{,} \PYG{o}{*}\PYG{n}{args}\PYG{p}{,} \PYG{o}{*}\PYG{o}{*}\PYG{n}{kwargs}\PYG{p}{)}\PYG{p}{:}
+        \PYG{o}{.}\PYG{o}{.}\PYG{o}{.}
+        \PYG{n}{user}\PYG{o}{.}\PYG{n}{friends}\PYG{o}{.}\PYG{n}{add}\PYG{p}{(}\PYG{n}{sender}\PYG{p}{)}
+        \PYG{n}{send\PYGZus{}invalidate\PYGZus{}event}\PYG{p}{(}
+            \PYG{n}{EventChannels}\PYG{o}{.}\PYG{n}{user\PYGZus{}events}\PYG{p}{(}\PYG{n}{user}\PYG{o}{.}\PYG{n}{uuid}\PYG{p}{)}\PYG{p}{,}
+            \PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{user}\PYG{l+s+s2}{\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{friends}\PYG{l+s+s2}{\PYGZdq{}}\PYG{p}{,} \PYG{n+nb}{str}\PYG{p}{(}\PYG{n}{user}\PYG{o}{.}\PYG{n}{uuid}\PYG{p}{)}\PYG{p}{]}
+        \PYG{p}{)}
+        \PYG{o}{.}\PYG{o}{.}\PYG{o}{.}
+\end{MintedVerbatim}

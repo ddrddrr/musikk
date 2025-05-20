@@ -1,9 +1,8 @@
-\chapter{Specification}\label{chap:specs}
+\chapter{Specification}\label{chap:specification}
 
 In this chapter the general outline of the application is specified via functional and non-functional requirements.
-Some of the features are based on the feedback from the survey and short in-person interviews,
-while others are based on the analysis of the existing platforms.
-The individual requirements are ordered based on the 'MoSCoW' criteria, i.e. from most to least important.
+% TODO: add ref to moscow
+The individual requirements are constructed based on the 'MoSCoW' criteria\cite{moscow}.
 
 % TODO: content-owner stuff
 
@@ -17,15 +16,13 @@ Below is the list of important terms that will be appearing throughout the requi
     \item \textbf{User Profile} – An object which encompasses all the information related to a specific User.
     \item \textbf{Song} – An object representing an individual audio object.
     \item \textbf{Song Collection} – Represents a container that holds multiple Songs.
-    \item \textbf{Content Owner} - An entity or a person which has the rights to particular Songs and Song Collections.
     \item \textbf{Playback} – A process during which the user is receiving audio information.
     \item \textbf{Playback Item} – A Song or a Song Collection.
     \item \textbf{Playback Queue} – A list of Playback Items.
     \item \textbf{Comment} – A small piece of text provided by the User input usually placed under a specific object to which it refers.
     \item \textbf{Reply Comment} – The same as Comment, but must be created in relation to another, 'parent' Comment.
-    \item \textbf{Forum} – A standalone list of User Comments. Has a unique name.
 \end{itemize}
-
+% TODO: add missing stuff
 
 \clearpage
 
@@ -56,11 +53,9 @@ Below is the list of important terms that will be appearing throughout the requi
         \hline
         The system shall differentiate presented content based on the User. That includes Songs and Song Collections, User Profile information and other related items. & Must Have \\
         \hline
-        The system shall differentiate between content owners and regular Users.                                                                                              & Must Have         \\
+        The system shall allow for Song and Song Collection creation. Only Artists shall be allowed to create Songs. & Must Have\\
         \hline
-        The system shall allow for Song and Song Collection creation. Only Content Owners shall be allowed to create the mentioned content. & Must Have\\
-        \hline
-        The system shall provide a way for Users to add Comments under Song Collections, Songs and other related items. & Must Have \\
+        The system shall provide a way for Users to add Comments under Song Collections                                                                                       & Must Have         \\
         \hline
         The system shall provide a Forum system. Forums shall be able to be created by Users. Forum Comments must be able to embed Playback Items. & Must Have \\
         \hline
@@ -70,7 +65,7 @@ Below is the list of important terms that will be appearing throughout the requi
         \hline
         The system shall make it possible to create Reply Comments for Comments.                                                                                              & Should Have       \\
         \hline
-        The system shall provide a notification system for Reply Comments and other appropriate items.                                                                                              & Should Have       \\
+        The system shall provide a notification system. It shall include Reply Comments and other appropriate items.                                                                                              & Should Have       \\
         \hline
         The system shall make it possible to filter Playback Items based on the User relations. & Should Have \\
         \hline

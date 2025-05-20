@@ -1,15 +1,8 @@
-\chapter{Implementation Planning}\label{chap:planning}
+\chapter{Implementation Planning}\label{ch:planning}
 
 This section explains the high-level technology choices behind the application.
-In addition, UML diagrams are provided as an overview of the system.
-
-The created platform is built using the Model-View-Controller \cite{mvc} architectural pattern
-and is split into three major parts:
-\begin{itemize}
-    \item \textbf{Backend.} Implements all the data-related logic and processing.
-    \item \textbf{API.} Is responsible for transferring the data to the frontend and receiving commands from it.
-    \item \textbf{Frontend.} Presents the data to the User and accepts their commands.
-\end{itemize}
+The following areas are discussed, as have the biggest influence on the overall implementation of the service:
+backend, frontend, audio transfer, authentication and server-client communication.
 
 
 \section{Backend}
@@ -24,7 +17,7 @@ In order to avoid errors related to building the system from the ground-up
 and shorten the time of the development, it was decided that a framework would be used.
 
 \subsection{Framework Comparison}
-Currently, there are 3 well-developed and widely-used WEB frameworks available for Python:
+Currently, there are 3 well-developed and widely-used frameworks available for Python:
 
 \begin{itemize}
     \item \textbf{FastAPI} \\
@@ -68,7 +61,7 @@ Currently, there are 3 well-developed and widely-used WEB frameworks available f
 
 Of the three frameworks Django is the more suitable one.
 Most of the application logic will be handled by the backend, heavily utilizing
-Django's ORM for most database tasks, greatly simplifying the development. For other frameworks a separate library would
+Django's ORM for most database tasks, simplifying the development. For other frameworks a separate library would
 have been needed to be used, such as SQLAlchemy\cite{sqlalchemy}.
 On top of that, a JSON-based API could be implemented using `django-rest-framework`,
 which would significantly reduce the amount of boilerplate code needed for the application.
@@ -122,60 +115,61 @@ Three main points secured PostgreSQL as the database of choice:
     \item Superior syntax, command-line interface, and error handling/messages.
 \end{enumerate}
 
+After establishing the backend stack, the next logical step would be choosing the frontend technologies.
+
 
 \section{Frontend}
-Contrary to popular belief, JavaScript is not the only language, in which the user interface part
-of the service can be written. Rust, Python and even C could be used to create the frontend of the application.
+Firstly, the language had to be chosen.
+
+Although JavaScript is the primary language for client-side development,
+other languages such as Rust, Python, and C can also be used to build frontend applications.
 However, these languages are not directly supported by the browsers, which
-means that the code has to be complied to WebAssembly first. This adds
+means that the code has to be complied to WebAssembly first (supported by browsers). This adds
 additional overhead to the development cycle, introduces new toolchains that add another level of
 complexity and more often than not results in bigger bundle(hence - download) sizes.
+Furthermore, these languages often lack solutions for common web development problems,
+compared to JavaScript which has a lot of libraries and packages ready to be installed.
 That is why the Frontend of the application is written in JavaScript and only JS frameworks are
 compared.
 
-Modern JavaScript development is dominated by three main frameworks: React, Vue, and Svelte.\cite{webstats}
+Modern JavaScript development is largely dominated by three technologies: React, Vue and Angular.\cite{frameworkdata}
 Each of them introduces a different approach to building frontend applications and comes with its own set of trade-offs.
 
 \begin{itemize}
     \item \textbf{React} \\
-    React is a JavaScript library developed by Facebook for building interactive user interfaces.
-    It relies heavily on component-based architecture and promotes a declarative way of designing views.\cite{react}
+    React is a JavaScript library focused on building user interfaces through a component-based architecture.\cite{react}
+    It emphasizes a declarative style of UI design and integrates well with a variety of state management tools and libraries.
 
-    One of React’s strengths lies in its ecosystem and long-term stability.
-    It is supported by a wide range of third-party packages, developer tools, and documentation.
-    Additionally, React is well-maintained by a large team and a lot of examples of working, deployed applications can be found.
-
-    However, one of the main benefits and drawbacks at the same time is its virtual DOM abstraction.
-    It introduces an additional processing layer which, while optimizing updates,
-    can become less efficient than compiled approaches in specific scenarios.
+    One of the main React’s strengths is its ecosystem - it is supported by a wide range of third-party packages,
+    developer tools, and documentation.
+    Additionally, React is maintained by a large team, and a lot of examples of working, deployed applications can be found.
+    However, the common problem mentioned is its complexity and lack of standards which could lead to highly inconsistent
+    code and performance problems later in development, if not used carefully.
 
     \item \textbf{Vue} \\
-    Vue aims to combine the best aspects of React and Angular,
-    offering a simpler learning curve and more opinionated design choices.\cite{vue}
-    It features two-way binding, directives, and an intuitive templating syntax,
+    Vue, in comparison to React, is a framework, which means that it has most of the basic often used features built-in(e.g. routing or forms)\cite{vue}
+    Many state that it is easier to pick up than React, due to its more intuitive templating syntax, and built-ins mentioned before,
     which can lead to faster initial development.
 
-    Vue's ecosystem includes built-in solutions for routing and state management,
-    which simplifies architectural decisions.
-    The ecosystem, while active, is smaller than React’s, and large-scale adoption remains limited.\cite{webstats}
-    That often leads to the implementation of features that are already present in the React ecosystem.
-    \item \textbf{Svelte} \\
-    Svelte introduces a different approach by compiling components at build time into JavaScript code,
-    removing the need for a virtual DOM.\cite{svelte}
+    The main drawback of Vue is its adoption.\cite{frameworkdata}
+    Fewer packages and less documentation are available online in comparison to React or Angular.
+    In some cases it can lead to the need of implementation of features already covered by existing solutions in other frameworks.
 
-    As a result, Svelte offers smaller bundle sizes and faster runtime performance for simpler apps.
-    It also provides a clean and concise syntax that minimizes boilerplate.
-    Despite this, Svelte is still a younger framework with limited tooling and fewer mature libraries.
-    Its compile-time model can also introduce hidden complexity, especially when debugging or integrating with external
-    JS code.
+    \item \textbf{Angular} \\
+    Angular is a full-stack framework for building web applications - hence, same as Vue, it provides many tools out of the box.
+    It is built on top of TypeScript and enforces the usage of pre-chosen architectural patterns which often leads to
+    more robust and structured code. This is a plus for bigger projects, but can significantly slow down the speed of
+    progress.
+
 \end{itemize}
 
 While all three frameworks offer modern development patterns and are capable of being used in production applications,
-React was chosen.
-Its maturity, extensive ecosystem, and widespread adoption help with the development speed.
-Despite some verbosity and a steeper learning curve for advanced concepts,
-React’s component model, community support,
-and alignment with industry standards make it the most suitable option for the frontend part of this application.
+React was chosen. It is mature, has an extensive ecosystem, and is widely adopted. To add, it does not force many
+restrictions and has a good debugging interface. Since this project is not going to be large, React would possibly be the
+better option due to sheer pace of development that can be achieved with it.
+
+After giving the outline of the client and server side of implementation,
+as the main aim of the application is music delivery, the appropriate protocols had to be examined as well.
 
 
 \section{Audio Transfer}
@@ -206,7 +200,7 @@ Audio playback can be tackled in numerous ways:
     smaller, discrete chunks, allowing for quicker access to specific points in the audio.
 
     \item \textbf{Peer to Peer}\\
-    In P2P audio streaming, audio data is shared directly between users'
+    In P2P audio transfer, audio data is shared directly between users'
     devices, rather than being served from a central server.
     Each user acts as both a client and a server, contributing to and consuming
     data. This method can reduce server load and improve access speed,
@@ -214,11 +208,15 @@ Audio playback can be tackled in numerous ways:
 \end{itemize}
 
 Although basic and progressive download methods are much simpler in implementation,
-streaming has many invaluable benefits, allowing for smooth playback in different
+streaming has many valuable benefits, allowing for smooth playback in different
 conditions and better audio representation techniques. P2P is also not suitable
 in the current case, as the files must be on users' machines, which can lead
 to various problems — from delays for clients located far away from the source of the audio
 to problematic enforcement of possible DRM (anti-piracy) protection.
+
+% TODO: improve
+Another important choice would be the authentication method, as it can greatly influence both
+the design of the frontend and backend parts.
 
 
 \section{Authentication}
@@ -256,6 +254,10 @@ WEB applications are considered below:
 
 JWT tokens were chosen as the main method of authentication. They are easy to set up, behave well when the
 application scales horizontally and, most importantly, do not use the database to manage authentication details.
+Additionally, they can greatly simplify the login/logout phase, and lower the amount of API calls needed to get the
+User information, as some of the information can be embedded inside.
+
+The last important concept that is needed to be worked out is the server-client communication.
 
 
 \section{Server-Client Communication}
@@ -273,11 +275,14 @@ because the architecture of the application is client-server, not peer-to-peer.
     While this method works in environments where other techniques are not available,
     it introduces unnecessary overhead by repeatedly opening and closing HTTP connections.
     It also increases server load under high traffic, proving not to be suitable for the logic that will be outlined
-    in \ref{chapter:implementation.}
+    in \ref{chapter:implementation}.
 
     \item \textbf{Server-Sent Events (SSE)} \\
     SSE is a one-way communication protocol that allows the server to push updates to the client over a
-    single HTTP connection. It is simpler to implement, works over standard HTTP/1.1, which helps with debugging,
+    single long-lived HTTP connection. Firstly, the client establishes the connection via an HTTP request, then the
+    server accepts and stores it, later sending special content-type HTTP responses(technically one never-ending response)
+    with a special using that channel.\\
+    It is simpler to implement, works over standard HTTP/1.1, which helps with debugging,
     and is supported by most modern browsers.\cite{sse}
     SSE is limited to server-to-client communication, but for applications where the client initiates
     most of the interactions, this limitation is not critical. In addition, it is easy to set up using the
@@ -305,7 +310,18 @@ because the architecture of the application is client-server, not peer-to-peer.
 
 Although WebSockets offer the most complete solution for real-time two-way communication and are well-suited
 for the target architecture, the complexity of their setup in Django makes them less practical in development.
-Therefore, Server-Sent Events were chosen as the communication method.
+Therefore, Server-Sent Events were chosen as the communication method;
 SSE provides adequate performance and responsiveness for the expected interaction model while reducing implementation overhead.
 
 
+\section{Summary}
+
+The created platform is going to be built using the Model-View-Controller \cite{mvc} architectural pattern
+and is split into three major parts:
+\begin{itemize}
+    \item \textbf{Backend.} Implements all the data-related logic and processing.
+    \item \textbf{API.} Is responsible for transferring the data to the frontend and receiving commands from it.
+    \item \textbf{Frontend.} Presents the data to the User and accepts their commands.
+\end{itemize}
+
+Next chapter \nameref{ch:implementation} provides the details of the actual implementation of the application.

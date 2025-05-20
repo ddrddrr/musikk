@@ -18,12 +18,21 @@
 \usepackage[pass]{geometry}
 \usepackage{ifdraft}
 
-% Source code listings
+
+\definecolor{codebg}{rgb}{0.98, 0.98, 0.98} % light gray
 \usepackage{minted}
 \usemintedstyle{friendly}
-\newminted{hs}{autogobble,linenos}
+\setminted{
+    bgcolor=codebg,
+    frame=single,
+    fontsize=\small,
+    xleftmargin=1em,
+    framesep=0.5em
+}
 
-\usepackage[ unicode=true,
+
+
+\usepackage[unicode=true,
     plainpages=false,
     pdfpagelabels,
     draft=false,
@@ -49,6 +58,8 @@
 \addbibresource{bibliography.bib}
 \setlength{\tabcolsep}{6pt}
 
+\usepackage{nameref}
+\usepackage{adjustbox}
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
 \begin{document}
