@@ -13,7 +13,7 @@ export function PlaybackProvider({ children }: PlaybackProviderProps) {
     const { data: queue } = useQueue();
     const { deviceID } = useCurrentDevice();
 
-    const head = queue?.nodes?.length && queue?.nodes?.length > 0 ? queue.nodes[0].collection_song : undefined;
+    const head = queue?.nodes?.length && queue?.nodes?.length > 0 ? queue.nodes[0] : undefined;
     const isThisDeviceActive = useMemo(() => {
         return !!deviceID && !!playback?.active_device?.uuid && deviceID == playback?.active_device?.uuid;
     }, [deviceID, playback?.active_device]);
@@ -22,7 +22,8 @@ export function PlaybackProvider({ children }: PlaybackProviderProps) {
         <PlaybackContext.Provider
             value={{
                 playbackState: playback,
-                playingCollectionSong: head,
+                playingCollectionSong: head?.collection_song,
+                queueHead: head,
                 isThisDeviceActive,
             }}
         >

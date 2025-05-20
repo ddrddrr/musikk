@@ -15,6 +15,7 @@ interface PlayerBarProps {
     setIsQueueOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
+// TODO: reset play button on end, reset timer to 0
 export function PlayerBar({ duration, time, seeking, setSeeking, setIsQueueOpen }: PlayerBarProps) {
     const { playingCollectionSong, isThisDeviceActive } = useContext(PlaybackContext);
     const [volume, setVolume] = useState(100);

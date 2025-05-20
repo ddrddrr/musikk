@@ -1,4 +1,4 @@
-import { SongContainer } from "@/components/songs/SongContainer";
+import { SongQueueContainer } from "@/components/song-queue/SongQueueContainer.tsx";
 import { SongDisplay } from "@/components/songs/SongDisplay";
 import { Button } from "@/components/ui/button";
 import { useQueue, useQueueChangeAPI } from "@/hooks/useQueueAPI";
@@ -22,9 +22,7 @@ export function SongQueue() {
                     <ul className="space-y-3">
                         {nodes.map((node) => (
                             <li key={node.uuid}>
-                                <SongContainer
-                                    collectionSong={node.collection_song}
-                                />
+                                <SongQueueContainer node={node} />
                             </li>
                         ))}
                     </ul>

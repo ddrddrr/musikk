@@ -11,7 +11,7 @@ interface PlayerProps {
 }
 
 export function Player({ onDurationChange, onTimeUpdate }: PlayerProps) {
-    const { isThisDeviceActive, playbackState, playingCollectionSong } = useContext(PlaybackContext);
+    const { isThisDeviceActive, playbackState, queueHead, playingCollectionSong } = useContext(PlaybackContext);
     const useShiftHeadMutation = useQueueChangeAPI();
     const audioRef = useRef<HTMLAudioElement>(null);
     const playerRef = useRef<shaka.Player | null>(null);
@@ -24,7 +24,7 @@ export function Player({ onDurationChange, onTimeUpdate }: PlayerProps) {
     const url = useMemo(() => {
         if (!playingCollectionSong) return undefined;
         return isSafari ? playingCollectionSong.song.m3u8 : playingCollectionSong.song.mpd;
-    }, [playingCollectionSong, isSafari]);
+    }, [queueHead, playingCollectionSong, isSafari]);
 
     useEffect(() => {
         shaka.polyfill.installAll();
@@ -45,7 +45,7 @@ export function Player({ onDurationChange, onTimeUpdate }: PlayerProps) {
 
             if (!player || !audio) return;
 
-            if (url) {
+            if (url && queueHead) {
                 try {
                     await player.attach(audio);
                     await player.load(url);
@@ -63,9 +63,8 @@ export function Player({ onDurationChange, onTimeUpdate }: PlayerProps) {
                 }
             }
         };
-
         initPlayback();
-    }, [url]);
+    }, [url, queueHead]);
 
     useEffect(() => {
         const audio = audioRef.current;
@@ -92,7 +91,7 @@ export function Player({ onDurationChange, onTimeUpdate }: PlayerProps) {
         return () => {
             clearTimeout(timeoutId);
         };
-    }, [url, isThisDeviceActive, playbackState?.is_playing]);
+    }, [url, queueHead, isThisDeviceActive, playbackState?.is_playing]);
 
     function handleLoadedMetadata() {
         const audio = audioRef.current;
