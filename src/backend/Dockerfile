@@ -8,7 +8,8 @@ FROM python:3.13-slim AS backend-builder
 
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
-ENV PATH="/opt/ffmpeg_build/bin:$PATH"
+ENV PATH="/opt/bin:$PATH"
+ENV LD_LIBRARY_PATH="/opt/ffmpeg_build/lib:$LD_LIBRARY_PATH"
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
@@ -16,6 +17,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libmagic1 \
     && rm -rf /var/lib/apt/lists/*
 
+COPY --from=ffmpeg-builder /opt/bin /opt/bin
 COPY --from=ffmpeg-builder /opt/ffmpeg_build /opt/ffmpeg_build
 
 WORKDIR /app

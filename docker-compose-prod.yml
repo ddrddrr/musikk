@@ -1,3 +1,5 @@
+name: musikk
+
 services:
   server:
     build: ./src/backend/
@@ -20,14 +22,12 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  client:
-    build: ./src/frontend
-    ports:
-      - "5173:5173"
-    env_file:
-      - src/frontend/musikk/.env
-    volumes:
-      - react_build:/build
+  #  client:
+  #    build: ./src/frontend
+  #    env_file:
+  #      - src/frontend/musikk/.env
+  #    volumes:
+  #      - react_build:/dist
 
   caddy:
     image: caddy:2.10.0-alpine

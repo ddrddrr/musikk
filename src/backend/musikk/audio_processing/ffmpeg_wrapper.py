@@ -123,7 +123,7 @@ class FFMPEGWrapper:
         except Exception as ex:
             if self.cleanup:
                 self._cleanup(song_content_path=song_content_path)
-            raise ConversionError from ex
+            raise ConversionError(f"Failed to convert song: {ex}") from ex
 
     def input_file_args(self, song_path: Path) -> list[str]:
         return ["ffmpeg", "-i", str(song_path)]

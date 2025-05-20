@@ -1,4 +1,5 @@
 import json
+import logging
 
 from rest_framework import status, serializers
 from rest_framework.generics import get_object_or_404, RetrieveAPIView
@@ -14,6 +15,8 @@ from streaming.api.v1.serializers_song import (
     SongCollectionSongSerializer,
 )
 from streaming.songs import SongCollectionSong
+
+logger = logging.getLogger(__name__)
 
 
 class SongCollectionSongRetrieveView(RetrieveAPIView):
@@ -50,6 +53,13 @@ class SongCreateView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
+        user = getattr(request.user.streaminguser, "artist", None)
+        if not user:
+            return Response(
+                status=status.HTTP_403_FORBIDDEN,
+                data={"error": "Only Artists are allowed to create Songs"},
+            )
+
         raw = request.data.get("info")
         if not raw:
             return Response(
@@ -57,7 +67,9 @@ class SongCreateView(APIView):
             )
 
         info = json.loads(raw)
-        authors = info.get("authors") or [str(request.user.streaminguser.uuid)]
+        authors = info.get("authors")
+        if not authors:
+            authors = [str(request.user.streaminguser.uuid)]
         songs = info.get("songs", [])
 
         succeeded, failed = [], []
@@ -78,10 +90,12 @@ class SongCreateView(APIView):
                 instance.draft = True  # handled when collection is created
                 instance.save(update_fields=["draft"])
                 succeeded.append({"uuid": str(instance.uuid), "key": key})
-            except serializers.ValidationError as exc:
-                failed.append({"key": key, "errors": exc.detail})
-            except Exception as exc:
-                failed.append({"key": key, "errors": [str(exc)]})
+            except serializers.ValidationError as ex:
+                failed.append({"key": key, "errors": ex.detail})
+                logger.error(f"Validation error while creating song '{key}': {ex}")
+            except Exception as ex:
+                failed.append({"key": key, "errors": [str(ex)]})
+                logger.error(f"Unexpected error while creating song '{key}': {ex}")
 
         if failed:
             response_status = status.HTTP_400_BAD_REQUEST

@@ -2,37 +2,32 @@
 
 skinparam packageStyle rectangle
 
-package "Reverse Proxy" as nginx
+package "Reverse Proxy" as caddy
 
-package "Django Server" as django {
+package "Django" as django {
     [SQL Database] as db
-'    [Task Queue] as rabbit
-'    [Workers] as celery
+    [Event Channels] as eventstream
+    [Serializers] as serializers
 }
 
-package "Audio Processor" as audioproc{
-     [ffmpeg]
+package "Audio Processor" as audioproc {
+    [ffmpeg]
 }
-entity "Storage" as store
 
-nginx --> django: API Call(HTTP Request)
-note right of django
-Chunked Audio Data
-JSON Model Data
-etc.
-end note
+entity "Media Storage" as store
 
-django -up-> nginx: API Response(HTTP Response)
-note left of nginx
-Upload Song
-Fetch Model
-Alter Data
-etc.
-end note
+caddy --> django: API Call (REST/Multipart)
+django --> db: Alter/Get Data
+django --> eventstream: Create Event
 
-django --> db: CRUD Operations with Model Data
-django -down-> ffmpeg: Process Audio Data/Presentation
-ffmpeg -down-> store: Store Processed Audio/Presentation
-django <-down- store: Get Audio Data/Presentation
+django --> serializers: Serialize Data
+serializers -up-> caddy: JSON Response
+
+caddy --> django: Open SSE Stream
+eventstream -up-> caddy: Send Event
+
+django --> ffmpeg: Process Uploaded Audio
+ffmpeg --> store: Upload Transcoded Audio
+django <-- store: Retrieve for Streaming/Presentation
 
 @enduml

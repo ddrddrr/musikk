@@ -190,8 +190,8 @@ class SongCollectionCreateView(APIView):
         )
         try:
             serializer.is_valid(raise_exception=True)
-        except serializers.ValidationError as exc:
-            return Response({"failed": exc.detail}, status=status.HTTP_400_BAD_REQUEST)
+        except serializers.ValidationError as ex:
+            return Response({"failed": ex.detail}, status=status.HTTP_400_BAD_REQUEST)
 
         collection = serializer.save()
         for scsong in SongCollectionSong.objects.filter(song_collection=collection):

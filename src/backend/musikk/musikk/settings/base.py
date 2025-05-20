@@ -4,6 +4,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 import os
+import sys
 from pathlib import Path
 
 from corsheaders.defaults import default_headers
@@ -161,7 +162,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = "static/"
+STATIC_URL = config("STATIC_URL", default="static/")
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # Default primary key field type
@@ -177,7 +178,7 @@ AUTH_USER_MODEL = "users.BaseUser"
 
 # MEDIA CONTENT
 MEDIA_ROOT = config("MEDIA_ROOT", default="/tmp/media/musikk_media")
-MEDIA_URL = "media/"
+MEDIA_URL = config("MEDIA_URL", default="media/")
 AUDIO_CONTENT_PATH = config("AUDIO_CONTENT_PATH", default="/tmp/media/musikk_audio")
 
 # LOGS
@@ -185,16 +186,24 @@ AUDIO_CONTENT_PATH = config("AUDIO_CONTENT_PATH", default="/tmp/media/musikk_aud
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
+    "formatters": {
+        "standard": {
+            "format": "[{levelname}] {asctime} {name}: {message}",
+            "style": "{",
+        },
+    },
     "handlers": {
         "console": {
             "level": "DEBUG",
             "class": "logging.StreamHandler",
+            "stream": sys.stdout,
+            "formatter": "standard",
         },
     },
     "loggers": {
-        "django_eventstream": {
+        "django": {
             "handlers": ["console"],
-            "level": "DEBUG",
+            "level": "INFO",
             "propagate": True,
         },
     },

@@ -13,4 +13,4 @@ COPY musikk .
 RUN npm run build
 
 FROM busybox AS final
-COPY --from=frontend_builder /app/dist /dist
+COPY --from=frontend_builder /app/dist /export

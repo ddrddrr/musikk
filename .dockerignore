@@ -2,8 +2,11 @@
 ./src/frontend/musikk/build
 ./src/frontend/musikk/dist
 ./src/frontend/musikk/.env.example
+./src/frontend/musikk/.env
 ./src/frontend/Dockerfile
 ./src/backend/Dockerfile
+./src/backend/musikk/.env
+./src/frontend/backend/.env.example
 
 .env.example
 .git

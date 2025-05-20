@@ -1,8 +1,7 @@
 from django.conf import settings
-from django.core.exceptions import ValidationError
 from rest_framework import serializers
 
-from audio_processing.ffmpeg_wrapper import FlacOnly, Full, StreamingProtocol
+from audio_processing.ffmpeg_wrapper import Full, StreamingProtocol
 from base.serializers import BaseModelSerializer
 from streaming.songs import BaseSong, SongCollectionSong, SongAuthor
 from users.api.v1.serializers_base import BaseUserSerializer
@@ -47,7 +46,7 @@ class BaseSongSerializer(BaseModelSerializer):
             return SongCollectionSong.objects.filter(
                 song=obj, song_collection=user.liked_songs
             ).exists()
-        raise ValidationError("User must be provided.")
+        raise serializers.ValidationError({"user": "User must be provided"})
 
     def get_authors(self, obj):
         sauthors = SongAuthor.objects.filter(song=obj).select_related("author")
@@ -73,7 +72,9 @@ class BaseSongCreateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         authors = Artist.objects.filter(uuid__in=validated_data.pop("authors"))
         if not authors:
-            raise serializers.ValidationError("Song must have at least one author.")
+            raise serializers.ValidationError(
+                {"authors": "Song must have at least one author."}
+            )
 
         res = Full.convert_song(validated_data.pop("audio"))
         instance = BaseSong(**validated_data)

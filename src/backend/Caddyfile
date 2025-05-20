@@ -1,4 +1,6 @@
 musikk.stream {
+    tls internal
+
     root /var/www/frontend
     file_server
 

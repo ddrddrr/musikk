@@ -4,27 +4,17 @@ actor User as user
 
 skinparam packageStyle rectangle
 
-package "Frontend" {
-    [React] as frontend
-}
+package frontend
+package proxy
+package backend
 
-package "Reverse Proxy" {
-    [Nginx] as proxy
-}
+user ---> proxy: Initial Page Load
+proxy ---> user: Static Files (HTML/CSS/JS)
 
-package "Backend" as backend {
-    [Django Sever] as django
-}
-
-user --> frontend : Interact with UI
-user <-- frontend: Present Content
-
-frontend --> proxy : Send HTTP Request
-django --> frontend : Serve Data
-proxy --> backend : Route API Request
-
-' layout
-user --[hidden]down-> frontend
-frontend --[hidden]down-> backend
+user ---> frontend: Interacts via UI
+frontend ---> proxy: API / SSE / Audio Requests
+proxy ---> backend: Forward API / SSE
+backend ---> proxy: JSON / Events
+proxy ---> frontend: Data / Events / Audio
 
 @enduml

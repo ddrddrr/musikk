@@ -31,7 +31,7 @@ class PublicationCreateSerializer(BaseModelSerializer):
 
         if bool(obj_type) != bool(obj_uuid):
             raise serializers.ValidationError(
-                "Both 'obj_type' and 'obj_uuid' must be excluded or provided together."
+                ["Both 'obj_type' and 'obj_uuid' must be excluded or provided together."]
             )
 
         related_instance = (

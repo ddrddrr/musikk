@@ -4,11 +4,11 @@ services:
     ports:
       - "5435:5432"
     env_file:
-      - src/backend/musikk/.env.prod
+      - src/backend/musikk/.env
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data2:/var/lib/postgresql/data
 
 
 volumes:
-  postgres_data:
+  postgres_data2:
 

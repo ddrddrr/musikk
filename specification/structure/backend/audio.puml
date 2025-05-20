@@ -1,38 +1,49 @@
-@startuml BackendAudio
+@startuml ClassDiagramAudio
 
 skinparam linetype ortho
 
-class FFMPEGWrapper{
-    + converters: list[AudioConverter]
+class FFMPEGWrapper {
+    audio_content_path: Path
+    converters: list[AudioConverter]
+    cleanup: bool
 
-    + add_converter(converted: AudioConverter): bool
-    ' returns manifest paths - {manifest_format: path}
-    + convert_song(song: bytes): dict[str, str]
+    add_converter(converter: AudioConverter): Self
+    convert_song(song: bytes | BytesIO | UploadedFile): SongRepresentation
+    input_file_args(song_path: Path): list[str]
+    output_type_args(): list[str]
+    mpd_path(song_uuid: UUID, song_content_path: Path): str
+    converter_args(): list[str]
+    _prepare_content_dir(song_uuid: UUID): Path
+    _prepare_song_file(song, song_content_path: Path): Path
+    _cleanup(song_content_path: Path): void
 }
-FFMPEGWrapper -up[dashed]> AudioConverter: <<uses>>
 
-abstract class AudioConverter{
-    + {static} dash_segment_type: str = "mp4"
+class AudioConverter {
+    encoder: str
+    protocol: str
+    bitrates: list[int]
+    extras: list[str]
 
-    + song_identifier: uuid | None
-    + seg_duration = 5000ms
-    + codec_bitrate_map: dict[str, list[int]]
-    + extras: dict
-    ' generate uuid inside(used for song later on),
-    ' take global var for base path --> create paths
-
-    + __init__(song: bytes): None
-    + max_playback_rate(): int
-    + min_playback_rate(): int
-    + manifest_path(): str
-    + init_seg_name(): str
-    + media_seg_name(): str
-    + ffmpeg_args(): str
+    set_bitrates(bitrates: list[int]): Self
+    set_extras(extras: list[str]): Self
+    construct_ffmpeg_command(channel_input: int): list[list[str]]
 }
-class DASHConverter
-class HLSConverter
-DASHConverter -|> AudioConverter
-HLSConverter -|> AudioConverter
 
-'layout
+FFMPEGWrapper ..> AudioConverter : <<uses>>
+FFMPEGWrapper --> SongRepresentation: <<outputs>>
+
+class SongRepresentation {
+    song_content_path: Path
+    manifests: dict[str, str]
+    uuid_: UUID
+}
+
+class AAC_CONVERTER <<instance of AudioConverter>>
+class OPUS_CONVERTER <<instance of AudioConverter>>
+class AACHEv2_CONVERTER <<instance of AudioConverter>>
+
+'AAC_CONVERTER -[hidden]-> AudioConverter
+'OPUS_CONVERTER -[hidden]-> AudioConverter
+'AACHEv2_CONVERTER -[hidden]-> AudioConverter
+
 @enduml

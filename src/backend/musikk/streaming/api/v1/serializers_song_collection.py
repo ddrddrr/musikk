@@ -1,4 +1,3 @@
-from django.core.exceptions import ValidationError
 from rest_framework import serializers
 
 from base.serializers import BaseModelSerializer
@@ -42,7 +41,7 @@ class SongCollectionSerializerBasic(BaseModelSerializer):
         if user := self.context["request"].user.streaminguser:
             return user.followed_song_collections.filter(pk=obj.pk).exists()
 
-        raise ValidationError("User must be provided.")
+        raise serializers.ValidationError({"user": "User must be provided"})
 
 
 class SongCollectionSerializerDetailed(SongCollectionSerializerBasic):
