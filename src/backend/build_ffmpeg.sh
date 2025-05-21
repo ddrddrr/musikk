@@ -22,6 +22,7 @@ apt-get update -qq && apt-get install -y --no-install-recommends \
   texinfo \
   wget \
   yasm \
+  nasm \
   zlib1g-dev && \
 
 apt-get install -y libunistring-dev libaom-dev libdav1d-dev libopus-dev && \

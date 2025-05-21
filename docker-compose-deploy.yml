@@ -2,10 +2,7 @@ name: musikk
 
 services:
   server:
-    build:
-      context: ./src/backend/
-      platforms:
-        - "linux/amd64"
+    image: ddrddrr2/musikk-server:latest
     depends_on:
       - database
     ports:
@@ -14,24 +11,19 @@ services:
       - django_static:/app/staticfiles
       - django_media:/app/media
     env_file:
-      - src/backend/musikk/.env
+      - .env
 
   database:
     image: postgres:17
     ports:
       - "5432:5432"
     env_file:
-      - src/backend/musikk/.env
+      - .env
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
   caddy:
-    build:
-      context: .
-      platforms:
-        - "linux/amd64"
-      args:
-        VITE_API_BASE_URL: https://musikk.stream
+    image: ddrddrr2/musikk-caddy:latest
     restart: unless-stopped
     ports:
       - "80:80"

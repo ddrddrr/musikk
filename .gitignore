@@ -86,3 +86,5 @@ pip-selfcheck.json
 text/charts
 text/diagrams
 samples
+.DS_Store
+src/backend/shadow
