@@ -6,6 +6,7 @@
 ./src/frontend/Dockerfile
 ./src/backend/Dockerfile
 ./src/backend/musikk/.env
+./src/backend/shadow
 ./src/frontend/backend/.env.example
 
 .env.example
