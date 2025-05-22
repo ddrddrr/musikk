@@ -1,15 +1,12 @@
-\usepackage{hyperref}
-
-
 \chapter{Implementation}\label{ch:implementation}
 
 This chapter presents the created platform; it is structured somewhat similarly to the previous one - firstly, the
-audio processing, representation and transfer are discussed, then both the backend and frontend are introduced,
+audio processing, representation and transfer are discussed, then both the Backend and Frontend are introduced,
 and lastly, the deployment process is shown.
 In addition, UML diagrams are provided as an overview of the system.
 
 High level overview can be seen in the following~\ref{fig:system_overview},
-~\ref{fig:backend},~\ref{fig:frontend} diagrams.
+~\ref{fig:Backend},~\ref{fig:Frontend} diagrams.
 
 \begin{figure}[htbp]
     \centering
@@ -22,24 +19,32 @@ High level overview can be seen in the following~\ref{fig:system_overview},
     \centering
     \includegraphics[width=1\textwidth, keepaspectratio]{diagrams/backend.png}
     \caption{Backend}
-    \label{fig:backend}
+    \label{fig:Backend}
 \end{figure}
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=1\textwidth, keepaspectratio]{diagrams/frontend.png}
     \caption{Frontend}
-    \label{fig:frontend}
+    \label{fig:Frontend}
 \end{figure}
 
 
 \section{Audio Processing, Representation and Transfer}
+The most important part that had to be implemented was the audio-related functionality, hence, the application develompent
+had started from it.
+
+Below, the core aspects of handling audio are described —-
+beginning with the selection of streaming protocols,
+followed by how audio is represented and converted into streamable formats,
+and finally the tools and approaches used for processing the audio into the desired
+output suitable for web delivery.
 
 \subsection{Streaming Protocols}
 Two protocols were chosen for audio streaming - DASH\cite{dash} and HLS\cite{hls}.
 Broadly speaking, they work by breaking the initial audio file into smaller chunks and present them via a manifest,
 which is a listing with all available chunks separated by their timecodes. Then it is possible to use that manifest
-to request individual chunks instead of fetching the whole file or its byte ranges. Moreover, it is possible to use
+to request individual chunks instead of fetching the whole file. Moreover, it is possible to use
 different coders and bitrates for the initial file, which would all be arranged together in the resulting manifest, giving
 the possibility to choose which chunk will be served next - e.g. in the case of web audio players the next chunk can
 be chosen based on multiple parameters, for example, network conditions.
@@ -67,8 +72,39 @@ can be calculated as `Sample rate x Bit depth x Number of channels`.
 However, codecs typically use bitrate as a primary input parameter instead of those individual components.
 This is because bitrate directly controls the trade-off between audio quality and file size,
 making it easier to manage both encoding and playback requirements.
-It also abstracts away the internal implementation details, especially in lossy codecs like MP3, AAC, or Opus,
+It also abstracts away the internal implementation details, especially in lossy codecs like AAC or Opus,
 which use perceptual models and compression techniques that aren’t strictly tied to sample rate or bit depth.
+
+In this implementation, Opus and AAC were selected due to their broad support across platforms and
+good performance in web-based streaming scenarios.
+
+Opus is a relatively newer codec, specifically designed for efficient, low-latency audio transmission over the internet.
+It has superior compression quality compared to other major codecs(including AAC)\cite{opusefficiency},
+and often offers better space efficiency.
+Additionally, it is open and royalty-free, making it a good option for audio encoding.
+However, browser support is not universal—most notably, Safari offers limited support for Opus\cite{caniuseopus},
+which restricts its use in HLS.
+
+AAC, in contrast, is an older and more widely adopted codec,
+especially in the Apple ecosystem where it is natively supported across all devices and
+browsers. It is also a high-quality codec\cite{opusefficiency}
+and still remains a standard in many streaming and media distribution systems.
+However, one very notable drawback of AAC is licensing – it is not royalty-free, meaning that commercial use,
+particularly involving encoding and distribution of AAC audio (as in streaming platforms),
+may require obtaining a license and paying fees to the patent holders via organizations like Via Licensing.\cite{vialicensing}
+
+
+Before selecting the encoding configuration, it is important to distinguish
+between two encoding strategies: \textbf{CBR (Constant Bitrate)}\cite{cbr} and \textbf{VBR (Variable Bitrate)}\cite{vbr}.
+
+CBR keeps the bitrate fixed across the entire audio file, resulting in predictable chunk
+sizes and smooth playback during streaming. VBR adjusts the bitrate depending on content complexity,
+which can provide better quality at a lower size compared to CBR but leads to inconsistent segment sizes,
+making streaming less stable~\cite{cbrvbrcomp}.
+
+For this reason, a \textbf{multi-CBR setup} was selected.
+While slightly less efficient in terms of quality-to-size ratio compared to VBR,
+CBR provides much greater reliability and predictability in adaptive streaming environments.
 
 The following configuration, based on the official documentation of the respective codec implementations, was selected:
 \begin{itemize}[leftmargin=1.5cm]
@@ -89,8 +125,8 @@ audio conversion.
 FFMPEG provides multiple codec implementations, out of which \texttt{libfdk\_aac} and \texttt{libopus} were used.
 Again, the choices made were backed by the documentation details~\cite{libfdkaac,libopus}.
 
-In order to integrate it into the backend architecture a small wrapper was written, which can be found in the
-\texttt{audio\_processing/ffmpeg\_wrapper.py} and \texttt{audio\_processing/converters.py} files; a class diagram is also
+In order to integrate it into the Backend architecture a small wrapper was written, which can be found in the
+\path{audio_processing/ffmpeg_wrapper.py} and \path{audio_processing/converters.py} files; a class diagram is also
 provided~\ref{fig:ffmpeg}.
 
 \begin{figure}[htbp]
@@ -108,12 +144,14 @@ is not maintained anymore and e.g. OpenAI has dropped it as their dependency due
 The resulting command for \texttt{ffmpeg} constructed by the wrapper(DASH only, for brevity) looks like this:
 
 \begin{minted}{bash}
+
 ffmpeg -i *input file path*
     -map 0:a -c:a:0 libfdk_aac -profile aac_he_v2 -b:a 24k
     -map 0:a -c:a:1 libopus -b:a 96k
     -map 0:a -c:a:2 libopus -b:a 160k
     -map 0:a -c:a:3 libopus -b:a 256k
     -f dash *output file path for manifest*
+    -adaptation_sets id=0,streams=a
 \end{minted}
 
 \texttt{-map 0:a} tells \texttt{ffmpeg} to select the audio track(s) from the first input.
@@ -122,24 +160,27 @@ ffmpeg -i *input file path*
 The index (e.g., \texttt{:0}, \texttt{:1}, etc.) determines the order of the audio representations
 in the output DASH manifest.
 
+\texttt{-adaptation\_sets id=0,streams=a} tells ffmpeg to create a single adaptation set that will include all
+coded audio streams. That is needed for the ability to switch between them.
+
 As the result, the individual manifests and corresponding chunks are created.
 Later on they will be placed under a subdirectory
-of Django's media directory, so they can later be served to the frontend audio player.
+of Django's media directory, prepared to be served to the Frontend audio player.
 
-Having determined, how the audio is going to be processed and represented, backend implementation is
-discussed in the further section.
+Having determined, how the audio is going to be processed and represented, data and API model
+implementation is discussed in the further section.
 
 
 \section{Backend}
-The description is organized by individual Django \textit{apps}.
-Each app section follows this structure:
+The description is organized by the individual Django \textit{apps}.
+Most of the subsections are comprised the following parts:
 
 \begin{enumerate}
-    \item \textbf{Models} – Define the data schema using Django's ORM.
-    \item \textbf{Serializers} – Convert Django models or native Python types into
+    \item \textbf{Models} – Objects that define the data schema using Django's ORM.
+    \item \textbf{Serializers} – Code that converts Django models or native Python types into
     formats suitable for HTTP transmission (and vice versa).
-    \item \textbf{API Endpoints} – Implemented as \textit{views}, these handle HTTP requests,
-    apply the relevant business logic, and return appropriate responses.
+    \item \textbf{Views} – Handlers for HTTP requests,
+    that provide the relevant business logic, and return appropriate responses.
 \end{enumerate}
 
 As a means to simplify the understanding of the underlying architecture, a full class diagram can be
@@ -154,18 +195,38 @@ seen first - it encompassed all attributes, methods and relationships of classes
     \label{fig:beclassdiagram}
 \end{figure}
 
-\subsection{\textit{base}}
-In this app the abstract \texttt{BaseModel} class is defined, all other models inherit from it.
+\subsection{\textit{base}}\label{subsec:base}
+In this app the abstract \texttt{BaseModel} class is defined from which all other models inherit.
+
 It has three attributes - \texttt{uuid, date\_added, date\_modified}. While the latter two are self-explanatory,
-\texttt{uuid} deserves an explanation. Since all of the data fetching in frontend will be happening via the REST API,
-a unique resource identifier is needed.\\
-The drawback of using an \texttt{ID} of the model record, which is added by default for all models by Django,
-is the possibility of enumeration attacks~\ref{enumattack} and unauthorized scraping of the web page, since it is
-much easier to get an existing ID and simply send requests to API endpoints with an incremented ID value.\\
-A serializer for the model is defined here as well, it is also the base class for the serializers of other models.
+\texttt{uuid} has to be explained. Since all of the data fetching in Frontend will be happening via the REST API,
+a unique resource identifier is needed. The drawback of using an \texttt{ID} of the model record,
+which is added by default for all models by Django, is the possibility of enumeration attacks~\ref{enumattack}
+and unauthorized scraping of the web page. It is much easier to get an existing ID and
+simply send requests to API endpoints with an incremented ID value than to guess a random 128-bit string.
+
+A retrieve serializer for the \texttt{BaseModel} is defined as well,
+it is also the base class for the serializers of other models.
+
+\subsection{\textit{api}}
+Firstly, it is needed to say that the resulting API follows REST~\cite{restdef} practices; it only deviates from them
+when strictly following the rules would degrade the readability and usability of the API.
+This can happen, for example, when an endpoint is used to execute an action instead of a data operation.
+The other rule that is not followed is the presence of hypermedia links on related resources,
+as in the current architecture it makes more sense to use
+individual model identifiers and construct URLs from them instead.
+
+The API itself is versioned, with current version being \textit{v1}.
+In case of the following apps, all of API-related files are always defined under the \path{api/v1} folder.
+
+As for the endpoint, all views that operate on data in some way require authentication, which can be determined
+by the presence of \mintinline{python}{permission_classes = [IsAuthenticated]} attribute on the view. User roles
+are also differentiated by checking the existence of the appropriate model, e.g. for Song creation the User set
+on request has to have a corresponding \texttt{Artist} instance.
 
 \subsection{\textit{users}}
-User classes and token logic are defined in this app.\\
+User classes and token logic are defined in this app.
+
 There are three main User classes:
 \begin{itemize}
     \item \texttt{BaseUser} - declares common fields for all other models, such as \texttt{email, display\_name} and others.
@@ -175,20 +236,24 @@ There are three main User classes:
         \item Relations to other users: \texttt{friends}, which are other \texttt{StreamingUsers},\\
         friend requests of whom the user has accepted (or the other way around);\\
         \texttt{followed} - the \texttt{Artist}s to the updates of which the User has subscribed.
+
         \item User-specific Song Collections: \texttt{history} containing all listened Songs,\\
         \texttt{liked\_songs} containing favourited Songs,\\
         and \texttt{followed\_song\_collections} - the Collections which user has saved to their profile.
-        \item \texttt{song\_queue} - a special structure containing already listened/to be listened to Songs of the User,\\
+
+        \item \texttt{song\_queue} - a special structure containing already/to be listened to Songs of the User,\\
         it will be described later in the dedicated app.
     \end{itemize}
     \item \texttt{Artist}: a subclass of \texttt{StreamingUser} with additional capabilities, such as Song uploads.
 \end{itemize}
 
-JWTTokens are also customized in this app. The authentication process of individual HTTP requests is made by adding the
-token to each request, then parsing and validating it. After validation the supplied User identifier is extracted and
-is used to find the existing User record to which the request belongs. Thus, the \texttt{uuid} of the User is added to the token payload, and
-the authorization logic, and it is customized to use UUID instead of ID for the user lookup.
-The usage of UUID in the token payload will be described in more detail in the frontend section.
+JWTTokens are also customized in this app.
+They are based on the implementation from \texttt{djangorestframework-simplejwt}~\cite{simplejwt},
+however, with one customization - the User’s \texttt{uuid} is included the token payload.
+
+Authentication for each HTTP request involves attaching the token, which is then parsed and validated.
+After validation, the \texttt{uuid} is extracted and used to identify the corresponding User record.
+This is done for the same reasons that were outlined in the \nameref{subsec:base}.
 
 Basic serializers for all User models are declared,
 allowing for the retrieval of information about specific Users or their creation and updates.
@@ -204,19 +269,22 @@ The following views are added as well:
     \item \texttt{UserEventViewSet}
 \end{itemize}
 
-The purpose of all views, except for the last one, could be deduced from their name.\\
-UserEventViewSet is a special view used to implement the SSE connection, the details are provided in the next subsection.
+The purpose of all views, except for the last one, is to send the information
+about Users or perform create/update actions on the related data.
 
-\subsection{\textit{sse}}
+UserEventViewSet is a special view used to implement the SSE connection,
+the details are provided in the subsection \nameref{sec:sse}.
+
+\subsection{\textit{sse}}\label{sec:sse}
 As was mentioned in \nameref{ch:planning}, \texttt{django-eventstream} package is used for the Server Sent Events
 configuration. Internally it works by creating special objects called \textit{channels} to which clients can subscribe
 via an HTTP request. Then, when a new event for a specific channel is created,
-e.g. via the \texttt{django-eventstream.send\_event()} method, all clients subscribed to that channel
+e.g., via the \texttt{django-eventstream.send\_event()} method, all clients subscribed to that channel
 will receive an HTTP response with the specified content.
 
 `UserEventViewSet` listens for incoming SSE connection requests from Users and creates a personalized channel using User's UUID.
 
-Events are mostly used throughout the system to signify to the frontend that some data is stale.
+Events are used throughout the system mostly to signify to the Frontend that some data is stale.
 An example of this is the aforementioned `UserFriendsView`, the post request handler of which is defined like this:
 
 \begin{minipage}{\textwidth}
@@ -235,13 +303,14 @@ An example of this is the aforementioned `UserFriendsView`, the post request han
 \end{minipage}
 \\
 \\
-Here, the custom \texttt{invalidate\_event} signifies to the frontend that the \texttt{friends} list has changed and should
-be refetched.
+Here, the custom \texttt{invalidate\_event} signifies to the Frontend that the \texttt{friends}
+list has changed and should be refetched.
 
-The \textit{invalidate} logic is used for models that are represented in the frontend,
-specifically in view handlers which change data. That way the client always has fresh information.
+The \textit{invalidate} logic is present for views that operate on models
+that are used in the Frontend, specifically in view handlers which change data.
+That way the client always has fresh information.
 
-Event re-delivery is also handled by the package, specifically with this parameter in Django settings:
+Event re-delivery is also handled by the package set with this parameter in Django settings:
 
 \begin{flushleft}
     \begin{minted}{python}
@@ -250,29 +319,302 @@ Event re-delivery is also handled by the package, specifically with this paramet
     \end{minted}
 \end{flushleft}
 
-This tells the package to store the events in the database, and in case of network failure or client disconnect they
-are redelivered.
+This tells the package to store the events in the database, and in case of network failure
+or client disconnect they are redelivered.
 
-Since the SSE part has been explained, it is safe to move on to the main part of the application - the \textit{streaming} package.
+Since the SSE part has been explained, it is safe to move on to the main part of the application
+-- the \textit{streaming} package.
 
 \subsection{\textit{streaming}}
+This app defines the main models responsible for the audio content and playback handling.
+
+\subsubsection{Songs and Song Collections}
+The backbone of the application are the \texttt{BaseSong} and \texttt{SongCollection} models which are declared
+in \path{streaming/songs.py} and \path{streaming/song_collections.py} files.
+
+\begin{itemize}
+
+    \item
+    \texttt{BaseSong} contains the metadata about each individual song - \texttt{title},
+    \texttt{description} and \texttt{image}.
+
+    Then there are attributes which contain the information about the underlying song file:
+    - \texttt{content\_path} representing the root directory with Song files(chunks, manifests)
+    - \texttt{mpd, m3u8} providing manifest paths for DASH and HLS respectively.
+
+    The last attribute is \texttt{draft}. It used in the Song creation process, which will be explained in the
+    view description.
+
+    \item
+    \texttt{SongCollection} represents a container for Songs and can be of two types(set with \texttt{type} attribute)
+    -- either a Playlist or an Album.
+    Playlist is a collection that is formed out of existing Songs, which can be created by both StreamingUsers
+    and Artists. An Album, on the other hand, is a collection that can be created only by an Artist
+    containing unique, uploaded Songs.
+
+    Because an individual \texttt{BaseSong} can be in multiple collections, a Many-to-Many relation is defined between
+    \texttt{BaseSong} and \texttt{SongCollection} named \texttt{SongCollectionSong}.
+    To enable arbitrary ordering of the songs a \texttt{position} attribute is added.
+
+    Another attribute on the \texttt{SongCollection} is \texttt{comments}.
+    As the name suggests, these are pieces of text that each User can add to the collection. The underlying
+    model is discussed in the \nameref{subsec:social}.
+
+    The same metadata as in \texttt{BaseSong} can be set as well.
+    However, there is one extra attribute - \texttt{private}.
+    It is used to signify which collections should not appear e.g., in global search results.
+
+    In addition, there are two subclasses of \texttt{SongCollection} - \texttt{UserHistory} and \texttt{LikedSongs}.
+    They are moved to separate classes, because in the future they will most probably have custom logic added to them.
+    In the current version of the app only the ordering that makes the newest added songs appear first is defined.
+
+\end{itemize}
+
+Each \texttt{SongCollection} and \texttt{BaseSong} also has a relation to the Users that created it(and visa versa).
+It is defined as an M2M relationship with an intermediary table - \texttt{SongCollectionAuthor} and
+\texttt{SongAuthor}. Attribute \texttt{author\_priority} sets the order in which the authors should be returned from
+the API and displayed on the Frontend.
+
+As for the views and endpoints - a standard set of CRUD operations is implemented for both models.
+Additionally, there are special views for User interactions with models, such as \texttt{SongAddLikedView}, which adds
+the provided Song to User's \texttt{LikedSongs} or \texttt{SongCollectionRemoveSong} which lets the User remove a Song
+from a collection, if it was created by that User.
+
+However, a couple of things have to be said about Song and Collection creation.
+The design choice is to not allow users create isolated Song instances,
+instead, if the User wants to upload Songs separately from a Collection, a single-song Album would
+be created instead. This greatly simplifies the logic when handling User playback interactions later on.
+For example, it makes possible to use the aforementioned \texttt{SongCollectionSong}
+instead of \texttt{BaseSong} in most views. As this relation contains the information about both models,
+we can, for instance, accurately show not only which Song is playing, but a Collection as well,
+without tracking both models.
+There are further different benefits of this which could be seen in the Frontend implementation.
+\\
+Apart from that, the Collection creation process is multi-stage and two views are responsible for it:
+\texttt{SongCreateView} and \texttt{SongCollectionCreateView}.
+Whenever a User wants to create a new Collection, firstly the Songs are processed.
+If an error happens during this stage the response with successful and failed Songs is returned
+and \texttt{draft} attribute is set to \textit{True} for the created Songs.
+This is done, because the User can abort the process of creation e.g.,
+by closing the whole browser application, and there would be no proper way to signal what Songs should be deleted.
+A simple crontab job or \texttt{celery} library could be utilized to run periodic tasks which would clean up
+Songs in the draft state.
+\\
+When creating a Song, multiple validation stages are made for the User input, both on the Frontend and the Backend.
+For instance, \path{ffmpeg_wrapper.py} checks the audio file size, its mime type via~\cite{pythonmagic} library and the
+underlying format, with available formats specified in \path{ffmpeg_wrapper.ALLOWED_FILE_TYPES} variable.
+
+Having discussed the main building blocks of the audio content part of the application,
+\texttt{SongQueue} which operates on these models can be presented.
+
+\subsubsection{SongQueue}
+\texttt{SongQueue} represents a list of previously listened Songs and the ones that are going to be
+listened by the User.
+
+The choice of the underlying structure was made based on the desired operations.
+Basic addition and removal from the queue had to be supported, as well as the differentiation
+between playing a Song/Collection or adding it to the queue.
+For example, when user would click play on a Song, it had to become the new "head" of the queue.
+And in case of clicking "add to queue" this Song would be added after other items
+that have been queued previously. All of this implies that addition/removal can happen in any part
+of the list. As the result a Doubly Linked List pattern has been chosen for this model.
+
+As the queue information had to be persisted in the database, a common implementation with
+nodes that point(using foreign keys in that case) to next and previous node might have been
+not the most efficient. An intersting approach proposed online was to use a \textit{position} column
+instead of foreign key references. That way we would be able to retrieve the whole queue with an SQL statement
+like so:
+
+\begin{minted}{sql}
+SELECT *
+FROM (join node table, queue table and StreamingUser table
+      to find the queue nodes of a particular User)
+WHERE node.position > (join queue and nodes to find the head of the queue)
+ORDER BY node.position
+\end{minted}
+
+While using a \texttt{position} column simplifies queue traversal and ordering, it introduces potential
+issues when it comes to frequent inserts and deletes.
+
+Every time a node is inserted between two existing positions, a new \texttt{position} value must be chosen
+such that the ordering remains correct. If positions are represented by integers, repeated insertions
+between tightly packed values (e.g., inserting between position 1 and 2) will eventually require
+re-indexing of the entire list to free up space — an operation that can be expensive in terms of performance.
+Similar problems can occur during deletes as well.
+
+These limitations could be mitigated, for example, by using high-precision floating point numbers,
+powers of numbers or large increments like 1000 to delay the need for full re-indexing.
+However, without the data showing the expected usage of the queue it is hard to tell, whether this approach would
+be beneficial.
+
+That is why a more simple approach with identifiers of neighbouring nodes was chosen, at least for now.
+
+Two models make up the queue functionality - \texttt{SongQueueNode} and \texttt{SongQueue} itself.
+
+Each node carries information about the \texttt{SongCollectionSong} attached to it, as well as
+links to the previous and next node.
+
+\texttt{SongQueue} has foreign keys to the nodes which signify the \texttt{head} and \texttt{tail} of the queue.
+Moreover, a special, third, attribute is declared - \texttt{add\_after}. This is also
+a foreign key to one of the nodes, but this time it indicates the node after which items
+should be added, when "add to queue" action is selected.
+I.e. if the user had selected "play" on a Song, it would become the queue head.
+Then, if the user selected "add to queue" on five different Songs,
+then the head would still point to the playing Song, but \texttt{add\_after} would
+contain the key of the fifth Song added using the second action.
+
+Multiple operations are supported, with the main ones being:
+\begin{itemize}
+    \item Setting the queue head. In case of Collections, e.g.,
+    when the User clicks "play" on a Collection object, the entire Collection is added to the queue.
+    \item Shifting the queue head backward and forward.
+    \item Removing a node.
+    \item Clearing the entire queue.
+\end{itemize}
 
 
-%
-%\subsection{social}
-%
-%\subsection{recommendations}
-%generic relations content type
-%
-%\subsection{notifications}
-%
-%\subsection{audio processing}
-%
-%\subsection{API}
-%versioning, rest practices(and problems, e.g. action endpoints)
-%using uuids
-%
-%
+The final aspect that needs to be addressed is the managing of the playback state.
+
+\subsubsection{Playback State and Playback Devices}
+The term "playback" represents the state of the sound, whether it is being played in a given moment.
+Each User has an attribute named \texttt{playback\_state} represented by the \texttt{PlaybackState} model.
+The playback can be toggled by using the \texttt{PlaybackState.is\_playing} attribute.
+
+Because the User can open multiple instances of an application, the playback handling can not be
+unloaded to the Frontend only, as it would not be synchronized across the instances of the application.
+
+As the result, the application has to differentiate User's "sessions", which is done
+via the \texttt{PlaybackDevice} model.
+It represents the individual devices on which the application is currently open.
+Each device has \texttt{is\_active} attribute, signifying where the sound should be played, and where
+to display controls(seek bar, volume).
+
+It would be expected for all instances of the application to show the same playback state(playing/stopped),
+and, intuitively clicking the play button would have to result for playback to be toggled on the active device with
+visual confirmation on all other devices. In addition, the active device must be able to be switched, which is done
+by the appropriate \texttt{PlaybackDeviceActivateView} handler.
+
+The standard serializers and views that allow for state/device manipulation are implemented.
+However, \texttt{PlaybackDeviceDeleteView} deviates from the standard rules, as it allows not authenticated requests
+and softens the CSRF restrictions. This is done due to browser limitations, shown in the ... section.
+% TODO
+The authentication is still made "by hand", inside the handler itself.
+
+This concludes the audio part of the application.
+
+\subsection{\texit{social}}\label{subsec:social}
+Before examining the contents of the \texit{social} app, an important Django concept
+has to be brought up -- the \texttt{ContentType} framework and \texttt{Generic Relation}~\cite{djangocontenttype}.
+
+The \texttt{ContentType} framework provides a way to refer to any model in the system
+using a generic identifier.
+\texttt{GenericRelation} uses the \texttt{ContentType} framework by storing the target
+model’s type and primary key in two separate fields: a foreign key to the
+\texttt{ContentType} model and an object ID.
+Together, these allow a single relation to point to any instance of any model,
+enabling polymorphic associations without hardcoding specific model references.
+
+This concept is used to implement the \texttt{Publication} model.
+
+For better understanding, the model code can be found below.
+Here, the \texttt{content\_object} field is a \texttt{GenericForeignKey}
+that dynamically joins the \texttt{content\_type} and \texttt{object\_id}
+fields to establish a reference to any model instance.
+This allows each \texttt{Publication} instance to be associated with
+an arbitrary object, such as a Song, or a Collection without requiring a
+fixed foreign key to a specific model.
+
+\begin{minted}{python}
+class Publication(BaseModel):
+    class PublicationType(models.TextChoices):
+        COMMENT = "comment", "Comment"
+        POST = "post", "Post"
+
+    RELATED_MODEL_TYPE_MAP = {
+        "user": "users.StreamingUser",
+        "collection": "streaming.SongCollection",
+        "song": "streaming.SongCollectionSong",
+    }
+
+    type = models.CharField(choices=PublicationType.choices)
+    content = models.CharField(max_length=255)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True,
+        on_delete=models.SET_NULL
+    )
+    parent = models.ForeignKey(
+        "self", null=True, blank=True,
+        related_name="replies", on_delete=models.SET_NULL
+    )
+    is_deleted = models.BooleanField(default=False)
+
+    content_type = models.ForeignKey(
+        ContentType, null=True,
+        blank=True, on_delete=on_content_type_delete
+    )
+    object_id = models.PositiveIntegerField(null=True, blank=True)
+    content_object = GenericForeignKey()
+\end{minted}
+
+Another attribute that needs an explanation is \texttt{type}.
+Currently it can have one of two values - \texttt{comment} and \texttt{post}.
+The comment type is used for comments under audio content(collections),
+while \texttt{posts} represent standalone User publications.
+
+The \texttt{Publication} model also contains a \texttt{parent} attribute, allowing for
+building trees of publications(i.e., replies).
+
+Standard CRUD serializers and views for publications are provided,
+with the addition of custom handling of the related models.
+
+Views related to the publication creation also have a special handling
+of instances which are considered as replies. They create a special
+\texttt{ReplyNotification} object, discussed in the next subsection \nameref{subsec:notif}.
+
+\subsection{\texit{notifications}}\label{subsec:notif}
+In order to notify users about actions such as replies to their publications
+or new friend requests, a notification system was implemented.
+
+The following two notification types are currently supported:
+\begin{itemize}
+    \item \texttt{ReplyNotification} – created when a user replies to a publication (e.g., comment).
+    It stores references to both the original and reply comments. The corresponding manager triggers an SSE
+    event to the original author's channel, making Frontend refresh the notifications list.
+    \item \texttt{FriendRequestNotification} – created when a friend request is sent.
+    It stores references to both the sender and the receiver. Upon creation, same as for \texttt{ReplyNotification}
+    an SSE event is emitted to the receiver's channel.
+\end{itemize}
+
+Both classes inherit from \texttt{Notification} class. It has a single attribute -- \texttt{is\_read} which helps to
+differentiate between already seen and new notifications on the Frontend
+
+\subsection{\textit{recommendations}}
+The \textit{recommendations} app currently provides basic search functionality across Songs,
+Collections, and Users using Django’s native PostgreSQL full-text support.
+
+The core search logic is implemented in the \texttt{SearchView},
+which uses \texttt{TrigramSimilarity} to retrieve fuzzy matches based on string similarity.
+Trigram search is appropriate for this purpose because many
+of the search targets, such as usernames or collection title, often contain informal,
+abbreviated, or non-standard text.
+In such cases, traditional vector-based full-text search
+(e.g., via \texttt{SearchVector}) would perform worse, as it is optimized for longer,
+more "text-like" content.
+
+A dedicated search engine like \texit{Elasticsearch} was not introduced for two reasons:
+\begin{enumerate}
+    \item The scale of the platform does not currently justify the additional
+    infrastructure, deployment, and synchronization complexity that comes
+    with search engines.
+    \item PostgreSQL's trigram extension provides sufficient performance
+    and accuracy for the expected use-case.
+    Moreover, Django offers first-class support for it
+    through the \texttt{django.contrib.postgres.search} module.
+\end{enumerate}
+
+This design ensures efficient search behavior while avoiding unnecessary overheads.
+
+
 %\section{Frontend}
 %
 %\subsection{Libs used}

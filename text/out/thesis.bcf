@@ -2430,11 +2430,22 @@
     <bcf:citekey order="54" intorder="1">mse</bcf:citekey>
     <bcf:citekey order="54" intorder="2">msecaniuse</bcf:citekey>
     <bcf:citekey order="55" intorder="1">browserusage</bcf:citekey>
-    <bcf:citekey order="56" intorder="1">ffmpeg</bcf:citekey>
-    <bcf:citekey order="57" intorder="1">libfdkaac</bcf:citekey>
-    <bcf:citekey order="57" intorder="2">libopus</bcf:citekey>
-    <bcf:citekey order="58" intorder="1">ffmpegpython</bcf:citekey>
-    <bcf:citekey order="59" intorder="1">ffmpegopenai</bcf:citekey>
+    <bcf:citekey order="56" intorder="1">opusefficiency</bcf:citekey>
+    <bcf:citekey order="57" intorder="1">caniuseopus</bcf:citekey>
+    <bcf:citekey order="58" intorder="1">opusefficiency</bcf:citekey>
+    <bcf:citekey order="59" intorder="1">vialicensing</bcf:citekey>
+    <bcf:citekey order="60" intorder="1">cbr</bcf:citekey>
+    <bcf:citekey order="61" intorder="1">vbr</bcf:citekey>
+    <bcf:citekey order="62" intorder="1">cbrvbrcomp</bcf:citekey>
+    <bcf:citekey order="63" intorder="1">ffmpeg</bcf:citekey>
+    <bcf:citekey order="64" intorder="1">libfdkaac</bcf:citekey>
+    <bcf:citekey order="64" intorder="2">libopus</bcf:citekey>
+    <bcf:citekey order="65" intorder="1">ffmpegpython</bcf:citekey>
+    <bcf:citekey order="66" intorder="1">ffmpegopenai</bcf:citekey>
+    <bcf:citekey order="67" intorder="1">restdef</bcf:citekey>
+    <bcf:citekey order="68" intorder="1">simplejwt</bcf:citekey>
+    <bcf:citekey order="69" intorder="1">pythonmagic</bcf:citekey>
+    <bcf:citekey order="70" intorder="1">djangocontenttype</bcf:citekey>
   </bcf:section>
   <!-- SORTING TEMPLATES -->
   <bcf:sortingtemplate name="none">
