@@ -1,5 +1,5 @@
 import { useCurrentDevice } from "@/hooks/useCurrentDevice.ts";
-import { useQueue } from "@/hooks/useQueueAPI.ts";
+import { useQueue } from "@/components/song-queue/hooks/useQueueAPI.ts";
 import { usePlaybackRetrieveQuery } from "@/playback/queries.ts";
 import { PlaybackContext } from "@/providers/playbackContext.ts";
 import { ReactNode, useMemo } from "react";

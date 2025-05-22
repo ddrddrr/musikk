@@ -1,0 +1,10 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{+w}{    }\PYG{k+kd}{const}\PYG{+w}{ }\PYG{n+nx}{isSafari}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n+nx}{useMemo}\PYG{p}{(}\PYG{p}{(}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{=\PYGZgt{}}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{        }\PYG{k}{return}\PYG{+w}{ }\PYG{l+s+sr}{/\PYGZca{}((?!chrome|android).)*safari/i}\PYG{p}{.}\PYG{n+nx}{test}\PYG{p}{(}\PYG{n+nx}{navigator}\PYG{p}{.}\PYG{n+nx}{userAgent}\PYG{p}{)}\PYG{p}{;}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}\PYG{p}{,}\PYG{+w}{ }\PYG{p}{[}\PYG{p}{]}\PYG{p}{)}\PYG{p}{;}
+
+\PYG{+w}{    }\PYG{k+kd}{const}\PYG{+w}{ }\PYG{n+nx}{url}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n+nx}{useMemo}\PYG{p}{(}\PYG{p}{(}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{=\PYGZgt{}}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{        }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{o}{!}\PYG{n+nx}{playingCollectionSong}\PYG{p}{)}\PYG{+w}{ }\PYG{k}{return}\PYG{+w}{ }\PYG{k+kc}{undefined}\PYG{p}{;}
+\PYG{+w}{        }\PYG{k}{return}\PYG{+w}{ }\PYG{n+nx}{isSafari}\PYG{+w}{ }\PYG{o}{?}\PYG{+w}{ }\PYG{n+nx}{playingCollectionSong.song.m3u8}\PYG{+w}{ }\PYG{o}{:}\PYG{+w}{ }\PYG{k+kt}{playingCollectionSong.song.mpd}\PYG{p}{;}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}\PYG{p}{,}\PYG{+w}{ }\PYG{p}{[}\PYG{n+nx}{queueHead}\PYG{p}{,}\PYG{+w}{ }\PYG{n+nx}{playingCollectionSong}\PYG{p}{,}\PYG{+w}{ }\PYG{n+nx}{isSafari}\PYG{p}{]}\PYG{p}{)}\PYG{p}{;}
+\end{MintedVerbatim}

@@ -27,10 +27,9 @@ ALLOWED_HOSTS = config(
 # TODO: change to dev/prod variants
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
+    "https://musikk.stream",
     "http://localhost:5173",
-    "http://localhost:8000",
 ]
-# CORS_URLS_REGEX = r"^*media*$"
 
 CORS_ALLOW_HEADERS = (
     *default_headers,

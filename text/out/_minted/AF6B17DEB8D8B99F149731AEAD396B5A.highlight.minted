@@ -1,0 +1,25 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{+w}{    }\PYG{k}{export}\PYG{+w}{ }\PYG{k+kd}{function}\PYG{+w}{ }\PYG{n+nx}{UserCollectionsProvider}\PYG{p}{(}
+\PYG{+w}{        }\PYG{p}{\PYGZob{}}\PYG{+w}{ }\PYG{n+nx}{children}\PYG{+w}{ }\PYG{p}{\PYGZcb{}}\PYG{o}{:}\PYG{+w}{ }\PYG{n+nx}{UserCollectionsProviderProps}
+\PYG{+w}{    }\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{k+kd}{const}\PYG{+w}{ }\PYG{n+nx}{userUUID}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n+nx}{useUserUUID}\PYG{p}{(}\PYG{p}{)}\PYG{p}{;}
+
+\PYG{+w}{    }\PYG{k+kd}{const}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{ }\PYG{n+nx}{data}\PYG{+w}{ }\PYG{p}{\PYGZcb{}}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n+nx}{useQuery}\PYG{p}{(}\PYG{p}{\PYGZob{}}
+\PYG{+w}{        }\PYG{n+nx}{queryKey}\PYG{o}{:}\PYG{+w}{ }\PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}collectionsPersonal\PYGZdq{}}\PYG{p}{]}\PYG{p}{,}
+\PYG{+w}{        }\PYG{n+nx}{queryFn}\PYG{o}{:}\PYG{+w}{ }\PYG{k+kt}{userUUID}\PYG{+w}{ }\PYG{o}{?}\PYG{+w}{ }\PYG{p}{(}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{=\PYGZgt{}}
+\PYG{+w}{            }\PYG{n+nx}{fetchCollectionsPersonal}\PYG{p}{(}\PYG{n+nx}{userUUID}\PYG{p}{)}\PYG{+w}{ }\PYG{o}{:}\PYG{+w}{ }\PYG{k+kc}{undefined}\PYG{p}{,}
+\PYG{+w}{        }\PYG{n+nx}{enabled}\PYG{o}{:}\PYG{+w}{ }\PYG{o}{!}\PYG{o}{!}\PYG{n+nx}{userUUID}\PYG{p}{,}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}\PYG{p}{)}\PYG{p}{;}
+\PYG{+w}{    }\PYG{k+kd}{const}\PYG{+w}{ }\PYG{n+nx}{contextValue}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{        }\PYG{n+nx}{history}\PYG{o}{:}\PYG{+w}{ }\PYG{k+kt}{data?.history}\PYG{+w}{ }\PYG{o}{??}\PYG{+w}{ }\PYG{k+kc}{null}\PYG{p}{,}
+\PYG{+w}{        }\PYG{n+nx}{liked\PYGZus{}songs}\PYG{o}{:}\PYG{+w}{ }\PYG{k+kt}{data?.liked\PYGZus{}songs}\PYG{+w}{ }\PYG{o}{??}\PYG{+w}{ }\PYG{k+kc}{null}\PYG{p}{,}
+\PYG{+w}{        }\PYG{n+nx}{followed\PYGZus{}collections}\PYG{o}{:}\PYG{+w}{ }\PYG{k+kt}{data?.followed\PYGZus{}collections}\PYG{+w}{ }\PYG{o}{??}\PYG{+w}{ }\PYG{k+kc}{null}\PYG{p}{,}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}\PYG{p}{;}
+
+\PYG{+w}{    }\PYG{k}{return}\PYG{+w}{ }\PYG{p}{(}
+\PYG{+w}{        }\PYG{o}{\PYGZlt{}}\PYG{n+nx}{UserCollectionsContext}\PYG{p}{.}\PYG{n+nx}{Provider}\PYG{+w}{ }\PYG{n+nx}{value}\PYG{o}{=}\PYG{p}{\PYGZob{}}\PYG{n+nx}{contextValue}\PYG{p}{\PYGZcb{}}\PYG{o}{\PYGZgt{}}
+\PYG{+w}{        }\PYG{p}{\PYGZob{}}\PYG{n+nx}{children}\PYG{p}{\PYGZcb{}}
+\PYG{+w}{        }\PYG{o}{\PYGZlt{}}\PYG{err}{/}\PYG{err}{U}\PYG{err}{s}\PYG{err}{e}\PYG{err}{r}\PYG{err}{C}\PYG{err}{o}\PYG{err}{l}\PYG{err}{l}\PYG{err}{e}\PYG{err}{c}\PYG{err}{t}\PYG{err}{i}\PYG{err}{o}\PYG{err}{n}\PYG{err}{s}\PYG{err}{C}\PYG{err}{o}\PYG{err}{n}\PYG{err}{t}\PYG{err}{e}\PYG{err}{x}\PYG{err}{t}\PYG{err}{.}\PYG{err}{P}\PYG{err}{r}\PYG{err}{o}\PYG{err}{v}\PYG{err}{i}\PYG{err}{d}\PYG{err}{e}\PYG{err}{r}\PYG{err}{\PYGZgt{}}
+\PYG{+w}{    }\PYG{p}{)}\PYG{p}{;}
+\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}

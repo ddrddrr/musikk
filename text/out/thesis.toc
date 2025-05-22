@@ -40,12 +40,21 @@
 \contentsline {subsection}{\numberline {6.2.1}\textit {base}}{34}{subsection.6.2.1}%
 \contentsline {subsection}{\numberline {6.2.2}\textit {api}}{34}{subsection.6.2.2}%
 \contentsline {subsection}{\numberline {6.2.3}\textit {users}}{34}{subsection.6.2.3}%
-\contentsline {subsection}{\numberline {6.2.4}\textit {sse}}{35}{subsection.6.2.4}%
-\contentsline {subsection}{\numberline {6.2.5}\textit {streaming}}{36}{subsection.6.2.5}%
-\contentsline {subsubsection}{Songs and Song Collections}{36}{section*.6}%
-\contentsline {subsubsection}{SongQueue}{38}{section*.7}%
-\contentsline {subsection}{\numberline {6.2.6}{social}}{39}{subsection.6.2.6}%
-\contentsline {subsection}{\numberline {6.2.7}{notifications}}{40}{subsection.6.2.7}%
-\contentsline {subsection}{\numberline {6.2.8}\textit {recommendations}}{41}{subsection.6.2.8}%
-\contentsline {chapter}{\numberline {7}Summary and Conclusion}{42}{chapter.7}%
-\contentsline {chapter}{Sources}{43}{chapter*.8}%
+\contentsline {subsection}{\numberline {6.2.4}\textit {sse}}{36}{subsection.6.2.4}%
+\contentsline {subsection}{\numberline {6.2.5}\textit {streaming}}{37}{subsection.6.2.5}%
+\contentsline {subsubsection}{Songs and Song Collections}{37}{section*.6}%
+\contentsline {subsubsection}{SongQueue}{39}{section*.7}%
+\contentsline {subsubsection}{Playback State and Playback Devices}{40}{section*.8}%
+\contentsline {subsection}{\numberline {6.2.6}{social}}{41}{subsection.6.2.6}%
+\contentsline {subsection}{\numberline {6.2.7}{notifications}}{42}{subsection.6.2.7}%
+\contentsline {subsection}{\numberline {6.2.8}\textit {recommendations}}{43}{subsection.6.2.8}%
+\contentsline {section}{\numberline {6.3}Frontend}{43}{section.6.3}%
+\contentsline {subsection}{\numberline {6.3.1}Authentication}{44}{subsection.6.3.1}%
+\contentsline {subsection}{\numberline {6.3.2}Data Management}{45}{subsection.6.3.2}%
+\contentsline {subsection}{\numberline {6.3.3}SSE}{46}{subsection.6.3.3}%
+\contentsline {subsection}{\numberline {6.3.4}Playback and Player}{47}{subsection.6.3.4}%
+\contentsline {subsection}{\numberline {6.3.5}Device Handling}{47}{subsection.6.3.5}%
+\contentsline {subsection}{\numberline {6.3.6}Components}{48}{subsection.6.3.6}%
+\contentsline {section}{\numberline {6.4}Deployment}{49}{section.6.4}%
+\contentsline {chapter}{\numberline {7}Summary and Conclusion}{50}{chapter.7}%
+\contentsline {chapter}{Sources}{51}{chapter*.9}%

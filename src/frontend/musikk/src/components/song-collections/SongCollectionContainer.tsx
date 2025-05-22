@@ -3,7 +3,7 @@ import { fetchCollectionDetailed } from "@/components/song-collections/queries";
 import { SongCollectionHeader } from "@/components/song-collections/SongCollectionHeader";
 import { SongContainer } from "@/components/songs/SongContainer.tsx";
 import { UUID } from "@/config/types.ts";
-import { useUserUUID } from "@/hooks/useUserUUID.ts";
+import { useUserUUID } from "@/components/user/hooks/useUserUUID.ts";
 import { UserCollectionsContext } from "@/providers/userCollectionsContext.ts";
 import { useQuery } from "@tanstack/react-query";
 import { useContext } from "react";

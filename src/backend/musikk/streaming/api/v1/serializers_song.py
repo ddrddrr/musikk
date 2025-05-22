@@ -108,7 +108,6 @@ class SongCollectionSongSerializer(BaseModelSerializer):
 
     class Meta:
         model = SongCollectionSong
-        # song_collection will be its uuid
         fields = BaseModelSerializer.Meta.fields + ["song", "song_collection"]
 
     def get_song(self, obj):

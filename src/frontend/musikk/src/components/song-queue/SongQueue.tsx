@@ -1,7 +1,7 @@
 import { SongQueueContainer } from "@/components/song-queue/SongQueueContainer.tsx";
 import { SongDisplay } from "@/components/songs/SongDisplay";
 import { Button } from "@/components/ui/button";
-import { useQueue, useQueueChangeAPI } from "@/hooks/useQueueAPI";
+import { useQueue, useQueueChangeAPI } from "@/components/song-queue/hooks/useQueueAPI";
 import { Trash2 } from "lucide-react";
 
 export function SongQueue() {

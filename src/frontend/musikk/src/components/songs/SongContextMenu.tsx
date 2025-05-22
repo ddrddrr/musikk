@@ -1,7 +1,7 @@
 import { collectionRemoveSong } from "@/components/song-collections/mutations.ts";
 import { ISongCollectionSong } from "@/components/song-collections/types.ts";
 import { useSongPlayHandler } from "@/components/songs/hooks/useSongPlayHandler.ts";
-import { useQueueAddAPI } from "@/hooks/useQueueAPI.ts";
+import { useQueueAddAPI } from "@/components/song-queue/hooks/useQueueAPI.ts";
 import {
     ContextMenu,
     ContextMenuContent,

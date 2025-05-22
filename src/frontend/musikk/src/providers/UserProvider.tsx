@@ -1,5 +1,5 @@
 import { fetchUser } from "@/components/user/queries.ts";
-import { useUserUUID } from "@/hooks/useUserUUID.ts";
+import { useUserUUID } from "@/components/user/hooks/useUserUUID.ts";
 import { UserContext } from "@/providers/userContext.ts";
 import { useQuery } from "@tanstack/react-query";
 import { ReactNode } from "react";

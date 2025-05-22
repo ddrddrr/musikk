@@ -1,0 +1,7 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k}{SELECT}\PYG{+w}{ }\PYG{o}{*}
+\PYG{k}{FROM}\PYG{+w}{ }\PYG{p}{(}\PYG{k}{join}\PYG{+w}{ }\PYG{n}{node}\PYG{+w}{ }\PYG{k}{table}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{queue}\PYG{+w}{ }\PYG{k}{table}\PYG{+w}{ }\PYG{k}{and}\PYG{+w}{ }\PYG{n}{StreamingUser}\PYG{+w}{ }\PYG{k}{table}
+\PYG{+w}{      }\PYG{k}{to}\PYG{+w}{ }\PYG{n}{find}\PYG{+w}{ }\PYG{n}{the}\PYG{+w}{ }\PYG{n}{queue}\PYG{+w}{ }\PYG{n}{nodes}\PYG{+w}{ }\PYG{k}{of}\PYG{+w}{ }\PYG{n}{a}\PYG{+w}{ }\PYG{n}{particular}\PYG{+w}{ }\PYG{k}{User}\PYG{p}{)}
+\PYG{k}{WHERE}\PYG{+w}{ }\PYG{n}{node}\PYG{p}{.}\PYG{k}{position}\PYG{+w}{ }\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{p}{(}\PYG{k}{join}\PYG{+w}{ }\PYG{n}{queue}\PYG{+w}{ }\PYG{k}{and}\PYG{+w}{ }\PYG{n}{nodes}\PYG{+w}{ }\PYG{k}{to}\PYG{+w}{ }\PYG{n}{find}\PYG{+w}{ }\PYG{n}{the}\PYG{+w}{ }\PYG{n}{head}\PYG{+w}{ }\PYG{k}{of}\PYG{+w}{ }\PYG{n}{the}\PYG{+w}{ }\PYG{n}{queue}\PYG{p}{)}
+\PYG{k}{ORDER}\PYG{+w}{ }\PYG{k}{BY}\PYG{+w}{ }\PYG{n}{node}\PYG{p}{.}\PYG{k}{position}
+\end{MintedVerbatim}

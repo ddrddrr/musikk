@@ -1,4 +1,4 @@
-import { useQueueChangeAPI } from "@/hooks/useQueueAPI.ts";
+import { useQueueChangeAPI } from "@/components/song-queue/hooks/useQueueAPI.ts";
 import { PlaybackContext } from "@/providers/playbackContext.ts";
 import { useContext, useEffect, useMemo, useRef } from "react";
 
@@ -106,7 +106,7 @@ export function Player({ onDurationChange, onTimeUpdate }: PlayerProps) {
                 audio.duration - audio.currentTime < 0.5 &&
                 !audio.paused
             ) {
-                handleOnEnded(); // manually call it
+                handleOnEnded();
             }
         }, 1000);
 

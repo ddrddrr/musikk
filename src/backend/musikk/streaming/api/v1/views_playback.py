@@ -68,10 +68,9 @@ class PlaybackDeviceActivateView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-# TODO: also add last access and custom task to delete every once in a while
 @method_decorator(
     csrf_exempt, name="dispatch"
-)  # beacon requests don't have CSRF tokens
+)  # receives a sendBeacon request, which doesn't have CSRF token
 class PlaybackDeviceDeleteView(APIView):
     def post(self, request, *args, **kwargs):
         data = json.loads(request.body)

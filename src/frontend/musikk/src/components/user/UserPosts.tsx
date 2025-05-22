@@ -3,7 +3,7 @@ import { PostTree } from "@/components/publications/PostTree";
 import { useUserPostsQuery } from "@/components/publications/queries";
 import { Card, CardContent } from "@/components/ui/card";
 import { UUID } from "@/config/types";
-import { useUserUUID } from "@/hooks/useUserUUID.ts";
+import { useUserUUID } from "@/components/user/hooks/useUserUUID.ts";
 
 export function UserPosts({ userUUID }: { userUUID: UUID }) {
     const { data: posts, isPending, error } = useUserPostsQuery(userUUID);

@@ -2446,6 +2446,22 @@
     <bcf:citekey order="68" intorder="1">simplejwt</bcf:citekey>
     <bcf:citekey order="69" intorder="1">pythonmagic</bcf:citekey>
     <bcf:citekey order="70" intorder="1">djangocontenttype</bcf:citekey>
+    <bcf:citekey order="71" intorder="1">shadcn</bcf:citekey>
+    <bcf:citekey order="72" intorder="1">tanstack</bcf:citekey>
+    <bcf:citekey order="73" intorder="1">reactrouterdom</bcf:citekey>
+    <bcf:citekey order="74" intorder="1">reacthookform</bcf:citekey>
+    <bcf:citekey order="75" intorder="1">vite</bcf:citekey>
+    <bcf:citekey order="76" intorder="1">axiosintercept</bcf:citekey>
+    <bcf:citekey order="77" intorder="1">eventsource</bcf:citekey>
+    <bcf:citekey order="78" intorder="1">shaka</bcf:citekey>
+    <bcf:citekey order="79" intorder="1">dashref</bcf:citekey>
+    <bcf:citekey order="80" intorder="1">chromelfapi</bcf:citekey>
+    <bcf:citekey order="80" intorder="2">beacons</bcf:citekey>
+    <bcf:citekey order="81" intorder="1">beacons</bcf:citekey>
+    <bcf:citekey order="82" intorder="1">libfdkaac</bcf:citekey>
+    <bcf:citekey order="83" intorder="1">caddy</bcf:citekey>
+    <bcf:citekey order="84" intorder="1">porkbun</bcf:citekey>
+    <bcf:citekey order="85" intorder="1">hetzner</bcf:citekey>
   </bcf:section>
   <!-- SORTING TEMPLATES -->
   <bcf:sortingtemplate name="none">

@@ -1,0 +1,24 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{+w}{    }\PYG{k}{export}\PYG{+w}{ }\PYG{k+kd}{function}\PYG{+w}{ }\PYG{n+nx}{usePlaybackRetrieveQuery}\PYG{p}{(}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{k}{return}\PYG{+w}{ }\PYG{n+nx}{useQuery}\PYG{o}{\PYGZlt{}}\PYG{n+nx}{IPlaybackState}\PYG{o}{\PYGZgt{}}\PYG{p}{(}\PYG{p}{\PYGZob{}}
+\PYG{+w}{        }\PYG{n+nx}{queryFn}\PYG{o}{:}\PYG{+w}{ }\PYG{k+kt}{async}\PYG{+w}{ }\PYG{p}{(}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{=\PYGZgt{}}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{            }\PYG{k+kd}{const}\PYG{+w}{ }\PYG{n+nx}{res}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{api}\PYG{p}{.}\PYG{n+nx}{get}\PYG{p}{(}\PYG{n+nx}{PlaybackURLs}\PYG{p}{.}\PYG{n+nx}{retrieve}\PYG{p}{)}\PYG{p}{;}
+\PYG{+w}{            }\PYG{k}{return}\PYG{+w}{ }\PYG{n+nx}{res}\PYG{p}{.}\PYG{n+nx}{data}\PYG{p}{;}
+\PYG{+w}{        }\PYG{p}{\PYGZcb{}}\PYG{p}{,}
+\PYG{+w}{        }\PYG{n+nx}{queryKey}\PYG{o}{:}\PYG{+w}{ }\PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}playback\PYGZdq{}}\PYG{p}{]}\PYG{p}{,}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}\PYG{p}{)}\PYG{p}{;}
+\PYG{p}{\PYGZcb{}}
+
+\PYG{+w}{    }\PYG{p}{...}
+
+\PYG{+w}{    }\PYG{k}{export}\PYG{+w}{ }\PYG{k}{async}\PYG{+w}{ }\PYG{k+kd}{function}\PYG{+w}{ }\PYG{n+nx}{commentCreate}\PYG{p}{(}\PYG{p}{\PYGZob{}}\PYG{+w}{ }\PYG{n+nx}{objType}\PYG{p}{,}\PYG{+w}{ }\PYG{n+nx}{objUUID}\PYG{p}{,}
+\PYG{+w}{        }\PYG{n+nx}{content}\PYG{p}{,}\PYG{+w}{ }\PYG{n+nx}{replyToUUID}\PYG{+w}{ }\PYG{p}{\PYGZcb{}}\PYG{o}{:}\PYG{+w}{ }\PYG{n+nx}{IAddCommentParams}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{k+kd}{const}\PYG{+w}{ }\PYG{n+nx}{data}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{        }\PYG{n+nx}{content}\PYG{p}{,}
+\PYG{+w}{        }\PYG{n+nx}{parent}\PYG{o}{:}\PYG{+w}{ }\PYG{k+kt}{replyToUUID}\PYG{p}{,}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}\PYG{p}{;}
+\PYG{+w}{    }\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{api}\PYG{p}{.}\PYG{n+nx}{post}\PYG{p}{(}\PYG{n+nx}{CommentURLs}\PYG{p}{.}\PYG{n+nx}{commentCreate}\PYG{p}{(}
+\PYG{+w}{        }\PYG{n+nx}{objType}\PYG{p}{,}\PYG{+w}{ }\PYG{n+nx}{objUUID}
+\PYG{+w}{    }\PYG{p}{)}\PYG{p}{,}\PYG{+w}{ }\PYG{n+nx}{data}\PYG{p}{)}\PYG{p}{;}
+\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}

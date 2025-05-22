@@ -19,8 +19,6 @@ api.interceptors.response.use(
 
         if (error.response?.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
-            // TODO: add error handling, if refresh token expires while
-            //  we are trying to use it
             await refreshAccessToken();
             const token = Cookies.get("access");
             originalRequest.headers.Authorization = `Bearer ${token}`;
@@ -30,3 +28,53 @@ api.interceptors.response.use(
         return Promise.reject(error);
     },
 );
+
+// let isRefreshing = false;
+// let refreshPromise: Promise<void> | null = null;
+// let subscribers: ((token: string) => void)[] = [];
+//
+// function onRefreshed(token: string) {
+//     subscribers.forEach((callback) => callback(token));
+//     subscribers = [];
+// }
+//
+// function addSubscriber(callback: (token: string) => void) {
+//     subscribers.push(callback);
+// }
+//
+// api.interceptors.response.use(
+//     (response) => response,
+//     async (error) => {
+//         const originalRequest = error.config;
+//
+//         if (error.response?.status === 401 && !originalRequest._retry) {
+//             originalRequest._retry = true;
+//
+//             if (!isRefreshing) {
+//                 isRefreshing = true;
+//                 refreshPromise = refreshAccessToken()
+//                     .then(() => {
+//                         const token = Cookies.get("access");
+//                         onRefreshed(token);
+//                     })
+//                     .finally(() => {
+//                         isRefreshing = false;
+//                         refreshPromise = null;
+//                     });
+//             }
+//
+//             return new Promise((resolve, reject) => {
+//                 addSubscriber((token) => {
+//                     originalRequest.headers.Authorization = `Bearer ${token}`;
+//                     resolve(api(originalRequest));
+//                 });
+//
+//                 if (refreshPromise) {
+//                     refreshPromise.catch(reject);
+//                 }
+//             });
+//         }
+//
+//         return Promise.reject(error);
+//     }
+// );

@@ -1,5 +1,5 @@
 import { useUserFollowedQuery, useUserFriendsQuery } from "@/components/user/queries.ts";
-import { useUserUUID } from "@/hooks/useUserUUID.ts";
+import { useUserUUID } from "@/components/user/hooks/useUserUUID.ts";
 import { UserConnectionsContext } from "@/providers/userConnectionsContext.tsx";
 import { ReactNode } from "react";
 

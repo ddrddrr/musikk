@@ -1,1 +1,37 @@
 \chapter{Summary and Conclusion}\label{chap:conclusion}
+This thesis set out to design and implement a modern music streaming platform
+with integrated social features, addressing the observed gap
+in user interaction capabilities across existing services. Based on the outcomes of
+a conducted survey and analysis of current solutions, the project identified
+an existing user interest in socially-enhanced music consumption and sharing.
+
+The platform was implemented using a Django-based backend and a React-based frontend,
+chosen for their development efficiency, community support, and extensibility.
+The audio delivery is performed using adaptive streaming via DASH and HLS protocols,
+ensuring compatibility and quality across devices and browsers.
+Opus and AAC codecs were utilized with multiple CBR representations to support adaptive bitrate
+switching. Server-Sent Events (SSE) were implemented to provide real-time
+updates with low complexity and good reliability. In addition,
+the resulting application is synchronized across different instances.
+
+The resulting system supports all basic operations expected from a music streaming platform,
+while adding additional social features.
+The social interaction capabilities were designed to be lightweight yet functional,
+including post and comment systems, real-time friend activity updates.
+
+Deployment was carried out using Docker, PostgreSQL, and a Caddy server,
+and the application is now publicly available online.
+Key challenges, such as browser inconsistencies with playback state persistence
+and device lifecycle handling, were identified, and workarounds
+or future improvement paths were proposed.
+
+In conclusion, the project demonstrates that a socially oriented music streaming
+platform can be effectively implemented with modern web technologies.
+It fulfills the identified requirements, introduces meaningful social
+interactions, and presents a flexible foundation for further enhancements,
+such as collaborative playlists, advanced discovery algorithms,
+or integration with third-party media platforms.
+Future development will aim to expand these features,
+improve performance, and ensure long-term scalability.
+
+

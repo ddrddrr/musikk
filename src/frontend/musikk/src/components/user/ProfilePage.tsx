@@ -4,7 +4,7 @@ import { ProfileForm } from "@/components/user/ProfileForm";
 import { fetchUser } from "@/components/user/queries";
 import { UserAvatar } from "@/components/user/UserAvatar.tsx";
 import { UserPosts } from "@/components/user/UserPosts.tsx";
-import { useUserUUID } from "@/hooks/useUserUUID.ts";
+import { useUserUUID } from "@/components/user/hooks/useUserUUID.ts";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 

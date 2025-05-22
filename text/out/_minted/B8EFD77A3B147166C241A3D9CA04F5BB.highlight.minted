@@ -1,0 +1,7 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k}{export}\PYG{+w}{ }\PYG{k+kd}{function}\PYG{+w}{ }\PYG{n+nx}{LeftColumn}\PYG{p}{(}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{k+kd}{const}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{ }\PYG{n+nx}{liked\PYGZus{}songs}\PYG{p}{,}\PYG{+w}{ }\PYG{n+nx}{history}\PYG{p}{,}\PYG{+w}{ }\PYG{n+nx}{followed\PYGZus{}collections}\PYG{+w}{ }\PYG{p}{\PYGZcb{}}\PYG{+w}{ }\PYG{o}{=}
+\PYG{+w}{        }\PYG{n+nx}{useContext}\PYG{p}{(}\PYG{n+nx}{UserCollectionsContext}\PYG{p}{)}\PYG{p}{;}
+\PYG{+w}{    }\PYG{c+c1}{//render the collections}
+\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}

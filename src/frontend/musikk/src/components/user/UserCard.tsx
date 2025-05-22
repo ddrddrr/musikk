@@ -6,7 +6,7 @@ import {
     useRemoveFollowedArtistMutation,
 } from "@/components/user/mutations.tsx";
 import { IUser } from "@/components/user/types.ts";
-import { useUserUUID } from "@/hooks/useUserUUID.ts";
+import { useUserUUID } from "@/components/user/hooks/useUserUUID.ts";
 import { UserConnectionsContext } from "@/providers/userConnectionsContext.tsx";
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from "@radix-ui/react-context-menu";
 import { MoreHorizontal, Smile } from "lucide-react";

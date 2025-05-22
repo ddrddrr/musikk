@@ -1,6 +1,6 @@
 import { ISongCollectionDetailed } from "@/components/song-collections/types.ts";
 import { Button } from "@/components/ui/button.tsx";
-import { useQueueAddAPI } from "@/hooks/useQueueAPI.ts";
+import { useQueueAddAPI } from "@/components/song-queue/hooks/useQueueAPI.ts";
 import { BetweenHorizonalStart } from "lucide-react";
 import { memo } from "react";
 

@@ -58,6 +58,9 @@ class UserHistory(SongCollection):
         self.private = True
         super().save(*args, **kwargs)
 
+    class Meta:
+        ordering = ("-date_added",)
+
 
 class LikedSongs(SongCollection):
     def save(self, *args, **kwargs):
@@ -67,6 +70,9 @@ class LikedSongs(SongCollection):
         self.metadata = None
         self.private = True
         super().save(*args, **kwargs)
+
+    class Meta:
+        ordering = ("-date_added",)
 
 
 class SongCollectionAuthor(BaseModel):

@@ -14,4 +14,9 @@ musikk.stream {
     reverse_proxy /api/* server:8000 {
         header_up X-Forwarded-Proto {scheme}
     }
+
+    handle {
+        try_files {path} /index.html
+        file_server
+    }
 }

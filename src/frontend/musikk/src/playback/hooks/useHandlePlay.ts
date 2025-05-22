@@ -1,6 +1,6 @@
 import { ISongCollection, ISongCollectionSong } from "@/components/song-collections/types.ts";
 import { useCurrentDevice } from "@/hooks/useCurrentDevice.ts";
-import { useQueueAddAPI } from "@/hooks/useQueueAPI.ts";
+import { useQueueAddAPI } from "@/components/song-queue/hooks/useQueueAPI.ts";
 import { usePlaybackStateMutation } from "@/playback/mutations.ts";
 import { PlaybackContext } from "@/providers/playbackContext.ts";
 import { useContext } from "react";

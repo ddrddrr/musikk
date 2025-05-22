@@ -38,7 +38,8 @@ class SongAddLikedView(APIView):
             song=scs.song, song_collection=user.liked_songs
         )
 
-        # doing a refetch for the queue is easier than traversing nodes and checking, whether the song is in the queue
+        # doing a refetch for the queue is easier than traversing nodes and checking,
+        # whether the song is in the queue
         send_invalidate_event(EventChannels.user_events(user.uuid), ["queue"])
         send_invalidate_event(EventChannels.user_events(user.uuid), ["openCollection"])
         send_invalidate_event(
