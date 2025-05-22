@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=pdflatex 2025.3.30)  22 MAY 2025 22:18
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=pdflatex 2025.3.30)  22 MAY 2025 22:23
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -1602,13 +1602,13 @@ Package pdftex.def Info: diagrams/ffmpeg.png  used on input line 132.
 \pydata@fh@_2EF71E68B4AD97F630480BCEBC1842FB.data.minted=\write8
 \openout8 = `_2EF71E68B4AD97F630480BCEBC1842FB.data.minted'.
 
-runsystem(latexminted config  --timestamp 20250522221808 2EF71E68B4AD97F630480B
+runsystem(latexminted config  --timestamp 20250522222332 2EF71E68B4AD97F630480B
 CEBC1842FB)...executed safely (allowed).
 
 
 (/Users/mazda/studies/musikk/text/out/_2EF71E68B4AD97F630480BCEBC1842FB.config.
 minted)
-runsystem(latexminted cleanconfig  --timestamp 20250522221808 2EF71E68B4AD97F63
+runsystem(latexminted cleanconfig  --timestamp 20250522222332 2EF71E68B4AD97F63
 0480BCEBC1842FB)...executed safely (allowed).
 
  (./out/_minted/friendly.style.minted)
@@ -1809,7 +1809,7 @@ lmri10.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/lm/lmtk10.pfb
 ></usr/local/texlive/2025/texmf-dist/fonts/type1/public/lm/lmtt10.pfb></usr/loc
 al/texlive/2025/texmf-dist/fonts/type1/public/lm/lmtti10.pfb>
 Output written on /Users/mazda/studies/musikk/text/out/thesis.pdf (61 pages, 30
-92851 bytes).
+92424 bytes).
 PDF statistics:
  1050 PDF objects out of 1200 (max. 8388607)
  929 compressed objects within 10 object streams
