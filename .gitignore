@@ -48,7 +48,7 @@ coverage.xml
 *.pot
 
 # Django stuff:
-*.log
+#*.log
 
 # Sphinx documentation
 docs/_build/
@@ -83,8 +83,8 @@ pyvenv.cfg
 pip-selfcheck.json
 
 # text
-text/charts
-text/diagrams
+#text/charts
+#text/diagrams
 samples
 .DS_Store
 src/backend/shadow
