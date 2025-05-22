@@ -218,7 +218,9 @@ The API itself is versioned, with the current version being \textit{v1}.
 In the case of the following apps, all the API-related files are always defined under the \path{api/v1} folder.
 
 As for the endpoint, all views that operate on data in some way require authentication, which can be determined
-by the presence of \mintinline{python}{permission_classes = [IsAuthenticated]} attribute on the view. User roles
+by the presence of
+\\\mintinline{python}{permission_classes = [IsAuthenticated]}\\
+attribute on the view. User roles
 are also differentiated by checking the existence of the appropriate model, e.g., for Song creation, the User set
 on request has to have a corresponding \texttt{Artist} instance.
 
@@ -252,7 +254,7 @@ the access token is short-lived and used to authenticate regular API requests,
 while the refresh token is long-lived and can be used to obtain new access tokens without requiring
 the user to re-authenticate.
 
-Authentication for each HTTP request involves attaching the access token as an HTTP \texit{Bearer} header.
+Authentication for each HTTP request involves attaching the access token as an HTTP \textit{Bearer} header.
 After parsing the request, the token is retrieved and validated.
 After validation, the User identifier is extracted and used to identify the corresponding User record.
 User validation logic is changed so it uses User's \texttt{uuid}, hence it is added to the token payload.
@@ -507,8 +509,8 @@ The authentication is still made "by hand" inside the handler itself.
 
 This concludes the audio part of the application.
 
-\subsection{\texit{social}}\label{subsec:social}
-Before examining the contents of the \texit{social} app, an important Django concept
+\subsection{\textit{social}}\label{subsec:social}
+Before examining the contents of the \textit{social} app, an important Django concept
 has to be brought up -- the \texttt{ContentType} framework and \texttt{Generic Relation}~\cite{djangocontenttype}.
 
 The \texttt{ContentType} framework provides a way to refer to any model in the system
@@ -576,7 +578,7 @@ Views related to the publication creation also have a special handling
 of instances that are considered as replies. They create a special
 \texttt{ReplyNotification} object, discussed in the next subsection \nameref{subsec:notif}.
 
-\subsection{\texit{notifications}}\label{subsec:notif}
+\subsection{\textit{notifications}}\label{subsec:notif}
 In order to notify users about actions such as replies to their publications
 or new friend requests, a notification system was implemented.
 
@@ -606,7 +608,7 @@ In such cases, traditional vector-based full-text search
 (e.g., via \texttt{SearchVector}) would perform worse, as it is optimized for longer,
 more "text-like" content.
 
-A dedicated search engine like \texit{Elasticsearch} was not introduced for two reasons:
+A dedicated search engine like \textit{Elasticsearch} was not introduced for two reasons:
 \begin{enumerate}
     \item The scale of the platform does not currently justify the additional
     infrastructure, deployment, and synchronization complexity that comes
@@ -666,11 +668,11 @@ refresh token in an HttpOnly, secure cookie. However, the Backend would have to 
 the implementation is left for future application versions.
 
 After getting the tokens, every further request needs to set them as the HTTP \textit{Bearer} header.
-This is done via a feature called \texit{axios interceptors}~\cite{axiosintercept}.
+This is done via a feature called \textit{axios interceptors}~\cite{axiosintercept}.
 They allow any custom logic to be executed before or after the request.
 
 The request interceptor checks whether the access token exists and, if it does, adds it to the request.
-The response interceptor has an "on error" handler for responses with \texit{NOT AUTHORIZED} status code(401); this usually means that the token was not set on the request. Hence, it tries to obtain a new one
+The response interceptor has an "on error" handler for responses with \textit{NOT AUTHORIZED} status code(401); this usually means that the token was not set on the request. Hence, it tries to obtain a new one
 by sending a request to the token refresh endpoint. If the token is successfully refreshed, the original request will be
 retried. Otherwise, the request is rejected.
 
@@ -819,7 +821,7 @@ When the application is closed, the device should be removed from the list of ac
 The registration and switching part is not complicated -- it is possible to send
 a device registration request on the first render of the \texttt{App} component,
 which is mounted only once. The result of this request,
-containing the device's unique identifier, then would be added to the \texit{LocalStorage}.
+containing the device's unique identifier, then would be added to the \textit{LocalStorage}.
 Then, on page refresh, the presence of this variable could be checked, and additional requests
 could be omitted.
 
