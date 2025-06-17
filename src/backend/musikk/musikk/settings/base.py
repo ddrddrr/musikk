@@ -8,28 +8,24 @@ import sys
 from pathlib import Path
 
 from corsheaders.defaults import default_headers
-from decouple import Csv, config
+from decouple import AutoConfig, Csv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent  # musikk dir(under backend/)
+
+config = AutoConfig(search_path=BASE_DIR.parent.parent)  # root dir
 
 DJANGO_BASE_URL = config("DJANGO_BASE_URL", default="http://localhost:8000")
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config("SECRET_KEY", default="musikk-secret-key")
+SECRET_KEY = config("SECRET_KEY", default="<SECRET_KEY>")
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config("DEBUG", default=False, cast=bool)
+DEBUG = config("DEBUG", default=True, cast=bool)
 
+# set without scheme, it is validated against HTTP Host header
 ALLOWED_HOSTS = config(
     "DJANGO_ALLOWED_HOSTS", default="localhost,127.0.0.1", cast=Csv()
 )
-# TODO: change to dev/prod variants
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOWED_ORIGINS = [
-    "https://musikk.stream",
-    "http://localhost:5173",
-]
 
 CORS_ALLOW_HEADERS = (
     *default_headers,
@@ -98,6 +94,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "musikk.wsgi.application"
 ASGI_APPLICATION = "musikk.asgi.application"
+
 # REST
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
@@ -110,22 +107,25 @@ REST_FRAMEWORK = {
         "django_eventstream.renderers.SSEEventRenderer",
     ],
 }
+
 SIMPLE_JWT = {
     "USER_ID_FIELD": "uuid",
     "USER_ID_CLAIM": "uuid",
     "TOKEN_OBTAIN_SERIALIZER": "users.api.v1.serializers_base.TokenPairSerializer",
 }
+
 EVENTSTREAM_STORAGE_CLASS = "django_eventstream.storage.DjangoModelStorage"
+
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 DATABASES = {
     "default": {
         "ENGINE": config("SQL_ENGINE", default="django.db.backends.postgresql"),
-        "USER": config("POSTGRES_USER", default="musikk_user"),
-        "PASSWORD": config("POSTGRES_PASSWORD", default="musikk_password"),
-        "NAME": config("POSTGRES_DB", default="postgres_db"),
+        "USER": config("POSTGRES_USER", default="user"),
+        "PASSWORD": config("POSTGRES_PASSWORD", default="password"),
+        "NAME": config("POSTGRES_DB", default="db"),
         "HOST": config("POSTGRES_HOST", default="localhost"),
-        "PORT": config("POSTGRES_PORT", default="5432"),
+        "PORT": config("POSTGRES_PORT", default="5435"),
     },
 }
 
@@ -176,9 +176,9 @@ INTERNAL_IPS = [
 AUTH_USER_MODEL = "users.BaseUser"
 
 # MEDIA CONTENT
-MEDIA_ROOT = config("MEDIA_ROOT", default="/tmp/media/musikk_media")
+MEDIA_ROOT = config("MEDIA_ROOT", default=os.path.join(BASE_DIR, "/media/"))
 MEDIA_URL = config("MEDIA_URL", default="media/")
-AUDIO_CONTENT_PATH = config("AUDIO_CONTENT_PATH", default="/tmp/media/musikk_audio")
+AUDIO_CONTENT_PATH = config("AUDIO_CONTENT_PATH", default=os.path.join(MEDIA_ROOT, "/audio/"))
 
 # LOGS
 

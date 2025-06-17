@@ -1,6 +1,5 @@
 musikk.stream {
-    root /var/www/frontend
-    file_server
+    tls internal
 
     handle_path /static/* {
         root /app/staticfiles
@@ -10,12 +9,13 @@ musikk.stream {
         root /app/media
         file_server
     }
-
-    reverse_proxy /api/* server:8000 {
-        header_up X-Forwarded-Proto {scheme}
+    handle /api/* {
+        reverse_proxy server:{env.DJANGO_PORT} {
+            header_up X-Forwarded-Proto {scheme}
+        }
     }
-
     handle {
+        root /var/www/frontend
         try_files {path} /index.html
         file_server
     }

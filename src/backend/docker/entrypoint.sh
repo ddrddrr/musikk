@@ -4,9 +4,11 @@ set -euo pipefail
 set -x
 
 mkdir -p "${MEDIA_ROOT_PATH:-/app/media}"&&
-mkdir -p "${AUDIO_CONTENT_PATH:-/app/media/audio_content}"
+mkdir -p "${AUDIO_CONTENT_PATH:-/app/media/audio}"
 
-until python3 << END
+source /app/.venv/bin/activate
+
+until uv run python << END
 import sys
 import psycopg
 import os
@@ -29,8 +31,8 @@ do
   sleep 2
 done
 
-python3.13 manage.py check --deploy &&
-python3.13 manage.py makemigrations &&
-python3.13 manage.py migrate &&
-python3.13 manage.py collectstatic --noinput &&
-daphne -b 0.0.0.0 -p 8000 musikk.asgi:application
+uv run python manage.py check --deploy &&
+uv run python manage.py makemigrations &&
+uv run python manage.py migrate &&
+uv run python manage.py collectstatic --noinput &&
+daphne -b 0.0.0.0 -p ${DJANGO_PORT} musikk.asgi:application

@@ -63,11 +63,12 @@ celerybeat-schedule
 .env
 .env.prod
 .env.dev
-**/.env
-**/.env.prod
-**/.env.dev
+.env.local.temp
+.env.dev.temp
 
 # virtualenv
+.venv
+venv
 venv/
 ENV/
 
@@ -79,7 +80,6 @@ ENV/
 [Ll]ocal
 [Ss]cripts
 pyvenv.cfg
-.venv
 pip-selfcheck.json
 
 # text
@@ -88,3 +88,6 @@ pip-selfcheck.json
 samples
 .DS_Store
 src/backend/shadow
+
+media
+media/*

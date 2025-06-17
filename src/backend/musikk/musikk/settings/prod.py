@@ -1,5 +1,10 @@
 from musikk.settings.base import *
 
+# set FQDN
+CORS_ALLOWED_ORIGINS = [
+    config("SERVICE_URL", default="https://musikk.stream"),
+]
+
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
 

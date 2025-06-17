@@ -1,16 +1,30 @@
-./src/frontend/musikk/node_modules
-./src/frontend/musikk/build
-./src/frontend/musikk/dist
-./src/frontend/musikk/.env.example
-./src/frontend/musikk/.env
-./src/frontend/Dockerfile
-./src/backend/Dockerfile
-./src/backend/musikk/.env
-./src/backend/shadow
-./src/frontend/backend/.env.example
+# FE
+node_modules
+build
+dist
 
-.env.example
+# dotenv
+.env*
+
+# virtualenv
+.venv
+venv
+venv/
+ENV/
+
+# Docker/GIT
+Dockerfile
 .git
 .gitignore
 .dockerignore
 docker-compose*
+
+#
+LICENCE*
+README*
+
+shadow
+samples
+media
+
+Caddyfile*

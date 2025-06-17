@@ -3,7 +3,7 @@ from pathlib import Path
 
 from django.test import TestCase
 
-from audio_processing.ffmpeg_wrapper import FFMPEGWrapper, StreamingProtocol, Full
+from audio_processing.ffmpeg_wrapper import FFMPEGWrapper, StreamingProtocol, FFMPEGFull
 from audio_processing.converters import (
     FLAC_CONVERTER,
     AACHEv2_CONVERTER,
@@ -50,7 +50,7 @@ class TestFFMPEGWrapper(TestCase):
         FFMPEGWrapper._cleanup(ret.song_content_path)
 
     def test_convert_full(self):
-        ret = Full.convert_song(self.audio_2)
+        ret = FFMPEGFull.convert_song(self.audio_2)
         self.assertTrue(ret)
         self.assertTrue(ret.manifests[StreamingProtocol.DASH])
         self.assertTrue(Path(ret.manifests[StreamingProtocol.DASH]).exists())

@@ -1,4 +1,5 @@
 #!/bin/bash
+# Builds FFMPEG for Linux as a static binary(no dynamic libs)
 
 set -euo pipefail
 set -x

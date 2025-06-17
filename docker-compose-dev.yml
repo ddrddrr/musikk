@@ -1,14 +1,64 @@
-services:
-  database:
-    image: postgres:17
-    ports:
-      - "5435:5432"
-    env_file:
-      - src/backend/musikk/.env
-    volumes:
-      - postgres_data2:/var/lib/postgresql/data
+name: musikk-dev
 
+services:
+  server:
+    env_file:
+      - .env
+    build:
+      context: ./src/backend/
+      dockerfile: docker/Dockerfile
+      platforms:
+        - ${DOCKER_BUILD_PLATFORM}
+    depends_on:
+      - database
+    expose:
+      - ${DJANGO_PORT}
+    volumes:
+      - django_static:/app/staticfiles
+      - django_media:/app/media
+    networks:
+      - main
+
+  database:
+    env_file:
+      - .env
+    image: postgres:17
+    expose:
+      - ${POSTGRES_PORT}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - main
+
+  proxy:
+    env_file:
+      - .env
+    build:
+      context: ./src/frontend
+      dockerfile: docker/Dockerfile
+      platforms:
+        - ${DOCKER_BUILD_PLATFORM}
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL}
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./src/frontend/docker/Caddyfile.dev:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+      - django_static:/app/staticfiles
+      - django_media:/app/media
+    networks:
+      - main
 
 volumes:
-  postgres_data2:
+  postgres_data:
+  caddy_data:
+  caddy_config:
+  django_static:
+  django_media:
 
+networks:
+  main:

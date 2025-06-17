@@ -1,7 +1,7 @@
 from django.conf import settings
 from rest_framework import serializers
 
-from audio_processing.ffmpeg_wrapper import Full, StreamingProtocol
+from audio_processing.ffmpeg_wrapper import FFMPEGFull, StreamingProtocol
 from base.serializers import BaseModelSerializer
 from streaming.songs import BaseSong, SongCollectionSong, SongAuthor
 from users.api.v1.serializers_base import BaseUserSerializer
@@ -76,7 +76,7 @@ class BaseSongCreateSerializer(serializers.ModelSerializer):
                 {"authors": "Song must have at least one author."}
             )
 
-        res = Full.convert_song(validated_data.pop("audio"))
+        res = FFMPEGFull.convert_song(validated_data.pop("audio"))
         instance = BaseSong(**validated_data)
         instance.mpd = res.manifests[StreamingProtocol.DASH]
         instance.m3u8 = res.manifests[StreamingProtocol.HLS]

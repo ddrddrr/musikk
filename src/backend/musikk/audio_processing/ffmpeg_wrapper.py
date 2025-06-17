@@ -1,6 +1,7 @@
 import shutil
 import uuid
-from enum import Enum
+from dataclasses import dataclass
+from enum import StrEnum
 from io import BytesIO
 from pathlib import Path
 import subprocess
@@ -43,28 +44,26 @@ ALLOWED_FILE_TYPES = [  # lossless for now
 ]
 
 
-class StreamingProtocol(Enum):
+class StreamingProtocol(StrEnum):
     DASH = "dash"
     HLS = "hls"
 
 
+@dataclass
 class SongRepresentation:
-    def __init__(
-            self, manifests: dict, uuid_: uuid.UUID, song_content_path: str | Path
-    ):
-        self.song_content_path = song_content_path
-        self.manifests: dict[StreamingProtocol, str] = manifests
-        self.uuid_ = uuid_
+    manifests: dict
+    uuid_: uuid.UUID
+    song_content_path: str | Path
 
 
-# TODO: allow for mp3?
+# TODO: add handling for lossy formats(e.g. mp3)
 class FFMPEGWrapper:
     def __init__(
             self,
             audio_content_path: str | Path = settings.AUDIO_CONTENT_PATH,
             cleanup: bool = True,
     ):
-        assert audio_content_path is not None, "audio_content_path must be a Path"
+        assert audio_content_path is not None, "`audio_content_path` must be provided"
 
         self.audio_content_path = Path(audio_content_path)
         self.cleanup = cleanup
@@ -81,9 +80,9 @@ class FFMPEGWrapper:
     ) -> SongRepresentation:
         # TODO: improve handling
         if not song:
-            raise ValueError("No song provided")
+            raise ValueError("No song provided.")
         if not self.converter_map:
-            raise Exception("No converters to use")
+            raise ValueError("No converters were defined.")
 
         song_uuid = uuid.uuid4()
         song_content_path = self._prepare_content_dir(song_uuid=song_uuid)
@@ -97,14 +96,14 @@ class FFMPEGWrapper:
                 command = (
                         self.input_file_args(song_path)
                         + self.converter_args(protocol)
-                        + self.output_type_args(protocol)
+                        + self.protocol_args(protocol)
                 )
-                output_path = self.output_path(
+                manifest_path = self.manifest_path(
                     protocol=protocol,
                     song_uuid=song_uuid,
                     song_content_path=song_content_path,
                 )
-                command.append(output_path)
+                command.append(manifest_path)
 
                 ffmpeg_result = subprocess.run(command, capture_output=True, text=True)
                 if ffmpeg_result.returncode != 0:
@@ -113,7 +112,7 @@ class FFMPEGWrapper:
                         f"\nError: {ffmpeg_result.stderr}"
                         f"\nInput args: {ffmpeg_result.args}"
                     )
-                manifests[protocol] = output_path
+                manifests[protocol] = manifest_path
 
             return SongRepresentation(
                 manifests=manifests,
@@ -128,7 +127,7 @@ class FFMPEGWrapper:
     def input_file_args(self, song_path: Path) -> list[str]:
         return ["ffmpeg", "-i", str(song_path)]
 
-    def output_type_args(self, protocol) -> list[str]:
+    def protocol_args(self, protocol) -> list[str]:
         if protocol == StreamingProtocol.DASH:
             return ["-f", "dash", "-adaptation_sets", "id=0, streams=a"]
         elif protocol == StreamingProtocol.HLS:
@@ -141,7 +140,7 @@ class FFMPEGWrapper:
         else:
             raise ValueError(f"Unsupported protocol: {protocol}")
 
-    def output_path(
+    def manifest_path(
             self, protocol, song_uuid: uuid.UUID, song_content_path: Path
     ) -> str:
         if protocol == StreamingProtocol.DASH:
@@ -187,7 +186,7 @@ class FFMPEGWrapper:
 
         size = len(song)
         if size > MAX_FILE_SIZE:
-            raise ValueError(f"Max audio file size exceeded. Actual size {size}")
+            raise ValueError(f"Max audio file size exceeded. Actual size: {size}.")
 
         file_type = magic.from_buffer(song, mime=True)
         if not file_type.startswith("audio/"):
@@ -209,8 +208,8 @@ class FFMPEGWrapper:
         shutil.rmtree(song_content_path)
 
 
-FlacOnly = FFMPEGWrapper().add_converter(StreamingProtocol.DASH, FLAC_CONVERTER)
-Full = (
+FFMPEGFlacOnly = FFMPEGWrapper().add_converter(StreamingProtocol.DASH, FLAC_CONVERTER)
+FFMPEGFull = (
     FFMPEGWrapper()
     # .add_converter(StreamingProtocol.DASH, FLAC_CONVERTER)
     .add_converter(StreamingProtocol.DASH, AACHEv2_CONVERTER)

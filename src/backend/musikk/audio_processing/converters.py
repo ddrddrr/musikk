@@ -16,14 +16,14 @@ class AudioConverter:
         return self
 
     def construct_ffmpeg_command(self, channel_input: int) -> list[list[str]]:
-        # TODO: change data structures, so there is no clunky indexing on lists
+        # TODO: change, so there is no clunky indexing on lists
         base_command = [
             "-map",
             "0:a",
             "-c:a:0",
             self.encoder,
+            *self.extras
         ]
-        base_command.extend(self.extras)
         if not self.bitrates:
             return [base_command]
 
