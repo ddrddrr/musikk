@@ -1,8 +1,7 @@
 from streaming.song_collections import LikedSongs
-from streaming.api.v1.views_song import *
-from streaming.api.v1.views_collection import *
-from streaming.api.v1.views_playback import *
-from streaming.api.v1.views_song_queue import *
+from streaming.api.v1.views.views_song import *
+from streaming.api.v1.views.views_collection import *
+from streaming.api.v1.views.views_song_queue import *
 from users.api.v1.serializers_base import BaseUserSerializer
 
 

@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from base.serializers import BaseModelSerializer
-from streaming.api.v1.serializers_song import (
+from streaming.api.v1.serializers.serializers_song import (
     SongCollectionSongSerializer,
 )
 from streaming.song_queue import SongQueue, SongQueueNode

@@ -12,8 +12,9 @@ from decouple import AutoConfig, Csv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent  # musikk dir(under backend/)
+ROOT_DIR = BASE_DIR.parent.parent.parent  # root dir(where /src lives)
 
-config = AutoConfig(search_path=BASE_DIR.parent.parent)  # root dir
+config = AutoConfig(search_path=ROOT_DIR)
 
 DJANGO_BASE_URL = config("DJANGO_BASE_URL", default="http://localhost:8000")
 
@@ -21,12 +22,12 @@ SECRET_KEY = config("SECRET_KEY", default="<SECRET_KEY>")
 
 DEBUG = config("DEBUG", default=True, cast=bool)
 
-# set without scheme, it is validated against HTTP Host header
+### Security
+# Set without scheme, it is validated against HTTP Host header
 ALLOWED_HOSTS = config(
     "DJANGO_ALLOWED_HOSTS", default="localhost,127.0.0.1", cast=Csv()
 )
 CORS_ALLOW_CREDENTIALS = True
-
 CORS_ALLOW_HEADERS = (
     *default_headers,
     "Bearer",
@@ -34,7 +35,8 @@ CORS_ALLOW_HEADERS = (
     "Access-Control-Allow-Origin",
     "Access-Control-Allow-Credentials",
 )
-# Application definition
+
+### Application definition
 INSTALLED_APPS = [
     "corsheaders",
     "jazzmin",
@@ -95,7 +97,7 @@ TEMPLATES = [
 WSGI_APPLICATION = "musikk.wsgi.application"
 ASGI_APPLICATION = "musikk.asgi.application"
 
-# REST
+### REST
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "users.tokens.UUIDJWTAuthentication",
@@ -108,12 +110,14 @@ REST_FRAMEWORK = {
     ],
 }
 
+### JWT
 SIMPLE_JWT = {
     "USER_ID_FIELD": "uuid",
     "USER_ID_CLAIM": "uuid",
     "TOKEN_OBTAIN_SERIALIZER": "users.api.v1.serializers_base.TokenPairSerializer",
 }
 
+### EVENTSTREAM
 EVENTSTREAM_STORAGE_CLASS = "django_eventstream.storage.DjangoModelStorage"
 
 # Database
@@ -175,12 +179,13 @@ INTERNAL_IPS = [
 
 AUTH_USER_MODEL = "users.BaseUser"
 
-# MEDIA CONTENT
-MEDIA_ROOT = config("MEDIA_ROOT", default=os.path.join(BASE_DIR, "/media/"))
+### MEDIA
+MEDIA_ROOT = config("MEDIA_ROOT", default=os.path.join(ROOT_DIR, "media"))
+# Relative to MEDIA_ROOT
+AUDIO_CONTENT_PATH = config("AUDIO_CONTENT_PATH", default="audio")
 MEDIA_URL = config("MEDIA_URL", default="media/")
-AUDIO_CONTENT_PATH = config("AUDIO_CONTENT_PATH", default=os.path.join(MEDIA_ROOT, "/audio/"))
 
-# LOGS
+### LOGS
 
 LOGGING = {
     "version": 1,
@@ -208,5 +213,27 @@ LOGGING = {
     },
 }
 
-# MISC
+### MISC
 MAX_PATH_LENGTH = os.pathconf("/", "PC_PATH_MAX")
+
+### Celery
+# See detailed info about options here https://gist.github.com/fjsj/da41321ac96cf28a96235cb20e7236f6
+
+CELERY_TASK_ALWAYS_EAGER = config("CELERY_TASK_ALWAYS_EAGER", cast=bool, default=True)
+CELERY_BROKER_URL = config("CELERY_BROKER_URL", default="amqp://user:password@localhost:5672//")
+CELERY_BROKER_TRANSPORT_OPTIONS = {"confirm_publish": True, "confirm_timeout": 5.0}
+# CELERY_RESULT_BACKEND = config("CELERY_RESULT_BACKEND", default="")
+CELERY_TASK_ACKS_LATE = config("CELERY_TASK_ACKS_LATE", cast=bool, default=True)
+CELERY_TASK_ACKS_ON_FAILURE_OR_TIMEOUT = config(
+    "CELERY_TASK_ACKS_ON_FAILURE_OR_TIMEOUT", cast=bool, default=True
+)
+CELERY_TASK_REJECT_ON_WORKER_LOST = config(
+    "CELERY_TASK_REJECT_ON_WORKER_LOST", cast=bool, default=False
+)
+CELERY_WORKER_PREFETCH_MULTIPLIER = config("CELERY_WORKER_PREFETCH_MULTIPLIER", cast=int, default=1)
+CELERY_WORKER_CONCURRENCY = config(
+    "CELERY_WORKER_CONCURRENCY", cast=lambda v: int(v) if v else None, default=None
+)
+CELERY_WORKER_MAX_TASKS_PER_CHILD = config(
+    "CELERY_WORKER_MAX_TASKS_PER_CHILD", cast=int, default=1000
+)

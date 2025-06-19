@@ -3,15 +3,15 @@ name: musikk-deploy
 services:
   server:
     image: ddrddrr2/musikk-server:latest
+    env_file:
+      - .env
     depends_on:
       - database
+    expose:
+      - ${DJANGO_PORT}
     volumes:
       - django_static:/app/staticfiles
       - django_media:/app/media
-    expose:
-      - 8000
-    env_file:
-      - .env
     networks:
       - main
 
@@ -22,12 +22,14 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     expose:
-      - 5432
+      - ${POSTGRES_PORT}
     networks:
       - main
 
   proxy:
     image: ddrddrr2/musikk-caddy:latest
+    env_file:
+      - .env
     restart: unless-stopped
     ports:
       - "80:80"

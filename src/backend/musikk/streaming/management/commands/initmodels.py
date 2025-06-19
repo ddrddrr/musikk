@@ -10,7 +10,7 @@ from faker import Faker
 from users.management.helpers import create_user_with_password
 from streaming.models import BaseSong, SongCollection, SongCollectionAuthor
 from streaming.songs import SongAuthor, SongCollectionSong
-from audio_processing.ffmpeg_wrapper import FFMPEGFull, StreamingProtocol
+from streaming.audio.ffmpeg_wrapper import FFMPEGFull, StreamingProtocol
 
 fake = Faker()
 SAMPLES_PATH = os.path.expanduser("~/studies/musikk/samples")
@@ -72,7 +72,7 @@ class Command(BaseCommand):
                         image=File(i, name=os.path.basename(random_image)),
                     )
                     print(f"Converting audio for song '{song.title}'")
-                    res = FFMPEGFull.convert_song(m)
+                    res = FFMPEGFull.convert_audio(m)
                     song.mpd = res.manifests[StreamingProtocol.DASH]
                     song.uuid = res.uuid_
                     song.save()

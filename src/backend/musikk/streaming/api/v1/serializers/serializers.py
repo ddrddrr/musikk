@@ -1,8 +1,4 @@
-from rest_framework import serializers
-
-from streaming.api.v1.serializers_song import *
-from streaming.api.v1.serializers_song_queue import *
-from streaming.api.v1.serializers_song_collection import *
+from streaming.api.v1.serializers.serializers_song_collection import *
 from base.serializers import BaseModelSerializer
 from streaming.models import PlaybackState, PlaybackDevice
 

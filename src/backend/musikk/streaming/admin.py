@@ -3,9 +3,9 @@ from pathlib import Path
 from django.contrib import admin
 from django import forms
 
-from audio_processing.ffmpeg_wrapper import FFMPEGWrapper
-from audio_processing.converters import FLAC_CONVERTER
-from musikk.utils import delete_dir_for_file
+from streaming.audio.ffmpeg_wrapper import FFMPEGWrapper
+from streaming.audio.converters import FLAC_CONVERTER
+from musikk.utils.paths import delete_dir_for_file
 from streaming.song_collections import SongCollection
 from streaming.songs import BaseSong, SongCollectionSong
 
@@ -19,7 +19,7 @@ class BaseSongAdminForm(forms.ModelForm):
             if self.instance.mpd:
                 delete_dir_for_file(Path(self.instance.mpd))
             ffmpeg = FFMPEGWrapper().add_converter(FLAC_CONVERTER)
-            song_repr = ffmpeg.convert_song(uploaded_file.file)
+            song_repr = ffmpeg.convert_audio(uploaded_file.file)
             return song_repr
 
         return None
@@ -38,6 +38,7 @@ class BaseSongAdmin(admin.ModelAdmin):
         "description",
         "image",
     ]
+
     # readonly_fields = ["mpd"]
 
     def save_model(self, request, obj, form, change):

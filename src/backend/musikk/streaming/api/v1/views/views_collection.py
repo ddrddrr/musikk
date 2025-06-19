@@ -9,8 +9,8 @@ from rest_framework.views import APIView
 from rest_framework.exceptions import NotFound
 
 from sse.config import EventChannels
-from sse.events import send_invalidate_event
-from streaming.api.v1.serializers_song_collection import (
+from sse.events import Event
+from streaming.api.v1.serializers.serializers_song_collection import (
     SongCollectionSerializerBasic,
     SongCollectionSerializerDetailed,
     SongCollectionCreateSerializer,
@@ -89,8 +89,8 @@ class SongCollectionAddLikedView(APIView):
         collection_uuid = kwargs["uuid"]
         collection = get_object_or_404(SongCollection, uuid=collection_uuid)
         user.followed_song_collections.add(collection)
-        send_invalidate_event(EventChannels.user_events(user.uuid), ["openCollection"])
-        send_invalidate_event(
+        Event.invalidate_event(EventChannels.user_events(user.uuid), ["openCollection"])
+        Event.invalidate_event(
             EventChannels.user_events(user.uuid), ["collectionsPersonal"]
         )
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -119,7 +119,7 @@ class SongCollectionRemoveSong(APIView):
             uuid=scs_uuid,
         )
         sc_song.delete()
-        send_invalidate_event(EventChannels.user_events(user.uuid), ["openCollection"])
+        Event.invalidate_event(EventChannels.user_events(user.uuid), ["openCollection"])
         return Response(
             status=status.HTTP_200_OK,
             data={"removed": scs_uuid},

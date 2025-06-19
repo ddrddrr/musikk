@@ -13,8 +13,8 @@ from rest_framework.generics import (
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from sse.config import EventChannels
-from sse.events import send_invalidate_event
-from streaming.api.v1.serializers import (
+from sse.events import Event
+from streaming.api.v1.serializers.serializers import (
     PlaybackStateSerializer,
     PlaybackDeviceSerializer,
 )
@@ -36,7 +36,7 @@ class PlaybackDeviceView(APIView):
                 pd.save()
                 user.playback_state.is_active = False
                 user.playback_state.save()
-                send_invalidate_event(EventChannels.user_events(user.uuid), ["playback"])
+                Event.invalidate_event(EventChannels.user_events(user.uuid), ["playback"])
 
         return Response(
             status=status.HTTP_201_CREATED, data=PlaybackDeviceSerializer(pd).data
@@ -64,7 +64,7 @@ class PlaybackDeviceActivateView(APIView):
             playback_state.is_playing = False
             playback_state.save()
 
-        send_invalidate_event(EventChannels.user_events(user.uuid), ["playback"])
+        Event.invalidate_event(EventChannels.user_events(user.uuid), ["playback"])
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -100,7 +100,7 @@ class PlaybackDeviceDeleteView(APIView):
                 user.playback_state.is_playing = False
                 user.playback_state.save()
 
-        send_invalidate_event(EventChannels.user_events(user.uuid), ["playback"])
+        Event.invalidate_event(EventChannels.user_events(user.uuid), ["playback"])
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -120,5 +120,5 @@ class PlaybackStateView(APIView):
             playback_state = user.playback_state
             playback_state.is_playing = is_playing
             playback_state.save()
-        send_invalidate_event(EventChannels.user_events(user.uuid), ["playback"])
+        Event.invalidate_event(EventChannels.user_events(user.uuid), ["playback"])
         return Response(status=status.HTTP_204_NO_CONTENT)

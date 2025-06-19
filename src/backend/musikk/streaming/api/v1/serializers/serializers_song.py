@@ -1,7 +1,8 @@
 from django.conf import settings
+from django.db import transaction
 from rest_framework import serializers
 
-from audio_processing.ffmpeg_wrapper import FFMPEGFull, StreamingProtocol
+from streaming.audio.ffmpeg_wrapper import FFMPEGFull, StreamingProtocol
 from base.serializers import BaseModelSerializer
 from streaming.songs import BaseSong, SongCollectionSong, SongAuthor
 from users.api.v1.serializers_base import BaseUserSerializer
@@ -29,16 +30,16 @@ class BaseSongSerializer(BaseModelSerializer):
     # TODO: make a method
     def get_mpd(self, obj):
         return (
-            settings.DJANGO_BASE_URL
-            + settings.MEDIA_URL
-            + f"audio_content/{obj.uuid}/{obj.uuid}.mpd"
+                settings.DJANGO_BASE_URL
+                + settings.MEDIA_URL
+                + f"audio_content/{obj.uuid}/{obj.uuid}.mpd"
         )
 
     def get_m3u8(self, obj):
         return (
-            settings.DJANGO_BASE_URL
-            + settings.MEDIA_URL
-            + f"audio_content/{obj.uuid}/{obj.uuid}.m3u8"
+                settings.DJANGO_BASE_URL
+                + settings.MEDIA_URL
+                + f"audio_content/{obj.uuid}/{obj.uuid}.m3u8"
         )
 
     def get_is_liked(self, obj):
@@ -56,13 +57,11 @@ class BaseSongSerializer(BaseModelSerializer):
 
 
 class BaseSongCreateSerializer(serializers.ModelSerializer):
-    audio = serializers.FileField(write_only=True)
-    authors = serializers.ListField(child=serializers.UUIDField(), write_only=True)
+    authors = serializers.ListField(child=serializers.UUIDField(), write_only=True, required=False)
 
     class Meta:
         model = BaseSong
         fields = [
-            "audio",
             "authors",
             "title",
             "image",
@@ -70,21 +69,24 @@ class BaseSongCreateSerializer(serializers.ModelSerializer):
         ]
 
     def create(self, validated_data):
-        authors = Artist.objects.filter(uuid__in=validated_data.pop("authors"))
-        if not authors:
-            raise serializers.ValidationError(
-                {"authors": "Song must have at least one author."}
-            )
+        orig_authors = validated_data.pop("authors", None)
+        if not orig_authors:
+            orig_authors = [self.context.get("request").user.uuid]
 
-        res = FFMPEGFull.convert_song(validated_data.pop("audio"))
-        instance = BaseSong(**validated_data)
-        instance.mpd = res.manifests[StreamingProtocol.DASH]
-        instance.m3u8 = res.manifests[StreamingProtocol.HLS]
-        instance.content_path = res.song_content_path
-        instance.uuid = res.uuid_
-        instance.save()
-        for author in authors:
-            SongAuthor.objects.create(song=instance, author=author)
+        qs_authors = Artist.objects.filter(uuid__in=orig_authors)
+        found_uuids = {str(a.uuid) for a in qs_authors}
+        missing = [str(u) for u in orig_authors if str(u) not in found_uuids]
+        if missing:
+            raise serializers.ValidationError({
+                "authors": f"Authors were not found: {', '.join(missing)}"
+            })
+
+        with transaction.atomic():
+            instance = BaseSong.objects.create(**validated_data, draft=True)
+            SongAuthor.objects.bulk_create([
+                SongAuthor(song=instance, author=author)
+                for author in qs_authors
+            ])
         return instance
 
     def update(self, instance, validated_data):

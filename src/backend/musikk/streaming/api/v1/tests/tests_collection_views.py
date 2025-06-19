@@ -3,10 +3,9 @@ from django.urls import reverse
 from rest_framework.test import APIRequestFactory, force_authenticate
 from faker import Faker
 
-
-from users.tests.factories import BaseUserFactory, StreamingUserFactory
+from users.tests.factories import StreamingUserFactory
 from streaming.tests.factories import BaseSongFactory
-from streaming.api.v1.views_collection import SongCollectionCreateView
+from streaming.api.v1.views.views_collection import SongCollectionCreateView
 from streaming.models import SongCollection
 from streaming.song_collections import SongCollectionAuthor
 
@@ -31,6 +30,7 @@ class TestSongCollectionCreateView(TestCase):
         request = self.factory.post(url, payload, format="multipart")
         force_authenticate(request, user=self.user)
         response = SongCollectionCreateView.as_view()(request)
+
         self.assertEqual(response.status_code, 201)
         self.assertIn("collection", response.data)
         data = response.data["collection"]

@@ -43,7 +43,7 @@ class Migration(migrations.Migration):
                 (
                     "image",
                     models.ImageField(
-                        blank=True, null=True, upload_to=musikk.utils.image_path
+                        blank=True, null=True, upload_to=musikk.utils.paths.image_path
                     ),
                 ),
             ],
@@ -79,7 +79,7 @@ class Migration(migrations.Migration):
                 (
                     "image",
                     models.ImageField(
-                        blank=True, null=True, upload_to=musikk.utils.image_path
+                        blank=True, null=True, upload_to=musikk.utils.paths.image_path
                     ),
                 ),
                 ("like_count", models.IntegerField(blank=True, default=0)),

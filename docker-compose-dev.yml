@@ -2,13 +2,13 @@ name: musikk-dev
 
 services:
   server:
-    env_file:
-      - .env
     build:
       context: ./src/backend/
       dockerfile: docker/Dockerfile
       platforms:
         - ${DOCKER_BUILD_PLATFORM}
+    env_file:
+      - .env
     depends_on:
       - database
     expose:
@@ -20,9 +20,9 @@ services:
       - main
 
   database:
+    image: postgres:17
     env_file:
       - .env
-    image: postgres:17
     expose:
       - ${POSTGRES_PORT}
     volumes:
@@ -31,8 +31,6 @@ services:
       - main
 
   proxy:
-    env_file:
-      - .env
     build:
       context: ./src/frontend
       dockerfile: docker/Dockerfile
@@ -40,6 +38,8 @@ services:
         - ${DOCKER_BUILD_PLATFORM}
       args:
         VITE_API_BASE_URL: ${VITE_API_BASE_URL}
+    env_file:
+      - .env
     restart: unless-stopped
     ports:
       - "80:80"

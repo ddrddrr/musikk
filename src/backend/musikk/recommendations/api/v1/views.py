@@ -4,11 +4,10 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 
-from streaming.api.v1.serializers_song import (
-    BaseSongSerializer,
+from streaming.api.v1.serializers.serializers_song import (
     SongCollectionSongSerializer,
 )
-from streaming.api.v1.serializers_song_collection import SongCollectionSerializerBasic
+from streaming.api.v1.serializers.serializers_song_collection import SongCollectionSerializerBasic
 from streaming.models import BaseSong, SongCollection
 from streaming.songs import SongCollectionSong
 from users.api.v1.serializers_base import BaseUserSerializer

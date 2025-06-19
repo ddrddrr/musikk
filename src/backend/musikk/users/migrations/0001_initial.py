@@ -71,7 +71,7 @@ class Migration(migrations.Migration):
                         blank=True,
                         max_length=255,
                         null=True,
-                        upload_to=musikk.utils.image_path,
+                        upload_to=musikk.utils.paths.image_path,
                     ),
                 ),
                 ("is_admin", models.BooleanField(default=False)),

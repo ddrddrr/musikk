@@ -16,7 +16,7 @@ from django_eventstream.viewsets import EventsViewSet
 from notifications.api.v1.serializers import FriendRequestNotificationSerializer
 from notifications.models import FriendRequestNotification
 from sse.config import EventChannels
-from sse.events import send_invalidate_event
+from sse.events import Event
 from users.api.v1.serializers_base import (
     BaseUserSerializer,
     ResetPasswordSerializer,
@@ -40,7 +40,7 @@ class UserRetrieveUpdateView(RetrieveUpdateAPIView):
     def perform_update(self, serializer):
         super().perform_update(serializer)
         user_uuid = self.request.user.uuid
-        send_invalidate_event(
+        Event.invalidate_event(
             EventChannels.user_events(user_uuid), ["user", str(user_uuid)]
         )
 
@@ -130,7 +130,7 @@ class UserFriendsCreateDeleteView(APIView):
             receiver=user,
         )
         user.friends.add(sender)
-        send_invalidate_event(
+        Event.invalidate_event(
             EventChannels.user_events(user.uuid), ["user", "friends", str(user.uuid)]
         )
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -139,7 +139,7 @@ class UserFriendsCreateDeleteView(APIView):
         user = get_object_or_404(StreamingUser, uuid=kwargs.get("user_uuid"))
         friend = get_object_or_404(StreamingUser, uuid=kwargs.get("friend_uuid"))
         user.friends.remove(friend)
-        send_invalidate_event(
+        Event.invalidate_event(
             EventChannels.user_events(user.uuid), ["user", "friends", str(user.uuid)]
         )
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -159,7 +159,7 @@ class ArtistFollowersView(APIView):
         artist = get_object_or_404(Artist, uuid=kwargs.get("uuid"))
         user = request.user.streaminguser
         user.followed.add(artist)
-        send_invalidate_event(
+        Event.invalidate_event(
             EventChannels.user_events(user.uuid), ["user", "followed", str(user.uuid)]
         )
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -168,7 +168,7 @@ class ArtistFollowersView(APIView):
         artist = get_object_or_404(Artist, uuid=kwargs.get("uuid"))
         user = request.user.streaminguser
         user.followed.remove(artist)
-        send_invalidate_event(
+        Event.invalidate_event(
             EventChannels.user_events(user.uuid), ["user", "followed", str(user.uuid)]
         )
         return Response(status=status.HTTP_204_NO_CONTENT)

@@ -13,7 +13,7 @@ from social.api.v1.serializers import (
 )
 from social.models import Publication
 from sse.config import EventChannels
-from sse.events import send_invalidate_event
+from sse.events import Event
 from users.users_extended import StreamingUser
 
 
@@ -48,7 +48,7 @@ class CommentsListCreateView(APIView):
             )
 
         if obj.content_object:
-            send_invalidate_event(
+            Event.invalidate_event(
                 EventChannels.user_events(user.uuid),
                 ["comments", data["obj_uuid"]],
             )
@@ -73,12 +73,12 @@ class PostCreateView(APIView):
                 orig_comment=obj.parent,
                 reply_comment=obj,
             )
-            send_invalidate_event(
+            Event.invalidate_event(
                 EventChannels.user_events(user.uuid),
                 ["posts", "children", str(obj.parent.uuid)],
             )
         else:
-            send_invalidate_event(
+            Event.invalidate_event(
                 EventChannels.user_events(user.uuid),
                 ["posts", "user", str(obj.get_root().user.uuid)],
             )

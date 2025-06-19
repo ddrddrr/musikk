@@ -3,7 +3,7 @@ from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 
 from base.models import BaseModel
-from musikk.utils import image_path, delete_dir_for_file
+from musikk.utils.paths import image_path, delete_dir_for_file
 
 # from streaming.stream import Stream
 

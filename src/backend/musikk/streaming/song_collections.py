@@ -2,7 +2,7 @@ from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 
 from base.models import BaseModel
-from musikk.utils import image_path
+from musikk.utils.paths import image_path
 from social.models import Publication
 # from streaming.stream import Stream
 from streaming.songs import SongCollectionSong, BaseSong

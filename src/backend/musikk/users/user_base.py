@@ -5,7 +5,7 @@ from django.urls.base import reverse
 from django.utils.crypto import get_random_string
 
 from base.models import BaseModel
-from musikk.utils import image_path
+from musikk.utils.paths import image_path
 from users.utils import password_reset_token_generator
 
 

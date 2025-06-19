@@ -9,13 +9,13 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from sse.config import EventChannels
-from sse.events import send_invalidate_event
-from streaming.api.v1.serializers_song_queue import SongQueueSerializer
+from sse.events import Event
+from streaming.api.v1.serializers.serializers_song_queue import SongQueueSerializer
 from streaming.models import SongQueue, SongQueueNode, SongCollection
 from streaming.songs import SongCollectionSong
 from users.users_extended import StreamingUser
 
-send_queue_invalidate_event = partial(send_invalidate_event, query_key=["queue"])
+send_queue_invalidate_event = partial(Event.invalidate_event, query_key=["queue"])
 
 
 class SongQueueBaseView(APIView):
@@ -111,7 +111,7 @@ class SongQueueClearView(SongQueueBaseView):
             ps.is_playing = False
             ps.save()
         send_queue_invalidate_event(EventChannels.user_events(self.request.user.uuid))
-        send_invalidate_event(EventChannels.user_events(user.uuid), ["playback"])
+        Event.invalidate_event(EventChannels.user_events(user.uuid), ["playback"])
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -130,7 +130,7 @@ class SongQueueShiftHeadView(SongQueueBaseView):
                 ps = user.playback_state
                 ps.is_playing = False
                 ps.save()
-                send_invalidate_event(EventChannels.user_events(user.uuid), ["playback"])
+                Event.invalidate_event(EventChannels.user_events(user.uuid), ["playback"])
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 

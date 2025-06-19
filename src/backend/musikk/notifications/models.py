@@ -3,7 +3,7 @@ from django.db import models
 from base.models import BaseModel
 from social.models import Publication
 from sse.config import EventChannels
-from sse.events import send_invalidate_event
+from sse.events import Event
 
 
 class Notification(BaseModel):
@@ -13,7 +13,7 @@ class Notification(BaseModel):
 class ReplyNotificationManager(models.Manager):
     def create(self, **kwargs):
         obj = super().create(**kwargs)
-        send_invalidate_event(
+        Event.invalidate_event(
             EventChannels.user_events(obj.orig_comment.user.uuid), ["notifications"]
         )
         return obj
@@ -36,7 +36,7 @@ class ReplyNotification(Notification):
 class FriendRequestNotificationManager(models.Manager):
     def create(self, **kwargs):
         obj = super().create(**kwargs)
-        send_invalidate_event(
+        Event.invalidate_event(
             EventChannels.user_events(obj.receiver.uuid), ["notifications"]
         )
         return obj
