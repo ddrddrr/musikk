@@ -1,8 +1,7 @@
-import json
 import logging
 import tempfile
 
-from rest_framework import status, serializers
+from rest_framework import status
 from rest_framework.generics import get_object_or_404, RetrieveAPIView
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import IsAuthenticated
@@ -80,6 +79,7 @@ class SongCreateView(APIView):
         convert_audio.apply_async(kwargs={
             "file_path": temp_path,
             "song_uuid": str(instance.uuid),
+            "initiator_uuid": str(user.uuid),
         })
         return Response(
             data={"uuid": str(instance.uuid)}, status=status.HTTP_202_ACCEPTED

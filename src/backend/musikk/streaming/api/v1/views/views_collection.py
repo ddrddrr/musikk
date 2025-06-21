@@ -103,7 +103,7 @@ class SongCollectionRemoveSong(APIView):
         user = request.user.streaminguser
         collection = get_object_or_404(SongCollection, uuid=kwargs["collection_uuid"])
         if (
-            collection.id not in (user.liked_songs.id, user.history.id)
+                collection.id not in (user.liked_songs.id, user.history.id)
         ) and collection not in user.authored_collections_link.all():
             return Response(
                 status=status.HTTP_403_FORBIDDEN,
@@ -133,7 +133,7 @@ class SongCollectionAddSong(APIView):
         user = request.user.streaminguser
         collection = get_object_or_404(SongCollection, uuid=kwargs["collection_uuid"])
         if (
-            collection.id not in (user.liked_songs.id, user.history.id)
+                collection.id not in (user.liked_songs.id, user.history.id)
         ) and collection not in user.authored_collections_link.all():
             return Response(
                 status=status.HTTP_403_FORBIDDEN,

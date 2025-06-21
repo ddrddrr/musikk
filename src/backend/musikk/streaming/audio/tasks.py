@@ -46,11 +46,15 @@ def convert_audio(
         song.save()
 
     if initiator_uuid:
-        Event.upload_event(
-            channel=EventChannels.user_events(initiator_uuid),
-            operation_id=str_uuid,
-            status="success"
-        )
+        try:
+            Event.upload_event(
+                channel=EventChannels.user_events(initiator_uuid),
+                operation_id=str_uuid,
+                status="success"
+            )
+            print(f"SSE: sent upload_event to {initiator_uuid}")
+        except Exception as e:
+            print("SSE ERROR:", e)
 
     if delete_orig_file:
         Path(file_path).unlink(missing_ok=True)
