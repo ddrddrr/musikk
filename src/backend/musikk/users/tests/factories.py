@@ -1,6 +1,8 @@
 import factory
+from factory import SubFactory
+
 from users.models import BaseUser
-from users.users_extended import StreamingUser, Artist
+from users.models.profiles import StreamingProfile, ArtistProfile
 
 fake = factory.Faker
 
@@ -15,11 +17,24 @@ class BaseUserFactory(factory.django.DjangoModelFactory):
     is_admin = fake("boolean")
 
 
-class StreamingUserFactory(BaseUserFactory):
+class BaseProfileFactory(factory.Factory):
     class Meta:
-        model = StreamingUser
+        abstract = True
+
+    display_name = fake("user_name")
+    bio = fake("paragraph")
+    avatar = None
 
 
-class ArtistFactory(StreamingUserFactory):
+class StreamingProfileFactory(BaseProfileFactory, factory.django.DjangoModelFactory):
     class Meta:
-        model = Artist
+        model = StreamingProfile
+
+    user = SubFactory(BaseUserFactory)
+
+
+class ArtistProfileFactory(BaseProfileFactory, factory.django.DjangoModelFactory):
+    class Meta:
+        model = ArtistProfile
+
+    user = SubFactory(BaseUserFactory)

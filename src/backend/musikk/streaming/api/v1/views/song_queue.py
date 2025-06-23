@@ -1,0 +1,166 @@
+from functools import partial
+
+from django.db import transaction
+from rest_framework import status
+from rest_framework.generics import RetrieveAPIView, get_object_or_404
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.request import Request
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from sse.config import EventChannels
+from sse.events import Event
+from streaming.api.v1.serializers.song_queue import SongQueueSerializer
+from streaming.models import SongQueue, SongQueueNode, Collection
+from streaming.models.songs import CollectionSong
+from users.models import StreamingProfile
+
+send_queue_invalidate_event = partial(Event.invalidate_event, query_key=["queue"])
+
+
+class SongQueueBaseView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get_song_queue(self, request: Request) -> SongQueue:
+        return self.request.user.streamingprofile.song_queue
+
+
+class SongQueueRetrieveView(SongQueueBaseView, RetrieveAPIView):
+    serializer_class = SongQueueSerializer
+
+    def get_object(self):
+        return self.get_song_queue(self.request)
+
+
+class SongQueueAddSongView(SongQueueBaseView):
+    def post(self, request, *args, **kwargs):
+        with transaction.atomic():
+            song_queue = self.get_song_queue(request)
+            song = CollectionSong.objects.get(uuid=kwargs["uuid"])
+            song_queue.add_song(song=song, action=SongQueue.AddAction.ADD)
+
+        send_queue_invalidate_event(EventChannels.user_events(self.request.user.uuid))
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class SongQueueAddCollectionView(SongQueueBaseView):
+    def post(self, request, *args, **kwargs):
+        with transaction.atomic():
+            song_queue = self.get_song_queue(request)
+            collection = Collection.objects.get(uuid=kwargs["uuid"])
+            song_queue.add_collection(
+                collection=collection, action=SongQueue.AddAction.ADD
+            )
+
+        send_queue_invalidate_event(EventChannels.user_events(self.request.user.uuid))
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class SongQueueSetSongHeadView(SongQueueBaseView):
+    def post(self, request, *args, **kwargs):
+        with transaction.atomic():
+            song_queue = self.get_song_queue(request)
+            song = CollectionSong.objects.get(uuid=kwargs["uuid"])
+            song_queue.add_song(song=song, action=SongQueue.AddAction.CHANGE_HEAD)
+
+        send_queue_invalidate_event(EventChannels.user_events(self.request.user.uuid))
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class SongQueueSetCollectionHeadView(SongQueueBaseView):
+    def post(self, request, *args, **kwargs):
+        with transaction.atomic():
+            song_queue = self.get_song_queue(request)
+            collection = Collection.objects.get(uuid=kwargs["uuid"])
+            song_queue.add_collection(
+                collection=collection, action=SongQueue.AddAction.CHANGE_HEAD
+            )
+
+        send_queue_invalidate_event(EventChannels.user_events(self.request.user.uuid))
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class SongQueueAppendRandomSongsView(SongQueueBaseView):
+    def post(self, request, *args, **kwargs):
+        with transaction.atomic():
+            song_queue = self.get_song_queue(request)
+            song_queue.append_random_songs()
+
+        send_queue_invalidate_event(EventChannels.user_events(self.request.user.uuid))
+        return Response(
+            status=status.HTTP_201_CREATED,
+        )
+
+
+class SongQueueRemoveNodeView(SongQueueBaseView):
+    def post(self, request, *args, **kwargs):
+        song_queue = self.get_song_queue(request)
+        node = SongQueueNode.objects.get(uuid=kwargs["uuid"])
+        if song_queue is node.song_queue:
+            node.delete()
+            send_queue_invalidate_event(
+                EventChannels.user_events(self.request.user.uuid)
+            )
+
+            return Response(status=status.HTTP_200_OK)
+
+        return Response(
+            status=status.HTTP_403_FORBIDDEN,
+            data={"error": "Node does not belong to this user's queue."},
+        )
+
+
+class SongQueueClearView(SongQueueBaseView):
+    def post(self, request, *args, **kwargs):
+        song_queue = self.get_song_queue(request)
+        profile: StreamingProfile = self.request.user.streamingprofile
+        with transaction.atomic():
+            song_queue.clear()
+            ps = profile.playback_state
+            ps.is_playing = False
+            ps.save()
+
+        send_queue_invalidate_event(EventChannels.user_events(self.request.user.uuid))
+
+        Event.invalidate_event(
+            EventChannels.user_events(self.request.user.uuid), ["playback"]
+        )
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class SongQueueShiftHeadView(SongQueueBaseView):
+    def post(self, request, *args, **kwargs):
+        song_queue = self.get_song_queue(request)
+        if not song_queue.is_empty():
+            shift_to_node = None
+            if node_uuid := kwargs.get("uuid"):
+                shift_to_node = get_object_or_404(SongQueueNode, uuid=node_uuid)
+            song_queue.shift_head_forward(to=shift_to_node)
+            send_queue_invalidate_event(
+                EventChannels.user_events(self.request.user.uuid)
+            )
+
+            if song_queue.is_empty():
+                profile = self.request.user.streamingprofile
+                ps = profile.playback_state
+                ps.is_playing = False
+                ps.save()
+
+                Event.invalidate_event(
+                    EventChannels.user_events(self.request.user.uuid), ["playback"]
+                )
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class SongQueueShiftHeadBackwardsView(SongQueueBaseView):
+    def post(self, request, *args, **kwargs):
+        song_queue = self.get_song_queue(request)
+        if not song_queue.is_empty():
+            song_queue.shift_head_backwards()
+            send_queue_invalidate_event(
+                EventChannels.user_events(self.request.user.uuid)
+            )
+        return Response(status=status.HTTP_204_NO_CONTENT)

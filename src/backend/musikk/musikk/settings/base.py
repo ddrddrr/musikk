@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.postgres",
+    "django.contrib.sites",
     ##
     "users.apps.UsersConfig",
     "streaming.apps.StreamingConfig",
@@ -61,7 +62,11 @@ INSTALLED_APPS = [
     "django_filters",
     "django_extensions",
     "rest_framework",
-    "rest_framework_simplejwt",
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "dj_rest_auth",
+    "dj_rest_auth.registration",
 ]
 
 MIDDLEWARE = [
@@ -71,6 +76,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "allauth.account.middleware.AccountMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -97,25 +103,77 @@ TEMPLATES = [
 WSGI_APPLICATION = "musikk.wsgi.application"
 ASGI_APPLICATION = "musikk.asgi.application"
 
+
+REDIS_PASSWORD = os.getenv("REDIS_PASSWORD", "password")
+REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
+REDIS_PORT = os.getenv("REDIS_PORT", "6375")
+REDIS_DB = os.getenv("REDIS_DB", "1")
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": f"redis://:{REDIS_PASSWORD}@{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}",
+    }
+}
+
 ### REST
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "users.tokens.UUIDJWTAuthentication",
         "rest_framework.authentication.SessionAuthentication",
+    ],
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
     ],
     "DEFAULT_RENDERER_CLASSES": [
         "rest_framework.renderers.JSONRenderer",
+        # TODO: probably remove in prod
         "rest_framework.renderers.BrowsableAPIRenderer",
         "django_eventstream.renderers.SSEEventRenderer",
     ],
 }
 
-### JWT
-SIMPLE_JWT = {
-    "USER_ID_FIELD": "uuid",
-    "USER_ID_CLAIM": "uuid",
-    "TOKEN_OBTAIN_SERIALIZER": "users.api.v1.serializers_base.TokenPairSerializer",
+### AUTH
+# Used by dj-rest-auth
+SITE_ID = 1
+
+# TODO: switch to redis only when configured for persistence
+SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
+SESSION_CACHE_ALIAS = "default"
+
+REST_AUTH = {"TOKEN_MODEL": None}
+REST_AUTH_REGISTER_SERIALIZERS = {
+    "REGISTER_SERIALIZER": "users.api.v1.serializers.BaseRegisterSerializer",
 }
+
+# `allauth` settings
+# new_user
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
+ACCOUNT_LOGIN_METHODS = ["email"]
+
+ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+ACCOUNT_EMAIL_VERIFICATION_BY_CODE_ENABLED = True
+ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 1  # days
+ACCOUNT_EMAIL_NOTIFICATIONS = True
+ACCOUNT_CHANGE_EMAIL = True
+ACCOUNT_MAX_EMAIL_ADDRESSES = 2
+
+# Password validation
+# https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
+    },
+]
 
 ### EVENTSTREAM
 EVENTSTREAM_STORAGE_CLASS = "django_eventstream.storage.DjangoModelStorage"
@@ -133,23 +191,6 @@ DATABASES = {
     },
 }
 
-# Password validation
-# https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
-
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
-    },
-]
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
@@ -172,10 +213,6 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
-INTERNAL_IPS = [
-    config("DJANGO_BASE_URL", default="127.0.0.1"),
-]
 
 AUTH_USER_MODEL = "users.BaseUser"
 
@@ -220,7 +257,9 @@ MAX_PATH_LENGTH = os.pathconf("/", "PC_PATH_MAX")
 # See detailed info about options here https://gist.github.com/fjsj/da41321ac96cf28a96235cb20e7236f6
 
 CELERY_TASK_ALWAYS_EAGER = config("CELERY_TASK_ALWAYS_EAGER", cast=bool, default=True)
-CELERY_BROKER_URL = config("CELERY_BROKER_URL", default="amqp://user:password@localhost:5672//")
+CELERY_BROKER_URL = config(
+    "CELERY_BROKER_URL", default="amqp://user:password@localhost:5672//"
+)
 CELERY_BROKER_TRANSPORT_OPTIONS = {"confirm_publish": True, "confirm_timeout": 5.0}
 # CELERY_RESULT_BACKEND = config("CELERY_RESULT_BACKEND", default="")
 CELERY_TASK_ACKS_LATE = config("CELERY_TASK_ACKS_LATE", cast=bool, default=True)
@@ -230,7 +269,9 @@ CELERY_TASK_ACKS_ON_FAILURE_OR_TIMEOUT = config(
 CELERY_TASK_REJECT_ON_WORKER_LOST = config(
     "CELERY_TASK_REJECT_ON_WORKER_LOST", cast=bool, default=False
 )
-CELERY_WORKER_PREFETCH_MULTIPLIER = config("CELERY_WORKER_PREFETCH_MULTIPLIER", cast=int, default=1)
+CELERY_WORKER_PREFETCH_MULTIPLIER = config(
+    "CELERY_WORKER_PREFETCH_MULTIPLIER", cast=int, default=1
+)
 CELERY_WORKER_CONCURRENCY = config(
     "CELERY_WORKER_CONCURRENCY", cast=lambda v: int(v) if v else None, default=None
 )

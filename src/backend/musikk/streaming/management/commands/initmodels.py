@@ -1,32 +1,35 @@
 import os
+import uuid
+import tempfile
+import io
 import random
+import requests
 
-from django.core.management.base import BaseCommand
+from django.conf import settings
 from django.core.files import File
+from django.core.management.base import BaseCommand
 from django.db import transaction
 
 from faker import Faker
 
 from users.management.helpers import create_user_with_password
-from streaming.models import BaseSong, SongCollection, SongCollectionAuthor
-from streaming.songs import SongAuthor, SongCollectionSong
-from streaming.audio.ffmpeg_wrapper import FFMPEGFull, StreamingProtocol
+from streaming.models import (
+    BaseSong,
+    Collection,
+    CollectionSong,
+    SongCredit,
+    CollectionCredit,
+)
+from streaming.audio.ffmpeg_wrapper import FFMPEGFull, ManifestType
+from musikk.utils.tests import AUDIO_URL_1, AUDIO_URL_2, IMAGE_URL_1, IMAGE_URL_2
+from users.models import StreamingProfile, ArtistProfile
 
 fake = Faker()
-SAMPLES_PATH = os.path.expanduser("~/studies/musikk/samples")
-
-
-def get_random_file_path(directory, extensions=None) -> str:
-    files = [
-        f
-        for f in os.listdir(directory)
-        if os.path.isfile(os.path.join(directory, f))
-        and (not extensions or os.path.splitext(f)[-1].lower() in extensions)
-    ]
-    return os.path.join(directory, random.choice(files))
 
 
 class Command(BaseCommand):
+    help = "Create sample users, artists, songs and collections"
+
     def add_arguments(self, parser):
         parser.add_argument("--users", type=int, default=2)
         parser.add_argument("--artists", type=int, default=3)
@@ -36,93 +39,127 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         users_count = options["users"]
         artists_count = options["artists"]
-        song_count = options["songs"]
-        collection_count = options["collections"]
+        songs_count = options["songs"]
+        collections_count = options["collections"]
+
+        audio_urls = [AUDIO_URL_1, AUDIO_URL_2]
+        image_urls = [IMAGE_URL_1, IMAGE_URL_2]
 
         with transaction.atomic():
+            # Create streaming users
             users = []
-            artists = []
-
-            print("\nCreating streaming users:")
             for _ in range(users_count):
-                user, password = create_user_with_password("streaming")
-                users.append((user, password))
-                print(f"- {user.email} / {password}")
+                user, pwd = create_user_with_password("streaming")
+                StreamingProfile.objects.for_user(user)
+                users.append(user)
+                self.stdout.write(f"- user: {user.email} / {pwd}")
 
-            print("\nCreating artists:")
+            # Create artist accounts
+            artists = []
             for _ in range(artists_count):
-                artist, password = create_user_with_password("artist")
-                artists.append((artist, password))
-                print(f"- {artist.email} / {password}")
+                artist, pwd = create_user_with_password("artist")
+                ArtistProfile.objects.for_user(artist)
+                artists.append(artist)
+                self.stdout.write(f"- artist: {artist.email} / {pwd}")
 
-            user_objs = [u[0] for u in users]
-            artist_objs = [a[0] for a in artists]
+            self.stdout.write(
+                f"\nCreated {len(users)} users and {len(artists)} artists.\n"
+            )
 
-            print(f"\nCreated {len(user_objs)} users and {len(artist_objs)} artists\n")
-
+            # Create songs
             songs = []
-            for _ in range(song_count):
-                random_image = get_random_file_path(SAMPLES_PATH, [".jpg", ".png"])
-                random_audio = get_random_file_path(SAMPLES_PATH, [".wav"])
+            for _ in range(songs_count):
+                # pick remote fixtures
+                audio_url = random.choice(audio_urls)
+                image_url = random.choice(image_urls)
 
-                with open(random_image, "rb") as i, open(random_audio, "rb") as m:
-                    song = BaseSong.objects.create(
-                        title=fake.catch_phrase(),
-                        description=fake.text(max_nb_chars=512),
-                        image=File(i, name=os.path.basename(random_image)),
-                    )
-                    print(f"Converting audio for song '{song.title}'")
-                    res = FFMPEGFull.convert_audio(m)
-                    song.mpd = res.manifests[StreamingProtocol.DASH]
-                    song.uuid = res.uuid_
-                    song.save()
+                # fetch and wrap image
+                img_resp = requests.get(image_url)
+                img_file = File(
+                    io.BytesIO(img_resp.content),
+                    name=os.path.basename(image_url),
+                )
 
-                    song_authors = random.sample(
-                        artist_objs, k=random.randint(1, min(3, len(artist_objs)))
-                    )
-                    for priority, artist in enumerate(song_authors):
-                        SongAuthor.objects.create(
-                            song=song, author=artist, author_priority=priority
-                        )
-                    print(
-                        f"Created song '{song.title}' with authors {[a.email for a in song_authors]}"
-                    )
-                    songs.append(song)
+                song = BaseSong.objects.create(
+                    title=fake.catch_phrase(),
+                    description=fake.text(max_nb_chars=512),
+                    image=img_file,
+                )
 
-            collection_types = [
-                SongCollection.CollectionType.PLAYLIST,
-                SongCollection.CollectionType.ALBUM,
+                # download to temp WAV
+                audio_resp = requests.get(audio_url)
+                with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tf:
+                    tf.write(audio_resp.content)
+                    tmp_audio_path = tf.name
+
+                self.stdout.write(f"Converting audio for '{song.title}'…")
+                audio_uuid = str(uuid.uuid4())
+                storage_dir = os.path.join(settings.AUDIO_CONTENT_PATH, audio_uuid)
+
+                ret = FFMPEGFull.convert_audio(
+                    file_path=tmp_audio_path,
+                    storage_dir=storage_dir,
+                    out_file_prefix=audio_uuid,
+                )
+
+                # assign manifests and uuid
+                song.uuid = audio_uuid
+                song.mpd = ret.manifests[ManifestType.MPD]
+                song.m3u8 = ret.manifests[ManifestType.M3U8]
+                song.save()
+
+                os.remove(tmp_audio_path)
+
+                # credits
+                num_authors = random.randint(1, min(3, len(artists)))
+                for priority, author in enumerate(random.sample(artists, num_authors)):
+                    SongCredit.objects.create(
+                        song=song, author=author, author_priority=priority
+                    )
+
+                self.stdout.write(
+                    f"Created '{song.title}' ({len(song.song_credits.all())} author(s))"
+                )
+                songs.append(song)
+
+            # Create collections (albums/playlists)
+            types = [
+                Collection.CollectionType.ALBUM,
+                Collection.CollectionType.PLAYLIST,
             ]
-
-            for _ in range(collection_count):
+            for _ in range(collections_count):
                 if not songs:
                     break
-                random_image = get_random_file_path(SAMPLES_PATH, [".jpg", ".png"])
-                with open(random_image, "rb") as i:
-                    collection_type = random.choice(collection_types)
-                    collection = SongCollection.objects.create(
-                        title=fake.bs().title(),
-                        description=fake.text(max_nb_chars=512),
-                        image=File(i, name=os.path.basename(random_image)),
-                        type=collection_type,
-                    )
-                    selected_songs = random.sample(
-                        songs, k=random.randint(1, len(songs))
-                    )
-                    for idx, song in enumerate(selected_songs):
-                        SongCollectionSong.objects.create(
-                            song=song, song_collection=collection, position=idx
-                        )
 
-                    authors = random.sample(
-                        artist_objs, k=random.randint(1, len(artist_objs))
+                image_url = random.choice(image_urls)
+                img_resp = requests.get(image_url)
+                img_file = File(
+                    io.BytesIO(img_resp.content),
+                    name=os.path.basename(image_url),
+                )
+
+                collection = Collection.objects.create(
+                    title=fake.bs().title(),
+                    description=fake.text(max_nb_chars=512),
+                    image=img_file,
+                    type=random.choice(types),
+                )
+
+                chosen = random.sample(songs, k=random.randint(1, len(songs)))
+                for idx, song in enumerate(chosen):
+                    CollectionSong.objects.create(
+                        collection=collection, song=song, position=idx
                     )
-                    for priority, author in enumerate(authors):
-                        SongCollectionAuthor.objects.create(
-                            song_collection=collection,
-                            author=author,
-                            author_priority=priority,
-                        )
-                    print(
-                        f"Created {collection.type} '{collection.title}' with {len(selected_songs)} songs and authors {[a.email for a in authors]}"
+
+                num_creds = random.randint(1, len(artists))
+                for priority, author in enumerate(random.sample(artists, num_creds)):
+                    CollectionCredit.objects.create(
+                        collection=collection,
+                        author=author,
+                        author_priority=priority,
                     )
+
+                self.stdout.write(
+                    f"Created {collection.get_type_display()} '{collection.title}' "
+                    f"with {len(chosen)} song(s) and {collection.collection_credits.count()} author(s)"
+                )

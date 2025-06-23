@@ -15,15 +15,18 @@ from notifications.models import (
     FriendRequestNotification,
     Notification,
 )
+from users.models import BaseUser
 
-from users.users_extended import StreamingUser
+
+# from users.models import StreamingUser
 
 
 class NotificationsPersonalListUpdateView(GenericAPIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
-        user = self.request.user.streaminguser
+        user = self.request.user
+
         replies = ReplyNotificationSerializer(
             ReplyNotification.objects.filter(orig_comment__user=user), many=True
         ).data
@@ -43,7 +46,7 @@ class NotificationDeleteView(GenericAPIView):
     permission_classes = [IsAuthenticated]
 
     def delete(self, request, *args, **kwargs):
-        user = self.request.user.streaminguser
+        user = self.request.user
         notif_uuid = kwargs["uuid"]
         # filtering by receiver, so any random user couldn't delete notifications
         # which don't belong to him
@@ -58,9 +61,9 @@ class FriendRequestNotificationCreateView(GenericAPIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
-        user = self.request.user.streaminguser
+        user = self.request.user
         receiver_uuid = kwargs["uuid"]
-        receiver = get_object_or_404(StreamingUser, uuid=receiver_uuid)
+        receiver = get_object_or_404(BaseUser, uuid=receiver_uuid)
 
         FriendRequestNotification.objects.create(sender=user, receiver=receiver)
 

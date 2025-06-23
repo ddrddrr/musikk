@@ -14,7 +14,7 @@ from social.api.v1.serializers import (
 from social.models import Publication
 from sse.config import EventChannels
 from sse.events import Event
-from users.users_extended import StreamingUser
+from users.models import StreamingProfile, BaseUser
 
 
 class CommentsListCreateView(APIView):
@@ -32,7 +32,7 @@ class CommentsListCreateView(APIView):
 
     def post(self, request, *args, **kwargs):
         data = request.data.copy()
-        user = request.user.streaminguser
+        user = request.user
         data["user"] = user.pk
         data["obj_uuid"] = kwargs["obj_uuid"]
         data["obj_type"] = kwargs["obj_type"]
@@ -61,7 +61,7 @@ class PostCreateView(APIView):
 
     def post(self, request, *args, **kwargs):
         data = request.data.copy()
-        user = request.user.streaminguser
+        user = request.user
         data["user"] = user.pk
 
         serializer = PublicationCreateSerializer(data={**data, "type": "post"})
@@ -97,7 +97,7 @@ class PostUserListView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
-        user = get_object_or_404(StreamingUser, uuid=kwargs["uuid"])
+        user = get_object_or_404(BaseUser, uuid=kwargs["uuid"])
 
         roots = PublicationRetrieveSerializer(
             Publication.objects.filter(

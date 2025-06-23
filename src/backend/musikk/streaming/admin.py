@@ -6,8 +6,8 @@ from django import forms
 from streaming.audio.ffmpeg_wrapper import FFMPEGWrapper
 from streaming.audio.converters import FLAC_CONVERTER
 from musikk.utils.paths import delete_dir_for_file
-from streaming.song_collections import SongCollection
-from streaming.songs import BaseSong, SongCollectionSong
+from streaming.models.collections import Collection
+from streaming.models.songs import BaseSong, CollectionSong
 
 
 class BaseSongAdminForm(forms.ModelForm):
@@ -50,11 +50,11 @@ class BaseSongAdmin(admin.ModelAdmin):
 
 
 class SongCollectionSongInline(admin.StackedInline):
-    model = SongCollectionSong
+    model = CollectionSong
     ordering = ["position"]
 
 
-@admin.register(SongCollection)
+@admin.register(Collection)
 class SongCollectionAdmin(admin.ModelAdmin):
     inlines = [SongCollectionSongInline]
 

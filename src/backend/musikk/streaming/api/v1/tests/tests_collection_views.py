@@ -3,11 +3,11 @@ from django.urls import reverse
 from rest_framework.test import APIRequestFactory, force_authenticate
 from faker import Faker
 
-from users.tests.factories import StreamingUserFactory
+from users.tests.factories import StreamingProfileFactory
 from streaming.tests.factories import BaseSongFactory
-from streaming.api.v1.views.views_collection import SongCollectionCreateView
-from streaming.models import SongCollection
-from streaming.song_collections import SongCollectionAuthor
+from streaming.api.v1.views.collections import CollectionCreateView
+from streaming.models import Collection
+from streaming.models.collections import CollectionCredit
 
 fake = Faker()
 
@@ -17,7 +17,8 @@ class TestSongCollectionCreateView(TestCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.factory = APIRequestFactory()
-        cls.user = StreamingUserFactory()
+        cls.streaming_profile = StreamingProfileFactory()
+        cls.user = cls.streaming_profile.user
         cls.songs = BaseSongFactory.create_batch(2)
 
     def test_create_with_valid_songs(self):
@@ -29,17 +30,17 @@ class TestSongCollectionCreateView(TestCase):
         }
         request = self.factory.post(url, payload, format="multipart")
         force_authenticate(request, user=self.user)
-        response = SongCollectionCreateView.as_view()(request)
+        response = CollectionCreateView.as_view()(request)
 
         self.assertEqual(response.status_code, 201)
         self.assertIn("collection", response.data)
         data = response.data["collection"]
 
-        collection = SongCollection.objects.get(uuid=data["uuid"])
+        collection = Collection.objects.get(uuid=data["uuid"])
         self.assertEqual(data["title"], payload["title"])
         self.assertEqual(collection.title, payload["title"])
 
-        authors = SongCollectionAuthor.objects.filter(song_collection=collection)
+        authors = CollectionCredit.objects.filter(collection=collection)
         self.assertEqual(authors.count(), 1)
         self.assertEqual(authors.first().author, self.user)
 
@@ -51,7 +52,7 @@ class TestSongCollectionCreateView(TestCase):
         }
         request = self.factory.post(url, payload, format="multipart")
         force_authenticate(request, user=self.user)
-        response = SongCollectionCreateView.as_view()(request)
+        response = CollectionCreateView.as_view()(request)
         self.assertEqual(response.status_code, 400)
         self.assertIn("failed", response.data)
 
@@ -63,6 +64,6 @@ class TestSongCollectionCreateView(TestCase):
         }
         request = self.factory.post(url, payload, format="multipart")
         force_authenticate(request, user=self.user)
-        response = SongCollectionCreateView.as_view()(request)
+        response = CollectionCreateView.as_view()(request)
         self.assertEqual(response.status_code, 201)
         self.assertIn("collection", response.data)

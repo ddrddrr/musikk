@@ -1,9 +1,9 @@
 import factory
 
 from base.tests.factories import BaseModelFactory
-from streaming.models import BaseSong, SongCollection
+from streaming.models import BaseSong, Collection
 
-from streaming.songs import SongCollectionSong
+from streaming.models.songs import CollectionSong
 
 fake = factory.Faker
 
@@ -14,14 +14,16 @@ class BaseSongFactory(BaseModelFactory):
 
     title = fake("name")
     description = fake("paragraph")
+    content_path = ""
     mpd = ""
+    m3u8 = ""
     image = None
     # metadata = factory.SubFactory()
 
 
-class SongCollectionFactory(BaseModelFactory):
+class CollectionFactory(BaseModelFactory):
     class Meta:
-        model = SongCollection
+        model = Collection
 
     title = fake("name")
     description = fake("paragraph")
@@ -36,7 +38,7 @@ class SongCollectionFactory(BaseModelFactory):
         songs = extracted or [BaseSongFactory() for _ in range(songs_count)]
 
         for i, song in enumerate(songs):
-            SongCollectionSong.objects.create(
+            CollectionSong.objects.create(
                 song=song,
-                song_collection=self,
+                collection=self,
             )

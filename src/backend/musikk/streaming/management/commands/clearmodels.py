@@ -3,9 +3,9 @@ from django.db import transaction
 
 from streaming.models import (
     BaseSong,
-    SongCollection,
+    Collection,
 )
-from users.user_base import BaseUser
+from users.models.user import BaseUser
 
 
 class Command(BaseCommand):
@@ -15,4 +15,4 @@ class Command(BaseCommand):
             for s in BaseSong.objects.all():
                 s.delete()
             BaseUser.objects.all().delete()
-            SongCollection.objects.all().delete()
+            Collection.objects.all().delete()

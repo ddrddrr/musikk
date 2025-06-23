@@ -3,7 +3,7 @@ from rest_framework import serializers
 
 from base.serializers import BaseModelSerializer
 from social.models import Publication
-from users.api.v1.serializers_base import BaseUserSerializer
+from users.api.v1.serializers import BaseUserSerializer, BaseProfileSerializer
 
 
 class PublicationCreateSerializer(BaseModelSerializer):
@@ -31,7 +31,9 @@ class PublicationCreateSerializer(BaseModelSerializer):
 
         if bool(obj_type) != bool(obj_uuid):
             raise serializers.ValidationError(
-                ["Both 'obj_type' and 'obj_uuid' must be excluded or provided together."]
+                [
+                    "Both 'obj_type' and 'obj_uuid' must be excluded or provided together."
+                ]
             )
 
         related_instance = (
@@ -67,7 +69,7 @@ class PublicationRetrieveSerializer(BaseModelSerializer):
     parent = serializers.UUIDField(
         source="parent.uuid", allow_null=True, read_only=True
     )
-    user = BaseUserSerializer(read_only=True)
+    user = serializers.SerializerMethodField(read_only=True)
     root_user_uuid = serializers.SerializerMethodField(allow_null=True, read_only=True)
 
     class Meta(BaseModelSerializer.Meta):
@@ -99,5 +101,8 @@ class PublicationRetrieveSerializer(BaseModelSerializer):
 
     def get_root_user_uuid(self, obj):
         if obj.type == "post":
-            return obj.get_root().user.uuid
+            return obj.get_root().user.baseprofile.uuid
         return None
+
+    def get_user(self, obj):
+        return BaseProfileSerializer(obj.user.baseprofile, context=self.context).data

@@ -2,11 +2,11 @@ from django.test import TestCase
 from django.urls.base import reverse
 from rest_framework.test import APIRequestFactory
 
-from streaming.tests.factories import BaseSongFactory, SongCollectionFactory
+from streaming.tests.factories import BaseSongFactory, CollectionFactory
 from recommendations.api.v1.views import SearchView
 from rest_framework.test import force_authenticate
 
-from users.tests.factories import BaseUserFactory
+from users.tests.factories import BaseUserFactory, BaseProfileFactory
 
 
 class TestSearchView(TestCase):
@@ -14,10 +14,11 @@ class TestSearchView(TestCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.factory = APIRequestFactory()
-        cls.user = BaseUserFactory()
+        cls.profile = BaseProfileFactory()
+        cls.user = cls.profile.user
 
         cls.songs = BaseSongFactory.create_batch(3)
-        cls.song_collections = SongCollectionFactory.create_batch(2)
+        cls.collections = CollectionFactory.create_batch(2)
 
     def test_empty_q_string(self):
         request = self.factory.get(reverse("api:search"))
@@ -26,7 +27,7 @@ class TestSearchView(TestCase):
         self.assertEqual(response.status_code, 204)
 
     def test_q_string_equal_collection_title(self):
-        query = f"?q={self.song_collections[0].title}"
+        query = f"?q={self.collections[0].title}"
         request = self.factory.get(reverse("api:search") + query)
         force_authenticate(user=self.user, request=request)
         response = SearchView.as_view()(request)
@@ -42,11 +43,11 @@ class TestSearchView(TestCase):
         self.assertTrue(len(response.data["songs"]))
 
     def test_q_string_multiple_similar_collection_titles(self):
-        for collection in self.song_collections:
-            SongCollectionFactory(title=(collection.title + "a"))
-            SongCollectionFactory(title=(collection.title + "b"))
+        for collection in self.collections:
+            CollectionFactory(title=(collection.title + "a"))
+            CollectionFactory(title=(collection.title + "b"))
 
-        query = f"?q={self.song_collections[0].title}"
+        query = f"?q={self.collections[0].title}"
         request = self.factory.get(reverse("api:search") + query)
         force_authenticate(user=self.user, request=request)
         response = SearchView.as_view()(request)
@@ -64,8 +65,8 @@ class TestSearchView(TestCase):
     def test_q_multiple_similar_user_titles(self):
         query = f"?q={self.user.display_name}"
         for i in range(5):
-            BaseUserFactory(display_name=(self.user.display_name + str(i)))
-            BaseUserFactory(display_name=str(i))
+            BaseProfileFactory(display_name=(self.user.display_name + str(i)))
+            BaseProfileFactory(display_name=str(i))
 
         request = self.factory.get(reverse("api:search") + query)
         force_authenticate(user=self.user, request=request)

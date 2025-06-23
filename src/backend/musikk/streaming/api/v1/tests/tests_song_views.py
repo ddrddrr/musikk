@@ -12,15 +12,15 @@ from rest_framework.test import APIRequestFactory, force_authenticate
 from faker import Faker
 
 from musikk.utils.tests import AUDIO_URL_1
-from streaming.api.v1.views.views_song import SongCreateView
-from users.tests.factories import ArtistFactory
-from streaming.songs import BaseSong
+from streaming.api.v1.views.songs import SongCreateView
+from users.tests.factories import ArtistProfileFactory
+from streaming.models.songs import BaseSong
 
 fake = Faker()
 
 
 @override_settings(
-    DEFAULT_FILE_STORAGE='django.core.files.storage.FileSystemStorage',
+    DEFAULT_FILE_STORAGE="django.core.files.storage.FileSystemStorage",
 )
 class TestSongCreateView(TestCase):
     @classmethod
@@ -30,13 +30,13 @@ class TestSongCreateView(TestCase):
         cls._tmp_media = tempfile.mkdtemp()
         cls._override = override_settings(
             MEDIA_ROOT=cls._tmp_media,
-            DEFAULT_FILE_STORAGE='django.core.files.storage.FileSystemStorage',
+            DEFAULT_FILE_STORAGE="django.core.files.storage.FileSystemStorage",
         )
         cls._override.enable()
 
         cls.factory = APIRequestFactory()
-        cls.artists = ArtistFactory.create_batch(5)
-        cls.main_artist = cls.artists[0]
+        cls.artists = ArtistProfileFactory.create_batch(5)
+        cls.main_artist = cls.artists[0].user
 
         response = requests.get(AUDIO_URL_1)
         cls.audio_content = response.content
@@ -65,7 +65,9 @@ class TestSongCreateView(TestCase):
         force_authenticate(request, user=self.main_artist)
         response = SongCreateView.as_view()(request)
 
-        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED, repr(response.data))
+        self.assertEqual(
+            response.status_code, status.HTTP_202_ACCEPTED, repr(response.data)
+        )
         self.assertIn("uuid", response.data)
 
         song = BaseSong.objects.get(uuid=response.data["uuid"])

@@ -44,10 +44,10 @@ class FriendRequestNotificationManager(models.Manager):
 
 class FriendRequestNotification(Notification):
     sender = models.ForeignKey(
-        "users.StreamingUser", on_delete=models.CASCADE, related_name="+"
+        "users.BaseUser", on_delete=models.CASCADE, related_name="+"
     )
     receiver = models.ForeignKey(
-        "users.StreamingUser", on_delete=models.CASCADE, related_name="+"
+        "users.BaseUser", on_delete=models.CASCADE, related_name="+"
     )
 
     class Meta:

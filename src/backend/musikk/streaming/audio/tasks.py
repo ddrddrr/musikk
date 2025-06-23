@@ -10,23 +10,23 @@ from django.core.files.storage import default_storage
 from sse.config import EventChannels
 from sse.events import Event
 from streaming.audio.ffmpeg_wrapper import FFMPEGFull, ManifestType, FFMPEGWrapper
-from streaming.songs import BaseSong
+from streaming.models.songs import BaseSong
 
 
 @shared_task(bind=True)
 def convert_audio(
-        self,
-        file_path: str | Path,
-        song_uuid: str | UUID,
-        initiator_uuid: str | UUID = None,
-        delete_orig_file: bool = True
+    self,
+    file_path: str | Path,
+    song_uuid: str | UUID,
+    initiator_uuid: str | UUID = None,
+    delete_orig_file: bool = True,
 ):
     str_uuid = str(song_uuid)
     try:
         song_repr = FFMPEGFull.convert_audio(
             file_path=file_path,
             storage_dir=os.path.join(settings.AUDIO_CONTENT_PATH, str_uuid),
-            out_file_prefix=str_uuid
+            out_file_prefix=str_uuid,
         )
     except Exception as ex:
         # TODO
@@ -50,7 +50,7 @@ def convert_audio(
             Event.upload_event(
                 channel=EventChannels.user_events(initiator_uuid),
                 operation_id=str_uuid,
-                status="success"
+                status="success",
             )
             print(f"SSE: sent upload_event to {initiator_uuid}")
         except Exception as e:

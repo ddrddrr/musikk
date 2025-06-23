@@ -29,9 +29,9 @@ class Publication(BaseModel):
         POST = "post", "Post"  # user feed
 
     RELATED_MODEL_TYPE_MAP = {
-        "user": "users.StreamingUser",
-        "collection": "streaming.SongCollection",
-        "song": "streaming.SongCollectionSong",
+        "user": "users.BaseUser",
+        "collection": "streaming.Collection",
+        "song": "streaming.CollectionSong",
     }
 
     type = models.CharField(choices=PublicationType.choices)

@@ -1,32 +1,32 @@
 from django.urls import path
 from rest_framework.permissions import AllowAny
 
-from streaming.api.v1.views.views import (
+from streaming.api.v1.views.connections import (
     ConnectionsLatestListenedView,
     ConnectionsLatestAddedView,
 )
-from streaming.api.v1.views.views_song import (
+from streaming.api.v1.views.songs import (
     SongAddLikedView,
     SongCreateView,
     SongCollectionSongRetrieveView,
 )
-from streaming.api.v1.views.views_collection import (
-    SongCollectionLatestView,
-    SongCollectionPersonalView,
-    SongCollectionDetailView,
-    SongCollectionAddLikedView,
-    SongCollectionRemoveSong,
-    SongCollectionAddSong,
-    SongCollectionCreateView,
+from streaming.api.v1.views.collections import (
+    CollectionLatestView,
+    CollectionPersonalView,
+    CollectionDetailView,
+    CollectionAddLikedView,
+    CollectionRemoveSong,
+    CollectionAddSong,
+    CollectionCreateView,
     AlbumBySongView,
 )
-from streaming.api.v1.views.views_playback import (
+from streaming.api.v1.views.playback import (
     PlaybackDeviceView,
     PlaybackDeviceActivateView,
     PlaybackStateView,
-    PlaybackDeviceDeleteView,
+    # PlaybackDeviceDeleteView,
 )
-from streaming.api.v1.views.views_song_queue import (
+from streaming.api.v1.views.song_queue import (
     SongQueueRetrieveView,
     SongQueueAddSongView,
     SongQueueAddCollectionView,
@@ -55,38 +55,36 @@ song_urls = [
 ]
 
 collection_urls = [
-    path("collections", SongCollectionCreateView.as_view(), name="collection-create"),
+    path("collections", CollectionCreateView.as_view(), name="collection-create"),
     path(
         "collections/<uuid:collection_uuid>/songs/<uuid:song_uuid>",
-        SongCollectionRemoveSong.as_view(),
+        CollectionRemoveSong.as_view(),
         name="collection-remove-song",
     ),
     path(
         "collections/<uuid:collection_uuid>/songs/<uuid:song_uuid>",
-        SongCollectionAddSong.as_view(),
+        CollectionAddSong.as_view(),
         name="collection-add-song",
     ),
-    path(
-        "collections/latest", SongCollectionLatestView.as_view(), name="collection-list"
-    ),
+    path("collections/latest", CollectionLatestView.as_view(), name="collection-list"),
     path(
         "collections/personal/<uuid:uuid>",
-        SongCollectionPersonalView.as_view(),
+        CollectionPersonalView.as_view(),
         name="collection-user-list",
     ),
     path(
         "collections/<uuid:uuid>",
-        SongCollectionDetailView.as_view(),
+        CollectionDetailView.as_view(),
         name="collection-retrieve",
     ),
     path(
         "collections/detail/<uuid:uuid>",
-        SongCollectionDetailView.as_view(),
+        CollectionDetailView.as_view(),
         name="collection-detail",
     ),
     path(
         "collections/<uuid:uuid>/like",
-        SongCollectionAddLikedView.as_view(),
+        CollectionAddLikedView.as_view(),
         name="collection-add-liked",
     ),
 ]
@@ -153,14 +151,15 @@ playback_urls = [
         PlaybackDeviceActivateView.as_view(),
         name="playback-device-activate",
     ),
-    path(
-        "playback-device/<uuid:uuid>/delete",
-        PlaybackDeviceDeleteView.as_view(
-            authentication_classes=[],
-            permission_classes=[AllowAny],
-        ),
-        name="playback-device-delete",
-    ),
+    # TODO:
+    # path(
+    #     "playback-device/<uuid:uuid>/delete",
+    #     PlaybackDeviceDeleteView.as_view(
+    #         authentication_classes=[],
+    #         permission_classes=[AllowAny],
+    #     ),
+    #     name="playback-device-delete",
+    # ),
 ]
 
 friend_activity_urls = [
@@ -177,5 +176,5 @@ friend_activity_urls = [
 ]
 
 urlpatterns = (
-        song_urls + collection_urls + song_queue_urls + playback_urls + friend_activity_urls
+    song_urls + collection_urls + song_queue_urls + playback_urls + friend_activity_urls
 )

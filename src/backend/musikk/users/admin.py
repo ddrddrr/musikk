@@ -2,17 +2,20 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 
-from users.models import BaseUser
+from users.models import BaseUser, BaseProfile
+
+
+class BaseProfileInline(admin.StackedInline):
+    model = BaseProfile
+    can_delete = False
+    verbose_name_plural = "Profile"
 
 
 class BaseUserChangeForm(UserChangeForm):
     class Meta:
         model = BaseUser
         fields = [
-            "display_name",
             "email",
-            "bio",
-            "avatar",
         ]
 
 
@@ -20,10 +23,7 @@ class BaseUserCreationForm(UserCreationForm):
     class Meta:
         model = BaseUser
         fields = [
-            "display_name",
             "email",
-            "bio",
-            "avatar",
         ]
 
 
@@ -32,27 +32,22 @@ class BaseUserAdmin(UserAdmin):
     add_form = BaseUserCreationForm
     form = BaseUserChangeForm
     model = BaseUser
+    inlines = [BaseProfileInline]
 
     list_display = (
         "email",
-        "display_name",
-        "bio",
         "is_active",
         "is_admin",
         "is_superuser",
         "uuid",
     )
     list_filter = ("is_active", "is_admin", "is_superuser", "groups")
-    search_fields = ("email", "display_name")
+    search_fields = ("email",)
     ordering = ("email",)
     list_display_links = ("email",)
 
     fieldsets = (
         (None, {"fields": ("email", "password")}),
-        (
-            "Personal info",
-            {"fields": ("bio", "display_name", "avatar")},
-        ),
         (
             "Permissions",
             {
@@ -76,8 +71,6 @@ class BaseUserAdmin(UserAdmin):
                 "classes": ("wide",),
                 "fields": (
                     "email",
-                    "display_name",
-                    "avatar",
                     "password1",
                     "password2",
                 ),
@@ -86,3 +79,10 @@ class BaseUserAdmin(UserAdmin):
     )
 
     readonly_fields = ("uuid", "last_login")
+
+
+@admin.register(BaseProfile)
+class BaseProfileAdmin(admin.ModelAdmin):
+    list_display = ("user", "display_name", "bio")
+    search_fields = ("user__email", "display_name")
+    raw_id_fields = ("user",)

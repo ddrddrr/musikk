@@ -4,15 +4,14 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 
-from streaming.api.v1.serializers.serializers_song import (
-    SongCollectionSongSerializer,
+from streaming.api.v1.serializers.songs import (
+    CollectionSongSerializer,
 )
-from streaming.api.v1.serializers.serializers_song_collection import SongCollectionSerializerBasic
-from streaming.models import BaseSong, SongCollection
-from streaming.songs import SongCollectionSong
-from users.api.v1.serializers_base import BaseUserSerializer
-from users.models import Artist, StreamingUser
-
+from streaming.api.v1.serializers.collections import CollectionSerializerBasic
+from streaming.models import BaseSong, Collection
+from streaming.models.songs import CollectionSong
+from users.api.v1.serializers import BaseProfileSerializer
+from users.models import BaseProfile
 
 TRIGRAM_SIMILARITY_THRESHOLD = 0.3
 MAX_RESULTS = 10
@@ -29,27 +28,33 @@ class SearchView(APIView):
         data = {
             "songs": self._songs(query),
             "albums": self.search(
-                SongCollection,
+                Collection,
                 query,
                 "title",
-                SongCollectionSerializerBasic,
+                CollectionSerializerBasic,
                 extra_filters={"type": "album"},
             ),
             "playlists": self.search(
-                SongCollection,
+                Collection,
                 query,
                 "title",
-                SongCollectionSerializerBasic,
+                CollectionSerializerBasic,
                 extra_filters={"type": "playlist"},
             ),
             "users": self.search(
-                StreamingUser,
+                BaseProfile,
                 query,
                 "display_name",
-                BaseUserSerializer,
-                extra_filters={"artist": None},  # users who are not artists
+                BaseProfileSerializer,
+                extra_filters={"user__artistprofile__isnull": True},
             ),
-            "artists": self.search(Artist, query, "display_name", BaseUserSerializer),
+            "artists": self.search(
+                BaseProfile,
+                query,
+                "display_name",
+                BaseProfileSerializer,
+                extra_filters={"user__artistprofile__isnull": False},
+            ),
         }
 
         return Response(data=data, status=status.HTTP_200_OK)
@@ -75,8 +80,8 @@ class SearchView(APIView):
             .order_by("-similarity")[:MAX_RESULTS]
         )
 
-        sc_songs = SongCollectionSong.objects.filter(song__in=matching_songs)
+        sc_songs = CollectionSong.objects.filter(song__in=matching_songs)
 
-        return SongCollectionSongSerializer(
+        return CollectionSongSerializer(
             sc_songs, many=True, context={"request": self.request}
         ).data

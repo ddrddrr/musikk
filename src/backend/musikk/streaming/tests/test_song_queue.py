@@ -2,7 +2,7 @@ from django.conf import settings
 from django.test import TestCase
 
 from streaming.models import SongQueue, SongQueueNode, BaseSong
-from streaming.tests.factories import BaseSongFactory, SongCollectionFactory
+from streaming.tests.factories import BaseSongFactory, CollectionFactory
 
 SONG_COUNT = 5
 
@@ -91,7 +91,7 @@ class TestSongQueue(TestCase):
     def test_add_collection_songs(self):
         song_queue = SongQueue.objects.create()
 
-        collection = SongCollectionFactory()
+        collection = CollectionFactory()
         csongs = collection.ordered_songs()
         added_nodes = song_queue.add_collection(
             collection, action=SongQueue.AddAction.APPEND
@@ -168,7 +168,7 @@ class TestSongQueue(TestCase):
         for song in self.songs:
             song_queue.add_song(song, action=SongQueue.AddAction.APPEND)
 
-        collection = SongCollectionFactory()
+        collection = CollectionFactory()
         csongs = collection.ordered_songs()
         song_queue.add_collection(collection, action=SongQueue.AddAction.CHANGE_HEAD)
 
