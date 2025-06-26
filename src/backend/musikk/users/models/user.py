@@ -28,7 +28,7 @@ class BaseUser(BaseModel, AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(unique=True)
 
     is_admin = models.BooleanField(default=False)
-    is_active = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
 
     def __str__(self):
         return self.email

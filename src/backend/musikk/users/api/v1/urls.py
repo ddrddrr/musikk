@@ -1,3 +1,8 @@
+from dj_rest_auth.registration.views import (
+    RegisterView,
+    VerifyEmailView,
+    ResendEmailVerificationView,
+)
 from dj_rest_auth.views import (
     PasswordResetView,
     PasswordResetConfirmView,
@@ -7,6 +12,7 @@ from dj_rest_auth.views import (
 )
 from django.urls import path
 from django.urls.conf import include, re_path
+from django.views.generic import TemplateView
 from rest_framework.routers import DefaultRouter
 
 from users.api.v1.views import (
@@ -40,7 +46,13 @@ dj_rest_auth_urls = [
     re_path(
         r"password/change/?$", PasswordChangeView.as_view(), name="rest_password_change"
     ),
-    path("registration/", include("dj_rest_auth.registration.urls")),
+    path("registration/", RegisterView.as_view(), name="rest_register"),
+    re_path(r"verify-email/?$", VerifyEmailView.as_view(), name="rest_verify_email"),
+    re_path(
+        r"resend-email/?$",
+        ResendEmailVerificationView.as_view(),
+        name="rest_resend_email",
+    ),
 ]
 urlpatterns = [
     path("", include(sse_router.urls)),

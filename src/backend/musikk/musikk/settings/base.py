@@ -36,7 +36,7 @@ CORS_ALLOW_HEADERS = (
     "Access-Control-Allow-Credentials",
 )
 
-### Application definition
+### Core
 INSTALLED_APPS = [
     "corsheaders",
     "jazzmin",
@@ -133,6 +133,9 @@ REST_FRAMEWORK = {
 }
 
 ### AUTH
+SESSION_COOKIE_HTTPONLY = True
+CSRF_COOKIE_HTTPONLY = False
+
 # Used by dj-rest-auth
 SITE_ID = 1
 
@@ -140,23 +143,29 @@ SITE_ID = 1
 SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
 SESSION_CACHE_ALIAS = "default"
 
-REST_AUTH = {"TOKEN_MODEL": None}
-REST_AUTH_REGISTER_SERIALIZERS = {
+REST_AUTH = {
+    "TOKEN_MODEL": None,
     "REGISTER_SERIALIZER": "users.api.v1.serializers.BaseRegisterSerializer",
 }
-
 # `allauth` settings
 # new_user
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
 ACCOUNT_LOGIN_METHODS = ["email"]
 
+# Deprecated, but required in dj-rest-auth
+# see https://github.com/iMerica/dj-rest-auth/issues/685
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_AUTHENTICATION_METHOD = "email"
+ACCOUNT_USERNAME_REQUIRED = False
+
 ACCOUNT_EMAIL_VERIFICATION = "mandatory"
-ACCOUNT_EMAIL_VERIFICATION_BY_CODE_ENABLED = True
 ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 1  # days
 ACCOUNT_EMAIL_NOTIFICATIONS = True
 ACCOUNT_CHANGE_EMAIL = True
 ACCOUNT_MAX_EMAIL_ADDRESSES = 2
+
+ACCOUNT_ADAPTER = "users.adapters.OTPAccountAdapter"
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -174,6 +183,13 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
+
+
+### Mail
+EMAIL_BACKEND = config(
+    "EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend"
+)
+DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="info@musikk.stream")
 
 ### EVENTSTREAM
 EVENTSTREAM_STORAGE_CLASS = "django_eventstream.storage.DjangoModelStorage"

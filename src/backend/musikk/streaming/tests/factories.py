@@ -25,6 +25,7 @@ class CollectionFactory(BaseModelFactory):
     class Meta:
         model = Collection
 
+    type = fake("random_element", elements=["playlist", "album"])
     title = fake("name")
     description = fake("paragraph")
     image = None
@@ -42,3 +43,11 @@ class CollectionFactory(BaseModelFactory):
                 song=song,
                 collection=self,
             )
+
+
+class CollectionSongFactory(BaseModelFactory):
+    class Meta:
+        model = CollectionSong
+
+    song = factory.SubFactory(BaseSongFactory)
+    collection = factory.SubFactory(CollectionFactory)

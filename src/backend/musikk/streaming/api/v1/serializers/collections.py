@@ -40,7 +40,7 @@ class CollectionSerializerBasic(BaseModelSerializer):
         raise serializers.ValidationError({"user": "User must be provided"})
 
     def get_authors(self, obj):
-        cauthors = CollectionCredit.objects.filter(song=obj).select_related(
+        cauthors = CollectionCredit.objects.filter(collection=obj).select_related(
             "author__baseprofile"
         )
         authors = [cauthor.author.baseprofile for cauthor in cauthors]
@@ -98,7 +98,7 @@ class CollectionCreateSerializer(serializers.ModelSerializer):
 
         # TODO: add validate songs(same as authors, maybe some generic method in general)
         songs = validated_data.pop("songs")
-        songs = BaseSong.objects.filter(song__uuid__in=songs)
+        songs = BaseSong.objects.filter(uuid__in=songs)
         with transaction.atomic():
             collection = Collection.objects.create(**validated_data)
             cs_objs = [

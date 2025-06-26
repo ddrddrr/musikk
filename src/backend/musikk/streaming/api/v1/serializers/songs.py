@@ -43,9 +43,9 @@ class BaseSongSerializer(BaseModelSerializer):
         )
 
     def get_is_liked(self, obj):
-        if user := self.context["request"].user.streaminguser:
+        if user := self.context["request"].user:
             return CollectionSong.objects.filter(
-                song=obj, collection=user.liked_songs
+                song=obj, collection=user.streamingprofile.liked_songs
             ).exists()
         raise serializers.ValidationError({"user": "User must be provided"})
 

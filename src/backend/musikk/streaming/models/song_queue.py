@@ -312,20 +312,21 @@ class SongQueue(BaseModel):
         # total random --> all available songs in the sys
         # radom on hastags --> all available with hashtag
 
-    def append_random_songs(
-        self,
-        amount: int = default_size,
-    ) -> list[SongQueueNode]:
-        # query = (
-        #     f"SELECT * FROM {BaseSong._meta.db_table} TABLESAMPLE SYSTEM_ROWS({size})"
-        # )
-        # query = query + where
-        if amount < self.song_count:
-            return []
-        with transaction.atomic():
-            qs = BaseSong.objects.all()
-            songs = random.choices(qs, k=min(amount, len(qs)))
-            return [self.add_song(song, action=self.AddAction.APPEND) for song in songs]
+    # TODO: implement
+    # def append_random_songs(
+    #     self,
+    #     amount: int = default_size,
+    # ) -> list[SongQueueNode]:
+    #     # query = (
+    #     #     f"SELECT * FROM {BaseSong._meta.db_table} TABLESAMPLE SYSTEM_ROWS({size})"
+    #     # )
+    #     # query = query + where
+    #     if amount < self.song_count:
+    #         return []
+    #     with transaction.atomic():
+    #         qs = BaseSong.objects.all()
+    #         songs = random.choices(qs, k=min(amount, len(qs)))
+    #         return [self.add_song(song, action=self.AddAction.APPEND) for song in songs]
 
     def is_empty(self):
         return self.head is None

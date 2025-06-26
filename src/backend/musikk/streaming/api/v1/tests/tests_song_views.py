@@ -19,10 +19,12 @@ from streaming.models.songs import BaseSong
 fake = Faker()
 
 
-@override_settings(
-    DEFAULT_FILE_STORAGE="django.core.files.storage.FileSystemStorage",
-)
 class TestSongCreateView(TestCase):
+    """
+    Warnings:
+        Should be run with CELERY_TASK_ALWAYS_EAGER=True
+    """
+
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -35,8 +37,8 @@ class TestSongCreateView(TestCase):
         cls._override.enable()
 
         cls.factory = APIRequestFactory()
-        cls.artists = ArtistProfileFactory.create_batch(5)
-        cls.main_artist = cls.artists[0].user
+        cls.artists = [ap.user for ap in ArtistProfileFactory.create_batch(5)]
+        cls.main_artist = cls.artists[0]
 
         response = requests.get(AUDIO_URL_1)
         cls.audio_content = response.content

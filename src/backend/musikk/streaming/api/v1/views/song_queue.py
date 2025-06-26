@@ -82,16 +82,18 @@ class SongQueueSetCollectionHeadView(SongQueueBaseView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+# TODO: implement
 class SongQueueAppendRandomSongsView(SongQueueBaseView):
     def post(self, request, *args, **kwargs):
-        with transaction.atomic():
-            song_queue = self.get_song_queue(request)
-            song_queue.append_random_songs()
-
-        send_queue_invalidate_event(EventChannels.user_events(self.request.user.uuid))
-        return Response(
-            status=status.HTTP_201_CREATED,
-        )
+        # with transaction.atomic():
+        #     song_queue = self.get_song_queue(request)
+        #     song_queue.append_random_songs()
+        #
+        # send_queue_invalidate_event(EventChannels.user_events(self.request.user.uuid))
+        # return Response(
+        #     status=status.HTTP_201_CREATED,
+        # )
+        pass
 
 
 class SongQueueRemoveNodeView(SongQueueBaseView):

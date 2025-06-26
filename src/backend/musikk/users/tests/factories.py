@@ -1,39 +1,46 @@
 import factory
 from factory import SubFactory
 
+from base.tests.factories import BaseModelFactory
 from users.models import BaseUser
-from users.models.profiles import StreamingProfile, ArtistProfile
+from users.models.profiles import StreamingProfile, ArtistProfile, BaseProfile
 
 fake = factory.Faker
 
 
-class BaseUserFactory(factory.django.DjangoModelFactory):
+class BaseUserFactory(BaseModelFactory):
     class Meta:
         model = BaseUser
 
     email = fake("ascii_email")
-    display_name = fake("user_name")
-    avatar = None
     is_admin = fake("boolean")
 
 
-class BaseProfileFactory(factory.Factory):
+class BaseProfileFactory(BaseModelFactory):
     class Meta:
-        abstract = True
+        model = BaseProfile
 
     display_name = fake("user_name")
     bio = fake("paragraph")
     avatar = None
 
-
-class StreamingProfileFactory(BaseProfileFactory, factory.django.DjangoModelFactory):
-    class Meta:
-        model = StreamingProfile
-
     user = SubFactory(BaseUserFactory)
 
 
-class ArtistProfileFactory(BaseProfileFactory, factory.django.DjangoModelFactory):
+class StreamingProfileFactory(BaseModelFactory):
+    class Meta:
+        model = StreamingProfile
+        django_get_or_create = ("user",)
+
+    user = SubFactory(BaseUserFactory)
+
+    @classmethod
+    def _create(cls, model_class, *args, **kwargs):
+        user = kwargs.pop("user")
+        return StreamingProfile.objects.for_user(user)
+
+
+class ArtistProfileFactory(BaseModelFactory):
     class Meta:
         model = ArtistProfile
 

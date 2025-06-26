@@ -56,10 +56,10 @@ class PlaybackDeviceActivateView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
-        user = self.request.user.streaminguser
+        profile: StreamingProfile = self.request.user.streamingprofile
         device_uuid = kwargs["uuid"]
         with transaction.atomic():
-            playback_state = user.playback_state
+            playback_state = profile.playback_state
 
             pd = get_object_or_404(
                 PlaybackDevice, uuid=device_uuid, playback_state=playback_state
@@ -73,7 +73,7 @@ class PlaybackDeviceActivateView(APIView):
             playback_state.is_playing = False
             playback_state.save()
 
-        Event.invalidate_event(EventChannels.user_events(user.uuid), ["playback"])
+        Event.invalidate_event(EventChannels.user_events(self.request.user.uuid), ["playback"])
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 

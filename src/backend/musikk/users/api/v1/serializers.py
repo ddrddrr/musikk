@@ -7,12 +7,8 @@ from users.models.profiles import BaseProfile
 
 
 class BaseRegisterSerializer(RegisterSerializer):
+    username = None
     is_artist = serializers.BooleanField(write_only=True, default=False)
-
-    def get_cleaned_data(self):
-        data = super().get_cleaned_data()
-        data["is_artist"] = self.validated_data.get("is_artist", False)
-        return data
 
     def save(self, request):
         user = super().save(request)

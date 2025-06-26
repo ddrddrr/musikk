@@ -1,5 +1,5 @@
 import os
-from dataclasses import dataclass
+import typing
 from enum import StrEnum
 from pathlib import Path
 import subprocess
@@ -29,8 +29,7 @@ class ManifestType(StrEnum):
     M3U8 = "m3u8"
 
 
-@dataclass
-class SongRepresentation:
+class SongRepresentation(typing.NamedTuple):
     """
     Attributes:
         content_path(str|Path): Path to the directory containing the chunks/manifests of a song.
@@ -38,6 +37,7 @@ class SongRepresentation:
             A mapping where keys are manifest types and values are their paths.
             They are always located under the content_path directory.
     """
+
     content_path: str | Path
     manifests: dict[ManifestType, str | Path]
 
@@ -45,9 +45,9 @@ class SongRepresentation:
 # TODO: add handling for lossy formats(e.g. mp3)
 class FFMPEGWrapper:
     def __init__(
-            self,
-            audio_content_path: str | Path = settings.AUDIO_CONTENT_PATH,
-            cleanup: bool = True,
+        self,
+        audio_content_path: str | Path = settings.AUDIO_CONTENT_PATH,
+        cleanup: bool = True,
     ):
         assert audio_content_path is not None, "`audio_content_path` must be provided"
 
@@ -56,13 +56,13 @@ class FFMPEGWrapper:
         self.converter_map: dict[StreamingProtocol, list[AudioConverter]] = {}
 
     def add_converter(
-            self, protocol: StreamingProtocol, converter: AudioConverter
+        self, protocol: StreamingProtocol, converter: AudioConverter
     ) -> Self:
         self.converter_map.setdefault(protocol, []).append(converter)
         return self
 
     def convert_audio(
-            self, file_path: str | Path, storage_dir: str | Path, out_file_prefix: str
+        self, file_path: str | Path, storage_dir: str | Path, out_file_prefix: str
     ) -> SongRepresentation:
         """
         Runs the FFMPEG conversion, writes chunks/manifests into a tmp dir, then copies them out
@@ -86,18 +86,20 @@ class FFMPEGWrapper:
                 manifests_tmp = {}
                 for protocol in self.converter_map.keys():
                     command = (
-                            self.input_file_args(file_path)
-                            + self.converter_args(protocol)
-                            + self.protocol_args(protocol)
+                        self.input_file_args(file_path)
+                        + self.converter_args(protocol)
+                        + self.protocol_args(protocol)
                     )
                     manifest_path = self.manifest_path(
                         protocol=protocol,
                         song_file_prefix=out_file_prefix,
-                        out_dir=tmpdir
+                        out_dir=tmpdir,
                     )
                     command.append(manifest_path)
 
-                    ffmpeg_result = subprocess.run(command, capture_output=True, text=True)
+                    ffmpeg_result = subprocess.run(
+                        command, capture_output=True, text=True
+                    )
                     if ffmpeg_result.returncode != 0:
                         raise Exception(
                             f"ffmpeg could not process input file.\n"
@@ -112,7 +114,9 @@ class FFMPEGWrapper:
                             manifests_tmp[ManifestType.M3U8] = manifest_path
 
                 try:
-                    paths = local_dir_to_storage(local_dir=tmpdir, storage_prefix=storage_dir)
+                    paths = local_dir_to_storage(
+                        local_dir=tmpdir, storage_prefix=storage_dir
+                    )
                 except Exception:
                     if self.cleanup:
                         self._cleanup(content_dir=storage_dir)
@@ -128,7 +132,9 @@ class FFMPEGWrapper:
                     manifests=manifests,
                 )
             except Exception as ex:
-                raise ConversionError(f"Failed to convert audio file {file_path}.") from ex
+                raise ConversionError(
+                    f"Failed to convert audio file {file_path}."
+                ) from ex
 
     def input_file_args(self, song_path: Path) -> list[str]:
         return ["ffmpeg", "-i", str(song_path)]
@@ -147,7 +153,7 @@ class FFMPEGWrapper:
             raise ValueError(f"Unsupported protocol: {protocol}")
 
     def manifest_path(
-            self, protocol: StreamingProtocol, song_file_prefix: str, out_dir: str
+        self, protocol: StreamingProtocol, song_file_prefix: str, out_dir: str
     ) -> str:
         base_path = os.path.join(out_dir, f"{song_file_prefix}")
         if protocol == StreamingProtocol.DASH:
