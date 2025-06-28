@@ -9,7 +9,7 @@ def generate_numeric_code(length=6):
     return str(secrets.randbelow(10**length)).zfill(length)
 
 
-class OTPAccountAdapter(DefaultAccountAdapter):
+class BaseAccountAdapter(DefaultAccountAdapter):
     # Duplicate emails have to be handled differently for every project
     # see https://github.com/Tivix/django-rest-auth/issues/243
     def clean_email(self, email):

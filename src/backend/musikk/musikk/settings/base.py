@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     "social.apps.SocialConfig",
     "notifications.apps.NotificationsConfig",
     ##
+    "anymail",
     "django_eventstream",
     "django_filters",
     "django_extensions",
@@ -165,7 +166,7 @@ ACCOUNT_EMAIL_NOTIFICATIONS = True
 ACCOUNT_CHANGE_EMAIL = True
 ACCOUNT_MAX_EMAIL_ADDRESSES = 2
 
-ACCOUNT_ADAPTER = "users.adapters.OTPAccountAdapter"
+ACCOUNT_ADAPTER = "users.adapters.BaseAccountAdapter"
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -185,11 +186,14 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-### Mail
+### MAIL
 EMAIL_BACKEND = config(
     "EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend"
 )
-DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="info@musikk.stream")
+DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="no-reply@mail.musikk.stream")
+SERVER_EMAIL = config("SERVER_EMAIL", default="server@mail.musikk.stream")
+# other settings, not needed in local development are in the `dev` file
+
 
 ### EVENTSTREAM
 EVENTSTREAM_STORAGE_CLASS = "django_eventstream.storage.DjangoModelStorage"
