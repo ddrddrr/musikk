@@ -10,7 +10,7 @@ REST_FRAMEWORK = REST_FRAMEWORK | {
         "rest_framework.throttling.AnonRateThrottle",
         "rest_framework.throttling.UserRateThrottle",
     ],
-    "DEFAULT_THROTTLE_RATES": {"anon": "100/m", "user": "500/m"},
+    "DEFAULT_THROTTLE_RATES": {"anon": "10/m", "user": "500/m"},
 }
 
 # Can be used with HTTPs only

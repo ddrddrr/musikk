@@ -23,13 +23,16 @@ class BaseRegisterSerializer(RegisterSerializer):
 class BaseUserSerializer(BaseModelSerializer):
     class Meta(BaseModelSerializer.Meta):
         model = BaseUser
-        fields = BaseModelSerializer.Meta.fields + ["email", "is_active"]
+        fields = BaseModelSerializer.Meta.fields + ["email"]
+        extra_kwargs = {
+            "email": {"read_only": True},
+        }
 
 
 class BaseProfileSerializer(BaseModelSerializer):
-    display_name = serializers.CharField()
-    bio = serializers.CharField()
-    avatar = serializers.ImageField()
+    display_name = serializers.CharField(required=False)
+    bio = serializers.CharField(required=False, allow_blank=True)
+    avatar = serializers.ImageField(required=False, allow_null=True)
 
     class Meta(BaseModelSerializer.Meta):
         model = BaseProfile

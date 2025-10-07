@@ -9,7 +9,7 @@ from rest_framework.test import force_authenticate
 from users.models import StreamingProfile
 from users.tests.factories import BaseUserFactory
 
-
+# TODO: rewrite with client instead of factory
 class TestSearchView(TestCase):
     @classmethod
     def setUpClass(cls):

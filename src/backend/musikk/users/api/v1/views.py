@@ -1,6 +1,8 @@
 from rest_framework.generics import (
     RetrieveUpdateAPIView,
     get_object_or_404,
+    RetrieveAPIView,
+    ListAPIView,
 )
 from rest_framework.views import APIView
 from rest_framework import status
@@ -16,21 +18,22 @@ from users.api.v1.serializers import (
     BaseProfileSerializer,
 )
 from users.models import BaseUser, BaseProfile, ArtistProfile, StreamingProfile
+from users.permissions import IsProfileOwnerOrReadOnly
 
 
-# TODO: improve update view, so that user could change only his credentials
-class UserRetrieveUpdateView(RetrieveUpdateAPIView):
+class UserRetrieveView(RetrieveAPIView):
     lookup_field = "uuid"
     queryset = BaseUser.objects.all()
     serializer_class = BaseUserSerializer
     permission_classes = [IsAuthenticated]
 
 
+# TODO: improve update view, so that user could change only his credentials
 class BaseProfileRetrieveUpdateView(RetrieveUpdateAPIView):
     lookup_field = "uuid"
     queryset = BaseProfile.objects.all()
     serializer_class = BaseProfileSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsProfileOwnerOrReadOnly]
 
     def perform_update(self, serializer):
         super().perform_update(serializer)
@@ -40,29 +43,25 @@ class BaseProfileRetrieveUpdateView(RetrieveUpdateAPIView):
         )
 
 
+class FriendsListView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = BaseProfileSerializer
+
+    def get_queryset(self):
+        profile = get_object_or_404(BaseProfile, uuid=self.kwargs["uuid"])
+        return profile.friends.all()
+
+
+class FollowedListView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = BaseProfileSerializer
+
+    def get_queryset(self):
+        profile = get_object_or_404(BaseProfile, uuid=self.kwargs["uuid"])
+        return profile.followed.all()
+
+
 class UserFriendsView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request, *args, **kwargs):
-        profile = get_object_or_404(BaseProfile, uuid=kwargs["uuid"])
-        friends = BaseProfileSerializer(
-            profile.friends.all(), many=True, context={"request": request}
-        ).data
-        return Response(status=status.HTTP_200_OK, data=friends)
-
-
-class UserFollowedView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request, *args, **kwargs):
-        profile = get_object_or_404(BaseProfile, uuid=kwargs["uuid"])
-        followed = BaseProfileSerializer(
-            profile.followed.all(), many=True, context={"request": request}
-        ).data
-        return Response(status=status.HTTP_200_OK, data=followed)
-
-
-class UserFriendsCreateDeleteView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):

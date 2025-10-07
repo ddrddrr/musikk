@@ -307,7 +307,7 @@ An example of this is the aforementioned `UserFriendsView`, the post request han
     def post(self, request, *args, **kwargs):
         ...
         user.friends.add(sender)
-        send_invalidate_event(
+        Event.invalidate_event(
             EventChannels.user_events(user.uuid),
             ["user", "friends", str(user.uuid)]
         )

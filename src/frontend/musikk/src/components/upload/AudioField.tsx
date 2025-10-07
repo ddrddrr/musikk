@@ -2,12 +2,16 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/comp
 import { Input } from "@/components/ui/input";
 import { useFormContext } from "react-hook-form";
 
-export function AudioField({ index }: { index: number }) {
+interface AudioFieldProps {
+    name: string;
+}
+
+export function AudioField({ name }: AudioFieldProps) {
     const { control } = useFormContext();
     return (
         <FormField
             control={control}
-            name={`songs.${index}.audio`}
+            name={name}
             render={({ field: { onChange, value } }) => (
                 <FormItem>
                     <FormLabel>Audio File</FormLabel>

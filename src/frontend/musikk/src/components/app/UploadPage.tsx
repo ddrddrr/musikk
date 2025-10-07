@@ -1,6 +1,6 @@
 import { BackButton } from "@/components/common/BackButton.tsx";
 import { Header } from "@/components/layout/header/Header.tsx";
-import { UploadForm } from "@/components/upload/UploadForm.tsx";
+import { CollectionUploadForm } from "@/components/upload/CollectionUploadForm.tsx";
 
 export function UploadPage() {
     return (
@@ -13,7 +13,7 @@ export function UploadPage() {
 
                     <div className="bg-white p-6 rounded-sm border-2 border-black">
                         <h1 className="text-2xl font-bold mb-6 text-center">Upload New Song or Collection</h1>
-                        <UploadForm />
+                        <CollectionUploadForm />
                     </div>
                 </div>
             </div>

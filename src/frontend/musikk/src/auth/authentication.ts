@@ -8,7 +8,7 @@ interface FullToken {
 }
 
 const ACCESS_EXPIRY = 5 * 60 * 1000; // 5 min
-const REFRESH_EXPIRY = 24 * 60 * 60 * 1000; // 5 min
+const REFRESH_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours
 
 const setTokenCookie = (key: string, value: string, expiresInMs: number) => {
     const expiryDate = new Date(Date.now() + expiresInMs);

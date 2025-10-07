@@ -23,7 +23,6 @@ SECRET_KEY = config("SECRET_KEY", default="<SECRET_KEY>")
 DEBUG = config("DEBUG", default=True, cast=bool)
 
 ### Security
-# Set without scheme, it is validated against HTTP Host header
 ALLOWED_HOSTS = config(
     "DJANGO_ALLOWED_HOSTS", default="localhost,127.0.0.1", cast=Csv()
 )
@@ -145,6 +144,7 @@ SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
 SESSION_CACHE_ALIAS = "default"
 
 REST_AUTH = {
+    # TODO: add user serializer
     "TOKEN_MODEL": None,
     "REGISTER_SERIALIZER": "users.api.v1.serializers.BaseRegisterSerializer",
 }
@@ -243,29 +243,33 @@ AUDIO_CONTENT_PATH = config("AUDIO_CONTENT_PATH", default="audio")
 MEDIA_URL = config("MEDIA_URL", default="media/")
 
 ### LOGS
-
+# TODO: improve
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
     "formatters": {
-        "standard": {
-            "format": "[{levelname}] {asctime} {name}: {message}",
-            "style": "{",
-        },
+        "simple": {"format": "%(asctime)s [%(levelname)s] %(name)s: %(message)s"},
     },
     "handlers": {
         "console": {
-            "level": "DEBUG",
             "class": "logging.StreamHandler",
-            "stream": sys.stdout,
-            "formatter": "standard",
+            "formatter": "simple",
         },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "INFO",
     },
     "loggers": {
         "django": {
             "handlers": ["console"],
             "level": "INFO",
-            "propagate": True,
+            "propagate": False,
+        },
+        "musikk": {
+            "handlers": ["console"],
+            "level": "DEBUG",
+            "propagate": False,
         },
     },
 }

@@ -12,15 +12,14 @@ from dj_rest_auth.views import (
 )
 from django.urls import path
 from django.urls.conf import include, re_path
-from django.views.generic import TemplateView
 from rest_framework.routers import DefaultRouter
 
 from users.api.v1.views import (
     UserEventViewSet,
-    UserRetrieveUpdateView,
+    UserRetrieveView,
     UserFriendsView,
     ArtistFollowersView,
-    UserFriendsCreateDeleteView,
+    UserFriendsView,
     UserFollowedView,
 )
 
@@ -59,8 +58,8 @@ urlpatterns = [
     path("auth/", include(dj_rest_auth_urls)),
     path(
         "users/<uuid:uuid>",
-        UserRetrieveUpdateView.as_view(),
-        name="user-update-retrieve",
+        UserRetrieveView.as_view(),
+        name="user-retrieve",
     ),
     path(
         "users/<uuid:uuid>/friends",
@@ -74,7 +73,7 @@ urlpatterns = [
     ),
     path(
         "users/<uuid:user_uuid>/friends/<uuid:friend_uuid>",
-        UserFriendsCreateDeleteView.as_view(),
+        UserFriendsView.as_view(),
         name="accept-to-friends",
     ),
     path(

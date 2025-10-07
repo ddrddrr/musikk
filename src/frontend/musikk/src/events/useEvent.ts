@@ -1,37 +1,19 @@
 import { refreshAccessToken } from "@/auth/authentication.ts";
-import { useQueryClient } from "@tanstack/react-query";
 import { EventSource } from "eventsource";
 import Cookies from "js-cookie";
-import { useCallback, useEffect } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 interface useEventProps {
     eventUrl: string;
+    handleEvent: (event: MessageEvent) => void;
+    eventKey: string;
     deps: any[];
     isEnabled: boolean;
 }
 
-type IEventInvalidate = {
-    invalidate: any[];
-};
-
-// TODO: add playback events
-
-export function useEvent({ eventUrl, deps, isEnabled }: useEventProps) {
+export function useEvent({ eventUrl, handleEvent, eventKey, deps, isEnabled }: useEventProps) {
     const navigate = useNavigate();
-    const client = useQueryClient();
-
-    const handleEvent = useCallback(
-        function handleEvent(event: MessageEvent) {
-            const data: IEventInvalidate = JSON.parse(event.data);
-            if (data) {
-                if ("invalidate" in data) {
-                    client.invalidateQueries({ queryKey: data.invalidate });
-                }
-            }
-        },
-        [client],
-    );
 
     // pain...
     useEffect(() => {
@@ -51,9 +33,12 @@ export function useEvent({ eventUrl, deps, isEnabled }: useEventProps) {
                             },
                         }),
                 });
-                es.addEventListener("message", handleEvent);
+                // es.addEventListener(eventKey, handleEvent);
+                es.addEventListener(eventKey, (evt) => {
+                    console.log(`[SSE] ${eventKey} event:`, evt.data);
+                    handleEvent(evt);
+                });
                 es.addEventListener("error", async (e: any) => {
-                    // handle tokens
                     if (e?.status === 401 || e?.target?.readyState === EventSource.CLOSED) {
                         es?.close();
                         try {
