@@ -1,22 +1,22 @@
-import os
 import typing
 from enum import StrEnum
 from pathlib import Path
-import subprocess
-from typing import Self
 import tempfile
 
 from django.conf import settings
 
 from musikk.utils.storage import local_dir_to_storage, delete_storage_dir
 from streaming.audio.converters import (
-    AudioConverter,
+    FFMPEGAudioConverter,
     FLAC_CONVERTER,
     AACHEv2_CONVERTER,
-    OPUS_CONVERTER,
-    AAC_CONVERTER,
+    OPUS_96_CONVERTER,
+    OPUS_160_CONVERTER,
+    OPUS_256_CONVERTER,
+    AAC_96_CONVERTER,
+    AAC_160_CONVERTER,
+    AAC_320_CONVERTER,
 )
-from streaming.audio.exceptions import ConversionError
 
 
 class StreamingProtocol(StrEnum):
@@ -46,149 +46,61 @@ class SongRepresentation(typing.NamedTuple):
 class FFMPEGWrapper:
     def __init__(
         self,
+        audio_converters: list[FFMPEGAudioConverter],
         audio_content_path: str | Path = settings.AUDIO_CONTENT_PATH,
-        cleanup: bool = True,
+        do_cleanup: bool = True,
     ):
         assert audio_content_path is not None, "`audio_content_path` must be provided"
+        assert audio_converters, "`audio_converters` must be set"
 
+        self.audio_converters: list[FFMPEGAudioConverter] = audio_converters
         self.audio_content_path = Path(audio_content_path)
-        self.cleanup = cleanup
-        self.converter_map: dict[StreamingProtocol, list[AudioConverter]] = {}
-
-    def add_converter(
-        self, protocol: StreamingProtocol, converter: AudioConverter
-    ) -> Self:
-        self.converter_map.setdefault(protocol, []).append(converter)
-        return self
+        self.do_cleanup = do_cleanup
 
     def convert_audio(
-        self, file_path: str | Path, storage_dir: str | Path, out_file_prefix: str
-    ) -> SongRepresentation:
+        self, file_path: str | Path, storage_dir: str | Path
+    ) -> list[str]:
         """
-        Runs the FFMPEG conversion, writes chunks/manifests into a tmp dir, then copies them out
-        to the default storage.
+        Transmuxes audio from one format to other formats defined by `converter_map` attribute.
 
         Args:
             file_path (str|Path): Path to the directory containing the chunks/manifests of a song.
             storage_dir (str|Path):
-                Relative Path to the storage directory.
+                Relative Path to the media directory.
                 In case of local FS storage should be a subdir of MEDIA_ROOT directory.
-            out_file_prefix (str): The prefix for the manifest file names.
-        """
 
-        if not file_path:
-            raise ValueError("No song path provided.")
-        if not self.converter_map:
-            raise ValueError("No converters were defined.")
+        Returns:
+            List of paths for created files.
+        """
+        assert file_path, "No song path provided."
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            try:
-                manifests_tmp = {}
-                for protocol in self.converter_map.keys():
-                    command = (
-                        self.input_file_args(file_path)
-                        + self.converter_args(protocol)
-                        + self.protocol_args(protocol)
-                    )
-                    manifest_path = self.manifest_path(
-                        protocol=protocol,
-                        song_file_prefix=out_file_prefix,
-                        out_dir=tmpdir,
-                    )
-                    command.append(manifest_path)
-
-                    ffmpeg_result = subprocess.run(
-                        command, capture_output=True, text=True
-                    )
-                    if ffmpeg_result.returncode != 0:
-                        raise Exception(
-                            f"ffmpeg could not process input file.\n"
-                            f"Error: {ffmpeg_result.stderr}\n"
-                            f"Input args: {ffmpeg_result.args}"
-                        )
-
-                    match protocol:
-                        case StreamingProtocol.DASH:
-                            manifests_tmp[ManifestType.MPD] = manifest_path
-                        case StreamingProtocol.HLS:
-                            manifests_tmp[ManifestType.M3U8] = manifest_path
-
+            for converter in self.audio_converters:
                 try:
-                    paths = local_dir_to_storage(
-                        local_dir=tmpdir, storage_prefix=storage_dir
+                    converter.convert_song(
+                        file_path=file_path, storage_dir=Path(tmpdir)
                     )
                 except Exception:
-                    if self.cleanup:
-                        self._cleanup(content_dir=storage_dir)
+                    if self.do_cleanup:
+                        delete_storage_dir(storage_dir=storage_dir)
                     raise
 
-                manifests = {}
-                for manifest_type, manifest_path in manifests_tmp.items():
-                    # set storage path instead of tmp
-                    manifests[manifest_type] = paths[manifest_path]
-
-                return SongRepresentation(
-                    content_path=storage_dir,
-                    manifests=manifests,
-                )
-            except Exception as ex:
-                raise ConversionError(
-                    f"Failed to convert audio file {file_path}."
-                ) from ex
-
-    def input_file_args(self, song_path: Path) -> list[str]:
-        return ["ffmpeg", "-i", str(song_path)]
-
-    def protocol_args(self, protocol: StreamingProtocol) -> list[str]:
-        if protocol == StreamingProtocol.DASH:
-            return ["-f", "dash", "-adaptation_sets", "id=0, streams=a"]
-        elif protocol == StreamingProtocol.HLS:
-            return [
-                "-f",
-                "hls",
-                "-hls_playlist_type",
-                "vod",  # makes playlist const
-            ]
-        else:
-            raise ValueError(f"Unsupported protocol: {protocol}")
-
-    def manifest_path(
-        self, protocol: StreamingProtocol, song_file_prefix: str, out_dir: str
-    ) -> str:
-        base_path = os.path.join(out_dir, f"{song_file_prefix}")
-        if protocol == StreamingProtocol.DASH:
-            return f"{base_path}.mpd"
-        elif protocol == StreamingProtocol.HLS:
-            return f"{base_path}.m3u8"
-        else:
-            raise ValueError(f"Unsupported protocol: {protocol}")
-
-    def converter_args(self, protocol: StreamingProtocol) -> list[str]:
-        channel_input = 0
-        commands = []
-        for converter in self.converter_map[protocol]:
-            ffmpeg_command = converter.construct_ffmpeg_command(channel_input)
-            for sublist in ffmpeg_command:
-                commands.extend(sublist)
-
-            if bitrate_count := len(converter.bitrates):
-                channel_input += bitrate_count
-            else:
-                channel_input += 1
-
-        return commands
-
-    @staticmethod
-    def _cleanup(content_dir: Path) -> None:
-        delete_storage_dir(content_dir)
+            orig_to_transferred_path_map = local_dir_to_storage(
+                local_dir=tmpdir, storage_prefix=storage_dir
+            )
+            return list(orig_to_transferred_path_map.values())
 
 
-FFMPEGFlacOnly = FFMPEGWrapper().add_converter(StreamingProtocol.DASH, FLAC_CONVERTER)
-FFMPEGFull = (
-    FFMPEGWrapper()
-    # .add_converter(StreamingProtocol.DASH, FLAC_CONVERTER)
-    .add_converter(StreamingProtocol.DASH, AACHEv2_CONVERTER)
-    .add_converter(StreamingProtocol.DASH, OPUS_CONVERTER)
-    .add_converter(StreamingProtocol.HLS, AAC_CONVERTER)
-    .add_converter(StreamingProtocol.HLS, AACHEv2_CONVERTER)
+FFMPEGFlacOnly = FFMPEGWrapper(audio_converters=[FLAC_CONVERTER])
+FFMPEGFull = FFMPEGWrapper(
+    audio_converters=[
+        FLAC_CONVERTER,
+        OPUS_96_CONVERTER,
+        OPUS_160_CONVERTER,
+        OPUS_256_CONVERTER,
+        AACHEv2_CONVERTER,
+        AAC_96_CONVERTER,
+        AAC_160_CONVERTER,
+        AAC_320_CONVERTER,
+    ]
 )

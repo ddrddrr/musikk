@@ -3,8 +3,12 @@ from pathlib import Path
 from django.core.files.base import File
 from django.core.files.storage import default_storage
 
+orig_path = transferred_path = str
 
-def local_dir_to_storage(local_dir: str | Path, storage_prefix: str, overwrite: bool = False) -> dict[str, str]:
+
+def local_dir_to_storage(
+    local_dir: str | Path, storage_prefix: str, overwrite: bool = False
+) -> dict[orig_path, transferred_path]:
     """
     Takes a local directory path and stores its contents in storage under storage_prefix directory.
 
@@ -28,16 +32,17 @@ def local_dir_to_storage(local_dir: str | Path, storage_prefix: str, overwrite: 
                 default_storage.delete(key)
 
             with open(abs_path, "rb") as f:
-                paths[str(abs_path)] = (default_storage.save(key, File(f)))
+                paths[str(abs_path)] = default_storage.save(key, File(f))
 
     return paths
 
 
-def delete_storage_dir(storage_prefix: str | Path) -> None:
-    storage_prefix = str(storage_prefix)
+def delete_storage_dir(storage_dir: str | Path) -> None:
+    """Deletes a dir from Django storage"""
+    storage_dir = str(storage_dir)
 
-    subdirs, files = default_storage.listdir(storage_prefix)
+    subdirs, files = default_storage.listdir(storage_dir)
     for fname in files:
-        default_storage.delete(f"{storage_prefix}/{fname}")
+        default_storage.delete(f"{storage_dir}/{fname}")
     for sub in subdirs:
-        delete_storage_dir(f"{storage_prefix}/{sub}")
+        delete_storage_dir(f"{storage_dir}/{sub}")

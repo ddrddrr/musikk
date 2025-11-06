@@ -1,48 +1,133 @@
-from typing import Self
+import shlex
+import subprocess
+from pathlib import Path
+from typing import Literal
+from uuid import uuid4
+
+from django.conf import settings
+
+from streaming.audio.exceptions import ConversionError
 
 
-class AudioConverter:
-    def __init__(self, encoder: str):
+class FFmpegCommand:
+    def __init__(
+        self,
+        input_path: Path,
+        output_path: Path,
+        encoder: str,
+        bitrate: int | None = None,
+        extras: list[str] | None = None,
+        strip_non_audio: bool = True,
+        movflags_faststart: bool = True,
+    ):
+        self.input_path = input_path
+        self.output_path = output_path
         self.encoder = encoder
-        self.bitrates: list[int] = []
-        self.extras: list[str] = []
+        self.bitrate = bitrate
+        self.extras = extras or []
+        self.strip_non_audio = strip_non_audio
+        self.movflags_faststart = movflags_faststart
 
-    def set_bitrates(self, bitrates: list[int]) -> Self:
-        self.bitrates = bitrates
-        return self
+    def build(self) -> list[str]:
+        parts: list[str] = []
+        parts += self._input_args()
+        parts += self._strip_non_audio_args()
+        parts += self._encoder_args()
+        parts += self._extras_args()
+        parts += self._bitrate_args()
+        parts += self._save_options_args()
+        parts += self._output_arg()
+        return parts
 
-    def set_extras(self, extras: list[str]) -> Self:
-        self.extras = extras
-        return self
+    def _input_args(self) -> list[str]:
+        return [settings.FFMPEG_BIN, "-i", str(self.input_path)]
 
-    def construct_ffmpeg_command(self, channel_input: int) -> list[list[str]]:
-        # TODO: change, so there is no clunky indexing on lists
-        base_command = [
-            "-map",
-            "0:a",
-            "-c:a:0",
-            self.encoder,
-            *self.extras
-        ]
-        if not self.bitrates:
-            return [base_command]
+    def _strip_non_audio_args(self) -> list[str]:
+        return ["-vn", "-sn", "-dn"] if self.strip_non_audio else []
 
-        commands = []
-        for bitrate in self.bitrates:
-            base_command[2] = base_command[2][:-1] + str(channel_input)
-            commands.append(base_command + ["-b:a", f"{bitrate}k"])
-            channel_input += 1
-        return commands
+    def _encoder_args(self) -> list[str]:
+        return ["-c:a", self.encoder]
+
+    def _bitrate_args(self) -> list[str]:
+        if self.bitrate:
+            return ["-b:a", f"{self.bitrate}k"]
+        return []
+
+    def _extras_args(self) -> list[str]:
+        return list(self.extras) if self.extras else []
+
+    def _save_options_args(self) -> list[str]:
+        return ["-movflags", "+faststart"] if self.movflags_faststart else []
+
+    def _output_arg(self) -> list[str]:
+        return [str(self.output_path)]
 
 
-FLAC_CONVERTER = AudioConverter("flac")
-OPUS_CONVERTER = AudioConverter("libopus").set_bitrates([96, 160, 256])
-AACHEv2_CONVERTER = (
-    AudioConverter(
-        "libfdk_aac",
-    )
-    .set_bitrates([24])
-    .set_extras(["-profile", "aac_he_v2"])
+# TODO: probably change so bitrate is set at runtime(to be more extensible)
+class FFMPEGAudioConverter:
+    def __init__(
+        self,
+        encoder: Literal["flac", "libopus", "libfdk_aac"],
+        bitrate: int | None = None,
+        extras: list[str] | None = None,
+        timeout: int | None = 60,
+    ):
+        self.encoder = encoder
+        self.bitrate = bitrate
+        self.extras = extras or []
+        self.timeout = timeout
+
+    def convert_song(self, file_path: Path, storage_dir: Path) -> str:
+        """
+        Transcodes a single audio file and returns the local output path (string).
+        """
+        output_path = self._output_file_path_arg(storage_dir=storage_dir)
+        cmd = FFmpegCommand(
+            input_path=file_path,
+            output_path=Path(output_path),
+            encoder=self.encoder,
+            bitrate=self.bitrate,
+            extras=self.extras,
+        ).build()
+
+        try:
+            ffmpeg_result = subprocess.run(
+                cmd, capture_output=True, text=True, timeout=self.timeout
+            )
+        except subprocess.TimeoutExpired as exc:
+            raise ConversionError(f"'ffmpeg' timeout: {exc}") from exc
+
+        if ffmpeg_result.returncode != 0:
+            readable = shlex.join(cmd)
+            raise ConversionError(
+                f"ffmpeg could not process input file (rc={ffmpeg_result.returncode}).\n"
+                f"stderr: {ffmpeg_result.stderr}\n"
+                f"cmd: {readable}"
+            )
+
+        return output_path
+
+    def _output_file_path_arg(self, storage_dir: Path) -> str:
+        return str(
+            storage_dir
+            / f"{self.encoder}-{str(self.bitrate) or 'static'}-{uuid4().hex}.mp4"
+        )
+
+
+FLAC_CONVERTER = FFMPEGAudioConverter("flac")
+OPUS_96_CONVERTER, OPUS_160_CONVERTER, OPUS_256_CONVERTER = (
+    FFMPEGAudioConverter(encoder="libopus", bitrate=bitrate)
+    for bitrate in [96, 160, 256]
 )
-
-AAC_CONVERTER = AudioConverter("libfdk_aac").set_bitrates([96, 160, 320])
+AACHEv2_CONVERTER = FFMPEGAudioConverter(
+    encoder="libfdk_aac",
+    bitrate=24,
+    extras=[
+        "-profile",
+        "aac_he_v2",
+    ],  # see https://trac.ffmpeg.org/wiki/Encode/AAC#Examples2
+)
+AAC_96_CONVERTER, AAC_160_CONVERTER, AAC_320_CONVERTER = (
+    FFMPEGAudioConverter(encoder="libfdk_aac", bitrate=bitrate)
+    for bitrate in [96, 160, 320]
+)

@@ -7,6 +7,7 @@ from django.conf import settings
 from django.db import transaction
 from django.core.files.storage import default_storage
 
+from musikk.utils.storage import delete_storage_dir
 from sse.config import EventChannels
 from sse.events import Event
 from streaming.audio.ffmpeg_wrapper import FFMPEGFull, ManifestType, FFMPEGWrapper
@@ -37,7 +38,7 @@ def convert_audio(
             song = BaseSong.objects.get(uuid=song_uuid)
         except Exception as ex:
             # TODO
-            FFMPEGWrapper._cleanup(song_repr.content_path)
+            delete_storage_dir(song_repr.content_path)
             raise
 
         song.content_path = song_repr.content_path

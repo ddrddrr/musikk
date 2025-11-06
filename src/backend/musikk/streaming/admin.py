@@ -18,7 +18,7 @@ class BaseSongAdminForm(forms.ModelForm):
         if uploaded_file:
             if self.instance.mpd:
                 delete_dir_for_file(Path(self.instance.mpd))
-            ffmpeg = FFMPEGWrapper().add_converter(FLAC_CONVERTER)
+            ffmpeg = FFMPEGWrapper().add_audio_converter(FLAC_CONVERTER)
             song_repr = ffmpeg.convert_audio(uploaded_file.file)
             return song_repr
 

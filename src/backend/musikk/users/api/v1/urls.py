@@ -20,7 +20,7 @@ from users.api.v1.views import (
     UserFriendsView,
     ArtistFollowersView,
     UserFriendsView,
-    UserFollowedView,
+
 )
 
 sse_router = DefaultRouter()
@@ -66,11 +66,11 @@ urlpatterns = [
         UserFriendsView.as_view(),
         name="user-friends",
     ),
-    path(
-        "users/<uuid:uuid>/followed",
-        UserFollowedView.as_view(),
-        name="user-followed",
-    ),
+    # path(
+    #     "users/<uuid:uuid>/followed",
+    #     UserFollowedView.as_view(),
+    #     name="user-followed",
+    # ),
     path(
         "users/<uuid:user_uuid>/friends/<uuid:friend_uuid>",
         UserFriendsView.as_view(),

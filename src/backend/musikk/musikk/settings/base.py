@@ -4,7 +4,6 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 import os
-import sys
 from pathlib import Path
 
 from corsheaders.defaults import default_headers
@@ -241,6 +240,9 @@ MEDIA_ROOT = config("MEDIA_ROOT", default=os.path.join(ROOT_DIR, "media"))
 # Relative to MEDIA_ROOT
 AUDIO_CONTENT_PATH = config("AUDIO_CONTENT_PATH", default="audio")
 MEDIA_URL = config("MEDIA_URL", default="media/")
+
+### FFMPEG
+FFMPEG_BIN = config("FFMPEG_BIN", default="/usr/bin/ffmpeg")
 
 ### LOGS
 # TODO: improve

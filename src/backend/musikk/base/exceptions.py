@@ -1,0 +1,2 @@
+class MusikkException(Exception):
+    pass

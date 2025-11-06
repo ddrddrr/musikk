@@ -25,3 +25,8 @@ dependencies = [
     "python-decouple>=3.8",
     "python-magic>=0.4.27",
 ]
+
+[dependency-groups]
+dev = [
+    "black>=25.9.0",
+]
