@@ -8,7 +8,7 @@ from django.test import TestCase, override_settings
 from django.core.files.storage import default_storage
 
 from musikk.utils.storage import delete_storage_dir
-from streaming.audio.ffmpeg_wrapper import FFMPEGFlacOnly
+from streaming.audio.ffmpeg_wrapper import FFMPEGFlacOnly, FFMPEGFull
 
 
 class TestFFMPEGConversion(TestCase):
@@ -27,15 +27,11 @@ class TestFFMPEGConversion(TestCase):
         assert cls.input_file.exists(), f"Test input_file not found: {cls.input_file}"
 
     def test_flac_conversion_creates_files_in_storage(self):
-        """
-        Run ffmpeg conversion using the FLAC converter and assert that files are saved
-        to the configured storage (MEDIA_ROOT) under the configured AUDIO_CONTENT_PATH.
-        """
         storage_subdir = uuid.uuid4().hex
         storage_dir_path = Path(os.path.join(self._tmp_media, storage_subdir))
         storage_dir_path.mkdir(exist_ok=True, parents=True)
         results = FFMPEGFlacOnly.convert_audio(
-            file_path=self.input_file, storage_dir=storage_dir_path
+            file_path=self.input_file, storage_dir=storage_subdir
         )
         self.assertIsInstance(results, list)
         self.assertTrue(len(results) > 0, "No files were returned from convert_audio")
@@ -44,7 +40,27 @@ class TestFFMPEGConversion(TestCase):
                 default_storage.exists(saved_path),
                 f"Expected saved file to exist in storage: {saved_path}",
             )
-        delete_storage_dir(storage_dir_path)
+
+        delete_storage_dir(storage_subdir)
+
+    def test_all_codecs_convert_and_save(self):
+        storage_subdir = uuid.uuid4().hex
+        storage_dir_path = Path(os.path.join(self._tmp_media, storage_subdir))
+        storage_dir_path.mkdir(exist_ok=True, parents=True)
+        results = FFMPEGFull.convert_audio(
+            file_path=self.input_file, storage_dir=storage_subdir
+        )
+        self.assertIsInstance(results, list)
+        self.assertTrue(
+            len(results) > 0, "No files were returned from convert_audio for FFMPEGFull"
+        )
+        for saved_path in results:
+            self.assertTrue(
+                default_storage.exists(saved_path),
+                f"Expected saved file to exist in storage: {saved_path}",
+            )
+
+        delete_storage_dir(storage_subdir)
 
     @classmethod
     def tearDownClass(cls):
