@@ -8,55 +8,45 @@ from django.db import transaction
 from django.core.files.storage import default_storage
 
 from musikk.utils.storage import delete_django_storage_dir
-from sse.config import EventChannels
-from sse.events import Event
-from streaming.audio.ffmpeg_conf.ffmpeg_wrapper import FFMPEGFull
+from streaming.audio.processing_pipeline import AudioProcessingPipeline
 from streaming.audio.shaka_packager_conf.shaka_packager_wrapper import ManifestType
 from streaming.models.songs import BaseSong
 
 
+# TODO: retries? and other celery task stuff
 @shared_task(bind=True)
 def convert_audio(
     self,
     file_path: str | Path,
     song_uuid: str | UUID,
-    initiator_uuid: str | UUID = None,
+    event_uuid: str | UUID = None,
     delete_orig_file: bool = True,
 ):
     str_uuid = str(song_uuid)
     try:
-        song_repr = FFMPEGFull.convert_audio(
-            file_path=file_path,
-            storage_dir=os.path.join(settings.AUDIO_CONTENT_PATH, str_uuid),
-            out_file_prefix=str_uuid,
+        result = AudioProcessingPipeline.run(
+            source=file_path,
+            final_storage_dir=os.path.join(settings.AUDIO_CONTENT_PATH, str_uuid),
         )
+        song_repr = result.song_repr
     except Exception as ex:
-        # TODO
+        # TODO: optionally emit failure event or perform custom retries
         raise
-
-    with transaction.atomic():
-        try:
+    try:
+        with transaction.atomic():
             song = BaseSong.objects.get(uuid=song_uuid)
-        except Exception as ex:
-            # TODO
-            delete_django_storage_dir(song_repr.content_path)
-            raise
+            song.content_path = song_repr.content_path
+            song.mpd = default_storage.url(song_repr.manifests[ManifestType.MPD])
+            song.m3u8 = default_storage.url(song_repr.manifests[ManifestType.M3U8])
+            song.save()
 
-        song.content_path = song_repr.content_path
-        song.mpd = default_storage.url(song_repr.manifests[ManifestType.MPD])
-        song.m3u8 = default_storage.url(song_repr.manifests[ManifestType.M3U8])
-        song.save()
+    except Exception:
+        delete_django_storage_dir(song_repr.content_path)
+        # TODO: err handling
 
-    if initiator_uuid:
-        try:
-            Event.upload_event(
-                channel=EventChannels.user_events(initiator_uuid),
-                operation_id=str_uuid,
-                status="success",
-            )
-            print(f"SSE: sent upload_event to {initiator_uuid}")
-        except Exception as e:
-            print("SSE ERROR:", e)
+    # TODO: emit event
 
+    # TODO: rewrite as storage delete (file should be saved to storage)
     if delete_orig_file:
+        # Remove the original uploaded file (best-effort).
         Path(file_path).unlink(missing_ok=True)

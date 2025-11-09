@@ -1,5 +1,5 @@
 from base.exceptions import MusikkException
 
 
-class FFMPEGConversionError(MusikkException):
+class AudioProcessingPipelineError(MusikkException):
     pass

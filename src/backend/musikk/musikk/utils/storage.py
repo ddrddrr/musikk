@@ -3,7 +3,8 @@ from pathlib import Path
 from django.core.files.base import File
 from django.core.files.storage import default_storage
 
-orig_path = transferred_path = str
+type orig_path = str
+type transferred_path = str
 
 
 def local_dir_to_django_storage(
@@ -39,6 +40,7 @@ def local_dir_to_django_storage(
     return paths
 
 
+# TODO: add proper err handling
 def delete_django_storage_dir(storage_dir: str | Path) -> None:
     """Delete a dir from Django storage"""
     storage_dir = str(storage_dir)
@@ -49,6 +51,8 @@ def delete_django_storage_dir(storage_dir: str | Path) -> None:
     for sub in subdirs:
         delete_django_storage_dir(f"{storage_dir}/{sub}")
 
+    default_storage.delete(storage_dir)
+
 
 def get_django_storage_files(storage_file_paths: list[str], tmpdir: str) -> list[Path]:
     """Download files from Django storage to tmpdir and return their local paths."""
@@ -58,9 +62,10 @@ def get_django_storage_files(storage_file_paths: list[str], tmpdir: str) -> list
         local_fname = f"{idx:02d}_{fname}"
         local_path = Path(tmpdir) / local_fname
 
-        with default_storage.open(file_path, "rb") as src, open(
-            local_path, "wb"
-        ) as dst:
+        with (
+            default_storage.open(file_path, "rb") as src,
+            open(local_path, "wb") as dst,
+        ):
             # stream copy to avoid large memory usage
             for chunk in src.chunks():
                 dst.write(chunk)

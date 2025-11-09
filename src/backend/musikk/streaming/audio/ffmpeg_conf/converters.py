@@ -1,5 +1,3 @@
-import shlex
-import subprocess
 from pathlib import Path
 from typing import Literal
 from uuid import uuid4
@@ -7,7 +5,7 @@ from uuid import uuid4
 from django.conf import settings
 
 from musikk.utils.cmd import run_shell_command
-from streaming.audio.exceptions import FFMPEGConversionError
+
 
 
 class FFMPEGCommand:
