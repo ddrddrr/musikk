@@ -1,5 +1,5 @@
 from base.exceptions import MusikkException
 
 
-class ConversionError(MusikkException):
+class FFMPEGConversionError(MusikkException):
     pass

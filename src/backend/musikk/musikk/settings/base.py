@@ -241,8 +241,9 @@ MEDIA_ROOT = config("MEDIA_ROOT", default=os.path.join(ROOT_DIR, "media"))
 AUDIO_CONTENT_PATH = config("AUDIO_CONTENT_PATH", default="audio")
 MEDIA_URL = config("MEDIA_URL", default="media/")
 
-### FFMPEG
+### FFMPEG, Shaka-packager
 FFMPEG_BIN = config("FFMPEG_BIN", default="/usr/bin/ffmpeg")
+SHAKA_PACKAGER_BIN = config("SHAKA_PACKAGER_BIN", default="/usr/bin/packager")
 
 ### LOGS
 # TODO: improve

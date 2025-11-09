@@ -7,8 +7,8 @@ from pathlib import Path
 from django.test import TestCase, override_settings
 from django.core.files.storage import default_storage
 
-from musikk.utils.storage import delete_storage_dir
-from streaming.audio.ffmpeg_wrapper import FFMPEGFlacOnly, FFMPEGFull
+from musikk.utils.storage import delete_django_storage_dir
+from streaming.audio.ffmpeg_conf.ffmpeg_wrapper import FFMPEGFlacOnly, FFMPEGFull
 
 
 class TestFFMPEGConversion(TestCase):
@@ -22,8 +22,9 @@ class TestFFMPEGConversion(TestCase):
             MEDIA_ROOT=cls._tmp_media,
         )
         cls.override.enable()
+
         tests_dir = Path(__file__).parent
-        cls.input_file = tests_dir / "file1.wav"
+        cls.input_file = tests_dir / "data" / "file1.wav"
         assert cls.input_file.exists(), f"Test input_file not found: {cls.input_file}"
 
     def test_flac_conversion_creates_files_in_storage(self):
@@ -41,7 +42,7 @@ class TestFFMPEGConversion(TestCase):
                 f"Expected saved file to exist in storage: {saved_path}",
             )
 
-        delete_storage_dir(storage_subdir)
+        delete_django_storage_dir(storage_subdir)
 
     def test_all_codecs_convert_and_save(self):
         storage_subdir = uuid.uuid4().hex
@@ -60,7 +61,7 @@ class TestFFMPEGConversion(TestCase):
                 f"Expected saved file to exist in storage: {saved_path}",
             )
 
-        delete_storage_dir(storage_subdir)
+        delete_django_storage_dir(storage_subdir)
 
     @classmethod
     def tearDownClass(cls):

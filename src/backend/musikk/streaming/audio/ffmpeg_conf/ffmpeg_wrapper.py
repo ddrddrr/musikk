@@ -5,8 +5,8 @@ import tempfile
 
 from django.conf import settings
 
-from musikk.utils.storage import local_dir_to_storage, delete_storage_dir
-from streaming.audio.converters import (
+from musikk.utils.storage import local_dir_to_django_storage, delete_django_storage_dir
+from streaming.audio.ffmpeg_conf.converters import (
     FFMPEGAudioConverter,
     FLAC_CONVERTER,
     AACHEv2_CONVERTER,
@@ -22,24 +22,6 @@ from streaming.audio.converters import (
 class StreamingProtocol(StrEnum):
     DASH = "dash"
     HLS = "hls"
-
-
-class ManifestType(StrEnum):
-    MPD = "mpd"
-    M3U8 = "m3u8"
-
-
-class SongRepresentation(typing.NamedTuple):
-    """
-    Attributes:
-        content_path(str|Path): Path to the directory containing the chunks/manifests of a song.
-        manifests(dict[ManifestType, str | Path]):
-            A mapping where keys are manifest types and values are their paths.
-            They are always located under the content_path directory.
-    """
-
-    content_path: str | Path
-    manifests: dict[ManifestType, str | Path]
 
 
 # TODO: add handling for lossy formats(e.g. mp3)
@@ -82,10 +64,10 @@ class FFMPEGWrapper:
                     )
                 except Exception:
                     if self.do_cleanup:
-                        delete_storage_dir(storage_dir=storage_dir)
+                        delete_django_storage_dir(storage_dir=storage_dir)
                     raise
 
-            orig_to_transferred_path_map = local_dir_to_storage(
+            orig_to_transferred_path_map = local_dir_to_django_storage(
                 local_dir=tmpdir, storage_prefix=storage_dir
             )
             return list(orig_to_transferred_path_map.values())

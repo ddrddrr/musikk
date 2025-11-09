@@ -6,14 +6,16 @@ from django.core.files.storage import default_storage
 orig_path = transferred_path = str
 
 
-def local_dir_to_storage(
+def local_dir_to_django_storage(
     local_dir: str | Path, storage_prefix: str, overwrite: bool = False
 ) -> dict[orig_path, transferred_path]:
     """
-    Takes a local directory path and stores its contents in storage under storage_prefix directory.
+    Take a local directory path and store its contents in Django storage under storage_prefix directory.
 
-    If local FS backend is used, writes files under MEDIA_ROOT directory. The path must be a relative path
-    to that directory. E.g. to write files under /media/audio/... specify `storage_prefix='audio'`.
+    For local FS:
+     writes files under `MEDIA_ROOT` directory
+     hence, the path must be a relative path to that directory.
+     E.g. to write files under /media/audio/... specify `storage_prefix='audio'`.
 
     Returns:
         Mapping of format {`original path`: `storage path`}
@@ -37,12 +39,32 @@ def local_dir_to_storage(
     return paths
 
 
-def delete_storage_dir(storage_dir: str | Path) -> None:
-    """Deletes a dir from Django storage"""
+def delete_django_storage_dir(storage_dir: str | Path) -> None:
+    """Delete a dir from Django storage"""
     storage_dir = str(storage_dir)
 
     subdirs, files = default_storage.listdir(storage_dir)
     for fname in files:
         default_storage.delete(f"{storage_dir}/{fname}")
     for sub in subdirs:
-        delete_storage_dir(f"{storage_dir}/{sub}")
+        delete_django_storage_dir(f"{storage_dir}/{sub}")
+
+
+def get_django_storage_files(storage_file_paths: list[str], tmpdir: str) -> list[Path]:
+    """Download files from Django storage to tmpdir and return their local paths."""
+    local_paths: list[Path] = []
+    for idx, file_path in enumerate(storage_file_paths):
+        fname = Path(file_path).name
+        local_fname = f"{idx:02d}_{fname}"
+        local_path = Path(tmpdir) / local_fname
+
+        with default_storage.open(file_path, "rb") as src, open(
+            local_path, "wb"
+        ) as dst:
+            # stream copy to avoid large memory usage
+            for chunk in src.chunks():
+                dst.write(chunk)
+
+        local_paths.append(local_path)
+
+    return local_paths

@@ -20,7 +20,7 @@ from streaming.models import (
     SongCredit,
     CollectionCredit,
 )
-from streaming.audio.ffmpeg_wrapper import FFMPEGFull, ManifestType
+from streaming.audio.ffmpeg_conf.ffmpeg_wrapper import FFMPEGFull, ManifestType
 from musikk.utils.tests import AUDIO_URL_1, AUDIO_URL_2, IMAGE_URL_1, IMAGE_URL_2
 from users.models import StreamingProfile, ArtistProfile
 

@@ -6,10 +6,11 @@ from uuid import uuid4
 
 from django.conf import settings
 
-from streaming.audio.exceptions import ConversionError
+from musikk.utils.cmd import run_shell_command
+from streaming.audio.exceptions import FFMPEGConversionError
 
 
-class FFmpegCommand:
+class FFMPEGCommand:
     def __init__(
         self,
         input_path: Path,
@@ -82,28 +83,16 @@ class FFMPEGAudioConverter:
         Transcodes a single audio file and returns the local output path (string).
         """
         output_path = self._output_file_path_arg(storage_dir=storage_dir)
-        cmd = FFmpegCommand(
-            input_path=file_path,
-            output_path=Path(output_path),
-            encoder=self.encoder,
-            bitrate=self.bitrate,
-            extras=self.extras,
-        ).build()
 
-        try:
-            ffmpeg_result = subprocess.run(
-                cmd, capture_output=True, text=True, timeout=self.timeout
-            )
-        except subprocess.TimeoutExpired as exc:
-            raise ConversionError(f"'ffmpeg' timeout: {exc}") from exc
-
-        if ffmpeg_result.returncode != 0:
-            readable = shlex.join(cmd)
-            raise ConversionError(
-                f"ffmpeg could not process input file (rc={ffmpeg_result.returncode}).\n"
-                f"stderr: {ffmpeg_result.stderr}\n"
-                f"cmd: {readable}"
-            )
+        run_shell_command(
+            FFMPEGCommand(
+                input_path=file_path,
+                output_path=Path(output_path),
+                encoder=self.encoder,
+                bitrate=self.bitrate,
+                extras=self.extras,
+            ).build()
+        )
 
         return output_path
 
@@ -115,10 +104,11 @@ class FFMPEGAudioConverter:
 
 
 FLAC_CONVERTER = FFMPEGAudioConverter("flac")
-OPUS_96_CONVERTER, OPUS_160_CONVERTER, OPUS_256_CONVERTER = (
-    FFMPEGAudioConverter(encoder="libopus", bitrate=bitrate)
-    for bitrate in [96, 160, 256]
-)
+
+OPUS_96_CONVERTER = FFMPEGAudioConverter(encoder="libopus", bitrate=96)
+OPUS_160_CONVERTER = FFMPEGAudioConverter(encoder="libopus", bitrate=160)
+OPUS_256_CONVERTER = FFMPEGAudioConverter(encoder="libopus", bitrate=256)
+
 AACHEv2_CONVERTER = FFMPEGAudioConverter(
     encoder="libfdk_aac",
     bitrate=24,
@@ -127,7 +117,7 @@ AACHEv2_CONVERTER = FFMPEGAudioConverter(
         "aac_he_v2",
     ],  # see https://trac.ffmpeg.org/wiki/Encode/AAC#Examples2
 )
-AAC_96_CONVERTER, AAC_160_CONVERTER, AAC_320_CONVERTER = (
-    FFMPEGAudioConverter(encoder="libfdk_aac", bitrate=bitrate)
-    for bitrate in [96, 160, 320]
-)
+
+AAC_96_CONVERTER = FFMPEGAudioConverter(encoder="libfdk_aac", bitrate=96)
+AAC_160_CONVERTER = FFMPEGAudioConverter(encoder="libfdk_aac", bitrate=160)
+AAC_320_CONVERTER = FFMPEGAudioConverter(encoder="libfdk_aac", bitrate=320)

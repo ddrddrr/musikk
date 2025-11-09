@@ -3,8 +3,8 @@ from pathlib import Path
 from django.contrib import admin
 from django import forms
 
-from streaming.audio.ffmpeg_wrapper import FFMPEGWrapper
-from streaming.audio.converters import FLAC_CONVERTER
+from streaming.audio.ffmpeg_conf.ffmpeg_wrapper import FFMPEGWrapper
+from streaming.audio.ffmpeg_conf.converters import FLAC_CONVERTER
 from musikk.utils.paths import delete_dir_for_file
 from streaming.models.collections import Collection
 from streaming.models.songs import BaseSong, CollectionSong
