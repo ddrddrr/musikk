@@ -13,6 +13,7 @@ from django.db import transaction
 from faker import Faker
 
 from streaming.audio.shaka_packager_conf.shaka_packager_wrapper import ManifestType
+from streaming.audio.processing_pipeline import AudioProcessingPipeline
 from users.management.helpers import create_user_with_password
 from streaming.models import (
     BaseSong,
@@ -21,11 +22,15 @@ from streaming.models import (
     SongCredit,
     CollectionCredit,
 )
-from streaming.audio.ffmpeg_conf.ffmpeg_wrapper import FFMPEGFull
-from musikk.utils.tests import AUDIO_URL_1, AUDIO_URL_2, IMAGE_URL_1, IMAGE_URL_2
 from users.models import StreamingProfile, ArtistProfile
 
 fake = Faker()
+
+AUDIO_URL_1 = "https://s3.amazonaws.com/citizen-dj-assets.labs.loc.gov/audio/samplepacks/loc-fma/Dans-la-messe-sans-le-sang-du-christ_fma-178769_001_00-00-00.wav"
+AUDIO_URL_2 = "https://s3.amazonaws.com/citizen-dj-assets.labs.loc.gov/audio/samplepacks/loc-fma/Insideoutworld_fma-174894_001_00-04-54.wav"
+
+IMAGE_URL_1 = "https://picsum.photos/500"
+IMAGE_URL_2 = "https://picsum.photos/200"
 
 
 class Command(BaseCommand):
@@ -47,120 +52,151 @@ class Command(BaseCommand):
         image_urls = [IMAGE_URL_1, IMAGE_URL_2]
 
         with transaction.atomic():
-            # Create streaming users
-            users = []
-            for _ in range(users_count):
-                user, pwd = create_user_with_password("streaming")
-                StreamingProfile.objects.for_user(user)
-                users.append(user)
-                self.stdout.write(f"- user: {user.email} / {pwd}")
-
-            # Create artist accounts
-            artists = []
-            for _ in range(artists_count):
-                artist, pwd = create_user_with_password("artist")
-                ArtistProfile.objects.for_user(artist)
-                artists.append(artist)
-                self.stdout.write(f"- artist: {artist.email} / {pwd}")
+            users = self._create_users(users_count)
+            artists = self._create_artists(artists_count)
 
             self.stdout.write(
                 f"\nCreated {len(users)} users and {len(artists)} artists.\n"
             )
 
-            # Create songs
             songs = []
             for _ in range(songs_count):
-                # pick remote fixtures
                 audio_url = random.choice(audio_urls)
                 image_url = random.choice(image_urls)
 
-                # fetch and wrap image
-                img_resp = requests.get(image_url)
-                img_file = File(
-                    io.BytesIO(img_resp.content),
-                    name=os.path.basename(image_url),
-                )
-
-                song = BaseSong.objects.create(
-                    title=fake.catch_phrase(),
-                    description=fake.text(max_nb_chars=512),
-                    image=img_file,
-                )
-
-                # download to temp WAV
-                audio_resp = requests.get(audio_url)
-                with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tf:
-                    tf.write(audio_resp.content)
-                    tmp_audio_path = tf.name
-
-                self.stdout.write(f"Converting audio for '{song.title}'…")
-                audio_uuid = str(uuid.uuid4())
-                storage_dir = os.path.join(settings.AUDIO_CONTENT_PATH, audio_uuid)
-
-                ret = FFMPEGFull.convert_audio(
-                    file_path=tmp_audio_path,
-                    storage_dir=storage_dir,
-                    out_file_prefix=audio_uuid,
-                )
-
-                # assign manifests and uuid
-                song.uuid = audio_uuid
-                song.mpd = ret.manifests[ManifestType.MPD]
-                song.m3u8 = ret.manifests[ManifestType.M3U8]
-                song.save()
-
-                os.remove(tmp_audio_path)
-
-                # credits
-                num_authors = random.randint(1, min(3, len(artists)))
-                for priority, author in enumerate(random.sample(artists, num_authors)):
-                    SongCredit.objects.create(
-                        song=song, author=author, author_priority=priority
-                    )
-
-                self.stdout.write(
-                    f"Created '{song.title}' ({len(song.song_credits.all())} author(s))"
+                song = self._create_song(
+                    audio_url=audio_url, image_url=image_url, artists=artists
                 )
                 songs.append(song)
 
-            # Create collections (albums/playlists)
-            types = [
-                Collection.CollectionType.ALBUM,
-                Collection.CollectionType.PLAYLIST,
-            ]
-            for _ in range(collections_count):
-                if not songs:
-                    break
+            self._create_collections(
+                songs=songs,
+                image_urls=image_urls,
+                collections_count=collections_count,
+                artists=artists,
+            )
 
-                image_url = random.choice(image_urls)
-                img_resp = requests.get(image_url)
-                img_file = File(
-                    io.BytesIO(img_resp.content),
-                    name=os.path.basename(image_url),
+    def _create_users(self, count):
+        created = []
+        for _ in range(count):
+            user, pwd = create_user_with_password("streaming")
+            StreamingProfile.objects.for_user(user)
+            created.append(user)
+            self.stdout.write(f"- user: {user.email} / {pwd}")
+        return created
+
+    def _create_artists(self, count):
+        created = []
+        for _ in range(count):
+            artist, pwd = create_user_with_password("artist")
+            ArtistProfile.objects.for_user(artist)
+            created.append(artist)
+            self.stdout.write(f"- artist: {artist.email} / {pwd}")
+        return created
+
+    def _create_song(self, audio_url: str, image_url: str, artists: list):
+        image_file = self._fetch_image_file(image_url)
+        song = BaseSong.objects.create(
+            title=fake.catch_phrase(),
+            description=fake.text(max_nb_chars=512),
+            image=image_file,
+        )
+
+        tmp_audio_path = self._download_temp_audio(audio_url)
+        audio_uuid = str(uuid.uuid4())
+        storage_dir = os.path.join(settings.AUDIO_CONTENT_PATH, audio_uuid)
+
+        try:
+            self.stdout.write(f"Converting audio for '{song.title}'…")
+            self._process_audio_for_song(song, tmp_audio_path, audio_uuid, storage_dir)
+        except Exception as exc:
+            self.stderr.write(f"Failed processing audio for '{song.title}': {exc}")
+        finally:
+            self._safe_remove(tmp_audio_path)
+
+        self._create_song_credits(song, artists)
+
+        self.stdout.write(
+            f"Created '{song.title}' ({len(song.song_credits.all())} author(s))"
+        )
+        return song
+
+    def _fetch_image_file(self, url: str) -> File:
+        resp = requests.get(url)
+        return File(io.BytesIO(resp.content), name=os.path.basename(url))
+
+    def _download_temp_audio(self, url: str) -> str:
+        resp = requests.get(url)
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tf:
+            tf.write(resp.content)
+            return tf.name
+
+    def _process_audio_for_song(
+        self, song: BaseSong, tmp_audio_path: str, audio_uuid: str, storage_dir: str
+    ) -> bool:
+        """
+        Run the processing pipeline and assign resulting manifests to the song.
+        Returns True on success, False otherwise.
+        """
+        result = AudioProcessingPipeline.run(
+            source=tmp_audio_path, final_storage_dir=storage_dir
+        )
+
+        song.uuid = audio_uuid
+        song.mpd = result.song_repr.manifests.get(ManifestType.MPD)
+        song.m3u8 = result.song_repr.manifests.get(ManifestType.M3U8)
+        song.save()
+        return True
+
+    def _create_song_credits(self, song: BaseSong, artists: list):
+        if not artists:
+            return
+        num_authors = random.randint(1, min(3, len(artists)))
+        for priority, author in enumerate(random.sample(artists, num_authors)):
+            SongCredit.objects.create(
+                song=song, author=author, author_priority=priority
+            )
+
+    def _create_collections(
+        self, songs: list, image_urls: list, collections_count: int, artists: list
+    ):
+        types = [Collection.CollectionType.ALBUM, Collection.CollectionType.PLAYLIST]
+        for _ in range(collections_count):
+            if not songs:
+                break
+
+            image_file = self._fetch_image_file(random.choice(image_urls))
+            collection = Collection.objects.create(
+                title=fake.bs().title(),
+                description=fake.text(max_nb_chars=512),
+                image=image_file,
+                type=random.choice(types),
+            )
+
+            chosen = random.sample(songs, k=random.randint(1, len(songs)))
+            for idx, song in enumerate(chosen):
+                CollectionSong.objects.create(
+                    collection=collection, song=song, position=idx
                 )
 
-                collection = Collection.objects.create(
-                    title=fake.bs().title(),
-                    description=fake.text(max_nb_chars=512),
-                    image=img_file,
-                    type=random.choice(types),
+            num_creds = random.randint(1, len(artists)) if artists else 0
+            for priority, author in enumerate(
+                random.sample(artists, num_creds) if num_creds else []
+            ):
+                CollectionCredit.objects.create(
+                    collection=collection,
+                    author=author,
+                    author_priority=priority,
                 )
 
-                chosen = random.sample(songs, k=random.randint(1, len(songs)))
-                for idx, song in enumerate(chosen):
-                    CollectionSong.objects.create(
-                        collection=collection, song=song, position=idx
-                    )
+            self.stdout.write(
+                f"Created {collection.get_type_display()} '{collection.title}' "
+                f"with {len(chosen)} song(s) and {collection.collection_credits.count()} author(s)"
+            )
 
-                num_creds = random.randint(1, len(artists))
-                for priority, author in enumerate(random.sample(artists, num_creds)):
-                    CollectionCredit.objects.create(
-                        collection=collection,
-                        author=author,
-                        author_priority=priority,
-                    )
-
-                self.stdout.write(
-                    f"Created {collection.get_type_display()} '{collection.title}' "
-                    f"with {len(chosen)} song(s) and {collection.collection_credits.count()} author(s)"
-                )
+    def _safe_remove(self, path: str):
+        try:
+            if path and os.path.exists(path):
+                os.remove(path)
+        except Exception:
+            self.stderr.write("Failed to remove temporary file %s", path)
