@@ -52,12 +52,15 @@ class SongAddLikedView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+# TODO: make client write to a url first and only then POST here
+# get/stream the file here
 class SongCreateView(APIView):
     parser_classes = [MultiPartParser, FormParser]
     permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
         user = self.request.user
+        # TODO: rewrite as permission?
         profile: ArtistProfile = getattr(user, "artistprofile", None)
         if not profile:
             return Response(
@@ -79,7 +82,6 @@ class SongCreateView(APIView):
                 tmp.write(chunk)
             temp_path = tmp.name
 
-        # TODO: probably call only on commit
         convert_audio.apply_async(
             kwargs={
                 "file_path": temp_path,

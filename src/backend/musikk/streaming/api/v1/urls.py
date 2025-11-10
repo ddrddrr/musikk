@@ -1,6 +1,7 @@
-from django.urls import path
+from django.urls import path, re_path
 from rest_framework.permissions import AllowAny
 
+from streaming.api.v1 import consumers
 from streaming.api.v1.views.connections import (
     ConnectionsLatestListenedView,
     ConnectionsLatestAddedView,
@@ -178,3 +179,8 @@ friend_activity_urls = [
 urlpatterns = (
     song_urls + collection_urls + song_queue_urls + playback_urls + friend_activity_urls
 )
+
+# TODO: probably decouple from this app somehow...
+websocket_urlpatterns = [
+    re_path(r"ws/user/?$", consumers.UserConsumer.as_asgi()),
+]

@@ -10,7 +10,19 @@ https://docs.djangoproject.com/en/5.1/howto/deployment/asgi/
 import os
 
 from django.core.asgi import get_asgi_application
+from channels.routing import ProtocolTypeRouter, URLRouter
+from channels.auth import AuthMiddlewareStack
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'musikk.settings')
+from streaming.api.v1.urls import websocket_urlpatterns
 
-application = get_asgi_application()
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "musikk.settings")
+
+django_asgi_app = get_asgi_application()
+application = ProtocolTypeRouter(
+    {
+        # HTTP handled by Django ASGI app
+        "http": django_asgi_app,
+        # WebSocket handling via Channels with AuthMiddlewareStack
+        "websocket": AuthMiddlewareStack(URLRouter(websocket_urlpatterns)),
+    }
+)

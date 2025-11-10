@@ -12,6 +12,7 @@ from django.db import transaction
 
 from faker import Faker
 
+from streaming.audio.shaka_packager_conf.shaka_packager_wrapper import ManifestType
 from users.management.helpers import create_user_with_password
 from streaming.models import (
     BaseSong,
@@ -20,7 +21,7 @@ from streaming.models import (
     SongCredit,
     CollectionCredit,
 )
-from streaming.audio.ffmpeg_conf.ffmpeg_wrapper import FFMPEGFull, ManifestType
+from streaming.audio.ffmpeg_conf.ffmpeg_wrapper import FFMPEGFull
 from musikk.utils.tests import AUDIO_URL_1, AUDIO_URL_2, IMAGE_URL_1, IMAGE_URL_2
 from users.models import StreamingProfile, ArtistProfile
 

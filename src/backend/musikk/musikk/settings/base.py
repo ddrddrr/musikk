@@ -36,9 +36,10 @@ CORS_ALLOW_HEADERS = (
 
 ### Core
 INSTALLED_APPS = [
+    "daphne",
+    "channels",
     "corsheaders",
     "jazzmin",
-    "daphne",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -112,6 +113,19 @@ CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.redis.RedisCache",
         "LOCATION": f"redis://:{REDIS_PASSWORD}@{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}",
+    }
+}
+
+# Channels channel layer (Redis). Required for Django Channels (WebSockets).
+# Make sure channels_redis is installed in your environment.
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [(REDIS_HOST, int(REDIS_PORT))],
+            # If your Redis requires password via URL, channels_redis supports URL strings as well.
+            # Example: "hosts": [f"redis://:{REDIS_PASSWORD}@{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}"]
+        },
     }
 }
 

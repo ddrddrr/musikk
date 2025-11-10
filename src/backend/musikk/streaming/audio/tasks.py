@@ -6,6 +6,8 @@ from celery import shared_task
 from django.conf import settings
 from django.db import transaction
 from django.core.files.storage import default_storage
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 
 from musikk.utils.storage import delete_django_storage_dir
 from streaming.audio.processing_pipeline import AudioProcessingPipeline
@@ -19,7 +21,7 @@ def convert_audio(
     self,
     file_path: str | Path,
     song_uuid: str | UUID,
-    event_uuid: str | UUID = None,
+    initiator_uuid: str | UUID = None,
     delete_orig_file: bool = True,
 ):
     str_uuid = str(song_uuid)
@@ -30,8 +32,9 @@ def convert_audio(
         )
         song_repr = result.song_repr
     except Exception as ex:
-        # TODO: optionally emit failure event or perform custom retries
+        # TODO: failure event or retry...?
         raise
+
     try:
         with transaction.atomic():
             song = BaseSong.objects.get(uuid=song_uuid)
@@ -39,6 +42,21 @@ def convert_audio(
             song.mpd = default_storage.url(song_repr.manifests[ManifestType.MPD])
             song.m3u8 = default_storage.url(song_repr.manifests[ManifestType.M3U8])
             song.save()
+
+            # Emit event to initiator group using initiator_uuid directly (no DB lookup).
+            if initiator_uuid:
+                try:
+                    channel_layer = get_channel_layer()
+                    group_name = f"user_{initiator_uuid}"
+                    async_to_sync(channel_layer.group_send)(
+                        group_name,
+                        {
+                            "type": "song.created",
+                        },
+                    )
+                except Exception:
+                    # TODO:
+                    pass
 
     except Exception:
         delete_django_storage_dir(song_repr.content_path)
