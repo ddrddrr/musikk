@@ -5,6 +5,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 import os
 from pathlib import Path
+from typing import Literal
 
 from corsheaders.defaults import default_headers
 from decouple import AutoConfig, Csv
@@ -173,7 +174,9 @@ ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_AUTHENTICATION_METHOD = "email"
 ACCOUNT_USERNAME_REQUIRED = False
 
-ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+ACCOUNT_EMAIL_VERIFICATION: Literal["mandatory", "none", "optional"] = config(
+    "ACCOUNT_EMAIL_VERIFICATION", default="mandatory"
+)
 ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 1  # days
 ACCOUNT_EMAIL_NOTIFICATIONS = True
 ACCOUNT_CHANGE_EMAIL = True

@@ -1,11 +1,14 @@
 from pathlib import Path
+import tempfile
 
 from django.contrib import admin
 from django import forms
+from django.core.files.storage import default_storage
+from django.core.files.base import File
 
-from streaming.audio.ffmpeg_conf.ffmpeg_wrapper import FFMPEGWrapper
-from streaming.audio.ffmpeg_conf.converters import FLAC_CONVERTER
-from musikk.utils.paths import delete_dir_for_file
+from musikk.utils.storage import delete_django_storage_dir
+from streaming.audio.processing_pipeline import AudioProcessingPipeline
+from streaming.audio.shaka_packager_conf.shaka_packager_wrapper import ManifestType
 from streaming.models.collections import Collection
 from streaming.models.songs import BaseSong, CollectionSong
 
@@ -15,14 +18,34 @@ class BaseSongAdminForm(forms.ModelForm):
 
     def clean_file(self):
         uploaded_file = self.cleaned_data.get("file")
-        if uploaded_file:
-            if self.instance.mpd:
-                delete_dir_for_file(Path(self.instance.mpd))
-            ffmpeg = FFMPEGWrapper().add_audio_converter(FLAC_CONVERTER)
-            song_repr = ffmpeg.convert_audio(uploaded_file.file)
-            return song_repr
+        if not uploaded_file:
+            return None
 
-        return None
+        # Delete old content if updating an existing song
+        if self.instance.pk and self.instance.content_path:
+            delete_django_storage_dir(self.instance.content_path)
+
+        # Save uploaded file to temporary location
+        with tempfile.NamedTemporaryFile(
+            delete=False, suffix=Path(uploaded_file.name).suffix
+        ) as tmp_file:
+            for chunk in uploaded_file.chunks():
+                tmp_file.write(chunk)
+            tmp_file_path = tmp_file.name
+
+        try:
+            # Generate storage directory path using the instance's UUID
+            storage_dir = f"audio/{self.instance.uuid}"
+
+            # Run the audio processing pipeline
+            result = AudioProcessingPipeline.run(
+                source=tmp_file_path, final_storage_dir=storage_dir
+            )
+
+            return result.song_repr
+        finally:
+            # Clean up temporary file
+            Path(tmp_file_path).unlink(missing_ok=True)
 
 
 @admin.register(BaseSong)
@@ -43,9 +66,9 @@ class BaseSongAdmin(admin.ModelAdmin):
 
     def save_model(self, request, obj, form, change):
         if song_repr := form.cleaned_data.get("file"):
-            obj.mpd = song_repr.manifests["mpd_path"]
-            obj.content_path = song_repr.content_path
-            obj.uuid = song_repr.uuid_
+            obj.content_path = str(song_repr.content_path)
+            obj.mpd = song_repr.manifests[ManifestType.MPD]
+            obj.m3u8 = song_repr.manifests[ManifestType.M3U8]
         super().save_model(request, obj, form, change)
 
 

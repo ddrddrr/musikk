@@ -16,7 +16,7 @@ class UserManager(BaseUserManager):
         return user
 
     def create_superuser(self, email, password, **kwargs):
-        kwargs["is_admin"] = True
+        kwargs["is_staff"] = True
         kwargs["is_superuser"] = True
         return self.create_user(email=email, password=password, **kwargs)
 
@@ -27,7 +27,7 @@ class BaseUser(BaseModel, AbstractBaseUser, PermissionsMixin):
 
     email = models.EmailField(unique=True)
 
-    is_admin = models.BooleanField(default=False)
+    is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
 
     def __str__(self):

@@ -13,7 +13,7 @@ class BaseUserFactory(BaseModelFactory):
         model = BaseUser
 
     email = fake("ascii_email")
-    is_admin = fake("boolean")
+    is_staff = fake("boolean")
 
 
 class BaseProfileFactory(BaseModelFactory):

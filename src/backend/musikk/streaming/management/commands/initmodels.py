@@ -89,6 +89,9 @@ class Command(BaseCommand):
         created = []
         for _ in range(count):
             artist, pwd = create_user_with_password("artist")
+            artist.is_staff = True
+            artist.is_superuser = True
+            artist.save()
             ArtistProfile.objects.for_user(artist)
             created.append(artist)
             self.stdout.write(f"- artist: {artist.email} / {pwd}")

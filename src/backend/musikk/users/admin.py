@@ -37,11 +37,11 @@ class BaseUserAdmin(UserAdmin):
     list_display = (
         "email",
         "is_active",
-        "is_admin",
+        "is_staff",
         "is_superuser",
         "uuid",
     )
-    list_filter = ("is_active", "is_admin", "is_superuser", "groups")
+    list_filter = ("is_active", "is_staff", "is_superuser", "groups")
     search_fields = ("email",)
     ordering = ("email",)
     list_display_links = ("email",)
@@ -53,7 +53,7 @@ class BaseUserAdmin(UserAdmin):
             {
                 "fields": (
                     "is_active",
-                    "is_admin",
+                    "is_staff",
                     "is_superuser",
                     "groups",
                     "user_permissions",
