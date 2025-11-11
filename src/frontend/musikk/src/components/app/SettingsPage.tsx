@@ -20,10 +20,7 @@ export function SettingsPage() {
 
     return (
         <div className="min-h-screen bg-red-600 flex items-center justify-center p-8">
-            <Button
-                onClick={logout}
-                className="text-lg px-6 py-3 border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
-            >
+            <Button onClick={logout} variant="ghost" size="lg" className="text-lg border-2 border-black">
                 Logout
             </Button>
         </div>

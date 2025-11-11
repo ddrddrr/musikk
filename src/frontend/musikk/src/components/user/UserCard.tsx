@@ -1,4 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
+import { useUserUUID } from "@/components/user/hooks/useUserUUID.ts";
 import {
     useDeleteFriendMutation,
     useFollowArtistMutation,
@@ -6,9 +7,8 @@ import {
     useRemoveFollowedArtistMutation,
 } from "@/components/user/mutations.tsx";
 import { IUser } from "@/components/user/types.ts";
-import { useUserUUID } from "@/components/user/hooks/useUserUUID.ts";
 import { UserConnectionsContext } from "@/providers/userConnectionsContext.tsx";
-import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from "@radix-ui/react-context-menu";
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from "@/components/ui/context-menu";
 import { MoreHorizontal, Smile } from "lucide-react";
 import { useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -99,9 +99,8 @@ export function UserCard({ user, size = "medium", onClick }: UserCardProps) {
                 </Card>
             </ContextMenuTrigger>
             {!!currUserUUID && user.uuid !== currUserUUID && user.role === "streaminguser" && (
-                <ContextMenuContent className="w-48 bg-white rounded-sm border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] py-1">
+                <ContextMenuContent className="w-48 bg-white rounded-sm border-2 border-black py-1">
                     <ContextMenuItem
-                        className="flex items-center px-3 py-2 text-sm text-black hover:bg-gray-100 transition-colors"
                         onSelect={() =>
                             isFriend
                                 ? deleteFriendMutation.mutate({ userUUID: currUserUUID, senderUUID: user.uuid })
@@ -114,9 +113,8 @@ export function UserCard({ user, size = "medium", onClick }: UserCardProps) {
                 </ContextMenuContent>
             )}
             {user.uuid !== currUserUUID && user.role === "artist" && (
-                <ContextMenuContent className="w-48 bg-white rounded-sm border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] py-1">
+                <ContextMenuContent className="w-48 bg-white rounded-sm border-2 border-black  py-1">
                     <ContextMenuItem
-                        className="flex items-center px-3 py-2 text-sm text-black hover:bg-gray-100 transition-colors"
                         onSelect={() =>
                             isFollowed
                                 ? removeFollowedArtistMutation.mutate(user.uuid)

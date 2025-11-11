@@ -71,11 +71,7 @@ export function SignUpForm() {
                             </FormItem>
                         )}
                     />
-                    <Button
-                        type="submit"
-                        disabled={isPending}
-                        className="w-full bg-red-600 hover:bg-red-700 text-white border-2 border-black p-6"
-                    >
+                    <Button type="submit" disabled={isPending} size="lg" className="w-full">
                         {isPending ? <Spinner /> : "Sign Up"}
                     </Button>
                     {message && (

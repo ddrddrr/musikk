@@ -1,14 +1,14 @@
 import { collectionRemoveSong } from "@/components/song-collections/mutations.ts";
 import { ISongCollectionSong } from "@/components/song-collections/types.ts";
-import { useSongPlayHandler } from "@/components/songs/hooks/useSongPlayHandler.ts";
 import { useQueueAddAPI } from "@/components/song-queue/hooks/useQueueAPI.ts";
+import { useSongPlayHandler } from "@/components/songs/hooks/useSongPlayHandler.ts";
 import {
     ContextMenu,
     ContextMenuContent,
     ContextMenuItem,
     ContextMenuPortal,
     ContextMenuTrigger,
-} from "@radix-ui/react-context-menu";
+} from "@/components/ui/context-menu";
 import { useMutation } from "@tanstack/react-query";
 import { BetweenHorizonalStart, Play, Trash2 } from "lucide-react";
 import { JSX } from "react";
@@ -28,10 +28,9 @@ export function SongContextMenu({ children, song, renderRemoveFromPlaylist = fal
         <ContextMenu>
             <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
             <ContextMenuPortal>
-                <ContextMenuContent className="w-48 bg-white rounded-sm border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] py-1">
+                <ContextMenuContent className="w-48 bg-white rounded-sm border-2 border-black py-1">
                     {renderRemoveFromPlaylist && (
                         <ContextMenuItem
-                            className="flex items-center px-3 py-2 text-sm text-black hover:bg-gray-100 transition-colors"
                             onSelect={() =>
                                 collectionRemoveSongMutation.mutate({
                                     collectionUUID: song.song_collection,
@@ -44,7 +43,6 @@ export function SongContextMenu({ children, song, renderRemoveFromPlaylist = fal
                         </ContextMenuItem>
                     )}
                     <ContextMenuItem
-                        className="flex items-center px-3 py-2 text-sm text-black hover:bg-gray-100 transition-colors"
                         onSelect={() =>
                             addToQueueMutation.mutate({
                                 type: "song",
@@ -56,10 +54,7 @@ export function SongContextMenu({ children, song, renderRemoveFromPlaylist = fal
                         <BetweenHorizonalStart className="w-4 h-4 mr-2" />
                         Add to queue
                     </ContextMenuItem>
-                    <ContextMenuItem
-                        className="flex items-center px-3 py-2 text-sm text-black hover:bg-gray-100 transition-colors"
-                        onSelect={onSongPlayClick}
-                    >
+                    <ContextMenuItem onSelect={onSongPlayClick}>
                         <Play className="w-4 h-4 mr-2" />
                         Play
                     </ContextMenuItem>

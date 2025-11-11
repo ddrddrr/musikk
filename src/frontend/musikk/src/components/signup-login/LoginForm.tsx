@@ -60,11 +60,7 @@ export function LoginForm() {
                     <EmailField />
                     <PasswordField />
 
-                    <Button
-                        type="submit"
-                        className="w-full bg-red-600 hover:bg-red-700 text-white border-2 border-black p-6"
-                        disabled={loading}
-                    >
+                    <Button type="submit" size="lg" className="w-full" disabled={loading}>
                         {loading ? <Spinner /> : "Login"}
                     </Button>
 
@@ -77,12 +73,9 @@ export function LoginForm() {
                     <div className="text-center">
                         <p>
                             Don't have an account?
-                            <Button
-                                onClick={() => navigate("/signup")}
-                                className="w-30 bg-red-600 hover:bg-red-700 text-white border-2 border-black p-4"
-                            >
-                                Sign up
-                            </Button>
+                            <Button onClick={() => navigate("/signup")} size="sm" className="ml-2">
+                            Sign up
+                        </Button>
                         </p>
                     </div>
                 </form>

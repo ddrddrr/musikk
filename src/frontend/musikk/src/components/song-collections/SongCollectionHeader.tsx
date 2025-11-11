@@ -26,7 +26,7 @@ export const SongCollectionHeader = memo(function SongCollectionHeader({
         <>
             <div
                 className={`flex items-start bg-white p-6 rounded-lg 
-                   border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]
+                   border-2 border-black
                    transition-all duration-300 ease-in-out ${showComments ? "flex-col sm:flex-row gap-4" : "flex-row"}`}
             >
                 {collection.image ? (
@@ -85,13 +85,7 @@ export const SongCollectionHeader = memo(function SongCollectionHeader({
                     Songs • {songsCount}
                 </h3>
                 {notPersonalCollection && (
-                    <Button
-                        onClick={toggleComments}
-                        className={`bg-blue-500 hover:bg-blue-600 text-white border-2 border-black rounded-lg 
-                       ${showComments ? "h-8 px-3 text-sm" : "h-12 px-4"} 
-                       shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] 
-                       active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]`}
-                    >
+                    <Button onClick={toggleComments} variant="accent" size={showComments ? "sm" : "lg"}>
                         {showComments ? "Hide Comments" : "Show Comments"}
                     </Button>
                 )}

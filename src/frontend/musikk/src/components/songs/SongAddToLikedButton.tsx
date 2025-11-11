@@ -28,9 +28,11 @@ export function SongAddToLikedButton({ collectionSong, className = "", size = 40
 
     return (
         <Button
+            variant={collectionSong.song.is_liked ? "brand" : "muted"}
+            size="icon"
             onClick={() => handleClick(collectionSong)}
             style={{ width: size, height: size }}
-            className={`bg-gray-200 hover:bg-gray-300 text-black border-2 border-black rounded-sm flex items-center justify-center p-0 ${className}`}
+            className={`p-0 flex items-center justify-center ${className}`}
         >
             {renderAddIcon()}
         </Button>

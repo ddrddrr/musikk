@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useFormContext } from "react-hook-form";
@@ -18,7 +19,9 @@ export function AudioField({ name }: AudioFieldProps) {
                     <FormControl>
                         <div className="bg-gray-200 p-4 border-2 border-black rounded-sm">
                             <label className="flex items-center cursor-pointer">
-                                <span className="px-3 py-2 bg-red-600 text-white rounded mr-2">Choose file</span>
+                                <Button asChild variant="brand" className="px-3 py-2 mr-2">
+                                    <span>Choose file</span>
+                                </Button>{" "}
                                 <span className="truncate text-sm">{value?.name ?? "No file selected"}</span>
                                 <Input
                                     type="file"

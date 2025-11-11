@@ -26,14 +26,10 @@ export function CollectionAddToLikedButton({ collection, showComments }: Collect
 
     return (
         <Button
+            variant={collection.is_liked ? "brand" : "muted"}
+            size="icon"
             onClick={() => handleClick(collection)}
-            className={`
-        bg-gray-200 hover:bg-gray-300 text-black
-        border-2 border-black rounded-lg
-        shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]
-        p-0 flex items-center justify-center
-        ${sizeClass}
-      `}
+            className={`p-0 flex items-center justify-center ${sizeClass}`}
         >
             {renderAddIcon()}
         </Button>

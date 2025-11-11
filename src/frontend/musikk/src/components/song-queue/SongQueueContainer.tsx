@@ -50,7 +50,7 @@ export const SongQueueContainer = memo(function SongContainer({
                                 alt=""
                                 className="w-10 h-10 object-cover rounded-sm border border-black"
                             />
-                        ) : (
+                            ) : (
                             <div className="w-10 h-10 bg-gray-200 flex items-center justify-center rounded-sm border border-black">
                                 <span className="text-gray-400 text-xl">♪</span>
                             </div>

@@ -19,9 +19,11 @@ export function SongPlayButton({ collectionSong, className = "", size = 20 }: So
 
     return (
         <Button
+            variant="brand"
+            size="icon"
             style={{ width: size, height: size }}
-            className={`bg-red-600 hover:bg-red-700 text-white border-2 border-black flex items-center justify-center rounded-sm p-0 ${className}`}
             onClick={onClick}
+            className={`p-0 flex items-center justify-center ${className}`}
         >
             {renderPlayPauseIcon()}
         </Button>

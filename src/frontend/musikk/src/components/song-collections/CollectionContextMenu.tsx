@@ -7,7 +7,7 @@ import {
     ContextMenuItem,
     ContextMenuPortal,
     ContextMenuTrigger,
-} from "@radix-ui/react-context-menu";
+} from "@/components/ui/context-menu";
 import { BetweenHorizonalStart, Play } from "lucide-react";
 import { JSX } from "react";
 
@@ -24,9 +24,8 @@ export function CollectionContextMenu({ children, collection }: SongContextMenuP
         <ContextMenu>
             <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
             <ContextMenuPortal>
-                <ContextMenuContent className="w-48 bg-white rounded-sm border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] py-1">
+                <ContextMenuContent className="w-48 bg-white rounded-sm border-2 border-black py-1">
                     <ContextMenuItem
-                        className="flex items-center px-3 py-2 text-sm text-black hover:bg-gray-100 transition-colors"
                         onSelect={() =>
                             addToQueueMutation.mutate({
                                 type: "collection",
@@ -39,10 +38,7 @@ export function CollectionContextMenu({ children, collection }: SongContextMenuP
                         Add to queue
                     </ContextMenuItem>
 
-                    <ContextMenuItem
-                        className="flex items-center px-3 py-2 text-sm text-black hover:bg-gray-100 transition-colors"
-                        onSelect={onCollectionPlayClick}
-                    >
+                    <ContextMenuItem onSelect={onCollectionPlayClick}>
                         <Play className="w-4 h-4 mr-2" />
                         Play
                     </ContextMenuItem>

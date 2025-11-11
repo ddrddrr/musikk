@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { Button } from "@/components/ui/button";
 
 type CommentFormData = z.infer<typeof commentSchema>;
 
@@ -54,13 +55,15 @@ export function CommentForm({ objType, objUUID, replyTo, setReplyTo }: CommentFo
                         <div className="font-medium truncate">{replyTo.display_name || "Anonymous"}</div>
                         <div className="italic truncate">{replyTo.content}</div>
                     </div>
-                    <button
+                    <Button
                         type="button"
+                        variant="ghost"
+                        size="sm"
                         onClick={() => setReplyTo?.(undefined)}
-                        className="text-blue-600 hover:underline ml-4 shrink-0"
+                        className="ml-4 shrink-0"
                     >
                         Cancel
-                    </button>
+                    </Button>
                 </div>
             )}
             <textarea
@@ -69,12 +72,13 @@ export function CommentForm({ objType, objUUID, replyTo, setReplyTo }: CommentFo
                 placeholder="Write a comment..."
             />
             {errors.content && <p className="text-xs text-red-500">{errors.content.message}</p>}
-            <button
+            <Button
                 type="submit"
-                className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white border-2 border-black rounded-lg shadow"
+                variant="brand"
+                className="px-4 py-2 rounded-lg"
             >
                 Post Comment
-            </button>
+            </Button>
         </form>
     );
 }

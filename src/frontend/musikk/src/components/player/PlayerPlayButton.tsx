@@ -15,8 +15,10 @@ export function PlayerPlayButton() {
 
     return (
         <Button
-            className={`bg-red-600 hover:bg-red-700 text-white border-2 border-black flex items-center justify-center rounded-sm`}
+            variant="brand"
+            size="icon"
             onClick={() => handlePlay()}
+            className="p-0 flex items-center justify-center rounded-sm"
         >
             {renderPlayPauseIcon()}
         </Button>

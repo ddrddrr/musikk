@@ -62,7 +62,8 @@ export const NotificationOverlay = memo(function NotificationOverlay({ notificat
                                     })}
                                 </span>
                                 <Button
-                                    className="text-xs px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+                                    variant="brand"
+                                    className="text-xs px-3 py-1 rounded"
                                     onClick={() => handleNavigateReplyClick(notification)}
                                 >
                                     Go to reply
@@ -89,8 +90,9 @@ export const NotificationOverlay = memo(function NotificationOverlay({ notificat
                                     })}
                                 </span>
                                 <Button
+                                    variant="brand"
+                                    className="text-xs px-3 py-1 rounded"
                                     onClick={() => handleAddToFriends(notification)}
-                                    className="text-xs px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
                                 >
                                     Add to friends
                                 </Button>

@@ -17,6 +17,8 @@ export const CollectionAddToQueueButton = memo(function CollectionAddToQueueButt
 
     return (
         <Button
+            variant="muted"
+            size="icon"
             onClick={() =>
                 addToQueueMutation.mutate({
                     type: "collection",
@@ -25,9 +27,7 @@ export const CollectionAddToQueueButton = memo(function CollectionAddToQueueButt
                 })
             }
             disabled={addToQueueMutation.isPending}
-            className={`bg-gray-200 hover:bg-gray-300 
-            text-black border-2 border-black rounded-lg shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]
-             p-0 flex items-center justify-center ${showComments ? "h-8 w-8" : "h-12 w-12"}`}
+            className={`p-0 flex items-center justify-center ${showComments ? "h-8 w-8" : "h-12 w-12"}`}
         >
             <BetweenHorizonalStart size={20} />
         </Button>

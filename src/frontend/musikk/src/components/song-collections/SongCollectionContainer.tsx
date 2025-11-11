@@ -2,8 +2,8 @@ import { CommentBox } from "@/components/publications/CommentBox";
 import { fetchCollectionDetailed } from "@/components/song-collections/queries";
 import { SongCollectionHeader } from "@/components/song-collections/SongCollectionHeader";
 import { SongContainer } from "@/components/songs/SongContainer.tsx";
-import { UUID } from "@/config/types.ts";
 import { useUserUUID } from "@/components/user/hooks/useUserUUID.ts";
+import { UUID } from "@/config/types.ts";
 import { UserCollectionsContext } from "@/providers/userCollectionsContext.ts";
 import { useQuery } from "@tanstack/react-query";
 import { useContext } from "react";
@@ -41,7 +41,7 @@ export function SongCollectionContainer({ collectionUUID }: SongCollectionContai
 
     if (error)
         return (
-            <div className="text-white text-center p-6 bg-red-600 rounded-lg border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+            <div className="text-white text-center p-6 bg-red-600 rounded-lg border-2 border-black">
                 An error has occurred: {error.message}
             </div>
         );
@@ -77,7 +77,7 @@ export function SongCollectionContainer({ collectionUUID }: SongCollectionContai
                         ))}
                     </ul>
                 ) : (
-                    <div className="text-center py-12 text-gray-700 bg-white rounded-lg border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                    <div className="text-center py-12 text-gray-700 bg-white rounded-lg border-2 border-black">
                         <p className="font-medium">No songs in this collection</p>
                     </div>
                 )}

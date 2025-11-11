@@ -1,7 +1,7 @@
 import { CommentForm } from "@/components/publications/CommentForm";
 import { CommentList } from "@/components/publications/CommentList";
 import { fetchCommentList } from "@/components/publications/queries";
-import { PublicationObjectType, IPublication } from "@/components/publications/types";
+import { IPublication, PublicationObjectType } from "@/components/publications/types";
 import { UUID } from "@/config/types";
 import { useQuery } from "@tanstack/react-query";
 import { memo, useEffect, useRef, useState } from "react";
@@ -35,7 +35,7 @@ export const CommentBox = memo(function CommentBox({ objType, objUUID }: Comment
 
     if (error) {
         return (
-            <div className="text-white text-center p-6 bg-red-600 rounded-lg border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+            <div className="text-white text-center p-6 bg-red-600 rounded-lg border-2 border-black">
                 An error has occurred: {error.message}
             </div>
         );
