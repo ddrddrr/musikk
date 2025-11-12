@@ -1,80 +1,30 @@
-import { refreshAccessToken } from "@/auth/authentication.ts";
+import { BaseURL } from "@/config/endpoints.ts";
 import axios from "axios";
 import Cookies from "js-cookie";
 
-export const api = axios.create();
+export const api = axios.create({
+    baseURL: BaseURL,
+    withCredentials: true,
+});
 
-api.interceptors.request.use((config) => {
-    const token = Cookies.get("access");
-    if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
+api.interceptors.request.use((cfg) => {
+    const method = (cfg.method || "get").toUpperCase();
+    if (!["GET", "HEAD", "OPTIONS", "TRACE"].includes(method)) {
+        const csrf = Cookies.get("csrftoken");
+        if (csrf) {
+            cfg.headers["X-CSRFToken"] = csrf;
+        }
     }
-    return config;
+    return cfg;
 });
 
 api.interceptors.response.use(
-    (response) => response,
-    async (error) => {
-        const originalRequest = error.config;
-
-        if (error.response?.status === 401 && !originalRequest._retry) {
-            originalRequest._retry = true;
-            await refreshAccessToken();
-            const token = Cookies.get("access");
-            originalRequest.headers.Authorization = `Bearer ${token}`;
-            return api(originalRequest);
+    (res) => res,
+    (err) => {
+        const status = err?.response?.status;
+        if (status === 401) {
+            window.location.href = "/login";
         }
-
-        return Promise.reject(error);
+        return Promise.reject(err);
     },
 );
-
-// let isRefreshing = false;
-// let refreshPromise: Promise<void> | null = null;
-// let subscribers: ((token: string) => void)[] = [];
-//
-// function onRefreshed(token: string) {
-//     subscribers.forEach((callback) => callback(token));
-//     subscribers = [];
-// }
-//
-// function addSubscriber(callback: (token: string) => void) {
-//     subscribers.push(callback);
-// }
-//
-// api.interceptors.response.use(
-//     (response) => response,
-//     async (error) => {
-//         const originalRequest = error.config;
-//
-//         if (error.response?.status === 401 && !originalRequest._retry) {
-//             originalRequest._retry = true;
-//
-//             if (!isRefreshing) {
-//                 isRefreshing = true;
-//                 refreshPromise = refreshAccessToken()
-//                     .then(() => {
-//                         const token = Cookies.get("access");
-//                         onRefreshed(token);
-//                     })
-//                     .finally(() => {
-//                         isRefreshing = false;
-//                         refreshPromise = null;
-//                     });
-//             }
-//
-//             return new Promise((resolve, reject) => {
-//                 addSubscriber((token) => {
-//                     originalRequest.headers.Authorization = `Bearer ${token}`;
-//                     resolve(api(originalRequest));
-//                 });
-//
-//                 if (refreshPromise) {
-//                     refreshPromise.catch(reject);
-//                 }
-//             });
-//         }
-//
-//         return Promise.reject(error);
-//     }
-// );

@@ -3,6 +3,7 @@ import { SongAddToLikedButton } from "@/components/songs/SongAddToLikedButton.ts
 import { SongAddToQueueButton } from "@/components/songs/SongAddToQueueButton.tsx";
 import { SongContextMenu } from "@/components/songs/SongContextMenu.tsx";
 import { SongPlayButton } from "@/components/songs/SongPlayButton";
+import { MediaBox } from "@/components/ui/media";
 import { memo } from "react";
 
 interface SongContainerProps {
@@ -45,15 +46,13 @@ export const SongContainer = memo(function SongContainer({
                 <div className="flex items-center gap-3 min-w-0">
                     {image &&
                         (song.image ? (
-                            <img
-                                src={song.image}
-                                alt=""
-                                className="w-10 h-10 object-cover rounded-sm border border-black"
-                            />
+                            <MediaBox className="w-10 h-10" asChild>
+                                <img src={song.image} alt="" className="w-full h-full object-cover" />
+                            </MediaBox>
                         ) : (
-                            <div className="w-10 h-10 bg-gray-200 flex items-center justify-center rounded-sm border border-black">
+                            <MediaBox className="w-10 h-10">
                                 <span className="text-gray-400 text-xl">♪</span>
-                            </div>
+                            </MediaBox>
                         ))}
 
                     <div className="flex flex-col min-w-0">

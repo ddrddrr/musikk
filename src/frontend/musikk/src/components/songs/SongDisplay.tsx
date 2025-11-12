@@ -1,5 +1,6 @@
 import type { ISong } from "@/components/songs/types.ts";
 import { UserIdentifier } from "@/components/user/UserIdentifier.tsx";
+import { MediaBox } from "@/components/ui/media";
 
 interface SongDisplayProps {
     song: ISong | undefined;
@@ -18,15 +19,13 @@ export function SongDisplay({ song }: SongDisplayProps) {
         <div className="flex flex-col items-start gap-3 mb-4">
             <div className="w-full aspect-square max-w-2/5">
                 {song.image ? (
-                    <img
-                        src={song.image}
-                        alt={song.title}
-                        className="w-full h-full items-start justify-start object-cover border border-black rounded-sm"
-                    />
+                    <MediaBox className="w-full h-full" asChild>
+                        <img src={song.image} alt={song.title} className="w-full h-full object-cover" />
+                    </MediaBox>
                 ) : (
-                    <div className="w-full h-full bg-gray-100 flex items-start justify-start border border-black rounded-sm">
+                    <MediaBox className="w-full h-full">
                         <span className="text-gray-400 text-3xl">♪</span>
-                    </div>
+                    </MediaBox>
                 )}
             </div>
             <div className="w-full text-start">

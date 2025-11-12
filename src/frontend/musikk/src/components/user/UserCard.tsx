@@ -78,7 +78,9 @@ export function UserCard({ user, size = "medium", onClick }: UserCardProps) {
             <ContextMenuTrigger asChild>
                 <Card
                     onClick={() => handleOnClick(user)}
-                    className={`py-0 cursor-pointer border-2 border-black rounded-sm overflow-hidden bg-gray-50 ${styles.card}`}
+                    variant="panel"
+                    size={size === "small" ? "sm" : size === "big" ? "lg" : "md"}
+                    className={`py-0 cursor-pointer ${styles.card}`}
                 >
                     <CardContent className="p-0 flex flex-col">
                         <div className={`${styles.avatarWrapper} bg-gray-200`}>
@@ -99,7 +101,7 @@ export function UserCard({ user, size = "medium", onClick }: UserCardProps) {
                 </Card>
             </ContextMenuTrigger>
             {!!currUserUUID && user.uuid !== currUserUUID && user.role === "streaminguser" && (
-                <ContextMenuContent className="w-48 bg-white rounded-sm border-2 border-black py-1">
+                <ContextMenuContent panel="card" className="w-48">
                     <ContextMenuItem
                         onSelect={() =>
                             isFriend
@@ -113,7 +115,7 @@ export function UserCard({ user, size = "medium", onClick }: UserCardProps) {
                 </ContextMenuContent>
             )}
             {user.uuid !== currUserUUID && user.role === "artist" && (
-                <ContextMenuContent className="w-48 bg-white rounded-sm border-2 border-black  py-1">
+                <ContextMenuContent panel="card" className="w-48">
                     <ContextMenuItem
                         onSelect={() =>
                             isFollowed

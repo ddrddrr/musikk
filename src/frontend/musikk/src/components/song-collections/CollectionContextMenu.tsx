@@ -24,7 +24,7 @@ export function CollectionContextMenu({ children, collection }: SongContextMenuP
         <ContextMenu>
             <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
             <ContextMenuPortal>
-                <ContextMenuContent className="w-48 bg-white rounded-sm border-2 border-black py-1">
+                <ContextMenuContent panel="card" className="w-48">
                     <ContextMenuItem
                         onSelect={() =>
                             addToQueueMutation.mutate({

@@ -1,4 +1,3 @@
-import { refreshAccessToken } from "@/auth/authentication.ts";
 import { EventSource } from "eventsource";
 import Cookies from "js-cookie";
 import { useEffect } from "react";
@@ -39,16 +38,7 @@ export function useEvent({ eventUrl, handleEvent, eventKey, deps, isEnabled }: u
                     handleEvent(evt);
                 });
                 es.addEventListener("error", async (e: any) => {
-                    if (e?.status === 401 || e?.target?.readyState === EventSource.CLOSED) {
-                        es?.close();
-                        try {
-                            await refreshAccessToken();
-                            token = Cookies.get("access");
-                            createEventSource();
-                        } catch {
-                            navigate("/login");
-                        }
-                    }
+                    console.error(e);
                 });
             } catch (err) {
                 console.log(err);

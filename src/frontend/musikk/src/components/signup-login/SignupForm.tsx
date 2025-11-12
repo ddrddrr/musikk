@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import axios from "axios";
+import { isAxiosError } from "axios";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 
@@ -33,8 +33,8 @@ export function SignUpForm() {
 
     const { mutate, isPending, isError, isSuccess } = useMutation({
         mutationFn: userCreate,
-        onError(error) {
-            const msg = axios.isAxiosError(error) ? error.response?.data?.error || error.message : "An error occurred";
+            onError(error) {
+            const msg = isAxiosError(error) ? error.response?.data?.error || error.message : "An error occurred";
             setMessage(msg);
         },
         onSuccess() {

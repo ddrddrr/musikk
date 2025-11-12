@@ -2,6 +2,7 @@ import { ISongCollectionSong } from "@/components/song-collections/types.ts";
 import { albumBySongRetrieve } from "@/components/songs/queries.ts";
 import { SongContextMenu } from "@/components/songs/SongContextMenu.tsx";
 import { Card, CardContent } from "@/components/ui/card";
+import { MediaBox } from "@/components/ui/media";
 import { useNavigate } from "react-router-dom";
 
 interface SongCardProps {
@@ -58,15 +59,19 @@ export function SongCard({ collectionSong, size = "medium", onClick = undefined 
             <Card
                 onClick={() => handleClick(collectionSong)}
                 key={uuid}
-                className={`cursor-pointer transition-all duration-200 py-0 border-2 border-black rounded-sm overflow-hidden bg-gray-50 ${sizes.card}`}
+                variant="panel"
+                size={size === "small" ? "sm" : size === "big" ? "lg" : "md"}
+                className={`cursor-pointer transition-all duration-200 py-0 ${sizes.card}`}
             >
                 <CardContent className="p-0">
                     {image ? (
-                        <img src={image} alt={title} className={`w-full ${sizes.image} object-cover`} />
+                        <MediaBox className={`w-full ${sizes.image}`} asChild>
+                            <img src={image} alt={title} className="w-full h-full object-cover" />
+                        </MediaBox>
                     ) : (
-                        <div className={`w-full ${sizes.image} bg-gray-200 flex items-center justify-center`}>
+                        <MediaBox className={`w-full ${sizes.image}`}>
                             <span className={`text-gray-400 ${sizes.icon}`}>♪</span>
-                        </div>
+                        </MediaBox>
                     )}
                     <div className={`bg-gray-200 border-t-2 border-black ${sizes.padding}`}>
                         <p className={`truncate text-gray-600 ${sizes.authors}`}>{authorNames}</p>

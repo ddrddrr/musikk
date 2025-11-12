@@ -28,7 +28,7 @@ export function SongContextMenu({ children, song, renderRemoveFromPlaylist = fal
         <ContextMenu>
             <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
             <ContextMenuPortal>
-                <ContextMenuContent className="w-48 bg-white rounded-sm border-2 border-black py-1">
+                <ContextMenuContent panel="card" className="w-48">
                     {renderRemoveFromPlaylist && (
                         <ContextMenuItem
                             onSelect={() =>

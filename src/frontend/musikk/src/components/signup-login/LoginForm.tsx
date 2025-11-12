@@ -9,7 +9,7 @@ import { useCurrentDevice } from "@/hooks/useCurrentDevice.ts";
 import { useRegisterPDMutation } from "@/playback/mutations.ts";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
+import { isAxiosError } from "axios";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
@@ -44,7 +44,7 @@ export function LoginForm() {
             saveDevice(device);
             navigate("/");
         } catch (error) {
-            const resMessage = axios.isAxiosError(error)
+            const resMessage = isAxiosError(error)
                 ? error.response?.data?.message || error.message
                 : String(error);
             setMessage(resMessage);
