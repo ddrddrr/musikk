@@ -20,7 +20,7 @@ from users.api.v1.views import (
     UserFriendsView,
     ArtistFollowersView,
     UserFriendsView,
-
+    csrf,
 )
 
 sse_router = DefaultRouter()
@@ -81,4 +81,5 @@ urlpatterns = [
         ArtistFollowersView.as_view(),
         name="artist-followers",
     ),
+    path("csrf", csrf)
 ]

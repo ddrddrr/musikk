@@ -9,6 +9,8 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django_eventstream.viewsets import EventsViewSet
+from django.views.decorators.csrf import ensure_csrf_cookie
+from django.http import HttpResponse
 
 from notifications.models import FriendRequestNotification
 from sse.config import EventChannels
@@ -19,6 +21,11 @@ from users.api.v1.serializers import (
 )
 from users.models import BaseUser, BaseProfile, ArtistProfile, StreamingProfile
 from users.permissions import IsProfileOwnerOrReadOnly
+
+
+@ensure_csrf_cookie
+def csrf(request):
+    return HttpResponse(status=204)
 
 
 class UserRetrieveView(RetrieveAPIView):

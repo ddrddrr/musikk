@@ -1,7 +1,9 @@
 from musikk.settings.base import *
 
-# set FQDN
 CORS_ALLOWED_ORIGINS = [
+    config("SERVICE_URL", default="https://musikk.stream"),
+]
+CSRF_TRUSTED_ORIGINS = [
     config("SERVICE_URL", default="https://musikk.stream"),
 ]
 

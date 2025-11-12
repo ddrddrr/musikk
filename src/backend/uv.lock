@@ -61,6 +61,7 @@ name = "backend"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
+    { name = "black" },
     { name = "celery" },
     { name = "channels", extra = ["daphne"] },
     { name = "daphne" },
@@ -91,6 +92,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "black", specifier = ">=25.9.0" },
     { name = "celery", specifier = ">=5.5.3" },
     { name = "channels", extras = ["daphne"], specifier = ">=4.3.1" },
     { name = "daphne", specifier = ">=4.2.0" },
