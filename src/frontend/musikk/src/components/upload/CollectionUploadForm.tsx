@@ -3,8 +3,8 @@ import { Form } from "@/components/ui/form";
 import { createSong } from "@/components/upload/mutations.ts";
 import { SongField } from "@/components/upload/SongField.tsx";
 import { CollectionUploadFormValues, CollectionUploadSchema, SongUploadState } from "@/components/upload/types";
-import { useHandleUploadEvent } from "@/components/upload/useHandleUploadEvent.ts";
-import { useUserEvent } from "@/events/useUserEvent.ts";
+// import { useHandleUploadEvent } from "@/components/upload/useHandleUploadEvent.ts";
+// import { useUserEvent } from "@/events/useUserEvent.ts";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { SubmitHandler, useFieldArray, useForm } from "react-hook-form";
@@ -50,10 +50,10 @@ export function CollectionUploadForm() {
         console.log("submitted", data);
     };
 
-    useUserEvent({
-        handleEvent: useHandleUploadEvent(setUploadStatuses, form.setValue),
-        eventKey: "upload",
-    });
+    // useUserEvent({
+    //     handleEvent: useHandleUploadEvent(setUploadStatuses, form.setValue),
+    //     eventKey: "upload",
+    // });
 
     // when all songs have a uuid, request to create a collection
     // if some is in the error state - disable submit

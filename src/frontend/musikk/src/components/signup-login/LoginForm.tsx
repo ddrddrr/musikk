@@ -39,7 +39,7 @@ export function LoginForm() {
         try {
             await login(values.email, values.password);
 
-            client.fetchQuery({ queryKey: ["user"] });
+            client.invalidateQueries({ queryKey: ["user"] });
             const device = await registerPDMutation.mutateAsync();
             saveDevice(device);
             navigate("/");

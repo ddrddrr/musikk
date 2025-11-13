@@ -1,3 +1,4 @@
+import { logout } from "@/auth/authentication.ts";
 import { Button } from "@/components/ui/button";
 import { useCurrentDevice } from "@/hooks/useCurrentDevice.ts";
 import { useDeletePDMutation } from "@/playback/mutations.ts";
@@ -11,16 +12,16 @@ export function SettingsPage() {
     const { getDeviceID } = useCurrentDevice();
     const deviceID = getDeviceID();
 
-    const logout = useCallback(() => {
-        if (Cookies.get("access")) Cookies.remove("access");
-        if (Cookies.get("refresh")) Cookies.remove("refresh");
+    const processLogout = useCallback(async () => {
+        if (Cookies.get("csrftoken")) Cookies.remove("csrftoken");
         if (deviceID) deleteDeviceMutation.mutate(deviceID);
+        await logout();
         navigate("/login");
     }, [deleteDeviceMutation, deviceID, navigate]);
 
     return (
         <div className="min-h-screen bg-red-600 flex items-center justify-center p-8">
-            <Button onClick={logout} variant="ghost" size="lg" className="text-lg border-2 border-black">
+            <Button onClick={processLogout} variant="ghost" size="lg" className="text-lg border-2 border-black">
                 Logout
             </Button>
         </div>

@@ -57,6 +57,7 @@ export const NotificationURLs = {
     notificationsDelete: (notificationUUID: UUID) => `/notifications/${notificationUUID}`,
 };
 export const UserURLs = {
+    me: "/users/me",
     userDetail: (userUUID: UUID) => `/users/${userUUID}`,
     userCreate: `/users`,
     userFriends: (userUUID: UUID) => `/users/${userUUID}/friends`,

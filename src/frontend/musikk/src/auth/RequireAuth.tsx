@@ -9,7 +9,7 @@ interface RequireAuthProps {
 export function RequireAuth({ children }: RequireAuthProps) {
     const location = useLocation();
 
-    if (!Cookies.get("refresh")) {
+    if (!Cookies.get("csrftoken")) {
         return <Navigate to="/login" state={{ from: location }} replace />;
     }
 

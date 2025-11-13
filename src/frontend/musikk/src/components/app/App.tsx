@@ -6,12 +6,12 @@ import { LoginPage } from "@/components/app/LoginPage.tsx";
 import { SettingsPage } from "@/components/app/SettingsPage.tsx";
 import { SignUpPage } from "@/components/app/SignupPage.tsx";
 import { UploadPage } from "@/components/app/UploadPage.tsx";
+// import { useHandleLoadUnload } from "@/hooks/useHandleLoadUnload.tsx";
 import { UserProvider } from "@/providers/UserProvider.tsx";
 import { memo } from "react";
-import { useHandleLoadUnload } from "@/hooks/useHandleLoadUnload.tsx";
 
 export const App = memo(function App() {
-    useHandleLoadUnload()
+    // useHandleLoadUnload();
     return (
         <BrowserRouter>
             <UserProvider>

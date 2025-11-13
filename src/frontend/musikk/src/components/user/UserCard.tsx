@@ -1,4 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from "@/components/ui/context-menu";
 import { useUserUUID } from "@/components/user/hooks/useUserUUID.ts";
 import {
     useDeleteFriendMutation,
@@ -8,7 +9,6 @@ import {
 } from "@/components/user/mutations.tsx";
 import { IUser } from "@/components/user/types.ts";
 import { UserConnectionsContext } from "@/providers/userConnectionsContext.tsx";
-import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from "@/components/ui/context-menu";
 import { MoreHorizontal, Smile } from "lucide-react";
 import { useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -50,7 +50,7 @@ export function UserCard({ user, size = "medium", onClick }: UserCardProps) {
     const deleteFriendMutation = useDeleteFriendMutation();
     const followArtistMutation = useFollowArtistMutation();
     const removeFollowedArtistMutation = useRemoveFollowedArtistMutation();
-    const currUserUUID = useUserUUID();
+    const myUuid = useUserUUID();
     const { friends, followed } = useContext(UserConnectionsContext);
 
     const styles = sizeStyles[size];
@@ -72,6 +72,15 @@ export function UserCard({ user, size = "medium", onClick }: UserCardProps) {
 
     const isFriend = user.role === "streaminguser" && friends.map((f) => f.uuid).includes(user.uuid);
     const isFollowed = user.role === "artist" && followed.map((f) => f.uuid).includes(user.uuid);
+
+    function handleToggleFriend() {
+        if (!myUuid) return;
+        if (isFriend) {
+            deleteFriendMutation.mutate({ userUUID: myUuid, senderUUID: user.uuid });
+        } else {
+            friendRequestMutation.mutate(user.uuid);
+        }
+    }
 
     return (
         <ContextMenu>
@@ -100,21 +109,15 @@ export function UserCard({ user, size = "medium", onClick }: UserCardProps) {
                     </CardContent>
                 </Card>
             </ContextMenuTrigger>
-            {!!currUserUUID && user.uuid !== currUserUUID && user.role === "streaminguser" && (
+            {!!myUuid && user.uuid !== myUuid && user.role === "streaminguser" && (
                 <ContextMenuContent panel="card" className="w-48">
-                    <ContextMenuItem
-                        onSelect={() =>
-                            isFriend
-                                ? deleteFriendMutation.mutate({ userUUID: currUserUUID, senderUUID: user.uuid })
-                                : friendRequestMutation.mutate(user.uuid)
-                        }
-                    >
+                    <ContextMenuItem onSelect={handleToggleFriend}>
                         <MoreHorizontal className="w-4 h-4 mr-2" />
                         {isFriend ? "Remove from friends" : "Send friend request"}
                     </ContextMenuItem>
                 </ContextMenuContent>
             )}
-            {user.uuid !== currUserUUID && user.role === "artist" && (
+            {user.uuid !== myUuid && user.role === "artist" && (
                 <ContextMenuContent panel="card" className="w-48">
                     <ContextMenuItem
                         onSelect={() =>

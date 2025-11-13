@@ -4,6 +4,11 @@ import { UserURLs } from "@/config/endpoints.ts";
 import { UUID } from "@/config/types.ts";
 import { useQuery } from "@tanstack/react-query";
 
+export async function fetchMe(): Promise<IUser | null> {
+    const res = await api.get(UserURLs.me);
+    return res.data;
+}
+
 export async function fetchUser(userUUID: UUID): Promise<IUser> {
     const res = await api.get(UserURLs.userDetail(userUUID));
     return res.data;
@@ -22,7 +27,7 @@ export function useUserFriendsQuery(userUUID: UUID | undefined, enabled: boolean
     });
 }
 
-export function useUserFollowedQuery(userUUID: UUID|undefined, enabled: boolean = true) {
+export function useUserFollowedQuery(userUUID: UUID | undefined, enabled: boolean = true) {
     return useQuery({
         queryKey: ["user", "followed", userUUID],
         queryFn: userUUID

@@ -1,16 +1,16 @@
-import { useHandleInvalidateEvent } from "@/components/app/useHandleInvalidateEvent.ts";
+// import { useHandleInvalidateEvent } from "@/components/app/useHandleInvalidateEvent.ts";
 import { Header } from "@/components/layout/header/Header.tsx";
 import { MainContent } from "@/components/layout/MainContent.tsx";
 import { PlayerBox } from "@/components/player/PlayerBox.tsx";
 import { Toaster } from "@/components/ui/sonner";
-import { useUserEvent } from "@/events/useUserEvent.ts";
+// import { useUserEvent } from "@/events/useUserEvent.ts";
 import { PlaybackProvider } from "@/providers/PlaybackProvider.tsx";
 import { UserCollectionsProvider } from "@/providers/UserCollectionsProvider.tsx";
 import { UserConnectionsProvider } from "@/providers/UserConnectionsProvider.tsx";
 import { memo } from "react";
 
 export const HomePage = memo(function HomePage() {
-    useUserEvent({ handleEvent: useHandleInvalidateEvent(), eventKey: "invalidate" });
+    // useUserEvent({ handleEvent: useHandleInvalidateEvent(), eventKey: "invalidate" });
 
     return (
         <PlaybackProvider>
