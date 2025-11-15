@@ -1,7 +1,7 @@
+import { api } from "@/api/axiosConf.ts";
+import { FriendActivityURLs } from "@/api/endpoints.ts";
 import { UserSong } from "@/components/friend-activity/types.ts";
 import { ISongCollection, ISongCollectionSong } from "@/components/song-collections/types.ts";
-import { api } from "@/config/axiosConf.ts";
-import { FriendActivityURLs } from "@/config/endpoints.ts";
 import { useUserUUID } from "@/components/user/hooks/useUserUUID.ts";
 import { useQuery } from "@tanstack/react-query";
 

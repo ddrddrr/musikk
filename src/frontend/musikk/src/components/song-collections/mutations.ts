@@ -1,6 +1,6 @@
-import { api } from "@/config/axiosConf.ts";
-import { CollectionURLs } from "@/config/endpoints.ts";
-import { UUID } from "@/config/types.ts";
+import { api } from "@/api/axiosConf.ts";
+import { CollectionURLs } from "@/api/endpoints.ts";
+import { UUID } from "@/api/types.ts";
 
 interface ICollectionAddSongParams {
     collectionUUID: UUID;

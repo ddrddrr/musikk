@@ -28,6 +28,11 @@ def csrf(request):
     return HttpResponse(status=204)
 
 
+class MeView(APIView):
+    def get(self, request, *args, **kwargs):
+        return Response(data={"me": BaseUserSerializer(self.request.user).data})
+
+
 class UserRetrieveView(RetrieveAPIView):
     lookup_field = "uuid"
     queryset = BaseUser.objects.all()

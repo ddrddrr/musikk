@@ -1,7 +1,7 @@
+import { api } from "@/api/axiosConf.ts";
+import { UserURLs } from "@/api/endpoints.ts";
+import { UUID } from "@/api/types.ts";
 import { IUser } from "@/components/user/types.ts";
-import { api } from "@/config/axiosConf.ts";
-import { UserURLs } from "@/config/endpoints.ts";
-import { UUID } from "@/config/types.ts";
 import { useQuery } from "@tanstack/react-query";
 
 export async function fetchMe(): Promise<IUser | null> {

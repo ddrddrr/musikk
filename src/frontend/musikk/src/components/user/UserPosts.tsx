@@ -1,8 +1,8 @@
+import { UUID } from "@/api/types";
 import { PostForm } from "@/components/publications/PostForm";
 import { PostTree } from "@/components/publications/PostTree";
 import { useUserPostsQuery } from "@/components/publications/queries";
 import { Card, CardContent } from "@/components/ui/card";
-import { UUID } from "@/config/types";
 import { useUserUUID } from "@/components/user/hooks/useUserUUID.ts";
 
 export function UserPosts({ userUUID }: { userUUID: UUID }) {
@@ -25,7 +25,9 @@ export function UserPosts({ userUUID }: { userUUID: UUID }) {
                     </CardContent>
                 </Card>
             )}
-            {posts?.map((post) => <PostTree key={post.uuid} publication={post} />)}
+            {posts?.map((post) => (
+                <PostTree key={post.uuid} publication={post} />
+            ))}
         </div>
     );
 }

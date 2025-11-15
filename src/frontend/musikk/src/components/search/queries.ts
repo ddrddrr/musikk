@@ -1,7 +1,7 @@
+import { api } from "@/api/axiosConf.ts";
+import { SearchURLs } from "@/api/endpoints.ts";
 import { ISongCollection, ISongCollectionSong } from "@/components/song-collections/types.ts";
 import { IUser } from "@/components/user/types.ts";
-import { api } from "@/config/axiosConf.ts";
-import { SearchURLs } from "@/config/endpoints.ts";
 
 interface PerformSearchResponse {
     songs: ISongCollectionSong[];

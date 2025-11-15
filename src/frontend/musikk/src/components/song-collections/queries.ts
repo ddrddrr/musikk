@@ -1,7 +1,7 @@
+import { api } from "@/api/axiosConf.ts";
+import { CollectionURLs } from "@/api/endpoints.ts";
+import { UUID } from "@/api/types.ts";
 import { ISongCollection, ISongCollectionDetailed } from "@/components/song-collections/types.ts";
-import { api } from "@/config/axiosConf.ts";
-import { CollectionURLs } from "@/config/endpoints.ts";
-import { UUID } from "@/config/types.ts";
 
 export async function fetchCollectionsLatest(): Promise<ISongCollection[]> {
     const response = await api.get(CollectionURLs.collectionLatest);

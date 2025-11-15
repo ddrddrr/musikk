@@ -1,6 +1,6 @@
+import { UUID } from "@/api/types.ts";
 import { IBaseModel } from "@/components/common/types.ts";
 import { ISongCollectionSong } from "@/components/song-collections/types.ts";
-import { UUID } from "@/config/types.ts";
 
 export interface ISongQueueNode extends IBaseModel {
     collection_song: ISongCollectionSong;

@@ -1,12 +1,12 @@
-import { commentSchema } from "@/components/publications/schemas.ts";
+import { UUID } from "@/api/types";
 import { commentCreate } from "@/components/publications/mutations";
-import { PublicationObjectType, IPublication } from "@/components/publications/types";
-import { UUID } from "@/config/types";
+import { commentSchema } from "@/components/publications/schemas.ts";
+import { IPublication, PublicationObjectType } from "@/components/publications/types";
+import { Button } from "@/components/ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Button } from "@/components/ui/button";
 
 type CommentFormData = z.infer<typeof commentSchema>;
 
@@ -72,11 +72,7 @@ export function CommentForm({ objType, objUUID, replyTo, setReplyTo }: CommentFo
                 placeholder="Write a comment..."
             />
             {errors.content && <p className="text-xs text-red-500">{errors.content.message}</p>}
-            <Button
-                type="submit"
-                variant="brand"
-                className="px-4 py-2 rounded-lg"
-            >
+            <Button type="submit" variant="brand" className="px-4 py-2 rounded-lg">
                 Post Comment
             </Button>
         </form>

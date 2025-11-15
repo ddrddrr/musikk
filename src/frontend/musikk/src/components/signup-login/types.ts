@@ -1,4 +1,4 @@
-import { UUID } from "@/config/types.ts";
+import { UUID } from "@/api/types.ts";
 
 export interface IJWTPayload {
     uuid: UUID;

@@ -1,8 +1,8 @@
+import { UUID } from "@/api/types";
 import { CommentForm } from "@/components/publications/CommentForm";
 import { CommentList } from "@/components/publications/CommentList";
 import { fetchCommentList } from "@/components/publications/queries";
 import { IPublication, PublicationObjectType } from "@/components/publications/types";
-import { UUID } from "@/config/types";
 import { useQuery } from "@tanstack/react-query";
 import { memo, useEffect, useRef, useState } from "react";
 

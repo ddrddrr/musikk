@@ -21,6 +21,7 @@ from users.api.v1.views import (
     ArtistFollowersView,
     UserFriendsView,
     csrf,
+    MeView,
 )
 
 sse_router = DefaultRouter()
@@ -61,6 +62,7 @@ urlpatterns = [
         UserRetrieveView.as_view(),
         name="user-retrieve",
     ),
+    path("users/me", MeView.as_view(), name="me"),
     path(
         "users/<uuid:uuid>/friends",
         UserFriendsView.as_view(),
@@ -81,5 +83,5 @@ urlpatterns = [
         ArtistFollowersView.as_view(),
         name="artist-followers",
     ),
-    path("csrf", csrf)
+    path("csrf", csrf),
 ]

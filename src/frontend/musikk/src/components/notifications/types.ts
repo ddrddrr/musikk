@@ -1,5 +1,5 @@
+import { UUID } from "@/api/types.ts";
 import { IPublication } from "@/components/publications/types.ts";
-import { UUID } from "@/config/types.ts";
 
 interface INotification {
     is_read: boolean;

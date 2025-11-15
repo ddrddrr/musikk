@@ -1,5 +1,5 @@
-import { api } from "@/config/axiosConf.ts";
-import { PlaybackURLs } from "@/config/endpoints.ts";
+import { api } from "@/api/axiosConf.ts";
+import { PlaybackURLs } from "@/api/endpoints.ts";
 import { IPlaybackState } from "@/playback/types.ts";
 import { useQuery } from "@tanstack/react-query";
 

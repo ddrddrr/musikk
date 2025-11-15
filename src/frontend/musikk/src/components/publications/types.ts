@@ -1,6 +1,6 @@
+import { UUID } from "@/api/types.ts";
 import { IBaseModel } from "@/components/common/types.ts";
 import { IUser } from "@/components/user/types.ts";
-import { UUID } from "@/config/types.ts";
 
 export type PublicationType = "comment" | "post";
 

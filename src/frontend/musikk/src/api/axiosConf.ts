@@ -1,9 +1,9 @@
-import { BaseURL } from "@/config/endpoints.ts";
+import { BaseAPIURL } from "@/api/endpoints.ts";
 import axios from "axios";
 import Cookies from "js-cookie";
 
 export const api = axios.create({
-    baseURL: BaseURL,
+    baseURL: BaseAPIURL,
     withCredentials: true,
 });
 

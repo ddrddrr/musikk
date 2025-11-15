@@ -1,5 +1,5 @@
-import { api } from "@/config/axiosConf.ts";
-import { QueueURLs } from "@/config/endpoints.ts";
+import { api } from "@/api/axiosConf.ts";
+import { QueueURLs } from "@/api/endpoints.ts";
 
 export async function addSong(songUUID: string) {
     await api.post(QueueURLs.addSong(songUUID));

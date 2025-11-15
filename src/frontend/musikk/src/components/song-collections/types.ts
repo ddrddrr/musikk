@@ -1,7 +1,7 @@
+import { UUID } from "@/api/types.ts";
 import { IBaseModel } from "@/components/common/types.ts";
 import { ISong } from "@/components/songs/types.ts";
 import { IUser } from "@/components/user/types.ts";
-import { UUID } from "@/config/types.ts";
 
 export interface ISongCollection extends IBaseModel {
     uuid: UUID;

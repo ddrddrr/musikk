@@ -1,7 +1,12 @@
+import { UUID } from "@/api/types.ts";
 import { PublicationObjectType } from "@/components/publications/types.ts";
-import { UUID } from "@/config/types.ts";
 
-export const BaseURL = import.meta.env.VITE_API_BASE_URL + "/api/v1";
+export const BaseWSUrl = import.meta.env.VITE_WS_BASE_URL;
+export const WebsocketURLs = {
+    userChannel: BaseWSUrl + "/ws/user",
+};
+
+export const BaseAPIURL = import.meta.env.VITE_API_BASE_URL + "/api/v1";
 
 export const AuthURLs = {
     login: "/auth/login",

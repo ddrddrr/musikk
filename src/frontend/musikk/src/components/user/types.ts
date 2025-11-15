@@ -1,4 +1,4 @@
-import { URL, UUID } from "@/config/types.ts";
+import { URL, UUID } from "@/api/types.ts";
 import { z } from "zod";
 
 export interface IUser {

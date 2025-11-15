@@ -1,5 +1,5 @@
-import { api } from "@/config/axiosConf.ts";
-import { AuthURLs } from "@/config/endpoints.ts";
+import { api } from "@/api/axiosConf.ts";
+import { AuthURLs } from "@/api/endpoints.ts";
 
 export async function initCsrf(): Promise<void> {
     await api.get(AuthURLs.csrf);

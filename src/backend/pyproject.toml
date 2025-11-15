@@ -7,6 +7,7 @@ requires-python = ">=3.13"
 dependencies = [
     "black>=25.9.0",
     "celery>=5.5.3",
+    "channels-redis>=4.3.0",
     "channels[daphne]>=4.3.1",
     "daphne>=4.2.0",
     "dj-rest-auth[with-social]>=7.0.1",

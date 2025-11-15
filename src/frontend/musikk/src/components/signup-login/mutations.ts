@@ -1,5 +1,5 @@
-import { api } from "@/config/axiosConf.ts";
-import { UserURLs } from "@/config/endpoints.ts";
+import { api } from "@/api/axiosConf.ts";
+import { UserURLs } from "@/api/endpoints.ts";
 
 interface UserCreateParams {
     password: string;

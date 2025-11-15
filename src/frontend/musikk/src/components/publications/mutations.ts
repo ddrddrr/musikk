@@ -1,6 +1,6 @@
+import { api } from "@/api/axiosConf.ts";
+import { CommentURLs, PostURLs } from "@/api/endpoints.ts";
 import { PublicationObjectType } from "@/components/publications/types.ts";
-import { api } from "@/config/axiosConf.ts";
-import { CommentURLs, PostURLs } from "@/config/endpoints.ts";
 import { useMutation } from "@tanstack/react-query";
 
 interface IAddCommentParams {

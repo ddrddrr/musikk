@@ -1,6 +1,6 @@
-import { api } from "@/config/axiosConf.ts";
-import { NotificationURLs, UserURLs } from "@/config/endpoints.ts";
-import { UUID } from "@/config/types.ts";
+import { api } from "@/api/axiosConf.ts";
+import { NotificationURLs, UserURLs } from "@/api/endpoints.ts";
+import { UUID } from "@/api/types.ts";
 import { useMutation } from "@tanstack/react-query";
 
 interface UserUpdateParams {

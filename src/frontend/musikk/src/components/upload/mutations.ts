@@ -1,7 +1,7 @@
+import { api } from "@/api/axiosConf.ts";
+import { CollectionURLs, SongURLs } from "@/api/endpoints.ts";
+import { UUID } from "@/api/types.ts";
 import { ISongCollection } from "@/components/song-collections/types.ts";
-import { api } from "@/config/axiosConf.ts";
-import { CollectionURLs, SongURLs } from "@/config/endpoints.ts";
-import { UUID } from "@/config/types.ts";
 
 interface SongPayload {
     title: string;

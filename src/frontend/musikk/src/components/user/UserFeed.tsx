@@ -1,9 +1,9 @@
+import { api } from "@/api/axiosConf.ts";
+import { PostURLs } from "@/api/endpoints.ts";
 import { PostTree } from "@/components/publications/PostTree";
 import { IPublication } from "@/components/publications/types.ts";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { api } from "@/config/axiosConf.ts";
-import { PostURLs } from "@/config/endpoints.ts";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 
@@ -36,7 +36,9 @@ export function UserFeed() {
         return (
             <TabsContent value={label}>
                 <div className="space-y-6">
-                    {posts?.map((post) => <PostTree key={post.uuid} publication={post} />)}
+                    {posts?.map((post) => (
+                        <PostTree key={post.uuid} publication={post} />
+                    ))}
                     {!posts?.length && (
                         <Card>
                             <CardContent className="text-center text-muted-foreground py-6">No posts yet.</CardContent>
