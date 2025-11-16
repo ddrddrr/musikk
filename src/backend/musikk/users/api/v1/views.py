@@ -8,7 +8,6 @@ from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from django_eventstream.viewsets import EventsViewSet
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.http import HttpResponse
 
@@ -51,7 +50,8 @@ class BaseProfileRetrieveUpdateView(RetrieveUpdateAPIView):
         user_uuid = self.request.user.uuid
         send_ws_event(
             f"user_{user_uuid}",
-            event_handler="base.event", event_name="invalidate.query",
+            event_handler="base.event",
+            event_name="invalidate.query",
             query_key=["profile", str(user_uuid)],
         )
 
@@ -89,7 +89,8 @@ class UserFriendsView(APIView):
         user.friends.add(friend)
         send_ws_event(
             f"user_{user.uuid}",
-            event_handler="base.event", event_name="invalidate.query",
+            event_handler="base.event",
+            event_name="invalidate.query",
             query_key=["user", "friends", str(user.uuid)],
         )
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -100,7 +101,8 @@ class UserFriendsView(APIView):
         user.friends.remove(friend)
         send_ws_event(
             f"user_{user.uuid}",
-            event_handler="base.event", event_name="invalidate.query",
+            event_handler="base.event",
+            event_name="invalidate.query",
             query_key=["user", "friends", str(user.uuid)],
         )
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -125,7 +127,8 @@ class ArtistFollowersView(APIView):
         profile.followed.add(artist)
         send_ws_event(
             f"user_{user.uuid}",
-            event_handler="base.event", event_name="invalidate.query",
+            event_handler="base.event",
+            event_name="invalidate.query",
             query_key=["user", "followed", str(user.uuid)],
         )
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -138,7 +141,8 @@ class ArtistFollowersView(APIView):
         profile.followed.remove(artist)
         send_ws_event(
             f"user_{user.uuid}",
-            event_handler="base.event", event_name="invalidate.query",
+            event_handler="base.event",
+            event_name="invalidate.query",
             query_key=["user", "followed", str(user.uuid)],
         )
         return Response(status=status.HTTP_204_NO_CONTENT)

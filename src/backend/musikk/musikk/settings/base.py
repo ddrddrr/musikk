@@ -59,7 +59,6 @@ INSTALLED_APPS = [
     "notifications.apps.NotificationsConfig",
     ##
     "anymail",
-    "django_eventstream",
     "django_filters",
     "django_extensions",
     "rest_framework",
@@ -140,7 +139,6 @@ REST_FRAMEWORK = {
         "rest_framework.renderers.JSONRenderer",
         # TODO: probably remove in prod
         "rest_framework.renderers.BrowsableAPIRenderer",
-        "django_eventstream.renderers.SSEEventRenderer",
     ],
 }
 
@@ -208,9 +206,6 @@ DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="no-reply@mail.musikk.
 SERVER_EMAIL = config("SERVER_EMAIL", default="server@mail.musikk.stream")
 # other settings, not needed in local development are in the `dev` file
 
-
-### EVENTSTREAM
-EVENTSTREAM_STORAGE_CLASS = "django_eventstream.storage.DjangoModelStorage"
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
