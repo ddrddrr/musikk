@@ -1,8 +1,8 @@
 import { ChangeActiveDeviceDropdown } from "@/components/player/ChangeActiveDeviceDropdown.tsx";
 import { PlayerPlayButton } from "@/components/player/PlayerPlayButton.tsx";
+import { useQueueChangeAPI } from "@/components/song-queue/hooks/useQueueAPI.ts";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { useQueueChangeAPI } from "@/components/song-queue/hooks/useQueueAPI.ts";
 import { PlaybackContext } from "@/providers/playbackContext.ts";
 import { ListMusic, SkipBack, SkipForward, Volume2 } from "lucide-react";
 import { useContext, useEffect, useRef, useState } from "react";

@@ -1,7 +1,4 @@
-from django.urls import path, re_path
-from rest_framework.permissions import AllowAny
-
-import websockets.consumers.user_consumer
+from django.urls import path
 
 from streaming.api.v1.views.connections import (
     ConnectionsLatestListenedView,

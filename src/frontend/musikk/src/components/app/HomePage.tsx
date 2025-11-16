@@ -6,26 +6,26 @@ import { Toaster } from "@/components/ui/sonner";
 import { PlaybackProvider } from "@/providers/PlaybackProvider.tsx";
 import { UserCollectionsProvider } from "@/providers/UserCollectionsProvider.tsx";
 import { UserConnectionsProvider } from "@/providers/UserConnectionsProvider.tsx";
-import { useUserWSChannel } from "@/websockets/useUserWSChannel.ts";
+import { WebSocketProvider } from "@/providers/WebSocketProvider.tsx";
 import { memo } from "react";
 
 export const HomePage = memo(function HomePage() {
-    useUserWSChannel();
-
     return (
-        <PlaybackProvider>
-            <UserCollectionsProvider>
-                <UserConnectionsProvider>
-                    <div className="h-screen flex flex-col bg-gray-200">
-                        <Header />
-                        <div className="flex flex-1 overflow-hidden">
-                            <MainContent />
+        <WebSocketProvider>
+            <PlaybackProvider>
+                <UserCollectionsProvider>
+                    <UserConnectionsProvider>
+                        <div className="h-screen flex flex-col bg-gray-200">
+                            <Header />
+                            <div className="flex flex-1 overflow-hidden">
+                                <MainContent />
+                            </div>
+                            <Toaster />
+                            <PlayerBox />
                         </div>
-                        <Toaster />
-                        <PlayerBox />
-                    </div>
-                </UserConnectionsProvider>
-            </UserCollectionsProvider>
-        </PlaybackProvider>
+                    </UserConnectionsProvider>
+                </UserCollectionsProvider>
+            </PlaybackProvider>
+        </WebSocketProvider>
     );
 });

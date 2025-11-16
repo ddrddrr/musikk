@@ -1,9 +1,9 @@
 import { UUID } from "@/api/types.ts";
 import { PublicationObjectType } from "@/components/publications/types.ts";
 
-export const BaseWSUrl = import.meta.env.VITE_WS_BASE_URL;
+export const BaseWSURL = import.meta.env.VITE_WS_BASE_URL;
 export const WebsocketURLs = {
-    userChannel: BaseWSUrl + "/ws/user",
+    userChannel: BaseWSURL + "/ws/user",
 };
 
 export const BaseAPIURL = import.meta.env.VITE_API_BASE_URL + "/api/v1";

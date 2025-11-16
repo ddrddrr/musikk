@@ -14,7 +14,7 @@ server -> client
 """
 
 
-class UserConsumer(JsonWebsocketConsumer):
+class BaseConsumer(JsonWebsocketConsumer):
     def connect(self):
         user = self.scope.get("user")
         if user is None or getattr(user, "is_anonymous", True):
