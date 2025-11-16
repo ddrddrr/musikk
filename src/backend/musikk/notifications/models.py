@@ -2,8 +2,7 @@ from django.db import models
 
 from base.models import BaseModel
 from social.models import Publication
-from sse.config import EventChannels
-from sse.events import Event
+from websockets.event_helpers import send_ws_event
 
 
 class Notification(BaseModel):
@@ -13,9 +12,7 @@ class Notification(BaseModel):
 class ReplyNotificationManager(models.Manager):
     def create(self, **kwargs):
         obj = super().create(**kwargs)
-        Event.invalidate_event(
-            EventChannels.user_events(obj.orig_comment.user.uuid), ["notifications"]
-        )
+        send_ws_event(f"user_{obj.orig_comment.user.uuid}", event_handler="base.event", event_name="invalidate.query", query_key=["notifications"])
         return obj
 
 
@@ -36,9 +33,7 @@ class ReplyNotification(Notification):
 class FriendRequestNotificationManager(models.Manager):
     def create(self, **kwargs):
         obj = super().create(**kwargs)
-        Event.invalidate_event(
-            EventChannels.user_events(obj.receiver.uuid), ["notifications"]
-        )
+        send_ws_event(f"user_{obj.receiver.uuid}", event_handler="base.event", event_name="invalidate.query", query_key=["notifications"])
         return obj
 
 

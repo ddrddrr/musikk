@@ -12,10 +12,8 @@ from dj_rest_auth.views import (
 )
 from django.urls import path
 from django.urls.conf import include, re_path
-from rest_framework.routers import DefaultRouter
 
 from users.api.v1.views import (
-    UserEventViewSet,
     UserRetrieveView,
     UserFriendsView,
     ArtistFollowersView,
@@ -24,12 +22,6 @@ from users.api.v1.views import (
     MeView,
 )
 
-sse_router = DefaultRouter()
-sse_router.register(
-    r"events/user",
-    UserEventViewSet,
-    basename="events-user",
-)
 dj_rest_auth_urls = [
     # URLs that do not require a session or valid token
     re_path(
@@ -55,7 +47,6 @@ dj_rest_auth_urls = [
     ),
 ]
 urlpatterns = [
-    path("", include(sse_router.urls)),
     path("auth/", include(dj_rest_auth_urls)),
     path(
         "users/<uuid:uuid>",

@@ -1,5 +1,3 @@
-from functools import partial
-
 from django.db import transaction
 from rest_framework import status
 from rest_framework.generics import RetrieveAPIView, get_object_or_404
@@ -8,14 +6,11 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from sse.config import EventChannels
-from sse.events import Event
+from websockets.event_helpers import send_ws_event
 from streaming.api.v1.serializers.song_queue import SongQueueSerializer
 from streaming.models import SongQueue, SongQueueNode, Collection
 from streaming.models.songs import CollectionSong
 from users.models import StreamingProfile
-
-send_queue_invalidate_event = partial(Event.invalidate_event, query_key=["queue"])
 
 
 class SongQueueBaseView(APIView):
@@ -39,7 +34,7 @@ class SongQueueAddSongView(SongQueueBaseView):
             song = CollectionSong.objects.get(uuid=kwargs["uuid"])
             song_queue.add_song(song=song, action=SongQueue.AddAction.ADD)
 
-        send_queue_invalidate_event(EventChannels.user_events(self.request.user.uuid))
+        send_ws_event(f"user_{self.request.user.uuid}", event_handler="base.event", event_name="invalidate.query", query_key=["queue"])
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -53,7 +48,7 @@ class SongQueueAddCollectionView(SongQueueBaseView):
                 collection=collection, action=SongQueue.AddAction.ADD
             )
 
-        send_queue_invalidate_event(EventChannels.user_events(self.request.user.uuid))
+        send_ws_event(f"user_{self.request.user.uuid}", event_handler="base.event", event_name="invalidate.query", query_key=["queue"])
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -65,7 +60,7 @@ class SongQueueSetSongHeadView(SongQueueBaseView):
             song = CollectionSong.objects.get(uuid=kwargs["uuid"])
             song_queue.add_song(song=song, action=SongQueue.AddAction.CHANGE_HEAD)
 
-        send_queue_invalidate_event(EventChannels.user_events(self.request.user.uuid))
+        send_ws_event(f"user_{self.request.user.uuid}", event_handler="base.event", event_name="invalidate.query", query_key=["queue"])
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -78,7 +73,7 @@ class SongQueueSetCollectionHeadView(SongQueueBaseView):
                 collection=collection, action=SongQueue.AddAction.CHANGE_HEAD
             )
 
-        send_queue_invalidate_event(EventChannels.user_events(self.request.user.uuid))
+        send_ws_event(f"user_{self.request.user.uuid}", event_handler="base.event", event_name="invalidate.query", query_key=["queue"])
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -89,7 +84,7 @@ class SongQueueAppendRandomSongsView(SongQueueBaseView):
         #     song_queue = self.get_song_queue(request)
         #     song_queue.append_random_songs()
         #
-        # send_queue_invalidate_event(EventChannels.user_events(self.request.user.uuid))
+        # send_ws_event(f"user_{self.request.user.uuid}", event_handler="base.event", event_name="invalidate.query", query_key=["queue"])
         # return Response(
         #     status=status.HTTP_201_CREATED,
         # )
@@ -102,9 +97,7 @@ class SongQueueRemoveNodeView(SongQueueBaseView):
         node = SongQueueNode.objects.get(uuid=kwargs["uuid"])
         if song_queue is node.song_queue:
             node.delete()
-            send_queue_invalidate_event(
-                EventChannels.user_events(self.request.user.uuid)
-            )
+            send_ws_event(f"user_{self.request.user.uuid}", event_handler="base.event", event_name="invalidate.query", query_key=["queue"])
 
             return Response(status=status.HTTP_200_OK)
 
@@ -124,11 +117,9 @@ class SongQueueClearView(SongQueueBaseView):
             ps.is_playing = False
             ps.save()
 
-        send_queue_invalidate_event(EventChannels.user_events(self.request.user.uuid))
+        send_ws_event(f"user_{self.request.user.uuid}", event_handler="base.event", event_name="invalidate.query", query_key=["queue"])
 
-        Event.invalidate_event(
-            EventChannels.user_events(self.request.user.uuid), ["playback"]
-        )
+        send_ws_event(f"user_{self.request.user.uuid}", event_handler="base.event", event_name="invalidate.query", query_key=["playback"])
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -140,9 +131,7 @@ class SongQueueShiftHeadView(SongQueueBaseView):
             if node_uuid := kwargs.get("uuid"):
                 shift_to_node = get_object_or_404(SongQueueNode, uuid=node_uuid)
             song_queue.shift_head_forward(to=shift_to_node)
-            send_queue_invalidate_event(
-                EventChannels.user_events(self.request.user.uuid)
-            )
+            send_ws_event(f"user_{self.request.user.uuid}", event_handler="base.event", event_name="invalidate.query", query_key=["queue"])
 
             if song_queue.is_empty():
                 profile = self.request.user.streamingprofile
@@ -150,9 +139,7 @@ class SongQueueShiftHeadView(SongQueueBaseView):
                 ps.is_playing = False
                 ps.save()
 
-                Event.invalidate_event(
-                    EventChannels.user_events(self.request.user.uuid), ["playback"]
-                )
+                send_ws_event(f"user_{self.request.user.uuid}", event_handler="base.event", event_name="invalidate.query", query_key=["playback"])
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -162,7 +149,5 @@ class SongQueueShiftHeadBackwardsView(SongQueueBaseView):
         song_queue = self.get_song_queue(request)
         if not song_queue.is_empty():
             song_queue.shift_head_backwards()
-            send_queue_invalidate_event(
-                EventChannels.user_events(self.request.user.uuid)
-            )
+            send_ws_event(f"user_{self.request.user.uuid}", event_handler="base.event", event_name="invalidate.query", query_key=["queue"])
         return Response(status=status.HTTP_204_NO_CONTENT)

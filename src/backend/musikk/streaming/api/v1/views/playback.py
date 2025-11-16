@@ -11,8 +11,7 @@ from rest_framework.generics import (
     get_object_or_404,
 )
 
-from sse.config import EventChannels
-from sse.events import Event
+from websockets.event_helpers import send_ws_event
 from streaming.api.v1.serializers.playback import (
     PlaybackDeviceSerializer,
     PlaybackStateSerializer,
@@ -43,9 +42,7 @@ class PlaybackDeviceView(APIView):
                 pd.save()
                 profile.playback_state.is_active = False
                 profile.playback_state.save()
-                Event.invalidate_event(
-                    EventChannels.user_events(self.request.user.uuid), ["playback"]
-                )
+                send_ws_event(f"user_{self.request.user.uuid}", event_handler="base.event", event_name="invalidate.query", query_key=["playback"])
 
         return Response(
             status=status.HTTP_201_CREATED, data=PlaybackDeviceSerializer(pd).data
@@ -73,7 +70,7 @@ class PlaybackDeviceActivateView(APIView):
             playback_state.is_playing = False
             playback_state.save()
 
-        Event.invalidate_event(EventChannels.user_events(self.request.user.uuid), ["playback"])
+        send_ws_event(f"user_{self.request.user.uuid}", event_handler="base.event", event_name="invalidate.query", query_key=["playback"])
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -111,7 +108,7 @@ class PlaybackDeviceActivateView(APIView):
 #                 user.playback_state.is_playing = False
 #                 user.playback_state.save()
 #
-#         Event.invalidate_event(EventChannels.user_events(user.uuid), ["playback"])
+#         send_ws_event(f"user_{user.uuid}", event_handler="base.event", event_name="invalidate.query", query_key=["playback"])
 #         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -137,7 +134,5 @@ class PlaybackStateView(APIView):
         playback_state.is_playing = is_playing
         playback_state.save()
 
-        Event.invalidate_event(
-            EventChannels.user_events(self.request.user.uuid), ["playback"]
-        )
+        send_ws_event(f"user_{self.request.user.uuid}", event_handler="base.event", event_name="invalidate.query", query_key=["playback"])
         return Response(status=status.HTTP_204_NO_CONTENT)

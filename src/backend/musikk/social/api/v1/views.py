@@ -12,8 +12,7 @@ from social.api.v1.serializers import (
     PublicationCreateSerializer,
 )
 from social.models import Publication
-from sse.config import EventChannels
-from sse.events import Event
+from websockets.event_helpers import send_ws_event
 from users.models import StreamingProfile, BaseUser
 
 
@@ -48,10 +47,7 @@ class CommentsListCreateView(APIView):
             )
 
         if obj.content_object:
-            Event.invalidate_event(
-                EventChannels.user_events(user.uuid),
-                ["comments", data["obj_uuid"]],
-            )
+            send_ws_event(f"user_{user.uuid}", event_handler="base.event", event_name="invalidate.query", query_key=["comments", data["obj_uuid"]])
 
         return Response(status=status.HTTP_201_CREATED)
 
@@ -73,15 +69,9 @@ class PostCreateView(APIView):
                 orig_comment=obj.parent,
                 reply_comment=obj,
             )
-            Event.invalidate_event(
-                EventChannels.user_events(user.uuid),
-                ["posts", "children", str(obj.parent.uuid)],
-            )
+            send_ws_event(f"user_{user.uuid}", event_handler="base.event", event_name="invalidate.query", query_key=["posts", "children", str(obj.parent.uuid)])
         else:
-            Event.invalidate_event(
-                EventChannels.user_events(user.uuid),
-                ["posts", "user", str(obj.get_root().user.uuid)],
-            )
+            send_ws_event(f"user_{user.uuid}", event_handler="base.event", event_name="invalidate.query", query_key=["posts", "user", str(obj.get_root().user.uuid)])
 
         return Response(status=status.HTTP_201_CREATED)
 

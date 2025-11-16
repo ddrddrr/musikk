@@ -7,8 +7,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.exceptions import NotFound
 
-from sse.config import EventChannels
-from sse.events import Event
+from websockets.event_helpers import send_ws_event
 from streaming.api.v1.serializers.collections import (
     CollectionSerializerBasic,
     CollectionSerializerDetailed,
@@ -90,10 +89,8 @@ class CollectionAddLikedView(APIView):
             collection = get_object_or_404(Collection, uuid=collection_uuid)
             user.streamingprofile.followed_collections.add(collection)
 
-        Event.invalidate_event(EventChannels.user_events(user_uuid), ["openCollection"])
-        Event.invalidate_event(
-            EventChannels.user_events(user_uuid), ["collectionsPersonal"]
-        )
+        send_ws_event(f"user_{user_uuid}", event_handler="base.event", event_name="invalidate.query", query_key=["openCollection"])
+        send_ws_event(f"user_{user_uuid}", event_handler="base.event", event_name="invalidate.query", query_key=["collectionsPersonal"])
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -112,9 +109,7 @@ class CollectionRemoveSong(APIView):
         )
 
         collection_song.delete()
-        Event.invalidate_event(
-            EventChannels.user_events(self.request.user.uuid), ["openCollection"]
-        )
+        send_ws_event(f"user_{self.request.user.uuid}", event_handler="base.event", event_name="invalidate.query", query_key=["openCollection"])
         return Response(
             status=status.HTTP_200_OK,
         )

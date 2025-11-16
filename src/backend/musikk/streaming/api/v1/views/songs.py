@@ -8,8 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from sse.config import EventChannels
-from sse.events import Event
+from websockets.event_helpers import send_ws_event
 from streaming.api.v1.serializers.songs import (
     BaseSongCreateSerializer,
     CollectionSongSerializer,
@@ -43,11 +42,23 @@ class SongAddLikedView(APIView):
 
         # doing a refetch for the queue is easier than traversing nodes and checking,
         # whether the song is in the queue
-        Event.invalidate_event(EventChannels.user_events(user_uuid), ["queue"])
-        Event.invalidate_event(EventChannels.user_events(user_uuid), ["openCollection"])
-        Event.invalidate_event(
-            EventChannels.user_events(user_uuid),
-            ["friend-activity", "listening", user_uuid],
+        send_ws_event(
+            f"user_{user_uuid}",
+            event_handler="base.event",
+            event_name="invalidate.query",
+            query_key=["queue"],
+        )
+        send_ws_event(
+            f"user_{user_uuid}",
+            event_handler="base.event",
+            event_name="invalidate.query",
+            query_key=["openCollection"],
+        )
+        send_ws_event(
+            f"user_{user_uuid}",
+            event_handler="base.event",
+            event_name="invalidate.query",
+            query_key=["friend-activity", "listening", user_uuid],
         )
         return Response(status=status.HTTP_204_NO_CONTENT)
 

@@ -1,5 +1,3 @@
-import json
-
 from asgiref.sync import async_to_sync as atos
 from channels.generic.websocket import JsonWebsocketConsumer
 
@@ -29,9 +27,18 @@ class BaseConsumer(JsonWebsocketConsumer):
         atos(self.channel_layer.group_discard)(self.group_name, self.channel_name)
 
     def receive_json(self, content, **kwargs):
-        atos(self.channel_layer.send)(
-            self.group_name, {"type": "test.base_msg", "payload": "aboba"}
-        )
+        match content:
+            case {"action": "test.event", "payload": payload}:
+                pass
+            case _:
+                atos(self.channel_layer.send)(
+                    self.group_name, {"type": "test.base_msg", "payload": "aboba"}
+                )
 
-    def song_created(self, event):
-        self.send(text_data=json.dumps({"event": "song.created"}))
+    def base_event(self, event):
+        self.send_json(
+            {
+                "event": event["event"],
+                "payload": event.get("payload"),
+            }
+        )

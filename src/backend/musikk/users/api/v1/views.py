@@ -13,8 +13,7 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 from django.http import HttpResponse
 
 from notifications.models import FriendRequestNotification
-from sse.config import EventChannels
-from sse.events import Event
+from websockets.event_helpers import send_ws_event
 from users.api.v1.serializers import (
     BaseUserSerializer,
     BaseProfileSerializer,
@@ -50,8 +49,10 @@ class BaseProfileRetrieveUpdateView(RetrieveUpdateAPIView):
     def perform_update(self, serializer):
         super().perform_update(serializer)
         user_uuid = self.request.user.uuid
-        Event.invalidate_event(
-            EventChannels.user_events(user_uuid), ["profile", str(user_uuid)]
+        send_ws_event(
+            f"user_{user_uuid}",
+            event_handler="base.event", event_name="invalidate.query",
+            query_key=["profile", str(user_uuid)],
         )
 
 
@@ -86,8 +87,10 @@ class UserFriendsView(APIView):
             receiver=user,
         )
         user.friends.add(friend)
-        Event.invalidate_event(
-            EventChannels.user_events(user.uuid), ["user", "friends", str(user.uuid)]
+        send_ws_event(
+            f"user_{user.uuid}",
+            event_handler="base.event", event_name="invalidate.query",
+            query_key=["user", "friends", str(user.uuid)],
         )
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -95,8 +98,10 @@ class UserFriendsView(APIView):
         user = get_object_or_404(BaseProfile, uuid=kwargs.get("profile_uuid"))
         friend = get_object_or_404(BaseProfile, uuid=kwargs.get("friend_uuid"))
         user.friends.remove(friend)
-        Event.invalidate_event(
-            EventChannels.user_events(user.uuid), ["user", "friends", str(user.uuid)]
+        send_ws_event(
+            f"user_{user.uuid}",
+            event_handler="base.event", event_name="invalidate.query",
+            query_key=["user", "friends", str(user.uuid)],
         )
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -118,8 +123,10 @@ class ArtistFollowersView(APIView):
         user = self.request.user
         profile: StreamingProfile = user.streamingprofile
         profile.followed.add(artist)
-        Event.invalidate_event(
-            EventChannels.user_events(user.uuid), ["user", "followed", str(user.uuid)]
+        send_ws_event(
+            f"user_{user.uuid}",
+            event_handler="base.event", event_name="invalidate.query",
+            query_key=["user", "followed", str(user.uuid)],
         )
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -129,18 +136,9 @@ class ArtistFollowersView(APIView):
         user = self.request.user
         profile: StreamingProfile = user.streamingprofile
         profile.followed.remove(artist)
-        Event.invalidate_event(
-            EventChannels.user_events(user.uuid), ["user", "followed", str(user.uuid)]
+        send_ws_event(
+            f"user_{user.uuid}",
+            event_handler="base.event", event_name="invalidate.query",
+            query_key=["user", "followed", str(user.uuid)],
         )
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-class UserEventViewSet(EventsViewSet):
-    permission_classes = [IsAuthenticated]
-
-    def list(self, request):
-        ch = EventChannels.user_events(self.request.user.uuid)
-        # no need to add the channel to the existing list, as it is
-        # request scoped, i.e. every user gets its own channel
-        self.channels = [ch]
-        return super().list(request)
