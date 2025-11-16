@@ -1,4 +1,3 @@
-// import { useHandleInvalidateEvent } from "@/components/app/useHandleInvalidateEvent.ts";
 import { Header } from "@/components/layout/header/Header.tsx";
 import { MainContent } from "@/components/layout/MainContent.tsx";
 import { PlayerBox } from "@/components/player/PlayerBox.tsx";
@@ -6,26 +5,23 @@ import { Toaster } from "@/components/ui/sonner";
 import { PlaybackProvider } from "@/providers/PlaybackProvider.tsx";
 import { UserCollectionsProvider } from "@/providers/UserCollectionsProvider.tsx";
 import { UserConnectionsProvider } from "@/providers/UserConnectionsProvider.tsx";
-import { WebSocketProvider } from "@/providers/WebSocketProvider.tsx";
 import { memo } from "react";
 
 export const HomePage = memo(function HomePage() {
     return (
-        <WebSocketProvider>
-            <PlaybackProvider>
-                <UserCollectionsProvider>
-                    <UserConnectionsProvider>
-                        <div className="h-screen flex flex-col bg-gray-200">
-                            <Header />
-                            <div className="flex flex-1 overflow-hidden">
-                                <MainContent />
-                            </div>
-                            <Toaster />
-                            <PlayerBox />
+        <PlaybackProvider>
+            <UserCollectionsProvider>
+                <UserConnectionsProvider>
+                    <div className="h-screen flex flex-col bg-gray-200">
+                        <Header />
+                        <div className="flex flex-1 overflow-hidden">
+                            <MainContent />
                         </div>
-                    </UserConnectionsProvider>
-                </UserCollectionsProvider>
-            </PlaybackProvider>
-        </WebSocketProvider>
+                        <Toaster />
+                        <PlayerBox />
+                    </div>
+                </UserConnectionsProvider>
+            </UserCollectionsProvider>
+        </PlaybackProvider>
     );
 });

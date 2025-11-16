@@ -1,16 +1,14 @@
+import { useWSClient } from "@/hooks/useWSClient.ts";
 import { useQueryClient } from "@tanstack/react-query";
-import { useCallback } from "react";
+import { useEffect } from "react";
 
 export function useHandleInvalidateEvent() {
+    const ws = useWSClient();
     const client = useQueryClient();
 
-    return useCallback(
-        function handleEvent(event: MessageEvent) {
-            const data: [any] = JSON.parse(event.data);
-            if (data) {
-                client.invalidateQueries({ queryKey: data });
-            }
-        },
-        [client],
-    );
+    useEffect(() => {
+        ws.subscribe("invalidate.query", (payload) =>
+            client.invalidateQueries({ queryKey: payload["query_key"] }),
+        );
+    }, [ws, client]);
 }

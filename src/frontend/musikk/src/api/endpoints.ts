@@ -79,9 +79,6 @@ export const UserURLs = {
 export const SearchURLs = {
     searchMain: (query: string) => `/search?q=${query}`,
 };
-export const EventURLs = {
-    userEvents: `/events/user`,
-};
 export const PlaybackURLs = {
     retrieve: `/playback`,
     setState: `/playback`,

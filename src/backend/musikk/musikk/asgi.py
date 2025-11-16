@@ -15,7 +15,7 @@ from channels.auth import AuthMiddlewareStack
 
 from websockets.urls import websocket_urlpatterns
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "musikk.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "musikk.settings.local")
 
 django_asgi_app = get_asgi_application()
 application = ProtocolTypeRouter(
