@@ -96,15 +96,15 @@
     </bcf:option>
     <bcf:option type="singlevalued">
       <bcf:key>maxbibnames</bcf:key>
-      <bcf:value>100</bcf:value>
+      <bcf:value>3</bcf:value>
     </bcf:option>
     <bcf:option type="singlevalued">
       <bcf:key>maxcitenames</bcf:key>
-      <bcf:value>100</bcf:value>
+      <bcf:value>3</bcf:value>
     </bcf:option>
     <bcf:option type="singlevalued">
       <bcf:key>maxsortnames</bcf:key>
-      <bcf:value>100</bcf:value>
+      <bcf:value>3</bcf:value>
     </bcf:option>
     <bcf:option type="singlevalued">
       <bcf:key>maxitems</bcf:key>
@@ -172,7 +172,7 @@
     </bcf:option>
     <bcf:option type="singlevalued">
       <bcf:key>sortingtemplatename</bcf:key>
-      <bcf:value>none</bcf:value>
+      <bcf:value>nty</bcf:value>
     </bcf:option>
     <bcf:option type="singlevalued">
       <bcf:key>sortsets</bcf:key>
@@ -331,15 +331,15 @@
     </bcf:option>
     <bcf:option type="singlevalued">
       <bcf:key>maxbibnames</bcf:key>
-      <bcf:value>100</bcf:value>
+      <bcf:value>3</bcf:value>
     </bcf:option>
     <bcf:option type="singlevalued">
       <bcf:key>maxcitenames</bcf:key>
-      <bcf:value>100</bcf:value>
+      <bcf:value>3</bcf:value>
     </bcf:option>
     <bcf:option type="singlevalued">
       <bcf:key>maxsortnames</bcf:key>
-      <bcf:value>100</bcf:value>
+      <bcf:value>3</bcf:value>
     </bcf:option>
     <bcf:option type="singlevalued">
       <bcf:key>maxitems</bcf:key>
@@ -2369,112 +2369,49 @@
   <!-- CITATION DATA -->
   <!-- SECTION 0 -->
   <bcf:bibdata section="0">
-    <bcf:datasource type="file" datatype="bibtex" glob="false">../bibliography.bib</bcf:datasource>
+    <bcf:datasource type="file" datatype="bibtex" glob="false">bibliography.bib</bcf:datasource>
   </bcf:bibdata>
   <bcf:section number="0">
-    <bcf:citekey order="1" intorder="1">music_role_life</bcf:citekey>
+    <bcf:citekey order="1" intorder="1">music_stats_decade</bcf:citekey>
     <bcf:citekey order="2" intorder="1">music_role_life</bcf:citekey>
-    <bcf:citekey order="3" intorder="1">music_role_life</bcf:citekey>
+    <bcf:citekey order="3" intorder="1">concert_going_social_aspects</bcf:citekey>
     <bcf:citekey order="4" intorder="1">googleforms</bcf:citekey>
     <bcf:citekey order="5" intorder="1">spotifypopularity</bcf:citekey>
-    <bcf:citekey order="6" intorder="1">music_stats_2024</bcf:citekey>
-    <bcf:citekey order="7" intorder="1">spotify_jam</bcf:citekey>
-    <bcf:citekey order="8" intorder="1">spotify_recs</bcf:citekey>
-    <bcf:citekey order="9" intorder="1">spotify_friend_activ</bcf:citekey>
-    <bcf:citekey order="10" intorder="1">spotify_party_1</bcf:citekey>
-    <bcf:citekey order="10" intorder="2">spotify_party_2</bcf:citekey>
-    <bcf:citekey order="11" intorder="1">sc_comments</bcf:citekey>
-    <bcf:citekey order="11" intorder="2">sc_reactions</bcf:citekey>
-    <bcf:citekey order="12" intorder="1">sc_reposts</bcf:citekey>
-    <bcf:citekey order="13" intorder="1">ryt</bcf:citekey>
-    <bcf:citekey order="14" intorder="1">2step</bcf:citekey>
-    <bcf:citekey order="15" intorder="1">lastfm</bcf:citekey>
-    <bcf:citekey order="16" intorder="1">inst_audio</bcf:citekey>
-    <bcf:citekey order="17" intorder="1">moscow</bcf:citekey>
-    <bcf:citekey order="18" intorder="1">python</bcf:citekey>
-    <bcf:citekey order="19" intorder="1">gil</bcf:citekey>
-    <bcf:citekey order="20" intorder="1">fastapi</bcf:citekey>
-    <bcf:citekey order="21" intorder="1">fastapi</bcf:citekey>
-    <bcf:citekey order="22" intorder="1">django</bcf:citekey>
-    <bcf:citekey order="23" intorder="1">drf</bcf:citekey>
-    <bcf:citekey order="24" intorder="1">django_channels</bcf:citekey>
-    <bcf:citekey order="25" intorder="1">flask</bcf:citekey>
-    <bcf:citekey order="26" intorder="1">sqlalchemy</bcf:citekey>
-    <bcf:citekey order="27" intorder="1">stackoverflow</bcf:citekey>
-    <bcf:citekey order="28" intorder="1">so_fastapi</bcf:citekey>
-    <bcf:citekey order="29" intorder="1">so_django</bcf:citekey>
-    <bcf:citekey order="30" intorder="1">so_flask</bcf:citekey>
-    <bcf:citekey order="31" intorder="1">sqlite</bcf:citekey>
-    <bcf:citekey order="32" intorder="1">postgres</bcf:citekey>
-    <bcf:citekey order="33" intorder="1">django_postgres</bcf:citekey>
-    <bcf:citekey order="34" intorder="1">mariadb</bcf:citekey>
-    <bcf:citekey order="35" intorder="1">dbfunctions</bcf:citekey>
-    <bcf:citekey order="36" intorder="1">dbrank</bcf:citekey>
-    <bcf:citekey order="37" intorder="1">frameworkdata</bcf:citekey>
-    <bcf:citekey order="38" intorder="1">react</bcf:citekey>
-    <bcf:citekey order="39" intorder="1">vue</bcf:citekey>
-    <bcf:citekey order="40" intorder="1">frameworkdata</bcf:citekey>
-    <bcf:citekey order="41" intorder="1">basic_auth</bcf:citekey>
-    <bcf:citekey order="42" intorder="1">session_auth</bcf:citekey>
-    <bcf:citekey order="43" intorder="1">jwt</bcf:citekey>
-    <bcf:citekey order="44" intorder="1">oauth2</bcf:citekey>
-    <bcf:citekey order="45" intorder="1">sse</bcf:citekey>
-    <bcf:citekey order="46" intorder="1">django_sse</bcf:citekey>
-    <bcf:citekey order="47" intorder="1">websockets</bcf:citekey>
-    <bcf:citekey order="48" intorder="1">pushapi</bcf:citekey>
-    <bcf:citekey order="49" intorder="1">mvc</bcf:citekey>
-    <bcf:citekey order="50" intorder="1">dash</bcf:citekey>
-    <bcf:citekey order="51" intorder="1">hls</bcf:citekey>
-    <bcf:citekey order="52" intorder="1">mse</bcf:citekey>
-    <bcf:citekey order="52" intorder="2">msecaniuse</bcf:citekey>
-    <bcf:citekey order="53" intorder="1">browserusage</bcf:citekey>
-    <bcf:citekey order="54" intorder="1">opusefficiency</bcf:citekey>
-    <bcf:citekey order="55" intorder="1">caniuseopus</bcf:citekey>
-    <bcf:citekey order="56" intorder="1">opusefficiency</bcf:citekey>
-    <bcf:citekey order="57" intorder="1">vialicensing</bcf:citekey>
-    <bcf:citekey order="58" intorder="1">cbr</bcf:citekey>
-    <bcf:citekey order="59" intorder="1">vbr</bcf:citekey>
-    <bcf:citekey order="60" intorder="1">cbrvbrcomp</bcf:citekey>
-    <bcf:citekey order="61" intorder="1">ffmpeg</bcf:citekey>
-    <bcf:citekey order="62" intorder="1">libfdkaac</bcf:citekey>
-    <bcf:citekey order="62" intorder="2">libopus</bcf:citekey>
-    <bcf:citekey order="63" intorder="1">ffmpegpython</bcf:citekey>
-    <bcf:citekey order="64" intorder="1">ffmpegopenai</bcf:citekey>
-    <bcf:citekey order="65" intorder="1">restdef</bcf:citekey>
-    <bcf:citekey order="66" intorder="1">simplejwt</bcf:citekey>
-    <bcf:citekey order="67" intorder="1">pythonmagic</bcf:citekey>
-    <bcf:citekey order="68" intorder="1">djangocontenttype</bcf:citekey>
-    <bcf:citekey order="69" intorder="1">shadcn</bcf:citekey>
-    <bcf:citekey order="70" intorder="1">tanstack</bcf:citekey>
-    <bcf:citekey order="71" intorder="1">reactrouterdom</bcf:citekey>
-    <bcf:citekey order="72" intorder="1">reacthookform</bcf:citekey>
-    <bcf:citekey order="73" intorder="1">vite</bcf:citekey>
-    <bcf:citekey order="74" intorder="1">axiosintercept</bcf:citekey>
-    <bcf:citekey order="75" intorder="1">eventsource</bcf:citekey>
-    <bcf:citekey order="76" intorder="1">shaka</bcf:citekey>
-    <bcf:citekey order="77" intorder="1">dashref</bcf:citekey>
-    <bcf:citekey order="78" intorder="1">chromelfapi</bcf:citekey>
-    <bcf:citekey order="78" intorder="2">beacons</bcf:citekey>
-    <bcf:citekey order="79" intorder="1">beacons</bcf:citekey>
-    <bcf:citekey order="80" intorder="1">libfdkaac</bcf:citekey>
-    <bcf:citekey order="81" intorder="1">caddy</bcf:citekey>
-    <bcf:citekey order="82" intorder="1">porkbun</bcf:citekey>
-    <bcf:citekey order="83" intorder="1">hetzner</bcf:citekey>
   </bcf:section>
   <!-- SORTING TEMPLATES -->
-  <bcf:sortingtemplate name="none">
+  <bcf:sortingtemplate name="nty">
     <bcf:sort order="1">
-      <bcf:sortitem order="1">citeorder</bcf:sortitem>
+      <bcf:sortitem order="1">presort</bcf:sortitem>
     </bcf:sort>
-    <bcf:sort order="2">
-      <bcf:sortitem order="1">intciteorder</bcf:sortitem>
+    <bcf:sort order="2" final="1">
+      <bcf:sortitem order="1">sortkey</bcf:sortitem>
+    </bcf:sort>
+    <bcf:sort order="3">
+      <bcf:sortitem order="1">sortname</bcf:sortitem>
+      <bcf:sortitem order="2">author</bcf:sortitem>
+      <bcf:sortitem order="3">editor</bcf:sortitem>
+      <bcf:sortitem order="4">translator</bcf:sortitem>
+      <bcf:sortitem order="5">sorttitle</bcf:sortitem>
+      <bcf:sortitem order="6">title</bcf:sortitem>
+    </bcf:sort>
+    <bcf:sort order="4">
+      <bcf:sortitem order="1">sorttitle</bcf:sortitem>
+      <bcf:sortitem order="2">title</bcf:sortitem>
+    </bcf:sort>
+    <bcf:sort order="5">
+      <bcf:sortitem order="1">sortyear</bcf:sortitem>
+      <bcf:sortitem order="2">year</bcf:sortitem>
+    </bcf:sort>
+    <bcf:sort order="6">
+      <bcf:sortitem order="1">volume</bcf:sortitem>
+      <bcf:sortitem literal="1" order="2">0</bcf:sortitem>
     </bcf:sort>
   </bcf:sortingtemplate>
   <!-- DATALISTS -->
   <bcf:datalist section="0"
-                name="none/global//global/global/global"
+                name="nty/global//global/global/global"
                 type="entry"
-                sortingtemplatename="none"
+                sortingtemplatename="nty"
                 sortingnamekeytemplatename="global"
                 labelprefix=""
                 uniquenametemplatename="global"

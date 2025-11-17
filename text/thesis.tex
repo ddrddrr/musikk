@@ -1,93 +1,93 @@
-\documentclass[11pt, a4paper, oneside, openany]{book}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% I, the copyright holder of this work, release this work into the
+%% public domain. This applies worldwide. In some countries this may
+%% not be legally possible; if so: I grant anyone the right to use
+%% this work for any purpose, without any conditions, unless such
+%% conditions are required by law.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Input and output encoding
-\usepackage[utf8]{inputenc}
-\usepackage[T1]{fontenc}
+\documentclass[
+    digital,
+    oneside,
+    nosansbold,  %% The `nosansbold` option prevents the use of the
+%% sans-serif type face for bold text. Replace with
+%% `sansbold` to use sans-serif type face for bold text.
+    nocolorbold,
+    lof,
+    lot,
+]{fithesis4}
 
-\usepackage[english]{babel}
-
-\usepackage[dvipsnames]{xcolor}
-\usepackage{lmodern}
-\usepackage{enumitem}
-\usepackage{todonotes}
-\usepackage{setspace}
-\usepackage{graphicx}
-\usepackage{amssymb,amsmath}
-\usepackage{mathtools}
-\usepackage{float}
-\usepackage[pass]{geometry}
-\usepackage{ifdraft}
-
-
-\definecolor{codebg}{rgb}{0.98, 0.98, 0.98} % light gray
-\usepackage{minted}
-\usemintedstyle{friendly}
-\setminted{
-    bgcolor=codebg,
-    frame=single,
-    fontsize=\small,
-    xleftmargin=1em,
-    framesep=0.5em
-}
-
-
-
-\usepackage[unicode=true,
-    plainpages=false,
-    pdfpagelabels,
-    draft=false,
-    colorlinks=true,
-    hyperfootnotes=false,
-    linkcolor={Sepia},
-    citecolor={PineGreen},
-    urlcolor={MidnightBlue},
-]{hyperref}
-
-\hypersetup{
-    pdfauthor={Kirill Vorozhtsov},
-    pdftitle={Musikk},
-    pdfsubject={Bachelor's Thesis}
-}
-
+%% The following section sets up the locales used in the thesis.
+\usepackage[resetfonts]{cmap}
+\usepackage[T1,T2A]{fontenc}
 \usepackage[
-    backend=biber,
-    style=numeric,
-    sorting=none,
-    maxnames=100
-]{biblatex}
-\addbibresource{../bibliography.bib}
-\setlength{\tabcolsep}{6pt}
+    main=english,
+    english, german, czech, slovak
+]{babel}
 
-\usepackage{nameref}
-\usepackage{adjustbox}
-\usepackage{url}
-% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
+%% The following section sets up the metadata of the thesis.
+\thesissetup{
+    date        = \the\year/\the\month/\the\day,
+    university  = mu,
+    faculty     = fi,
+    type        = bc,
+    author      = Kirill Vorozhtsov,
+    gender      = m,
+    advisor     = {Mgr. Luděk Bártek, Ph.D},
+    title       = {Musikk: A Modern, Social-First Music Streaming Platform},
+    keywords    = {Audio Streaming, Python, JavaScript, MPEG-DASH, HLS, WebSockets},
+    abstract    = {%
+        This bachelor's thesis aims to design and implement
+        a web-based music streaming platform focused on social interactions between users.
+
+        The theoretical part presents a survey that analyzes people's
+        music listening habits and shows that such a platform could find its user base.
+        It then compares existing music-related services with built-in social
+        features and derives functional and non-functional requirements for the proposed system.
+        Based on these requirements, suitable technologies and architectural patterns are selected.
+
+        The practical part covers the technical part of the platform, for example,
+        data model, audio processing, user interaction features, real-time synchronization, etc.
+
+        The result is a fully functional and deployed application.
+    },
+    thanks      = {%
+        These are the acknowledgements for my thesis, which can
+
+        span multiple paragraphs.
+    },
+    bib         = {bibliography.bib},
+    facultyLogo = fithesis-fi,
+}
+\usepackage{makeidx}
+\makeindex
+\usepackage{paralist} %% Compact list environments
+\usepackage{amsmath}  %% Mathematics
+\usepackage{amsthm}
+\usepackage{amsfonts}
+\usepackage{url}      %% Hyperlinks
+\usepackage{markdown} %% Lightweight markup
+\usepackage{listings} %% Source code highlighting
+\lstset{
+    basicstyle      = \ttfamily,
+    identifierstyle = \color{black},
+    keywordstyle    = \color{blue},
+    keywordstyle    = {[2]\color{cyan}},
+    keywordstyle    = {[3]\color{olive}},
+    stringstyle     = \color{teal},
+    commentstyle    = \itshape\color{magenta},
+    breaklines      = true,
+}
+\usepackage{floatrow} %% Putting captions above tables
+\floatsetup[table]{capposition=top}
+\usepackage[babel]{csquotes}
+\usepackage{graphicx}
+\usepackage{biblatex}
+\usepackage{hyperref} %% Context-sensitive quotation marks
+
 
 \begin{document}
-    \frontmatter
-    \input{titlepage}
-    \input{frontmatter}
-
-    \setcounter{tocdepth}{2}
-    \tableofcontents
-    \pagestyle{plain}
-
-    \mainmatter
     \input{chapters/1_intro}
     \input{chapters/2_survey}
-    \input{chapters/3_existing_solutions}
-    \input{chapters/4_specification}
-    \input{chapters/5_implementation_planning}
-    \input{chapters/6_implementation}
-    \input{chapters/7_conclusion}
-    \backmatter
-
-
-    \chapter{Sources}
-    \begingroup
-    \raggedright
-    \printbibliography[heading=none]
-    \endgroup
-
-
+    \input{chapters/appendix}
 \end{document}

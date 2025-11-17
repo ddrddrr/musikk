@@ -22,21 +22,17 @@ import textwrap
 #         outfile.write(replace_commas_in_quotes(line))
 
 
-# Load data
-data = pd.read_csv("res2.csv")
+data = pd.read_csv("survey_results.csv")
 data.drop("Timestamp", axis="columns", inplace=True)
 
-# Chart output directory
 output_dir = "charts"
 os.makedirs(output_dir, exist_ok=True)
 
 
-# Wrap text utility
 def wrap_text(text, width=40):
     return "\n".join(textwrap.wrap(str(text), width))
 
 
-# Question titles
 question_titles = {
     "age": "How old are you?",
     "constumption method": "How do you mostly consume audio media?",
@@ -60,7 +56,6 @@ question_titles = {
     "extra": "Any additional comments?",
 }
 
-# Multiselect columns by index
 multiselect_indexes = [1, 2, 3, 6, 9, 12, 13]
 multiselect_columns = [data.columns[i] for i in multiselect_indexes]
 
@@ -68,12 +63,10 @@ multiselect_columns = [data.columns[i] for i in multiselect_indexes]
 def audio_consumption_method(d):
     dummies = d["constumption method"].str.get_dummies(sep="|")
 
-    # Combine rare answers into "Other"
     total_counts = dummies.sum()
     common = total_counts[total_counts > 1]
     other = total_counts[total_counts <= 1]
 
-    # Filter dummies to include only common columns
     common_cols = common.index.tolist()
     dummies_filtered = dummies[common_cols].copy()
     if not other.empty:
@@ -88,23 +81,20 @@ def audio_consumption_method(d):
     percentages.plot(kind="bar", ax=ax)
 
     ax.yaxis.set_major_formatter(mtick.PercentFormatter(xmax=1))
-    ax.set_ylabel("Percentage of respondents", fontsize=16)
-    ax.set_xlabel("Age Group", fontsize=16)
-    ax.set_title(question_titles["constumption method"], fontsize=18)
+    ax.set_ylabel("Percentage of respondents", fontsize=18)
+    ax.set_xlabel("Age Group", fontsize=18)
+    ax.set_title(question_titles["constumption method"], fontsize=20)
 
-    # Increase tick label sizes
-    ax.tick_params(axis="both", labelsize=14)
+    ax.tick_params(axis="both", labelsize=16)
 
-    # Wrap legend labels
     wrapped_labels = [wrap_text(label, 30) for label in percentages.columns]
 
-    # Increase legend font size
     ax.legend(
         wrapped_labels,
         title="Method",
         bbox_to_anchor=(1.05, 1),
         loc="upper left",
-        prop={"size": 14},
+        prop={"size": 20},
         title_fontsize=16,
     )
 
@@ -126,7 +116,6 @@ def generate_charts(df):
         if is_multiselect:
             dummies = series.str.get_dummies(sep="|")
 
-            # Combine rare answers into "Other"
             raw_counts = dummies.sum()
             common = raw_counts[raw_counts > 1]
             other_count = raw_counts[raw_counts <= 1].sum()
@@ -134,33 +123,40 @@ def generate_charts(df):
             counts = common.copy()
             if other_count > 0:
                 counts["Other"] = other_count
-            counts = counts.sort_values(ascending=True)
+            counts = counts.sort_values(ascending=False)
 
-            labels = [wrap_text(label, 40) for label in counts.index]
+            labels = [wrap_text(label, 30) for label in counts.index]
 
-            fig, ax = plt.subplots(figsize=(9, 7))
-            bars = ax.barh(labels, counts.values, color="coral")
-            ax.tick_params(axis="both", labelsize=14)
+            fig, ax = plt.subplots(figsize=(9, 6))
 
+            x = range(len(counts))
+            bars = ax.bar(x, counts.values, color="coral")
+
+            ax.set_xticks(x)
+            ax.set_xticklabels(labels, rotation=45, ha="right", fontsize=12)
+
+            max_val = counts.max()
+            ax.set_ylim(0, max_val * 1.2)
             for bar, val in zip(bars, counts.values):
                 ax.text(
-                    val + 1,
-                    bar.get_y() + bar.get_height() / 2,
+                    bar.get_x() + bar.get_width() / 2,
+                    val + max_val * 0.03,  # small offset above bar
                     f"{val} ({val / series.shape[0] * 100:.1f}%)",
-                    va="center",
-                    fontsize=14,
+                    ha="center",
+                    va="bottom",
+                    fontsize=12,
                 )
 
+            ax.set_ylabel("Number of respondents", fontsize=14)
             ax.set_title(
                 wrap_text(
                     question_titles.get(col, col.replace("_", " ").capitalize()), 60
                 ),
                 fontsize=18,
             )
-            ax.set_xlabel("Number of respondents")
-            plt.savefig(
-                os.path.join(output_dir, f"{col}.png"), bbox_inches="tight", dpi=300
-            )
+
+            plt.tight_layout()
+            plt.savefig(os.path.join(output_dir, f"{col}.png"), dpi=300)
             plt.close()
         elif series.nunique() < 20:
             counts = series.value_counts()
@@ -171,7 +167,7 @@ def generate_charts(df):
                 subplot_kw=dict(aspect="equal"),
             )
             wedges, texts, autotexts = ax.pie(
-                counts, autopct="%1.1f%%", startangle=140, textprops={"fontsize": 8}
+                counts, autopct="%1.1f%%", startangle=140, textprops={"fontsize": 7}
             )
             ax.legend(
                 wedges,
