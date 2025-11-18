@@ -628,9 +628,6 @@ INPUT ./charts/age.png
 INPUT ./charts/age.png
 INPUT ./charts/age.png
 INPUT ./charts/age.png
-INPUT /usr/local/texlive/2025/texmf-dist/fonts/vf/adobe/palatino/pplr7t.vf
-INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/adobe/palatino/pplr8r.tfm
-INPUT /usr/local/texlive/2025/texmf-dist/fonts/enc/dvips/base/8r.enc
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc
 INPUT ./charts/song amount month.png
 INPUT ./charts/song amount month.png
@@ -667,6 +664,16 @@ INPUT ./charts/share method.png
 INPUT ./charts/share method.png
 INPUT ./charts/share method.png
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/public/tex-gyre/ec-qplri.tfm
+INPUT ./chapters/3_existing_solutions.tex
+INPUT ./chapters/3_existing_solutions.tex
+INPUT ./chapters/3_existing_solutions.tex
+INPUT ./chapters/3_existing_solutions.tex
+INPUT chapters/3_existing_solutions.tex
+INPUT ./charts/discovery methods.png
+INPUT ./charts/discovery methods.png
+INPUT ./charts/discovery methods.png
+INPUT ./charts/discovery methods.png
+INPUT ./charts/discovery methods.png
 INPUT ./chapters/appendix.tex
 INPUT ./chapters/appendix.tex
 INPUT ./chapters/appendix.tex
@@ -720,4 +727,3 @@ INPUT /usr/local/texlive/2025/texmf-dist/fonts/type1/public/tex-gyre/qhvr.pfb
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/type1/public/tex-gyre/qplb.pfb
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/type1/public/tex-gyre/qplr.pfb
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/type1/public/tex-gyre/qplri.pfb
-INPUT /usr/local/texlive/2025/texmf-dist/fonts/type1/urw/palatino/uplr8a.pfb

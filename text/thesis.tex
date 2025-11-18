@@ -41,20 +41,19 @@
         a web-based music streaming platform focused on social interactions between users.
 
         The theoretical part presents a survey that analyzes people's
-        music listening habits and shows that such a platform could find its user base.
+        music listening habits, showing that such a platform could find its user base.
         It then compares existing music-related services with built-in social
         features and derives functional and non-functional requirements for the proposed system.
         Based on these requirements, suitable technologies and architectural patterns are selected.
 
-        The practical part covers the technical part of the platform, for example,
-        data model, audio processing, user interaction features, real-time synchronization, etc.
+        The practical part covers the technical aspects of the platform, including data model, audio processing,
+        user interaction features, and real-time synchronization, among others.
 
         The result is a fully functional and deployed application.
     },
     thanks      = {%
-        These are the acknowledgements for my thesis, which can
-
-        span multiple paragraphs.
+        I would like to thank Mgr. Luděk Bártek, Ph.D., for his time and
+        the valuable advice he provided for this thesis.
     },
     bib         = {bibliography.bib},
     facultyLogo = fithesis-fi,
@@ -82,12 +81,14 @@
 \floatsetup[table]{capposition=top}
 \usepackage[babel]{csquotes}
 \usepackage{graphicx}
-\usepackage{biblatex}
+\usepackage[sorting=none]{biblatex}
 \usepackage{hyperref} %% Context-sensitive quotation marks
 
 
 \begin{document}
     \input{chapters/1_intro}
     \input{chapters/2_survey}
+    \input{chapters/3_existing_solutions}
+%    \input{chapters/4_specification}
     \input{chapters/appendix}
 \end{document}

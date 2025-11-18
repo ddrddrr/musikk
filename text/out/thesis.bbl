@@ -18,27 +18,10 @@
 
 
 \refsection{0}
-  \datalist[entry]{nty/global//global/global/global}
-    \entry{googleforms}{online}{}{}
-      \field{sortinit}{G}
-      \field{sortinithash}{32d67eca0634bf53703493fb1090a2e8}
-      \field{labeltitlesource}{title}
-      \field{langid}{english}
-      \field{title}{Google Forms}
-      \field{urlday}{5}
-      \field{urlmonth}{4}
-      \field{urlyear}{2025}
-      \field{urldateera}{ce}
-      \verb{urlraw}
-      \verb https://docs.google.com/forms/u/0/
-      \endverb
-      \verb{url}
-      \verb https://docs.google.com/forms/u/0/
-      \endverb
-    \endentry
+  \datalist[entry]{none/global//global/global/global}
     \entry{music_stats_decade}{online}{}{}
-      \field{sortinit}{M}
-      \field{sortinithash}{4625c616857f13d17ce56f7d4f97d451}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
       \field{labeltitlesource}{title}
       \field{langid}{english}
       \field{title}{Music Streaming Market Decade Insights}
@@ -69,8 +52,8 @@
       \strng{authornamehash}{fa31c0459fa99591a6150bcced9c1ee0}
       \strng{authorfullhash}{fa31c0459fa99591a6150bcced9c1ee0}
       \strng{authorfullhashraw}{fa31c0459fa99591a6150bcced9c1ee0}
-      \field{sortinit}{R}
-      \field{sortinithash}{5e1c39a9d46ffb6bebd8f801023a9486}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
       \field{langid}{english}
@@ -89,8 +72,8 @@
       \endverb
     \endentry
     \entry{concert_going_social_aspects}{online}{}{}
-      \field{sortinit}{S}
-      \field{sortinithash}{b164b07b29984b41daf1e85279fbc5ab}
+      \field{sortinit}{4}
+      \field{sortinithash}{9381316451d1b9788675a07e972a12a7}
       \field{labeltitlesource}{title}
       \field{langid}{english}
       \field{title}{Sharing Music: Social and Communal Aspects of Concert-Going}
@@ -105,9 +88,26 @@
       \verb https://ojs.meccsa.org.uk/index.php/netknow/article/view/428/250
       \endverb
     \endentry
+    \entry{googleforms}{online}{}{}
+      \field{sortinit}{5}
+      \field{sortinithash}{20e9b4b0b173788c5dace24730f47d8c}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{Google Forms}
+      \field{urlday}{5}
+      \field{urlmonth}{4}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://docs.google.com/forms/u/0/
+      \endverb
+      \verb{url}
+      \verb https://docs.google.com/forms/u/0/
+      \endverb
+    \endentry
     \entry{spotifypopularity}{online}{}{}
-      \field{sortinit}{S}
-      \field{sortinithash}{b164b07b29984b41daf1e85279fbc5ab}
+      \field{sortinit}{6}
+      \field{sortinithash}{b33bc299efb3c36abec520a4c896a66d}
       \field{labeltitlesource}{title}
       \field{langid}{english}
       \field{title}{Spotify Popularity}
@@ -120,6 +120,244 @@
       \endverb
       \verb{url}
       \verb https://simplebeen.com/music-streaming-statistics/?utm_source=chatgpt.com
+      \endverb
+    \endentry
+    \entry{music_stats_2024}{online}{}{}
+      \field{sortinit}{7}
+      \field{sortinithash}{108d0be1b1bee9773a1173443802c0a3}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{Audio Usage Statistics 2024}
+      \field{urlday}{15}
+      \field{urlmonth}{3}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://www.ifpi.org/wp-content/uploads/2023/12/IFPI-Engaging-With-Music-2023_full-report.pdf
+      \endverb
+      \verb{url}
+      \verb https://www.ifpi.org/wp-content/uploads/2023/12/IFPI-Engaging-With-Music-2023_full-report.pdf
+      \endverb
+    \endentry
+    \entry{spotify_jam}{online}{}{}
+      \field{sortinit}{8}
+      \field{sortinithash}{a231b008ebf0ecbe0b4d96dcc159445f}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{Spotify Jam}
+      \field{urlday}{16}
+      \field{urlmonth}{3}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://support.spotify.com/cz/article/jam/
+      \endverb
+      \verb{url}
+      \verb https://support.spotify.com/cz/article/jam/
+      \endverb
+    \endentry
+    \entry{spotify_friend_activ}{online}{}{}
+      \field{sortinit}{9}
+      \field{sortinithash}{0a5ebc79d83c96b6579069544c73c7d4}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{Spotify Friend Activity}
+      \field{urlday}{16}
+      \field{urlmonth}{3}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://support.spotify.com/cz/article/friend-activity/
+      \endverb
+      \verb{url}
+      \verb https://support.spotify.com/cz/article/friend-activity/
+      \endverb
+    \endentry
+    \entry{spotify_party_1}{online}{}{}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{Spotify Party Announcement}
+      \field{urlday}{16}
+      \field{urlmonth}{3}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://newsroom.spotify.com/2024-09-12/fans-artists-connections-features/
+      \endverb
+      \verb{url}
+      \verb https://newsroom.spotify.com/2024-09-12/fans-artists-connections-features/
+      \endverb
+    \endentry
+    \entry{spotify_party_2}{online}{}{}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{Spotify Party}
+      \field{urlday}{16}
+      \field{urlmonth}{3}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://support.spotify.com/us/article/listening-party/
+      \endverb
+      \verb{url}
+      \verb https://support.spotify.com/us/article/listening-party/
+      \endverb
+    \endentry
+    \entry{spotify_chat}{online}{}{}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{Spotify Chat}
+      \field{urlday}{17}
+      \field{urlmonth}{11}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://newsroom.spotify.com/2025-08-26/introducing-messages-a-new-way-to-share-what-you-love-on-spotify-with-friends-and-family/
+      \endverb
+      \verb{url}
+      \verb https://newsroom.spotify.com/2025-08-26/introducing-messages-a-new-way-to-share-what-you-love-on-spotify-with-friends-and-family/
+      \endverb
+    \endentry
+    \entry{vk_music}{online}{}{}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{VK Music}
+      \field{urlday}{17}
+      \field{urlmonth}{11}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://music.vk.com/
+      \endverb
+      \verb{url}
+      \verb https://music.vk.com/
+      \endverb
+    \endentry
+    \entry{sc_comments}{online}{}{}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{SoundCloud Comments}
+      \field{urlday}{16}
+      \field{urlmonth}{3}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://help.soundcloud.com/hc/en-us/articles/115003566008-Commenting-basics
+      \endverb
+      \verb{url}
+      \verb https://help.soundcloud.com/hc/en-us/articles/115003566008-Commenting-basics
+      \endverb
+    \endentry
+    \entry{sc_reactions}{online}{}{}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{SoundCloud Reactions}
+      \field{urlday}{16}
+      \field{urlmonth}{3}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://help.soundcloud.com/hc/en-us/articles/31039497560731-Reactions
+      \endverb
+      \verb{url}
+      \verb https://help.soundcloud.com/hc/en-us/articles/31039497560731-Reactions
+      \endverb
+    \endentry
+    \entry{sc_reposts}{online}{}{}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{Soundcloud Reposts}
+      \field{urlday}{16}
+      \field{urlmonth}{3}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://help.soundcloud.com/hc/en-us/articles/115003567488-Reposting-tracks-or-playlists
+      \endverb
+      \verb{url}
+      \verb https://help.soundcloud.com/hc/en-us/articles/115003567488-Reposting-tracks-or-playlists
+      \endverb
+    \endentry
+    \entry{ryt}{online}{}{}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{Rate Your Music}
+      \field{urlday}{25}
+      \field{urlmonth}{3}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://rateyourmusic.com/discover
+      \endverb
+      \verb{url}
+      \verb https://rateyourmusic.com/discover
+      \endverb
+    \endentry
+    \entry{2step}{online}{}{}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labeltitlesource}{title}
+      \field{langid}{russian}
+      \field{title}{2step.ru}
+      \field{urlday}{25}
+      \field{urlmonth}{3}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb http://www.2step.ru/
+      \endverb
+      \verb{url}
+      \verb http://www.2step.ru/
+      \endverb
+    \endentry
+    \entry{lastfm}{online}{}{}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{LastFM}
+      \field{urlday}{10}
+      \field{urlmonth}{5}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://www.last.fm/home
+      \endverb
+      \verb{url}
+      \verb https://www.last.fm/home
+      \endverb
+    \endentry
+    \entry{inst_audio}{online}{}{}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{Instagram Audio}
+      \field{urlday}{25}
+      \field{urlmonth}{3}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://help.instagram.com/664508917489819?helpref=faq_content
+      \endverb
+      \verb{url}
+      \verb https://help.instagram.com/664508917489819?helpref=faq_content
       \endverb
     \endentry
   \enddatalist

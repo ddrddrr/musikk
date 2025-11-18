@@ -327,8 +327,8 @@
     \edef\@path{\thesis@logopath\thesis@universityLogo
       \ifthesis@color@-color\fi}%
     \expandafter\thesis@blocks@logo\expandafter{\@path}{#1}}}
-\let\thesis@department@name\thesis@department
-\let\thesis@departmentEn@name\thesis@departmentEn
+%\let\thesis@department@name\thesis@department
+%\let\thesis@departmentEn@name\thesis@departmentEn
 \let\thesis@field@name\thesis@field
 \let\thesis@fieldEn@name\thesis@fieldEn
 \def\thesis@blocks@cover{%
@@ -365,7 +365,7 @@
     \thesis@@{advisorSignature}
   }}}%
 \newif\ifthesis@blocks@titlePage@department@
-\thesis@blocks@titlePage@department@true
+%\thesis@blocks@titlePage@department@true
 \newif\ifthesis@blocks@titlePage@field@
 \thesis@blocks@titlePage@field@true
 \newif\ifthesis@blocks@titlePage@programme@
@@ -567,7 +567,6 @@
         \thesis@author\\
         \thesis@@{facultyName} \\
         \thesis@@{universityName}\\
-        \thesis@department@name
       }\\
     \textbf{\thesis@@{bib@thesisTitle}:}
       & \thesis@title \\
@@ -619,7 +618,6 @@
         \thesis@author\\
         \thesis@english@facultyName \\
         \thesis@english@universityName\\
-        \thesis@departmentEn@name
         }\\
     \textbf{\thesis@english@bib@thesisTitle:}
       & \thesis@titleEn \\
