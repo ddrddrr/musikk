@@ -89,8 +89,18 @@ class CollectionAddLikedView(APIView):
             collection = get_object_or_404(Collection, uuid=collection_uuid)
             user.streamingprofile.followed_collections.add(collection)
 
-        send_ws_event(f"user_{user_uuid}", event_handler="base.event", event_name="invalidate.query", query_key=["openCollection"])
-        send_ws_event(f"user_{user_uuid}", event_handler="base.event", event_name="invalidate.query", query_key=["collectionsPersonal"])
+        send_ws_event(
+            f"user_{user_uuid}",
+            event_handler="base.event",
+            event_name="invalidate.query",
+            query_key=["openCollection"],
+        )
+        send_ws_event(
+            f"user_{user_uuid}",
+            event_handler="base.event",
+            event_name="invalidate.query",
+            query_key=["collectionsPersonal"],
+        )
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -109,7 +119,12 @@ class CollectionRemoveSong(APIView):
         )
 
         collection_song.delete()
-        send_ws_event(f"user_{self.request.user.uuid}", event_handler="base.event", event_name="invalidate.query", query_key=["openCollection"])
+        send_ws_event(
+            f"user_{self.request.user.uuid}",
+            event_handler="base.event",
+            event_name="invalidate.query",
+            query_key=["openCollection"],
+        )
         return Response(
             status=status.HTTP_200_OK,
         )

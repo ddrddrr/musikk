@@ -87,7 +87,7 @@ class PublicationRetrieveSerializer(BaseModelSerializer):
         ]
 
     def get_display_name(self, obj):
-        return obj.user.display_name if obj.user else None
+        return obj.user.baseprofile.display_name if obj.user else None
 
     def get_obj_type(self, obj):
         return (

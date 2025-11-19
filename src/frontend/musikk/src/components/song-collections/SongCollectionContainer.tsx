@@ -29,7 +29,11 @@ export function SongCollectionContainer({ collectionUUID }: SongCollectionContai
     });
 
     const toggleComments = () => {
-        navigate(showComments ? `/collection/${collectionUUID}` : `/collection/${collectionUUID}/comments`);
+        navigate(
+            showComments
+                ? `/collection/${collectionUUID}`
+                : `/collection/${collectionUUID}/comments`,
+        );
     };
 
     if (isPending)
@@ -47,48 +51,50 @@ export function SongCollectionContainer({ collectionUUID }: SongCollectionContai
         );
 
     const songs = collection.songs;
-    const notPersonalCollection = collection?.uuid !== liked_songs?.uuid && collection?.uuid !== history?.uuid;
+    const notPersonalCollection =
+        collection?.uuid !== liked_songs?.uuid && collection?.uuid !== history?.uuid;
     showComments = showComments && notPersonalCollection;
-    const removeFromPlaylistCtxBtn = !!currUserUUID && collection?.authors.map((a) => a.uuid).includes(currUserUUID);
+    const removeFromPlaylistCtxBtn =
+        !!currUserUUID && collection?.authors.map((a) => a.uuid).includes(currUserUUID);
 
     return (
-        <div className={`flex gap-4 ${showComments ? "flex-row" : "flex-col"} max-w-4xl mx-auto p-4`}>
-            <div className={showComments ? "w-1/2 pr-2" : "space-y-4"}>
-                <SongCollectionHeader
-                    collection={collection}
-                    toggleComments={toggleComments}
-                    songsCount={songs.length}
-                    notPersonalCollection={notPersonalCollection}
-                    showComments={showComments}
-                />
+        <div className="max-w-7xl mx-auto p-4">
+            <div className={`flex gap-6 ${showComments ? "flex-row" : "flex-col"}`}>
+                <div className={showComments ? "flex-1 min-w-0" : "w-full"}>
+                    <div className="space-y-4">
+                        <SongCollectionHeader
+                            collection={collection}
+                            toggleComments={toggleComments}
+                            songsCount={songs.length}
+                            notPersonalCollection={notPersonalCollection}
+                            showComments={showComments}
+                        />
 
-                {songs.length > 0 ? (
-                    <ul className="space-y-4" role="list">
-                        {songs.map((collectionSong, index) => (
-                            <li
-                                key={`${collectionSong.uuid}-${index}`}
-                                className="bg-white p-4 rounded-sm border border-gray-200 transition-colors hover:bg-gray-50"
-                            >
-                                <SongContainer
-                                    collectionSong={collectionSong}
-                                    renderItems={{ removeFromPlaylistCtxBtn }}
-                                />
-                            </li>
-                        ))}
-                    </ul>
-                ) : (
-                    <div className="text-center py-12 text-gray-700 bg-white rounded-lg border-2 border-black">
-                        <p className="font-medium">No songs in this collection</p>
+                        {songs.length > 0 ? (
+                            <ul className="space-y-2" role="list">
+                                {songs.map((collectionSong, index) => (
+                                    <li key={`${collectionSong.uuid}-${index}`}>
+                                        <SongContainer
+                                            collectionSong={collectionSong}
+                                            className="bg-white p-4 rounded-sm border border-gray-200 transition-colors hover:bg-gray-50"
+                                            renderItems={{ removeFromPlaylistCtxBtn }}
+                                        />
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : (
+                            <div className="text-center py-12 text-gray-700 bg-white rounded-lg border-2 border-black">
+                                <p className="font-medium">No songs in this collection</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {showComments && (
+                    <div className="flex-1 min-w-0">
+                        <CommentBox objType="collection" objUUID={collectionUUID} />
                     </div>
                 )}
-            </div>
-
-            <div
-                className={`w-1/2 pl-2 transition-all duration-500 ease-in-out transform ${
-                    showComments ? "opacity-100 translate-x-0" : "opacity-0 translate-x-8"
-                }`}
-            >
-                {showComments && <CommentBox objType="collection" objUUID={collectionUUID} />}
             </div>
         </div>
     );

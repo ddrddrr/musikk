@@ -65,8 +65,11 @@ export function PostTree({ publication, depth = 0 }: PostTreeProps) {
                 );
             case "song":
                 return (
-                    <div className="mb-4 border border-gray-300 rounded-md p-3 bg-white">
-                        <SongContainer collectionSong={obj} />
+                    <div className="mb-4">
+                        <SongContainer 
+                            collectionSong={obj}
+                            className="border border-gray-300 rounded-md p-3 bg-white"
+                        />
                     </div>
                 );
             case "user":

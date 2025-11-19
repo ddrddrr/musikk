@@ -17,7 +17,7 @@ export function ListeningFeed() {
                         >
                             <UserIdentifier user={user} />
                             <div className="mt-2">
-                                <SongContainer collectionSong={song} buttonSize={30} renderItems={{ image: false }} />
+                                <SongContainer collectionSong={song} size="compact" renderItems={{ image: false }} />
                             </div>
                         </div>
                     ))}

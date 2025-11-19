@@ -1,14 +1,13 @@
-import { login } from "@/auth/authentication";
 import { Spinner } from "@/components/common/Spinner";
 import { EmailField } from "@/components/signup-login/EmailField";
 import { PasswordField } from "@/components/signup-login/PasswordField";
 import { Button } from "@/components/ui/button";
 import { CardContent } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
+import { useAuth } from "@/hooks/useAuth";
 import { useCurrentDevice } from "@/hooks/useCurrentDevice.ts";
 import { useRegisterPDMutation } from "@/playback/mutations.ts";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQueryClient } from "@tanstack/react-query";
 import { isAxiosError } from "axios";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -23,7 +22,7 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 export function LoginForm() {
     const navigate = useNavigate();
-    const client = useQueryClient();
+    const { login } = useAuth();
     const registerPDMutation = useRegisterPDMutation();
     const { saveDevice } = useCurrentDevice();
     const [loading, setLoading] = useState(false);
@@ -38,8 +37,6 @@ export function LoginForm() {
         setLoading(true);
         try {
             await login(values.email, values.password);
-
-            client.invalidateQueries({ queryKey: ["user"] });
             const device = await registerPDMutation.mutateAsync();
             saveDevice(device);
             navigate("/");

@@ -4,13 +4,15 @@ import { SongAddToQueueButton } from "@/components/songs/SongAddToQueueButton.ts
 import { SongContextMenu } from "@/components/songs/SongContextMenu.tsx";
 import { SongPlayButton } from "@/components/songs/SongPlayButton";
 import { MediaBox } from "@/components/ui/media";
+import { cn } from "@/lib/utils";
 import { memo } from "react";
+
+type SongContainerSize = "compact" | "normal" | "comfortable";
 
 interface SongContainerProps {
     collectionSong: ISongCollectionSong;
-    buttonSize?: number;
-    buttonClass?: string;
-    titleMaxWidth?: string;
+    size?: SongContainerSize;
+    className?: string;
     renderItems?: Partial<RenderItems>;
 }
 
@@ -22,11 +24,43 @@ interface RenderItems {
     removeFromPlaylistCtxBtn: boolean;
 }
 
+const sizeConfig = {
+    compact: {
+        container: "gap-2",
+        image: "w-8 h-8",
+        title: "text-xs",
+        authors: "text-[10px]",
+        icon: "text-lg",
+        buttons: "gap-1",
+        buttonSize: 28,
+        buttonClass: "p-1",
+    },
+    normal: {
+        container: "gap-3",
+        image: "w-10 h-10",
+        title: "text-sm",
+        authors: "text-xs",
+        icon: "text-xl",
+        buttons: "gap-2",
+        buttonSize: 40,
+        buttonClass: "p-2",
+    },
+    comfortable: {
+        container: "gap-4",
+        image: "w-12 h-12",
+        title: "text-base",
+        authors: "text-sm",
+        icon: "text-2xl",
+        buttons: "gap-2",
+        buttonSize: 48,
+        buttonClass: "p-2",
+    },
+};
+
 export const SongContainer = memo(function SongContainer({
     collectionSong,
-    buttonSize = 40,
-    buttonClass = "p-2",
-    titleMaxWidth = "max-w",
+    size = "normal",
+    className,
     renderItems = {},
 }: SongContainerProps) {
     const {
@@ -39,44 +73,57 @@ export const SongContainer = memo(function SongContainer({
 
     const song = collectionSong.song;
     const authors = song.authors.map((a) => a.display_name).join(", ");
+    const config = sizeConfig[size];
 
     return (
         <SongContextMenu song={collectionSong} renderRemoveFromPlaylist={removeFromPlaylistCtxBtn}>
-            <div className="flex items-center justify-between w-full h-full overflow-hidden">
-                <div className="flex items-center gap-3 min-w-0">
+            <div
+                className={cn(
+                    "flex items-center justify-between w-full overflow-hidden",
+                    config.container,
+                    className,
+                )}
+            >
+                <div className={cn("flex items-center min-w-0", config.container)}>
                     {image &&
                         (song.image ? (
-                            <MediaBox className="w-10 h-10" asChild>
-                                <img src={song.image} alt="" className="w-full h-full object-cover" />
+                            <MediaBox className={config.image} asChild>
+                                <img src={song.image} alt="" className="w-1/2 h-1/2 object-cover" />
                             </MediaBox>
                         ) : (
-                            <MediaBox className="w-10 h-10">
-                                <span className="text-gray-400 text-xl">♪</span>
+                            <MediaBox className={config.image}>
+                                <span className={cn("text-gray-400", config.icon)}>♪</span>
                             </MediaBox>
                         ))}
 
                     <div className="flex flex-col min-w-0">
-                        <p className={`font-bold text-sm text-black truncate ${titleMaxWidth}`}>{song.title}</p>
-                        <p className={`text-xs text-gray-600 truncate ${titleMaxWidth}`}>{authors}</p>
+                        <p className={cn("font-bold text-black truncate", config.title)}>
+                            {song.title}
+                        </p>
+                        <p className={cn("text-gray-600 truncate", config.authors)}>{authors}</p>
                     </div>
                 </div>
 
-                <div className="flex items-center gap-2 shrink-0">
+                <div className={cn("flex items-center shrink-0", config.buttons)}>
                     {playButton && (
-                        <SongPlayButton collectionSong={collectionSong} size={buttonSize} className={buttonClass} />
+                        <SongPlayButton
+                            collectionSong={collectionSong}
+                            size={config.buttonSize}
+                            className={config.buttonClass}
+                        />
                     )}
                     {addToLikedButton && (
                         <SongAddToLikedButton
                             collectionSong={collectionSong}
-                            size={buttonSize}
-                            className={buttonClass}
+                            size={config.buttonSize}
+                            className={config.buttonClass}
                         />
                     )}
                     {addToQueueButton && (
                         <SongAddToQueueButton
                             collectionSong={collectionSong}
-                            size={buttonSize}
-                            className={buttonClass}
+                            size={config.buttonSize}
+                            className={config.buttonClass}
                         />
                     )}
                 </div>

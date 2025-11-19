@@ -58,9 +58,12 @@ export function SearchWindow({ onItemSelect, songMode = "card" }: SearchWindowPr
                             : undefined;
 
                         return songMode === "container" ? (
-                            <div key={song.uuid} onClick={onClick} className={onClick ? "cursor-pointer" : ""}>
-                                <SongContainer collectionSong={song} buttonSize={30} />
-                            </div>
+                            <SongContainer
+                                key={song.uuid}
+                                collectionSong={song}
+                                size="compact"
+                                className={onClick ? "cursor-pointer" : ""}
+                            />
                         ) : (
                             <SongCard key={song.uuid} collectionSong={song} size="small" onClick={onClick} />
                         );

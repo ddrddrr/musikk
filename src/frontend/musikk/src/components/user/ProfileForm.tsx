@@ -6,13 +6,13 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useUserUpdateMutation } from "@/components/user/mutations";
 import { ProfileFormSchema, ProfileFormValues } from "@/components/user/types";
-import { UserContext } from "@/providers/userContext";
+import { useAuth } from "@/hooks/useAuth";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useContext, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 
 export function ProfileForm() {
-    const { user } = useContext(UserContext);
+    const { user } = useAuth();
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
 

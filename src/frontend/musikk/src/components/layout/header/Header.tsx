@@ -2,15 +2,15 @@ import { ProfileDropdown } from "@/components/layout/header/ProfileDropdown.tsx"
 import { NotificationBox } from "@/components/notifications/NotificationBox";
 import { SearchBar } from "@/components/search/SearchBar.tsx";
 import { Button } from "@/components/ui/button";
-import { UserContext } from "@/providers/userContext.ts";
+import { useAuth } from "@/hooks/useAuth";
 import { Cog, Disc3, MessageSquareText, Upload } from "lucide-react";
-import { memo, useContext } from "react";
+import { memo } from "react";
 import { useNavigate } from "react-router-dom";
 
 export const Header = memo(function Header() {
     const navigate = useNavigate();
-    const { user } = useContext(UserContext);
-    if (!user) return null;
+    const { user, isAuthenticated } = useAuth();
+    if (!isAuthenticated || !user) return null;
     return (
         <div className="flex justify-between items-center p-4 bg-red-600 text-white">
             <div className="flex-none">

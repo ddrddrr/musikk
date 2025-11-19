@@ -7,14 +7,16 @@ import {
 } from "@/components/ui/dropdown-menu.tsx";
 import { Skeleton } from "@/components/ui/skeleton.tsx";
 import { UserAvatar } from "@/components/user/UserAvatar.tsx";
-import { UserContext } from "@/providers/userContext";
-import { useContext } from "react";
+import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 
 export function ProfileDropdown() {
-    const { user } = useContext(UserContext);
+    const { user, isLoading } = useAuth();
     const navigate = useNavigate();
-    if (user === undefined) return <Skeleton className="w-8 h-8 rounded-full" />;
+    
+    if (isLoading || !user) {
+        return <Skeleton className="w-8 h-8 rounded-full" />;
+    }
 
     return (
         <DropdownMenu>

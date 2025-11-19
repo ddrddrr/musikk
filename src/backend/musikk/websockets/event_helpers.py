@@ -15,5 +15,5 @@ def send_ws_event(group_name: str, event_handler: str, event_name: str, **kwargs
     # TODO: add assert for event_name format?
     channel_layer = get_channel_layer()
     atos(channel_layer.group_send)(
-        group_name, {"type": event_handler, "event": event_name, **kwargs}
+        group_name, {"type": event_handler, "event": event_name, "payload": kwargs}
     )

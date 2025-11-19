@@ -47,7 +47,12 @@ class CommentsListCreateView(APIView):
             )
 
         if obj.content_object:
-            send_ws_event(f"user_{user.uuid}", event_handler="base.event", event_name="invalidate.query", query_key=["comments", data["obj_uuid"]])
+            send_ws_event(
+                f"user_{user.uuid}",
+                event_handler="base.event",
+                event_name="invalidate.query",
+                query_key=["comments", str(data["obj_uuid"])],
+            )
 
         return Response(status=status.HTTP_201_CREATED)
 
@@ -69,9 +74,19 @@ class PostCreateView(APIView):
                 orig_comment=obj.parent,
                 reply_comment=obj,
             )
-            send_ws_event(f"user_{user.uuid}", event_handler="base.event", event_name="invalidate.query", query_key=["posts", "children", str(obj.parent.uuid)])
+            send_ws_event(
+                f"user_{user.uuid}",
+                event_handler="base.event",
+                event_name="invalidate.query",
+                query_key=["posts", "children", str(obj.parent.uuid)],
+            )
         else:
-            send_ws_event(f"user_{user.uuid}", event_handler="base.event", event_name="invalidate.query", query_key=["posts", "user", str(obj.get_root().user.uuid)])
+            send_ws_event(
+                f"user_{user.uuid}",
+                event_handler="base.event",
+                event_name="invalidate.query",
+                query_key=["posts", "user", str(obj.get_root().user.uuid)],
+            )
 
         return Response(status=status.HTTP_201_CREATED)
 

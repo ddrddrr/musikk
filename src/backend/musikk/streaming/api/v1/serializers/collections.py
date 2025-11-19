@@ -65,7 +65,9 @@ class CollectionSerializerDetailed(CollectionSerializerBasic):
 
     def get_songs(self, obj):
         return CollectionSongSerializer(
-            obj.songs.all(), context=self.context, many=True
+            CollectionSong.objects.filter(collection=obj),
+            context=self.context,
+            many=True,
         ).data
 
 

@@ -12,7 +12,12 @@ class Notification(BaseModel):
 class ReplyNotificationManager(models.Manager):
     def create(self, **kwargs):
         obj = super().create(**kwargs)
-        send_ws_event(f"user_{obj.orig_comment.user.uuid}", event_handler="base.event", event_name="invalidate.query", query_key=["notifications"])
+        send_ws_event(
+            f"user_{obj.orig_comment.user.uuid}",
+            event_handler="base.event",
+            event_name="invalidate.query",
+            query_key=["notifications"],
+        )
         return obj
 
 
@@ -33,7 +38,12 @@ class ReplyNotification(Notification):
 class FriendRequestNotificationManager(models.Manager):
     def create(self, **kwargs):
         obj = super().create(**kwargs)
-        send_ws_event(f"user_{obj.receiver.uuid}", event_handler="base.event", event_name="invalidate.query", query_key=["notifications"])
+        send_ws_event(
+            f"user_{obj.receiver.uuid}",
+            event_handler="base.event",
+            event_name="invalidate.query",
+            query_key=["notifications"],
+        )
         return obj
 
 
