@@ -1,0 +1,40 @@
+import { api_client } from "@/api/axiosConf.ts";
+import { CommentURLs, PostURLs } from "@/api/endpoints.ts";
+import { PublicationObjectType } from "@/modules/publications/types.ts";
+import { useMutation } from "@tanstack/react-query";
+
+interface IAddCommentParams {
+    objType: PublicationObjectType;
+    objUUID: string;
+    content: string;
+    replyToUUID: string | undefined;
+}
+
+export async function commentCreate({ objType, objUUID, content, replyToUUID }: IAddCommentParams) {
+    const data = {
+        content,
+        parent: replyToUUID,
+    };
+    await api_client.post(CommentURLs.commentCreate(objType, objUUID), data);
+}
+
+interface IUserPostCreateParams {
+    objType?: PublicationObjectType;
+    objUUID?: string;
+    content: string;
+    replyToUUID: string | undefined;
+}
+
+export function useUserPostCreateMutation() {
+    return useMutation({
+        mutationFn: async ({ ...params }: IUserPostCreateParams) => {
+            const data = {
+                content: params.content,
+                obj_type: params.objType,
+                obj_uuid: params.objUUID,
+                parent: params.replyToUUID,
+            };
+            api_client.post(PostURLs.postCreate, data);
+        },
+    });
+}

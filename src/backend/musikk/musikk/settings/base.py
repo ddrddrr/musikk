@@ -154,12 +154,10 @@ SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
 SESSION_CACHE_ALIAS = "default"
 
 REST_AUTH = {
-    # TODO: add user serializer
     "TOKEN_MODEL": None,
     "REGISTER_SERIALIZER": "users.api.v1.serializers.BaseRegisterSerializer",
 }
 # `allauth` settings
-# new_user
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
 ACCOUNT_LOGIN_METHODS = ["email"]
@@ -179,7 +177,7 @@ ACCOUNT_CHANGE_EMAIL = True
 ACCOUNT_MAX_EMAIL_ADDRESSES = 2
 
 ACCOUNT_ADAPTER = "users.adapters.BaseAccountAdapter"
-
+ACCOUNT_RATE_LIMITS = config("ACCOUNT_RATE_LIMITS", default=True, cast=bool)
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 AUTH_PASSWORD_VALIDATORS = [
@@ -204,7 +202,11 @@ EMAIL_BACKEND = config(
 )
 DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="no-reply@mail.musikk.stream")
 SERVER_EMAIL = config("SERVER_EMAIL", default="server@mail.musikk.stream")
-# other settings, not needed in local development are in the `dev` file
+ANYMAIL = {
+    "MAILGUN_API_KEY": config("MAILGUN_API_KEY", ""),
+    "MAILGUN_SENDER_DOMAIN": config("MAILGUN_SENDER_DOMAIN", ""),
+    "MAILGUN_API_URL": config("MAILGUN_API_URL", ""),
+}
 
 
 # Database

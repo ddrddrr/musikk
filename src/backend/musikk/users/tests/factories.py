@@ -37,7 +37,7 @@ class StreamingProfileFactory(BaseModelFactory):
     @classmethod
     def _create(cls, model_class, *args, **kwargs):
         user = kwargs.pop("user")
-        return StreamingProfile.objects.for_user(user)
+        return StreamingProfile.objects.get_or_create_for_user(user)
 
 
 class ArtistProfileFactory(BaseModelFactory):

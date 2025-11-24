@@ -16,8 +16,8 @@ def create_user_with_password(
 
     user = BaseUser.objects.create_user(email=email, password=password)
 
-    StreamingProfile.objects.for_user(user=user)
+    StreamingProfile.objects.get_or_create_for_user(user=user)
     if user_type == "artist":
-        ArtistProfile.objects.for_user(user=user)
+        ArtistProfile.objects.get_or_create_for_user(user=user)
 
     return user, password

@@ -21,7 +21,7 @@ from users.models import StreamingProfile, ArtistProfile
 logger = logging.getLogger(__name__)
 
 
-class SongCollectionSongRetrieveView(RetrieveAPIView):
+class CollectionSongRetrieveView(RetrieveAPIView):
     permission_classes = [IsAuthenticated]
     queryset = CollectionSong.objects.all()
     serializer_class = CollectionSongSerializer

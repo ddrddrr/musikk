@@ -9,6 +9,7 @@ from streaming.models.songs import CollectionSong, BaseSong
 
 
 # TODO: add metadata, streams, hashtags, ratings
+# TODO: rewrite, we have types here but also inherit, not correct
 class Collection(BaseModel):
     class CollectionType(models.TextChoices):
         PLAYLIST = "playlist", "Playlist"

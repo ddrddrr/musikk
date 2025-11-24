@@ -7,7 +7,7 @@ from streaming.api.v1.views.connections import (
 from streaming.api.v1.views.songs import (
     SongAddLikedView,
     SongCreateView,
-    SongCollectionSongRetrieveView,
+    CollectionSongRetrieveView,
 )
 from streaming.api.v1.views.collections import (
     CollectionLatestView,
@@ -47,7 +47,7 @@ song_urls = [
     ),
     path(
         "songs/<uuid:uuid>",
-        SongCollectionSongRetrieveView.as_view(),
+        CollectionSongRetrieveView.as_view(),
         name="song-retrieve",
     ),
     path("songs/<uuid:uuid>/album", AlbumBySongView.as_view(), name="album-by-song"),

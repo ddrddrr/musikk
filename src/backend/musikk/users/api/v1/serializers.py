@@ -13,9 +13,9 @@ class BaseRegisterSerializer(RegisterSerializer):
     def save(self, request):
         user = super().save(request)
 
-        StreamingProfile.objects.for_user(user=user)
+        StreamingProfile.objects.get_or_create_for_user(user=user)
         if self.cleaned_data.get("is_artist"):
-            ArtistProfile.objects.for_user(user=user)
+            ArtistProfile.objects.get_or_create_for_user(user=user)
 
         return user
 
@@ -37,3 +37,9 @@ class BaseProfileSerializer(BaseModelSerializer):
     class Meta(BaseModelSerializer.Meta):
         model = BaseProfile
         fields = BaseModelSerializer.Meta.fields + ["display_name", "bio", "avatar"]
+
+# TODO
+# class StreamingProfileSerializer(BaseProfileSerializer):
+#     class Meta(BaseModelSerializer.Meta):
+#         model = StreamingProfile
+#         fields = BaseModelSerializer.Meta.fields + ["display_name", "bio", "avatar"]

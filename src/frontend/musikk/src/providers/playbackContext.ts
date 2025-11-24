@@ -1,5 +1,5 @@
-import { ISongCollectionSong } from "@/components/song-collections/types.ts";
-import { ISongQueueNode } from "@/components/song-queue/types.ts";
+import { ISongCollectionSong } from "@/modules/song-collections/types.ts";
+import { ISongQueueNode } from "@/modules/song-queue/types.ts";
 import { IPlaybackState } from "@/playback/types.ts";
 import { createContext } from "react";
 

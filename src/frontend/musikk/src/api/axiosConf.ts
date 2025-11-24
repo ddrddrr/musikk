@@ -2,12 +2,12 @@ import { BaseAPIURL } from "@/api/endpoints.ts";
 import axios from "axios";
 import Cookies from "js-cookie";
 
-export const api = axios.create({
+export const api_client = axios.create({
     baseURL: BaseAPIURL,
     withCredentials: true,
 });
 
-api.interceptors.request.use((cfg) => {
+api_client.interceptors.request.use((cfg) => {
     const method = (cfg.method || "get").toUpperCase();
     if (!["GET", "HEAD", "OPTIONS", "TRACE"].includes(method)) {
         const csrf = Cookies.get("csrftoken");
@@ -18,7 +18,7 @@ api.interceptors.request.use((cfg) => {
     return cfg;
 });
 
-api.interceptors.response.use(
+api_client.interceptors.response.use(
     (res) => res,
     (err) => {
         const status = err?.response?.status;

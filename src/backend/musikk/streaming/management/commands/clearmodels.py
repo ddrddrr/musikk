@@ -14,5 +14,5 @@ class Command(BaseCommand):
         with transaction.atomic():
             for s in BaseSong.objects.all():
                 s.delete()
-            BaseUser.objects.all().delete()
+            # BaseUser.objects.all().delete()
             Collection.objects.all().delete()

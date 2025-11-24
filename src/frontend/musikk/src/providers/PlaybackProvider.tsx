@@ -1,4 +1,4 @@
-import { useQueue } from "@/components/song-queue/hooks/useQueueAPI.ts";
+import { useQueue } from "@/modules/song-queue/hooks/useQueueAPI.ts";
 import { useCurrentDevice } from "@/hooks/useCurrentDevice.ts";
 import { usePlaybackRetrieveQuery } from "@/playback/queries.ts";
 import { PlaybackContext } from "@/providers/playbackContext.ts";

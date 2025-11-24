@@ -33,7 +33,7 @@ from streaming.api.v1.views.song_queue import (
     SongQueueShiftHeadBackwardsView,
 )
 from streaming.api.v1.views.songs import (
-    SongCollectionSongRetrieveView,
+    CollectionSongRetrieveView,
     SongAddLikedView,
     SongCreateView,
 )

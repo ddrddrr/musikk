@@ -3,6 +3,8 @@ from logging import getLogger
 from asgiref.sync import async_to_sync as atos
 from channels.generic.websocket import JsonWebsocketConsumer
 
+from websockets.status_codes import WebsocketStatusCode
+
 """
 client -> server
 "action":"queue.shift",
@@ -17,14 +19,16 @@ logger = getLogger(__name__)
 
 
 class BaseConsumer(JsonWebsocketConsumer):
-
     def connect(self):
         logger.debug("WS Conn received")
         user = self.scope.get("user")
-        logger.debug(f"User: {user}")
+        logger.debug(f"WS Conn User: {user}")
 
         if user is None or getattr(user, "is_anonymous", True):
-            self.close()
+            self.close(
+                code=WebsocketStatusCode.Unauthorized,
+                reason="User is not Authenticated.",
+            )
             return
 
         self.group_name = f"user_{user.uuid}"

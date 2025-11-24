@@ -1,0 +1,76 @@
+import { useUserUUID } from "@/modules/auth/hooks/useUserUUID.ts";
+import { Button } from "@/modules/ui/button";
+import {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/modules/ui/dialog";
+import { ProfileForm } from "@/modules/user/ProfileForm";
+import { fetchUser } from "@/modules/user/queries";
+import { UserAvatar } from "@/modules/user/UserAvatar.tsx";
+import { UserPosts } from "@/modules/user/UserPosts.tsx";
+import { useQuery } from "@tanstack/react-query";
+import { useParams } from "react-router-dom";
+
+export function ProfilePage() {
+    const { uuid } = useParams<{ uuid: string }>();
+    const currUserUUID = useUserUUID();
+
+    const {
+        isLoading,
+        isError,
+        data: user,
+    } = useQuery({
+        queryKey: ["user", uuid],
+        queryFn: () => fetchUser(uuid),
+    });
+
+    if (isLoading) {
+        return <div className="p-8 text-center">Loading profile…</div>;
+    }
+
+    if (isError) {
+        return <div className="p-8 text-center text-red-600">Error loading profile.</div>;
+    }
+
+    if (!user || !uuid) {
+        return null;
+    }
+
+    return (
+        <div className="flex flex-col items-center pt-8">
+            <div className="flex items-start space-x-6">
+                <UserAvatar src={user.avatar} alt={user.display_name} size="lg" />
+                <div>
+                    <h1 className="text-2xl font-semibold">{user.display_name}</h1>
+                    <div className="text-sm text-muted-foreground mt-1 max-h-40 overflow-y-auto">
+                        {user.bio}
+                    </div>
+                    {currUserUUID === user.uuid && (
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <Button variant="outline" className="mt-4">
+                                    Edit Profile
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle>Edit Profile</DialogTitle>
+                                    <DialogClose />
+                                </DialogHeader>
+
+                                <ProfileForm />
+                            </DialogContent>
+                        </Dialog>
+                    )}
+                </div>
+            </div>
+            <div className="mt-8 w-full">
+                <UserPosts userUUID={uuid} />
+            </div>
+        </div>
+    );
+}

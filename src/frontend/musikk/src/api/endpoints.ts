@@ -1,5 +1,5 @@
 import { UUID } from "@/api/types.ts";
-import { PublicationObjectType } from "@/components/publications/types.ts";
+import { PublicationObjectType } from "@/modules/publications/types.ts";
 
 export const BaseWSURL = import.meta.env.VITE_WS_BASE_URL;
 export const WebsocketURLs = {
@@ -9,9 +9,11 @@ export const WebsocketURLs = {
 export const BaseAPIURL = import.meta.env.VITE_API_BASE_URL + "/api/v1";
 
 export const AuthURLs = {
+    csrf: "/csrf",
+    register: "/auth/registration",
+    verifyEmail: "/auth/verify-email",
     login: "/auth/login",
     logout: "/auth/logout",
-    csrf: "/csrf",
 };
 export const SongURLs = {
     songList: `/songs`,
@@ -39,14 +41,17 @@ export const CollectionURLs = {
     collectionRetrieve: (collectionUUID: UUID) => `/collections/${collectionUUID}`,
     collectionDetail: (collectionUUID: UUID) => `/collections/detail/${collectionUUID}`,
     collectionAddToLiked: (collectionUUID: UUID) => `/collections/${collectionUUID}/like`,
-    collectionAddSong: (collectionUUID: UUID, songUUID: UUID) => `/collections/${collectionUUID}/songs/${songUUID}`,
+    collectionAddSong: (collectionUUID: UUID, songUUID: UUID) =>
+        `/collections/${collectionUUID}/songs/${songUUID}`,
     collectionRemoveSong: (collectionUUID: UUID, songCollectionSongUUID: UUID) =>
         `/collections/${collectionUUID}/songs/${songCollectionSongUUID}`,
     likedSongsAddSong: (songUUID: UUID) => `/liked-songs/add-song/${songUUID}`,
 };
 export const CommentURLs = {
-    commentList: (objType: PublicationObjectType, objUUID: UUID) => `/comments/${objType}/${objUUID}`,
-    commentCreate: (objType: PublicationObjectType, objUUID: UUID) => `/comments/${objType}/${objUUID}`,
+    commentList: (objType: PublicationObjectType, objUUID: UUID) =>
+        `/comments/${objType}/${objUUID}`,
+    commentCreate: (objType: PublicationObjectType, objUUID: UUID) =>
+        `/comments/${objType}/${objUUID}`,
 };
 export const PostURLs = {
     postCreate: `/posts`,
@@ -64,17 +69,16 @@ export const NotificationURLs = {
 export const UserURLs = {
     me: "/users/me",
     userDetail: (userUUID: UUID) => `/users/${userUUID}`,
-    userCreate: `/users`,
     userFriends: (userUUID: UUID) => `/users/${userUUID}/friends`,
     userFollowed: (userUUID: UUID) => `/users/${userUUID}/followed`,
-    userFriendsAccept: (userUUID: UUID, senderUUID: UUID) => `/users/${userUUID}/friends/${senderUUID}`,
-    userFriendsDelete: (userUUID: UUID, senderUUID: UUID) => `/users/${userUUID}/friends/${senderUUID}`,
+    userFriendsAccept: (userUUID: UUID, senderUUID: UUID) =>
+        `/users/${userUUID}/friends/${senderUUID}`,
+    userFriendsDelete: (userUUID: UUID, senderUUID: UUID) =>
+        `/users/${userUUID}/friends/${senderUUID}`,
     userUpdate: (userUUID: UUID) => `/users/${userUUID}`,
     artistFollowersList: (artistUUID: UUID) => `/users/artists/${artistUUID}/followers`,
     followArtist: (artistUUID: UUID) => `/users/artists/${artistUUID}/followers`,
     removeFollowedArtist: (artistUUID: UUID) => `/users/artists/${artistUUID}/followers`,
-    tokenGet: `/token/`,
-    tokenRefresh: `/token/refresh/`,
 };
 export const SearchURLs = {
     searchMain: (query: string) => `/search?q=${query}`,

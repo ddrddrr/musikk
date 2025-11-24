@@ -17,7 +17,7 @@ class TestSearchView(TestCase):
         cls.factory = APIRequestFactory()
         cls.user = BaseUserFactory()
         cls.profile = cls.user.baseprofile
-        cls.stprofile = StreamingProfile.objects.for_user(cls.user)
+        cls.stprofile = StreamingProfile.objects.get_or_create_for_user(cls.user)
 
         cls.collections = CollectionFactory.create_batch(2)
         cls.songs = [song for c in cls.collections for song in c.base_songs.all()]
@@ -72,12 +72,12 @@ class TestSearchView(TestCase):
             u1 = BaseUserFactory()
             u1.baseprofile.display_name = self.profile.display_name + str(i)
             u1.baseprofile.save()
-            StreamingProfile.objects.for_user(u1)
+            StreamingProfile.objects.get_or_create_for_user(u1)
 
             u2 = BaseUserFactory()
             u2.baseprofile.display_name = str(i)
             u2.baseprofile.save()
-            StreamingProfile.objects.for_user(u2)
+            StreamingProfile.objects.get_or_create_for_user(u2)
 
         request = self.factory.get(reverse("api:search") + query)
         force_authenticate(user=self.user, request=request)

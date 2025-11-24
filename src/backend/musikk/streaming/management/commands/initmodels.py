@@ -80,7 +80,7 @@ class Command(BaseCommand):
         created = []
         for _ in range(count):
             user, pwd = create_user_with_password("streaming")
-            StreamingProfile.objects.for_user(user)
+            StreamingProfile.objects.get_or_create_for_user(user)
             created.append(user)
             self.stdout.write(f"- user: {user.email} / {pwd}")
         return created
@@ -92,7 +92,7 @@ class Command(BaseCommand):
             artist.is_staff = True
             artist.is_superuser = True
             artist.save()
-            ArtistProfile.objects.for_user(artist)
+            ArtistProfile.objects.get_or_create_for_user(artist)
             created.append(artist)
             self.stdout.write(f"- artist: {artist.email} / {pwd}")
         return created

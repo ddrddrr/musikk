@@ -29,7 +29,7 @@ class BaseProfile(BaseModel):
 # We do this to avoid creating profiles which may not be used
 # and otherwise would be wasting space
 class StreamingProfileManager(models.Manager):
-    def for_user(self, user):
+    def get_or_create_for_user(self, user):
         try:
             return self.get(user=user)
         except StreamingProfile.DoesNotExist:
@@ -89,7 +89,7 @@ class StreamingProfile(BaseModel):
 
 
 class ArtistProfileManager(models.Manager):
-    def for_user(self, user):
+    def get_or_create_for_user(self, user):
         try:
             return self.get(user=user)
         except ArtistProfile.DoesNotExist:

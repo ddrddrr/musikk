@@ -10,8 +10,8 @@ def generate_numeric_code(length=6):
 
 
 class BaseAccountAdapter(DefaultAccountAdapter):
-    # Duplicate emails have to be handled differently for every project
-    # see https://github.com/Tivix/django-rest-auth/issues/243
+    # Duplicate emails have to be handled differently for every project,
+    # hence this custom adapter (see https://github.com/Tivix/django-rest-auth/issues/243)
     def clean_email(self, email):
         email = super().clean_email(email)
         if get_user_model().objects.filter(email__iexact=email).exists():
@@ -20,6 +20,6 @@ class BaseAccountAdapter(DefaultAccountAdapter):
             )
         return email
 
-    # TODO: make proper
+    # TODO: set frontend url
     def get_email_confirmation_url(self, request, emailconfirmation):
-        return f"http://localhost:3000/email-confirmation/{emailconfirmation.key}"
+        return f"http://localhost:5175/email-confirmation/{emailconfirmation.key}"

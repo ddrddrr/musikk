@@ -1,5 +1,5 @@
-import { ISongCollection, ISongCollectionSong } from "@/components/song-collections/types.ts";
-import { useQueueAddAPI } from "@/components/song-queue/hooks/useQueueAPI.ts";
+import { ISongCollection, ISongCollectionSong } from "@/modules/song-collections/types.ts";
+import { useQueueAddAPI } from "@/modules/song-queue/hooks/useQueueAPI.ts";
 import { useCurrentDevice } from "@/hooks/useCurrentDevice.ts";
 import { usePlaybackStateMutation } from "@/playback/mutations.ts";
 import { PlaybackContext } from "@/providers/playbackContext.ts";

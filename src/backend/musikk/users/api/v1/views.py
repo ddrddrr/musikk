@@ -31,6 +31,7 @@ class MeView(APIView):
         return Response(data={"me": BaseUserSerializer(self.request.user).data})
 
 
+# TODO: this is probably not needed anymore, remove
 class UserRetrieveView(RetrieveAPIView):
     lookup_field = "uuid"
     queryset = BaseUser.objects.all()
@@ -38,7 +39,6 @@ class UserRetrieveView(RetrieveAPIView):
     permission_classes = [IsAuthenticated]
 
 
-# TODO: improve update view, so that user could change only his credentials
 class BaseProfileRetrieveUpdateView(RetrieveUpdateAPIView):
     lookup_field = "uuid"
     queryset = BaseProfile.objects.all()

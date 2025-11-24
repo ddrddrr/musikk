@@ -1,0 +1,65 @@
+import { useDeviceManagement } from "@/hooks/useDeviceManagement.ts";
+import { login as loginAPI, logout as logoutAPI } from "@/modules/auth/api.ts";
+import { AuthContext } from "@/modules/auth/providers/AuthContext.tsx";
+import { fetchMe } from "@/modules/user/queries.ts";
+import { IUserBaseProfile } from "@/modules/user/types.ts";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import Cookies from "js-cookie";
+import { ReactNode } from "react";
+import { useNavigate } from "react-router-dom";
+
+interface AuthProviderProps {
+    children: ReactNode;
+}
+
+export function AuthProvider({ children }: AuthProviderProps) {
+    const navigate = useNavigate();
+    const queryClient = useQueryClient();
+    const { deleteDevice } = useDeviceManagement();
+
+    const {
+        data: user,
+        isLoading,
+        refetch,
+        error,
+    } = useQuery<IUserBaseProfile | null>({
+        queryKey: ["user"],
+        queryFn: fetchMe,
+        retry: false,
+        refetchOnWindowFocus: false,
+        staleTime: 30 * 60 * 1000, // 30 minutes
+    });
+
+    const isAuthenticated = !!user && !error;
+
+    const login = async (email: string, password: string) => {
+        await loginAPI(email, password);
+        await refetch();
+    };
+
+    const logout = async () => {
+        try {
+            await deleteDevice();
+        } catch (error) {
+            console.error("Failed to delete device during logout:", error);
+        }
+        await logoutAPI();
+        queryClient.clear();
+        if (Cookies.get("csrftoken")) Cookies.remove("csrftoken");
+        navigate("/login");
+    };
+
+    return (
+        <AuthContext.Provider
+            value={{
+                isAuthenticated,
+                user: user ?? null,
+                isLoading,
+                login,
+                logout,
+            }}
+        >
+            {children}
+        </AuthContext.Provider>
+    );
+}
