@@ -5,13 +5,13 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 
 from streaming.api.v1.serializers.songs import (
-    CollectionSongSerializer,
+    CollectionSongGetSerializer,
 )
 from streaming.api.v1.serializers.collections import CollectionSerializerBasic
 from streaming.models import BaseSong, Collection
 from streaming.models.songs import CollectionSong
-from users.api.v1.serializers import BaseProfileSerializer
-from users.models import BaseProfile
+from users.api.v1.serializers import BaseUserSerializer, ArtistSerializer
+from users.models import BaseUser, Artist
 
 TRIGRAM_SIMILARITY_THRESHOLD = 0.3
 MAX_RESULTS = 10
@@ -42,17 +42,17 @@ class SearchView(APIView):
                 extra_filters={"type": "playlist"},
             ),
             "users": self.search(
-                BaseProfile,
+                BaseUser,
                 query,
                 "display_name",
-                BaseProfileSerializer,
+                BaseUserSerializer,
                 extra_filters={"user__artistprofile__isnull": True},
             ),
             "artists": self.search(
-                BaseProfile,
+                Artist,
                 query,
                 "display_name",
-                BaseProfileSerializer,
+                ArtistSerializer,
                 extra_filters={"user__artistprofile__isnull": False},
             ),
         }
@@ -82,6 +82,6 @@ class SearchView(APIView):
 
         sc_songs = CollectionSong.objects.filter(song__in=matching_songs)
 
-        return CollectionSongSerializer(
+        return CollectionSongGetSerializer(
             sc_songs, many=True, context={"request": self.request}
         ).data

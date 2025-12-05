@@ -4,7 +4,7 @@ import tempfile
 from django.test import TestCase
 
 from streaming.tests.factories import BaseSongFactory
-from users.tests.factories import BaseUserFactory, ArtistProfileFactory
+from users.tests.factories import ArtistFactory
 
 from streaming.audio.tasks import convert_audio
 from streaming.audio.shaka_packager_conf.shaka_packager_wrapper import ManifestType
@@ -12,8 +12,7 @@ from streaming.audio.shaka_packager_conf.shaka_packager_wrapper import ManifestT
 
 class ConvertAudioWebsocketEventTest(TestCase):
     def setUp(self):
-        self.user = BaseUserFactory.create()
-        ArtistProfileFactory(user=self.user)
+        self.user = ArtistFactory.create()
         self.song = BaseSongFactory.create()
 
     @patch("streaming.audio.tasks.AudioProcessingPipeline.run")

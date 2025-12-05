@@ -1,2 +1,3 @@
-from users.models.user import BaseUser
-from users.models.profiles import BaseProfile, StreamingProfile, ArtistProfile
+from users.models.base import BaseUser
+from users.models.artist import Artist
+from users.models.connections import UserFollow

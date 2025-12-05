@@ -1,7 +1,6 @@
 from django.db import models
 
 from base.models import BaseModel
-from social.models import Publication
 from websockets.event_helpers import send_ws_event
 
 
@@ -22,11 +21,11 @@ class ReplyNotificationManager(models.Manager):
 
 
 class ReplyNotification(Notification):
-    orig_comment = models.ForeignKey(
-        Publication, null=True, related_name="+", on_delete=models.SET_NULL
+    orig_publication = models.ForeignKey(
+        "social.Publication", null=True, related_name="+", on_delete=models.SET_NULL
     )
-    reply_comment = models.ForeignKey(
-        Publication, related_name="+", on_delete=models.CASCADE
+    reply_publication = models.ForeignKey(
+        "social.Publication", related_name="+", on_delete=models.CASCADE
     )
 
     class Meta:
@@ -35,7 +34,8 @@ class ReplyNotification(Notification):
     objects = ReplyNotificationManager()
 
 
-class FriendRequestNotificationManager(models.Manager):
+# TODO: remove, add follow notification
+class FollowerNotificationManager(models.Manager):
     def create(self, **kwargs):
         obj = super().create(**kwargs)
         send_ws_event(
@@ -47,7 +47,7 @@ class FriendRequestNotificationManager(models.Manager):
         return obj
 
 
-class FriendRequestNotification(Notification):
+class FollowerNotification(Notification):
     sender = models.ForeignKey(
         "users.BaseUser", on_delete=models.CASCADE, related_name="+"
     )
@@ -58,4 +58,4 @@ class FriendRequestNotification(Notification):
     class Meta:
         ordering = ["-date_added"]
 
-    objects = FriendRequestNotificationManager()
+    objects = FollowerNotificationManager()

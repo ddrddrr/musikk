@@ -18,11 +18,11 @@ from users.management.helpers import create_user_with_password
 from streaming.models import (
     BaseSong,
     Collection,
+    Album,
     CollectionSong,
     SongCredit,
     CollectionCredit,
 )
-from users.models import StreamingProfile, ArtistProfile
 
 fake = Faker()
 
@@ -34,19 +34,21 @@ IMAGE_URL_2 = "https://picsum.photos/200"
 
 
 class Command(BaseCommand):
-    help = "Create sample users, artists, songs and collections"
+    help = "Create sample users, artists, songs, collections, and albums"
 
     def add_arguments(self, parser):
         parser.add_argument("--users", type=int, default=2)
         parser.add_argument("--artists", type=int, default=3)
         parser.add_argument("--songs", type=int, default=7)
-        parser.add_argument("--collections", type=int, default=3)
+        parser.add_argument("--collections", type=int, default=2)
+        parser.add_argument("--albums", type=int, default=2)
 
     def handle(self, *args, **options):
         users_count = options["users"]
         artists_count = options["artists"]
         songs_count = options["songs"]
         collections_count = options["collections"]
+        albums_count = options["albums"]
 
         audio_urls = [AUDIO_URL_1, AUDIO_URL_2]
         image_urls = [IMAGE_URL_1, IMAGE_URL_2]
@@ -73,6 +75,13 @@ class Command(BaseCommand):
                 songs=songs,
                 image_urls=image_urls,
                 collections_count=collections_count,
+                users=users,
+            )
+
+            self._create_albums(
+                songs=songs,
+                image_urls=image_urls,
+                albums_count=albums_count,
                 artists=artists,
             )
 
@@ -80,7 +89,6 @@ class Command(BaseCommand):
         created = []
         for _ in range(count):
             user, pwd = create_user_with_password("streaming")
-            StreamingProfile.objects.get_or_create_for_user(user)
             created.append(user)
             self.stdout.write(f"- user: {user.email} / {pwd}")
         return created
@@ -92,7 +100,6 @@ class Command(BaseCommand):
             artist.is_staff = True
             artist.is_superuser = True
             artist.save()
-            ArtistProfile.objects.get_or_create_for_user(artist)
             created.append(artist)
             self.stdout.write(f"- artist: {artist.email} / {pwd}")
         return created
@@ -120,7 +127,7 @@ class Command(BaseCommand):
         self._create_song_credits(song, artists)
 
         self.stdout.write(
-            f"Created '{song.title}' ({len(song.song_credits.all())} author(s))"
+            f"Created '{song.title}' ({len(song.credits.all())} author(s))"
         )
         return song
 
@@ -137,15 +144,11 @@ class Command(BaseCommand):
     def _process_audio_for_song(
         self, song: BaseSong, tmp_audio_path: str, audio_uuid: str, storage_dir: str
     ) -> bool:
-        """
-        Run the processing pipeline and assign resulting manifests to the song.
-        Returns True on success, False otherwise.
-        """
         result = AudioProcessingPipeline.run(
             source=tmp_audio_path, final_storage_dir=storage_dir
         )
 
-        song.uuid = audio_uuid
+        song.content_path = storage_dir
         song.mpd = result.song_repr.manifests.get(ManifestType.MPD)
         song.m3u8 = result.song_repr.manifests.get(ManifestType.M3U8)
         song.save()
@@ -161,9 +164,8 @@ class Command(BaseCommand):
             )
 
     def _create_collections(
-        self, songs: list, image_urls: list, collections_count: int, artists: list
+        self, songs: list, image_urls: list, collections_count: int, users: list
     ):
-        types = [Collection.CollectionType.ALBUM, Collection.CollectionType.PLAYLIST]
         for _ in range(collections_count):
             if not songs:
                 break
@@ -173,7 +175,6 @@ class Command(BaseCommand):
                 title=fake.bs().title(),
                 description=fake.text(max_nb_chars=512),
                 image=image_file,
-                type=random.choice(types),
             )
 
             chosen = random.sample(songs, k=random.randint(1, len(songs)))
@@ -182,9 +183,9 @@ class Command(BaseCommand):
                     collection=collection, song=song, position=idx
                 )
 
-            num_creds = random.randint(1, len(artists)) if artists else 0
+            num_creds = random.randint(1, len(users)) if users else 0
             for priority, author in enumerate(
-                random.sample(artists, num_creds) if num_creds else []
+                random.sample(users, num_creds) if num_creds else []
             ):
                 CollectionCredit.objects.create(
                     collection=collection,
@@ -193,8 +194,41 @@ class Command(BaseCommand):
                 )
 
             self.stdout.write(
-                f"Created {collection.get_type_display()} '{collection.title}' "
+                f"Created collection '{collection.title}' "
                 f"with {len(chosen)} song(s) and {collection.collection_credits.count()} author(s)"
+            )
+
+    def _create_albums(
+        self, songs: list, image_urls: list, albums_count: int, artists: list
+    ):
+        for _ in range(albums_count):
+            if not songs:
+                break
+
+            image_file = self._fetch_image_file(random.choice(image_urls))
+            album = Album.objects.create(
+                title=fake.bs().title(),
+                description=fake.text(max_nb_chars=512),
+                image=image_file,
+            )
+
+            chosen = random.sample(songs, k=random.randint(1, len(songs)))
+            for idx, song in enumerate(chosen):
+                CollectionSong.objects.create(collection=album, song=song, position=idx)
+
+            num_creds = random.randint(1, len(artists)) if artists else 0
+            for priority, author in enumerate(
+                random.sample(artists, num_creds) if num_creds else []
+            ):
+                CollectionCredit.objects.create(
+                    collection=album,
+                    author=author,
+                    author_priority=priority,
+                )
+
+            self.stdout.write(
+                f"Created album '{album.title}' "
+                f"with {len(chosen)} song(s) and {album.collection_credits.count()} author(s)"
             )
 
     def _safe_remove(self, path: str):

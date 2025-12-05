@@ -12,7 +12,7 @@ from streaming.api.v1.serializers.song_queue import (
     SongQueueSerializer,
 )
 from streaming.api.v1.serializers.songs import (
-    BaseSongSerializer,
+    BaseSongGetSerializer,
     BaseSongCreateSerializer,
-    CollectionSongSerializer,
+    CollectionSongGetSerializer,
 )

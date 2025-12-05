@@ -8,15 +8,16 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from streaming.models.state import StreamingProfile
+from users.permissions import IsArtist
 from websockets.event_helpers import send_ws_event
 from streaming.api.v1.serializers.songs import (
     BaseSongCreateSerializer,
-    CollectionSongSerializer,
+    CollectionSongGetSerializer,
 )
 from streaming.audio.tasks import convert_audio
 from streaming.audio.validators import validate_audio
 from streaming.models.songs import CollectionSong
-from users.models import StreamingProfile, ArtistProfile
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +25,7 @@ logger = logging.getLogger(__name__)
 class CollectionSongRetrieveView(RetrieveAPIView):
     permission_classes = [IsAuthenticated]
     queryset = CollectionSong.objects.all()
-    serializer_class = CollectionSongSerializer
+    serializer_class = CollectionSongGetSerializer
     lookup_field = "uuid"
 
 
@@ -67,18 +68,11 @@ class SongAddLikedView(APIView):
 # get/stream the file here
 class SongCreateView(APIView):
     parser_classes = [MultiPartParser, FormParser]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsArtist]
 
     def post(self, request, *args, **kwargs):
         user = self.request.user
         # TODO: rewrite as permission?
-        profile: ArtistProfile = getattr(user, "artistprofile", None)
-        if not profile:
-            return Response(
-                status=status.HTTP_403_FORBIDDEN,
-                data={"error": "Only Artists are allowed to create Songs."},
-            )
-
         audio = request.FILES["audio"]
         validate_audio(audio)
 

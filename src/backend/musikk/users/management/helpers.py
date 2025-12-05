@@ -1,5 +1,5 @@
 from faker import Faker
-from users.models import BaseUser, StreamingProfile, ArtistProfile
+from users.models import BaseUser, Artist
 
 fake = Faker()
 
@@ -14,10 +14,9 @@ def create_user_with_password(
     email = email or fake.ascii_email()
     password = fake.password(length=12, special_chars=True, digits=True)
 
-    user = BaseUser.objects.create_user(email=email, password=password)
-
-    StreamingProfile.objects.get_or_create_for_user(user=user)
     if user_type == "artist":
-        ArtistProfile.objects.get_or_create_for_user(user=user)
+        user = Artist.objects.create(email=email, password=password)
+    else:
+        user = BaseUser.objects.create_user(email=email, password=password)
 
     return user, password

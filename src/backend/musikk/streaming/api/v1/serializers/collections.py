@@ -3,13 +3,14 @@ from rest_framework import serializers
 
 from base.serializers import BaseModelSerializer
 from streaming.api.v1.serializers.songs import (
-    CollectionSongSerializer,
+    CollectionSongGetSerializer,
 )
 from streaming.api.v1.serializers.validators import validate_authors
 from streaming.models import BaseSong
 from streaming.models.collections import Collection, CollectionCredit
 from streaming.models.songs import CollectionSong
-from users.api.v1.serializers import BaseProfileSerializer
+from users.api.v1.serializers import ArtistSerializer
+from users.models import Artist
 
 
 class CollectionSerializerBasic(BaseModelSerializer):
@@ -23,14 +24,10 @@ class CollectionSerializerBasic(BaseModelSerializer):
             "image",
             "authors",
             "is_liked",
-            "type",
         ]
         extra_kwargs = BaseModelSerializer.Meta.extra_kwargs | {
             "title": {"read_only": True},
             "image": {"read_only": True},
-            "authors": {"read_only": True},
-            "is_liked": {"read_only": True},
-            "type": {"read_only": True},
         }
 
     def get_is_liked(self, obj):
@@ -40,12 +37,13 @@ class CollectionSerializerBasic(BaseModelSerializer):
         raise serializers.ValidationError({"user": "User must be provided"})
 
     def get_authors(self, obj):
-        cauthors = CollectionCredit.objects.filter(collection=obj).select_related(
-            "author__baseprofile"
-        )
-        authors = [cauthor.author.baseprofile for cauthor in cauthors]
+        collection_credits = CollectionCredit.objects.filter(
+            collection=obj
+        ).select_related("author")
 
-        return BaseProfileSerializer(authors, many=True, context=self.context).data
+        return ArtistSerializer(
+            [cc.author for cc in collection_credits], many=True, context=self.context
+        ).data
 
 
 class CollectionSerializerDetailed(CollectionSerializerBasic):
@@ -64,7 +62,7 @@ class CollectionSerializerDetailed(CollectionSerializerBasic):
         }
 
     def get_songs(self, obj):
-        return CollectionSongSerializer(
+        return CollectionSongGetSerializer(
             CollectionSong.objects.filter(collection=obj),
             context=self.context,
             many=True,
@@ -82,9 +80,6 @@ class CollectionCreateSerializer(serializers.ModelSerializer):
         write_only=True,
         help_text="UUIDs of `BaseSong` model.",
     )
-    type = serializers.ChoiceField(
-        choices=Collection.CollectionType.choices, required=True, write_only=True
-    )
 
     class Meta:
         model = Collection
@@ -92,20 +87,21 @@ class CollectionCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         # TODO: add support for position
-        authors = validated_data.pop("authors", None)
-        if not authors:
+        author_uuids = validated_data.pop("authors", None)
+        authors: list[Artist]
+        if not author_uuids:
             authors = [self.context.get("request").user]
         else:
-            authors = validate_authors(authors)
+            authors = validate_authors(author_uuids)
 
         # TODO: add validate songs(same as authors, maybe some generic method in general)
-        songs = validated_data.pop("songs")
-        songs = BaseSong.objects.filter(uuid__in=songs)
+        song_uuids = validated_data.pop("songs")
+        song_uuids = BaseSong.objects.filter(uuid__in=song_uuids)
         with transaction.atomic():
             collection = Collection.objects.create(**validated_data)
             cs_objs = [
                 CollectionSong(collection=collection, song=song, position=i)
-                for i, song in enumerate(songs)
+                for i, song in enumerate(song_uuids)
             ]
             CollectionSong.objects.bulk_create(cs_objs)
 
@@ -117,6 +113,6 @@ class CollectionCreateSerializer(serializers.ModelSerializer):
             ]
             CollectionCredit.objects.bulk_create(cc_objs)
 
-            songs.update(draft=False)
+            song_uuids.update(draft=False)
 
         return collection

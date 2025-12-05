@@ -15,12 +15,10 @@ from django.urls.conf import include
 
 from users.api.v1.views import (
     UserRetrieveView,
-    UserFriendsView,
-    ArtistFollowersView,
-    UserFriendsView,
-    csrf,
     MeView,
-    BaseProfileRetrieveUpdateView,
+    FriendsView,
+    FollowersView,
+    csrf,
 )
 
 dj_rest_auth_urls = [
@@ -43,6 +41,7 @@ dj_rest_auth_urls = [
 ]
 urlpatterns = [
     path("auth/", include(dj_rest_auth_urls)),
+    path("csrf", csrf),
     path(
         "users/<uuid:uuid>",
         UserRetrieveView.as_view(),
@@ -50,29 +49,13 @@ urlpatterns = [
     ),
     path("users/me", MeView.as_view(), name="me"),
     path(
-        "users/<uuid:uuid>/base-profile",
-        BaseProfileRetrieveUpdateView.as_view(),
-        name="base-profile",
-    ),
-    path(
-        "users/<uuid:uuid>/friends",
-        UserFriendsView.as_view(),
+        "users/<for_user_uuid:uuid>/friends",
+        FriendsView.as_view(),
         name="user-friends",
     ),
-    # path(
-    #     "users/<uuid:uuid>/followed",
-    #     UserFollowedView.as_view(),
-    #     name="user-followed",
-    # ),
     path(
-        "users/<uuid:user_uuid>/friends/<uuid:friend_uuid>",
-        UserFriendsView.as_view(),
-        name="accept-to-friends",
+        "users/<uuid:uuid>/followers",
+        FollowersView.as_view(),
+        name="user-followers",
     ),
-    path(
-        "users/artists/<uuid:uuid>/followers",
-        ArtistFollowersView.as_view(),
-        name="artist-followers",
-    ),
-    path("csrf", csrf),
 ]

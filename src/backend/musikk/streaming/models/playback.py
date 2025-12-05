@@ -16,7 +16,7 @@ class PlaybackState(BaseModel):
             return active_device[0]
         return None
 
-
+# TODO: move to session?
 class PlaybackDevice(BaseModel):
     name = models.CharField(max_length=255)
     is_active = models.BooleanField(default=False)

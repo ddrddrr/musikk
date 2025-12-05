@@ -12,7 +12,7 @@ class BaseSong(BaseModel):
     image = models.ImageField(upload_to=image_path, null=True, blank=True)
     draft = models.BooleanField(default=False)
 
-    authors = models.ManyToManyField("users.BaseUser", through="streaming.SongCredit")
+    authors = models.ManyToManyField("users.Artist", through="streaming.SongCredit")
 
     content_path = models.CharField(
         default="",
@@ -50,13 +50,13 @@ class BaseSong(BaseModel):
 
 class SongCredit(BaseModel):
     song = models.ForeignKey(
-        BaseSong, on_delete=models.CASCADE, related_name="song_credits"
+        BaseSong, on_delete=models.CASCADE, related_name="credits"
     )
     author = models.ForeignKey(
-        "users.BaseUser",
+        "users.Artist",
         null=True,
         on_delete=models.SET_NULL,
-        related_name="song_credits",
+        related_name="created_songs",
     )
     author_priority = models.IntegerField(
         default=0, help_text="Priority in which the author will be displayed."

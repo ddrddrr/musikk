@@ -11,14 +11,13 @@ from rest_framework.permissions import IsAuthenticated
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.http import HttpResponse
 
-from notifications.models import FriendRequestNotification
+from notifications.models import FollowerNotification
 from websockets.event_helpers import send_ws_event
 from users.api.v1.serializers import (
     BaseUserSerializer,
-    BaseProfileSerializer,
+    BaseMeSerializer,
 )
-from users.models import BaseUser, BaseProfile, ArtistProfile, StreamingProfile
-from users.permissions import IsProfileOwnerOrReadOnly
+from users.models import BaseUser, UserFollow
 
 
 @ensure_csrf_cookie
@@ -28,10 +27,9 @@ def csrf(request):
 
 class MeView(APIView):
     def get(self, request, *args, **kwargs):
-        return Response(data={"me": BaseUserSerializer(self.request.user).data})
+        return Response(data={"me": BaseMeSerializer(self.request.user).data})
 
 
-# TODO: this is probably not needed anymore, remove
 class UserRetrieveView(RetrieveAPIView):
     lookup_field = "uuid"
     queryset = BaseUser.objects.all()
@@ -39,110 +37,72 @@ class UserRetrieveView(RetrieveAPIView):
     permission_classes = [IsAuthenticated]
 
 
-class BaseProfileRetrieveUpdateView(RetrieveUpdateAPIView):
-    lookup_field = "uuid"
-    queryset = BaseProfile.objects.all()
-    serializer_class = BaseProfileSerializer
-    permission_classes = [IsAuthenticated, IsProfileOwnerOrReadOnly]
+class FriendsView(APIView):
+    permission_classes = [IsAuthenticated]
 
-    def perform_update(self, serializer):
-        super().perform_update(serializer)
-        user_uuid = self.request.user.uuid
-        send_ws_event(
-            f"user_{user_uuid}",
-            event_handler="base.event",
-            event_name="invalidate.query",
-            query_key=["profile", str(user_uuid)],
+    def get(self, *args, **kwargs):
+        user = get_object_or_404(BaseUser, uuid=kwargs["for_user_uuid"])
+        if (user is self.request.user) or (user in self.request.user.friends):
+            return Response(
+                data={
+                    "friends": BaseUserSerializer(
+                        self.request.user.friends, many=True
+                    ).data
+                }
+            )
+
+        return Response(
+            status=status.HTTP_403_FORBIDDEN,
+            data={
+                "detail": f"Not authorized to see `friends` for user {kwargs["for_user_uuid"]}"
+            },
         )
 
 
-class FriendsListView(ListAPIView):
-    permission_classes = [IsAuthenticated]
-    serializer_class = BaseProfileSerializer
+class FollowersView(APIView):
+    def get(self, *args, **kwargs):
+        user = get_object_or_404(BaseUser, uuid=kwargs["for_user_uuid"])
+        if (user is self.request.user) or (user in self.request.user.friends):
+            return Response(
+                data={
+                    "friends": BaseUserSerializer(
+                        self.request.user.friends, many=True
+                    ).data
+                }
+            )
 
-    def get_queryset(self):
-        profile = get_object_or_404(BaseProfile, uuid=self.kwargs["uuid"])
-        return profile.friends.all()
-
-
-class FollowedListView(ListAPIView):
-    permission_classes = [IsAuthenticated]
-    serializer_class = BaseProfileSerializer
-
-    def get_queryset(self):
-        profile = get_object_or_404(BaseProfile, uuid=self.kwargs["uuid"])
-        return profile.followed.all()
-
-
-class UserFriendsView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def post(self, request, *args, **kwargs):
-        user = get_object_or_404(BaseProfile, uuid=kwargs.get("profile_uuid"))
-        friend = get_object_or_404(BaseProfile, uuid=kwargs.get("friend_uuid"))
-        # can't add a friend, if there was no prior request
-        get_object_or_404(
-            FriendRequestNotification,
-            sender=friend,
-            receiver=user,
+        return Response(
+            status=status.HTTP_403_FORBIDDEN,
+            data={
+                "detail": f"Not authorized to see `friend list` for user {kwargs["for_user_uuid"]}"
+            },
         )
-        user.friends.add(friend)
-        send_ws_event(
-            f"user_{user.uuid}",
-            event_handler="base.event",
-            event_name="invalidate.query",
-            query_key=["user", "friends", str(user.uuid)],
-        )
-        return Response(status=status.HTTP_204_NO_CONTENT)
 
-    def delete(self, request, *args, **kwargs):
-        user = get_object_or_404(BaseProfile, uuid=kwargs.get("profile_uuid"))
-        friend = get_object_or_404(BaseProfile, uuid=kwargs.get("friend_uuid"))
-        user.friends.remove(friend)
-        send_ws_event(
-            f"user_{user.uuid}",
-            event_handler="base.event",
-            event_name="invalidate.query",
-            query_key=["user", "friends", str(user.uuid)],
-        )
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-class ArtistFollowersView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request, *args, **kwargs):
-        profile: ArtistProfile = self.request.user.artistprofile
-        followers = BaseProfileSerializer(
-            profile.followers.all(), many=True, context={"request": request}
-        ).data
-        return Response(status=status.HTTP_200_OK, data=followers)
-
-    def post(self, request, *args, **kwargs):
-        # TODO: add check that this is actually an artist
-        artist = get_object_or_404(BaseProfile, uuid=kwargs.get("uuid"))
-
+    def post(self, *args, **kwargs):
         user = self.request.user
-        profile: StreamingProfile = user.streamingprofile
-        profile.followed.add(artist)
-        send_ws_event(
-            f"user_{user.uuid}",
-            event_handler="base.event",
-            event_name="invalidate.query",
-            query_key=["user", "followed", str(user.uuid)],
-        )
+        follow_user = get_object_or_404(BaseUser, uuid=kwargs["user_uuid"])
+        UserFollow.objects.create(from_user=user, to_user=follow_user)
+        # TODO: friends for both, followers for the other, followed for this
+        # send_ws_event(
+        #     f"user_{user.uuid}",
+        #     event_handler="base.event",
+        #     event_name="invalidate.query",
+        #     query_key=["user", "followed", str(user.uuid)],
+        # )
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    def delete(self, request, *args, **kwargs):
-        artist = get_object_or_404(BaseProfile, uuid=kwargs.get("uuid"))
-
+    def delete(self, *args, **kwargs):
         user = self.request.user
-        profile: StreamingProfile = user.streamingprofile
-        profile.followed.remove(artist)
-        send_ws_event(
-            f"user_{user.uuid}",
-            event_handler="base.event",
-            event_name="invalidate.query",
-            query_key=["user", "followed", str(user.uuid)],
+        unfollow_user = get_object_or_404(BaseUser, uuid=kwargs["user_uuid"])
+        user_connection = get_object_or_404(
+            UserFollow, from_user=user, to_user=unfollow_user
         )
+        user_connection.delete()
+        # TODO: friends for both, followers for the other, followed for this
+        # send_ws_event(
+        #     f"user_{user.uuid}",
+        #     event_handler="base.event",
+        #     event_name="invalidate.query",
+        #     query_key=["user", "followed", str(user.uuid)],
+        # )
         return Response(status=status.HTTP_204_NO_CONTENT)

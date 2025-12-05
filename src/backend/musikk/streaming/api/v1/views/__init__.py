@@ -10,8 +10,8 @@ from streaming.api.v1.views.collections import (
     AlbumBySongView,
 )
 from streaming.api.v1.views.connections import (
-    ConnectionsLatestListenedView,
-    ConnectionsLatestAddedView,
+    FriendsLatestListenedView,
+    FriendsLatestAddedCollectionsView
 )
 from streaming.api.v1.views.playback import (
     PlaybackDeviceView,

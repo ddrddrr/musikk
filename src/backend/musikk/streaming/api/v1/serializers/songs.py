@@ -6,10 +6,9 @@ from base.serializers import BaseModelSerializer
 from streaming.api.v1.serializers.validators import validate_authors
 from streaming.models import BaseSong, CollectionSong, SongCredit
 from users.api.v1.serializers import BaseUserSerializer
-from users.models import ArtistProfile
 
 
-class BaseSongSerializer(BaseModelSerializer):
+class BaseSongGetSerializer(BaseModelSerializer):
     mpd = serializers.SerializerMethodField(read_only=True)
     m3u8 = serializers.SerializerMethodField(read_only=True)
     is_liked = serializers.SerializerMethodField(read_only=True, allow_null=True)
@@ -27,7 +26,7 @@ class BaseSongSerializer(BaseModelSerializer):
             "authors",
         ]
 
-    # TODO: make a method
+    # TODO: make a method on model?
     def get_mpd(self, obj):
         return (
             settings.DJANGO_BASE_URL
@@ -43,11 +42,10 @@ class BaseSongSerializer(BaseModelSerializer):
         )
 
     def get_is_liked(self, obj):
-        if user := self.context["request"].user:
-            return CollectionSong.objects.filter(
-                song=obj, collection=user.streamingprofile.liked_songs
-            ).exists()
-        raise serializers.ValidationError({"user": "User must be provided"})
+        user = self.context["request"].user
+        return CollectionSong.objects.filter(
+            song=obj, collection=user.streamingprofile.liked_songs
+        ).exists()
 
     def get_authors(self, obj):
         # TODO: optimize
@@ -94,7 +92,7 @@ class BaseSongCreateSerializer(serializers.ModelSerializer):
         return instance
 
 
-class CollectionSongSerializer(BaseModelSerializer):
+class CollectionSongGetSerializer(BaseModelSerializer):
     song = serializers.SerializerMethodField()
 
     class Meta:
@@ -102,4 +100,4 @@ class CollectionSongSerializer(BaseModelSerializer):
         fields = BaseModelSerializer.Meta.fields + ["song", "collection"]
 
     def get_song(self, obj):
-        return BaseSongSerializer(obj.song, context=self.context).data
+        return BaseSongGetSerializer(obj.song, context=self.context).data

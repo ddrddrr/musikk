@@ -2,15 +2,9 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 
-from users.models import BaseUser, BaseProfile
+from users.models import BaseUser
 
-
-class BaseProfileInline(admin.StackedInline):
-    model = BaseProfile
-    can_delete = False
-    verbose_name_plural = "Profile"
-
-
+# TODO: user artist stuff
 class BaseUserChangeForm(UserChangeForm):
     class Meta:
         model = BaseUser
@@ -32,7 +26,6 @@ class BaseUserAdmin(UserAdmin):
     add_form = BaseUserCreationForm
     form = BaseUserChangeForm
     model = BaseUser
-    inlines = [BaseProfileInline]
 
     list_display = (
         "email",
@@ -79,10 +72,3 @@ class BaseUserAdmin(UserAdmin):
     )
 
     readonly_fields = ("uuid", "last_login")
-
-
-@admin.register(BaseProfile)
-class BaseProfileAdmin(admin.ModelAdmin):
-    list_display = ("user", "display_name", "bio")
-    search_fields = ("user__email", "display_name")
-    raw_id_fields = ("user",)

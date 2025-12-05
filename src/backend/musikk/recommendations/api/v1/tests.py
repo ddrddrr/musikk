@@ -6,8 +6,8 @@ from streaming.tests.factories import BaseSongFactory, CollectionFactory
 from recommendations.api.v1.views import SearchView
 from rest_framework.test import force_authenticate
 
-from users.models import StreamingProfile
 from users.tests.factories import BaseUserFactory
+
 
 # TODO: rewrite with client instead of factory
 class TestSearchView(TestCase):
@@ -16,8 +16,6 @@ class TestSearchView(TestCase):
         super().setUpClass()
         cls.factory = APIRequestFactory()
         cls.user = BaseUserFactory()
-        cls.profile = cls.user.baseprofile
-        cls.stprofile = StreamingProfile.objects.get_or_create_for_user(cls.user)
 
         cls.collections = CollectionFactory.create_batch(2)
         cls.songs = [song for c in cls.collections for song in c.base_songs.all()]
@@ -59,7 +57,7 @@ class TestSearchView(TestCase):
         )
 
     def test_q_equal_user_title(self):
-        query = f"?q={self.profile.display_name}"
+        query = f"?q={self.user.display_name}"
         request = self.factory.get(reverse("api:search") + query)
         force_authenticate(user=self.user, request=request)
         response = SearchView.as_view()(request)
@@ -67,17 +65,15 @@ class TestSearchView(TestCase):
         self.assertTrue(len(response.data["users"]) == 1)
 
     def test_q_multiple_similar_user_titles(self):
-        query = f"?q={self.profile.display_name}"
+        query = f"?q={self.user.display_name}"
         for i in range(5):
             u1 = BaseUserFactory()
-            u1.baseprofile.display_name = self.profile.display_name + str(i)
-            u1.baseprofile.save()
-            StreamingProfile.objects.get_or_create_for_user(u1)
+            u1.display_name = self.user.display_name + str(i)
+            u1.save()
 
             u2 = BaseUserFactory()
-            u2.baseprofile.display_name = str(i)
-            u2.baseprofile.save()
-            StreamingProfile.objects.get_or_create_for_user(u2)
+            u2.display_name = str(i)
+            u2.save()
 
         request = self.factory.get(reverse("api:search") + query)
         force_authenticate(user=self.user, request=request)

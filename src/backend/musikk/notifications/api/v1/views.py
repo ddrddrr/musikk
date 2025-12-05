@@ -12,7 +12,7 @@ from notifications.api.v1.serializers import (
 )
 from notifications.models import (
     ReplyNotification,
-    FriendRequestNotification,
+    FollowerNotification,
     Notification,
 )
 from users.models import BaseUser
@@ -31,7 +31,7 @@ class NotificationsPersonalListUpdateView(GenericAPIView):
             ReplyNotification.objects.filter(orig_comment__user=user), many=True
         ).data
         friend_requests = FriendRequestNotificationSerializer(
-            FriendRequestNotification.objects.filter(receiver=user), many=True
+            FollowerNotification.objects.filter(receiver=user), many=True
         ).data
         return Response({"replies": replies, "friend_requests": friend_requests})
 
@@ -51,7 +51,7 @@ class NotificationDeleteView(GenericAPIView):
         # filtering by receiver, so any random user couldn't delete notifications
         # which don't belong to him
         notification = get_object_or_404(
-            FriendRequestNotification, receiver=user, uuid=notif_uuid
+            FollowerNotification, receiver=user, uuid=notif_uuid
         )
         notification.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -65,6 +65,6 @@ class FriendRequestNotificationCreateView(GenericAPIView):
         receiver_uuid = kwargs["uuid"]
         receiver = get_object_or_404(BaseUser, uuid=receiver_uuid)
 
-        FriendRequestNotification.objects.create(sender=user, receiver=receiver)
+        FollowerNotification.objects.create(sender=user, receiver=receiver)
 
         return Response(status=status.HTTP_204_NO_CONTENT)

@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from base.serializers import BaseModelSerializer
-from notifications.models import ReplyNotification, FriendRequestNotification
+from notifications.models import ReplyNotification, FollowerNotification
 from social.api.v1.serializers import PublicationRetrieveSerializer
 
 
@@ -32,7 +32,7 @@ class FriendRequestNotificationSerializer(BaseNotificationSerializer):
     receiver = serializers.SerializerMethodField()
 
     class Meta(BaseNotificationSerializer.Meta):
-        model = FriendRequestNotification
+        model = FollowerNotification
         fields = BaseNotificationSerializer.Meta.fields + ["sender", "receiver"]
 
     def get_sender(self, obj):

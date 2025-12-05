@@ -1,8 +1,4 @@
-import json
-
 from django.db import transaction
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -11,13 +7,13 @@ from rest_framework.generics import (
     get_object_or_404,
 )
 
+from streaming.models.state import StreamingProfile
 from websockets.event_helpers import send_ws_event
 from streaming.api.v1.serializers.playback import (
     PlaybackDeviceSerializer,
     PlaybackStateSerializer,
 )
 from streaming.models import PlaybackDevice
-from users.models import StreamingProfile
 
 
 class PlaybackDeviceView(APIView):
@@ -42,7 +38,12 @@ class PlaybackDeviceView(APIView):
                 pd.save()
                 profile.playback_state.is_active = False
                 profile.playback_state.save()
-                send_ws_event(f"user_{self.request.user.uuid}", event_handler="base.event", event_name="invalidate.query", query_key=["playback"])
+                send_ws_event(
+                    f"user_{self.request.user.uuid}",
+                    event_handler="base.event",
+                    event_name="invalidate.query",
+                    query_key=["playback"],
+                )
 
         return Response(
             status=status.HTTP_201_CREATED, data=PlaybackDeviceSerializer(pd).data
@@ -70,7 +71,12 @@ class PlaybackDeviceActivateView(APIView):
             playback_state.is_playing = False
             playback_state.save()
 
-        send_ws_event(f"user_{self.request.user.uuid}", event_handler="base.event", event_name="invalidate.query", query_key=["playback"])
+        send_ws_event(
+            f"user_{self.request.user.uuid}",
+            event_handler="base.event",
+            event_name="invalidate.query",
+            query_key=["playback"],
+        )
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -134,5 +140,10 @@ class PlaybackStateView(APIView):
         playback_state.is_playing = is_playing
         playback_state.save()
 
-        send_ws_event(f"user_{self.request.user.uuid}", event_handler="base.event", event_name="invalidate.query", query_key=["playback"])
+        send_ws_event(
+            f"user_{self.request.user.uuid}",
+            event_handler="base.event",
+            event_name="invalidate.query",
+            query_key=["playback"],
+        )
         return Response(status=status.HTTP_204_NO_CONTENT)

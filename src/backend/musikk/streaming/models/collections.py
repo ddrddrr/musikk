@@ -1,21 +1,13 @@
-from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 
 from base.models import BaseModel
 from musikk.utils.paths import image_path
-from social.models import Publication
 
 from streaming.models.songs import CollectionSong, BaseSong
 
 
 # TODO: add metadata, streams, hashtags, ratings
-# TODO: rewrite, we have types here but also inherit, not correct
 class Collection(BaseModel):
-    class CollectionType(models.TextChoices):
-        PLAYLIST = "playlist", "Playlist"
-        ALBUM = "album", "Album"
-
-    type = models.CharField(choices=CollectionType.choices)
     base_songs = models.ManyToManyField(
         "streaming.BaseSong",
         through="streaming.CollectionSong",
@@ -29,7 +21,6 @@ class Collection(BaseModel):
         "users.BaseUser",
         through="streaming.CollectionCredit",
     )
-    comments = GenericRelation(Publication, limit_choices_to={"type": "comment"})
 
     def ordered_songs(self) -> list[BaseSong]:
         return [
@@ -43,13 +34,16 @@ class Collection(BaseModel):
         return self.title
 
 
+class Album(Collection):
+    authors = models.ManyToManyField(
+        "users.Artist",
+        through="streaming.CollectionCredit",
+    )
+
+
 class UserHistory(Collection):
     def save(self, *args, **kwargs):
         self.title = "History"
-        self.description = ""
-        self.image = None
-        self.metadata = None
-        self.private = True
         super().save(*args, **kwargs)
 
     class Meta:
@@ -59,10 +53,6 @@ class UserHistory(Collection):
 class LikedSongs(Collection):
     def save(self, *args, **kwargs):
         self.title = "Liked Songs"
-        self.description = ""
-        self.image = None
-        self.metadata = None
-        self.private = True
         super().save(*args, **kwargs)
 
     class Meta:

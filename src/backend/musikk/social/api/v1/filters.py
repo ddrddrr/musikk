@@ -1,7 +1,6 @@
 from django_filters import rest_framework as filters
 
 from social.models import Publication
-from users.models import StreamingProfile
 
 
 class PublicationFilter(filters.FilterSet):
@@ -13,15 +12,14 @@ class PublicationFilter(filters.FilterSet):
         fields = ["connection"]
 
     def filter_connection_type(self, queryset, name, value):
-        profile: StreamingProfile = self.request.user.streamingprofile
         match value:
             case "friends":
                 return queryset.filter(
-                    user__streamingprofile__in=profile.friends.all()
+                    author__in=self.request.user.friends.all()
                 ).order_by("-date_added")[:50]
             case "followed":
                 return queryset.filter(
-                    user__streamingprofile__in=profile.followed.all()
+                    author__in=self.request.user.followed_users.all()
                 ).order_by("-date_added")[:50]
             case _:
                 return queryset.none()
