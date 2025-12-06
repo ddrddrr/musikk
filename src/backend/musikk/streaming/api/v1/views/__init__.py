@@ -1,5 +1,5 @@
 from streaming.api.v1.views.collections import (
-    CollectionLatestView,
+    PlaylistsLatestView,
     CollectionPersonalView,
     CollectionRetrieveView,
     CollectionDetailView,

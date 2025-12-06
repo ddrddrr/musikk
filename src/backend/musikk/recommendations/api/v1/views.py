@@ -18,7 +18,6 @@ MAX_RESULTS = 10
 
 
 class SearchView(APIView):
-    permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
         query = request.query_params.get("q", "").strip()

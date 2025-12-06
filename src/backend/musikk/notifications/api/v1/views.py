@@ -22,7 +22,6 @@ from users.models import BaseUser
 
 
 class NotificationsPersonalListUpdateView(GenericAPIView):
-    permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
         user = self.request.user
@@ -43,7 +42,6 @@ class NotificationsPersonalListUpdateView(GenericAPIView):
 
 
 class NotificationDeleteView(GenericAPIView):
-    permission_classes = [IsAuthenticated]
 
     def delete(self, request, *args, **kwargs):
         user = self.request.user
@@ -58,7 +56,6 @@ class NotificationDeleteView(GenericAPIView):
 
 
 class FriendRequestNotificationCreateView(GenericAPIView):
-    permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
         user = self.request.user

@@ -15,7 +15,7 @@ from websockets.event_helpers import send_ws_event
 
 
 class PublicationsListCreateView(APIView):
-    permission_classes = [IsAuthenticated]
+
 
     def get(self, request, obj_type, obj_uuid, *args, **kwargs):
         related_model = CREATED_FOR_TYPE_TO_MODEL_MAP.get(obj_type)

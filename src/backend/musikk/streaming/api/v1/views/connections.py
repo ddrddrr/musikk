@@ -8,7 +8,7 @@ from users.api.v1.serializers import BaseUserSerializer
 
 
 class FriendsLatestListenedView(APIView):
-    permission_classes = [IsAuthenticated]
+
 
     def get(self, *args, **kwargs):
         user_songs = []
@@ -32,7 +32,7 @@ class FriendsLatestAddedCollectionsView(APIView):
 
 
 # class ConnectionsLatestListenedView(APIView):
-#     permission_classes = [IsAuthenticated]
+# 
 #
 #     def get(self, request, *args, **kwargs):
 #         profile: StreamingProfile = request.user.streamingprofile
@@ -64,7 +64,7 @@ class FriendsLatestAddedCollectionsView(APIView):
 #
 # # TODO: return who exactly followed the collection/song
 # class ConnectionsLatestAddedView(APIView):
-#     permission_classes = [IsAuthenticated]
+# 
 #     amount = 30
 #
 #     def get(self, request, *args, **kwargs):

@@ -17,7 +17,7 @@ from streaming.models import PlaybackDevice
 
 
 class PlaybackDeviceView(APIView):
-    permission_classes = [IsAuthenticated]
+
 
     def post(self, request, *args, **kwargs):
         pd_name = request.data.get("name")
@@ -51,7 +51,7 @@ class PlaybackDeviceView(APIView):
 
 
 class PlaybackDeviceActivateView(APIView):
-    permission_classes = [IsAuthenticated]
+
 
     def post(self, request, *args, **kwargs):
         profile: StreamingProfile = self.request.user.streamingprofile
@@ -119,7 +119,7 @@ class PlaybackDeviceActivateView(APIView):
 
 
 class PlaybackStateView(APIView):
-    permission_classes = [IsAuthenticated]
+
 
     def get(self, request, *args, **kwargs):
         playback_state = self.request.user.streamingprofile.playback_state

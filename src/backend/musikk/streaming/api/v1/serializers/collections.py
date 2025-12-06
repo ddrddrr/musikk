@@ -24,6 +24,7 @@ class CollectionSerializerBasic(BaseModelSerializer):
             "image",
             "authors",
             "is_liked",
+            "type",
         ]
         extra_kwargs = BaseModelSerializer.Meta.extra_kwargs | {
             "title": {"read_only": True},
@@ -31,10 +32,11 @@ class CollectionSerializerBasic(BaseModelSerializer):
         }
 
     def get_is_liked(self, obj):
-        if profile := self.context["request"].user.streamingprofile:
-            return profile.followed_collections.filter(pk=obj.pk).exists()
-
-        raise serializers.ValidationError({"user": "User must be provided"})
+        return (
+            self.context["request"]
+            .user.streamingprofile.followed_collections.filter(pk=obj.pk)
+            .exists()
+        )
 
     def get_authors(self, obj):
         collection_credits = CollectionCredit.objects.filter(
@@ -63,7 +65,9 @@ class CollectionSerializerDetailed(CollectionSerializerBasic):
 
     def get_songs(self, obj):
         return CollectionSongGetSerializer(
-            CollectionSong.objects.filter(collection=obj),
+            CollectionSong.objects.filter(collection=obj)
+            .select_related("song")
+            .filter(song__draft=False),
             context=self.context,
             many=True,
         ).data
@@ -94,9 +98,8 @@ class CollectionCreateSerializer(serializers.ModelSerializer):
         else:
             authors = validate_authors(author_uuids)
 
-        # TODO: add validate songs(same as authors, maybe some generic method in general)
         song_uuids = validated_data.pop("songs")
-        song_uuids = BaseSong.objects.filter(uuid__in=song_uuids)
+        song_uuids = BaseSong.objects.published().filter(uuid__in=song_uuids)
         with transaction.atomic():
             collection = Collection.objects.create(**validated_data)
             cs_objs = [

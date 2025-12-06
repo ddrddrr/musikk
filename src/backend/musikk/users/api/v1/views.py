@@ -34,11 +34,11 @@ class UserRetrieveView(RetrieveAPIView):
     lookup_field = "uuid"
     queryset = BaseUser.objects.all()
     serializer_class = BaseUserSerializer
-    permission_classes = [IsAuthenticated]
+
 
 
 class FriendsView(APIView):
-    permission_classes = [IsAuthenticated]
+
 
     def get(self, *args, **kwargs):
         user = get_object_or_404(BaseUser, uuid=kwargs["for_user_uuid"])

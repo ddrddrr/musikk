@@ -5,17 +5,13 @@ from streaming.api.v1.views import (
     FriendsLatestListenedView,
 )
 
-# from streaming.api.v1.views.connections import (
-#     ConnectionsLatestListenedView,
-#     ConnectionsLatestAddedView,
-# )
 from streaming.api.v1.views.songs import (
     SongAddLikedView,
     SongCreateView,
     CollectionSongRetrieveView,
 )
 from streaming.api.v1.views.collections import (
-    CollectionLatestView,
+    PlaylistsLatestView,
     CollectionPersonalView,
     CollectionDetailView,
     CollectionAddLikedView,
@@ -70,7 +66,7 @@ collection_urls = [
         CollectionAddSong.as_view(),
         name="collection-add-song",
     ),
-    path("collections/latest", CollectionLatestView.as_view(), name="collection-list"),
+    path("collections/latest", PlaylistsLatestView.as_view(), name="collection-list"),
     path(
         "collections/personal/<uuid:uuid>",
         CollectionPersonalView.as_view(),

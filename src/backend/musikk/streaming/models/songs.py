@@ -5,6 +5,14 @@ from base.models import BaseModel
 from musikk.utils.paths import image_path, delete_dir_for_file
 
 
+class BaseSongQuerySet(models.QuerySet):
+    def published(self):
+        return self.filter(draft=False)
+
+
+BaseSongManager = models.Manager.from_queryset(BaseSongQuerySet)
+
+
 # TODO: add metadata model, add streams, hashtags, ratings
 class BaseSong(BaseModel):
     title = models.CharField(max_length=128)
@@ -32,6 +40,8 @@ class BaseSong(BaseModel):
         max_length=settings.MAX_PATH_LENGTH,
         help_text="Path to the m3u8 file representing the song.",
     )
+
+    objects = BaseSongManager()
 
     # TODO: django is kinda weird with deletes on relation
     #  so probably add a scheduled task for cleanup instead

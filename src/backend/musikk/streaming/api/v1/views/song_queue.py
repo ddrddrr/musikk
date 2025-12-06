@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from streaming.models.state import StreamingProfile
+from streaming.permissions import IsPublicOrCollectionAuthor
 from websockets.event_helpers import send_ws_event
 from streaming.api.v1.serializers.song_queue import SongQueueSerializer
 from streaming.models import SongQueue, SongQueueNode, Collection
@@ -15,7 +16,7 @@ from streaming.models.songs import CollectionSong
 
 # TODO: rewrite as mixin?
 class SongQueueBaseView(APIView):
-    permission_classes = [IsAuthenticated]
+
 
     def get_song_queue(self, request: Request) -> SongQueue:
         return self.request.user.streamingprofile.song_queue
@@ -29,10 +30,14 @@ class SongQueueRetrieveView(SongQueueBaseView, RetrieveAPIView):
 
 
 class SongQueueAddSongView(SongQueueBaseView):
+    permission_classes = [IsPublicOrCollectionAuthor]
+
     def post(self, request, *args, **kwargs):
+        song = get_object_or_404(CollectionSong, uuid=kwargs["uuid"])
+        self.check_object_permissions(request, song)
+        
         with transaction.atomic():
             song_queue = self.get_song_queue(request)
-            song = CollectionSong.objects.get(uuid=kwargs["uuid"])
             song_queue.add_song(song=song, action=SongQueue.AddAction.ADD)
 
         send_ws_event(
@@ -46,10 +51,14 @@ class SongQueueAddSongView(SongQueueBaseView):
 
 
 class SongQueueAddCollectionView(SongQueueBaseView):
+    permission_classes = [IsPublicOrCollectionAuthor]
+
     def post(self, request, *args, **kwargs):
+        collection = get_object_or_404(Collection, uuid=kwargs["uuid"])
+        self.check_object_permissions(request, collection)
+        
         with transaction.atomic():
             song_queue = self.get_song_queue(request)
-            collection = Collection.objects.get(uuid=kwargs["uuid"])
             song_queue.add_collection(
                 collection=collection, action=SongQueue.AddAction.ADD
             )
@@ -65,10 +74,14 @@ class SongQueueAddCollectionView(SongQueueBaseView):
 
 
 class SongQueueSetSongHeadView(SongQueueBaseView):
+    permission_classes = [IsPublicOrCollectionAuthor]
+
     def post(self, request, *args, **kwargs):
+        song = get_object_or_404(CollectionSong, uuid=kwargs["uuid"])
+        self.check_object_permissions(request, song)
+        
         with transaction.atomic():
             song_queue = self.get_song_queue(request)
-            song = CollectionSong.objects.get(uuid=kwargs["uuid"])
             song_queue.add_song(song=song, action=SongQueue.AddAction.CHANGE_HEAD)
 
         send_ws_event(
@@ -81,10 +94,14 @@ class SongQueueSetSongHeadView(SongQueueBaseView):
 
 
 class SongQueueSetCollectionHeadView(SongQueueBaseView):
+    permission_classes = [IsPublicOrCollectionAuthor]
+
     def post(self, request, *args, **kwargs):
+        collection = get_object_or_404(Collection, uuid=kwargs["uuid"])
+        self.check_object_permissions(request, collection)
+        
         with transaction.atomic():
             song_queue = self.get_song_queue(request)
-            collection = Collection.objects.get(uuid=kwargs["uuid"])
             song_queue.add_collection(
                 collection=collection, action=SongQueue.AddAction.CHANGE_HEAD
             )
