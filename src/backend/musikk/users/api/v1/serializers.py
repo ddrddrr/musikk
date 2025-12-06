@@ -2,7 +2,6 @@ from dj_rest_auth.registration.serializers import RegisterSerializer
 from rest_framework import serializers
 
 from base.serializers import BaseModelSerializer
-from streaming.models import CollectionSong
 from users.models import BaseUser
 
 

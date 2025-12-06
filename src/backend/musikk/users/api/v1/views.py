@@ -1,23 +1,19 @@
 from rest_framework.generics import (
-    RetrieveUpdateAPIView,
     get_object_or_404,
     RetrieveAPIView,
-    ListAPIView,
 )
 from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.http import HttpResponse
 
-from notifications.models import FollowerNotification
-from websockets.event_helpers import send_ws_event
 from users.api.v1.serializers import (
     BaseUserSerializer,
     BaseMeSerializer,
 )
 from users.models import BaseUser, UserFollow
+from users.permissions import IsSelfOrFriend
 
 
 @ensure_csrf_cookie
@@ -36,46 +32,25 @@ class UserRetrieveView(RetrieveAPIView):
     serializer_class = BaseUserSerializer
 
 
-
 class FriendsView(APIView):
-
+    permission_classes = [IsSelfOrFriend]
 
     def get(self, *args, **kwargs):
         user = get_object_or_404(BaseUser, uuid=kwargs["for_user_uuid"])
-        if (user is self.request.user) or (user in self.request.user.friends):
-            return Response(
-                data={
-                    "friends": BaseUserSerializer(
-                        self.request.user.friends, many=True
-                    ).data
-                }
-            )
-
+        self.check_object_permissions(self.request, user)
         return Response(
-            status=status.HTTP_403_FORBIDDEN,
-            data={
-                "detail": f"Not authorized to see `friends` for user {kwargs["for_user_uuid"]}"
-            },
+            data={"friends": BaseUserSerializer(user.friends, many=True).data}
         )
 
 
 class FollowersView(APIView):
+    permission_classes = [IsSelfOrFriend]
+
     def get(self, *args, **kwargs):
         user = get_object_or_404(BaseUser, uuid=kwargs["for_user_uuid"])
-        if (user is self.request.user) or (user in self.request.user.friends):
-            return Response(
-                data={
-                    "friends": BaseUserSerializer(
-                        self.request.user.friends, many=True
-                    ).data
-                }
-            )
-
+        self.check_object_permissions(self.request, user)
         return Response(
-            status=status.HTTP_403_FORBIDDEN,
-            data={
-                "detail": f"Not authorized to see `friend list` for user {kwargs["for_user_uuid"]}"
-            },
+            data={"friends": BaseUserSerializer(user.friends, many=True).data}
         )
 
     def post(self, *args, **kwargs):
