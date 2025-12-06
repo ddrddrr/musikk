@@ -5,3 +5,4 @@ from streaming.models.collections import (
 )
 from streaming.models.songs import BaseSong, SongCredit, CollectionSong
 from streaming.models.playback import PlaybackState, PlaybackDevice
+from streaming.models.profile import StreamingProfile

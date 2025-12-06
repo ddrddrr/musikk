@@ -4,6 +4,7 @@ from streaming.api.v1.views import (
     FriendsLatestAddedCollectionsView,
     FriendsLatestListenedView,
 )
+from streaming.api.v1.views.profile import StreamingProfileRetrieveView
 
 from streaming.api.v1.views.songs import (
     SongAddLikedView,
@@ -175,6 +176,18 @@ friend_activity_urls = [
     ),
 ]
 
+streaming_profile_urls = [
+    path(
+        "streaming-profile",
+        StreamingProfileRetrieveView.as_view(),
+        name="streaming-profile",
+    )
+]
 urlpatterns = (
-    song_urls + collection_urls + song_queue_urls + playback_urls + friend_activity_urls
+    song_urls
+    + collection_urls
+    + song_queue_urls
+    + playback_urls
+    + friend_activity_urls
+    + streaming_profile_urls
 )

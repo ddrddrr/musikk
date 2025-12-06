@@ -7,7 +7,7 @@ from rest_framework.generics import (
     get_object_or_404,
 )
 
-from streaming.models.state import StreamingProfile
+from streaming.models.profile import StreamingProfile
 from websockets.event_helpers import send_ws_event
 from streaming.api.v1.serializers.playback import (
     PlaybackDeviceSerializer,

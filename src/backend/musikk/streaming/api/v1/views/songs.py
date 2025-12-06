@@ -7,7 +7,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from streaming.models.state import StreamingProfile
+from streaming.models.profile import StreamingProfile
 from streaming.permissions import IsPublicOrCollectionAuthor
 from users.permissions import IsArtist
 from websockets.event_helpers import send_ws_event

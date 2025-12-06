@@ -6,7 +6,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from streaming.models.state import StreamingProfile
+from streaming.models.profile import StreamingProfile
 from streaming.permissions import IsPublicOrCollectionAuthor
 from websockets.event_helpers import send_ws_event
 from streaming.api.v1.serializers.song_queue import SongQueueSerializer
