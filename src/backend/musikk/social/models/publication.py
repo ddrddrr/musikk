@@ -38,8 +38,8 @@ class Publication(UserContent):
         super().save(*args, **kwargs)
         if is_new and self.parent:
             ReplyNotification.objects.create(
-                orig_comment=self.parent,
-                reply_comment=self,
+                orig_publication=self.parent,
+                reply_publication=self,
             )
 
     def get_root(self):

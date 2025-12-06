@@ -15,14 +15,14 @@ class BaseNotificationSerializer(BaseModelSerializer):
 
 
 class ReplyNotificationSerializer(BaseNotificationSerializer):
-    orig_comment = PublicationRetrieveSerializer(read_only=True)
-    reply_comment = PublicationRetrieveSerializer(read_only=True)
+    orig_publication = PublicationRetrieveSerializer(read_only=True)
+    reply_publication = PublicationRetrieveSerializer(read_only=True)
 
     class Meta(BaseNotificationSerializer.Meta):
         model = ReplyNotification
         fields = BaseNotificationSerializer.Meta.fields + [
-            "orig_comment",
-            "reply_comment",
+            "orig_publication",
+            "reply_publication",
             "is_read",
         ]
 

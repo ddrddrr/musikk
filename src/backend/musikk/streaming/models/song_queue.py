@@ -1,4 +1,5 @@
 import random
+from typing import Callable
 
 from django.db import models
 from django.db import transaction
@@ -331,7 +332,7 @@ class SongQueue(BaseModel):
     def is_empty(self):
         return self.head is None
 
-    def apply(self, func: callable) -> None:
+    def apply(self, func: Callable) -> None:
         current = self.head
         while current:
             func(current)

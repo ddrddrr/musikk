@@ -16,6 +16,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("base", "0001_enable_trgm"),
+        ("sites", "0001_initial"),
     ]
 
     operations = [

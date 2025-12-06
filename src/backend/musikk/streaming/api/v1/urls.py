@@ -57,13 +57,14 @@ song_urls = [
 
 collection_urls = [
     path("collections", CollectionCreateView.as_view(), name="collection-create"),
+    # TODO: not correct, the path should be the same, i.e. use ViewSets
     path(
-        "collections/<uuid:collection_uuid>/songs/<uuid:song_uuid>",
+        "collections/<uuid:collection_uuid>/songs/<uuid:song_uuid>/remove",
         CollectionRemoveSong.as_view(),
         name="collection-remove-song",
     ),
     path(
-        "collections/<uuid:collection_uuid>/songs/<uuid:song_uuid>",
+        "collections/<uuid:collection_uuid>/songs/<uuid:song_uuid>/add",
         CollectionAddSong.as_view(),
         name="collection-add-song",
     ),

@@ -19,4 +19,5 @@ class ArtistFactory(BaseModelFactory):
     class Meta:
         model = Artist
 
-    user = SubFactory(BaseUserFactory)
+    email = fake("ascii_email")
+    is_staff = fake("boolean")

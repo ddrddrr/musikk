@@ -1,8 +1,6 @@
-from email._header_value_parser import ContentType
-
+from django.contrib.contenttypes.models import ContentType
 from rest_framework import status
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from social.api.v1.serializers import (
@@ -15,7 +13,6 @@ from websockets.event_helpers import send_ws_event
 
 
 class PublicationsListCreateView(APIView):
-
 
     def get(self, request, obj_type, obj_uuid, *args, **kwargs):
         related_model = CREATED_FOR_TYPE_TO_MODEL_MAP.get(obj_type)

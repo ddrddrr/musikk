@@ -29,7 +29,7 @@ class TestPublicationsListCreateView(TestCase):
         )
 
         url = reverse(
-            "api:v1:social:publication-create-list",
+            "api:publication-create-list",
             kwargs={
                 "obj_type": "collection",
                 "obj_uuid": str(self.collection.uuid),
@@ -64,7 +64,7 @@ class TestPublicationsListCreateView(TestCase):
 
     def test_create_publication_requires_authentication(self):
         url = reverse(
-            "api:v1:social:publication-create-list",
+            "api:publication-create-list",
             kwargs={
                 "obj_type": "collection",
                 "obj_uuid": str(self.collection.uuid),
@@ -86,7 +86,7 @@ class TestPublicationsListCreateView(TestCase):
 
     def test_create_publication_with_valid_data(self):
         url = reverse(
-            "api:v1:social:publication-create-list",
+            "api:publication-create-list",
             kwargs={
                 "obj_type": "collection",
                 "obj_uuid": str(self.collection.uuid),
@@ -124,7 +124,7 @@ class TestPublicationsListCreateView(TestCase):
         )
 
         url = reverse(
-            "api:v1:social:publication-create-list",
+            "api:publication-create-list",
             kwargs={
                 "obj_type": "collection",
                 "obj_uuid": str(self.collection.uuid),
@@ -153,13 +153,13 @@ class TestPublicationsListCreateView(TestCase):
         notification = ReplyNotification.objects.first()
         self.assertEqual(notification.orig_publication, parent_publication)
         self.assertEqual(
-            notification.reply_publication.uuid,
+            str(notification.reply_publication.uuid),
             response.data["publication"]["uuid"],
         )
 
     def test_create_publication_missing_obj_type_returns_400(self):
         url = reverse(
-            "api:v1:social:publication-create-list",
+            "api:publication-create-list",
             kwargs={
                 "obj_type": "collection",
                 "obj_uuid": str(self.collection.uuid),
@@ -181,7 +181,7 @@ class TestPublicationsListCreateView(TestCase):
 
     def test_create_publication_invalid_obj_type_returns_400(self):
         url = reverse(
-            "api:v1:social:publication-create-list",
+            "api:publication-create-list",
             kwargs={
                 "obj_type": "collection",
                 "obj_uuid": str(self.collection.uuid),

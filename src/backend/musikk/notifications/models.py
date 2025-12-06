@@ -12,7 +12,7 @@ class ReplyNotificationManager(models.Manager):
     def create(self, **kwargs):
         obj = super().create(**kwargs)
         send_ws_event(
-            f"user_{obj.orig_comment.user.uuid}",
+            f"user_{obj.orig_publication.author.uuid}",
             event_handler="base.event",
             event_name="invalidate.query",
             query_key=["notifications"],

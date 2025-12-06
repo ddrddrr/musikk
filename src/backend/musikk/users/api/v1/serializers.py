@@ -2,7 +2,7 @@ from dj_rest_auth.registration.serializers import RegisterSerializer
 from rest_framework import serializers
 
 from base.serializers import BaseModelSerializer
-from users.models import BaseUser
+from users.models import BaseUser, Artist
 
 
 class BaseRegisterSerializer(RegisterSerializer):
@@ -28,7 +28,7 @@ class BaseMeSerializer(BaseUserSerializer):
 
 class ArtistSerializer(BaseUserSerializer):
     class Meta(BaseModelSerializer.Meta):
-        model = BaseUser
+        model = Artist
         fields = BaseModelSerializer.Meta.fields + [
             "display_name",
             "bio",

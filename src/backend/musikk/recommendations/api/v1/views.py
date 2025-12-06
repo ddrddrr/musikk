@@ -45,14 +45,13 @@ class SearchView(APIView):
                 query,
                 "display_name",
                 BaseUserSerializer,
-                extra_filters={"user__artistprofile__isnull": True},
+                extra_filters={"user__artist__isnull": True},
             ),
             "artists": self.search(
                 Artist,
                 query,
                 "display_name",
                 ArtistSerializer,
-                extra_filters={"user__artistprofile__isnull": False},
             ),
         }
 

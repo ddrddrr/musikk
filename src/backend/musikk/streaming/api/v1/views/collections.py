@@ -13,7 +13,7 @@ from streaming.api.v1.serializers.collections import (
 )
 from streaming.models.collections import Collection, CollectionType
 from streaming.models.songs import CollectionSong
-from streaming.permissions import IsPublicOrCollectionAuthor
+from streaming.permissions import IsPublicOrCollectionAuthor, IsCollecitonAuthor
 
 
 class PlaylistsLatestView(ListAPIView):
@@ -33,7 +33,6 @@ class PlaylistsLatestView(ListAPIView):
 
 
 class AlbumsLatestView(ListAPIView):
-
     queryset = Collection.objects.all()
     serializer_class = CollectionSerializerBasic
     amount = 50
@@ -119,15 +118,15 @@ class CollectionAddLikedView(APIView):
 
 
 class CollectionRemoveSong(APIView):
-    permission_classes = [IsPublicOrCollectionAuthor]
+    permission_classes = [IsCollecitonAuthor]
 
-    def delete(self, request, *args, **kwargs):
+    def delete(self, *args, **kwargs):
         collection_song = get_object_or_404(
             CollectionSong,
             collection__uuid=kwargs["collection_uuid"],
             uuid=kwargs["song_uuid"],
         )
-        self.check_object_permissions(request, collection_song)
+        self.check_object_permissions(self.request, collection_song)
 
         collection_song.delete()
         send_ws_event(
@@ -142,11 +141,14 @@ class CollectionRemoveSong(APIView):
 
 
 class CollectionAddSong(APIView):
-    def post(self, request, *args, **kwargs):
-        user = request.user
+    permission_classes = [IsCollecitonAuthor]
+
+    def post(self, *args, **kwargs):
         with transaction.atomic():
             collection = get_object_or_404(
-                Collection, uuid=kwargs["collection_uuid"], authors__in=user
+                Collection,
+                uuid=kwargs["collection_uuid"],
+                authors__in=[self.request.user],
             )
             collection_song = get_object_or_404(
                 CollectionSong, uuid=kwargs["song_uuid"]
@@ -159,6 +161,7 @@ class CollectionAddSong(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+# TODO: restrict album creation to artists only
 class CollectionCreateView(APIView):
     """
     { title, description, image?, private, authors: [UUID], songs: [UUID,...], type }
@@ -166,10 +169,10 @@ class CollectionCreateView(APIView):
 
     parser_classes = [MultiPartParser, FormParser]
 
-    def post(self, request, *args, **kwargs):
-        data = request.data.copy()
+    def post(self, *args, **kwargs):
+        data = self.request.data.copy()
 
-        authors = data.getlist("authors", [str(request.user.uuid)])
+        authors = data.getlist("authors", [])
         if not isinstance(authors, list):
             authors = [authors]
 
@@ -181,12 +184,12 @@ class CollectionCreateView(APIView):
             data={
                 "title": data["title"],
                 "description": data.get("description", ""),
-                "image": request.FILES.get("image"),
+                "image": self.request.FILES.get("image"),
                 "authors": authors,
                 "songs": songs,
                 "type": data["type"],
             },
-            context={"request": request},
+            context={"request": self.request},
         )
 
         serializer.is_valid(raise_exception=True)

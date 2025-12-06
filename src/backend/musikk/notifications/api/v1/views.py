@@ -27,7 +27,7 @@ class NotificationsPersonalListUpdateView(GenericAPIView):
         user = self.request.user
 
         replies = ReplyNotificationSerializer(
-            ReplyNotification.objects.filter(orig_comment__user=user), many=True
+            ReplyNotification.objects.filter(orig_publication__user=user), many=True
         ).data
         friend_requests = FriendRequestNotificationSerializer(
             FollowerNotification.objects.filter(receiver=user), many=True

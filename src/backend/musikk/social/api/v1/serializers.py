@@ -26,6 +26,7 @@ class PublicationCreateSerializer(BaseModelSerializer):
     class Meta(BaseModelSerializer.Meta):
         model = Publication
         fields = BaseModelSerializer.Meta.fields + [
+            "author",
             "content",
             "obj_type",
             "obj_uuid",

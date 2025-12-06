@@ -61,3 +61,5 @@ class StreamingProfile(BaseModel):
     @property
     def liked_songs(self):
         return Collection.objects.liked().get(collection_credits__author=self.user)
+
+    objects = StreamingProfileManager()
