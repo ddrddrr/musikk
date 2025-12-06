@@ -1,8 +1,38 @@
-from django.db import models
+from django.db import models, transaction
 from django.conf import settings
 
 
 from base.models import BaseModel
+from streaming.models import PlaybackState, Collection, CollectionCredit, SongQueue
+from streaming.models.collections import CollectionType
+
+
+class StreamingProfileManager(models.Manager):
+    @transaction.atomic
+    def create_for_user(self, user):
+        playback_state = PlaybackState.objects.create()
+        song_queue = SongQueue.objects.create()
+
+        history = Collection.objects.create(
+            type=CollectionType.HISTORY,
+            title="History",
+            private=True,
+        )
+
+        liked_songs = Collection.objects.create(
+            type=CollectionType.LIKED,
+            title="Liked Songs",
+            private=True,
+        )
+
+        CollectionCredit.objects.create(collection=history, author=user)
+        CollectionCredit.objects.create(collection=liked_songs, author=user)
+
+        return self.create(
+            user=user,
+            playback_state=playback_state,
+            song_queue=song_queue,
+        )
 
 
 class StreamingProfile(BaseModel):
@@ -14,16 +44,8 @@ class StreamingProfile(BaseModel):
         "streaming.PlaybackState",
         on_delete=models.PROTECT,
     )
-    liked_songs = models.OneToOneField(
-        "streaming.LikedSongs",
-        on_delete=models.PROTECT,
-    )
     song_queue = models.OneToOneField(
         "streaming.SongQueue",
-        on_delete=models.PROTECT,
-    )
-    history = models.OneToOneField(
-        "streaming.UserHistory",
         on_delete=models.PROTECT,
     )
     followed_collections = models.ManyToManyField(
@@ -31,3 +53,11 @@ class StreamingProfile(BaseModel):
         related_name="followers",
         blank=True,
     )
+
+    @property
+    def history(self):
+        return Collection.objects.histories().get(collection_credits__author=self.user)
+
+    @property
+    def liked_songs(self):
+        return Collection.objects.liked().get(collection_credits__author=self.user)

@@ -3,11 +3,11 @@ from django.urls import reverse
 from rest_framework.test import APIRequestFactory, force_authenticate
 from faker import Faker
 
-from users.tests.factories import StreamingProfileFactory
 from streaming.tests.factories import BaseSongFactory
 from streaming.api.v1.views.collections import CollectionCreateView
 from streaming.models import Collection
 from streaming.models.collections import CollectionCredit
+from users.tests.factories import BaseUserFactory
 
 fake = Faker()
 
@@ -17,8 +17,7 @@ class TestSongCollectionCreateView(TestCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.factory = APIRequestFactory()
-        cls.streaming_profile = StreamingProfileFactory()
-        cls.user = cls.streaming_profile.user
+        cls.user = BaseUserFactory()
         cls.songs = BaseSongFactory.create_batch(2)
 
     def test_create_with_valid_songs(self):

@@ -14,11 +14,11 @@ from faker import Faker
 
 from streaming.audio.shaka_packager_conf.shaka_packager_wrapper import ManifestType
 from streaming.audio.processing_pipeline import AudioProcessingPipeline
+from streaming.models.collections import CollectionType
 from users.management.helpers import create_user_with_password
 from streaming.models import (
     BaseSong,
     Collection,
-    Album,
     CollectionSong,
     SongCredit,
     CollectionCredit,
@@ -71,7 +71,7 @@ class Command(BaseCommand):
                 )
                 songs.append(song)
 
-            self._create_collections(
+            self._create_playlists(
                 songs=songs,
                 image_urls=image_urls,
                 collections_count=collections_count,
@@ -163,7 +163,7 @@ class Command(BaseCommand):
                 song=song, author=author, author_priority=priority
             )
 
-    def _create_collections(
+    def _create_playlists(
         self, songs: list, image_urls: list, collections_count: int, users: list
     ):
         for _ in range(collections_count):
@@ -191,6 +191,7 @@ class Command(BaseCommand):
                     collection=collection,
                     author=author,
                     author_priority=priority,
+                    type=CollectionType.PLAYLIST,
                 )
 
             self.stdout.write(
@@ -206,10 +207,11 @@ class Command(BaseCommand):
                 break
 
             image_file = self._fetch_image_file(random.choice(image_urls))
-            album = Album.objects.create(
+            album = Collection.objects.create(
                 title=fake.bs().title(),
                 description=fake.text(max_nb_chars=512),
                 image=image_file,
+                type=CollectionType.ALBUM,
             )
 
             chosen = random.sample(songs, k=random.randint(1, len(songs)))

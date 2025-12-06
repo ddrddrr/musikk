@@ -2,12 +2,44 @@ from django.db import models
 
 from base.models import BaseModel
 from musikk.utils.paths import image_path
-
 from streaming.models.songs import CollectionSong, BaseSong
 
 
-# TODO: add metadata, streams, hashtags, ratings
+class CollectionType(models.TextChoices):
+    PLAYLIST = "playlist", "Playlist"
+    ALBUM = "album", "Album"
+    HISTORY = "history", "History"
+    LIKED = "liked", "Liked songs"
+
+
+class CollectionQuerySet(models.QuerySet):
+    def playlists(self):
+        return self.filter(type=CollectionType.PLAYLIST)
+
+    def albums(self):
+        return self.filter(type=CollectionType.ALBUM)
+
+    def histories(self):
+        return self.filter(type=CollectionType.HISTORY)
+
+    def liked(self):
+        return self.filter(type=CollectionType.LIKED)
+
+    def public(self):
+        return self.filter(private=False)
+
+
+CollectionManager = models.Manager.from_queryset(CollectionQuerySet)
+
+
+# TODO: on user creation create history, liked songs classes
 class Collection(BaseModel):
+    type = models.CharField(
+        max_length=16,
+        choices=CollectionType.choices,
+        default=CollectionType.PLAYLIST,
+    )
+
     base_songs = models.ManyToManyField(
         "streaming.BaseSong",
         through="streaming.CollectionSong",
@@ -20,48 +52,33 @@ class Collection(BaseModel):
     authors = models.ManyToManyField(
         "users.BaseUser",
         through="streaming.CollectionCredit",
+        related_name="collections",
     )
+
+    objects = CollectionManager()
 
     def ordered_songs(self) -> list[BaseSong]:
         return [
             sc.song
-            for sc in CollectionSong.objects.filter(collection=self)
-            .order_by("position")
-            .select_related("song")
+            for sc in (
+                CollectionSong.objects.filter(collection=self)
+                .order_by("position")
+                .select_related("song")
+            )
         ]
+
+    class Meta:
+        ordering = ("-date_added",)
 
     def __str__(self):
         return self.title
 
 
-class Album(Collection):
-    authors = models.ManyToManyField(
-        "users.Artist",
-        through="streaming.CollectionCredit",
-    )
-
-
-class UserHistory(Collection):
-    def save(self, *args, **kwargs):
-        self.title = "History"
-        super().save(*args, **kwargs)
-
-    class Meta:
-        ordering = ("-date_added",)
-
-
-class LikedSongs(Collection):
-    def save(self, *args, **kwargs):
-        self.title = "Liked Songs"
-        super().save(*args, **kwargs)
-
-    class Meta:
-        ordering = ("-date_added",)
-
-
 class CollectionCredit(BaseModel):
     collection = models.ForeignKey(
-        Collection, on_delete=models.CASCADE, related_name="collection_credits"
+        Collection,
+        on_delete=models.CASCADE,
+        related_name="collection_credits",
     )
     author = models.ForeignKey(
         "users.BaseUser",
@@ -70,8 +87,12 @@ class CollectionCredit(BaseModel):
         related_name="collection_credits",
     )
     author_priority = models.IntegerField(
-        default=0, help_text="Priority in which the authors will be displayed."
+        default=0,
+        help_text="Priority in which the authors will be displayed.",
     )
 
     class Meta:
         ordering = ("author_priority",)
+
+    def __str__(self):
+        return f"{self.collection}: {self.author}"

@@ -34,7 +34,6 @@ class ReplyNotification(Notification):
     objects = ReplyNotificationManager()
 
 
-# TODO: remove, add follow notification
 class FollowerNotificationManager(models.Manager):
     def create(self, **kwargs):
         obj = super().create(**kwargs)

@@ -49,7 +49,7 @@ urlpatterns = [
     ),
     path("users/me", MeView.as_view(), name="me"),
     path(
-        "users/<for_user_uuid:uuid>/friends",
+        "users/<uuid:for_user_uuid>/friends",
         FriendsView.as_view(),
         name="user-friends",
     ),
