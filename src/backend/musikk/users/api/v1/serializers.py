@@ -11,13 +11,19 @@ class BaseRegisterSerializer(RegisterSerializer):
 
 
 class BaseUserSerializer(BaseModelSerializer):
+    is_artist = serializers.SerializerMethodField()
+
     class Meta(BaseModelSerializer.Meta):
         model = BaseUser
         fields = BaseModelSerializer.Meta.fields + [
             "display_name",
             "bio",
             "avatar",
+            "is_artist",
         ]
+
+    def get_is_artist(self, obj) -> bool:
+        return bool(getattr(obj, "artist", None))
 
 
 class BaseMeSerializer(BaseUserSerializer):

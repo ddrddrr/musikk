@@ -26,8 +26,9 @@ from streaming.models import (
 
 fake = Faker()
 
-AUDIO_URL_1 = "https://s3.amazonaws.com/citizen-dj-assets.labs.loc.gov/audio/samplepacks/loc-fma/Dans-la-messe-sans-le-sang-du-christ_fma-178769_001_00-00-00.wav"
-AUDIO_URL_2 = "https://s3.amazonaws.com/citizen-dj-assets.labs.loc.gov/audio/samplepacks/loc-fma/Insideoutworld_fma-174894_001_00-04-54.wav"
+AUDIO_LOCAL_FILE = str(
+    settings.BASE_DIR / "streaming" / "audio" / "tests" / "data" / "file1.wav"
+)
 
 IMAGE_URL_1 = "https://picsum.photos/500"
 IMAGE_URL_2 = "https://picsum.photos/200"
@@ -50,7 +51,6 @@ class Command(BaseCommand):
         collections_count = options["collections"]
         albums_count = options["albums"]
 
-        audio_urls = [AUDIO_URL_1, AUDIO_URL_2]
         image_urls = [IMAGE_URL_1, IMAGE_URL_2]
 
         with transaction.atomic():
@@ -63,11 +63,10 @@ class Command(BaseCommand):
 
             songs = []
             for _ in range(songs_count):
-                audio_url = random.choice(audio_urls)
                 image_url = random.choice(image_urls)
 
                 song = self._create_song(
-                    audio_url=audio_url, image_url=image_url, artists=artists
+                    audio_path=AUDIO_LOCAL_FILE, image_url=image_url, artists=artists
                 )
                 songs.append(song)
 
@@ -104,7 +103,7 @@ class Command(BaseCommand):
             self.stdout.write(f"- artist: {artist.email} / {pwd}")
         return created
 
-    def _create_song(self, audio_url: str, image_url: str, artists: list):
+    def _create_song(self, audio_path: str, image_url: str, artists: list):
         image_file = self._fetch_image_file(image_url)
         song = BaseSong.objects.create(
             title=fake.catch_phrase(),
@@ -112,7 +111,7 @@ class Command(BaseCommand):
             image=image_file,
         )
 
-        tmp_audio_path = self._download_temp_audio(audio_url)
+        tmp_audio_path = self._get_local_temp_audio(audio_path)
         audio_uuid = str(uuid.uuid4())
         storage_dir = os.path.join(settings.AUDIO_CONTENT_PATH, audio_uuid)
 
@@ -135,11 +134,18 @@ class Command(BaseCommand):
         resp = requests.get(url)
         return File(io.BytesIO(resp.content), name=os.path.basename(url))
 
-    def _download_temp_audio(self, url: str) -> str:
-        resp = requests.get(url)
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tf:
-            tf.write(resp.content)
-            return tf.name
+    def _get_local_temp_audio(self, path: str) -> str:
+        """
+        Copy a local audio file to a temporary file and return its path.
+        Expects `path` to be an existing filesystem path.
+        """
+        if not os.path.exists(path):
+            raise FileNotFoundError(f"Local audio file not found: {path}")
+        suffix = os.path.splitext(path)[1] or ".wav"
+        with open(path, "rb") as rf:
+            with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tf:
+                tf.write(rf.read())
+                return tf.name
 
     def _process_audio_for_song(
         self, song: BaseSong, tmp_audio_path: str, audio_uuid: str, storage_dir: str
@@ -191,7 +197,6 @@ class Command(BaseCommand):
                     collection=collection,
                     author=author,
                     author_priority=priority,
-                    type=CollectionType.PLAYLIST,
                 )
 
             self.stdout.write(
