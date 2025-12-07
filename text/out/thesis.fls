@@ -598,6 +598,7 @@ INPUT ./chapters/2_survey.tex
 INPUT chapters/2_survey.tex
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/public/tex-gyre/ec-qplr.tfm
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/public/tex-gyre/ec-qplb.tfm
+INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/public/tex-gyre/ec-qplri.tfm
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/public/tex-gyre/ec-qplr.tfm
 INPUT /usr/local/texlive/2025/texmf-dist/tex/latex/lm/t1lmtt.fd
 INPUT /usr/local/texlive/2025/texmf-dist/tex/latex/lm/t1lmtt.fd
@@ -663,7 +664,6 @@ INPUT ./charts/share method.png
 INPUT ./charts/share method.png
 INPUT ./charts/share method.png
 INPUT ./charts/share method.png
-INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/public/tex-gyre/ec-qplri.tfm
 INPUT ./chapters/3_existing_solutions.tex
 INPUT ./chapters/3_existing_solutions.tex
 INPUT ./chapters/3_existing_solutions.tex
@@ -674,6 +674,21 @@ INPUT ./charts/discovery methods.png
 INPUT ./charts/discovery methods.png
 INPUT ./charts/discovery methods.png
 INPUT ./charts/discovery methods.png
+INPUT /usr/local/texlive/2025/texmf-dist/fonts/vf/public/mathpazo/zplmr7y.vf
+INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/public/cm/cmsy10.tfm
+INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/public/mathpazo/fplmr.tfm
+INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/adobe/palatino/pplr8r.tfm
+INPUT ./chapters/4_specification.tex
+INPUT ./chapters/4_specification.tex
+INPUT ./chapters/4_specification.tex
+INPUT ./chapters/4_specification.tex
+INPUT chapters/4_specification.tex
+INPUT ./chapters/5_implementation_planning.tex
+INPUT ./chapters/5_implementation_planning.tex
+INPUT ./chapters/5_implementation_planning.tex
+INPUT ./chapters/5_implementation_planning.tex
+INPUT chapters/5_implementation_planning.tex
+INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/public/lm/ec-lmtt12.tfm
 INPUT ./chapters/appendix.tex
 INPUT ./chapters/appendix.tex
 INPUT ./chapters/appendix.tex
@@ -714,12 +729,12 @@ INPUT out/../extras/survey-questions.pdf
 INPUT out/../extras/survey-questions.pdf
 INPUT out/../extras/survey-questions.pdf
 INPUT out/../extras/survey-questions.pdf
-INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/public/lm/ec-lmtt12.tfm
 INPUT out/thesis.aux
 INPUT out/thesis.out
 INPUT out/thesis.out
 INPUT out/thesis.run.xml
 OUTPUT out/thesis.run.xml
+INPUT /usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/type1/public/lm/lmtt10.pfb
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/type1/public/lm/lmtt12.pfb
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/type1/public/tex-gyre/qhvb.pfb

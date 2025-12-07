@@ -37,17 +37,18 @@
     title       = {Musikk: A Modern, Social-First Music Streaming Platform},
     keywords    = {Audio Streaming, Python, JavaScript, MPEG-DASH, HLS, WebSockets},
     abstract    = {%
-        This bachelor's thesis aims to design and implement
+        This bachelor's thesis aims to develop
         a web-based music streaming platform focused on social interactions between users.
 
         The theoretical part presents a survey that analyzes people's
-        music listening habits, showing that such a platform could find its user base.
+        music listening habits, showing that such a platform could attract a solid user base.
         It then compares existing music-related services with built-in social
         features and derives functional and non-functional requirements for the proposed system.
-        Based on these requirements, suitable technologies and architectural patterns are selected.
+        Then, based on these requirements, suitable technologies and architectural patterns are selected.
 
-        The practical part covers the technical aspects of the platform, including data model, audio processing,
-        user interaction features, and real-time synchronization, among others.
+
+        The practical part covers the implementation details of the platform, including data model,
+        audio processing, API design, and real-time synchronization.
 
         The result is a fully functional and deployed application.
     },
@@ -84,11 +85,16 @@
 \usepackage[sorting=none]{biblatex}
 \usepackage{hyperref} %% Context-sensitive quotation marks
 
+% macros
+\newcommand{\chapterref}[1]{%
+    \textbf{\hyperref[#1]{Chapter~\ref*{#1}}}%
+}
 
 \begin{document}
     \input{chapters/1_intro}
     \input{chapters/2_survey}
     \input{chapters/3_existing_solutions}
-%    \input{chapters/4_specification}
+    \input{chapters/4_specification}
+    \input{chapters/5_implementation_planning}
     \input{chapters/appendix}
 \end{document}

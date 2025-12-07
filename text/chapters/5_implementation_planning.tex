@@ -1,321 +1,603 @@
 \chapter{Implementation Planning}\label{ch:planning}
 
-This section explains the high-level technology choices behind the application.
-The following areas are discussed as they have the most significant influence on the overall implementation of the service:
-Backend, Frontend, audio transfer, authentication, and server-client communication.
+Before the actual implementation could begin, it was necessary to choose the languages,
+frameworks, and other technologies that would shape the overall architecture of the application.
+This chapter discusses the following areas:
+Audio Processing and Playback, Authentication,
+Server–Client Communication, Backend and Frontend.
 
 
-\section{Backend}
-Python\cite{python} was chosen as the primary language for this part of the application.
-It supports all the needed instruments, such as external process calls,
-file handling, and asynchronous code execution. Moreover, it has a flexible and straightforward
-syntax, allowing rapid development.
-As this project is mostly IO-driven and most of the processor-heavy operations are offloaded to external processes,
-i.e., no thread programming is used, Python's performance limitations\cite{gil} will not have such a drastic effect.
-
-In order to avoid errors related to building the system from the ground up
-and shorten the development time, it was decided that a framework would be used.
-
-\subsection{Framework Comparison}
-Currently, there are three well-developed and widely used frameworks available for Python:
-
-\begin{itemize}
-    \item \textbf{FastAPI} \\
-    FastAPI is a comparably quick framework that can be on par in terms of speed with frameworks from other languages,
-    such as NodeJS or Go~\cite{fastapi}.
-    As the official website states:
-    \begin{quote}
-        'FastAPI is a modern, fast (high-performance), web framework for building APIs
-        with Python, based on standard Python type hints.'~\cite{fastapi}. \\
-    \end{quote}
-    On top of that, it offers full integration with API documentation standards, such as
-    Open API, and API representation tools, e.g., Swagger.
-
-    However, it is relatively new and basic; given the requirements and the fact that
-    few additional packages are available for this framework - lots of custom code would have
-    to be written on top, which is a disadvantage for this specific project.
-
-    \item \textbf{Django} \\
-    Django is a 'batteries-included' framework in the sense that almost everything -
-    from access control and database management to API routing and the admin interface -
-    is a part of it.\cite{django}
-    Additionally, Django offers an extensive ecosystem, including support for REST APIs through
-    \texttt{django-rest-framework}\cite{drf}, various authentication methods,
-    and multiple data transfer protocols. Even two-way communication, such as WebSockets and Server-Sent Events,
-    is supported via the \texttt{django-channels}\cite{django_channels} package.
-
-    Some notable drawbacks include its opinionated design choices, which can make it hard to add custom logic.
-    In addition, the size and speed of the application can be worse than in the FastAPI case,
-    as this framework includes many parts that may not be used but still bloat and slow down the system.
-
-    \item \textbf{Flask} \\
-    Flask is a micro-framework built on the WSGI interface.
-    It is well-suited for smaller applications and follows a minimalist philosophy
-    when selecting the components that are used.\cite{flask} Most additional functionality is provided by
-    the community and is distributed as external packages.
-
-    One of the main downsides of Flask is that it does not integrate well enough with the ASGI
-    interface, which is necessary for the proper handling of the Server-Client communication part.
-    Moreover, strongly relying on external packages can pose potential security risks.
-\end{itemize}
-
-Of the three frameworks, Django is the most suitable one.
-Most of the application logic will be handled by the backend, heavily utilizing
-Django's ORM for most database tasks, simplifying the development. A separate library would
-have been needed for other frameworks, such as SQLAlchemy\cite{sqlalchemy}.
-On top of that, a JSON-based API could be implemented using `django-rest-framework`,
-which would significantly reduce the amount of boilerplate code needed for the application.
-Lastly, Django has the biggest community acceptance, which can be verified, for example, by looking at the
-StackOverflow\cite{stackoverflow} search results for individual frameworks.\cite{so_fastapi},\cite{so_django},\cite{so_flask}
-
-Having established what will be used for the backend application logic, the database had to be chosen next.
-
-\subsection{Database}
-Below is a comparison of the databases that the Django framework supports.
-It is worth mentioning that two other databases can be used as well - Oracle and MySQL.
-However, Oracle is ruled out due to its commercial license, and MySQL is not considered because
-MariaDB is fully compatible with it, while providing multiple enhancements.
-
-\begin{itemize}
-    \item \textbf{SQLite} \\
-    \begin{quote}
-        'SQLite is an embedded SQL database engine.
-        Unlike most other SQL databases, SQLite does not have a separate
-        server process. SQLite reads and writes directly to ordinary disk
-        files.'\cite{sqlite}.
-    \end{quote}
-    As a result of SQLite's design, it is suitable
-    in situations where simple storage is needed and write operations are limited.
-    Moreover, as SQLite stores all information in a file on a disk, future scalability could be an issue;
-    changing the database mid-way is often hard.
-
-    \item \textbf{PostgreSQL} \\
-    PostgreSQL is a traditional object-relational database almost entirely compatible with the SQL standard
-    and a de facto standard in most modern applications. It offers many supplementary features,
-    such as complex data types, proper replication and logging, full-text search, etc.
-    In addition, PostgreSQL provides extensions that can fit the database to the specific application.
-    \cite{postgres}
-    Django has the best support for it, adding a lot of wrappers for PostgreSQL's custom logic.\cite{django_postgres}
-
-    \item \textbf{MariaDB} \\
-    MariaDB is a fork of MySQL, which adds several advanced features and performance optimizations.
-    One prominent aspect of this database is its pluggable storage engine architecture,
-    which allows one to choose a different engine per table for the needed workload.\cite{mariadb}
-    It can also be lightweight and use fewer system resources than PostgreSQL if set up right.
-    However, it is not fully in line with the SQL standard -
-    e.g., limited ALTER statements and GROUP BY handling\cite{dbfunctions}, which often lead to unexpected time losses
-    with debugging.
-    And as a consequence of its lesser acceptance\cite{dbrank},
-    the community support for the non-MySQL parts of the database is not as broad.
-\end{itemize}
-Three main points secured PostgreSQL as the database of choice:
-\begin{enumerate}
-    \item More advanced full-text search functionality compared to SQLite and MariaDB.
-    \item Integrated Django wrappers around PostgreSQL, which greatly reduces the amount of handwritten SQL.
-    \item Superior syntax, command-line interface, and error handling/messages.
-\end{enumerate}
-
-After establishing the backend stack, the next logical step would be choosing the frontend technologies.
-
-
-\section{Frontend}
-Firstly, the language had to be chosen.
-
-Although JavaScript is the primary language for client-side development,
-other languages such as Rust, Python, and C can also be used to build frontend applications.
-However, these languages are not directly supported by the browsers, meaning the code must be compiled to WebAssembly first (supported by browsers). This adds
-additional overhead to the development cycle introduces new toolchains that add another level of
-complexity and often results in bigger bundle(hence - download) sizes.
-Furthermore, these languages often lack solutions for common web development problems,
-compared to JavaScript, which has a lot of libraries and packages ready to be installed.
-That is why the application's Frontend is written in JavaScript, and only JS frameworks are
-compared.
-
-Modern JavaScript development is primarily dominated by three technologies: React, Vue, and Angular.\cite{frameworkdata}
-Each introduces a different approach to building frontend applications and has its own trade-offs.
-
-\begin{itemize}
-    \item \textbf{React} \\
-    React is a JavaScript library focused on building user interfaces through a component-based architecture.\cite{react}
-    It emphasizes a declarative style of UI design and integrates well with various state management tools and libraries.
-
-    One of the main React’s strengths is its ecosystem - a wide range of third-party packages support it,
-    developer tools, and documentation.
-    Additionally, React is maintained by a large team, and many examples of working and deployed applications can be found.
-    However, the common problem mentioned is its complexity and lack of standards, which could lead to highly inconsistent
-    code and performance problems later in development if not used carefully.
-
-    \item \textbf{Vue} \\
-    Vue, in comparison to React, is a framework, which means that it has most of the basic, often-used features built-in(e.g., routing or forms)\cite{vue}
-    Many state that it is easier to pick up than React due to its more intuitive templating syntax and built-ins mentioned before,
-    which can lead to faster initial development.
-
-    The main drawback of Vue is its adoption.\cite{frameworkdata}
-    Fewer packages and less documentation are available online compared to React or Angular.
-    In some cases, it can lead to the need for the implementation of features already covered by existing solutions in other frameworks.
-
-    \item \textbf{Angular} \\
-    Angular is a full-stack framework for building web applications - hence, like Vue, it provides many tools out of the box.
-    It is built on top of TypeScript and enforces the usage of pre-chosen architectural patterns, often leading to
-    more robust and structured code. This is a plus for bigger projects, but it can significantly slow down the speed of
-    progress.
-
-\end{itemize}
-
-While all three frameworks offer modern development patterns and are capable of being used in production applications,
-React was chosen. It is mature, has an extensive ecosystem, and is widely adopted. To add, it does not force many
-restrictions and has a good debugging interface. Since this project is not going to be large, React would possibly be the
-better option due to the sheer pace of development that can be achieved with it.
-
-After giving the outline of the client and server sides of the implementation,
-as the main aim of the application is music delivery, the appropriate protocols had to be examined as well.
-
-
-\section{Audio Transfer}
-Audio playback can be tackled in numerous ways:
-
+\section{Audio Processing and Playback}
+Audio processing and playback is the most important aspect of the application and is researched first.
+There are four main approaches used today:
 \begin{itemize}
     \item \textbf{Basic Download}\\
-    The audio file is downloaded in its entirety before playback begins.
-    Once the download is complete, the user can listen to the file offline.
-    This method typically requires significant storage space and time to download,
-    especially for larger audio files.
+    Basic download works by downloading the entire file before the playback begins.
+    Only when the data transfer is complete, the user can start the playback.
+
+    This poses several limitations: for high quality files this method typically
+    requires significant storage space and time to download, and if the user's connection is
+    unstable it can make the application unusable.
+    The situation in case of bad network conditions can be partially improved by providing several
+    representations of the same file, e.g., a highly compressed version alonside a lossless one,
+    but it would mean after that the download has started the system would not able to adapt
+    to the changing network state.
+    In other words, the user is tied to the version of the file that has started to download
+    and can not benefit from, for instance, changing the slow mobile network to fast home Wi-Fi.
 
     \item \textbf{Progressive Download}\\
-    The audio file begins to play after a portion of the file
-    has been downloaded. As the playback continues, more of the file is downloaded
-    in the background. This method allows quicker access to the content
-    than basic downloading but still requires enough data to be buffered at the start or during seeking.
+    For progressive download it is possible to download only portions of the file, meaning the client
+    is not restricted in playback until the whole file is on their system.
+    This is usually implemented via a combination of HTTP byte range requests, and audio container
+    metadata (such as MP4 indices or MP3 frame headers) that tell the client which byte ranges
+    map to which time segments of the audio.~\parencite{progressive_download}
+    Nevertheless, the two big issues found in basic download are still present:
+    \emph{variable bitrate}, in the sense that switching between multiple full-file
+    representations is fragile since different encodings may not be perfectly aligned,
+    and extra cross-file metadata would be needed to coordinate them;
+    and \emph{data storage}, since substantial portions
+    of each file still have to be cached locally on the client device.
 
-    \item \textbf{Streaming}\\
-    Audio is transmitted over the internet in real time without needing
-    to be downloaded. The user can start listening almost immediately while the audio is being
-    sent from a remote server. This method does not require local storage and is
-    ideal for accessing content on demand, but it depends on a stable internet connection.
-    Additionally, modern streaming protocols support adaptive streaming, allowing the audio file
-    to be delivered in multiple representations. Different bitrates and codecs can be
-    selected based on the network conditions or device capabilities, providing an optimized experience.
-    Furthermore, seeking can be more accurate because streaming protocols divide the data into
-    smaller, discrete chunks, allowing quicker access to specific points in the audio.
+    \item \textbf{Streaming\footnote{In its traditional usage, `streaming' means real-time media
+    delivery over persistent transport protocols such as RTMP,
+        where the server pushes a continuous encoded stream to the client.
+        In this section, the term is used for HTTP-based
+        segmented streaming (e.g., HLS, DASH).}}\\
+    With audio streaming data is transmitted over the Internet in real time without the need
+    to be downloaded.
+    This is achieved by encoding the audio into short segments (chunks) with varying quality
+    and providing a file called a manifest that lists them.
+    That is how modern streaming protocols support adaptive playback: client can choose what
+    chunk to get next.~\parencite{dash_technical}
+    As a result, different bitrates and codecs can be selected based on the network
+    conditions or device capabilities, providing an optimized playback.
+    In addition, the client keeps only a small buffer of segments in memory
+    and discards those that have already been played largely fixing the issues that download
+    methods had.
 
-    \item \textbf{Peer to Peer}\\
+    \item \textbf{Peer-to-Peer}\\
     In P2P audio transfer, audio data is shared directly between users'
     devices rather than being served from a central server.
-    Each user acts as both a client and a server, contributing to and consuming
-    data. This method can reduce server load and improve access speed but relies heavily on user participation and network conditions.
+    Each user acts as both a client and a server, sending data to and
+    consuming audio from other users in the peer-to-peer network.
+    This method can reduce server load and improve access speed but relies heavily on user
+    participation and network conditions.
 \end{itemize}
 
-Although basic and progressive download methods are much simpler in implementation,
-streaming has many valuable benefits, allowing for smooth playback in different
-conditions and better audio representation techniques. P2P is also not suitable
-in the current case, the files must be on users' machines, which can lead
-to various problems: from delays for clients located far away from the source of the audio
-to problematic enforcement of possible DRM (anti-piracy) protection.
+Streaming was chosen as the playback method for this thesis.
+Based on the research, basic download was deemed too impractical, and
+progressive download in its basic form was also found to suffer from the
+same limitations, namely the inability to adapt to changing network
+conditions during playback and the need to cache large portions of the file
+on the client device.
+In a more advanced form, progressive download could approximate adaptive playback, but this
+would effectively behave like streaming while adding several drawbacks on top, for example, higher
+implementation complexity, since a custom solution for playback adaptation would have to be written.
 
-% TODO: improve
-Another important choice would be the authentication method, as it can significantly influence both
-the design of the frontend and backend parts.
+P2P is not suitable in the current case because the files must be on users' machines, which could lead
+to various problems: from delays for clients located far away from the source of the audio to slow
+playback speeds for files with big demand and low supply.
+
+As stated before streaming allows for smooth playback in different network conditions and lowers
+the memory impact a service has on the user's device.
+In addition, its integration into the service, as will be shown
+later in \chapterref{ch:implementation}, is straightforward.
+
+The next key choice would be the authentication method, as it can significantly influence both
+the design of the Frontend and Backend parts.
 
 
 \section{Authentication}
 There are many different methods of authentication available, but only the ones suitable for
-web applications are considered below:
+web applications are considered: Basic Authentication, Session-Based Authentication,
+Token Authenctication, and Third-Party Authentication~(OAuth2).
+
 \begin{itemize}
     \item \textbf{Basic Authentication} \\
-    Basic Authentication works by sending a username and password with each request,
-    typically encoded in base64.\cite{basic_auth} It is simple to configure, and it can work well for, e.g., communication between internal services. However, it incorporates credentials in every request,
-    making it prone to security risks in client-server systems if not used over HTTPS.
-    Moreover, it lacks session management, limiting scalability.
+    Basic Authentication sends a username and password with each request in the
+    HTTP \texttt{Authorization} header, typically
+    Base64-encoded.~\parencite{basic_auth}
 
-    \item \textbf{Session Authentication} \\
-    Session authentication creates a session after the user logs in, with session
-    data stored on the server and the client storing a session ID in a cookie.
-    It makes authentication management centralized, which can enhance security compared to Basic Authentication.
-    However, it can be vulnerable to session hijacking if cookies are not properly protected and can greatly increase the load on the database.\cite{session_auth}
+    The browser then usually caches those credentials after the first successful login and
+    automatically attaches the header to subsequent requests.
+    \footnote{This is not usually clearly stated in the browser documentation.
+    However, e.g., in case of Mozilla this is implied in bugtracker tickets and user
+    documentation~\parencite{basic_auth_mozilla_bugtracker}~\parencite{basic_auth_mozilla_caching}. }
 
-    \item \textbf{JWT (JSON Web Token)} \\
-    JWT is a compact, URL-safe method of representing claims between two parties.\cite{jwt}
-    It is an example of stateless authentication, where the token has all the needed information for user authentication.
-    It can also carry an additional custom payload, which, for instance, can be utilized for role management.
-    They provide a flexible and scalable way to implement secure authentication.
-    However, if not properly managed (e.g., using long expiration times), they can become security risks,
-    as compromised tokens may be used for extended periods.
+    Nonetheless, it has multiple problems, even if used over HTTPS.
+    Since Base-64 is not an encryption algorithm but only an encoding the header can be easily decoded back.
+    And since the Authorization header is sent on every request it may appear in logs or telemetry
+    (especially after HTTPs is terminated, e.g., after reaching the internal proxy).
 
-    \item \textbf{OAuth 2.0} \\
-    OAuth 2.0 is an authorization framework that allows third-party applications to access resources
-    on behalf of the user without exposing user credentials.\cite{oauth2} It requires the user to have an account
-    with a company that owns a resource server(e.g., Google, Facebook\ldots). This is a proper means of
-    authorization, however, it must be used in conjunction with other regular methods.
+    Furthermore, there is no protocol-level notion of \textit{logout} or per-device sessions.
+    It means that either the Frontend has to come up with hacks which bypass that limitation, for instance,
+    purposely sending a request with manually configured \texttt{Authorization} header that has the wrong credentials,
+    or the user has to clear its browser cache~\parencite{basic_auth_mozilla_bugtracker}.
+
+    \item \textbf{Cookie-Based Session Authentication} \\
+    Session authentication makes it possible to identify users without sending their credentials on every request.
+    Initially the user has to log in with their credentials in the same way as for basic authenctication.
+    But, instead of the browser caching and reusing the credentials, the server which processed the request,
+    creates a \textit{session} record (data structure holding relevant user information such as ID, roles, etc.)
+    and instructs the browser to set a cookie with the session id.
+    This id is later sent on subsequent requests instead of the user credentials and is
+    used to identify the logged-in user.~\parencite{session_auth}
+
+    Compared to Basic Authentication, this enables server-side logout and revocation
+    (by deleting or invalidating sessions), per-session security policies
+    (device binding, inactivity timeouts),
+    centralized control of active logins, and simpler implementation
+    of features that depend on temporary state.
+
+    The main trade-off is the need for a session store, typically implemented using a relational database or an
+    in-memory key–value store such as Redis\textit{redis}, which introduces additional operational
+    complexity, infrastructure dependencies, and potential bottlenecks if not configured appropriately.
+
+    \item \textbf{Token Authentication} \\
+    Token-based authentication replaces raw credentials with a token that can be
+    presented on each request instead of the login and password.
+    The token is an opaque value issued by the server and typically sent in the
+    \texttt{Authorization} header (usually under \texttt{Bearer} identifier).
+
+    Unlike cookie-based sessions, the server does not look up session records.
+    Instead, it validates the token on each request, for example, by checking a signed
+    token with a shared secret or public key,
+    and derives the user identity and permissions from the token itself.
+    This removes the dependency on an external session store and can make horizontal scaling simpler,
+    because any instance that knows the verification key can accept requests.
+
+    Token-based authentication fits well for clients that are not browsers, such as command-line tools,
+    mobile applications, and IoT devices, where sending cookies is inconvenient.
+    It is also commonly used for public APIs and distributed systems, where independent services need
+    to authenticate to each other without sharing a central session store.
+
+    But, token-based authentication has an important trade-off: tokens are hard to revoke.
+    Once issued, the token becomes invalid only when its expiry time has elapsed.
+    It is also possible to keep a \emph{revocation list} and check every request against it,
+    but that adds state, coordination, and latency.
+    As a result, if an attacker obtains a valid token, they can usually use it until it expires.
+
+    \item \textbf{Third-Party Authentication~(OAuth2)} \\
+    External provider authentication delegates user login to a third-party
+    identity provider (via OAuth~2.0 protocol), such as Google, GitHub, and others.~\parencite{oauth2}
+    Instead of handling passwords directly, the application trusts this provider to authenticate
+    the user and assert their identity.
+
+    In the common authentication flow, the application redirects the user
+    to the provider's endpoint, where the user logs in.
+    The provider then redirects back with an authorization code, which the
+    application exchanges for tokens which can be later used to obtain user information.
+    Using that information, the application can then create internal user models
+    with the provided identity.
+
+    Thus, this approach offloads password storage, multi-factor authentication, and
+    account recovery to the provider.
+    However, it should not be the only authentication method the application provides, since it requires
+    the user to have an account with one of the providers.
 \end{itemize}
 
-JWT tokens were chosen as the primary method of authentication. They are easy to set up, behave well when the
-application scales horizontally, and, most importantly, do not use the database to manage authentication details.
-Additionally, they can greatly simplify the login/logout phase and lower the number of API calls needed to get the
-User information, as some of the information can be embedded inside.
+Based on the outlined characteristics of the authentication methods it was
+decided to use session authentication.
+Compared to Basic Authentication, it avoids sending user credentials with every request,
+supports explicit logout, per-session security policies, and extra session-related data.
+Compared to token authentication, sessions offer simpler revocation, do not
+require managing custom code for token creation and validation, and are sufficient for a web
+application that does not yet need stateless or cross-service authentication.
+External provider authentication based on OAuth~2.0 can be added on top of this
+design.
 
-The last important concept that needs to be worked out is the server-client communication.
+Another important concept that must be addressed is the server-client communication.
 
 
 \section{Server-Client Communication}
-As was pointed out before, the communication in the application is going to be bi-directional.
-Because this is a web application, techniques such as Webhooks, gRPC, Pub/Sub, and others that are not directly supported by browsers will not be discussed. Traditional polling is also not mentioned due
-to its performance limitations and inefficiency. P2P techniques(e.g., WebRTC) will not be listed
-because the application's architecture is client-server, not peer-to-peer.
+Some of the features outlined in \chapterref{ch:specification}~(immediate updates,
+chat, playback updates, etc.) require bi-directional communication.
+Hence, a way to communicate from server to client has to be added.
 
+Because this is a web application, techniques such as Webhooks, gRPC, Pub/Sub, and others that
+are not directly supported by browsers are not discussed.
+Traditional polling is also not mentioned due to its performance limitations and inefficiency.
+P2P techniques~(e.g., WebRTC) are not listed because the application's architecture is client-server,
+not peer-to-peer.
+
+Currently there are four main ways to enable server-client communication: Long-Polling,
+Server-Sent Events, WebSockets and Push API\@.
 \begin{itemize}
     \item \textbf{Long-Polling} \\
-    Long-polling is a technique where the client sends a request and waits until the server responds,
-    potentially holding the request open for an extended period.
-    Once a response is received, the client immediately issues another request.
-    While this method works in environments where other techniques are not available,
-    it introduces unnecessary overhead by repeatedly opening and closing HTTP connections.
-    It also increases server load under high traffic, proving unsuitable for the logic outlined
-    in \ref{chapter:implementation}.
+    Long Polling is a technique where the client sends a request and waits until the server responds,
+    holding the connection open until a response is received (or a timeout occurs).
+    Once a response is received, the client immediately issues another request, therefore listening to
+    server messages continously.~\parencite{long_polling}
+    While this method works in environments where server to client messages are rare,
+    it is unsuitable for high throughput scenarious~(especially for frequent and small payloads),
+    as it introduces a significant overhead by repeatedly opening and closing HTTP connections.~\parencite{server_client_comparison}
 
     \item \textbf{Server-Sent Events (SSE)} \\
-    SSE is a one-way communication protocol that allows the server to push updates to the client over a
-    single, long-lived HTTP connection. Firstly, the client establishes the connection via an HTTP request, then the
-    server accepts and stores it, later sending special HTTP responses(technically one never-ending response) using that channel.\\
-    It is simpler to implement, works over standard HTTP/1.1, which helps with debugging
-    and is supported by most modern browsers.\cite{sse}
-    SSE is limited to server-to-client communication, but this limitation is not critical for applications where the client initiates
-    most of the interactions. In addition, it is easy to set up using the
-    \texttt{django-evenstream}\cite{django_sse} package that allows to integrate
-    SSE with regular \texttt{django-rest-framework} components.
+    SSE is a one-way communication protocol that allows the server to push updates
+    to the client over a single, long-lived HTTP connection.
+
+    Firstly, the client establishes the connection via an HTTP request, to which the server
+    answers with a response that has its \textit{content type} set to \texttt{text/event-stream}.
+    The server can then reuse that open connection to send an
+    unlimited amount of responses~(events).~\parencite{sse}
+    Compared to Long Polling, SSE does not need to open a new HTTP connection for every update,
+    so it reduces the number of requests.
+    At the same time, it is still based on plain HTTP, so it works
+    in most browsers and fits well into networking setups.
+
+    However, this protocol also requires additional connection handling logic: the
+    proxy and the server need to keep track of all the connected clients.
+    Moreover, special handling on the Backend must be added in order to
+    properly differentiate to which client the next message should be sent.~\parencite{django_channels}
 
     \item \textbf{WebSockets} \\
-    WebSockets provide full-duplex communication over a single persistent TCP connection.
-    This method allows messages to be sent both ways at any moment and is optimal for real-time applications\cite{websockets}.
-    However, implementing WebSockets requires additional infrastructure and logic for
-    managing connections and message routing. In the case of Django, support for WebSockets is realized via
-    \texttt{django-channels} package, but all of the communication handling still has to be implemented by the developer,
-    which leads to a prolonged development time.
+    WebSockets, in comparison to SSE, provide full-duplex communication over
+    a single TCP connection.
+    This is achieved by firstly creating a standard HTTP connection and then upgrading it to the
+    WebSocket protocol via the Web Socket Protocol Handshake.~\parencite{websockets}.
+    This method allows messages to be sent both ways at any moment and is optimal
+    for applications needing frequent~(as in multiple times per second) double-sided communication.~\parencite{server_client_comparison}
 
-    Furthermore, WebSocket traffic is not always reliably supported in all environments.
-    Firewalls and corporate proxies may block or degrade persistent TCP connections,
-    affecting delivery and/or availability.
+    However, adding WebSockets to an application also requires additional infrastructure and logic for
+    managing connections and message routing.
 
-    \item \textbf{Web Workers Push API} \\
-    This technique allows background scripts in the browser(service workers) to receive push notifications from the server,
-    even when the web page is not active.\cite{pushapi} While useful for notification systems, where message
-    delivery time does not play a big role,
-    it is not suitable for interaction that requires an immediate response.
+    In addition, WebSocket messages do not follow the normal HTTP request-response model.
+    They cannot be cached by standard HTTP caches~\parencite{http_caching} or CDNs,
+    and they do not benefit from built-in features such as idempotent retries.
+
+    \item \textbf{Push API} \\
+    The Push API is a specialized web interface that allows a server to send messages to the browser
+    without a preceding request from the client.~\parencite{pushapi}
+    After the user grants permission, the browser creates a \textit{push subscription}
+    and exposes a special endpoint that the application server can later
+    send data to without additional negotiation.~\parencite{http_push}
+    When such a request is received, the browser validates it and queues the message for processing
+    by a special background script called a \textit{service worker}.~\parencite{service_workers_mdn}
+    Each domain (website) can register its own service worker, which is usually dormant and
+    is only started when events such as \texttt{push} need to be handled.
+
+    While this mechanism is useful for notification systems, where short delivery time is not critical,
+    it is not suitable for interactions that require an immediate response,
+    such as updating the user's current playback state.
+    Messages can be delayed inside the browser because multiple sites may have pending
+    push messages to process, and the browser is free to schedule or throttle service worker execution
+    and limit the resources available to it.
+    As a result, push notifications typically have higher and less predictable latency
+    than direct communication protocols such as WebSockets.~\parencite{pushapi}
 \end{itemize}
 
-Although WebSockets offer the most complete solution for real-time two-way communication and are well-suited
-for the target architecture, the complexity of their setup in Django makes them less practical in development.
-Therefore, Server-Sent Events were chosen as the communication method;
-SSE provides adequate performance and responsiveness for the expected interaction model while reducing implementation overhead.
+Based on the requirements outlined in \chapterref{ch:specification} at least three features
+would require fast server to client communication:
+\begin{itemize}
+    \item \textbf{Playback state synchronization.}
+    The primary device would need to transmit playback updates to the server approximately once per second.
+    The server would then propagate the synchronized playback position to all
+    other active devices to ensure consistency.
+
+    \item \textbf{Real-time typing indicators in chat.}
+    The client would frequently send short updates to the server while the user is typing.
+    The server would then relay these events to the other chat participant to display
+    the current typing activity in real time.
+
+    \item \textbf{Immediate screen updates on newly created content.}
+    The screen would need to update when, for example, new Publications are added on an open feed.
+    In order for this to feel responsive the server will send
+    the new content to the client without prior requests.
+\end{itemize}
+
+The initial implementation used SSE, but it quickly proved to be too inefficient
+even with a small amount of clients.
+That is why WebSockets are used instead, as they reduce the overhead
+of client to server communication for messages coming in rapid succession.
+
+At this point the core technologies which could influence the choice
+of languages and frameworks are known and Backend is discussed in the subsequent step.
+
+
+\section{Backend}
+
+\subsection{Language}
+Three languages were considered for the Backend part of the application: Python, Java,
+and JavaScript~(Node.js).
+All three can be used to build a web backend, so the decision was mainly about how much
+time the implementation would take and how familiar the author is with the language and its tools.
+
+Java offers strong static typing and higher performance compared to Python and JavaScript.~\parencite{py_vs_java_vs_js}
+It also has mature frameworks such as Spring Boot and good tooling support in common IDEs.
+However, due to the language rules and syntax, it usually requires more boilerplate code
+and configuration for even simple endpoints.
+In addition, the author has limited experience with Java web development.
+Using Java would first require learning and testing the framework stack, which would reduce
+the time available for designing and evaluating the application itself.
+
+JavaScript with Node.js would make it possible to use the same language on both
+the Frontend and the Backend, and it has good support for real-time communication while being the
+second fastest language of the three.~\parencite{js,py_vs_java_vs_js}
+It is also widely used for backend services, with widely-used libraries for APIs and WebSocket-based
+real-time features, so it fits the needs of this application well in theory.
+Nevertheless, as with Java, the author has less experience with Node.js on the server side.
+Setting up a development stack, choosing and integrating the necessary libraries,
+and validating the design would again take a noticeable amount of time.
+
+Python, in contrast, is the language the author knows best.
+It has mature web frameworks such as Django, FastAPI, and Flask, as well as good library support
+for common backend tasks: authentication, database access, caching, background jobs, etc.
+While Python is slower in raw CPU benchmarks than Java or Node.js~\parencite{js,py_vs_java_vs_js},
+real-world web applications are usually limited by network and database latency rather than
+by pure CPU computational power.
+For an application that is mainly I/O-bound and uses external programs~(i.e., processes) for
+CPU-bound work, such as audio processing,
+the performance offered by a Python backend is sufficient and can be improved further by adding more
+worker processes or server instances if needed.
+Therefore, choosing Python does not introduce a practical performance bottleneck for the expected load.
+
+Taking these points into account, Python was chosen as the Backend language.
+The choice is made mainly because of the author's prior experience and
+the limited time frame of the thesis.
+
+\subsection{Python Framework Comparison}
+As mentioned previously, currently there are three widely used frameworks available for Python:
+
+\begin{itemize}
+    \item \textbf{FastAPI} \\
+    As the official website states:
+    \begin{quote}
+        `FastAPI is a modern, fast (high-performance), web framework for building APIs
+        with Python, based on standard Python type hints.'~\parencite{fastapi}. \\
+    \end{quote}
+    Its main emphasis is compatibility with Python's \texttt{asyncio} which makes it much easier
+    to write asynchronous code in comparison to the other two frameworks.
+    In addition, it integrates well with Pydantic~\parencite{pydantic} making
+    input data validation simple.
+    Moreover, routing/middleware do not require lots of configuration.~\parencite{fastapi_features}
+
+    However, FastAPI is relatively new and intentionally minimal.
+    It can work well for small or highly custom systems, but for common setups it lacks many convenience wrappers.
+    For example, the WebSockets integration does not provide connection lifecycle management or message
+    broadcast capabilities.~\parencite{fastapi_websockets}
+    In addition, no predefined templates are available for basic CRUD operations, hence, they have to
+    be implemented manually adding unnecessary complexity.
+    And lastly, despite the usage of FastAPI steadily growing, the community support is still
+    not as wide as for Django or Flask.~\parencite{so_2024_survey}
+
+    \item \textbf{Django} \\
+    Django is a `batteries-included'~\parencite{django} framework in the sense that it provides
+    instruments for most of the common web development tasks.
+    It provides advanced user session management, convenient CSRF and XSS protection integration,
+    flexible built-in file storage abstractions, and integrated handling of media files (images, audio, etc.).
+    Support for REST APIs can be added through
+    \texttt{django-rest-framework}~\parencite{drf}, which provides generic views,
+    serializers, and routers makeing implementation of CRUD endpoints quick with minimal custom code on top.
+    Real-time functionality can be implemented using \texttt{django-channels}~\parencite{django_channels},
+    an official Django package that adds connection lifecycle management, group-based message broadcasting,
+    and integration with Django’s authentication and session system.
+    As the documentation states one of the main advantages of
+    this framework is the time savings it offers.~\parencite{django_overview}
+
+    Yet, some notable drawbacks include its opinionated design choices,
+    which can make it hard to add custom logic.
+    Furthermore, the size of the resulting codebase can be larger, because the framework ships with many
+    modules that may remain unused while still occupying storage space
+    (for example, RSS integration or server-side rendering machinery).
+    Finally, the most significant disadvantage is its limited support for asynchronous processing~\parencite{django_async},
+    which often requires the use of external task queues such as Celery~\parencite{celery} for
+    long-running or background operations.
+
+    \item \textbf{Flask} \\
+    Flask is also a lightweight Python web framework.~\parencite{flask}
+    It provides only a small core with routing, request/response handling, and templating, while most
+    other functionality is added through extensions.
+    This modular design is suitable mainly for small services or prototypes with
+    a limited and clearly defined scope.
+
+    However, for typical JSON-based APIs, FastAPI offers similar functionality with fewer
+    dependencies and less setup, while Flask usually requires several additionally installed libraries
+    and manual configuration to reach the same result.
+    At the same time, Flask, like Django, is based on the synchronous WSGI interface.
+    WebSocket support is usually added via additional tools such as SocketIO~\parencite{socketio},
+    which requires the Frontend to use the same library instead of the standard WebSocket API
+    and introduces unnecessary coupling.
+    As a result, Flask effectively combines the disadvantages of the other two frameworks:
+    it lacks Django’s integrated ecosystem and
+    does not provide FastAPI’s modern asynchronous features.
+    In the context of this application, it does not bring any clear
+    advantage over Django or FastAPI.
+\end{itemize}
+
+Summing up, of the three frameworks, Django is the most suitable one.
+In the context of a music streaming platform its media handling capabilities,
+WebSocket support via \texttt{django-channels} and CRUD endpoint abstractions
+of \texttt{django-rest-framework} lead to a better developer experience
+shortening the overall implementation time.
+In addition, it has been proved by Instagram~\parencite{django_instagram} that Django
+can handle huge loads, hence, its WSGI reliance should not be a major drawback.
+
+Having established the Backend framework, the database had to be chosen next.
+
+\subsection{Database}
+The Django framework supports several relational databases:
+SQLite, PostgreSQL, MySQL/MariaDB, and Oracle.
+Oracle is excluded due to its commercial license~\parencite{oracle_pricing}.
+Oterwise, for a project of this size, any of these options would be fast enough, because the expected
+number of users and the amount of stored data are not large.
+Therefore, performance is not the main factor in the choice of database.
+
+Instead, the choice is based on the available features and how well they are integrated
+with Django.
+In this application, two requirements are especially important: full-text search and
+UUID primary keys.
+And for these requirements, PostgreSQL is the most suitable option.
+
+First, PostgreSQL offers good full-text search support and additional tools for
+fuzzy matching, such as trigram indexes.~\parencite{postgres_fulltext}
+As a result, it can be used as the base for full-text search
+instead of a separate service like Elastic or Sphinx.
+
+Moreover, Django exposes these features through the
+\texttt{django.\-contrib.\-postgres} module, which simplifies the creation of full-text and
+trigram-based queries directly from Python code.~\parencite{postgres,django_postgres}
+
+Second, PostgreSQL has native support for UUID values via a dedicated
+\texttt{uuid} column type.~\parencite{postgres_uuid}
+This type stores UUIDs in a compact binary form and allows efficient indexing
+and comparison.\footnote{If using time-based UUID types, e.g., UUIDv7}.
+In contrast, other databases store UUIDs as plain text
+(e.g.\ \texttt{CHAR(36)}), which is less space and index efficient.
+Django's \texttt{UUIDField} also maps cleanly to PostgreSQL's native type, so
+UUID-based identifiers can be used without extra configuration.
+
+Lastly, with the database chosen, Frontend application type, language and framework had to be selected.
+
+
+\section{Frontend}
+
+\subsection{Application Type}
+Modern web applications are typically built either around
+server-side rendering~(SSR), where most HTML is generated on the server,
+or around client-side rendering~(CSR), where most HTML is generated in the
+browser using JavaScript.
+A single-page application~(SPA) is an application that keeps a single HTML
+document loaded and updates the user interface dynamically on the client,
+usually relying on CSR, sometimes combined with SSR for the initial page load.
+
+In an SSR setup, frameworks such as Django generate most of the user interface
+on the server and send complete HTML pages (or partial updates) to the browser,
+often only requiring small pieces of JavaScript for interaction.~\parencite{django_html}
+In contrast, an SPA typically fetches JSON or other data from the server and
+based on it renders and updates the user interface directly in the browser.~\parencite{spa}
+
+The research for the Frontend began by deciding which of these approaches to use.
+For many web applications, rendering HTML on the server reduces client-side complexity,
+avoids duplicating logic between browser and backend, and works reliably across a wide
+range of devices and browsers, making it a simpler and more robust default choice.
+
+However, in this project the application must maintain
+a lot of state directly in the browser: the current playback
+position, the playback queue, the volume level, the chat state, etc.
+These values change frequently and in small steps, sometimes several times per
+second, and require immediate feedback for the user.
+Moreover, the user interface must react to events coming
+from the server over WebSockets, such as playback updates or chat messages.
+A purely server-rendered approach with full page reloads or round-trips for
+each small change would be unsuitable for this kind of highly interactive,
+real-time interface and would complicate state handling across devices.
+
+Because of these requirements, the Frontend is implemented as a
+client-side rendered single-page application~(SPA).
+
+\subsection{Language}
+Currently there are many libraries and frameworks in different languages
+that can be used to write web interfaces,
+for example, it is possible to create them even in the low-level languages,
+such as C~\parencite{clay_lib} or Rust\parencite{yew_framework}.
+Nevertheless, JavaScript remains the industry standard, because it is still the only
+general-purpose language directly supported by browsers.
+It means that JavaScript is the only language which can be executed natively by the browser's
+runtime, without the need for previous pre-processing~(e.g, compilation to WebAssembly).
+This simplifies the development, build and deployment process and, for these reasons,
+the client application is implemented in JavaScript.
+
+\subsection{JavaScript Framework Comparison}
+Modern JavaScript development is usually based on one of three libraries/frameworks:
+React, Vue, or Angular.~\parencite{frameworkdata}
+Each of them takes a different approach to structuring Frontend applications and
+has its own advantages and disadvantages.
+
+\begin{itemize}
+    \item \textbf{React} \\
+    React is a JavaScript library focused on building user interfaces through
+    a component-based architecture.~\parencite{react}
+    It is defined by its declarative programming style where the developer describes what
+    the UI should look like for a given state, and React handles the updates.~\parencite{react_declarative_def}
+    Internally, React maintains a virtual representation of the DOM and only applies the minimal
+    necessary changes to the real DOM, which helps keep many updates efficient without the developer
+    managing manual interface update operations.
+
+    One of the main strengths of React is its ecosystem.
+    It has detailed documentation, many learning resources, and a large number of open-source packages.
+    For instance, it integrates well with various state management tools and data-fetching libraries.
+    Another React's advantage is React DevTools which allows the developer
+    to inspect the component tree and the current state directly
+    in the browser greatly improving the debugging experience.~\parencite{react_devtools}
+    In addition, React is widely adopted and backed by a large community,
+    so examples of real-world applications and solutions to common problems are easy to find.~\parencite{so_react}
+
+    At the same time, React does not provide many features.
+    It does not include routing, form handling, or data-fetching solutions in its core.
+    As a result, these features must be added by the developer via separate libraries.
+    This flexibility is useful, but it also means that the developer has
+    to make more decisions and ensure that chosen packages work well together.
+
+    Another point is performance tuning.
+    For simple interfaces React is usually fast, but in larger projects `naive' code can cause many
+    unnecessary re-renders, which leads to average performance compared to other frameworks
+    unless memoization and careful prop passing are used.~\parencite{react_performance_review}
+
+    \item \textbf{Vue} \\
+    Vue, in comparison to React, is a full framework that includes many common features out of the box,
+    such as routing and form handling.~\parencite{vue}
+    It offers a template-based syntax and single-file components,
+    which combine markup, logic, and styles in a single file.
+    This structure can make it straightforward to start new projects, since less setup is needed.
+
+    The main drawback of Vue is its adoption compared to React and Angular.~\parencite{frameworkdata}
+    While it has an active community, there are fewer third-party packages, fewer example projects,
+    and fewer guides for advanced use cases.
+    In the context of this thesis, where, as mentioned before, development time is a key factor,
+    this can mean extra work, because features that exist as mature
+    packages in other ecosystems may have to be implemented by hand or with less proven tools.
+
+
+    \item \textbf{Angular} \\
+    Angular is a full-stack framework for building web applications.~\parencite{angular}
+    Like Vue, it provides many tools out of the box, including routing, form handling,
+    and a dependency injection system.
+    It is built on top of TypeScript and uses strongly typed code
+    and clearly defined architectural patterns.
+    This can lead to more structured and robust code in large projects with many developers.
+
+    In addition, Angular provides built-in tooling and conventions for project setup,
+    templates, and asynchronous data handling.
+    This makes it easier to follow a single, consistent approach across the codebase
+    instead of combining many separate libraries.
+
+    As can be seen, Angular is aimed towards bigger, enterprise-oriented projects.
+    While they can benefit from the structure and order that Angular brings, in smaller apps
+    the extra code that is needed to create and maintain the project can be a major disadvantage,
+    especially in the case of this thesis.
+\end{itemize}
+
+While all three frameworks offer modern development patterns and are suitable for production,
+React was chosen as the Frontend framework for this project.
+It is mature, widely used, and has an extensive ecosystem of libraries for routing,
+state management, and UI components.
+Its small core does not impose a strict application structure,
+which is convenient in a smaller project.
+Together with the available debugging tools, this makes it possible to iterate on the
+user interface quickly and to integrate real-time features such as playback synchronization
+in a straightforward way.
 
 
 \section{Summary}
 
-The created platform is going to be built using the Model-View-Controller \cite{mvc} architectural pattern
-and is split into three major parts:
+The platform will follow the Model–View–Controller architectural pattern~\parencite{mvc}
+and will be split into three major parts:
+
 \begin{itemize}
-    \item \textbf{Backend.} Implements all the data-related logic and processing.
-    \item \textbf{API.} Is responsible for transferring the data to the Frontend and receiving commands from it.
-    \item \textbf{Frontend.} Presents the data to the User and accepts their commands.
+    \item \textbf{Backend}
+    Implements the data-related logic and processing using Python and the Django framework.
+    It exposes a REST API and real-time endpoints over WebSockets
+    and stores data in a PostgreSQL database.
+    \item \textbf{API}
+    Provides a structured HTTP and WebSocket interface that transfers data
+    between the Backend and the Frontend.
+    It uses cookie-based session authentication and serves as the boundary between
+    internal models and external clients.
+    \item \textbf{Frontend}
+    Presents the data to the user and accepts their commands.
+    It is implemented as a single-page application in JavaScript using
+    React and communicates with the API for both standard requests and real-time updates.
 \end{itemize}
 
-The next Chapter \nameref{ch:implementation} provides the details of the actual implementation of the application.
+The next chapter, \nameref{ch:implementation}, describes the concrete implementation of these
+parts and how they work together to form the complete music streaming platform.

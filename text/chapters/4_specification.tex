@@ -1,4 +1,4 @@
-\chapter{Specification}\label{chap:specification}
+\chapter{Specification}\label{ch:specification}
 
 In this chapter the general outline of the application is specified via functional and non-functional requirements.
 The individual requirements are constructed based on the 'MoSCoW' criteria\cite{moscow}.
@@ -6,103 +6,84 @@ The individual requirements are constructed based on the 'MoSCoW' criteria\cite{
 
 \section{Important Terms}
 
-Below is the list of important terms that will be appearing throughout the requirements section.
-
+Below is the list of important terms that will be appearing throughout the requirements section:
 \begin{itemize}
     \item \textbf{Anonymous User} – A User which is not yet registered in the system or has not logged in.
-    \item \textbf{Artist} - a User with additional privileges.
-    \item \textbf{User Profile} – An object which encompasses all the information related to a specific User.
-    \item \textbf{Song} – An object representing an individual audio object.
+    \item \textbf{User} – An object containing information such as email, display name and other User parameters.
+    \item \textbf{User Profile} – A Frontend-only abstraction which shows Base User information.
+    \item \textbf{Artist} - A User with additional privileges, for example, Song or Song Collection creation.
+    \item \textbf{Follower/Followee} - A relationship between User and another User where one subscribes to another.
+    \item \textbf{Friend} - A Followee and Follower which are mutually subscribed to each other.
+    \item \textbf{Song} – An object representing a processed audio file with additional metadata such as `title' or `authors'.
     \item \textbf{Song Collection} – Represents a container that holds multiple Songs.
-    \item \textbf{Playback} – A process during which the user is receiving audio information.
+    \item \textbf{Playlist} – A Song Collection consisting of pre-existing (already uploaded) Songs.
+    \item \textbf{Album} – A Song Collection consisting of newly uploaded Songs.
+    \item \textbf{Playback} – A process during which the user is receiving or manipulating audio data.
     \item \textbf{Playback Item} – A Song or a Song Collection.
     \item \textbf{Playback Queue} – A list of Playback Items.
     \item \textbf{Playback Device} – A device on which the app can be used.
-    \item \textbf{Comment} – A small piece of text provided by the User input usually placed under a specific object to which it refers.
-    \item \textbf{Reply Comment} – The same as Comment, but must be created in relation to another, 'parent' Comment.
-    \item \textbf{Post} - A publication made by a User.
+    \item \textbf{Friend Activity} – A display of the Songs currently listened by User's Friends.
+    \item \textbf{Publication} – Textual User input.
+    \item \textbf{Attachment} - Non-textual User input. For example, a Song attached to a Publication.
+    \item \textbf{Reply} – The same as Publication, but created in relation to another, `parent' Publication.
 \end{itemize}
-% TODO: add missing stuff
-
 \clearpage
 
 
 \section{Functional Requirements}
 
-\begin{table}[h!]
-    \centering
-    \begin{tabular}{|p{12cm}|p{3cm}|}
-        \hline
-        \textbf{Requirement}                                                                                                                                            & \textbf{Priority} \\
-        \hline
-        The system shall support over-the-net audio Playback.                                                                                                           & Must Have         \\
-        \hline
-        The system shall provide a way to control the audio Playback. That includes shifting the Playback backward and forward, stopping the playback. & Must Have \\
-        \hline
-        The system shall provide a way to show Playback Items.                                                                                                          & Must Have         \\
-        \hline
-        The system shall support new Playback Item addition.                                                                                                            & Must Have         \\
-        \hline
-        The system shall provide a way to enqueue Playback Items and the means to manipulate the Playback Queue. & Must Have \\
-        \hline
-        The system shall make possible to add new Playback Devices and switch between them. & Must Have \\
-        \hline
-        The system shall have individual User Profiles.                                                                                                                 & Must Have         \\
-        \hline
-        The system shall allow Anonymous Users to create a User Profile and log in to the system using email and password. & Must Have \\
-        \hline
-        The system shall allow Users to change their User Profile information.                                                                                          & Must Have         \\
-        \hline
-        The system shall differentiate presented content based on the User. That includes Songs and Song Collections, User Profile information and other related items. & Must Have \\
-        \hline
-        The system shall allow for Song and Song Collection creation. Only Artists shall be allowed to create Songs. & Must Have\\
-        \hline
-        The system shall provide a way for Users to add Comments under Song Collections                                                                                 & Must Have         \\
-        \hline
-        The system shall provide a Post system. Posts shall be able to be created by Users. & Must Have \\
-        \hline
-        The system shall provide a way for Users to create relations to other Users. Post-related content shall be able to be filtered on these User relations. & Must Have \\
-        \hline
-        The system shall have a way to filter and search Playback Items and Users.                                                                                      & Must Have         \\
-        \hline
-        The system shall make it possible to create Reply Comments for Comments.                                                                                        & Should Have       \\
-        \hline
-        The system shall provide a notification system. It shall include Reply Comments and other appropriate items.                                                                                              & Should Have       \\
-        \hline
-        The system shall make it possible to filter Playback Items based on the User relations. & Should Have \\
-        \hline
-        The system shall provide chat capabilities.                                                                                                                     & Could Have        \\
-        \hline
-    \end{tabular}
-    \caption{Functional Requirements}
-\end{table}
+\subsection*{Must Have}
+\begin{itemize}
+    \item The system shall support User and Artist models.
+    \item The system shall allow Anonymous Users to create a User model and log in to the system using email and password.
+    \item The system shall allow Users to change provided information (name, bio, avatar, etc.) after the model creation.
+    \item The system shall support over-the-net audio Playback.
+    \item The system shall provide a way to control the audio Playback. That includes shifting the Playback backward and forward and stopping the playback.
+    \item The system shall provide a way to show Playback Items uploaded to it.
+    \item The system shall limit content presentation based on a concrete User. That includes Playback Items, User Profile, User Playback Devices and other related items.
+    \item The system shall support Playback Item creation. Playlists shall be created by all Users. Albums shall be created by Artists only.
+    \item The system shall provide a Playback Queue and a possibility to add or remove Playback Items from it.
+    \item The system shall make it possible to add new Playback Devices and switch between them.
+    \item The system shall provide a way for Users to add Publications (comments) under Song Collections.
+    \item The system shall provide a personal Publication system (posts).
+    \item The system shall provide a way for Users to create relations to other Users.
+    \item The system shall have a way to filter and search Playback Items, Users and Artists.
+\end{itemize}
 
+\subsection*{Should Have}
+\begin{itemize}
+    \item The system shall provide a notification system. It shall show information about Users that followed the target User, new `reply' Publication, etc.
+    \item The system shall make it possible to filter Playback Items/Publications based on the User relations to other Users.
+\end{itemize}
+
+\subsection*{Could Have}
+\begin{itemize}
+        % TODO: move to must have if i will implement that
+    \item The system shall provide chat capabilities.
+\end{itemize}
 
 \clearpage
+
+% add uuid as pk req
+% add csrf/xss/etc attacks stuff
+% add https?
 
 
 \section{Non-functional Requirements}
 
-\begin{table}[h!]
-    \centering
-    \begin{tabular}{|p{12cm}|p{3cm}|}
-        \hline
-        \textbf{Requirement}                                                                                                                                                               & \textbf{Priority} \\
-        \hline
-        The system shall provide access to its contents only to authorized Users. The only exception shall be the 'Log In/Sign Up' page. & Must Have \\
-        \hline
-        The system shall store content securely; data representation shall be as efficient as possible. & Must Have \\
-        \hline
-        The system shall store and transport sensible user information only in safe manners. & Must Have \\
-        \hline
-        The system shall, in case of failure, remain rendered on the screen and show the appropriate non-technical message to the User. & Must Have \\
-        \hline
-        The system shall render new available information without refreshing the content page. That includes new Comments, Playback Items, updated Playback Queue and other related items. & Must Have \\
-        \hline
-        The system shall provide a responsive search method which would react to dynamic user input. & Should Have       \\
-        \hline
-        The system shall synchronize Playback across multiple devices.                                                                                                                     & Should Have       \\
-        \hline
-    \end{tabular}
-    \caption{Non-functional Requirements}
-\end{table}
+\subsection*{Must Have}
+\begin{itemize}
+    \item The system shall provide access to its contents only to authorized Users. The only exception shall be the `Log In' and `Sign Up' pages.
+    \item The system shall store uploaded content securely.
+    \item The system shall store and transport sensible user information only in safe manners.
+    \item The system shall, in case of unexpected failure, remain rendered on the screen and show the appropriate non-technical message to the User.
+    \item The system shall render new available information without user input. That includes updates to Publications, Playback Items, Playback Queue and other related items.
+\end{itemize}
+
+\subsection*{Should Have}
+\begin{itemize}
+    \item The system shall provide a responsive search method which would react to dynamic user input.
+    \item The system shall synchronize Playback across multiple devices.
+\end{itemize}
+
+The next chapter presents the high-level technology choices used in the implementation.
