@@ -1,5 +1,5 @@
-import { useSetDeviceActiveMutation } from "@/playback/mutations.ts";
-import { IPlaybackDevice } from "@/playback/types.ts";
+import { useSetDeviceActiveMutation } from "@/modules/playback/mutations.ts";
+import { IPlaybackDevice } from "@/modules/playback/types.ts";
 
 export function useHandleSwitchDevice() {
     const setActiveDeviceMutation = useSetDeviceActiveMutation();

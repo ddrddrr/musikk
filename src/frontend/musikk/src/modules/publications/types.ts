@@ -1,13 +1,13 @@
 import { UUID } from "@/api/types.ts";
 import { IBaseModel } from "@/modules/common/types.ts";
-import { IUserBaseProfile } from "@/modules/user/types.ts";
+import { IUser } from "@/modules/user/types.ts";
 
 export type PublicationType = "comment" | "post";
 
 export interface IPublication extends IBaseModel {
     content: string;
     display_name: string | null;
-    user: IUserBaseProfile;
+    user: IUser;
     parent: UUID | null;
     is_deleted: boolean;
     obj_type: PublicationObjectType | null;

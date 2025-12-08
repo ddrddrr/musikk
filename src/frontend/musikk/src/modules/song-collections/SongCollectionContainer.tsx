@@ -4,7 +4,7 @@ import { CommentBox } from "@/modules/publications/CommentBox";
 import { fetchCollectionDetailed } from "@/modules/song-collections/queries";
 import { SongCollectionHeader } from "@/modules/song-collections/SongCollectionHeader";
 import { SongContainer } from "@/modules/songs/SongContainer.tsx";
-import { UserCollectionsContext } from "@/providers/userCollectionsContext.ts";
+import { UserCollectionsContext } from "@/modules/user/providers/userCollectionsContext.ts";
 import { useQuery } from "@tanstack/react-query";
 import { useContext } from "react";
 import { useMatch, useNavigate } from "react-router-dom";

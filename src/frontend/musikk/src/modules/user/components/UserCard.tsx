@@ -1,28 +1,28 @@
 import { useUserUUID } from "@/modules/auth/hooks/useUserUUID.ts";
-import { Card, CardContent } from "@/modules/ui/card";
+import { Card, CardContent } from "@/modules/ui/card.tsx";
 import {
     ContextMenu,
     ContextMenuContent,
     ContextMenuItem,
     ContextMenuTrigger,
-} from "@/modules/ui/context-menu";
+} from "@/modules/ui/context-menu.tsx";
 import {
     useDeleteFriendMutation,
     useFollowArtistMutation,
     useFriendRequestMutation,
     useRemoveFollowedArtistMutation,
 } from "@/modules/user/mutations.tsx";
-import { IUserBaseProfile } from "@/modules/user/types.ts";
-import { UserConnectionsContext } from "@/providers/userConnectionsContext.tsx";
+import { UserConnectionsContext } from "@/modules/user/providers/userConnectionsContext.tsx";
+import { IUser } from "@/modules/user/types.ts";
 import { MoreHorizontal, Smile } from "lucide-react";
 import { useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 interface UserCardProps {
-    user: IUserBaseProfile;
+    user: IUser;
     size?: "small" | "medium" | "big";
-    onClick?: (u: IUserBaseProfile) => void;
+    onClick?: (u: IUser) => void;
 }
 
 const sizeStyles = {
@@ -67,7 +67,7 @@ export function UserCard({ user, size = "medium", onClick }: UserCardProps) {
         }
     }, [friendRequestMutation.isSuccess]);
 
-    function handleOnClick(u: IUserBaseProfile) {
+    function handleOnClick(u: IUser) {
         if (onClick) {
             onClick(u);
         } else {
@@ -75,9 +75,8 @@ export function UserCard({ user, size = "medium", onClick }: UserCardProps) {
         }
     }
 
-    const isFriend =
-        user.role === "streaminguser" && friends.map((f) => f.uuid).includes(user.uuid);
-    const isFollowed = user.role === "artist" && followed.map((f) => f.uuid).includes(user.uuid);
+    const isFriend = !user.is_artist && friends.map((f) => f.uuid).includes(user.uuid);
+    const isFollowed = user.is_artist && followed.map((f) => f.uuid).includes(user.uuid);
 
     function handleToggleFriend() {
         if (!myUuid) return;
@@ -121,7 +120,7 @@ export function UserCard({ user, size = "medium", onClick }: UserCardProps) {
                     </CardContent>
                 </Card>
             </ContextMenuTrigger>
-            {!!myUuid && user.uuid !== myUuid && user.role === "streaminguser" && (
+            {!!myUuid && user.uuid !== myUuid && !user.is_artist && (
                 <ContextMenuContent panel="card" className="w-48">
                     <ContextMenuItem onSelect={handleToggleFriend}>
                         <MoreHorizontal className="w-4 h-4 mr-2" />
@@ -129,7 +128,7 @@ export function UserCard({ user, size = "medium", onClick }: UserCardProps) {
                     </ContextMenuItem>
                 </ContextMenuContent>
             )}
-            {user.uuid !== myUuid && user.role === "artist" && (
+            {user.uuid !== myUuid && user.is_artist && (
                 <ContextMenuContent panel="card" className="w-48">
                     <ContextMenuItem
                         onSelect={() =>

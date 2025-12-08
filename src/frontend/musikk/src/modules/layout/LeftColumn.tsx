@@ -1,5 +1,5 @@
 import { SongCollectionCard } from "@/modules/song-collections/SongCollectionCard";
-import { UserCollectionsContext } from "@/providers/userCollectionsContext.ts";
+import { UserCollectionsContext } from "@/modules/user/providers/userCollectionsContext.ts";
 import { useContext, useMemo } from "react";
 
 export function LeftColumn() {

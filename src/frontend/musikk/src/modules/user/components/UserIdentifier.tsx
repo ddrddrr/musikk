@@ -1,9 +1,9 @@
 import { Button } from "@/modules/ui/button.tsx";
-import { IUserBaseProfile } from "@/modules/user/types.ts";
-import { UserAvatar } from "@/modules/user/UserAvatar.tsx";
+import { UserAvatar } from "@/modules/user/components/UserAvatar.tsx";
+import { IUser } from "@/modules/user/types.ts";
 import { useNavigate } from "react-router-dom";
 
-export function UserIdentifier({ user }: { user: IUserBaseProfile }) {
+export function UserIdentifier({ user }: { user: IUser }) {
     const navigate = useNavigate();
     return (
         <div className="flex items-center gap-2 text-sm font-medium">

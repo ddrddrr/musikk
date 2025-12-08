@@ -1,7 +1,7 @@
-import { useQueue } from "@/modules/song-queue/hooks/useQueueAPI.ts";
 import { useCurrentDevice } from "@/hooks/useCurrentDevice.ts";
-import { usePlaybackRetrieveQuery } from "@/playback/queries.ts";
-import { PlaybackContext } from "@/providers/playbackContext.ts";
+import { PlaybackContext } from "@/modules/playback/providers/playbackContext.ts";
+import { usePlaybackRetrieveQuery } from "@/modules/playback/queries.ts";
+import { useQueue } from "@/modules/song-queue/hooks/useQueueAPI.ts";
 import { ReactNode, useMemo } from "react";
 
 interface PlaybackProviderProps {
@@ -15,7 +15,11 @@ export function PlaybackProvider({ children }: PlaybackProviderProps) {
     const deviceID = getDeviceID();
     const head = queue?.nodes?.length && queue?.nodes?.length > 0 ? queue.nodes[0] : undefined;
     const isThisDeviceActive = useMemo(() => {
-        return !!deviceID && !!playback?.active_device?.uuid && deviceID == playback?.active_device?.uuid;
+        return (
+            !!deviceID &&
+            !!playback?.active_device?.uuid &&
+            deviceID == playback?.active_device?.uuid
+        );
     }, [playback, deviceID, playback?.active_device]);
 
     return (

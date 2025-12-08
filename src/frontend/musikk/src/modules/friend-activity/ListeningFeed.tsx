@@ -1,6 +1,6 @@
 import { useFriendsListeningQuery } from "@/modules/friend-activity/queries.ts";
 import { SongContainer } from "@/modules/songs/SongContainer.tsx";
-import { UserIdentifier } from "@/modules/user/UserIdentifier.tsx";
+import { UserIdentifier } from "@/modules/user/components/UserIdentifier.tsx";
 
 export function ListeningFeed() {
     const { data: userSongs } = useFriendsListeningQuery();
@@ -17,7 +17,11 @@ export function ListeningFeed() {
                         >
                             <UserIdentifier user={user} />
                             <div className="mt-2">
-                                <SongContainer collectionSong={song} size="compact" renderItems={{ image: false }} />
+                                <SongContainer
+                                    collectionSong={song}
+                                    size="compact"
+                                    renderItems={{ image: false }}
+                                />
                             </div>
                         </div>
                     ))}

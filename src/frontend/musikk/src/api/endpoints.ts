@@ -47,6 +47,7 @@ export const CollectionURLs = {
         `/collections/${collectionUUID}/songs/${songCollectionSongUUID}`,
     likedSongsAddSong: (songUUID: UUID) => `/liked-songs/add-song/${songUUID}`,
 };
+// TODO non existent anymore, rewrite(both comments and posts)
 export const CommentURLs = {
     commentList: (objType: PublicationObjectType, objUUID: UUID) =>
         `/comments/${objType}/${objUUID}`,
@@ -60,6 +61,7 @@ export const PostURLs = {
     postChildrenList: (postUUID: UUID) => `/posts/${postUUID}/children`,
     postLatestList: `/posts/latest`,
 };
+// TODO no friend requests anymore
 export const NotificationURLs = {
     notificationsSetRead: `/notifications`,
     notificationsList: `/notifications`,
@@ -69,14 +71,16 @@ export const NotificationURLs = {
 export const UserURLs = {
     me: "/users/me",
     userDetail: (userUUID: UUID) => `/users/${userUUID}`,
+    userUpdate: (userUUID: UUID) => `/users/${userUUID}`,
     userFriends: (userUUID: UUID) => `/users/${userUUID}/friends`,
-    userFollowed: (userUUID: UUID) => `/users/${userUUID}/followed`,
+    userFollowers: (userUUID: UUID) => `/users/${userUUID}/followers`,
+    followUser: (userUUID: UUID) => `/users/${userUUID}/followers`,
+    unfollowUser: (userUUID: UUID) => `/users/${userUUID}/followers`,
+    // TODO remove
     userFriendsAccept: (userUUID: UUID, senderUUID: UUID) =>
         `/users/${userUUID}/friends/${senderUUID}`,
     userFriendsDelete: (userUUID: UUID, senderUUID: UUID) =>
         `/users/${userUUID}/friends/${senderUUID}`,
-    userUpdate: (userUUID: UUID) => `/users/${userUUID}`,
-    artistFollowersList: (artistUUID: UUID) => `/users/artists/${artistUUID}/followers`,
     followArtist: (artistUUID: UUID) => `/users/artists/${artistUUID}/followers`,
     removeFollowedArtist: (artistUUID: UUID) => `/users/artists/${artistUUID}/followers`,
 };

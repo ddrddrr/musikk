@@ -1,14 +1,14 @@
 import { api_client } from "@/api/axiosConf.ts";
 import { SearchURLs } from "@/api/endpoints.ts";
 import { ISongCollection, ISongCollectionSong } from "@/modules/song-collections/types.ts";
-import { IUserBaseProfile } from "@/modules/user/types.ts";
+import { IUser } from "@/modules/user/types.ts";
 
 interface PerformSearchResponse {
     songs: ISongCollectionSong[];
     playlists: ISongCollection[];
     albums: ISongCollection[];
-    users: IUserBaseProfile[];
-    artists: IUserBaseProfile[];
+    users: IUser[];
+    artists: IUser[];
 }
 
 export async function performSearch(query: string): Promise<PerformSearchResponse> {

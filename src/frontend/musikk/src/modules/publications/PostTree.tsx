@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import { PostForm } from "@/modules/publications/PostForm.tsx";
 import { usePostChildrenQuery } from "@/modules/publications/queries.ts";
 import { IPublication } from "@/modules/publications/types";
@@ -8,10 +9,9 @@ import { SongContainer } from "@/modules/songs/SongContainer.tsx";
 import { Button } from "@/modules/ui/button";
 import { Card, CardContent } from "@/modules/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/modules/ui/collapsible";
+import { UserCard } from "@/modules/user/components/UserCard.tsx";
+import { UserIdentifier } from "@/modules/user/components/UserIdentifier.tsx";
 import { fetchUser } from "@/modules/user/queries.ts";
-import { UserCard } from "@/modules/user/UserCard.tsx";
-import { UserIdentifier } from "@/modules/user/UserIdentifier.tsx";
-import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
@@ -66,7 +66,7 @@ export function PostTree({ publication, depth = 0 }: PostTreeProps) {
             case "song":
                 return (
                     <div className="mb-4">
-                        <SongContainer 
+                        <SongContainer
                             collectionSong={obj}
                             className="border border-gray-300 rounded-md p-3 bg-white"
                         />
@@ -132,9 +132,17 @@ export function PostTree({ publication, depth = 0 }: PostTreeProps) {
             {hasChildren && (
                 <Collapsible open={areChildrenOpen} onOpenChange={setAreChildrenOpen}>
                     <CollapsibleTrigger asChild>
-                        <Button variant="ghost" size="sm" className="h-6 px-2 text-[11px] hover:bg-gray-100">
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 px-2 text-[11px] hover:bg-gray-100"
+                        >
                             <span className="flex items-center gap-1">
-                                {areChildrenOpen ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+                                {areChildrenOpen ? (
+                                    <ChevronUp size={12} />
+                                ) : (
+                                    <ChevronDown size={12} />
+                                )}
                                 <span className="flex items-center gap-1">
                                     {children.length} {children.length === 1 ? "reply" : "replies"}
                                 </span>

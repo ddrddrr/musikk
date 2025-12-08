@@ -1,6 +1,6 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/modules/ui/tabs";
-import { UserCard } from "@/modules/user/UserCard";
-import { UserConnectionsContext } from "@/providers/userConnectionsContext";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/modules/ui/tabs.tsx";
+import { UserCard } from "@/modules/user/components/UserCard.tsx";
+import { UserConnectionsContext } from "@/modules/user/providers/userConnectionsContext.tsx";
 import { useContext, useState } from "react";
 
 export function Connections() {

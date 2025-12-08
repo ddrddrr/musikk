@@ -10,8 +10,8 @@ import { SongCollectionCard } from "@/modules/song-collections/SongCollectionCar
 import { ISongCollection } from "@/modules/song-collections/types.ts";
 import { SongCard } from "@/modules/songs/SongCard.tsx";
 import { SongContainer } from "@/modules/songs/SongContainer.tsx";
-import { UserCard } from "@/modules/user/UserCard.tsx";
-import { IUserBaseProfile } from "@/modules/user/types.ts";
+import { UserCard } from "@/modules/user/components/UserCard.tsx";
+import { IUser } from "@/modules/user/types.ts";
 
 const QUERY_TIMEOUT = 300;
 
@@ -108,7 +108,7 @@ export function SearchWindow({ onItemSelect, songMode = "card" }: SearchWindowPr
         );
     };
 
-    const renderUsers = (label: string, items: IUserBaseProfile[]) => {
+    const renderUsers = (label: string, items: IUser[]) => {
         if (!items?.length) return null;
 
         return (

@@ -1,6 +1,6 @@
+import { IPlaybackState } from "@/modules/playback/types.ts";
 import { ISongCollectionSong } from "@/modules/song-collections/types.ts";
 import { ISongQueueNode } from "@/modules/song-queue/types.ts";
-import { IPlaybackState } from "@/playback/types.ts";
 import { createContext } from "react";
 
 export interface PlaybackContextProps {

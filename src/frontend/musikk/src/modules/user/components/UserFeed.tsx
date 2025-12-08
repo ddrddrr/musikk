@@ -1,9 +1,9 @@
 import { api_client } from "@/api/axiosConf.ts";
 import { PostURLs } from "@/api/endpoints.ts";
-import { PostTree } from "@/modules/publications/PostTree";
+import { PostTree } from "@/modules/publications/PostTree.tsx";
 import { IPublication } from "@/modules/publications/types.ts";
-import { Card, CardContent } from "@/modules/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/modules/ui/tabs";
+import { Card, CardContent } from "@/modules/ui/card.tsx";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/modules/ui/tabs.tsx";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 
@@ -12,14 +12,18 @@ export function UserFeed() {
 
     const { data: postsFriends } = useQuery<IPublication[]>({
         queryFn: async () => {
-            const res = await api_client.get(PostURLs.postLatestList, { params: { connection: "friends" } });
+            const res = await api_client.get(PostURLs.postLatestList, {
+                params: { connection: "friends" },
+            });
             return res.data;
         },
         queryKey: ["posts", "latest", "friends"],
     });
     const { data: postsFollowed } = useQuery<IPublication[]>({
         queryFn: async () => {
-            const res = await api_client.get(PostURLs.postLatestList, { params: { connection: "followed" } });
+            const res = await api_client.get(PostURLs.postLatestList, {
+                params: { connection: "followed" },
+            });
             return res.data;
         },
         queryKey: ["posts", "latest", "followed"],
@@ -41,7 +45,9 @@ export function UserFeed() {
                     ))}
                     {!posts?.length && (
                         <Card>
-                            <CardContent className="text-center text-muted-foreground py-6">No posts yet.</CardContent>
+                            <CardContent className="text-center text-muted-foreground py-6">
+                                No posts yet.
+                            </CardContent>
                         </Card>
                     )}
                 </div>

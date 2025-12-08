@@ -1,6 +1,6 @@
 import { api_client } from "@/api/axiosConf.ts";
 import { PlaybackURLs } from "@/api/endpoints.ts";
-import { IPlaybackState } from "@/playback/types.ts";
+import { IPlaybackState } from "@/modules/playback/types.ts";
 import { useQuery } from "@tanstack/react-query";
 
 export function usePlaybackRetrieveQuery() {

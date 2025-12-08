@@ -1,13 +1,13 @@
 import { UUID } from "@/api/types.ts";
 import { IBaseModel } from "@/modules/common/types.ts";
 import { ISong } from "@/modules/songs/types.ts";
-import { IUserBaseProfile } from "@/modules/user/types.ts";
+import { IUser } from "@/modules/user/types.ts";
 
 export interface ISongCollection extends IBaseModel {
     uuid: UUID;
     title: string;
     description: string;
-    authors: IUserBaseProfile[];
+    authors: IUser[];
     image?: string;
     is_liked: boolean;
 }

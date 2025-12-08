@@ -1,6 +1,6 @@
+import { useHandlePlay } from "@/modules/playback/hooks/useHandlePlay.ts";
+import { PlaybackContext } from "@/modules/playback/providers/playbackContext.ts";
 import { Button } from "@/modules/ui/button.tsx";
-import { useHandlePlay } from "@/playback/hooks/useHandlePlay.ts";
-import { PlaybackContext } from "@/providers/playbackContext.ts";
 import { Pause, Play } from "lucide-react";
 import { useContext } from "react";
 

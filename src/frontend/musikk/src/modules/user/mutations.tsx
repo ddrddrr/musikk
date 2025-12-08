@@ -38,7 +38,7 @@ interface AddToFriendsParams {
     userUUID: UUID;
     senderUUID: UUID;
 }
-
+// TODO: remove all down
 export function useAddToFriendsMutation() {
     return useMutation({
         mutationFn: async ({ userUUID, senderUUID }: AddToFriendsParams) => {
@@ -51,6 +51,22 @@ export function useDeleteFriendMutation() {
     return useMutation({
         mutationFn: async ({ userUUID, senderUUID }: AddToFriendsParams) => {
             return await api_client.delete(UserURLs.userFriendsDelete(userUUID, senderUUID));
+        },
+    });
+}
+
+export function useFollowUserMutation() {
+    return useMutation({
+        mutationFn: async (userUUID: UUID) => {
+            return await api_client.post(UserURLs.followUser(userUUID));
+        },
+    });
+}
+
+export function useUnfollowUserMutation() {
+    return useMutation({
+        mutationFn: async (userUUID: UUID) => {
+            return await api_client.delete(UserURLs.unfollowUser(userUUID));
         },
     });
 }

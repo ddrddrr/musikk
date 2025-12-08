@@ -1,3 +1,5 @@
+import { useHandleSwitchDevice } from "@/hooks/useHandleSwitchDevice.ts";
+import { PlaybackContext } from "@/modules/playback/providers/playbackContext.ts";
 import { Button } from "@/modules/ui/button.tsx";
 import {
     DropdownMenu,
@@ -5,8 +7,6 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/modules/ui/dropdown-menu.tsx";
-import { useHandleSwitchDevice } from "@/hooks/useHandleSwitchDevice.ts";
-import { PlaybackContext } from "@/providers/playbackContext.ts";
 import { Computer } from "lucide-react";
 import { useContext } from "react";
 

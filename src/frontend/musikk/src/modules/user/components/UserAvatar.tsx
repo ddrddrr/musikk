@@ -1,4 +1,4 @@
-import { Avatar, AvatarImage } from "@/modules/ui/avatar";
+import { Avatar, AvatarImage } from "@/modules/ui/avatar.tsx";
 import { Smile } from "lucide-react";
 
 type UserAvatarProps = {
@@ -8,7 +8,8 @@ type UserAvatarProps = {
 };
 
 export function UserAvatar({ src, alt, size = "md" }: UserAvatarProps) {
-    const sizeClasses = {
+    // TODO rewrite
+    const sizeClass = {
         sm: "w-8 h-8",
         md: "w-16 h-16",
         lg: "w-24 h-24",
@@ -16,14 +17,14 @@ export function UserAvatar({ src, alt, size = "md" }: UserAvatarProps) {
 
     if (src) {
         return (
-            <Avatar className={sizeClasses}>
+            <Avatar className={sizeClass}>
                 <AvatarImage src={src} alt={alt} className="object-cover" />
             </Avatar>
         );
     }
 
     return (
-        <div className={`flex items-center justify-center ${sizeClasses} rounded-full bg-muted`}>
+        <div className={`flex items-center justify-center ${sizeClass} rounded-full bg-muted`}>
             <Smile className="w-2/3 h-2/3 text-muted-foreground" />
         </div>
     );

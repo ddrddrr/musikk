@@ -1,10 +1,14 @@
 import { UUID } from "@/api/types.ts";
-import { useCurrentDevice, ActiveDevice } from "@/hooks/useCurrentDevice.ts";
-import { useDeletePDMutation, useRegisterPDMutation } from "@/playback/mutations.ts";
+import { ActiveDevice, useCurrentDevice } from "@/hooks/useCurrentDevice.ts";
+import { useDeletePDMutation, useRegisterPDMutation } from "@/modules/playback/mutations.ts";
 import { useCallback } from "react";
 
 export function useDeviceManagement() {
-    const { saveDevice: saveDeviceToStorage, deleteDevice: deleteDeviceFromStorage, getDeviceID } = useCurrentDevice();
+    const {
+        saveDevice: saveDeviceToStorage,
+        deleteDevice: deleteDeviceFromStorage,
+        getDeviceID,
+    } = useCurrentDevice();
     const registerPDMutation = useRegisterPDMutation();
     const deletePDMutation = useDeletePDMutation();
 
@@ -18,13 +22,16 @@ export function useDeviceManagement() {
         return activeDevice;
     }, [registerPDMutation, saveDeviceToStorage]);
 
-    const deleteDevice = useCallback(async (deviceID?: UUID | null): Promise<void> => {
-        const idToDelete = deviceID ?? getDeviceID();
-        if (idToDelete) {
-            await deletePDMutation.mutateAsync(idToDelete);
-        }
-        deleteDeviceFromStorage();
-    }, [deletePDMutation, deleteDeviceFromStorage, getDeviceID]);
+    const deleteDevice = useCallback(
+        async (deviceID?: UUID | null): Promise<void> => {
+            const idToDelete = deviceID ?? getDeviceID();
+            if (idToDelete) {
+                await deletePDMutation.mutateAsync(idToDelete);
+            }
+            deleteDeviceFromStorage();
+        },
+        [deletePDMutation, deleteDeviceFromStorage, getDeviceID],
+    );
 
     return {
         registerDevice,

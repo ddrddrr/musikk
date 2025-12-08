@@ -1,9 +1,9 @@
-import { UUID } from "@/api/types";
+import { UUID } from "@/api/types.ts";
 import { useUserUUID } from "@/modules/auth/hooks/useUserUUID.ts";
-import { PostForm } from "@/modules/publications/PostForm";
-import { PostTree } from "@/modules/publications/PostTree";
-import { useUserPostsQuery } from "@/modules/publications/queries";
-import { Card, CardContent } from "@/modules/ui/card";
+import { PostForm } from "@/modules/publications/PostForm.tsx";
+import { PostTree } from "@/modules/publications/PostTree.tsx";
+import { useUserPostsQuery } from "@/modules/publications/queries.ts";
+import { Card, CardContent } from "@/modules/ui/card.tsx";
 
 export function UserPosts({ userUUID }: { userUUID: UUID }) {
     const { data: posts, isPending, error } = useUserPostsQuery(userUUID);

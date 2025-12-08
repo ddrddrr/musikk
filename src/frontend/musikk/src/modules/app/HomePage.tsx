@@ -1,10 +1,10 @@
 import { Header } from "@/modules/layout/header/Header.tsx";
 import { MainContent } from "@/modules/layout/MainContent.tsx";
+import { PlaybackProvider } from "@/modules/playback/providers/PlaybackProvider.tsx";
 import { PlayerBox } from "@/modules/player/PlayerBox.tsx";
 import { Toaster } from "@/modules/ui/sonner";
-import { PlaybackProvider } from "@/providers/PlaybackProvider.tsx";
-import { UserCollectionsProvider } from "@/providers/UserCollectionsProvider.tsx";
-import { UserConnectionsProvider } from "@/providers/UserConnectionsProvider.tsx";
+import { UserCollectionsProvider } from "@/modules/user/providers/UserCollectionsProvider.tsx";
+import { UserConnectionsProvider } from "@/modules/user/providers/UserConnectionsProvider.tsx";
 import { memo } from "react";
 
 export const HomePage = memo(function HomePage() {

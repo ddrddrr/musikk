@@ -1,6 +1,6 @@
 import type { ISong } from "@/modules/songs/types.ts";
-import { UserIdentifier } from "@/modules/user/UserIdentifier.tsx";
 import { MediaBox } from "@/modules/ui/media";
+import { UserIdentifier } from "@/modules/user/components/UserIdentifier.tsx";
 
 interface SongDisplayProps {
     song: ISong | undefined;
@@ -20,7 +20,12 @@ export function SongDisplay({ song }: SongDisplayProps) {
             <div className="w-full aspect-square max-w-2/5">
                 {song.image ? (
                     <MediaBox className="w-full h-full" asChild>
-                        <img src={song.image} alt={song.title} className="w-full h-full object-cover" />
+                        {/*TODO: consolidate with other images*/}
+                        <img
+                            src={song.image}
+                            alt={song.title}
+                            className="w-full h-full object-cover"
+                        />
                     </MediaBox>
                 ) : (
                     <MediaBox className="w-full h-full">

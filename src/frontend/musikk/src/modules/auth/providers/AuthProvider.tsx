@@ -2,7 +2,7 @@ import { useDeviceManagement } from "@/hooks/useDeviceManagement.ts";
 import { login as loginAPI, logout as logoutAPI } from "@/modules/auth/api.ts";
 import { AuthContext } from "@/modules/auth/providers/AuthContext.tsx";
 import { fetchMe } from "@/modules/user/queries.ts";
-import { IUserBaseProfile } from "@/modules/user/types.ts";
+import { IUser } from "@/modules/user/types.ts";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Cookies from "js-cookie";
 import { ReactNode } from "react";
@@ -22,7 +22,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         isLoading,
         refetch,
         error,
-    } = useQuery<IUserBaseProfile | null>({
+    } = useQuery<IUser | null>({
         queryKey: ["user"],
         queryFn: fetchMe,
         retry: false,

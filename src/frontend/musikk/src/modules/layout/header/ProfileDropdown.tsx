@@ -7,7 +7,7 @@ import {
     DropdownMenuTrigger,
 } from "@/modules/ui/dropdown-menu.tsx";
 import { Skeleton } from "@/modules/ui/skeleton.tsx";
-import { UserAvatar } from "@/modules/user/UserAvatar.tsx";
+import { UserAvatar } from "@/modules/user/components/UserAvatar.tsx";
 import { useNavigate } from "react-router-dom";
 
 export function ProfileDropdown() {
@@ -26,7 +26,6 @@ export function ProfileDropdown() {
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-                {/*TODO: add profile endpoints?*/}
                 <DropdownMenuItem onSelect={() => navigate(`/users/${user.uuid}`)}>
                     Profile
                 </DropdownMenuItem>

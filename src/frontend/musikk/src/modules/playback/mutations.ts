@@ -1,14 +1,16 @@
 import { api_client } from "@/api/axiosConf.ts";
 import { PlaybackURLs } from "@/api/endpoints.ts";
 import { UUID } from "@/api/types.ts";
-import { IPlaybackDevice } from "@/playback/types.ts";
+import { IPlaybackDevice } from "@/modules/playback/types.ts";
 import { getWebPlayerLabel } from "@/utils/getWebPlayerLabel.ts";
 import { useMutation } from "@tanstack/react-query";
 
 export function useRegisterPDMutation() {
     return useMutation<IPlaybackDevice>({
         mutationFn: async () => {
-            const res = await api_client.post(PlaybackURLs.registerDevice, { name: getWebPlayerLabel() });
+            const res = await api_client.post(PlaybackURLs.registerDevice, {
+                name: getWebPlayerLabel(),
+            });
             return res.data;
         },
     });

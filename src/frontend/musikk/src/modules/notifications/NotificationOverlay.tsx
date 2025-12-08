@@ -9,8 +9,10 @@ import { useNavigate } from "react-router-dom";
 interface NotificationOverlayProps {
     notifications: NotificationListParams;
 }
-
-export const NotificationOverlay = memo(function NotificationOverlay({ notifications }: NotificationOverlayProps) {
+// TODO remove user stuff, add reply stuff/follower stuff
+export const NotificationOverlay = memo(function NotificationOverlay({
+    notifications,
+}: NotificationOverlayProps) {
     const navigate = useNavigate();
     const addToFriendsMutation = useAddToFriendsMutation();
     const deleteNotificationMutation = useDeleteNotificationMutation();
@@ -52,8 +54,12 @@ export const NotificationOverlay = memo(function NotificationOverlay({ notificat
                             <div className="font-semibold text-sm">
                                 Reply: {notification.reply_comment.display_name ?? "Anonymous"}
                             </div>
-                            <div className="text-xs text-gray-600 mt-1">{notification.orig_comment.content}</div>
-                            <div className="text-sm text-gray-800 mt-2">{notification.reply_comment.content}</div>
+                            <div className="text-xs text-gray-600 mt-1">
+                                {notification.orig_comment.content}
+                            </div>
+                            <div className="text-sm text-gray-800 mt-2">
+                                {notification.reply_comment.content}
+                            </div>
                             <div className="flex justify-between mt-2">
                                 <span className="text-xs text-gray-600">
                                     {new Date(notification.date_added).toLocaleString(undefined, {

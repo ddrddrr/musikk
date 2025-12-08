@@ -9,7 +9,7 @@ import { EmailVerificationPage } from "@/modules/auth/components/EmailVerificati
 import { RequireAuth } from "@/modules/auth/components/RequireAuth.tsx";
 import { AuthProvider } from "@/modules/auth/providers/AuthProvider.tsx";
 import { WebSocketProvider } from "@/providers/WebSocketProvider";
-import { useHandleInvalidateEvent } from "./useHandleInvalidateEvent";
+import { useHandleInvalidateEvent } from "../../websockets/useHandleInvalidateEvent.ts";
 
 function AuthenticatedApp() {
     useHandleInvalidateEvent();

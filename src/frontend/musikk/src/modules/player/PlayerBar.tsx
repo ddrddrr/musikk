@@ -1,9 +1,9 @@
+import { PlaybackContext } from "@/modules/playback/providers/playbackContext.ts";
 import { ChangeActiveDeviceDropdown } from "@/modules/player/ChangeActiveDeviceDropdown.tsx";
 import { PlayerPlayButton } from "@/modules/player/PlayerPlayButton.tsx";
 import { useQueueChangeAPI } from "@/modules/song-queue/hooks/useQueueAPI.ts";
 import { Button } from "@/modules/ui/button";
 import { Slider } from "@/modules/ui/slider";
-import { PlaybackContext } from "@/providers/playbackContext.ts";
 import { ListMusic, SkipBack, SkipForward, Volume2 } from "lucide-react";
 import { useContext, useEffect, useRef, useState } from "react";
 
@@ -135,7 +135,11 @@ export function PlayerBar({ duration, time, seeking, setSeeking, setIsQueueOpen 
                         </div>
                     )}
 
-                    <Button variant="ghost" size="icon" onClick={() => setIsQueueOpen((prev: boolean) => !prev)}>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setIsQueueOpen((prev: boolean) => !prev)}
+                    >
                         <ListMusic />
                     </Button>
 

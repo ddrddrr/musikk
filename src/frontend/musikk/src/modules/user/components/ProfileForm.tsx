@@ -1,12 +1,19 @@
-import { ImageField } from "@/modules/common/ImageField";
-import { Avatar, AvatarImage } from "@/modules/ui/avatar";
-import { Button } from "@/modules/ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/modules/ui/form";
-import { Input } from "@/modules/ui/input";
-import { Textarea } from "@/modules/ui/textarea";
-import { useUserUpdateMutation } from "@/modules/user/mutations";
-import { ProfileFormSchema, ProfileFormValues } from "@/modules/user/types";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/useAuth.ts";
+import { ImageField } from "@/modules/common/ImageField.tsx";
+import { Avatar, AvatarImage } from "@/modules/ui/avatar.tsx";
+import { Button } from "@/modules/ui/button.tsx";
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from "@/modules/ui/form.tsx";
+import { Input } from "@/modules/ui/input.tsx";
+import { Textarea } from "@/modules/ui/textarea.tsx";
+import { useUserUpdateMutation } from "@/modules/user/mutations.tsx";
+import { ProfileFormSchema, ProfileFormValues } from "@/modules/user/types.ts";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -49,7 +56,11 @@ export function ProfileForm() {
         <div className="max-w-xl mx-auto space-y-6 bg-white p-6 rounded-2xl">
             <div className="flex items-center space-x-4">
                 <Avatar className="rounded-md w-12 h-12">
-                    <AvatarImage src={user.avatar} alt={user.display_name} className="object-cover" />
+                    <AvatarImage
+                        src={user.avatar}
+                        alt={user.display_name}
+                        className="object-cover"
+                    />
                 </Avatar>
                 <div className="text-lg font-medium">{user.display_name}</div>
             </div>
@@ -61,7 +72,9 @@ export function ProfileForm() {
                         name="display_name"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel className="text-sm font-semibold">Display Name</FormLabel>
+                                <FormLabel className="text-sm font-semibold">
+                                    Display Name
+                                </FormLabel>
                                 <FormControl>
                                     <Input {...field} className="mt-1" />
                                 </FormControl>
@@ -96,8 +109,12 @@ export function ProfileForm() {
                         </Button>
                     </div>
 
-                    {errorMessage && <p className="mt-2 text-sm text-red-600 text-center">{errorMessage}</p>}
-                    {successMessage && <p className="mt-2 text-sm text-green-600 text-center">{successMessage}</p>}
+                    {errorMessage && (
+                        <p className="mt-2 text-sm text-red-600 text-center">{errorMessage}</p>
+                    )}
+                    {successMessage && (
+                        <p className="mt-2 text-sm text-green-600 text-center">{successMessage}</p>
+                    )}
                 </form>
             </Form>
         </div>

@@ -1,5 +1,5 @@
 import { useUserUUID } from "@/modules/auth/hooks/useUserUUID.ts";
-import { Button } from "@/modules/ui/button";
+import { Button } from "@/modules/ui/button.tsx";
 import {
     Dialog,
     DialogClose,
@@ -7,18 +7,18 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
-} from "@/modules/ui/dialog";
-import { ProfileForm } from "@/modules/user/ProfileForm";
-import { fetchUser } from "@/modules/user/queries";
-import { UserAvatar } from "@/modules/user/UserAvatar.tsx";
-import { UserPosts } from "@/modules/user/UserPosts.tsx";
+} from "@/modules/ui/dialog.tsx";
+import { ProfileForm } from "@/modules/user/components/ProfileForm.tsx";
+import { UserAvatar } from "@/modules/user/components/UserAvatar.tsx";
+import { UserPosts } from "@/modules/user/components/UserPosts.tsx";
+import { fetchUser } from "@/modules/user/queries.ts";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 
 export function ProfilePage() {
     const { uuid } = useParams<{ uuid: string }>();
     const currUserUUID = useUserUUID();
-
+    // TODO add handling if curruseruuid is undefined
     const {
         isLoading,
         isError,

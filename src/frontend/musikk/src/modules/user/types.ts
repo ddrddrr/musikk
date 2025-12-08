@@ -1,13 +1,13 @@
 import { URL, UUID } from "@/api/types.ts";
 import { z } from "zod";
 
-export interface IUserBaseProfile {
+export interface IUser {
     uuid: UUID;
     display_name: string;
     avatar: URL;
     bio: string;
+    is_artist: boolean;
 }
-export interface IUserArtistProfile extends IUserBaseProfile {}
 
 export const ProfileFormSchema = z.object({
     display_name: z

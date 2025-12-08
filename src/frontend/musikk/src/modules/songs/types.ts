@@ -1,9 +1,9 @@
 import { IBaseModel } from "@/modules/common/types.ts";
-import { IUserBaseProfile } from "@/modules/user/types.ts";
+import { IUser } from "@/modules/user/types.ts";
 
 export interface ISong extends IBaseModel {
     title: string;
-    authors: IUserBaseProfile[];
+    authors: IUser[];
     mpd: string;
     m3u8: string;
     image?: string;

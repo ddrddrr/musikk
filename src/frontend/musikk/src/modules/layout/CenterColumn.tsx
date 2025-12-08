@@ -1,8 +1,8 @@
 import { MusicFeed } from "@/modules/layout/MusicFeed.tsx";
 import { SongCollectionContainer } from "@/modules/song-collections/SongCollectionContainer";
-import { Connections } from "@/modules/user/Connections.tsx";
-import { ProfilePage } from "@/modules/user/ProfilePage";
-import { UserFeed } from "@/modules/user/UserFeed.tsx";
+import { Connections } from "@/modules/user/components/Connections.tsx";
+import { ProfilePage } from "@/modules/user/components/ProfilePage.tsx";
+import { UserFeed } from "@/modules/user/components/UserFeed.tsx";
 import { Route, Routes, useParams } from "react-router-dom";
 
 export function CenterColumn() {
