@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from social.api.v1.serializers import (
     PublicationCreateSerializer,
     PublicationRetrieveSerializer,
+    PublicationRetrieveWithChildrenSerializer,
 )
 from social.api.v1.type_to_model_maps import CREATED_FOR_TYPE_TO_MODEL_MAP
 from social.models import Publication
@@ -13,7 +14,7 @@ from websockets.event_helpers import send_ws_event
 
 
 class PublicationsListCreateView(APIView):
-
+    # TODO: proper access rights
     def get(self, request, obj_type, obj_uuid, *args, **kwargs):
         related_model = CREATED_FOR_TYPE_TO_MODEL_MAP.get(obj_type)
         if not related_model:
@@ -27,15 +28,31 @@ class PublicationsListCreateView(APIView):
         except related_model.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-        publications = Publication.objects.filter(
-            created_for_type=ContentType.objects.get_for_model(related_model),
-            created_for_id=target_obj.pk,
+        with_children = (
+            True if request.query_params.get("with_children") == "true" else False
         )
 
-        serializer = PublicationRetrieveSerializer(
-            publications, many=True, context={"request": request}
-        )
-        return Response(status=status.HTTP_200_OK, data=serializer.data)
+        content_type = ContentType.objects.get_for_model(related_model)
+        if with_children:
+            queryset = (
+                Publication.objects.filter(
+                    created_for_type=content_type,
+                    created_for_id=target_obj.pk,
+                    parent__isnull=True,
+                )
+                .select_related("author")
+                .prefetch_related("replies__author")
+            )
+            serializer = PublicationRetrieveWithChildrenSerializer
+        else:
+            queryset = Publication.objects.filter(
+                created_for_type=content_type,
+                created_for_id=target_obj.pk,
+            ).select_related("author")
+            serializer = PublicationRetrieveSerializer
+
+        sz_instance = serializer(queryset, many=True, context={"request": request})
+        return Response(status=status.HTTP_200_OK, data=sz_instance.data)
 
     def post(self, request, *args, **kwargs):
         data = request.data.copy()

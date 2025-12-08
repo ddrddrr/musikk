@@ -131,7 +131,6 @@ class PublicationRetrieveSerializer(BaseModelSerializer):
         for k, v in CREATED_FOR_TYPE_TO_MODEL_MAP.items():
             if v == obj_type:
                 return k
-
         assert False, f"The related class for Publication does not exist: {obj_type}"
 
     def get_obj_uuid(self, obj):
@@ -151,3 +150,17 @@ class PublicationRetrieveSerializer(BaseModelSerializer):
 
     def get_parent_uuid(self, obj):
         return str(obj.parent.uuid) if obj.parent else None
+
+
+class PublicationRetrieveWithChildrenSerializer(PublicationRetrieveSerializer):
+    children = serializers.SerializerMethodField()
+
+    class Meta(PublicationRetrieveSerializer.Meta):
+        fields = PublicationRetrieveSerializer.Meta.fields + ["children"]
+
+    def get_children(self, obj):
+        qs = obj.replies.all().order_by("date_added")
+        serializer = PublicationRetrieveSerializer(
+            qs, many=True, context=self.context
+        )
+        return serializer.data
