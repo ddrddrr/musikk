@@ -33,7 +33,20 @@ export function useUserFollowersQuery(userUUID: UUID | undefined, enabled: boole
         queryFn: userUUID
             ? async () => {
                   const res = await api_client.get(UserURLs.userFollowers(userUUID));
-                  return res.data.friends;
+                  return res.data.followers;
+              }
+            : undefined,
+        enabled: enabled,
+    });
+}
+
+export function useUserFollowedQuery(userUUID: UUID | undefined, enabled: boolean = true) {
+    return useQuery({
+        queryKey: ["user", "followed", userUUID],
+        queryFn: userUUID
+            ? async () => {
+                  const res = await api_client.get(UserURLs.userFollowed(userUUID));
+                  return res.data.followed;
               }
             : undefined,
         enabled: enabled,

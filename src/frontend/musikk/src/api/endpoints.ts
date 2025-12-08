@@ -61,11 +61,9 @@ export const PostURLs = {
     postChildrenList: (postUUID: UUID) => `/posts/${postUUID}/children`,
     postLatestList: `/posts/latest`,
 };
-// TODO no friend requests anymore
 export const NotificationURLs = {
     notificationsSetRead: `/notifications`,
     notificationsList: `/notifications`,
-    friendRequestCreate: (receiverUUID: UUID) => `/notifications/friend-requests/${receiverUUID}`,
     notificationsDelete: (notificationUUID: UUID) => `/notifications/${notificationUUID}`,
 };
 export const UserURLs = {
@@ -74,15 +72,9 @@ export const UserURLs = {
     userUpdate: (userUUID: UUID) => `/users/${userUUID}`,
     userFriends: (userUUID: UUID) => `/users/${userUUID}/friends`,
     userFollowers: (userUUID: UUID) => `/users/${userUUID}/followers`,
-    followUser: (userUUID: UUID) => `/users/${userUUID}/followers`,
-    unfollowUser: (userUUID: UUID) => `/users/${userUUID}/followers`,
-    // TODO remove
-    userFriendsAccept: (userUUID: UUID, senderUUID: UUID) =>
-        `/users/${userUUID}/friends/${senderUUID}`,
-    userFriendsDelete: (userUUID: UUID, senderUUID: UUID) =>
-        `/users/${userUUID}/friends/${senderUUID}`,
-    followArtist: (artistUUID: UUID) => `/users/artists/${artistUUID}/followers`,
-    removeFollowedArtist: (artistUUID: UUID) => `/users/artists/${artistUUID}/followers`,
+    userFollowed: (userUUID: UUID) => `/users/${userUUID}/followed`,
+    followUser: (userUUID: UUID) => `/users/${userUUID}/followed`,
+    unfollowUser: (userUUID: UUID) => `/users/${userUUID}/followed`,
 };
 export const SearchURLs = {
     searchMain: (query: string) => `/search?q=${query}`,

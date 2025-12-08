@@ -29,11 +29,11 @@ export function Connections() {
 
                 <TabsContent value="followed">
                     {followed.length === 0 ? (
-                        <p className="text-muted-foreground">Not following any artists yet.</p>
+                        <p className="text-muted-foreground">Not following anyone yet.</p>
                     ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                            {followed.map((artist) => (
-                                <UserCard key={artist.uuid} user={artist} />
+                            {followed.map((user) => (
+                                <UserCard key={user.uuid} user={user} />
                             ))}
                         </div>
                     )}

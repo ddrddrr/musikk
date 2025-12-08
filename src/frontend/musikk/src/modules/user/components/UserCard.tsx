@@ -6,18 +6,12 @@ import {
     ContextMenuItem,
     ContextMenuTrigger,
 } from "@/modules/ui/context-menu.tsx";
-import {
-    useDeleteFriendMutation,
-    useFollowArtistMutation,
-    useFriendRequestMutation,
-    useRemoveFollowedArtistMutation,
-} from "@/modules/user/mutations.tsx";
+import { useFollowUserMutation, useUnfollowUserMutation } from "@/modules/user/mutations.tsx";
 import { UserConnectionsContext } from "@/modules/user/providers/userConnectionsContext.tsx";
 import { IUser } from "@/modules/user/types.ts";
 import { MoreHorizontal, Smile } from "lucide-react";
-import { useContext, useEffect } from "react";
+import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
 
 interface UserCardProps {
     user: IUser;
@@ -51,21 +45,13 @@ const sizeStyles = {
 
 export function UserCard({ user, size = "medium", onClick }: UserCardProps) {
     const navigate = useNavigate();
-    const friendRequestMutation = useFriendRequestMutation();
-    const deleteFriendMutation = useDeleteFriendMutation();
-    const followArtistMutation = useFollowArtistMutation();
-    const removeFollowedArtistMutation = useRemoveFollowedArtistMutation();
+    const followUserMutation = useFollowUserMutation();
+    const unfollowUserMutation = useUnfollowUserMutation();
     const myUuid = useUserUUID();
-    const { friends, followed } = useContext(UserConnectionsContext);
+    const { followed } = useContext(UserConnectionsContext);
 
     const styles = sizeStyles[size];
     const { avatar, display_name } = user;
-
-    useEffect(() => {
-        if (friendRequestMutation.isSuccess) {
-            toast("Friend request sent.");
-        }
-    }, [friendRequestMutation.isSuccess]);
 
     function handleOnClick(u: IUser) {
         if (onClick) {
@@ -75,15 +61,13 @@ export function UserCard({ user, size = "medium", onClick }: UserCardProps) {
         }
     }
 
-    const isFriend = !user.is_artist && friends.map((f) => f.uuid).includes(user.uuid);
-    const isFollowed = user.is_artist && followed.map((f) => f.uuid).includes(user.uuid);
+    const isFollowing = followed.map((f) => f.uuid).includes(user.uuid);
 
-    function handleToggleFriend() {
-        if (!myUuid) return;
-        if (isFriend) {
-            deleteFriendMutation.mutate({ userUUID: myUuid, senderUUID: user.uuid });
+    function handleToggleFollow() {
+        if (isFollowing) {
+            unfollowUserMutation.mutate(user.uuid);
         } else {
-            friendRequestMutation.mutate(user.uuid);
+            followUserMutation.mutate(user.uuid);
         }
     }
 
@@ -120,25 +104,11 @@ export function UserCard({ user, size = "medium", onClick }: UserCardProps) {
                     </CardContent>
                 </Card>
             </ContextMenuTrigger>
-            {!!myUuid && user.uuid !== myUuid && !user.is_artist && (
+            {!!myUuid && user.uuid !== myUuid && (
                 <ContextMenuContent panel="card" className="w-48">
-                    <ContextMenuItem onSelect={handleToggleFriend}>
+                    <ContextMenuItem onSelect={handleToggleFollow}>
                         <MoreHorizontal className="w-4 h-4 mr-2" />
-                        {isFriend ? "Remove from friends" : "Send friend request"}
-                    </ContextMenuItem>
-                </ContextMenuContent>
-            )}
-            {user.uuid !== myUuid && user.is_artist && (
-                <ContextMenuContent panel="card" className="w-48">
-                    <ContextMenuItem
-                        onSelect={() =>
-                            isFollowed
-                                ? removeFollowedArtistMutation.mutate(user.uuid)
-                                : followArtistMutation.mutate(user.uuid)
-                        }
-                    >
-                        <MoreHorizontal className="w-4 h-4 mr-2" />
-                        {isFollowed ? "Unfollow" : "Follow"}
+                        {isFollowing ? "Unfollow" : "Follow"}
                     </ContextMenuItem>
                 </ContextMenuContent>
             )}

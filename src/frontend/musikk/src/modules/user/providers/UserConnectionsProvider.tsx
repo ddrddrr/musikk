@@ -1,6 +1,10 @@
 import { useUserUUID } from "@/modules/auth/hooks/useUserUUID.ts";
 import { UserConnectionsContext } from "@/modules/user/providers/userConnectionsContext.tsx";
-import { useUserFollowersQuery, useUserFriendsQuery } from "@/modules/user/queries.ts";
+import {
+    useUserFollowedQuery,
+    useUserFollowersQuery,
+    useUserFriendsQuery,
+} from "@/modules/user/queries.ts";
 import { ReactNode } from "react";
 
 interface UserConnectionsProviderProps {
@@ -14,12 +18,17 @@ export function UserConnectionsProvider({ children }: UserConnectionsProviderPro
         userUUID,
         !!userUUID,
     );
+    const { isPending: followedPending, data: followed } = useUserFollowedQuery(
+        userUUID,
+        !!userUUID,
+    );
 
     return (
         <UserConnectionsContext.Provider
             value={{
                 friends: friendsPending ? [] : friends,
-                followed: followersPending ? [] : followers,
+                followers: followersPending ? [] : followers,
+                followed: followedPending ? [] : followed,
             }}
         >
             {children}

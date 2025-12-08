@@ -1,5 +1,5 @@
 import { api_client } from "@/api/axiosConf.ts";
-import { NotificationURLs, UserURLs } from "@/api/endpoints.ts";
+import { UserURLs } from "@/api/endpoints.ts";
 import { UUID } from "@/api/types.ts";
 import { useMutation } from "@tanstack/react-query";
 
@@ -25,36 +25,6 @@ export function useUserUpdateMutation() {
     });
 }
 
-export function useFriendRequestMutation() {
-    return useMutation({
-        mutationFn: async (receiverUUID: UUID) => {
-            const res = await api_client.post(NotificationURLs.friendRequestCreate(receiverUUID));
-            return res.data;
-        },
-    });
-}
-
-interface AddToFriendsParams {
-    userUUID: UUID;
-    senderUUID: UUID;
-}
-// TODO: remove all down
-export function useAddToFriendsMutation() {
-    return useMutation({
-        mutationFn: async ({ userUUID, senderUUID }: AddToFriendsParams) => {
-            return await api_client.post(UserURLs.userFriendsAccept(userUUID, senderUUID));
-        },
-    });
-}
-
-export function useDeleteFriendMutation() {
-    return useMutation({
-        mutationFn: async ({ userUUID, senderUUID }: AddToFriendsParams) => {
-            return await api_client.delete(UserURLs.userFriendsDelete(userUUID, senderUUID));
-        },
-    });
-}
-
 export function useFollowUserMutation() {
     return useMutation({
         mutationFn: async (userUUID: UUID) => {
@@ -67,22 +37,6 @@ export function useUnfollowUserMutation() {
     return useMutation({
         mutationFn: async (userUUID: UUID) => {
             return await api_client.delete(UserURLs.unfollowUser(userUUID));
-        },
-    });
-}
-
-export function useFollowArtistMutation() {
-    return useMutation({
-        mutationFn: async (artistUUID: UUID) => {
-            return await api_client.post(UserURLs.followArtist(artistUUID));
-        },
-    });
-}
-
-export function useRemoveFollowedArtistMutation() {
-    return useMutation({
-        mutationFn: async (artistUUID: UUID) => {
-            return await api_client.delete(UserURLs.removeFollowedArtist(artistUUID));
         },
     });
 }
