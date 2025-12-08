@@ -18,6 +18,7 @@ from users.api.v1.views import (
     MeView,
     FriendsView,
     FollowersView,
+    FollowedView,
     csrf,
 )
 
@@ -57,5 +58,10 @@ urlpatterns = [
         "users/<uuid:uuid>/followers",
         FollowersView.as_view(),
         name="user-followers",
+    ),
+    path(
+        "users/<uuid:user_uuid>/followed",
+        FollowedView.as_view(),
+        name="user-followed",
     ),
 ]
