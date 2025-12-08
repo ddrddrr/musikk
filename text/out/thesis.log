@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=pdflatex 2025.11.16)  7 DEC 2025 11:39
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=pdflatex 2025.11.16)  8 DEC 2025 20:08
 entering extended mode
  \write18 enabled.
  %&-line parsing enabled.
@@ -352,6 +352,18 @@ Package babel Info: Importing font and identification data for czech
 x
 Package babel Info: Importing font and identification data for german
 (babel)             from babel-de.ini. Reported on input line 25.
+) (/usr/local/texlive/2025/texmf-dist/tex/latex/hyphenat/hyphenat.sty
+Package: hyphenat 2009/09/02 v2.3c hyphenation utilities
+
+
+Package hyphenat Warning: *******************************
+(hyphenat)                * You have used the htt option.
+(hyphenat)                * You are likely to get many Font Warning messages.
+(hyphenat)                * These can usually be ignored.
+(hyphenat)                *******************************.
+
+\langwohyphens=\language91
+LaTeX Info: Redefining \_ on input line 43.
 )
 \@month=\count279
 \@year=\count280
@@ -771,7 +783,7 @@ File: logreq.def 2010/08/04 v1.0 logreq spec v1.0
 \bibhang=\skip82
 \blx@bcfin=\read6
 \blx@bcfout=\write8
-\blx@langwohyphens=\language91
+\blx@langwohyphens=\language92
 \c@mincomprange=\count371
 \c@maxcomprange=\count372
 \c@mincompwidth=\count373
@@ -1541,8 +1553,8 @@ File: fithesis/style/mu/fithesis-mu-12.clo 2021/02/21
 (./fithesis/style/mu/fithesis-mu-fi.sty
 Package: fithesis/style/mu/fithesis-mu-fi 2021/04/24
 )
-Package hyperref Info: Option `unicode' set `true' on input line 93.
-Package hyperref Info: Option `unicode' set `true' on input line 93.
+Package hyperref Info: Option `unicode' set `true' on input line 94.
+Package hyperref Info: Option `unicode' set `true' on input line 94.
 
 (/usr/local/texlive/2025/texmf-dist/tex/generic/stringenc/se-pdfdoc.def
 File: se-pdfdoc.def 2019/11/29 v1.12 stringenc: PDFDocEncoding
@@ -1553,26 +1565,130 @@ Package csquotes Info: ... found 'babel' package.
 (out/thesis.aux)
 \openout1 = `thesis.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 93.
-LaTeX Font Info:    ... okay on input line 93.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 93.
-LaTeX Font Info:    ... okay on input line 93.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 93.
-LaTeX Font Info:    ... okay on input line 93.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 93.
-LaTeX Font Info:    ... okay on input line 93.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 93.
-LaTeX Font Info:    ... okay on input line 93.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 93.
-LaTeX Font Info:    ... okay on input line 93.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 93.
-LaTeX Font Info:    ... okay on input line 93.
-LaTeX Font Info:    Checking defaults for T2A/cmr/m/n on input line 93.
-LaTeX Font Info:    ... okay on input line 93.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 93.
-LaTeX Font Info:    ... okay on input line 93.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 93.
-LaTeX Font Info:    ... okay on input line 93.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 94.
+LaTeX Font Info:    ... okay on input line 94.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 94.
+LaTeX Font Info:    ... okay on input line 94.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 94.
+LaTeX Font Info:    ... okay on input line 94.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 94.
+LaTeX Font Info:    ... okay on input line 94.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 94.
+LaTeX Font Info:    ... okay on input line 94.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 94.
+LaTeX Font Info:    ... okay on input line 94.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 94.
+LaTeX Font Info:    ... okay on input line 94.
+LaTeX Font Info:    Checking defaults for T2A/cmr/m/n on input line 94.
+LaTeX Font Info:    ... okay on input line 94.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 94.
+LaTeX Font Info:    ... okay on input line 94.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 94.
+LaTeX Font Info:    ... okay on input line 94.
+LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 9
+4.
+ (/usr/local/texlive/2025/texmf-dist/tex/latex/lm/t1lmtt.fd
+File: t1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
+)
+
+LaTeX Font Warning: Font shape `T1/lmtt/b/it' in size <12> not available
+(Font)              Font shape `T1/lmtt/b/sl' tried instead on input line 94.
+
+
+LaTeX Font Warning: Font shape `T1/lmtt/b/scsl' undefined
+(Font)              using `T1/lmtt/b/sc' instead on input line 94.
+
+
+LaTeX Font Warning: Font shape `T1/lmtt/b/sc' undefined
+(Font)              using `T1/lmtt/b/n' instead on input line 94.
+
+LaTeX Font Info:    Font shape `T1/lmtt/bx/n' in size <12> not available
+(Font)              Font shape `T1/lmtt/b/n' tried instead on input line 94.
+
+LaTeX Font Warning: Font shape `T1/lmtt/bx/it' in size <12> not available
+(Font)              Font shape `T1/lmtt/b/sl' tried instead on input line 94.
+
+LaTeX Font Info:    Font shape `T1/lmtt/bx/sl' in size <12> not available
+(Font)              Font shape `T1/lmtt/b/sl' tried instead on input line 94.
+
+LaTeX Font Warning: Font shape `T1/lmtt/bx/scsl' undefined
+(Font)              using `T1/lmtt/bx/sc' instead on input line 94.
+
+
+LaTeX Font Warning: Font shape `T1/lmtt/bx/sc' undefined
+(Font)              using `T1/lmtt/bx/n' instead on input line 94.
+
+
+LaTeX Font Warning: Font shape `T1/lmtt/sbx/sc' undefined
+(Font)              using `T1/lmtt/sb/sc' instead on input line 94.
+
+
+LaTeX Font Warning: Font shape `T1/lmtt/sb/n' undefined
+(Font)              using `T1/lmtt/m/n' instead on input line 94.
+
+
+LaTeX Font Warning: Font shape `T1/lmtt/sb/it' undefined
+(Font)              using `T1/lmtt/sb/n' instead on input line 94.
+
+
+LaTeX Font Warning: Font shape `T1/lmtt/sb/sl' undefined
+(Font)              using `T1/lmtt/sb/it' instead on input line 94.
+
+
+LaTeX Font Warning: Font shape `T1/lmtt/sb/scit' undefined
+(Font)              using `T1/lmtt/sb/sc' instead on input line 94.
+
+
+LaTeX Font Warning: Font shape `T1/lmtt/sb/sc' undefined
+(Font)              using `T1/lmtt/sb/n' instead on input line 94.
+
+
+LaTeX Font Warning: Font shape `T1/lmtt/sbc/sc' undefined
+(Font)              using `T1/lmtt/c/sc' instead on input line 94.
+
+
+LaTeX Font Warning: Font shape `T1/lmtt/c/n' undefined
+(Font)              using `T1/lmtt/m/n' instead on input line 94.
+
+
+LaTeX Font Warning: Font shape `T1/lmtt/c/it' undefined
+(Font)              using `T1/lmtt/c/n' instead on input line 94.
+
+
+LaTeX Font Warning: Font shape `T1/lmtt/c/sl' undefined
+(Font)              using `T1/lmtt/c/it' instead on input line 94.
+
+
+LaTeX Font Warning: Font shape `T1/lmtt/c/scit' undefined
+(Font)              using `T1/lmtt/c/sc' instead on input line 94.
+
+
+LaTeX Font Warning: Font shape `T1/lmtt/c/sc' undefined
+(Font)              using `T1/lmtt/c/n' instead on input line 94.
+
+
+LaTeX Font Warning: Font shape `T1/lmtt/lc/it' in size <12> not available
+(Font)              Font shape `T1/lmtt/lc/sl' tried instead on input line 94.
+
+
+LaTeX Font Warning: Font shape `T1/lmtt/lc/scsl' undefined
+(Font)              using `T1/lmtt/lc/sc' instead on input line 94.
+
+
+LaTeX Font Warning: Font shape `T1/lmtt/lc/sc' undefined
+(Font)              using `T1/lmtt/lc/n' instead on input line 94.
+
+
+LaTeX Font Warning: Font shape `T1/lmtt/m/ui' undefined
+(Font)              using `T1/lmtt/m/n' instead on input line 94.
+
+
+LaTeX Font Warning: Font shape `T1/lmtt/bx/ui' undefined
+(Font)              using `T1/lmtt/bx/n' instead on input line 94.
+
+
+LaTeX Font Warning: Font shape `T1/lmtt/m/In' undefined
+(Font)              using `T1/lmtt/m/n' instead on input line 94.
 
 (/usr/local/texlive/2025/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
@@ -1632,9 +1748,9 @@ Package biblatex Info: Trying to load bibliographic data...
 Package biblatex Info: ... file 'thesis.bbl' found.
 
 (out/thesis.bbl)
-Package biblatex Info: Reference section=0 on input line 93.
-Package biblatex Info: Reference segment=0 on input line 93.
-Package hyperref Info: Link coloring OFF on input line 93.
+Package biblatex Info: Reference section=0 on input line 94.
+Package biblatex Info: Reference segment=0 on input line 94.
+Package hyperref Info: Link coloring OFF on input line 94.
  (out/thesis.out) (out/thesis.out)
 \@outlinefile=\write10
 \openout10 = `thesis.out'.
@@ -1655,19 +1771,19 @@ Package pdflscape Info: Auto-detected driver: pdftex on input line 81.
 Package microtype Info: Patching varwidth to enable character protrusion.
 \MT@vwid@leftmargin=\dimen323
 \MT@vwid@rightmargin=\dimen324
-LaTeX Info: Redefining \microtypecontext on input line 93.
-Package microtype Info: Applying patch `toc' on input line 93.
-Package microtype Info: Applying patch `eqnum' on input line 93.
-Package microtype Info: Applying patch `footnote' on input line 93.
-Package microtype Info: Applying patch `verbatim' on input line 93.
-LaTeX Info: Redefining \microtypesetup on input line 93.
+LaTeX Info: Redefining \microtypecontext on input line 94.
+Package microtype Info: Applying patch `toc' on input line 94.
+Package microtype Info: Applying patch `eqnum' on input line 94.
+Package microtype Info: Applying patch `footnote' on input line 94.
+Package microtype Info: Applying patch `verbatim' on input line 94.
+LaTeX Info: Redefining \microtypesetup on input line 94.
 Package microtype Info: Generating PDF output.
 Package microtype Info: Character protrusion enabled (level 2).
 Package microtype Info: Using default protrusion set `alltext'.
 Package microtype Info: Automatic font expansion enabled (level 2),
 (microtype)             stretch: 20, shrink: 20, step: 1, non-selected.
 Package microtype Info: Using default expansion set `alltext-nott'.
-LaTeX Info: Redefining \showhyphens on input line 93.
+LaTeX Info: Redefining \showhyphens on input line 94.
 Package microtype Info: No adjustment of tracking.
 Package microtype Info: No adjustment of interword spacing.
 Package microtype Info: No adjustment of character kerning.
@@ -1678,44 +1794,44 @@ File: mt-ppl.cfg 2005/11/16 v1.6 microtype config. file: Palatino (RS)
 )
 \@logowidth=\skip105
 \@logoheight=\skip106
-<fithesis/logo/mu/fithesis-base-english.pdf, id=161, 202.7575pt x 52.195pt>
+<fithesis/logo/mu/fithesis-base-english.pdf, id=165, 202.7575pt x 52.195pt>
 File: fithesis/logo/mu/fithesis-base-english.pdf Graphic file (type pdf)
 <use fithesis/logo/mu/fithesis-base-english.pdf>
 Package pdftex.def Info: fithesis/logo/mu/fithesis-base-english.pdf  used on in
-put line 93.
+put line 94.
 (pdftex.def)             Requested size: 182.48006pt x 46.97505pt.
 File: fithesis/logo/mu/fithesis-base-english.pdf Graphic file (type pdf)
 <use fithesis/logo/mu/fithesis-base-english.pdf>
 Package pdftex.def Info: fithesis/logo/mu/fithesis-base-english.pdf  used on in
-put line 93.
+put line 94.
 (pdftex.def)             Requested size: 182.48006pt x 46.97505pt.
 File: fithesis/logo/mu/fithesis-base-english.pdf Graphic file (type pdf)
 <use fithesis/logo/mu/fithesis-base-english.pdf>
 Package pdftex.def Info: fithesis/logo/mu/fithesis-base-english.pdf  used on in
-put line 93.
+put line 94.
 (pdftex.def)             Requested size: 182.48006pt x 46.97505pt.
-LaTeX Font Info:    Trying to load font information for T1+qhv on input line 93
+LaTeX Font Info:    Trying to load font information for T1+qhv on input line 94
 .
 
 (/usr/local/texlive/2025/texmf-dist/tex/latex/tex-gyre/t1qhv.fd
 File: t1qhv.fd 2009/09/25 v1.2 font definition file for T1/qhv
 )
 LaTeX Font Info:    Font shape `T1/qhv/m/n' will be
-(Font)              scaled to size 10.35608pt on input line 93.
+(Font)              scaled to size 10.35608pt on input line 94.
 Package microtype Info: Loading generic protrusion settings for font family
 (microtype)             `qhv' (encoding: T1).
 (microtype)             For optimal results, create family-specific settings.
 (microtype)             See the microtype manual for details.
 LaTeX Font Info:    Font shape `T1/qhv/m/n' will be
-(Font)              scaled to size 12.42728pt on input line 93.
+(Font)              scaled to size 12.42728pt on input line 94.
 LaTeX Font Info:    Font shape `T1/qhv/b/n' will be
-(Font)              scaled to size 10.35608pt on input line 93.
+(Font)              scaled to size 10.35608pt on input line 94.
 LaTeX Font Info:    Font shape `T1/qhv/b/n' will be
-(Font)              scaled to size 21.4716pt on input line 93.
+(Font)              scaled to size 21.4716pt on input line 94.
 LaTeX Font Info:    Font shape `T1/qhv/m/n' will be
-(Font)              scaled to size 14.91275pt on input line 93.
+(Font)              scaled to size 14.91275pt on input line 94.
 LaTeX Font Info:    Font shape `T1/qhv/m/n' will be
-(Font)              scaled to size 17.89876pt on input line 93.
+(Font)              scaled to size 17.89876pt on input line 94.
 
 
 [1
@@ -1725,49 +1841,49 @@ al/texlive/2025/texmf-dist/fonts/enc/dvips/tex-gyre/q-ec.enc} <./fithesis/logo/
 mu/fithesis-base-english.pdf>]
 \@logowidth=\skip107
 \@logoheight=\skip108
-<fithesis/logo/mu/fithesis-base-english-color.pdf, id=170, 202.7575pt x 52.195p
+<fithesis/logo/mu/fithesis-base-english-color.pdf, id=174, 202.7575pt x 52.195p
 t>
 File: fithesis/logo/mu/fithesis-base-english-color.pdf Graphic file (type pdf)
 <use fithesis/logo/mu/fithesis-base-english-color.pdf>
 Package pdftex.def Info: fithesis/logo/mu/fithesis-base-english-color.pdf  used
- on input line 93.
+ on input line 94.
 (pdftex.def)             Requested size: 182.48006pt x 46.97505pt.
 File: fithesis/logo/mu/fithesis-base-english-color.pdf Graphic file (type pdf)
 <use fithesis/logo/mu/fithesis-base-english-color.pdf>
 Package pdftex.def Info: fithesis/logo/mu/fithesis-base-english-color.pdf  used
- on input line 93.
+ on input line 94.
 (pdftex.def)             Requested size: 182.48006pt x 46.97505pt.
 File: fithesis/logo/mu/fithesis-base-english-color.pdf Graphic file (type pdf)
 <use fithesis/logo/mu/fithesis-base-english-color.pdf>
 Package pdftex.def Info: fithesis/logo/mu/fithesis-base-english-color.pdf  used
- on input line 93.
+ on input line 94.
 (pdftex.def)             Requested size: 182.48006pt x 46.97505pt.
 
 
 [1 <./fithesis/logo/mu/fithesis-base-english-color.pdf>]
 \@logowidth=\skip109
 \@logoheight=\skip110
-<fithesis/logo/mu/fithesis-fi-color.pdf, id=176, 291.0875pt x 291.0875pt>
+<fithesis/logo/mu/fithesis-fi-color.pdf, id=180, 291.0875pt x 291.0875pt>
 File: fithesis/logo/mu/fithesis-fi-color.pdf Graphic file (type pdf)
 <use fithesis/logo/mu/fithesis-fi-color.pdf>
 Package pdftex.def Info: fithesis/logo/mu/fithesis-fi-color.pdf  used on input 
-line 93.
+line 94.
 (pdftex.def)             Requested size: 276.53154pt x 276.53154pt.
 File: fithesis/logo/mu/fithesis-fi-color.pdf Graphic file (type pdf)
 <use fithesis/logo/mu/fithesis-fi-color.pdf>
 Package pdftex.def Info: fithesis/logo/mu/fithesis-fi-color.pdf  used on input 
-line 93.
+line 94.
 (pdftex.def)             Requested size: 276.53154pt x 276.53154pt.
 File: fithesis/logo/mu/fithesis-fi-color.pdf Graphic file (type pdf)
 <use fithesis/logo/mu/fithesis-fi-color.pdf>
 Package pdftex.def Info: fithesis/logo/mu/fithesis-fi-color.pdf  used on input 
-line 93.
+line 94.
 (pdftex.def)             Requested size: 276.53154pt x 276.53154pt.
 
 
 [2 <./fithesis/logo/mu/fithesis-fi-color.pdf>]
 LaTeX Font Info:    Trying to load font information for TS1+qpl on input line 9
-3.
+4.
 
 (/usr/local/texlive/2025/texmf-dist/tex/latex/tex-gyre/ts1qpl.fd
 File: ts1qpl.fd 2009/09/25 v1.2 font definition file for TS1/qpl
@@ -1875,11 +1991,6 @@ LaTeX Warning: Reference `ch:conclusion' on page 1 undefined on input line 38.
 
 ]
 Chapter 2.
-LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 2
-1.
-(/usr/local/texlive/2025/texmf-dist/tex/latex/lm/t1lmtt.fd
-File: t1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
-)
 Package microtype Info: Loading generic protrusion settings for font family
 (microtype)             `lmtt' (encoding: T1).
 (microtype)             For optimal results, create family-specific settings.
@@ -1902,7 +2013,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 21--21
  _ SfuHV4xy6JoDaRsM5uCElYn _
  []
 
-<charts/age.png, id=306, 221.3871pt x 139.722pt>
+<charts/age.png, id=311, 221.3871pt x 139.722pt>
 File: charts/age.png Graphic file (type png)
 <use charts/age.png>
 Package pdftex.def Info: charts/age.png  used on input line 34.
@@ -1913,18 +2024,18 @@ Underfull \vbox (badness 2894) has occurred while \output is active []
 
 
 [2{/usr/local/texlive/2025/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}]
-<charts/song amount month.png, id=319, 650.43pt x 433.62pt>
+<charts/song amount month.png, id=323, 650.43pt x 433.62pt>
 File: charts/song amount month.png Graphic file (type png)
 <use charts/song amount month.png>
 Package pdftex.def Info: charts/song amount month.png  used on input line 52.
 (pdftex.def)             Requested size: 327.89388pt x 218.59666pt.
-<charts/listening regularity.png, id=320, 650.43pt x 433.62pt>
+<charts/listening regularity.png, id=324, 650.43pt x 433.62pt>
 File: charts/listening regularity.png Graphic file (type png)
 <use charts/listening regularity.png>
 Package pdftex.def Info: charts/listening regularity.png  used on input line 59
 .
 (pdftex.def)             Requested size: 327.89388pt x 218.59666pt.
-<charts/constumption_method.png, id=322, 1307.6052pt x 635.0124pt>
+<charts/constumption_method.png, id=326, 1307.6052pt x 635.0124pt>
 File: charts/constumption_method.png Graphic file (type png)
 <use charts/constumption_method.png>
 Package pdftex.def Info: charts/constumption_method.png  used on input line 73.
@@ -1944,12 +2055,12 @@ Package microtype Info: Character `029' is missing
 charts/age.png>]
 
 [4 <./charts/song amount month.png> <./charts/listening regularity.png>]
-<charts/streaming platform.png, id=340, 650.43pt x 433.62pt>
+<charts/streaming platform.png, id=344, 650.43pt x 433.62pt>
 File: charts/streaming platform.png Graphic file (type png)
 <use charts/streaming platform.png>
 Package pdftex.def Info: charts/streaming platform.png  used on input line 93.
 (pdftex.def)             Requested size: 327.89388pt x 218.59666pt.
-<charts/listen together method.png, id=342, 650.43pt x 433.62pt>
+<charts/listen together method.png, id=346, 650.43pt x 433.62pt>
 File: charts/listen together method.png Graphic file (type png)
 <use charts/listen together method.png>
 Package pdftex.def Info: charts/listen together method.png  used on input line 
@@ -1958,13 +2069,13 @@ Package pdftex.def Info: charts/listen together method.png  used on input line
 
 
 [5 <./charts/constumption_method.png>]
-<charts/listen together freq.png, id=350, 402.7848pt x 139.722pt>
+<charts/listen together freq.png, id=354, 402.7848pt x 139.722pt>
 File: charts/listen together freq.png Graphic file (type png)
 <use charts/listen together freq.png>
 Package pdftex.def Info: charts/listen together freq.png  used on input line 12
 4.
 (pdftex.def)             Requested size: 361.34999pt x 125.34781pt.
-<charts/share freq.png, id=352, 399.6531pt x 139.722pt>
+<charts/share freq.png, id=356, 399.6531pt x 139.722pt>
 File: charts/share freq.png Graphic file (type png)
 <use charts/share freq.png>
 Package pdftex.def Info: charts/share freq.png  used on input line 141.
@@ -1977,7 +2088,7 @@ Underfull \vbox (badness 10000) has occurred while \output is active []
 [6 <./charts/streaming platform.png>]
 
 [7 <./charts/listen together method.png> <./charts/listen together freq.png>]
-<charts/share method.png, id=365, 650.43pt x 433.62pt>
+<charts/share method.png, id=369, 650.43pt x 433.62pt>
 File: charts/share method.png Graphic file (type png)
 <use charts/share method.png>
 Package pdftex.def Info: charts/share method.png  used on input line 157.
@@ -1989,7 +2100,7 @@ Package pdftex.def Info: charts/share method.png  used on input line 157.
 
 [9]
 Chapter 3.
-<charts/discovery methods.png, id=378, 650.43pt x 433.62pt>
+<charts/discovery methods.png, id=382, 650.43pt x 433.62pt>
 File: charts/discovery methods.png Graphic file (type png)
 <use charts/discovery methods.png>
 Package pdftex.def Info: charts/discovery methods.png  used on input line 18.
@@ -1999,7 +2110,7 @@ Package pdftex.def Info: charts/discovery methods.png  used on input line 18.
 [10 <./charts/discovery methods.png>]
 
 [11]
-Underfull \hbox (badness 10000) in paragraph at lines 85--87
+Underfull \hbox (badness 10000) in paragraph at lines 84--86
 
  []
 
@@ -2008,32 +2119,32 @@ Underfull \hbox (badness 10000) in paragraph at lines 85--87
 [12]
 
 [13]
-Underfull \hbox (badness 10000) in paragraph at lines 146--151
+Underfull \hbox (badness 10000) in paragraph at lines 144--149
 
  []
 
 
-Overfull \hbox (5.3342pt too wide) in paragraph at lines 173--173
+Overfull \hbox (5.3342pt too wide) in paragraph at lines 171--171
 []|\T1/qpl/b/n/12 (-20) Interaction
  []
 
 
-Overfull \hbox (1.51215pt too wide) in paragraph at lines 173--173
+Overfull \hbox (1.51215pt too wide) in paragraph at lines 171--171
 []|\T1/qpl/m/n/12 (-20) Individual| 
  []
 
 
-Overfull \hbox (1.51215pt too wide) in paragraph at lines 173--173
+Overfull \hbox (1.51215pt too wide) in paragraph at lines 171--171
 []|\T1/qpl/m/n/12 (-20) Individual| 
  []
 
 
-Overfull \hbox (1.51215pt too wide) in paragraph at lines 173--173
+Overfull \hbox (1.51215pt too wide) in paragraph at lines 171--171
 []|\T1/qpl/m/n/12 (-20) Individual| 
  []
 
 
-Overfull \hbox (6.9827pt too wide) in paragraph at lines 173--173
+Overfull \hbox (6.9827pt too wide) in paragraph at lines 171--171
 []|\T1/qpl/m/n/12 (-20) Pair/Group| 
  []
 
@@ -2062,15 +2173,18 @@ Chapter 5.
 
 
 [21]
+Overfull \vbox (5.03389pt too high) has occurred while \output is active []
+
+
 
 [22]
 
 LaTeX Warning: Hyper reference `ch:implementation' on page 23 undefined on inpu
-t line 85.
+t line 91.
 
 
 LaTeX Warning: Reference `ch:implementation' on page 23 undefined on input line
- 85.
+ 91.
 
 
 
@@ -2085,51 +2199,59 @@ LaTeX Warning: Reference `ch:implementation' on page 23 undefined on input line
 [27]
 
 [28]
-Underfull \hbox (badness 10000) in paragraph at lines 317--319
-
- []
-
-
 
 [29]
+Underfull \hbox (badness 10000) in paragraph at lines 357--359
 
-[30]
-Overfull \vbox (2.54932pt too high) has occurred while \output is active []
-
-
-
-[31]
-Overfull \hbox (8.82532pt too wide) in paragraph at lines 427--434
-\T1/qpl/m/n/12 (-20) Modern web ap-pli-ca-tions are typ-i-cally built us-ing ei
--ther server-rendered
  []
 
 
+
+[30]
+
+[31]
 
 [32]
 
+LaTeX Warning: Hyper reference `ch:implementation' on page 33 undefined on inpu
+t line 443.
+
+
+LaTeX Warning: Reference `ch:implementation' on page 33 undefined on input line
+ 443.
+
+
+
 [33]
+Underfull \vbox (badness 2119) has occurred while \output is active []
+
+
 
 [34]
-Overfull \hbox (6.78638pt too wide) in paragraph at lines 523--525
-\T1/qpl/m/n/12 (-20) mands. It is im-ple-mented as a single-page ap-pli-ca-tion
- in JavaScript
- []
+
+[35]
+
+[36]
+
+[37]
+
+LaTeX Warning: Hyper reference `ch:implementation' on page 38 undefined on inpu
+t line 628.
 
 
-LaTeX Warning: Reference `ch:implementation' on page 35 undefined on input line
- 527.
+LaTeX Warning: Reference `ch:implementation' on page 38 undefined on input line
+ 628.
 
 ) (./chapters/appendix.tex
 
-[35]
+[38]
 Appendix A.
-<../extras/survey-questions.pdf, id=612, 614.295pt x 794.97pt>
+<../extras/survey-questions.pdf, id=663, 614.295pt x 794.97pt>
 File: ../extras/survey-questions.pdf Graphic file (type pdf)
 <use ../extras/survey-questions.pdf>
 Package pdftex.def Info: ../extras/survey-questions.pdf  used on input line 8.
 (pdftex.def)             Requested size: 614.29349pt x 794.96806pt.
-<../extras/survey-questions.pdf, id=614, page=1, 614.295pt x 794.97pt>
+<../extras/survey-questions.pdf, id=665, page=1, 614.295pt x 794.97pt>
 File: ../extras/survey-questions.pdf Graphic file (type pdf)
 <use ../extras/survey-questions.pdf, page 1>
 Package pdftex.def Info: ../extras/survey-questions.pdf , page1 used on input l
@@ -2142,7 +2264,7 @@ ine 8.
 (pdftex.def)             Requested size: 1016.73932pt x 1315.78033pt.
 
 
-[36]
+[39]
 File: ../extras/survey-questions.pdf Graphic file (type pdf)
 <use ../extras/survey-questions.pdf, page 1>
 Package pdftex.def Info: ../extras/survey-questions.pdf , page1 used on input l
@@ -2158,206 +2280,228 @@ ine 8.
 File: ../extras/survey-questions.pdf Graphic file (type pdf)
 <use ../extras/survey-questions.pdf, page 1>
 Package pdftex.def Info: ../extras/survey-questions.pdf , page1 used on input l
-ine 8.
-(pdftex.def)             Requested size: 1016.73932pt x 1315.78033pt.
-[37
-
- <out/../extras/survey-questions.pdf>]
-<../extras/survey-questions.pdf, id=637, page=2, 614.295pt x 794.97pt>
-File: ../extras/survey-questions.pdf Graphic file (type pdf)
-<use ../extras/survey-questions.pdf, page 2>
-Package pdftex.def Info: ../extras/survey-questions.pdf , page2 used on input l
-ine 8.
-(pdftex.def)             Requested size: 1016.73932pt x 1315.78033pt.
-File: ../extras/survey-questions.pdf Graphic file (type pdf)
-<use ../extras/survey-questions.pdf, page 2>
-Package pdftex.def Info: ../extras/survey-questions.pdf , page2 used on input l
-ine 8.
-(pdftex.def)             Requested size: 1016.73932pt x 1315.78033pt.
-
-
-File: ../extras/survey-questions.pdf Graphic file (type pdf)
-<use ../extras/survey-questions.pdf, page 2>
-Package pdftex.def Info: ../extras/survey-questions.pdf , page2 used on input l
-ine 8.
-(pdftex.def)             Requested size: 1016.73932pt x 1315.78033pt.
-[38
-
- <out/../extras/survey-questions.pdf>]
-<../extras/survey-questions.pdf, id=642, page=3, 614.295pt x 794.97pt>
-File: ../extras/survey-questions.pdf Graphic file (type pdf)
-<use ../extras/survey-questions.pdf, page 3>
-Package pdftex.def Info: ../extras/survey-questions.pdf , page3 used on input l
-ine 8.
-(pdftex.def)             Requested size: 1016.73932pt x 1315.78033pt.
-File: ../extras/survey-questions.pdf Graphic file (type pdf)
-<use ../extras/survey-questions.pdf, page 3>
-Package pdftex.def Info: ../extras/survey-questions.pdf , page3 used on input l
-ine 8.
-(pdftex.def)             Requested size: 1016.73932pt x 1315.78033pt.
-
-
-File: ../extras/survey-questions.pdf Graphic file (type pdf)
-<use ../extras/survey-questions.pdf, page 3>
-Package pdftex.def Info: ../extras/survey-questions.pdf , page3 used on input l
-ine 8.
-(pdftex.def)             Requested size: 1016.73932pt x 1315.78033pt.
-[39
-
- <out/../extras/survey-questions.pdf>]
-<../extras/survey-questions.pdf, id=648, page=4, 614.295pt x 794.97pt>
-File: ../extras/survey-questions.pdf Graphic file (type pdf)
-<use ../extras/survey-questions.pdf, page 4>
-Package pdftex.def Info: ../extras/survey-questions.pdf , page4 used on input l
-ine 8.
-(pdftex.def)             Requested size: 1016.73932pt x 1315.78033pt.
-File: ../extras/survey-questions.pdf Graphic file (type pdf)
-<use ../extras/survey-questions.pdf, page 4>
-Package pdftex.def Info: ../extras/survey-questions.pdf , page4 used on input l
-ine 8.
-(pdftex.def)             Requested size: 1016.73932pt x 1315.78033pt.
-
-
-File: ../extras/survey-questions.pdf Graphic file (type pdf)
-<use ../extras/survey-questions.pdf, page 4>
-Package pdftex.def Info: ../extras/survey-questions.pdf , page4 used on input l
 ine 8.
 (pdftex.def)             Requested size: 1016.73932pt x 1315.78033pt.
 [40
 
  <out/../extras/survey-questions.pdf>]
-<../extras/survey-questions.pdf, id=653, page=5, 614.295pt x 794.97pt>
+<../extras/survey-questions.pdf, id=689, page=2, 614.295pt x 794.97pt>
 File: ../extras/survey-questions.pdf Graphic file (type pdf)
-<use ../extras/survey-questions.pdf, page 5>
-Package pdftex.def Info: ../extras/survey-questions.pdf , page5 used on input l
+<use ../extras/survey-questions.pdf, page 2>
+Package pdftex.def Info: ../extras/survey-questions.pdf , page2 used on input l
 ine 8.
 (pdftex.def)             Requested size: 1016.73932pt x 1315.78033pt.
 File: ../extras/survey-questions.pdf Graphic file (type pdf)
-<use ../extras/survey-questions.pdf, page 5>
-Package pdftex.def Info: ../extras/survey-questions.pdf , page5 used on input l
+<use ../extras/survey-questions.pdf, page 2>
+Package pdftex.def Info: ../extras/survey-questions.pdf , page2 used on input l
 ine 8.
 (pdftex.def)             Requested size: 1016.73932pt x 1315.78033pt.
 
 
 File: ../extras/survey-questions.pdf Graphic file (type pdf)
-<use ../extras/survey-questions.pdf, page 5>
-Package pdftex.def Info: ../extras/survey-questions.pdf , page5 used on input l
+<use ../extras/survey-questions.pdf, page 2>
+Package pdftex.def Info: ../extras/survey-questions.pdf , page2 used on input l
 ine 8.
 (pdftex.def)             Requested size: 1016.73932pt x 1315.78033pt.
 [41
 
  <out/../extras/survey-questions.pdf>]
-<../extras/survey-questions.pdf, id=658, page=6, 614.295pt x 794.97pt>
+<../extras/survey-questions.pdf, id=694, page=3, 614.295pt x 794.97pt>
 File: ../extras/survey-questions.pdf Graphic file (type pdf)
-<use ../extras/survey-questions.pdf, page 6>
-Package pdftex.def Info: ../extras/survey-questions.pdf , page6 used on input l
+<use ../extras/survey-questions.pdf, page 3>
+Package pdftex.def Info: ../extras/survey-questions.pdf , page3 used on input l
 ine 8.
 (pdftex.def)             Requested size: 1016.73932pt x 1315.78033pt.
 File: ../extras/survey-questions.pdf Graphic file (type pdf)
-<use ../extras/survey-questions.pdf, page 6>
-Package pdftex.def Info: ../extras/survey-questions.pdf , page6 used on input l
+<use ../extras/survey-questions.pdf, page 3>
+Package pdftex.def Info: ../extras/survey-questions.pdf , page3 used on input l
 ine 8.
 (pdftex.def)             Requested size: 1016.73932pt x 1315.78033pt.
 
 
 File: ../extras/survey-questions.pdf Graphic file (type pdf)
-<use ../extras/survey-questions.pdf, page 6>
-Package pdftex.def Info: ../extras/survey-questions.pdf , page6 used on input l
+<use ../extras/survey-questions.pdf, page 3>
+Package pdftex.def Info: ../extras/survey-questions.pdf , page3 used on input l
 ine 8.
 (pdftex.def)             Requested size: 1016.73932pt x 1315.78033pt.
 [42
 
  <out/../extras/survey-questions.pdf>]
-<../extras/survey-questions.pdf, id=667, page=7, 614.295pt x 794.97pt>
+<../extras/survey-questions.pdf, id=699, page=4, 614.295pt x 794.97pt>
 File: ../extras/survey-questions.pdf Graphic file (type pdf)
-<use ../extras/survey-questions.pdf, page 7>
-Package pdftex.def Info: ../extras/survey-questions.pdf , page7 used on input l
+<use ../extras/survey-questions.pdf, page 4>
+Package pdftex.def Info: ../extras/survey-questions.pdf , page4 used on input l
 ine 8.
 (pdftex.def)             Requested size: 1016.73932pt x 1315.78033pt.
 File: ../extras/survey-questions.pdf Graphic file (type pdf)
-<use ../extras/survey-questions.pdf, page 7>
-Package pdftex.def Info: ../extras/survey-questions.pdf , page7 used on input l
+<use ../extras/survey-questions.pdf, page 4>
+Package pdftex.def Info: ../extras/survey-questions.pdf , page4 used on input l
 ine 8.
 (pdftex.def)             Requested size: 1016.73932pt x 1315.78033pt.
 
 
 File: ../extras/survey-questions.pdf Graphic file (type pdf)
-<use ../extras/survey-questions.pdf, page 7>
-Package pdftex.def Info: ../extras/survey-questions.pdf , page7 used on input l
+<use ../extras/survey-questions.pdf, page 4>
+Package pdftex.def Info: ../extras/survey-questions.pdf , page4 used on input l
 ine 8.
 (pdftex.def)             Requested size: 1016.73932pt x 1315.78033pt.
 [43
 
+ <out/../extras/survey-questions.pdf>]
+<../extras/survey-questions.pdf, id=704, page=5, 614.295pt x 794.97pt>
+File: ../extras/survey-questions.pdf Graphic file (type pdf)
+<use ../extras/survey-questions.pdf, page 5>
+Package pdftex.def Info: ../extras/survey-questions.pdf , page5 used on input l
+ine 8.
+(pdftex.def)             Requested size: 1016.73932pt x 1315.78033pt.
+File: ../extras/survey-questions.pdf Graphic file (type pdf)
+<use ../extras/survey-questions.pdf, page 5>
+Package pdftex.def Info: ../extras/survey-questions.pdf , page5 used on input l
+ine 8.
+(pdftex.def)             Requested size: 1016.73932pt x 1315.78033pt.
+
+
+File: ../extras/survey-questions.pdf Graphic file (type pdf)
+<use ../extras/survey-questions.pdf, page 5>
+Package pdftex.def Info: ../extras/survey-questions.pdf , page5 used on input l
+ine 8.
+(pdftex.def)             Requested size: 1016.73932pt x 1315.78033pt.
+[44
+
+ <out/../extras/survey-questions.pdf>]
+<../extras/survey-questions.pdf, id=709, page=6, 614.295pt x 794.97pt>
+File: ../extras/survey-questions.pdf Graphic file (type pdf)
+<use ../extras/survey-questions.pdf, page 6>
+Package pdftex.def Info: ../extras/survey-questions.pdf , page6 used on input l
+ine 8.
+(pdftex.def)             Requested size: 1016.73932pt x 1315.78033pt.
+File: ../extras/survey-questions.pdf Graphic file (type pdf)
+<use ../extras/survey-questions.pdf, page 6>
+Package pdftex.def Info: ../extras/survey-questions.pdf , page6 used on input l
+ine 8.
+(pdftex.def)             Requested size: 1016.73932pt x 1315.78033pt.
+
+
+File: ../extras/survey-questions.pdf Graphic file (type pdf)
+<use ../extras/survey-questions.pdf, page 6>
+Package pdftex.def Info: ../extras/survey-questions.pdf , page6 used on input l
+ine 8.
+(pdftex.def)             Requested size: 1016.73932pt x 1315.78033pt.
+[45
+
+ <out/../extras/survey-questions.pdf>]
+<../extras/survey-questions.pdf, id=719, page=7, 614.295pt x 794.97pt>
+File: ../extras/survey-questions.pdf Graphic file (type pdf)
+<use ../extras/survey-questions.pdf, page 7>
+Package pdftex.def Info: ../extras/survey-questions.pdf , page7 used on input l
+ine 8.
+(pdftex.def)             Requested size: 1016.73932pt x 1315.78033pt.
+File: ../extras/survey-questions.pdf Graphic file (type pdf)
+<use ../extras/survey-questions.pdf, page 7>
+Package pdftex.def Info: ../extras/survey-questions.pdf , page7 used on input l
+ine 8.
+(pdftex.def)             Requested size: 1016.73932pt x 1315.78033pt.
+
+
+File: ../extras/survey-questions.pdf Graphic file (type pdf)
+<use ../extras/survey-questions.pdf, page 7>
+Package pdftex.def Info: ../extras/survey-questions.pdf , page7 used on input l
+ine 8.
+(pdftex.def)             Requested size: 1016.73932pt x 1315.78033pt.
+[46
+
  <out/../extras/survey-questions.pdf>])
-Underfull \hbox (badness 1286) in paragraph at lines 100--100
+Underfull \hbox (badness 1286) in paragraph at lines 101--101
 []\T1/qpl/m/it/12 (+20) VK Mu-sic\T1/qpl/m/n/12 (+20) . \T1/qpl/m/sc/12 (+20) u
-rl\T1/qpl/m/n/12 (+20) : []$\T1/lmtt/m/n/12 https : / / music . vk . com/$[] \T
-1/qpl/m/n/12 (+20) (vis-ited on
+rl\T1/qpl/m/n/12 (+20) : []$\T1/lmtt/c/it/12 https : / / music . vk . com/$[] \
+T1/qpl/m/n/12 (+20) (vis-ited on
  []
 
 
 
-[44]
-Underfull \hbox (badness 1033) in paragraph at lines 100--100
+[47]
+Underfull \hbox (badness 1033) in paragraph at lines 101--101
 []\T1/qpl/m/it/12 (+20) Instagram Au-dio\T1/qpl/m/n/12 (+20) . \T1/qpl/m/sc/12 
-(+20) url\T1/qpl/m/n/12 (+20) : []$\T1/lmtt/m/n/12 https : / / help . instagram
- . com /
+(+20) url\T1/qpl/m/n/12 (+20) : []$\T1/lmtt/c/it/12 https : / / help . instagra
+m . com /
  []
 
 
-Underfull \hbox (badness 3954) in paragraph at lines 100--100
-\T1/lmtt/m/n/12 664508917489819 ? helpref = faq _ content$[] \T1/qpl/m/n/12 (+2
-0) (vis-ited on
+Underfull \hbox (badness 3954) in paragraph at lines 101--101
+\T1/lmtt/c/it/12 664508917489819 ? helpref = faq _ content$[] \T1/qpl/m/n/12 (+
+20) (vis-ited on
  []
 
 
 
-[45]
-Underfull \hbox (badness 6859) in paragraph at lines 100--100
+[48]
+Underfull \hbox (badness 6859) in paragraph at lines 101--101
 []\T1/qpl/m/it/12 (+20) Generic Event De-liv-ery Us-ing HTTP Push\T1/qpl/m/n/12
- (+20) . \T1/qpl/m/sc/12 (+20) url\T1/qpl/m/n/12 (+20) : []$\T1/lmtt/m/n/12 htt
-ps :
+ (+20) . \T1/qpl/m/sc/12 (+20) url\T1/qpl/m/n/12 (+20) : []$\T1/lmtt/c/it/12 ht
+tps :
  []
 
 
 
-[46]
+[49]
 
-[47] (out/thesis.aux)
+[50]
+Underfull \hbox (badness 1270) in paragraph at lines 101--101
+[]\T1/qpl/m/it/12 (+20) How declar-a-tive UI com-pares to im-per-a-tive\T1/qpl/
+m/n/12 (+20) . \T1/qpl/m/sc/12 (+20) url\T1/qpl/m/n/12 (+20) : []$\T1/lmtt/c/it
+/12 https : / /
+ []
+
+
+Underfull \hbox (badness 1939) in paragraph at lines 101--101
+\T1/lmtt/c/it/12 questions / tagged / reactjs ? tab = Newest$[] \T1/qpl/m/n/12 
+(+20) (vis-ited on
+ []
+
+
+Underfull \hbox (badness 2478) in paragraph at lines 101--101
+\T1/lmtt/c/it/12 academia . edu / 44039524 / IRJET _ Addressing _ the _
+ []
+
+
+
+[51] (out/thesis.aux)
  ***********
 LaTeX2e <2024-11-01> patch level 2
 L3 programming layer <2020/03/25>
  ***********
 
 
+LaTeX Font Warning: Some font shapes were not available, defaults substituted.
+
+
 LaTeX Warning: There were undefined references.
 
 Package rerunfilecheck Info: File `thesis.out' has not changed.
-(rerunfilecheck)             Checksum: FF9F63CE8D3817C37FAF52F4122F8E35;2454.
+(rerunfilecheck)             Checksum: DC37EE345A06BFDD7E09B6C6B41D3AC2;2545.
 Package logreq Info: Writing requests to 'thesis.run.xml'.
 \openout1 = `thesis.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 42170 strings out of 473190
- 816311 string characters out of 5715799
- 1680894 words of memory out of 5000000
- 64301 multiletter control sequences out of 15000+600000
- 635510 words of font info for 200 fonts, out of 8000000 for 9000
+ 42341 strings out of 473190
+ 820471 string characters out of 5715799
+ 1686084 words of memory out of 5000000
+ 64438 multiletter control sequences out of 15000+600000
+ 636016 words of font info for 200 fonts, out of 8000000 for 9000
  1143 hyphenation exceptions out of 8191
  100i,17n,123p,1183b,2362s stack positions out of 10000i,1000n,20000p,200000b,200000s
-</usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb
-></usr/local/texlive/2025/texmf-dist/fonts/type1/public/lm/lmtt10.pfb></usr/loc
-al/texlive/2025/texmf-dist/fonts/type1/public/lm/lmtt12.pfb></usr/local/texlive
-/2025/texmf-dist/fonts/type1/public/tex-gyre/qhvb.pfb></usr/local/texlive/2025/
-texmf-dist/fonts/type1/public/tex-gyre/qhvr.pfb></usr/local/texlive/2025/texmf-
-dist/fonts/type1/public/tex-gyre/qplb.pfb></usr/local/texlive/2025/texmf-dist/f
-onts/type1/public/tex-gyre/qplr.pfb></usr/local/texlive/2025/texmf-dist/fonts/t
-ype1/public/tex-gyre/qplri.pfb>
-Output written on out/thesis.pdf (57 pages, 2242278 bytes).
+</usr/local/texlive/2025/texmf-dist/fonts/type1/public/lm/lmtt10.pfb></usr/lo
+cal/texlive/2025/texmf-dist/fonts/type1/public/lm/lmtt12.pfb></usr/local/texliv
+e/2025/texmf-dist/fonts/type1/public/tex-gyre/qhvb.pfb></usr/local/texlive/2025
+/texmf-dist/fonts/type1/public/tex-gyre/qhvr.pfb></usr/local/texlive/2025/texmf
+-dist/fonts/type1/public/tex-gyre/qplb.pfb></usr/local/texlive/2025/texmf-dist/
+fonts/type1/public/tex-gyre/qplr.pfb></usr/local/texlive/2025/texmf-dist/fonts/
+type1/public/tex-gyre/qplri.pfb>
+Output written on out/thesis.pdf (61 pages, 2247152 bytes).
 PDF statistics:
- 867 PDF objects out of 1000 (max. 8388607)
- 744 compressed objects within 8 object streams
- 179 named destinations out of 1000 (max. 500000)
- 42435 words of extra memory for PDF output out of 42996 (max. 10000000)
+ 955 PDF objects out of 1000 (max. 8388607)
+ 829 compressed objects within 9 object streams
+ 199 named destinations out of 1000 (max. 500000)
+ 42443 words of extra memory for PDF output out of 42996 (max. 10000000)
 

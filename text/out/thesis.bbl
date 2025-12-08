@@ -454,7 +454,7 @@
       \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
       \field{labeltitlesource}{title}
       \field{langid}{english}
-      \field{title}{Mozilla Caching Behaviour for Basic Authentication}
+      \field{title}{Mozilla Caching Behaviour Bug Tracker}
       \field{urlday}{1}
       \field{urlmonth}{11}
       \field{urlyear}{2025}
@@ -471,7 +471,7 @@
       \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
       \field{labeltitlesource}{title}
       \field{langid}{english}
-      \field{title}{Mozilla Caching Behaviour}
+      \field{title}{Mozilla Caching Behaviour Documentation}
       \field{urlday}{1}
       \field{urlmonth}{11}
       \field{urlyear}{2025}
@@ -498,6 +498,23 @@
       \endverb
       \verb{url}
       \verb https://docs.djangoproject.com/en/5.2/topics/http/sessions/
+      \endverb
+    \endentry
+    \entry{redis}{online}{}{}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{Redis}
+      \field{urlday}{7}
+      \field{urlmonth}{12}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://redis.io/
+      \endverb
+      \verb{url}
+      \verb https://redis.io/
       \endverb
     \endentry
     \entry{oauth2}{online}{}{}
@@ -535,8 +552,8 @@
       \endverb
     \endentry
     \entry{server_client_comparison}{online}{}{}
-      \field{sortinit}{2}
-      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{sortinit}{3}
+      \field{sortinithash}{ad6fe7482ffbd7b9f99c9e8b5dccd3d7}
       \field{labeltitlesource}{title}
       \field{langid}{english}
       \field{title}{Comparison of Server to Client Communication Methods}
@@ -602,6 +619,23 @@
       \verb https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API
       \endverb
     \endentry
+    \entry{http_caching}{online}{}{}
+      \field{sortinit}{3}
+      \field{sortinithash}{ad6fe7482ffbd7b9f99c9e8b5dccd3d7}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{Http Caching}
+      \field{urlday}{2}
+      \field{urlmonth}{5}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Caching
+      \endverb
+      \verb{url}
+      \verb https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Caching
+      \endverb
+    \endentry
     \entry{pushapi}{online}{}{}
       \field{sortinit}{3}
       \field{sortinithash}{ad6fe7482ffbd7b9f99c9e8b5dccd3d7}
@@ -653,9 +687,43 @@
       \verb https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API
       \endverb
     \endentry
+    \entry{py_vs_java_vs_js}{online}{}{}
+      \field{sortinit}{4}
+      \field{sortinithash}{9381316451d1b9788675a07e972a12a7}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{Java, Python and Javascript, a comparison}
+      \field{urlday}{7}
+      \field{urlmonth}{12}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://www.diva-portal.org/smash/record.jsf?pid=diva2%3A1355073&dswid=-4197
+      \endverb
+      \verb{url}
+      \verb https://www.diva-portal.org/smash/record.jsf?pid=diva2%3A1355073&dswid=-4197
+      \endverb
+    \endentry
+    \entry{js}{online}{}{}
+      \field{sortinit}{4}
+      \field{sortinithash}{9381316451d1b9788675a07e972a12a7}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{JavaScript}
+      \field{urlday}{7}
+      \field{urlmonth}{12}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://developer.mozilla.org/en-US/docs/Web/JavaScript
+      \endverb
+      \verb{url}
+      \verb https://developer.mozilla.org/en-US/docs/Web/JavaScript
+      \endverb
+    \endentry
     \entry{fastapi}{online}{}{}
-      \field{sortinit}{3}
-      \field{sortinithash}{ad6fe7482ffbd7b9f99c9e8b5dccd3d7}
+      \field{sortinit}{4}
+      \field{sortinithash}{9381316451d1b9788675a07e972a12a7}
       \field{labeltitlesource}{title}
       \field{langid}{english}
       \field{title}{FastAPI}
@@ -670,9 +738,26 @@
       \verb https://fastapi.tiangolo.com/
       \endverb
     \endentry
+    \entry{pydantic}{online}{}{}
+      \field{sortinit}{4}
+      \field{sortinithash}{9381316451d1b9788675a07e972a12a7}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{Pydantic}
+      \field{urlday}{1}
+      \field{urlmonth}{5}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://docs.pydantic.dev/latest/
+      \endverb
+      \verb{url}
+      \verb https://docs.pydantic.dev/latest/
+      \endverb
+    \endentry
     \entry{fastapi_features}{online}{}{}
-      \field{sortinit}{3}
-      \field{sortinithash}{ad6fe7482ffbd7b9f99c9e8b5dccd3d7}
+      \field{sortinit}{4}
+      \field{sortinithash}{9381316451d1b9788675a07e972a12a7}
       \field{labeltitlesource}{title}
       \field{langid}{english}
       \field{title}{FastAPI Features}
@@ -688,8 +773,8 @@
       \endverb
     \endentry
     \entry{fastapi_websockets}{online}{}{}
-      \field{sortinit}{3}
-      \field{sortinithash}{ad6fe7482ffbd7b9f99c9e8b5dccd3d7}
+      \field{sortinit}{4}
+      \field{sortinithash}{9381316451d1b9788675a07e972a12a7}
       \field{labeltitlesource}{title}
       \field{langid}{english}
       \field{title}{FastAPI Websockets}
@@ -755,9 +840,26 @@
       \verb https://www.django-rest-framework.org/
       \endverb
     \endentry
+    \entry{django_overview}{online}{}{}
+      \field{sortinit}{5}
+      \field{sortinithash}{20e9b4b0b173788c5dace24730f47d8c}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{Django Overview}
+      \field{urlday}{7}
+      \field{urlmonth}{12}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://www.djangoproject.com/start/overview/
+      \endverb
+      \verb{url}
+      \verb https://www.djangoproject.com/start/overview/
+      \endverb
+    \endentry
     \entry{django_async}{online}{}{}
-      \field{sortinit}{4}
-      \field{sortinithash}{9381316451d1b9788675a07e972a12a7}
+      \field{sortinit}{5}
+      \field{sortinithash}{20e9b4b0b173788c5dace24730f47d8c}
       \field{labeltitlesource}{title}
       \field{langid}{english}
       \field{title}{Django Async Support}
@@ -772,9 +874,26 @@
       \verb https://docs.djangoproject.com/en/5.2/topics/async/
       \endverb
     \endentry
+    \entry{celery}{online}{}{}
+      \field{sortinit}{5}
+      \field{sortinithash}{20e9b4b0b173788c5dace24730f47d8c}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{Celery Library}
+      \field{urlday}{7}
+      \field{urlmonth}{12}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://docs.celeryq.dev
+      \endverb
+      \verb{url}
+      \verb https://docs.celeryq.dev
+      \endverb
+    \endentry
     \entry{flask}{online}{}{}
-      \field{sortinit}{4}
-      \field{sortinithash}{9381316451d1b9788675a07e972a12a7}
+      \field{sortinit}{5}
+      \field{sortinithash}{20e9b4b0b173788c5dace24730f47d8c}
       \field{labeltitlesource}{title}
       \field{langid}{english}
       \field{title}{Flask}
@@ -790,8 +909,8 @@
       \endverb
     \endentry
     \entry{socketio}{online}{}{}
-      \field{sortinit}{4}
-      \field{sortinithash}{9381316451d1b9788675a07e972a12a7}
+      \field{sortinit}{5}
+      \field{sortinithash}{20e9b4b0b173788c5dace24730f47d8c}
       \field{labeltitlesource}{title}
       \field{langid}{english}
       \field{title}{SocketIO}
@@ -806,9 +925,26 @@
       \verb https://socket.io/
       \endverb
     \endentry
+    \entry{django_instagram}{online}{}{}
+      \field{sortinit}{5}
+      \field{sortinithash}{20e9b4b0b173788c5dace24730f47d8c}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{Web Service Efficiency at Instagram with Python}
+      \field{urlday}{7}
+      \field{urlmonth}{12}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://instagram-engineering.com/web-service-efficiency-at-instagram-with-python-4976d078e366
+      \endverb
+      \verb{url}
+      \verb https://instagram-engineering.com/web-service-efficiency-at-instagram-with-python-4976d078e366
+      \endverb
+    \endentry
     \entry{oracle_pricing}{online}{}{}
-      \field{sortinit}{4}
-      \field{sortinithash}{9381316451d1b9788675a07e972a12a7}
+      \field{sortinit}{5}
+      \field{sortinithash}{20e9b4b0b173788c5dace24730f47d8c}
       \field{labeltitlesource}{title}
       \field{langid}{english}
       \field{title}{Oracle Price List}
@@ -823,9 +959,26 @@
       \verb https://www.oracle.com/a/ocom/docs/corporate/pricing/technology-price-list-070617.pdf
       \endverb
     \endentry
+    \entry{postgres_fulltext}{online}{}{}
+      \field{sortinit}{5}
+      \field{sortinithash}{20e9b4b0b173788c5dace24730f47d8c}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{PostgreSQL Full Text Search}
+      \field{urlday}{7}
+      \field{urlmonth}{12}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://www.postgresql.org/docs/current/textsearch.html
+      \endverb
+      \verb{url}
+      \verb https://www.postgresql.org/docs/current/textsearch.html
+      \endverb
+    \endentry
     \entry{postgres}{online}{}{}
-      \field{sortinit}{4}
-      \field{sortinithash}{9381316451d1b9788675a07e972a12a7}
+      \field{sortinit}{5}
+      \field{sortinithash}{20e9b4b0b173788c5dace24730f47d8c}
       \field{labeltitlesource}{title}
       \field{langid}{english}
       \field{title}{PostgreSQL}
@@ -841,8 +994,8 @@
       \endverb
     \endentry
     \entry{django_postgres}{online}{}{}
-      \field{sortinit}{4}
-      \field{sortinithash}{9381316451d1b9788675a07e972a12a7}
+      \field{sortinit}{5}
+      \field{sortinithash}{20e9b4b0b173788c5dace24730f47d8c}
       \field{labeltitlesource}{title}
       \field{langid}{english}
       \field{title}{Django PostgreSQL Support}
@@ -858,8 +1011,8 @@
       \endverb
     \endentry
     \entry{postgres_uuid}{online}{}{}
-      \field{sortinit}{4}
-      \field{sortinithash}{9381316451d1b9788675a07e972a12a7}
+      \field{sortinit}{6}
+      \field{sortinithash}{b33bc299efb3c36abec520a4c896a66d}
       \field{labeltitlesource}{title}
       \field{langid}{english}
       \field{title}{Postgres UUID Type}
@@ -874,9 +1027,43 @@
       \verb https://www.postgresql.org/docs/current/datatype-uuid.html
       \endverb
     \endentry
+    \entry{django_html}{online}{}{}
+      \field{sortinit}{6}
+      \field{sortinithash}{b33bc299efb3c36abec520a4c896a66d}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{Django Templates}
+      \field{urlday}{30}
+      \field{urlmonth}{1}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://docs.djangoproject.com/en/5.2/ref/templates/language/
+      \endverb
+      \verb{url}
+      \verb https://docs.djangoproject.com/en/5.2/ref/templates/language/
+      \endverb
+    \endentry
+    \entry{spa}{online}{}{}
+      \field{sortinit}{6}
+      \field{sortinithash}{b33bc299efb3c36abec520a4c896a66d}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{Single Page Application}
+      \field{urlday}{7}
+      \field{urlmonth}{12}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://developer.mozilla.org/en-US/docs/Glossary/SPA
+      \endverb
+      \verb{url}
+      \verb https://developer.mozilla.org/en-US/docs/Glossary/SPA
+      \endverb
+    \endentry
     \entry{clay_lib}{online}{}{}
-      \field{sortinit}{5}
-      \field{sortinithash}{20e9b4b0b173788c5dace24730f47d8c}
+      \field{sortinit}{6}
+      \field{sortinithash}{b33bc299efb3c36abec520a4c896a66d}
       \field{labeltitlesource}{title}
       \field{langid}{english}
       \field{title}{Clay Library}
@@ -892,8 +1079,8 @@
       \endverb
     \endentry
     \entry{yew_framework}{online}{}{}
-      \field{sortinit}{5}
-      \field{sortinithash}{20e9b4b0b173788c5dace24730f47d8c}
+      \field{sortinit}{6}
+      \field{sortinithash}{b33bc299efb3c36abec520a4c896a66d}
       \field{labeltitlesource}{title}
       \field{langid}{english}
       \field{title}{Yew Framework}
@@ -909,8 +1096,8 @@
       \endverb
     \endentry
     \entry{frameworkdata}{online}{}{}
-      \field{sortinit}{5}
-      \field{sortinithash}{20e9b4b0b173788c5dace24730f47d8c}
+      \field{sortinit}{6}
+      \field{sortinithash}{b33bc299efb3c36abec520a4c896a66d}
       \field{labeltitlesource}{title}
       \field{langid}{english}
       \field{title}{Framework Usage}
@@ -926,8 +1113,8 @@
       \endverb
     \endentry
     \entry{react}{online}{}{}
-      \field{sortinit}{5}
-      \field{sortinithash}{20e9b4b0b173788c5dace24730f47d8c}
+      \field{sortinit}{6}
+      \field{sortinithash}{b33bc299efb3c36abec520a4c896a66d}
       \field{labeltitlesource}{title}
       \field{langid}{english}
       \field{title}{React}
@@ -942,9 +1129,26 @@
       \verb https://react.dev/
       \endverb
     \endentry
+    \entry{react_declarative_def}{online}{}{}
+      \field{sortinit}{6}
+      \field{sortinithash}{b33bc299efb3c36abec520a4c896a66d}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{How declarative UI compares to imperative}
+      \field{urlday}{7}
+      \field{urlmonth}{12}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://react.dev/learn/reacting-to-input-with-state#how-declarative-ui-compares-to-imperative
+      \endverb
+      \verb{url}
+      \verb https://react.dev/learn/reacting-to-input-with-state#how-declarative-ui-compares-to-imperative
+      \endverb
+    \endentry
     \entry{react_devtools}{online}{}{}
-      \field{sortinit}{5}
-      \field{sortinithash}{20e9b4b0b173788c5dace24730f47d8c}
+      \field{sortinit}{6}
+      \field{sortinithash}{b33bc299efb3c36abec520a4c896a66d}
       \field{labeltitlesource}{title}
       \field{langid}{english}
       \field{title}{React Developer Tools}
@@ -959,9 +1163,43 @@
       \verb https://react.dev/learn/react-developer-tools
       \endverb
     \endentry
+    \entry{so_react}{online}{}{}
+      \field{sortinit}{6}
+      \field{sortinithash}{b33bc299efb3c36abec520a4c896a66d}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{StackOverflow React}
+      \field{urlday}{7}
+      \field{urlmonth}{12}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://stackoverflow.com/questions/tagged/reactjs?tab=Newest
+      \endverb
+      \verb{url}
+      \verb https://stackoverflow.com/questions/tagged/reactjs?tab=Newest
+      \endverb
+    \endentry
+    \entry{react_performance_review}{online}{}{}
+      \field{sortinit}{7}
+      \field{sortinithash}{108d0be1b1bee9773a1173443802c0a3}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{Addressing the Limitations of React JS}
+      \field{urlday}{7}
+      \field{urlmonth}{12}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://www.academia.edu/44039524/IRJET_Addressing_the_Limitations_of_React_JS
+      \endverb
+      \verb{url}
+      \verb https://www.academia.edu/44039524/IRJET_Addressing_the_Limitations_of_React_JS
+      \endverb
+    \endentry
     \entry{vue}{online}{}{}
-      \field{sortinit}{5}
-      \field{sortinithash}{20e9b4b0b173788c5dace24730f47d8c}
+      \field{sortinit}{7}
+      \field{sortinithash}{108d0be1b1bee9773a1173443802c0a3}
       \field{labeltitlesource}{title}
       \field{langid}{english}
       \field{title}{VueJS}
@@ -976,9 +1214,26 @@
       \verb https://vuejs.org/about/faq.html
       \endverb
     \endentry
+    \entry{angular}{online}{}{}
+      \field{sortinit}{7}
+      \field{sortinithash}{108d0be1b1bee9773a1173443802c0a3}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{Angular}
+      \field{urlday}{7}
+      \field{urlmonth}{12}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://angular.dev/
+      \endverb
+      \verb{url}
+      \verb https://angular.dev/
+      \endverb
+    \endentry
     \entry{mvc}{online}{}{}
-      \field{sortinit}{5}
-      \field{sortinithash}{20e9b4b0b173788c5dace24730f47d8c}
+      \field{sortinit}{7}
+      \field{sortinithash}{108d0be1b1bee9773a1173443802c0a3}
       \field{labeltitlesource}{title}
       \field{langid}{english}
       \field{title}{MVC}
