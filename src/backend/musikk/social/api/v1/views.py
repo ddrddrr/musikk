@@ -1,8 +1,10 @@
 from django.contrib.contenttypes.models import ContentType
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
+from social.api.v1.filters import PublicationFilter
 from social.api.v1.serializers import (
     PublicationCreateSerializer,
     PublicationRetrieveSerializer,
@@ -13,7 +15,7 @@ from social.models import Publication
 from websockets.event_helpers import send_ws_event
 
 
-class PublicationsListCreateView(APIView):
+class PublicationListCreateForObjView(APIView):
     # TODO: proper access rights
     def get(self, request, obj_type, obj_uuid, *args, **kwargs):
         related_model = CREATED_FOR_TYPE_TO_MODEL_MAP.get(obj_type)
@@ -28,12 +30,9 @@ class PublicationsListCreateView(APIView):
         except related_model.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-        with_children = (
-            True if request.query_params.get("with_children") == "true" else False
-        )
-
         content_type = ContentType.objects.get_for_model(related_model)
-        if with_children:
+        # TODO is this valid?
+        if request.query_params.get("with_children"):
             queryset = (
                 Publication.objects.filter(
                     created_for_type=content_type,
@@ -79,3 +78,35 @@ class PublicationsListCreateView(APIView):
                 ).data,
             },
         )
+
+
+class PublicationFeedLatestView(APIView):
+    """
+    View for getting aggregated feed publications (friends/followed/all).
+    Supports filtering by connection type via query params.
+    """
+    
+    def get(self, request, *args, **kwargs):
+        queryset = Publication.objects.all()
+        
+        # Apply filters
+        filterset = PublicationFilter(request.GET, queryset=queryset, request=request)
+        
+        if filterset.is_valid():
+            filtered_qs = filterset.qs
+        else:
+            # If no valid filter, return all feed publications (top-level only)
+            from users.models import BaseUser
+            feed_content_type = ContentType.objects.get_for_model(BaseUser)
+            filtered_qs = queryset.filter(
+                parent__isnull=True,
+                created_for_type=feed_content_type
+            ).order_by("-date_added")[:50]
+        
+        serializer = PublicationRetrieveSerializer(
+            filtered_qs, 
+            many=True, 
+            context={"request": request}
+        )
+        
+        return Response(status=status.HTTP_200_OK, data=serializer.data)

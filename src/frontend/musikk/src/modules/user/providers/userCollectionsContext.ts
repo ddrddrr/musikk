@@ -1,10 +1,10 @@
-import { ISongCollection } from "@/modules/song-collections/types.ts";
+import { ICollection } from "@/modules/song-collections/types.ts";
 import { createContext } from "react";
 
 interface UserCollectionsContextType {
-    liked_songs: ISongCollection | null;
-    followed_collections: ISongCollection[] | null;
-    history: ISongCollection | null;
+    liked_songs: ICollection | null;
+    followed_collections: ICollection[] | null;
+    history: ICollection | null;
 }
 
 export const UserCollectionsContext = createContext<UserCollectionsContextType>({

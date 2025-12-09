@@ -15,12 +15,14 @@ export function Comment({ comment, setReplyTo, repliedTo, parent }: CommentProps
         >
             {parent && (
                 <div className="text-xs text-gray-600 border border-gray-300 bg-gray-100 p-2 mb-2 rounded">
-                    <div className="font-medium truncate">{parent.display_name || "Anonymous"}</div>
+                    <div className="font-medium truncate">
+                        {parent.author.display_name || "Anonymous"}
+                    </div>
                     <div className="italic truncate">{parent.content}</div>
                 </div>
             )}
             <div className="flex items-center justify-between mb-1">
-                <UserIdentifier user={comment.user} />
+                <UserIdentifier user={comment.author} />
                 <span className="text-[10px] text-gray-600 truncate text-right max-w-[50%]">
                     {new Date(comment.date_added).toLocaleString("en-US", {
                         dateStyle: "medium",

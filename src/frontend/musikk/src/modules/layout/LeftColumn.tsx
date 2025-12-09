@@ -1,4 +1,4 @@
-import { SongCollectionCard } from "@/modules/song-collections/SongCollectionCard";
+import { CollectionCard } from "@/modules/song-collections/CollectionCard.tsx";
 import { UserCollectionsContext } from "@/modules/user/providers/userCollectionsContext.ts";
 import { useContext, useMemo } from "react";
 
@@ -26,7 +26,7 @@ export function LeftColumn() {
                 <ul className="space-y-6" role="list">
                     {collections.map((collection) => (
                         <li key={collection.uuid}>
-                            <SongCollectionCard collection={collection} size="big" />
+                            <CollectionCard collection={collection} size="big" />
                         </li>
                     ))}
                 </ul>

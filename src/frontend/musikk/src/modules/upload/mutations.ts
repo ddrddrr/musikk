@@ -1,7 +1,7 @@
 import { api_client } from "@/api/axiosConf.ts";
 import { CollectionURLs, SongURLs } from "@/api/endpoints.ts";
 import { UUID } from "@/api/types.ts";
-import { ISongCollection } from "@/modules/song-collections/types.ts";
+import { ICollection } from "@/modules/song-collections/types.ts";
 
 interface SongPayload {
     title: string;
@@ -33,7 +33,7 @@ export async function createCollection(payload: {
     image?: File;
     authors?: UUID[];
     songs: string[];
-}): Promise<ISongCollection> {
+}): Promise<ICollection> {
     const formData = new FormData();
 
     formData.append("title", payload.title);

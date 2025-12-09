@@ -3,9 +3,11 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { useUserPostCreateMutation } from "@/modules/publications/mutations";
+import { UUID } from "@/api/types.ts";
+import { usePublicationCreateMutation } from "@/modules/publications/mutations";
 import { postSchema } from "@/modules/publications/schemas";
-import { IAttachment, IPublication } from "@/modules/publications/types";
+import { Attachment, IPublication } from "@/modules/publications/types";
+import { ICollection } from "@/modules/song-collections/types.ts";
 
 import { SearchBar } from "@/modules/search/SearchBar.tsx";
 import { Button } from "@/modules/ui/button";
@@ -17,9 +19,10 @@ interface PostFormProps {
     replyTo?: IPublication;
     setReplyTo?: (reply?: IPublication) => void;
     onSuccess?: () => void;
+    feedUserUuid?: UUID;
 }
 
-export function PostForm({ replyTo, setReplyTo, onSuccess }: PostFormProps) {
+export function PostForm({ replyTo, setReplyTo, onSuccess, feedUserUuid }: PostFormProps) {
     const {
         register,
         handleSubmit,
@@ -29,16 +32,41 @@ export function PostForm({ replyTo, setReplyTo, onSuccess }: PostFormProps) {
         resolver: zodResolver(postSchema),
     });
 
-    const [attachedObj, setAttachedObj] = useState<IAttachment | undefined>(undefined);
-    const postMutation = useUserPostCreateMutation();
+    const [attachedObj, setAttachedObj] = useState<Attachment | undefined>(undefined);
 
-    const submitHandler = async (data: PostFormData) => {
-        const payload = {
-            content: data.content,
-            objType: attachedObj?.objType,
-            objUUID: attachedObj?.objUUID,
-            replyToUUID: replyTo?.uuid,
+    const postMutation = usePublicationCreateMutation();
+
+    const isCollection = (obj: Attachment): obj is ICollection => {
+        return "title" in obj && "authors" in obj;
+    };
+
+    const submitHandler = async (formData: PostFormData) => {
+        const payload: {
+            content: string;
+            obj_type: "feed";
+            obj_uuid: UUID;
+            parent_uuid?: UUID;
+            attachment_type?: "song" | "collection";
+            attachment_uuid?: UUID;
+        } = {
+            content: formData.content,
+            obj_type: "feed",
+            obj_uuid: feedUserUuid!,
         };
+
+        if (replyTo?.uuid) {
+            payload.parent_uuid = replyTo.uuid;
+        }
+
+        if (attachedObj) {
+            if (isCollection(attachedObj)) {
+                payload.attachment_type = "collection";
+                payload.attachment_uuid = attachedObj.uuid;
+            } else {
+                payload.attachment_type = "song";
+                payload.attachment_uuid = attachedObj.uuid;
+            }
+        }
 
         await postMutation.mutateAsync(payload);
 
@@ -53,15 +81,20 @@ export function PostForm({ replyTo, setReplyTo, onSuccess }: PostFormProps) {
             <Textarea {...register("content")} />
             {errors.content && <p className="text-xs text-red-500">{errors.content.message}</p>}
 
-            <SearchBar onItemSelect={(obj) => setAttachedObj(obj)} placeholder={"Attach"} songMode={"card"} />
+            <SearchBar
+                onItemSelect={(obj) => setAttachedObj(obj)}
+                placeholder={"Attach"}
+                songMode={"card"}
+            />
 
-            {attachedObj && <div className="text-xs text-muted-foreground italic">Attached: {attachedObj.repr}</div>}
+            {attachedObj && (
+                <div className="text-xs text-muted-foreground italic">
+                    Attached:{" "}
+                    {isCollection(attachedObj) ? attachedObj.title : attachedObj.song.title}
+                </div>
+            )}
 
-            <Button
-                type="submit"
-                variant="brand"
-                className="px-4 py-2 rounded-sm"
-            >
+            <Button type="submit" variant="brand" className="px-4 py-2 rounded-sm">
                 Submit
             </Button>
         </form>

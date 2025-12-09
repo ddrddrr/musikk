@@ -11,7 +11,9 @@ export function CommentList({ comments, replyTo, setReplyTo }: CommentListProps)
     return (
         <div className="space-y-4">
             {comments.map((comment) => {
-                const parent = comment.parent ? comments.find((c) => c.uuid === comment.parent) : undefined;
+                const parent = comment.parent_uuid
+                    ? comments.find((c) => c.uuid === comment.parent_uuid)
+                    : undefined;
 
                 return (
                     <Comment

@@ -6,36 +6,9 @@ from rest_framework.views import APIView
 from streaming.api.v1.serializers import CollectionSongGetSerializer
 from users.api.v1.serializers import BaseUserSerializer
 
-
-class FriendsLatestListenedView(APIView):
-
-
-    def get(self, *args, **kwargs):
-        user_songs = []
-        for f in self.request.user.friends:
-            user_songs.append(
-                {
-                    "user": BaseUserSerializer(
-                        f.user.baseprofile, context={"request": self.request}
-                    ).data,
-                    "song": CollectionSongGetSerializer(
-                        f.song_queue.head.song, context={"request": self.request}
-                    ).data,
-                }
-            )
-
-        return Response(status=status.HTTP_200_OK, data=user_songs)
-
-
-class FriendsLatestAddedCollectionsView(APIView):
-    pass
-
-
-# class ConnectionsLatestListenedView(APIView):
-# 
-#
+# TODO: playback state is an issue!
+# class FriendsLatestListenedView(APIView):
 #     def get(self, request, *args, **kwargs):
-#         profile: StreamingProfile = request.user.streamingprofile
 #         friends = StreamingProfile.objects.filter(
 #             user__baseprofile__in=profile.friends.all(),
 #             playback_state__is_playing=True,
@@ -63,8 +36,8 @@ class FriendsLatestAddedCollectionsView(APIView):
 #
 #
 # # TODO: return who exactly followed the collection/song
-# class ConnectionsLatestAddedView(APIView):
-# 
+# class FriendsLatestAddedCollectionsView(APIView):
+#
 #     amount = 30
 #
 #     def get(self, request, *args, **kwargs):

@@ -1,10 +1,10 @@
 import { api_client } from "@/api/axiosConf.ts";
 import { NotificationURLs } from "@/api/endpoints.ts";
-import { IFriendRequestNotification, IReplyNotification } from "@/modules/notifications/types.ts";
+import { IReplyNotification } from "@/modules/notifications/types.ts";
 
+// TODO add follow notifications
 export interface NotificationListParams {
     replies: IReplyNotification[];
-    friend_requests: IFriendRequestNotification[];
 }
 
 export async function fetchNotificationList(): Promise<NotificationListParams> {

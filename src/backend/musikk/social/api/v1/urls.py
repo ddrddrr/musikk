@@ -1,13 +1,19 @@
 from django.urls import path
 
 from social.api.v1.views import (
-    PublicationsListCreateView,
+    PublicationListCreateForObjView,
+    PublicationFeedLatestView,
 )
 
 urlpatterns = [
     path(
         "publications/<str:obj_type>/<uuid:obj_uuid>",
-        PublicationsListCreateView.as_view(),
-        name="publication-create-list",
+        PublicationListCreateForObjView.as_view(),
+        name="publication-create-list-for-obj",
+    ),
+    path(
+        "publications/feed/latest",
+        PublicationFeedLatestView.as_view(),
+        name="publication-feed-latest",
     ),
 ]

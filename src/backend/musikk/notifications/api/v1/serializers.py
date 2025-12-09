@@ -25,24 +25,3 @@ class ReplyNotificationSerializer(BaseNotificationSerializer):
             "reply_publication",
             "is_read",
         ]
-
-
-class FriendRequestNotificationSerializer(BaseNotificationSerializer):
-    sender = serializers.SerializerMethodField()
-    receiver = serializers.SerializerMethodField()
-
-    class Meta(BaseNotificationSerializer.Meta):
-        model = FollowerNotification
-        fields = BaseNotificationSerializer.Meta.fields + ["sender", "receiver"]
-
-    def get_sender(self, obj):
-        return {
-            "uuid": obj.sender.uuid,
-            "display_name": obj.sender.baseprofile.display_name,
-        }
-
-    def get_receiver(self, obj):
-        return {
-            "uuid": obj.receiver.uuid,
-            "display_name": obj.receiver.baseprofile.display_name,
-        }

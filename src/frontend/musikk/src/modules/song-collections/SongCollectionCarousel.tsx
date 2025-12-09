@@ -1,9 +1,15 @@
-import { SongCollectionCard } from "@/modules/song-collections/SongCollectionCard";
-import { ISongCollection } from "@/modules/song-collections/types.ts";
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/modules/ui/carousel";
+import { CollectionCard } from "@/modules/song-collections/CollectionCard.tsx";
+import { ICollection } from "@/modules/song-collections/types.ts";
+import {
+    Carousel,
+    CarouselContent,
+    CarouselItem,
+    CarouselNext,
+    CarouselPrevious,
+} from "@/modules/ui/carousel";
 
 interface SongCollectionsCarouselProps {
-    collections: ISongCollection[];
+    collections: ICollection[];
     title: string;
 }
 
@@ -26,11 +32,13 @@ export function SongCollectionCarousel({ collections, title }: SongCollectionsCa
                                     key={collection.uuid}
                                     className="pl-2 md:pl-4 basis-1/2 md:basis-1/3 lg:basis-1/4"
                                 >
-                                    <SongCollectionCard collection={collection} size="medium" />
+                                    <CollectionCard collection={collection} size="medium" />
                                 </CarouselItem>
                             ))
                         ) : (
-                            <div className="text-center text-gray-500 w-full">No collections available</div>
+                            <div className="text-center text-gray-500 w-full">
+                                No collections available
+                            </div>
                         )}
                     </CarouselContent>
                     {collections.length > 0 && (

@@ -1,4 +1,5 @@
 export function Spinner() {
+    // TODO: use new https://ui.shadcn.com/docs/components/spinner
     return (
         <span className="flex items-center justify-center">
             <svg
@@ -7,7 +8,14 @@ export function Spinner() {
                 fill="none"
                 viewBox="0 0 24 24"
             >
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                ></circle>
                 <path
                     className="opacity-75"
                     fill="currentColor"

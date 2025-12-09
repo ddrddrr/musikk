@@ -1,17 +1,16 @@
 import { UUID } from "@/api/types";
-import { commentCreate } from "@/modules/publications/mutations";
+import { usePublicationCreateMutation } from "@/modules/publications/mutations";
 import { commentSchema } from "@/modules/publications/schemas.ts";
-import { IPublication, PublicationObjectType } from "@/modules/publications/types";
+import { IPublication, PublicationForType } from "@/modules/publications/types";
 import { Button } from "@/modules/ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 type CommentFormData = z.infer<typeof commentSchema>;
 
 interface CommentFormDataProps {
-    objType: PublicationObjectType;
+    objType: PublicationForType;
     objUUID: UUID;
     replyTo?: IPublication;
     setReplyTo?: (comment?: IPublication) => void;
@@ -27,24 +26,25 @@ export function CommentForm({ objType, objUUID, replyTo, setReplyTo }: CommentFo
         resolver: zodResolver(commentSchema),
     });
 
-    const addCommentMutation = useMutation({
-        mutationFn: commentCreate,
-        onSuccess: () => {
-            reset();
-            setReplyTo?.(undefined);
-        },
-        onError: (error) => {
-            console.error("Failed to add comment:", error);
-        },
-    });
-
+    const addCommentMutation = usePublicationCreateMutation();
     const submitHandler = (data: CommentFormData) => {
-        addCommentMutation.mutate({
-            objType,
-            objUUID,
-            content: data.content,
-            replyToUUID: replyTo?.uuid,
-        });
+        addCommentMutation.mutate(
+            {
+                obj_type: objType,
+                obj_uuid: objUUID,
+                content: data.content,
+                parent_uuid: replyTo?.uuid,
+            },
+            {
+                onSuccess: () => {
+                    reset();
+                    setReplyTo?.(undefined);
+                },
+                onError: (error) => {
+                    console.error("Failed to add comment:", error);
+                },
+            },
+        );
     };
 
     return (
@@ -52,7 +52,9 @@ export function CommentForm({ objType, objUUID, replyTo, setReplyTo }: CommentFo
             {replyTo && (
                 <div className="text-xs text-gray-600 border border-blue-300 bg-blue-100 p-2 mb-2 rounded flex justify-between items-start">
                     <div className="truncate max-w-xs">
-                        <div className="font-medium truncate">{replyTo.display_name || "Anonymous"}</div>
+                        <div className="font-medium truncate">
+                            {replyTo.author.display_name || "Anonymous"}
+                        </div>
                         <div className="italic truncate">{replyTo.content}</div>
                     </div>
                     <Button

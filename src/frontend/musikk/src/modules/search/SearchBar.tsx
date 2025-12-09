@@ -1,11 +1,11 @@
-import { IAttachment } from "@/modules/publications/types";
+import { Attachment } from "@/modules/publications/types";
 import { SearchWindow } from "@/modules/search/SearchWindow";
 import { Popover, PopoverContent, PopoverTrigger } from "@/modules/ui/popover";
 import { Search } from "lucide-react";
 import { useState } from "react";
 
 interface SearchBarProps {
-    onItemSelect?: (obj: IAttachment) => void;
+    onItemSelect?: (obj: Attachment) => void;
     placeholder?: string;
     songMode?: "container" | "card";
 }
@@ -17,7 +17,7 @@ export function SearchBar({
 }: SearchBarProps) {
     const [open, setOpen] = useState(false);
 
-    const handleSelect = (item: IAttachment) => {
+    const handleSelect = (item: Attachment) => {
         if (!onItemSelect) return;
         onItemSelect(item);
         setOpen(false);
@@ -37,7 +37,10 @@ export function SearchBar({
                     align="center"
                 >
                     <div className="p-4">
-                        <SearchWindow onItemSelect={onItemSelect ? handleSelect : undefined} songMode={songMode} />
+                        <SearchWindow
+                            onItemSelect={onItemSelect ? handleSelect : undefined}
+                            songMode={songMode}
+                        />
                     </div>
                 </PopoverContent>
             </Popover>

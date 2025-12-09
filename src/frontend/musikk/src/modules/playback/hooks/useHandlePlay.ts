@@ -1,7 +1,7 @@
 import { useCurrentDevice } from "@/hooks/useCurrentDevice.ts";
 import { usePlaybackStateMutation } from "@/modules/playback/mutations.ts";
 import { PlaybackContext } from "@/modules/playback/providers/playbackContext.ts";
-import { ISongCollection, ISongCollectionSong } from "@/modules/song-collections/types.ts";
+import { ICollection, ICollectionSong } from "@/modules/song-collections/types.ts";
 import { useQueueAddAPI } from "@/modules/song-queue/hooks/useQueueAPI.ts";
 import { useContext } from "react";
 
@@ -15,8 +15,8 @@ export function useHandlePlay() {
         newCollection,
         newSong,
     }: {
-        newCollection?: ISongCollection;
-        newSong?: ISongCollectionSong;
+        newCollection?: ICollection;
+        newSong?: ICollectionSong;
     } = {}) {
         if (!getDeviceID()) return;
 

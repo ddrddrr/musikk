@@ -1,26 +1,22 @@
 import { UUID } from "@/api/types.ts";
 import { IBaseModel } from "@/modules/common/types.ts";
+import { ICollection, ICollectionSong } from "@/modules/song-collections/types.ts";
 import { IUser } from "@/modules/user/types.ts";
 
-export type PublicationType = "comment" | "post";
+export type AttachmentType = "collection" | "song";
+export type Attachment = ICollection | ICollectionSong;
 
 export interface IPublication extends IBaseModel {
+    author: IUser;
+    root_author_uuid: UUID;
     content: string;
-    display_name: string | null;
-    user: IUser;
-    parent: UUID | null;
+    parent_uuid: UUID;
     is_deleted: boolean;
-    obj_type: PublicationObjectType | null;
-    obj_uuid: UUID | null;
-    type: PublicationType;
-    root_user_uuid: UUID | null;
+    obj_type: string;
+    obj_uuid: UUID;
+    attachment_type: AttachmentType;
+    attachment: Attachment | null;
+    children: IPublication[];
 }
 
-export type PublicationObjectType = "collection" | "song" | "user";
-
-export interface IAttachment {
-    objType: PublicationObjectType;
-    objUUID: UUID;
-    repr: string;
-    image?: string;
-}
+export type PublicationForType = "collection" | "feed";

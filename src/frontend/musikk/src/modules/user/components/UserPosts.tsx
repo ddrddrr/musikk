@@ -2,11 +2,11 @@ import { UUID } from "@/api/types.ts";
 import { useUserUUID } from "@/modules/auth/hooks/useUserUUID.ts";
 import { PostForm } from "@/modules/publications/PostForm.tsx";
 import { PostTree } from "@/modules/publications/PostTree.tsx";
-import { useUserPostsQuery } from "@/modules/publications/queries.ts";
+import { usePublicationListQuery } from "@/modules/publications/queries.ts";
 import { Card, CardContent } from "@/modules/ui/card.tsx";
 
 export function UserPosts({ userUUID }: { userUUID: UUID }) {
-    const { data: posts, isPending, error } = useUserPostsQuery(userUUID);
+    const { data: posts, isPending, error } = usePublicationListQuery("feed", userUUID);
     const currUserUUID = useUserUUID();
 
     if (error) {
@@ -21,7 +21,7 @@ export function UserPosts({ userUUID }: { userUUID: UUID }) {
                 <Card className="border-2 border-black shadow-md">
                     <CardContent className="p-4 space-y-3">
                         <h2 className="text-lg font-semibold">Add a Post :)</h2>
-                        <PostForm />
+                        <PostForm feedUserUuid={userUUID} />
                     </CardContent>
                 </Card>
             )}

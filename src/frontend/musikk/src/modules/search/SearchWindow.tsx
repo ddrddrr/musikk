@@ -6,8 +6,8 @@ import { Card, CardContent } from "@/modules/ui/card";
 import { Input } from "@/modules/ui/input";
 
 import { IAttachment } from "@/modules/publications/types.ts";
-import { SongCollectionCard } from "@/modules/song-collections/SongCollectionCard";
-import { ISongCollection } from "@/modules/song-collections/types.ts";
+import { CollectionCard } from "@/modules/song-collections/CollectionCard.tsx";
+import { ICollection } from "@/modules/song-collections/types.ts";
 import { SongCard } from "@/modules/songs/SongCard.tsx";
 import { SongContainer } from "@/modules/songs/SongContainer.tsx";
 import { UserCard } from "@/modules/user/components/UserCard.tsx";
@@ -78,7 +78,7 @@ export function SearchWindow({ onItemSelect, songMode = "card" }: SearchWindowPr
         );
     };
 
-    const renderCollections = (label: string, items: ISongCollection[]) => {
+    const renderCollections = (label: string, items: ICollection[]) => {
         if (!items?.length) return null;
 
         return (
@@ -86,7 +86,7 @@ export function SearchWindow({ onItemSelect, songMode = "card" }: SearchWindowPr
                 <h3 className="text-sm font-semibold mb-2">{label}</h3>
                 <div className="grid grid-cols-2 gap-2">
                     {items.map((collection) => (
-                        <SongCollectionCard
+                        <CollectionCard
                             key={collection.uuid}
                             collection={collection}
                             size="small"

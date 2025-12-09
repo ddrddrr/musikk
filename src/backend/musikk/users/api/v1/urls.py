@@ -55,12 +55,12 @@ urlpatterns = [
         name="user-friends",
     ),
     path(
-        "users/<uuid:uuid>/followers",
+        "users/<uuid:for_user_uuid>/followers",
         FollowersView.as_view(),
         name="user-followers",
     ),
     path(
-        "users/<uuid:user_uuid>/followed",
+        "users/<uuid:for_user_uuid>/followed",
         FollowedView.as_view(),
         name="user-followed",
     ),

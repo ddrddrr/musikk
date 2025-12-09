@@ -1,12 +1,12 @@
 import { CollectionAddToLikedButton } from "@/modules/song-collections/CollectionAddToLikedButton.tsx";
 import { CollectionAddToQueueButton } from "@/modules/song-collections/CollectionAddToQueueButton.tsx";
 import { SongCollectionPlayButton } from "@/modules/song-collections/SongCollectionPlayButton.tsx";
-import { ISongCollectionDetailed } from "@/modules/song-collections/types.ts";
+import { ICollectionDetailed } from "@/modules/song-collections/types.ts";
 import { Button } from "@/modules/ui/button";
 import { memo } from "react";
 
 interface SongCollectionHeaderProps {
-    collection: ISongCollectionDetailed;
+    collection: ICollectionDetailed;
     showComments: boolean;
     toggleComments: () => void;
     songsCount: number;
@@ -47,12 +47,21 @@ export const SongCollectionHeader = memo(function SongCollectionHeader({
                             <p className="font-bold text-sm truncate">{collection.title}</p>
                             <div className="flex gap-3 mt-2">
                                 {songsCount > 0 && (
-                                    <SongCollectionPlayButton collection={collection} showComments={showComments} />
+                                    <SongCollectionPlayButton
+                                        collection={collection}
+                                        showComments={showComments}
+                                    />
                                 )}
                                 {notPersonalCollection && (
-                                    <CollectionAddToLikedButton collection={collection} showComments={showComments} />
+                                    <CollectionAddToLikedButton
+                                        collection={collection}
+                                        showComments={showComments}
+                                    />
                                 )}
-                                <CollectionAddToQueueButton collection={collection} showComments={showComments} />
+                                <CollectionAddToQueueButton
+                                    collection={collection}
+                                    showComments={showComments}
+                                />
                             </div>
                         </div>
                     ) : (
@@ -68,12 +77,21 @@ export const SongCollectionHeader = memo(function SongCollectionHeader({
                             </div>
                             <div className="flex gap-3 ml-6 flex-shrink-0">
                                 {songsCount > 0 && (
-                                    <SongCollectionPlayButton collection={collection} showComments={showComments} />
+                                    <SongCollectionPlayButton
+                                        collection={collection}
+                                        showComments={showComments}
+                                    />
                                 )}
                                 {notPersonalCollection && (
-                                    <CollectionAddToLikedButton collection={collection} showComments={showComments} />
+                                    <CollectionAddToLikedButton
+                                        collection={collection}
+                                        showComments={showComments}
+                                    />
                                 )}
-                                <CollectionAddToQueueButton collection={collection} showComments={showComments} />
+                                <CollectionAddToQueueButton
+                                    collection={collection}
+                                    showComments={showComments}
+                                />
                             </div>
                         </div>
                     )}
@@ -85,7 +103,11 @@ export const SongCollectionHeader = memo(function SongCollectionHeader({
                     Songs • {songsCount}
                 </h3>
                 {notPersonalCollection && (
-                    <Button onClick={toggleComments} variant="accent" size={showComments ? "sm" : "lg"}>
+                    <Button
+                        onClick={toggleComments}
+                        variant="accent"
+                        size={showComments ? "sm" : "lg"}
+                    >
                         {showComments ? "Hide Comments" : "Show Comments"}
                     </Button>
                 )}

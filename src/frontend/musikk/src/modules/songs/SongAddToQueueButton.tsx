@@ -1,15 +1,19 @@
-import { ISongCollectionSong } from "@/modules/song-collections/types.ts";
-import { Button } from "@/modules/ui/button.tsx";
+import { ICollectionSong } from "@/modules/song-collections/types.ts";
 import { useQueueAddAPI } from "@/modules/song-queue/hooks/useQueueAPI";
+import { Button } from "@/modules/ui/button.tsx";
 import { BetweenHorizonalStart } from "lucide-react";
 
 interface SongAddToQueueButtonProps {
-    collectionSong: ISongCollectionSong;
+    collectionSong: ICollectionSong;
     size?: number;
     className?: string;
 }
 
-export function SongAddToQueueButton({ collectionSong, size = 40, className = "" }: SongAddToQueueButtonProps) {
+export function SongAddToQueueButton({
+    collectionSong,
+    size = 40,
+    className = "",
+}: SongAddToQueueButtonProps) {
     const addToQueueMutation = useQueueAddAPI();
     const iconSize = Math.floor(size * 0.6);
 

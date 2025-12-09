@@ -18,13 +18,9 @@ export const NotificationBox = memo(function NotificationBox() {
 
     const unreadUUIDs = useMemo(() => {
         if (!data) return [];
+        const { replies = [] } = data;
 
-        const { replies = [], friend_requests = [] } = data;
-
-        return [
-            ...replies.filter((n) => !n.is_read).map((n) => n.uuid),
-            ...friend_requests.filter((n) => !n.is_read).map((n) => n.uuid),
-        ];
+        return [...replies.filter((n) => !n.is_read).map((n) => n.uuid)];
     }, [data]);
 
     async function handleOpenChange(open: boolean) {
@@ -35,7 +31,8 @@ export const NotificationBox = memo(function NotificationBox() {
     }
 
     if (isPending) return <div className="text-center text-sm p-4">Loading...</div>;
-    if (error) return <div className="text-center text-sm text-red-500 p-4">Error: {error.message}</div>;
+    if (error)
+        return <div className="text-center text-sm text-red-500 p-4">Error: {error.message}</div>;
 
     return (
         <Popover onOpenChange={handleOpenChange}>

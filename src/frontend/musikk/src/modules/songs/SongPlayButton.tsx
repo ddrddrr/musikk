@@ -1,10 +1,10 @@
-import { ISongCollectionSong } from "@/modules/song-collections/types.ts";
+import { ICollectionSong } from "@/modules/song-collections/types.ts";
 import { useSongPlayHandler } from "@/modules/songs/hooks/useSongPlayHandler.ts";
 import { Button } from "@/modules/ui/button.tsx";
 import { Pause, Play } from "lucide-react";
 
 interface SongPlayButtonProps {
-    collectionSong: ISongCollectionSong;
+    collectionSong: ICollectionSong;
     className?: string;
     size?: number;
 }

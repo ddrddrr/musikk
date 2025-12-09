@@ -1,40 +1,38 @@
 import { api_client } from "@/api/axiosConf.ts";
-import { CommentURLs, PostURLs } from "@/api/endpoints.ts";
-import { PublicationObjectType } from "@/modules/publications/types.ts";
+import { PublicationURLs } from "@/api/endpoints.ts";
+import { UUID } from "@/api/types.ts";
+import { AttachmentType, PublicationForType } from "@/modules/publications/types.ts";
 import { useMutation } from "@tanstack/react-query";
 
-interface IAddCommentParams {
-    objType: PublicationObjectType;
-    objUUID: string;
+interface IPublicationCreateParams {
     content: string;
-    replyToUUID: string | undefined;
+    obj_type: PublicationForType;
+    obj_uuid: UUID;
+    attachment_type?: AttachmentType;
+    attachment_uuid?: UUID;
+    parent_uuid?: UUID;
 }
 
-export async function commentCreate({ objType, objUUID, content, replyToUUID }: IAddCommentParams) {
-    const data = {
+export async function publicationCreate({
+    content,
+    obj_type,
+    obj_uuid,
+    attachment_type,
+    attachment_uuid,
+    parent_uuid,
+}: IPublicationCreateParams) {
+    await api_client.post(PublicationURLs.publicationCreate(obj_type, obj_uuid), {
         content,
-        parent: replyToUUID,
-    };
-    await api_client.post(CommentURLs.commentCreate(objType, objUUID), data);
+        obj_type,
+        obj_uuid,
+        attachment_type,
+        attachment_uuid,
+        parent_uuid,
+    });
 }
 
-interface IUserPostCreateParams {
-    objType?: PublicationObjectType;
-    objUUID?: string;
-    content: string;
-    replyToUUID: string | undefined;
-}
-
-export function useUserPostCreateMutation() {
+export function usePublicationCreateMutation() {
     return useMutation({
-        mutationFn: async ({ ...params }: IUserPostCreateParams) => {
-            const data = {
-                content: params.content,
-                obj_type: params.objType,
-                obj_uuid: params.objUUID,
-                parent: params.replyToUUID,
-            };
-            api_client.post(PostURLs.postCreate, data);
-        },
+        mutationFn: publicationCreate,
     });
 }

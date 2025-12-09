@@ -1,5 +1,5 @@
 import { api_client } from "@/api/axiosConf.ts";
-import { PostURLs } from "@/api/endpoints.ts";
+import { PublicationURLs } from "@/api/endpoints.ts";
 import { PostTree } from "@/modules/publications/PostTree.tsx";
 import { IPublication } from "@/modules/publications/types.ts";
 import { Card, CardContent } from "@/modules/ui/card.tsx";
@@ -12,28 +12,28 @@ export function UserFeed() {
 
     const { data: postsFriends } = useQuery<IPublication[]>({
         queryFn: async () => {
-            const res = await api_client.get(PostURLs.postLatestList, {
+            const res = await api_client.get(PublicationURLs.publicationFeedLatest, {
                 params: { connection: "friends" },
             });
             return res.data;
         },
-        queryKey: ["posts", "latest", "friends"],
+        queryKey: ["publications", "feed", "latest", "friends"],
     });
     const { data: postsFollowed } = useQuery<IPublication[]>({
         queryFn: async () => {
-            const res = await api_client.get(PostURLs.postLatestList, {
+            const res = await api_client.get(PublicationURLs.publicationFeedLatest, {
                 params: { connection: "followed" },
             });
             return res.data;
         },
-        queryKey: ["posts", "latest", "followed"],
+        queryKey: ["publications", "feed", "latest", "followed"],
     });
     const { data: postsAll } = useQuery<IPublication[]>({
         queryFn: async () => {
-            const res = await api_client.get(PostURLs.postLatestList);
+            const res = await api_client.get(PublicationURLs.publicationFeedLatest);
             return res.data;
         },
-        queryKey: ["posts", "latest", "all"],
+        queryKey: ["publications", "feed", "latest", "all"],
     });
 
     function renderPostTree(label: string, posts: IPublication[] | undefined) {

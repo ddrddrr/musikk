@@ -2,14 +2,17 @@ import { Button } from "@/modules/ui/button";
 import { useMutation } from "@tanstack/react-query";
 import { Check, Plus } from "lucide-react";
 import { collectionAddToLiked } from "./mutations";
-import { ISongCollection } from "./types";
+import { ICollection } from "./types";
 
 interface CollectionAddToLikedButtonProps {
-    collection: ISongCollection;
+    collection: ICollection;
     showComments: boolean;
 }
 
-export function CollectionAddToLikedButton({ collection, showComments }: CollectionAddToLikedButtonProps) {
+export function CollectionAddToLikedButton({
+    collection,
+    showComments,
+}: CollectionAddToLikedButtonProps) {
     const collectionAddToLikedMutation = useMutation({ mutationFn: collectionAddToLiked });
     const sizeClass = showComments ? "h-8 w-8" : "h-12 w-12";
 
@@ -17,7 +20,7 @@ export function CollectionAddToLikedButton({ collection, showComments }: Collect
         return collection.is_liked ? <Check size={20} /> : <Plus size={20} />;
     };
 
-    function handleClick(collection: ISongCollection) {
+    function handleClick(collection: ICollection) {
         if (collection.is_liked) {
             return; // remove from liked
         }

@@ -2,13 +2,11 @@ from rest_framework.generics import (
     GenericAPIView,
     get_object_or_404,
 )
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 
 from notifications.api.v1.serializers import (
     ReplyNotificationSerializer,
-    FriendRequestNotificationSerializer,
 )
 from notifications.models import (
     ReplyNotification,
@@ -18,21 +16,14 @@ from notifications.models import (
 from users.models import BaseUser
 
 
-# from users.models import StreamingUser
-
-
 class NotificationsPersonalListUpdateView(GenericAPIView):
-
     def get(self, request, *args, **kwargs):
         user = self.request.user
 
         replies = ReplyNotificationSerializer(
-            ReplyNotification.objects.filter(orig_publication__user=user), many=True
+            ReplyNotification.objects.filter(orig_publication__author=user), many=True
         ).data
-        friend_requests = FriendRequestNotificationSerializer(
-            FollowerNotification.objects.filter(receiver=user), many=True
-        ).data
-        return Response({"replies": replies, "friend_requests": friend_requests})
+        return Response({"replies": replies})
 
     def patch(self, request, *args, **kwargs):
         notif_uuids = self.request.data["uuids"]
@@ -42,7 +33,6 @@ class NotificationsPersonalListUpdateView(GenericAPIView):
 
 
 class NotificationDeleteView(GenericAPIView):
-
     def delete(self, request, *args, **kwargs):
         user = self.request.user
         notif_uuid = kwargs["uuid"]
@@ -52,16 +42,4 @@ class NotificationDeleteView(GenericAPIView):
             FollowerNotification, receiver=user, uuid=notif_uuid
         )
         notification.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-class FriendRequestNotificationCreateView(GenericAPIView):
-
-    def post(self, request, *args, **kwargs):
-        user = self.request.user
-        receiver_uuid = kwargs["uuid"]
-        receiver = get_object_or_404(BaseUser, uuid=receiver_uuid)
-
-        FollowerNotification.objects.create(sender=user, receiver=receiver)
-
         return Response(status=status.HTTP_204_NO_CONTENT)

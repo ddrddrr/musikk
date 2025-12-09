@@ -1,16 +1,16 @@
-import { ISongCollectionSong } from "@/modules/song-collections/types.ts";
+import { cn } from "@/lib/utils";
+import { ICollectionSong } from "@/modules/song-collections/types.ts";
 import { SongAddToLikedButton } from "@/modules/songs/SongAddToLikedButton.tsx";
 import { SongAddToQueueButton } from "@/modules/songs/SongAddToQueueButton.tsx";
 import { SongContextMenu } from "@/modules/songs/SongContextMenu.tsx";
 import { SongPlayButton } from "@/modules/songs/SongPlayButton";
 import { MediaBox } from "@/modules/ui/media";
-import { cn } from "@/lib/utils";
 import { memo } from "react";
 
 type SongContainerSize = "compact" | "normal" | "comfortable";
 
 interface SongContainerProps {
-    collectionSong: ISongCollectionSong;
+    collectionSong: ICollectionSong;
     size?: SongContainerSize;
     className?: string;
     renderItems?: Partial<RenderItems>;

@@ -23,8 +23,10 @@ export function MusicFeed() {
 
     return (
         <div className="flex flex-col gap-8">
-            {collections && <SongCollectionCarousel collections={collections} title="New Collections" />}
-            <LatestAdded />
+            {collections && (
+                <SongCollectionCarousel collections={collections} title="New Collections" />
+            )}
+            {/*<LatestAdded />*/}
         </div>
     );
 }

@@ -1,9 +1,9 @@
 import { useHandlePlay } from "@/modules/playback/hooks/useHandlePlay.ts";
 import { PlaybackContext } from "@/modules/playback/providers/playbackContext.ts";
-import { ISongCollection } from "@/modules/song-collections/types";
+import { ICollection } from "@/modules/song-collections/types";
 import { useCallback, useContext } from "react";
 
-export function useCollectionPlayHandler(collection: ISongCollection) {
+export function useCollectionPlayHandler(collection: ICollection) {
     const { playbackState, playingCollectionSong } = useContext(PlaybackContext);
     const handlePlay = useHandlePlay();
 

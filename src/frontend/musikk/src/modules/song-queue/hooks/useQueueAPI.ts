@@ -1,4 +1,4 @@
-import type { ISongCollection, ISongCollectionSong } from "@/modules/song-collections/types.ts";
+import type { ICollection, ICollectionSong } from "@/modules/song-collections/types.ts";
 import {
     addCollection,
     addSong,
@@ -24,12 +24,12 @@ export function useQueue() {
 type AddSongAction = {
     type: "song";
     action: "add" | "setHead";
-    item: ISongCollectionSong;
+    item: ICollectionSong;
 };
 type AddCollectionAction = {
     type: "collection";
     action: "add" | "setHead";
-    item: ISongCollection;
+    item: ICollection;
 };
 type QueueAddInput = AddSongAction | AddCollectionAction;
 
@@ -37,9 +37,13 @@ export function useQueueAddAPI() {
     function handleQueueAddAction(input: QueueAddInput): Promise<unknown> {
         switch (input.type) {
             case "song":
-                return input.action === "add" ? addSong(input.item.uuid) : setHeadSong(input.item.uuid);
+                return input.action === "add"
+                    ? addSong(input.item.uuid)
+                    : setHeadSong(input.item.uuid);
             case "collection":
-                return input.action === "add" ? addCollection(input.item.uuid) : setHeadCollection(input.item.uuid);
+                return input.action === "add"
+                    ? addCollection(input.item.uuid)
+                    : setHeadCollection(input.item.uuid);
             default:
                 return Promise.reject(new Error("Invalid action"));
         }

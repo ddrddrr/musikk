@@ -1,18 +1,12 @@
 import { cn } from "@/lib/utils";
 import { PostForm } from "@/modules/publications/PostForm.tsx";
-import { usePostChildrenQuery } from "@/modules/publications/queries.ts";
 import { IPublication } from "@/modules/publications/types";
-import { fetchCollectionBasic } from "@/modules/song-collections/queries";
-import { SongCollectionCard } from "@/modules/song-collections/SongCollectionCard";
-import { songRetrieve } from "@/modules/songs/queries.ts";
+import { CollectionCard } from "@/modules/song-collections/CollectionCard.tsx";
 import { SongContainer } from "@/modules/songs/SongContainer.tsx";
 import { Button } from "@/modules/ui/button";
 import { Card, CardContent } from "@/modules/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/modules/ui/collapsible";
-import { UserCard } from "@/modules/user/components/UserCard.tsx";
 import { UserIdentifier } from "@/modules/user/components/UserIdentifier.tsx";
-import { fetchUser } from "@/modules/user/queries.ts";
-import { useQuery } from "@tanstack/react-query";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
 
@@ -24,62 +18,37 @@ interface PostTreeProps {
 export function PostTree({ publication, depth = 0 }: PostTreeProps) {
     const [isReplying, setIsReplying] = useState(false);
     const [areChildrenOpen, setAreChildrenOpen] = useState(false);
-    const { data: children } = usePostChildrenQuery(publication.uuid);
-    const objType = publication.obj_type;
-    const objUUID = publication.obj_uuid;
-    const hasChildren = children && children.length > 0;
+    const hasChildren = publication.children && publication.children.length > 0;
 
     // nesting levels
     const getBgColor = () => {
-        if (!publication.parent) return "bg-white";
+        if (!publication.parent_uuid) return "bg-white";
 
         const colors = ["bg-gray-50", "bg-gray-100", "bg-gray-200", "bg-gray-300"];
         return colors[depth % colors.length];
     };
 
-    const { data: obj } = useQuery({
-        queryKey: [objType, objUUID],
-        queryFn: async () => {
-            if (!objType || !objUUID) return null;
-            switch (objType) {
-                case "collection":
-                    return fetchCollectionBasic(objUUID);
-                case "song":
-                    return songRetrieve(objUUID);
-                case "user":
-                    return fetchUser(objUUID);
-                default:
-                    throw new Error("Unknown obj_type");
-            }
-        },
-        enabled: !!(objType && objUUID),
-    });
-
     function renderCardContent() {
-        switch (objType) {
-            case "collection":
-                return (
-                    <div className="mb-4">
-                        <SongCollectionCard collection={obj} size="medium" />
-                    </div>
-                );
-            case "song":
-                return (
-                    <div className="mb-4">
-                        <SongContainer
-                            collectionSong={obj}
-                            className="border border-gray-300 rounded-md p-3 bg-white"
-                        />
-                    </div>
-                );
-            case "user":
-                return (
-                    <div className="mb-4">
-                        <UserCard user={obj} />
-                    </div>
-                );
-            default:
-                return null;
+        if (publication.attachment) {
+            switch (publication.attachment_type) {
+                case "collection":
+                    return (
+                        <div className="mb-4">
+                            <CollectionCard collection={publication.attachment} size="medium" />
+                        </div>
+                    );
+                case "song":
+                    return (
+                        <div className="mb-4">
+                            <SongContainer
+                                collectionSong={publication.attachment}
+                                className="border border-gray-300 rounded-md p-3 bg-white"
+                            />
+                        </div>
+                    );
+                default:
+                    return null;
+            }
         }
     }
 
@@ -87,11 +56,11 @@ export function PostTree({ publication, depth = 0 }: PostTreeProps) {
         <div className="relative">
             <Card className={cn("border border-black rounded-md shadow-sm mb-2", getBgColor())}>
                 <CardContent className="py-0 px-3">
-                    {obj && renderCardContent()}
+                    {publication.attachment && renderCardContent()}
 
                     <div className="flex items-center gap-2">
                         {/*<div className="text-xs font-medium">{publication.display_name || "Anonymous"}</div>*/}
-                        <UserIdentifier user={publication.user} />
+                        <UserIdentifier user={publication.author} />
                         <div className="text-[10px] text-muted-foreground">
                             {new Date(publication.date_added).toLocaleString("en-US", {
                                 dateStyle: "short",
@@ -122,6 +91,7 @@ export function PostTree({ publication, depth = 0 }: PostTreeProps) {
                                     replyTo={publication}
                                     setReplyTo={() => setIsReplying(false)}
                                     onSuccess={() => setIsReplying(false)}
+                                    feedUserUuid={publication.obj_uuid}
                                 />
                             </div>
                         </div>
@@ -144,7 +114,8 @@ export function PostTree({ publication, depth = 0 }: PostTreeProps) {
                                     <ChevronDown size={12} />
                                 )}
                                 <span className="flex items-center gap-1">
-                                    {children.length} {children.length === 1 ? "reply" : "replies"}
+                                    {publication.children.length}{" "}
+                                    {publication.children.length === 1 ? "reply" : "replies"}
                                 </span>
                             </span>
                         </Button>
@@ -153,7 +124,7 @@ export function PostTree({ publication, depth = 0 }: PostTreeProps) {
                         <CollapsibleContent>
                             <div className="relative pl-4 ml-2 space-y-0">
                                 <div className="left-0 top-0 bottom-0 w-[2px] bg-gray-200"></div>
-                                {children.map((reply) => (
+                                {publication.children.map((reply: IPublication) => (
                                     <div key={reply.uuid} className="relative">
                                         <div className="left-0 top-3 w-2 h-[2px] bg-gray-200"></div>
                                         <PostTree publication={reply} depth={depth + 1} />

@@ -31,21 +31,21 @@ class SearchView(APIView):
                 query,
                 "title",
                 CollectionSerializerBasic,
-                extra_filters={"type": "album"},
+                extra_filters={"type": "album", "private": False},
             ),
             "playlists": self.search(
                 Collection,
                 query,
                 "title",
                 CollectionSerializerBasic,
-                extra_filters={"type": "playlist"},
+                extra_filters={"type": "playlist", "private": False},
             ),
             "users": self.search(
                 BaseUser,
                 query,
                 "display_name",
                 BaseUserSerializer,
-                extra_filters={"user__artist__isnull": True},
+                extra_filters={"artist__isnull": True},
             ),
             "artists": self.search(
                 Artist,
@@ -78,7 +78,9 @@ class SearchView(APIView):
             .order_by("-similarity")[:MAX_RESULTS]
         )
 
-        sc_songs = CollectionSong.objects.filter(song__in=matching_songs)
+        sc_songs = CollectionSong.objects.filter(collection__private=False).filter(
+            song__in=matching_songs
+        )
 
         return CollectionSongGetSerializer(
             sc_songs, many=True, context={"request": self.request}

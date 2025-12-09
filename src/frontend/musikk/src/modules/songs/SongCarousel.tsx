@@ -1,9 +1,15 @@
-import { ISongCollectionSong } from "@/modules/song-collections/types.ts";
+import { ICollectionSong } from "@/modules/song-collections/types.ts";
 import { SongCard } from "@/modules/songs/SongCard.tsx";
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/modules/ui/carousel";
+import {
+    Carousel,
+    CarouselContent,
+    CarouselItem,
+    CarouselNext,
+    CarouselPrevious,
+} from "@/modules/ui/carousel";
 
 interface SongCarouselProps {
-    songs: ISongCollectionSong[];
+    songs: ICollectionSong[];
     title: string;
 }
 
@@ -30,7 +36,9 @@ export function SongCarousel({ songs, title }: SongCarouselProps) {
                                 </CarouselItem>
                             ))
                         ) : (
-                            <div className="text-center text-gray-500 w-full">No songs available</div>
+                            <div className="text-center text-gray-500 w-full">
+                                No songs available
+                            </div>
                         )}
                     </CarouselContent>
                     {songs.length > 0 && (

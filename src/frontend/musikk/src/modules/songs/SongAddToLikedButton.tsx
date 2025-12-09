@@ -1,11 +1,11 @@
 import { addToLikedSongs } from "@/modules/song-collections/mutations.ts";
-import { ISongCollectionSong } from "@/modules/song-collections/types.ts";
+import { ICollectionSong } from "@/modules/song-collections/types.ts";
 import { Button } from "@/modules/ui/button";
 import { useMutation } from "@tanstack/react-query";
 import { Check, Plus } from "lucide-react";
 
 interface SongCardProps {
-    collectionSong: ISongCollectionSong;
+    collectionSong: ICollectionSong;
     className?: string;
     size?: number;
 }
@@ -19,7 +19,7 @@ export function SongAddToLikedButton({ collectionSong, className = "", size = 40
         return collectionSong.song.is_liked ? <Check size={iconSize} /> : <Plus size={iconSize} />;
     };
 
-    function handleClick(collectionSong: ISongCollectionSong) {
+    function handleClick(collectionSong: ICollectionSong) {
         if (collectionSong.song.is_liked) {
             return; // TODO: remove from liked
         }

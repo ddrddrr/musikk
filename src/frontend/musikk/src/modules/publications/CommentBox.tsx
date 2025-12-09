@@ -1,22 +1,18 @@
 import { UUID } from "@/api/types";
 import { CommentForm } from "@/modules/publications/CommentForm";
 import { CommentList } from "@/modules/publications/CommentList";
-import { fetchCommentList } from "@/modules/publications/queries";
-import { IPublication, PublicationObjectType } from "@/modules/publications/types";
-import { useQuery } from "@tanstack/react-query";
+import { usePublicationListQuery } from "@/modules/publications/queries";
+import { IPublication, PublicationForType } from "@/modules/publications/types";
 import { memo, useEffect, useRef, useState } from "react";
 
 interface CommentBoxProps {
-    objType: PublicationObjectType;
+    objType: PublicationForType;
     objUUID: UUID;
 }
 
 export const CommentBox = memo(function CommentBox({ objType, objUUID }: CommentBoxProps) {
     const [replyTo, setReplyTo] = useState<IPublication | undefined>(undefined);
-    const { isPending, error, data } = useQuery({
-        queryKey: ["comments", objUUID],
-        queryFn: () => fetchCommentList(objType, objUUID),
-    });
+    const { isPending, error, data } = usePublicationListQuery(objType, objUUID);
     const commentsContainerRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
@@ -25,6 +21,7 @@ export const CommentBox = memo(function CommentBox({ objType, objUUID }: Comment
         }
     }, [data]);
 
+    // todo use new shadcn spinner
     if (isPending) {
         return (
             <div className="min-h-[400px] flex items-center justify-center">
@@ -33,6 +30,7 @@ export const CommentBox = memo(function CommentBox({ objType, objUUID }: Comment
         );
     }
 
+    // todo create a centralized err message?
     if (error) {
         return (
             <div className="text-white text-center p-6 bg-red-600 rounded-lg border-2 border-black">
@@ -41,13 +39,19 @@ export const CommentBox = memo(function CommentBox({ objType, objUUID }: Comment
         );
     }
 
+    // todo some shadcn component?
     return (
         <div className="flex flex-col border border-black rounded-lg bg-white h-full max-h-[600px] overflow-hidden">
             <div className="flex-1 overflow-y-auto p-4 space-y-4" ref={commentsContainerRef}>
                 <CommentList comments={data} replyTo={replyTo} setReplyTo={setReplyTo} />
             </div>
             <div className="border-t border-black p-4 bg-gray-100">
-                <CommentForm objType={objType} objUUID={objUUID} replyTo={replyTo} setReplyTo={setReplyTo} />
+                <CommentForm
+                    objType={objType}
+                    objUUID={objUUID}
+                    replyTo={replyTo}
+                    setReplyTo={setReplyTo}
+                />
             </div>
         </div>
     );

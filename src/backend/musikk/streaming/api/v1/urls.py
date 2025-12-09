@@ -1,9 +1,9 @@
 from django.urls import path
 
-from streaming.api.v1.views import (
-    FriendsLatestAddedCollectionsView,
-    FriendsLatestListenedView,
-)
+# from streaming.api.v1.views import (
+#     FriendsLatestAddedCollectionsView,
+#     FriendsLatestListenedView,
+# )
 from streaming.api.v1.views.profile import StreamingProfileRetrieveView
 
 from streaming.api.v1.views.songs import (
@@ -163,19 +163,19 @@ playback_urls = [
     #     name="playback-device-delete",
     # ),
 ]
-
-friend_activity_urls = [
-    path(
-        "friend-activity/latest-added",
-        FriendsLatestAddedCollectionsView.as_view(),
-        name="friends-latest-added",
-    ),
-    path(
-        "friend-activity/active-songs",
-        FriendsLatestListenedView.as_view(),
-        name="friends-listening-activity",
-    ),
-]
+# TODO:
+# friend_activity_urls = [
+#     path(
+#         "friend-activity/latest-added",
+#         FriendsLatestAddedCollectionsView.as_view(),
+#         name="friends-latest-added",
+#     ),
+#     path(
+#         "friend-activity/active-songs",
+#         FriendsLatestListenedView.as_view(),
+#         name="friends-listening-activity",
+#     ),
+# ]
 
 streaming_profile_urls = [
     path(
@@ -189,6 +189,6 @@ urlpatterns = (
     + collection_urls
     + song_queue_urls
     + playback_urls
-    + friend_activity_urls
+    # + friend_activity_urls
     + streaming_profile_urls
 )

@@ -1,5 +1,5 @@
 import { UUID } from "@/api/types.ts";
-import { PublicationObjectType } from "@/modules/publications/types.ts";
+import { PublicationForType } from "@/modules/publications/types.ts";
 
 export const BaseWSURL = import.meta.env.VITE_WS_BASE_URL;
 export const WebsocketURLs = {
@@ -47,19 +47,12 @@ export const CollectionURLs = {
         `/collections/${collectionUUID}/songs/${songCollectionSongUUID}`,
     likedSongsAddSong: (songUUID: UUID) => `/liked-songs/add-song/${songUUID}`,
 };
-// TODO non existent anymore, rewrite(both comments and posts)
-export const CommentURLs = {
-    commentList: (objType: PublicationObjectType, objUUID: UUID) =>
-        `/comments/${objType}/${objUUID}`,
-    commentCreate: (objType: PublicationObjectType, objUUID: UUID) =>
-        `/comments/${objType}/${objUUID}`,
-};
-export const PostURLs = {
-    postCreate: `/posts`,
-    userPostList: (userUUID: UUID) => `/posts/users/${userUUID}`,
-    postRetrieve: (postUUID: UUID) => `/posts/${postUUID}`,
-    postChildrenList: (postUUID: UUID) => `/posts/${postUUID}/children`,
-    postLatestList: `/posts/latest`,
+export const PublicationURLs = {
+    publicationList: (objType: PublicationForType, objUUID: UUID) =>
+        `/publications/${objType}/${objUUID}`,
+    publicationCreate: (objType: PublicationForType, objUUID: UUID) =>
+        `/publications/${objType}/${objUUID}`,
+    publicationFeedLatest: `/publications/feed/latest`,
 };
 export const NotificationURLs = {
     notificationsSetRead: `/notifications`,

@@ -14,10 +14,10 @@ export const NotificationOverlay = memo(function NotificationOverlay({
     const navigate = useNavigate();
 
     function handleNavigateReplyClick(notification: IReplyNotification) {
-        if (notification.reply_comment.type == "post") {
-            navigate(`/users/${notification.reply_comment.root_user_uuid}`);
+        if (notification.reply_publication.obj_type == "feed") {
+            navigate(`/users/${notification.reply_publication.root_author_uuid}`);
         } else {
-            navigate(`/collection/${notification.reply_comment.obj_uuid}/comments`);
+            navigate(`/collection/${notification.reply_publication.obj_uuid}/comments`);
         }
     }
 
@@ -33,13 +33,13 @@ export const NotificationOverlay = memo(function NotificationOverlay({
                     className={`border border-black rounded-lg p-3 mb-2 ${notification.is_read ? "bg-gray-50" : "bg-yellow-100"}`}
                 >
                     <div className="font-semibold text-sm">
-                        Reply: {notification.reply_comment.display_name ?? "Anonymous"}
+                        Reply: {notification.reply_publication.author.display_name ?? "Anonymous"}
                     </div>
                     <div className="text-xs text-gray-600 mt-1">
-                        {notification.orig_comment.content}
+                        {notification.orig_publication.content}
                     </div>
                     <div className="text-sm text-gray-800 mt-2">
-                        {notification.reply_comment.content}
+                        {notification.reply_publication.content}
                     </div>
                     <div className="flex justify-between mt-2">
                         <span className="text-xs text-gray-600">
