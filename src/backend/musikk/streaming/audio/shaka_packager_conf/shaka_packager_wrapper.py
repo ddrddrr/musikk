@@ -32,8 +32,8 @@ class SongRepresentation:
 
 class ShakaPackagerCommand:
     """
-    Command builder for shaka-packager. Mirrors the FFmpegCommand pattern used elsewhere:
-    - Responsible only for building the command and returning the expected output paths.
+    Command builder for `shaka-packager`.
+    Responsible for building the command and returning the manifest output paths.
     """
 
     def __init__(
@@ -41,23 +41,31 @@ class ShakaPackagerCommand:
         local_paths: list[Path],
         tmpdir: str,
         bin_path: str = settings.SHAKA_PACKAGER_BIN,
+        segment_duration=3,  # seconds
     ):
         self.local_paths = local_paths
         self.tmpdir = Path(tmpdir)
         self.bin_path = bin_path
+        self.segment_duration = segment_duration
 
     def build(self) -> tuple[list[str], Path, Path]:
         """
-        Build the full shaka-packager command along with the
-        MPD and HLS master output Paths located in tmpdir.
-
         Returns:
             tuple (cmd, mpd_out, hls_master_out)
         """
         inputs_args: list[str] = []
         for i, local in enumerate(self.local_paths):
-            out_name = self.tmpdir / f"audio_{i}.mp4"
-            arg = f"input={local.as_posix()},stream=audio,output={out_name.as_posix()}"
+            base = f"audio_{i}"
+            init_seg = self.tmpdir / f"{base}_init.mp4"
+            segment_tmpl = self.tmpdir / f"{base}_$Number$.m4s"
+            playlist_name = f"{base}.m3u8"  # per-representation HLS playlist
+
+            arg = (
+                f"input={local.as_posix()},stream=audio,"
+                f"init_segment={init_seg.as_posix()},"
+                f"segment_template={segment_tmpl.as_posix()},"
+                f"playlist_name={playlist_name}"
+            )
             inputs_args.append(arg)
 
         mpd_out = self.tmpdir / "manifest.mpd"
@@ -65,6 +73,8 @@ class ShakaPackagerCommand:
 
         cmd: list[str] = [self.bin_path]
         cmd.extend(inputs_args)
+        cmd.extend(["--segment_duration", str(self.segment_duration)])
+        cmd.append("--generate_static_live_mpd")
         cmd.append(f"--mpd_output={mpd_out.as_posix()}")
         cmd.append(f"--hls_master_playlist_output={hls_master_out.as_posix()}")
 
@@ -73,10 +83,10 @@ class ShakaPackagerCommand:
 
 class ShakaPackagerWrapper:
     """
-    Wrapper around shaka-packager.
-    - Downloads input audio files from Django storage to a temporary directory
-    - Runs shaka-packager to produce DASH (MPD) and HLS (M3U8) manifests + segments
-    - Uploads the generated files to Django storage under `storage_dir`
+    Wrapper around shaka-packager:
+        - Downloads input audio files from Django storage to a temporary directory
+        - Runs shaka-packager to produce DASH (MPD) and HLS (M3U8) manifests + segments
+        - Uploads the generated files to Django storage under `storage_dir`
     """
 
     def __init__(

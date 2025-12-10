@@ -26,20 +26,11 @@ class BaseSongGetSerializer(BaseModelSerializer):
             "authors",
         ]
 
-    # TODO: make a method on model?
     def get_mpd(self, obj):
-        return (
-            settings.DJANGO_BASE_URL
-            + settings.MEDIA_URL
-            + f"audio_content/{obj.uuid}/{obj.uuid}.mpd"
-        )
+        return settings.DJANGO_BASE_URL + settings.MEDIA_URL + obj.mpd
 
     def get_m3u8(self, obj):
-        return (
-            settings.DJANGO_BASE_URL
-            + settings.MEDIA_URL
-            + f"audio_content/{obj.uuid}/{obj.uuid}.m3u8"
-        )
+        return settings.DJANGO_BASE_URL + settings.MEDIA_URL + obj.m3u8
 
     def get_is_liked(self, obj):
         user = self.context["request"].user

@@ -10,7 +10,7 @@
         <script>
             document.addEventListener("DOMContentLoaded", function () {
                 var player = dashjs.MediaPlayer().create();
-                var mpd_url = window.location.origin + "{{ MEDIA_URL }}audio_content/{{ original.uuid }}/{{ original.uuid }}.mpd";
+                var mpd_url = window.location.origin + "{{ MEDIA_URL }}{{ original.mpd }}";
                 console.log(mpd_url)
                 player.initialize(document.querySelector("#dash-audio"), mpd_url, true);
             });

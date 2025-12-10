@@ -26,9 +26,10 @@ from streaming.models import (
 
 fake = Faker()
 
-AUDIO_LOCAL_FILE = str(
-    settings.BASE_DIR / "streaming" / "audio" / "tests" / "data" / "file1.wav"
-)
+# AUDIO_LOCAL_FILE = str(
+#     settings.BASE_DIR / "streaming" / "audio" / "tests" / "data" / "file1.wav"
+# )
+AUDIO_LOCAL_FILE = str(settings.BASE_DIR / "sample_flac_song.flac")
 
 IMAGE_URL_1 = "https://picsum.photos/500"
 IMAGE_URL_2 = "https://picsum.photos/200"

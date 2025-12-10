@@ -15,8 +15,8 @@ class BaseSongFactory(BaseModelFactory):
     title = fake("name")
     description = fake("paragraph")
     content_path = ""
-    mpd = ""
-    m3u8 = ""
+    mpd = "audio/ba7af36a-d695-425b-b235-40b344c19880/manifest.mpd"
+    m3u8 = "audio/ba7af36a-d695-425b-b235-40b344c19880/master.m3u8"
     image = None
     # metadata = factory.SubFactory()
 

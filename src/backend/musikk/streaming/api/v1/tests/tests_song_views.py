@@ -2,6 +2,7 @@ import io
 from unittest.mock import patch, MagicMock
 from django.test import TestCase
 from django.urls import reverse
+from django.conf import settings
 from rest_framework import status
 from rest_framework.test import APIRequestFactory, force_authenticate
 from rest_framework.exceptions import ValidationError
@@ -97,6 +98,14 @@ class TestCollectionSongRetrieveView(TestCase):
         self.assertEqual(response.data["uuid"], str(collection_song.uuid))
         self.assertIn("song", response.data)
         self.assertEqual(response.data["song"]["uuid"], str(song.uuid))
+        self.assertEqual(
+            response.data["song"]["mpd"],
+            settings.DJANGO_BASE_URL + settings.MEDIA_URL + song.mpd,
+        )
+        self.assertEqual(
+            response.data["song"]["m3u8"],
+            settings.DJANGO_BASE_URL + settings.MEDIA_URL + song.m3u8,
+        )
 
     def test_retrieve_song_from_private_collection_as_non_author(self):
         song = BaseSongFactory(draft=False)
