@@ -12,10 +12,10 @@ export function SongCollectionPlayButton({
     collection,
     showComments,
 }: SongCollectionPlayButtonProps) {
-    const { isThisPlaying, onClick } = useCollectionPlayHandler(collection);
+    const { isThisCollectionPlaying, onClick } = useCollectionPlayHandler(collection);
 
     const renderPlayPauseIcon = () => {
-        return isThisPlaying ? <Pause size={20} /> : <Play size={20} />;
+        return isThisCollectionPlaying ? <Pause size={20} /> : <Play size={20} />;
     };
     return (
         <Button

@@ -1,14 +1,14 @@
 interface ServerEvent {
     event: string;
-    payload: unknown;
+    payload: any;
 }
 
 interface UserAction {
     action: string;
-    payload: unknown;
+    payload: any;
 }
 
-type MessageHandler = (payload: unknown) => void;
+type MessageHandler = (payload: any) => void;
 
 const MAX_RECONNECTS = 10;
 const RECONNECT_DELAY = 1000; // ms
@@ -98,7 +98,7 @@ export class WSClient {
             console.debug(`WS Connection closed (code: ${event.code}, reason: ${reason})`);
             this.ws = null;
 
-            // Attempt reconnection for abnormal closures
+            // reconnect on non-standard close
             if (
                 this.shouldReconnect &&
                 event.code !== 1000 &&
@@ -133,7 +133,7 @@ export class WSClient {
     }
 
     send({ action, payload }: UserAction) {
-        const message = JSON.stringify({ type: action, payload });
+        const message = JSON.stringify({ action: action, payload: payload });
 
         if (this.ws && this.ws.readyState === WebSocket.OPEN) {
             this.ws.send(message);

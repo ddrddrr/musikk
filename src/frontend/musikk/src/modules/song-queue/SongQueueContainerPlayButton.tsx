@@ -9,7 +9,7 @@ interface SongQueuePlayButtonProps {
     size?: number;
 }
 
-export function SongQueuePlayButtonButton({ node, className = "", size = 20 }: SongQueuePlayButtonProps) {
+export function SongQueuePlayButton({ node, className = "", size = 20 }: SongQueuePlayButtonProps) {
     const { isThisPlaying, onClick } = useQueuePlayHandler(node);
 
     const renderPlayPauseIcon = () => {

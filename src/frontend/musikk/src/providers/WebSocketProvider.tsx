@@ -1,6 +1,6 @@
 import { WebsocketURLs } from "@/api/endpoints.ts";
 import { WSContext } from "@/providers/websocketContext.ts";
-import WebSocketManager from "@/websockets/manager";
+import WebSocketManager from "@/ws/manager";
 import { ReactNode, useEffect, useState } from "react";
 
 export function WebSocketProvider({ children }: { children: ReactNode }) {

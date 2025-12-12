@@ -18,7 +18,7 @@ import { useParams } from "react-router-dom";
 export function ProfilePage() {
     const { uuid } = useParams<{ uuid: string }>();
     const currUserUUID = useUserUUID();
-    // TODO add handling if curruseruuid is undefined
+    // TODO add handling if curr user uuid is undefined
     const {
         isLoading,
         isError,

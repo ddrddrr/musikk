@@ -11,7 +11,7 @@ interface PlayerProps {
 }
 
 export function Player({ onDurationChange, onTimeUpdate }: PlayerProps) {
-    const { isThisDeviceActive, playbackState, queueHead, playingCollectionSong } =
+    const { isThisDeviceActive, isPlaybackActive, queueHead, playingCollectionSong } =
         useContext(PlaybackContext);
     const useShiftHeadMutation = useQueueChangeAPI();
     const audioRef = useRef<HTMLAudioElement>(null);
@@ -27,8 +27,14 @@ export function Player({ onDurationChange, onTimeUpdate }: PlayerProps) {
         return isSafari ? playingCollectionSong.song.m3u8 : playingCollectionSong.song.mpd;
     }, [queueHead, playingCollectionSong, isSafari]);
 
+    // removes browser incompatibilities, see
+    // https://shaka-player-demo.appspot.com/docs/api/tutorial-basic-usage.html
     useEffect(() => {
         shaka.polyfill.installAll();
+        if (!shaka.Player.isBrowserSupported()) {
+            // TODO: show msg for user
+            console.error("Browser not supported!");
+        }
 
         const player = new shaka.Player();
         playerRef.current = player;
@@ -76,7 +82,7 @@ export function Player({ onDurationChange, onTimeUpdate }: PlayerProps) {
         const tryPlay = () => {
             if (queueHead && isThisDeviceActive) {
                 if (isAudioReadyRef.current) {
-                    if (playbackState?.is_playing) {
+                    if (isPlaybackActive) {
                         audio.play().catch(console.warn);
                     } else {
                         audio.pause();
@@ -92,8 +98,14 @@ export function Player({ onDurationChange, onTimeUpdate }: PlayerProps) {
         return () => {
             clearTimeout(timeoutId);
         };
-    }, [queueHead?.uuid, isThisDeviceActive, playbackState?.is_playing]);
-    // TODO: fix
+    }, [queueHead?.uuid, isThisDeviceActive, isPlaybackActive]);
+
+    async function handleOnEnded() {
+        isAudioReadyRef.current = false;
+        useShiftHeadMutation.mutate({ action: "shift" });
+    }
+
+    // handles badly padded song ends, needed, e.g., for very short audio
     useEffect(() => {
         const audio = audioRef.current;
         if (!audio) return;
@@ -126,11 +138,6 @@ export function Player({ onDurationChange, onTimeUpdate }: PlayerProps) {
         if (audio && onTimeUpdate) {
             onTimeUpdate(audio.currentTime);
         }
-    }
-
-    async function handleOnEnded() {
-        isAudioReadyRef.current = false;
-        useShiftHeadMutation.mutate({ action: "shift" });
     }
 
     return (

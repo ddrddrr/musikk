@@ -21,12 +21,7 @@ from streaming.api.v1.views.collections import (
     CollectionCreateView,
     AlbumBySongView,
 )
-from streaming.api.v1.views.playback import (
-    PlaybackDeviceView,
-    PlaybackDeviceActivateView,
-    PlaybackStateView,
-    # PlaybackDeviceDeleteView,
-)
+
 from streaming.api.v1.views.song_queue import (
     SongQueueRetrieveView,
     SongQueueAddSongView,
@@ -141,28 +136,7 @@ song_queue_urls = [
     ),
 ]
 
-playback_urls = [
-    path("playback", PlaybackStateView.as_view(), name="playback-state"),
-    path(
-        "playback-device",
-        PlaybackDeviceView.as_view(),
-        name="playback-device-register",
-    ),
-    path(
-        "playback-device/<uuid:uuid>/activate",
-        PlaybackDeviceActivateView.as_view(),
-        name="playback-device-activate",
-    ),
-    # TODO:
-    # path(
-    #     "playback-device/<uuid:uuid>/delete",
-    #     PlaybackDeviceDeleteView.as_view(
-    #         authentication_classes=[],
-    #         permission_classes=[AllowAny],
-    #     ),
-    #     name="playback-device-delete",
-    # ),
-]
+
 # TODO:
 # friend_activity_urls = [
 #     path(
@@ -188,7 +162,6 @@ urlpatterns = (
     song_urls
     + collection_urls
     + song_queue_urls
-    + playback_urls
     # + friend_activity_urls
     + streaming_profile_urls
 )

@@ -1,9 +1,8 @@
-import { useSetDeviceActiveMutation } from "@/modules/playback/mutations.ts";
 import { IPlaybackDevice } from "@/modules/playback/types.ts";
+import { useSetDeviceActiveAction } from "@/modules/playback/ws/actionHooks.ts";
 
 export function useHandleSwitchDevice() {
-    const setActiveDeviceMutation = useSetDeviceActiveMutation();
-
+    const setDeviceActiveAction = useSetDeviceActiveAction();
     function handleSwitchDevice(device: IPlaybackDevice) {
         const audio = document.querySelector("audio");
         if (audio) {
@@ -13,7 +12,7 @@ export function useHandleSwitchDevice() {
                 console.error(error);
             }
         }
-        setActiveDeviceMutation.mutate(device.uuid);
+        setDeviceActiveAction(device);
     }
 
     return handleSwitchDevice;

@@ -5,12 +5,11 @@ import { Pause, Play } from "lucide-react";
 import { useContext } from "react";
 
 export function PlayerPlayButton() {
-    const { playbackState } = useContext(PlaybackContext);
-    const isPlaying = playbackState?.is_playing;
+    const { isPlaybackActive } = useContext(PlaybackContext);
     const handlePlay = useHandlePlay();
 
     const renderPlayPauseIcon = () => {
-        return isPlaying ? <Pause size={18} /> : <Play size={18} />;
+        return isPlaybackActive ? <Pause size={18} /> : <Play size={18} />;
     };
 
     return (

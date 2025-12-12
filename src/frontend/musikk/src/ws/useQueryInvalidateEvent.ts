@@ -2,7 +2,7 @@ import { useWSClient } from "@/hooks/useWSClient.ts";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 
-export function useHandleInvalidateEvent() {
+export function useQueryInvalidateEvent() {
     const ws = useWSClient();
     const client = useQueryClient();
 

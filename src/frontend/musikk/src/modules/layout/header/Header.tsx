@@ -23,6 +23,7 @@ export const Header = memo(function Header() {
 
             <div className="flex-1 flex justify-center items-center">
                 <div className="flex items-center space-x-2">
+                    {/*TODO: add onItemSelect*/}
                     <SearchBar />
                     <h1 className="text-xl font-bold">Musikk</h1>
                 </div>
@@ -38,7 +39,7 @@ export const Header = memo(function Header() {
                 >
                     <Cog />
                 </Button>
-                {user?.role == "artist" && (
+                {user?.is_artist && (
                     <Button
                         variant="outline"
                         size="sm"

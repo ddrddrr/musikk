@@ -5,7 +5,7 @@ import { performSearch } from "@/modules/search/queries";
 import { Card, CardContent } from "@/modules/ui/card";
 import { Input } from "@/modules/ui/input";
 
-import { IAttachment } from "@/modules/publications/types.ts";
+import { Attachment } from "@/modules/publications/types.ts";
 import { CollectionCard } from "@/modules/song-collections/CollectionCard.tsx";
 import { ICollection } from "@/modules/song-collections/types.ts";
 import { SongCard } from "@/modules/songs/SongCard.tsx";
@@ -15,8 +15,9 @@ import { IUser } from "@/modules/user/types.ts";
 
 const QUERY_TIMEOUT = 300;
 
+// TODO: fix this shouldn't be an attachment or should be defined a bit differently
 interface SearchWindowProps {
-    onItemSelect?: (obj: IAttachment) => void;
+    onItemSelect?: (obj: Attachment) => void;
     songMode?: "container" | "card";
 }
 

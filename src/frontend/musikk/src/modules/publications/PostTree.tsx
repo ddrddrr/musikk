@@ -31,6 +31,7 @@ export function PostTree({ publication, depth = 0 }: PostTreeProps) {
     function renderCardContent() {
         if (publication.attachment) {
             switch (publication.attachment_type) {
+                // TODO: tighten types here
                 case "collection":
                     return (
                         <div className="mb-4">

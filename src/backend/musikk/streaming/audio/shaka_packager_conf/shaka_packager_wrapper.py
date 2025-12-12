@@ -12,7 +12,9 @@ from musikk.utils.storage import (
     get_django_storage_files,
 )
 
-
+# TODO: its bad to mix all codecs in the same manifest
+# the m3u8 should have only aac stuff
+# the mpd all other
 class ManifestType(StrEnum):
     MPD = "mpd"
     M3U8 = "m3u8"

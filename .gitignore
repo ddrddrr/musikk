@@ -82,12 +82,10 @@ ENV/
 pyvenv.cfg
 pip-selfcheck.json
 
-# text
-#text/charts
-#text/diagrams
+### Media
 samples
-.DS_Store
-src/backend/shadow
-
 media
 media/*
+
+### Macos
+.DS_Store

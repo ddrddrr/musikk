@@ -12,6 +12,7 @@ from social.api.v1.serializers import (
 )
 from social.api.v1.type_to_model_maps import CREATED_FOR_TYPE_TO_MODEL_MAP
 from social.models import Publication
+from users.models import BaseUser
 from websockets.event_helpers import send_ws_event
 
 
@@ -81,32 +82,20 @@ class PublicationListCreateForObjView(APIView):
 
 
 class PublicationFeedLatestView(APIView):
-    """
-    View for getting aggregated feed publications (friends/followed/all).
-    Supports filtering by connection type via query params.
-    """
-    
     def get(self, request, *args, **kwargs):
         queryset = Publication.objects.all()
-        
-        # Apply filters
+
         filterset = PublicationFilter(request.GET, queryset=queryset, request=request)
-        
         if filterset.is_valid():
             filtered_qs = filterset.qs
         else:
-            # If no valid filter, return all feed publications (top-level only)
-            from users.models import BaseUser
             feed_content_type = ContentType.objects.get_for_model(BaseUser)
             filtered_qs = queryset.filter(
-                parent__isnull=True,
-                created_for_type=feed_content_type
+                parent__isnull=True, created_for_type=feed_content_type
             ).order_by("-date_added")[:50]
-        
+
         serializer = PublicationRetrieveSerializer(
-            filtered_qs, 
-            many=True, 
-            context={"request": request}
+            filtered_qs, many=True, context={"request": request}
         )
-        
+
         return Response(status=status.HTTP_200_OK, data=serializer.data)

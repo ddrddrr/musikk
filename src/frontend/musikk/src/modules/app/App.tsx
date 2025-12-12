@@ -8,12 +8,18 @@ import { UploadPage } from "@/modules/app/UploadPage.tsx";
 import { EmailVerificationPage } from "@/modules/auth/components/EmailVerificationPage.tsx";
 import { RequireAuth } from "@/modules/auth/components/RequireAuth.tsx";
 import { AuthProvider } from "@/modules/auth/providers/AuthProvider.tsx";
+import { useDeviceLifecycle } from "@/modules/playback/hooks/useDeviceLifecycle.ts";
 import { WebSocketProvider } from "@/providers/WebSocketProvider";
-import { useHandleInvalidateEvent } from "../../websockets/useHandleInvalidateEvent.ts";
+import { useQueryInvalidateEvent } from "@/ws/useQueryInvalidateEvent.ts";
+import { DeviceListProvider } from "../playback/providers/DeviceListProvider";
+import { useDeviceListEvent, usePlaybackChangeEvent } from "../playback/ws/eventHooks";
 
 function AuthenticatedApp() {
-    useHandleInvalidateEvent();
-
+    // TODO: probably move and centralize
+    useQueryInvalidateEvent();
+    useDeviceListEvent();
+    usePlaybackChangeEvent();
+    useDeviceLifecycle();
     return (
         <Routes>
             <Route path="/*" element={<HomePage />} />
@@ -39,7 +45,9 @@ export function App() {
                         element={
                             <RequireAuth>
                                 <WebSocketProvider>
-                                    <AuthenticatedApp />
+                                    <DeviceListProvider>
+                                        <AuthenticatedApp />
+                                    </DeviceListProvider>
                                 </WebSocketProvider>
                             </RequireAuth>
                         }

@@ -4,22 +4,21 @@ import { ICollection } from "@/modules/song-collections/types";
 import { useCallback, useContext } from "react";
 
 export function useCollectionPlayHandler(collection: ICollection) {
-    const { playbackState, playingCollectionSong } = useContext(PlaybackContext);
+    const { isPlaybackActive, playingCollectionSong } = useContext(PlaybackContext);
     const handlePlay = useHandlePlay();
 
-    const isThisChosen = collection.uuid === playingCollectionSong?.song_collection;
-    const isPlaying = playbackState?.is_playing;
+    const isThisCollectionChosen = collection.uuid === playingCollectionSong?.song_collection;
 
     const onClick = useCallback(() => {
-        if (isThisChosen) {
+        if (isThisCollectionChosen) {
             handlePlay();
         } else {
             handlePlay({ newCollection: collection });
         }
-    }, [isThisChosen, collection, handlePlay]);
+    }, [isThisCollectionChosen, collection, handlePlay]);
 
     return {
-        isThisPlaying: isThisChosen && isPlaying,
+        isThisCollectionPlaying: isThisCollectionChosen && isPlaybackActive,
         onClick,
     };
 }

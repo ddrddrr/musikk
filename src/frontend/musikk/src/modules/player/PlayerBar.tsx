@@ -54,7 +54,7 @@ export function PlayerBar({ duration, time, seeking, setSeeking, setIsQueueOpen 
         // helps with little stutter on seek
         setTimeout(() => {
             setSeeking(false);
-        }, 100);
+        }, 200);
     };
 
     const playingSong = playingCollectionSong?.song;

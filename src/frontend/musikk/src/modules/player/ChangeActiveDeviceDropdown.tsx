@@ -1,5 +1,5 @@
-import { useHandleSwitchDevice } from "@/hooks/useHandleSwitchDevice.ts";
-import { PlaybackContext } from "@/modules/playback/providers/playbackContext.ts";
+import { useDeviceList } from "@/modules/playback/hooks/useDeviceList.ts";
+import { useHandleSwitchDevice } from "@/modules/playback/hooks/useHandleSwitchDevice.ts";
 import { Button } from "@/modules/ui/button.tsx";
 import {
     DropdownMenu,
@@ -8,10 +8,9 @@ import {
     DropdownMenuTrigger,
 } from "@/modules/ui/dropdown-menu.tsx";
 import { Computer } from "lucide-react";
-import { useContext } from "react";
 
 export function ChangeActiveDeviceDropdown() {
-    const { playbackState } = useContext(PlaybackContext);
+    const { deviceList } = useDeviceList();
     const handleSwitchDevice = useHandleSwitchDevice();
     return (
         <DropdownMenu>
@@ -21,9 +20,9 @@ export function ChangeActiveDeviceDropdown() {
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-                {playbackState?.devices.map((device) => (
+                {deviceList.map((device) => (
                     <DropdownMenuItem
-                        key={device.uuid}
+                        key={device.id}
                         onClick={() => {
                             if (!device.is_active) {
                                 handleSwitchDevice(device);

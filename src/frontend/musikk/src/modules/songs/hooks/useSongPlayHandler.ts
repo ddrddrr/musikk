@@ -4,11 +4,10 @@ import { ICollectionSong } from "@/modules/song-collections/types.ts";
 import { useCallback, useContext } from "react";
 
 export function useSongPlayHandler(collectionSong: ICollectionSong) {
-    const { playbackState, playingCollectionSong } = useContext(PlaybackContext);
+    const { isPlaybackActive, playingCollectionSong } = useContext(PlaybackContext);
     const handlePlay = useHandlePlay();
 
     const isThisChosen = collectionSong.uuid === playingCollectionSong?.uuid;
-    const isPlaying = playbackState?.is_playing;
 
     const onClick = useCallback(() => {
         if (isThisChosen) {
@@ -19,7 +18,7 @@ export function useSongPlayHandler(collectionSong: ICollectionSong) {
     }, [isThisChosen, collectionSong, handlePlay]);
 
     return {
-        isThisPlaying: isThisChosen && isPlaying,
+        isThisPlaying: isThisChosen && isPlaybackActive,
         onClick,
     };
 }

@@ -1,5 +1,4 @@
 import { useAuth } from "@/hooks/useAuth.ts";
-import { useDeviceManagement } from "@/hooks/useDeviceManagement.ts";
 import { EmailField } from "@/modules/auth/components/EmailField.tsx";
 import { PasswordField } from "@/modules/auth/components/PasswordField.tsx";
 import { Spinner } from "@/modules/common/Spinner.tsx";
@@ -21,7 +20,6 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 export function LoginForm() {
     const { login } = useAuth();
-    const { registerDevice } = useDeviceManagement();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [message, setmessage] = useState("");
@@ -35,7 +33,6 @@ export function LoginForm() {
         setLoading(true);
         try {
             await login(values.email, values.password);
-            await registerDevice();
             navigate("/");
         } catch (error) {
             const resMessage = isAxiosError(error)
@@ -55,7 +52,13 @@ export function LoginForm() {
                     <EmailField />
                     <PasswordField name={"password"} />
 
-                    <Button type="submit" variant="brand" size="lg" className="w-full" disabled={loading}>
+                    <Button
+                        type="submit"
+                        variant="brand"
+                        size="lg"
+                        className="w-full"
+                        disabled={loading}
+                    >
                         {loading ? <Spinner /> : "Login"}
                     </Button>
 
@@ -68,10 +71,10 @@ export function LoginForm() {
                     <div className="text-center">
                         <p className="text-gray-700">
                             Don't have an account?
-                            <Button 
-                                onClick={() => navigate("/signup")} 
-                                variant="link" 
-                                size="sm" 
+                            <Button
+                                onClick={() => navigate("/signup")}
+                                variant="link"
+                                size="sm"
                                 className="ml-1 text-red-600 hover:text-red-700"
                             >
                                 Sign up

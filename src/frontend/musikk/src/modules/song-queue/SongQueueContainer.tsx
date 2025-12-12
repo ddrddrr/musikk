@@ -1,4 +1,4 @@
-import { SongQueuePlayButtonButton } from "@/modules/song-queue/SongQueueContainerPlayButton.tsx";
+import { SongQueuePlayButton } from "@/modules/song-queue/SongQueueContainerPlayButton.tsx";
 import { ISongQueueNode } from "@/modules/song-queue/types.ts";
 import { SongAddToLikedButton } from "@/modules/songs/SongAddToLikedButton.tsx";
 import { SongAddToQueueButton } from "@/modules/songs/SongAddToQueueButton.tsx";
@@ -40,7 +40,10 @@ export const SongQueueContainer = memo(function SongContainer({
     const authors = song.authors.map((a) => a.display_name).join(", ");
 
     return (
-        <SongContextMenu song={node.collection_song} renderRemoveFromPlaylist={removeFromPlaylistCtxBtn}>
+        <SongContextMenu
+            song={node.collection_song}
+            renderRemoveFromPlaylist={removeFromPlaylistCtxBtn}
+        >
             <div className="flex items-center justify-between w-full h-full overflow-hidden">
                 <div className="flex items-center gap-3 min-w-0">
                     {image &&
@@ -50,20 +53,30 @@ export const SongQueueContainer = memo(function SongContainer({
                                 alt=""
                                 className="w-10 h-10 object-cover rounded-sm border border-black"
                             />
-                            ) : (
+                        ) : (
                             <div className="w-10 h-10 bg-gray-200 flex items-center justify-center rounded-sm border border-black">
                                 <span className="text-gray-400 text-xl">♪</span>
                             </div>
                         ))}
 
                     <div className="flex flex-col min-w-0">
-                        <p className={`font-bold text-sm text-black truncate ${titleMaxWidth}`}>{song.title}</p>
-                        <p className={`text-xs text-gray-600 truncate ${titleMaxWidth}`}>{authors}</p>
+                        <p className={`font-bold text-sm text-black truncate ${titleMaxWidth}`}>
+                            {song.title}
+                        </p>
+                        <p className={`text-xs text-gray-600 truncate ${titleMaxWidth}`}>
+                            {authors}
+                        </p>
                     </div>
                 </div>
 
                 <div className="flex items-center gap-2 shrink-0">
-                    {playButton && <SongQueuePlayButtonButton node={node} size={buttonSize} className={buttonClass} />}
+                    {playButton && (
+                        <SongQueuePlayButton
+                            node={node}
+                            size={buttonSize}
+                            className={buttonClass}
+                        />
+                    )}
                     {addToLikedButton && (
                         <SongAddToLikedButton
                             collectionSong={node.collection_song}

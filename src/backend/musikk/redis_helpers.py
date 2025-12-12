@@ -1,5 +1,5 @@
 from django_redis import get_redis_connection
 
 
-def get_default_redis():
+def get_default_redis_conn():
     return get_redis_connection("default")

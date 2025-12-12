@@ -1,4 +1,3 @@
-import { useDeviceManagement } from "@/hooks/useDeviceManagement.ts";
 import { login as loginAPI, logout as logoutAPI } from "@/modules/auth/api.ts";
 import { AuthContext } from "@/modules/auth/providers/AuthContext.tsx";
 import { fetchMe } from "@/modules/user/queries.ts";
@@ -15,7 +14,6 @@ interface AuthProviderProps {
 export function AuthProvider({ children }: AuthProviderProps) {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
-    const { deleteDevice } = useDeviceManagement();
 
     const {
         data: user,
@@ -38,11 +36,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     };
 
     const logout = async () => {
-        try {
-            await deleteDevice();
-        } catch (error) {
-            console.error("Failed to delete device during logout:", error);
-        }
         await logoutAPI();
         queryClient.clear();
         if (Cookies.get("csrftoken")) Cookies.remove("csrftoken");

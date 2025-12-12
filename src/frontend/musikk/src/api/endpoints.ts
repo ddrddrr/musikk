@@ -72,13 +72,6 @@ export const UserURLs = {
 export const SearchURLs = {
     searchMain: (query: string) => `/search?q=${query}`,
 };
-export const PlaybackURLs = {
-    retrieve: `/playback`,
-    setState: `/playback`,
-    registerDevice: `/playback-device`,
-    deleteDevice: (deviceUUID: UUID) => `/playback-device/${deviceUUID}/delete`,
-    setDeviceActive: (deviceUUID: UUID) => `/playback-device/${deviceUUID}/activate`,
-};
 export const FriendActivityURLs = {
     listeningToList: `/friend-activity/active-songs`,
     latestAddedList: `/friend-activity/latest-added`,
