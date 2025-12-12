@@ -2,12 +2,9 @@ import json
 from typing import TypedDict
 
 from redis_helpers import get_default_redis_conn
+from utils.data import try_decode
 
 DEVICE_TTL_SECONDS = 5  # heartbeat TTL seconds
-
-
-def _decode(value):
-    return value.decode() if isinstance(value, bytes) else value
 
 
 class Device(TypedDict):
@@ -65,11 +62,11 @@ class DeviceManager:
 
         device_ids = r.smembers(self.devices_set_key())
         active_device_raw = r.get(self.active_device_key())
-        active_device_id = _decode(active_device_raw) if active_device_raw else None
+        active_device_id = try_decode(active_device_raw) if active_device_raw else None
 
         devices: list[Device] = []
         for raw_device_id in device_ids:
-            device_id = _decode(raw_device_id)
+            device_id = try_decode(raw_device_id)
             raw_device = r.get(self.device_key(device_id))
             if not raw_device:
                 r.srem(self.devices_set_key(), device_id)
@@ -81,11 +78,11 @@ class DeviceManager:
                 device = {}
 
             devices.append(
-                {
-                    "id": device_id,
-                    "name": device.get("name", ""),
-                    "is_active": device_id == active_device_id,
-                }
+                Device(
+                    id=device_id,
+                    name=device.get("name", ""),
+                    is_active=device_id == active_device_id,
+                )
             )
 
         return devices
@@ -103,7 +100,7 @@ class DeviceManager:
         r.srem(self.devices_set_key(), device_id)
 
         prev_active = r.get(self.active_device_key())
-        prev_active = _decode(prev_active) if prev_active else None
+        prev_active = try_decode(prev_active) if prev_active else None
 
         if prev_active == device_id:
             r.delete(self.active_device_key())

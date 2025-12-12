@@ -2,19 +2,18 @@ import { PlaybackContext } from "@/modules/playback/providers/playbackContext.ts
 import { useQueueChangeAPI } from "@/modules/song-queue/hooks/useQueueAPI.ts";
 import { useContext, useEffect, useMemo, useRef } from "react";
 
-// @ts-expect-error, see shaka docs
 import shaka from "shaka-player";
 
 interface PlayerProps {
+    audioRef: React.RefObject<HTMLAudioElement>;
     onDurationChange?: (duration: number) => void;
     onTimeUpdate?: (currentTime: number) => void;
 }
 
-export function Player({ onDurationChange, onTimeUpdate }: PlayerProps) {
+export function Player({ audioRef, onDurationChange, onTimeUpdate }: PlayerProps) {
     const { isThisDeviceActive, isPlaybackActive, queueHead, playingCollectionSong } =
         useContext(PlaybackContext);
     const useShiftHeadMutation = useQueueChangeAPI();
-    const audioRef = useRef<HTMLAudioElement>(null);
     const playerRef = useRef<shaka.Player | null>(null);
     const isAudioReadyRef = useRef(false);
 

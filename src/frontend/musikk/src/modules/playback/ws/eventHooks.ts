@@ -24,8 +24,10 @@ export function usePlaybackChangeEvent() {
     const { setIsPlaying } = usePlaybackState();
 
     useEffect(() => {
-        ws.subscribe("playback.change", (payload: PlaybackChangeEvent) =>
-            setIsPlaying(payload.playback),
-        );
+        ws.subscribe("playback.change", (payload: PlaybackChangeEvent) => {
+            if (setIsPlaying) {
+                setIsPlaying(payload.playback);
+            }
+        });
     }, [ws, setIsPlaying]);
 }

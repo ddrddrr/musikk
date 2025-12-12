@@ -65,6 +65,7 @@ class BaseConsumer(JsonWebsocketConsumer):
             self.broadcast_devices()
 
     def receive_json(self, content, **kwargs):
+        logger.debug(f"Received WS event: {content}")
         action = content.get("action")
         payload = content.get("payload") or {}
 
@@ -76,9 +77,9 @@ class BaseConsumer(JsonWebsocketConsumer):
             case "device.heartbeat":
                 self.handle_device_heartbeat(payload)
             case "playback.activate":
-                pass
+                self.handle_playback_activate()
             case "playback.stop":
-                pass
+                self.handle_playback_stop()
             case _:
                 self.close(
                     code=WebSocketStatusCode.UnknownEvent,
@@ -135,9 +136,11 @@ class BaseConsumer(JsonWebsocketConsumer):
 
     def handle_playback_activate(self, *args, **kwargs):
         self.playback_manager.activate()
+        self.broadcast_playback_state()
 
     def handle_playback_stop(self, *args, **kwargs):
         self.playback_manager.stop()
+        self.broadcast_playback_state()
 
     def broadcast_devices(self):
         devices = self.device_manager.get_devices()

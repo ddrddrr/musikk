@@ -12,6 +12,7 @@ import { useDeviceLifecycle } from "@/modules/playback/hooks/useDeviceLifecycle.
 import { WebSocketProvider } from "@/providers/WebSocketProvider";
 import { useQueryInvalidateEvent } from "@/ws/useQueryInvalidateEvent.ts";
 import { DeviceListProvider } from "../playback/providers/DeviceListProvider";
+import { PlaybackProvider } from "../playback/providers/PlaybackProvider";
 import { useDeviceListEvent, usePlaybackChangeEvent } from "../playback/ws/eventHooks";
 
 function AuthenticatedApp() {
@@ -46,7 +47,9 @@ export function App() {
                             <RequireAuth>
                                 <WebSocketProvider>
                                     <DeviceListProvider>
-                                        <AuthenticatedApp />
+                                        <PlaybackProvider>
+                                            <AuthenticatedApp />
+                                        </PlaybackProvider>
                                     </DeviceListProvider>
                                 </WebSocketProvider>
                             </RequireAuth>

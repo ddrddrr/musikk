@@ -1,11 +1,12 @@
 import { Player } from "@/modules/player/Player.tsx";
 import { PlayerBar } from "@/modules/player/PlayerBar.tsx";
 import { SongQueue } from "@/modules/song-queue/SongQueue.tsx";
-import { memo, useState } from "react";
+import { memo, useRef, useState } from "react";
 
 export const PlayerBox = memo(function PlayerBox() {
+    const audioRef = useRef<HTMLAudioElement>(null);
     const [isQueueOpen, setIsQueueOpen] = useState(false);
-    const [duration, setDuration] = useState(0);
+    const [totalDuration, setTotalDuration] = useState(0);
     const [time, setTime] = useState(0);
     const [seeking, setSeeking] = useState(false);
 
@@ -19,20 +20,23 @@ export const PlayerBox = memo(function PlayerBox() {
                     <SongQueue />
                 </div>
             )}
+
             <PlayerBar
-                duration={duration}
+                audioRef={audioRef}
+                totalDuration={totalDuration}
                 time={time}
                 seeking={seeking}
                 setSeeking={setSeeking}
                 setIsQueueOpen={setIsQueueOpen}
+                onSeekCommit={(t) => setTime(t)}
             />
+
             <div className="hidden">
                 <Player
-                    onDurationChange={setDuration}
+                    audioRef={audioRef}
+                    onDurationChange={setTotalDuration}
                     onTimeUpdate={(currentTime) => {
-                        if (!seeking) {
-                            setTime(currentTime);
-                        }
+                        if (!seeking) setTime(currentTime);
                     }}
                 />
             </div>

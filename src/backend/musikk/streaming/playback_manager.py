@@ -1,4 +1,5 @@
 from redis_helpers import get_default_redis_conn
+from utils.data import try_decode
 
 
 # TODO: celery task to remove inactive states?
@@ -8,12 +9,13 @@ class PlaybackManager:
 
     def activate(self):
         r = get_default_redis_conn()
-        r.set(self.playback_key, True)
+        r.set(self.playback_key, "true")
 
     def stop(self):
         r = get_default_redis_conn()
-        r.set(self.playback_key, False)
+        r.set(self.playback_key, "false")
 
     def get_state(self) -> bool:
         r = get_default_redis_conn()
-        return r.get(self.playback_key)
+
+        return try_decode(r.get(self.playback_key)) == "true"

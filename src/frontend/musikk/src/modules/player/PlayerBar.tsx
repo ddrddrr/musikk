@@ -5,30 +5,30 @@ import { useQueueChangeAPI } from "@/modules/song-queue/hooks/useQueueAPI.ts";
 import { Button } from "@/modules/ui/button";
 import { Slider } from "@/modules/ui/slider";
 import { ListMusic, SkipBack, SkipForward, Volume2 } from "lucide-react";
-import { useContext, useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 
 interface PlayerBarProps {
-    duration: number;
+    audioRef: React.RefObject<HTMLAudioElement>;
+    totalDuration: number;
     time: number;
     seeking: boolean;
     setSeeking: (s: boolean) => void;
     setIsQueueOpen: React.Dispatch<React.SetStateAction<boolean>>;
+    onSeekCommit?: (t: number) => void;
 }
-
-// TODO: reset play button on end, reset timer to 0
-export function PlayerBar({ duration, time, seeking, setSeeking, setIsQueueOpen }: PlayerBarProps) {
+export function PlayerBar({
+    audioRef,
+    totalDuration,
+    time,
+    seeking,
+    setSeeking,
+    setIsQueueOpen,
+    onSeekCommit,
+}: PlayerBarProps) {
     const { playingCollectionSong, isThisDeviceActive } = useContext(PlaybackContext);
     const [volume, setVolume] = useState(100);
     const [seekTime, setSeekTime] = useState(0);
-    const useShiftHeadMutation = useQueueChangeAPI();
-    const audioRef = useRef<HTMLAudioElement | null>(null);
-
-    useEffect(() => {
-        const audio = document.querySelector("audio");
-        if (audio) {
-            audioRef.current = audio;
-        }
-    }, []);
+    const shiftHeadMutation = useQueueChangeAPI();
 
     useEffect(() => {
         if (audioRef.current) {
@@ -42,19 +42,27 @@ export function PlayerBar({ duration, time, seeking, setSeeking, setIsQueueOpen 
         return `${mins}:${secs.toString().padStart(2, "0")}`;
     };
 
+    // if the audio is playing, coming to and end and the person is seeking back
+    // the audio will switch
+    // this is expected as there is no proper way to prevent the audio from switching
+    // and seek at the same time
     const handleSeek = (value: number[]) => {
         setSeeking(true);
         setSeekTime(value[0]);
     };
 
-    const handleSeekCommit = () => {
-        if (audioRef.current) {
-            audioRef.current.currentTime = seekTime;
+    const handleSeekCommit = (value: number[]) => {
+        const t = value[0];
+
+        setSeekTime(t);
+        onSeekCommit?.(t);
+
+        const audio = audioRef.current;
+        if (audio) {
+            audio.currentTime = t;
         }
-        // helps with little stutter on seek
-        setTimeout(() => {
-            setSeeking(false);
-        }, 200);
+
+        setSeeking(false);
     };
 
     const playingSong = playingCollectionSong?.song;
@@ -93,19 +101,19 @@ export function PlayerBar({ duration, time, seeking, setSeeking, setIsQueueOpen 
                             <Slider
                                 value={[displayTime]}
                                 min={0}
-                                max={duration || 100}
+                                max={totalDuration || 100}
                                 step={1}
                                 onValueChange={handleSeek}
                                 onValueCommit={handleSeekCommit}
                                 className="flex-1 cursor-pointer"
                             />
-                            <span className="text-xs">{formatTime(duration)}</span>
+                            <span className="text-xs">{formatTime(totalDuration)}</span>
                         </div>
                     )}
 
                     <div className="flex items-center gap-1">
                         <Button
-                            onClick={() => useShiftHeadMutation.mutate({ action: "shift-back" })}
+                            onClick={() => shiftHeadMutation.mutate({ action: "shift-back" })}
                             variant="ghost"
                             size="icon"
                         >
@@ -113,7 +121,7 @@ export function PlayerBar({ duration, time, seeking, setSeeking, setIsQueueOpen 
                         </Button>
                         <PlayerPlayButton />
                         <Button
-                            onClick={() => useShiftHeadMutation.mutate({ action: "shift" })}
+                            onClick={() => shiftHeadMutation.mutate({ action: "shift" })}
                             variant="ghost"
                             size="icon"
                         >
