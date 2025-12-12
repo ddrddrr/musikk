@@ -61,8 +61,10 @@ export function useHandlePlay() {
             } else {
                 activatePlaybackAction();
             }
+            return;
         }
-        // if no item in queue do not change state (should be stopped)
+        // no item in the queue -> should be stopped
+        stopPlaybackAction();
     }
 
     return handlePlay;
