@@ -13,8 +13,10 @@ There are four main approaches used today: Basic Download, Progressive Download,
 
 \begin{itemize}
     \item \textbf{Basic Download}\\
-    Basic Download works by downloading the entire file before the playback begins.
-    Only when the data transfer is complete can the user start the playback.
+    Basic Download works by downloading the entire file before playback begins.
+    It does so by making a standard HTTP GET request to which the server sends back an HTTP response
+    with the media as raw binary data in its body.~\parencite{mime_octet_stream}
+    Only once the full transfer has completed can the user start playback.
 
     This method poses several limitations: for high-quality files, it typically requires
     significant storage space and time to download.
@@ -30,37 +32,67 @@ There are four main approaches used today: Basic Download, Progressive Download,
     mobile network to a fast home Wi-Fi connection.
 
     \item \textbf{Progressive Download}\\
-    With Progressive Download, it is possible to download only portions of the file, meaning the client
-    is not restricted in playback until the whole file is on their system.
-    This is usually implemented via a combination of HTTP byte range requests and audio container
-    metadata (such as MP4 indices or MP3 frame headers) that tell the client which byte ranges
-    map to which time segments of the audio.~\parencite{progressive_download}
-    Nevertheless, \emph{variable bitrate} is still an issue: switching between multiple file
-    representations is fragile, since different encodings may not be perfectly aligned,
-    and extra cross-file metadata would be needed to coordinate them.
-    Additionally, \emph{data storage} is problematic as well, since substantial portions
-    of each file still have to be cached locally on the client device.
+    \footnote{Sometimes called `Pseudo-Streaming'.~\parencite{pseudo_streaming}}
+    Progressive Download still uses standard HTTP, but the client does not need to download the entire file
+    before playback starts.
+    Instead, it fetches a short initial part, begins playback, and continues downloading further parts as needed.
 
-    \item \textbf{Streaming}
+    This is usually implemented with HTTP byte-range requests.~\parencite{range_http_requests}
+    To make this possible, the client relies on container
+    metadata~(e.g., the header of an MP4 file) that maps playback time to
+    byte offsets.~\parencite{progressive_download}
+    With that mapping, the player can request the next few seconds of audio
+    and also seek by requesting a different range.
+
+    In comparison to Basic Download, since the file no longer needs to be downloaded fully,
+    storage becomes less of an issue.
+    The player only needs a small buffer in memory, and older data
+    can be discarded once it has been played.
+    The browser may still cache recently fetched ranges,
+    but the application does not need to persist large portions of the file on disk.
+
+    In addition, it becomes possible to approximate adaptive playback.
+    One approach, presented by~\citeauthor{progressive_download}~\parencite{progressive_download},
+    involves storing multiple representations as separate tracks inside a single
+    container file~(e.g., MP4) and switching between them during playback.
+    The client then continues requesting the following parts of the file
+    using HTTP byte ranges, but chooses the
+    track that best matches the current network conditions.
+    However, seamless switching requires the representations to be prepared
+    in a compatible way, for example, corresponding parts of each track
+    must cover the same playback time intervals and start at safe switching points.
+
+    \textbf{Segmented HTTP Streaming}\\
     \footnote{
         In its traditional usage, `Streaming' means real-time media
         delivery over persistent transport protocols such as RTMP,
-        where the server pushes a continuous encoded stream to the client.
-        In this section, the term is used to refer to HTTP-based
-        segmented Streaming (e.g., HLS, DASH).
+        where the server sends data via UDP\@.
+        In this section, the term is used to refer to HTTP-based segmented
+        Streaming~(e.g., HLS, DASH), where the client fetches small parts of the file over HTTP\@.
     }
 
-    With audio Streaming, data is transmitted over the Internet in real-time without
-    the need for the entire file to be downloaded.
-    This is achieved by splitting the audio into short segments (chunks) with varying quality
-    and providing a file called a manifest that lists them.
-    That is how modern Streaming protocols support adaptive playback: the client can choose what
-    chunk to get next based on the manifest information.~\parencite{dash_technical}
-    As a result, different bitrates and codecs can be selected based on the network
-    conditions or device capabilities, providing an optimized playback.
-    In addition, the client keeps only a small buffer of segments in memory
-    and discards those that have already been played, largely fixing the issues that download
-    methods had.
+    With Segmented HTTP Streaming, the audio file is first split into many small files (chunks),
+    and a special manifest file is then generated that lists the chunks
+    and describes which time range each chunk covers.
+    The client then downloads the individual chunks and uses them for playback instead
+    of working with byte range requests for a single large file,
+    as was the case with Progressive Download.
+    Since the manifest provides a mapping of chunks to audio time slots.~\parencite{dash_technical}
+    this makes it possible to play the audio from any point and enables seeking.
+
+    Moreover, the original audio file can first be encoded into multiple formats of different sizes.
+    Then, it is possible to preprocess those files and create a single manifest that
+    allows choosing chunks of different sizes and quality for the same time slot.
+    As a result, chunks can be selected based on network
+    conditions or device capabilities, providing a more optimized playback.
+
+    Compared to Progressive Download, Streaming makes adaptive playback simpler,
+    because the manifest provides a standardized way to describe multiple representations
+    and their timing.
+    It also simplifies retries and caching, since each chunk is fetched as a separate
+    HTTP resource and can be handled efficiently by standard HTTP caches and CDNs.
+    Finally, the client logic becomes more straightforward: instead of computing byte
+    ranges inside a large file, the player selects the next chunk from the manifest.
 
     \item \textbf{Peer-to-Peer}\\
     In P2P audio transfer, audio data is shared directly between users'
@@ -72,21 +104,18 @@ There are four main approaches used today: Basic Download, Progressive Download,
 \end{itemize}
 
 Streaming was chosen as the playback method for this thesis.
-Based on the research, Basic Download was deemed too impractical, and
-Progressive Download in its simple form was also found to suffer from the
-same limitations, namely the inability to adapt to changing network
-conditions during playback and the need to cache large portions of the file
-on the client device.
-In a more advanced form, Progressive Download could approximate adaptive playback, but this
-would effectively behave like Streaming while adding several drawbacks, such as higher
-implementation complexity, since a custom solution for playback adaptation would need to be written.
 
-P2P is not suitable in the current case because the files must be on users' machines, which could lead
-to various problems: from delays for clients located far away from the source of the audio to slow
-playback speeds for files with high demand and low supply.
+Basic Download was excluded because it requires downloading the whole file
+before playback can start, making the usability of the application limited.
+Progressive Download improves startup time and seeking, but adapting to changing network
+conditions is not a standard part of the approach and would require custom preprocessing of
+audio files on the server side, as well as client logic that can utilize this approach.
+Peer-to-Peer transfer was also excluded, since it would rely on users’ devices as sources of audio data,
+making playback speed dependent on peer availability and location.
 
-As stated earlier, Streaming allows for smooth playback under different network conditions and reduces
-the memory impact a service has on the user's device.
+Segmented HTTP Streaming addresses these issues by defining adaptive playback directly in
+the manifest and delivering the audio as small chunk files that can be cached
+and retried like regular HTTP resources.
 Additionally, its integration into the service, as will be demonstrated
 later in \chapterref{ch:implementation}, is straightforward.
 
