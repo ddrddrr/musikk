@@ -1,4 +1,3 @@
-import typing
 from enum import StrEnum
 from pathlib import Path
 import tempfile

@@ -83,7 +83,7 @@ class BaseSongCreateSerializer(serializers.ModelSerializer):
         return instance
 
 
-class CollectionSongGetSerializer(BaseModelSerializer):
+class CollectionSongSerializer(BaseModelSerializer):
     song = serializers.SerializerMethodField()
 
     class Meta:

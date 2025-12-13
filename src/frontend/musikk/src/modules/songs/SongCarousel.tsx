@@ -1,4 +1,4 @@
-import { ICollectionSong } from "@/modules/song-collections/types.ts";
+import { CollectionSong } from "@/modules/song-collections/types.ts";
 import { SongCard } from "@/modules/songs/SongCard.tsx";
 import {
     Carousel,
@@ -9,7 +9,7 @@ import {
 } from "@/modules/ui/carousel";
 
 interface SongCarouselProps {
-    songs: ICollectionSong[];
+    songs: CollectionSong[];
     title: string;
 }
 

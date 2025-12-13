@@ -8,13 +8,12 @@ package frontend
 package proxy
 package backend
 
-user ---> proxy: Initial Page Load
 proxy ---> user: Static Files (HTML/CSS/JS)
 
 user ---> frontend: Interacts via UI
-frontend ---> proxy: API / SSE / Audio Requests
-proxy ---> backend: Forward API / SSE
-backend ---> proxy: JSON / Events
-proxy ---> frontend: Data / Events / Audio
+frontend ---> proxy: API Requests / WebSocket Actions
+proxy ---> backend: Forward API Requests / WebSocket Actions
+backend ---> proxy: JSON Responses / WebSocket Events
+proxy ---> frontend: JSON Responses / WebSocket Events
 
 @enduml

@@ -159,6 +159,6 @@ class BaseConsumer(JsonWebsocketConsumer):
             {
                 "type": "ws_event",
                 "event": "playback.change",
-                "payload": {"playback": self.playback_manager.get_state()},
+                "payload": {"playback": self.playback_manager.is_playback_active()},
             },
         )

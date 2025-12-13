@@ -1,12 +1,12 @@
 import { UUID } from "@/api/types.ts";
-import { IBaseModel } from "@/modules/common/types.ts";
-import { ICollection, ICollectionSong } from "@/modules/song-collections/types.ts";
+import { BaseModel } from "@/modules/common/types.ts";
+import { Collection, CollectionSong } from "@/modules/song-collections/types.ts";
 import { IUser } from "@/modules/user/types.ts";
 
 export type AttachmentType = "collection" | "song";
-export type Attachment = ICollection | ICollectionSong;
+export type Attachment = Collection | CollectionSong;
 
-export interface IPublication extends IBaseModel {
+export interface IPublication extends BaseModel {
     author: IUser;
     root_author_uuid: UUID;
     content: string;

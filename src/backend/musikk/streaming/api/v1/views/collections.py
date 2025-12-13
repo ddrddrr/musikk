@@ -1,11 +1,19 @@
 from django.db import transaction
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
-from rest_framework.generics import ListAPIView, RetrieveAPIView, get_object_or_404
-from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.generics import (
+    ListAPIView,
+    RetrieveAPIView,
+    get_object_or_404,
+    ListCreateAPIView,
+)
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from users.permissions import IsArtist
 from websockets.event_helpers import send_ws_event
+from streaming.api.v1.filters import CollectionFilter
 from streaming.api.v1.serializers.collections import (
     CollectionSerializerBasic,
     CollectionSerializerDetailed,
@@ -16,36 +24,24 @@ from streaming.models.songs import CollectionSong
 from streaming.permissions import IsPublicOrCollectionAuthor, IsCollecitonAuthor
 
 
-class PlaylistsLatestView(ListAPIView):
-    queryset = Collection.objects.all()
-    serializer_class = CollectionSerializerBasic
-    amount = 50
+class CollectionListCreateView(ListCreateAPIView):
+    queryset = Collection.objects.filter(private=False).order_by("-date_added")
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = CollectionFilter
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
-    def get_queryset(self):
-        qs = (
-            super()
-            .get_queryset()
-            .filter(type=CollectionType.PLAYLIST)
-            .exclude(private=True)
-            .order_by("-date_added")[: self.amount]
+    def get_serializer_class(self):
+        return (
+            CollectionCreateSerializer
+            if self.request.method == "POST"
+            else CollectionSerializerBasic
         )
-        return qs
 
-
-class AlbumsLatestView(ListAPIView):
-    queryset = Collection.objects.all()
-    serializer_class = CollectionSerializerBasic
-    amount = 50
-
-    def get_queryset(self):
-        qs = (
-            super()
-            .get_queryset()
-            .filter(type=CollectionType.ALBUM)
-            .exclude(private=True)
-            .order_by("-date_added")[: self.amount]
-        )
-        return qs
+    def get_permissions(self):
+        permissions = super().get_permissions()
+        if self.request.method == "POST":
+            return permissions + [IsArtist()]
+        return permissions
 
 
 class CollectionPersonalView(APIView):
@@ -161,40 +157,40 @@ class CollectionAddSong(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-# TODO: restrict album creation to artists only
-class CollectionCreateView(APIView):
-    """
-    { title, description, image?, private, authors: [UUID], songs: [UUID,...], type }
-    """
-
-    parser_classes = [MultiPartParser, FormParser]
-
-    def post(self, *args, **kwargs):
-        data = self.request.data.copy()
-
-        authors = data.getlist("authors", [])
-        if not isinstance(authors, list):
-            authors = [authors]
-
-        songs = data.getlist("songs", [])
-        if not isinstance(songs, list):
-            songs = [songs]
-
-        serializer = CollectionCreateSerializer(
-            data={
-                "title": data["title"],
-                "description": data.get("description", ""),
-                "image": self.request.FILES.get("image"),
-                "authors": authors,
-                "songs": songs,
-                "type": data["type"],
-            },
-            context={"request": self.request},
-        )
-
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(status=status.HTTP_201_CREATED)
+# class CollectionCreateView(APIView):
+#     """
+#     { title, description, image?, private, authors: [UUID], songs: [UUID,...], type }
+#     """
+#
+#     permission_classes = [IsArtist]
+#     parser_classes = [MultiPartParser, FormParser]
+#
+#     def post(self, *args, **kwargs):
+#         data = self.request.data.copy()
+#
+#         authors = data.getlist("authors", [])
+#         if not isinstance(authors, list):
+#             authors = [authors]
+#
+#         songs = data.getlist("songs", [])
+#         if not isinstance(songs, list):
+#             songs = [songs]
+#
+#         serializer = CollectionCreateSerializer(
+#             data={
+#                 "title": data["title"],
+#                 "description": data.get("description", ""),
+#                 "image": self.request.FILES.get("image"),
+#                 "authors": authors,
+#                 "songs": songs,
+#                 "type": data["type"],
+#             },
+#             context={"request": self.request},
+#         )
+#
+#         serializer.is_valid(raise_exception=True)
+#         serializer.save()
+#         return Response(status=status.HTTP_201_CREATED)
 
 
 class AlbumBySongView(APIView):

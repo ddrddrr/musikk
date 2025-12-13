@@ -1,9 +1,8 @@
 from django.urls import path
 
-# from streaming.api.v1.views import (
-#     FriendsLatestAddedCollectionsView,
-#     FriendsLatestListenedView,
-# )
+from streaming.api.v1.views import (
+    FriendsLatestListenedView,
+)
 from streaming.api.v1.views.profile import StreamingProfileRetrieveView
 
 from streaming.api.v1.views.songs import (
@@ -12,14 +11,14 @@ from streaming.api.v1.views.songs import (
     CollectionSongRetrieveView,
 )
 from streaming.api.v1.views.collections import (
-    PlaylistsLatestView,
+    CollectionListCreateView,
     CollectionPersonalView,
     CollectionDetailView,
     CollectionAddLikedView,
     CollectionRemoveSong,
     CollectionAddSong,
-    CollectionCreateView,
     AlbumBySongView,
+    CollectionRetrieveView,
 )
 
 from streaming.api.v1.views.song_queue import (
@@ -51,8 +50,9 @@ song_urls = [
 ]
 
 collection_urls = [
-    path("collections", CollectionCreateView.as_view(), name="collection-create"),
-    # TODO: not correct, the path should be the same, i.e. use ViewSets
+    path(
+        "collections", CollectionListCreateView.as_view(), name="collection-list-create"
+    ),
     path(
         "collections/<uuid:collection_uuid>/songs/<uuid:song_uuid>/remove",
         CollectionRemoveSong.as_view(),
@@ -63,7 +63,6 @@ collection_urls = [
         CollectionAddSong.as_view(),
         name="collection-add-song",
     ),
-    path("collections/latest", PlaylistsLatestView.as_view(), name="collection-list"),
     path(
         "collections/personal/<uuid:uuid>",
         CollectionPersonalView.as_view(),
@@ -71,7 +70,7 @@ collection_urls = [
     ),
     path(
         "collections/<uuid:uuid>",
-        CollectionDetailView.as_view(),
+        CollectionRetrieveView.as_view(),
         name="collection-retrieve",
     ),
     path(
@@ -137,19 +136,13 @@ song_queue_urls = [
 ]
 
 
-# TODO:
-# friend_activity_urls = [
-#     path(
-#         "friend-activity/latest-added",
-#         FriendsLatestAddedCollectionsView.as_view(),
-#         name="friends-latest-added",
-#     ),
-#     path(
-#         "friend-activity/active-songs",
-#         FriendsLatestListenedView.as_view(),
-#         name="friends-listening-activity",
-#     ),
-# ]
+friend_activity_urls = [
+    path(
+        "friend-activity/active-songs",
+        FriendsLatestListenedView.as_view(),
+        name="friends-listening-activity",
+    ),
+]
 
 streaming_profile_urls = [
     path(
@@ -162,6 +155,6 @@ urlpatterns = (
     song_urls
     + collection_urls
     + song_queue_urls
-    # + friend_activity_urls
+    + friend_activity_urls
     + streaming_profile_urls
 )

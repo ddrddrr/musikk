@@ -3,6 +3,8 @@ import uuid
 import tempfile
 import io
 import random
+from pathlib import Path
+
 import requests
 
 from django.conf import settings
@@ -26,10 +28,8 @@ from streaming.models import (
 
 fake = Faker()
 
-# AUDIO_LOCAL_FILE = str(
-#     settings.BASE_DIR / "streaming" / "audio" / "tests" / "data" / "file1.wav"
-# )
-AUDIO_LOCAL_FILE = str(settings.BASE_DIR / "sample_flac_song.flac")
+
+AUDIO_FILES_DIR = Path(settings.BASE_DIR) / "samples"
 
 IMAGE_URL_1 = "https://picsum.photos/500"
 IMAGE_URL_2 = "https://picsum.photos/200"
@@ -65,9 +65,12 @@ class Command(BaseCommand):
             songs = []
             for _ in range(songs_count):
                 image_url = random.choice(image_urls)
+                audio_path = self._pick_random_audio_path()
 
                 song = self._create_song(
-                    audio_path=AUDIO_LOCAL_FILE, image_url=image_url, artists=artists
+                    audio_path=str(audio_path),
+                    image_url=image_url,
+                    artists=artists,
                 )
                 songs.append(song)
 
@@ -84,6 +87,16 @@ class Command(BaseCommand):
                 albums_count=albums_count,
                 artists=artists,
             )
+
+    def _pick_random_audio_path(self) -> Path:
+        if not AUDIO_FILES_DIR.exists() or not AUDIO_FILES_DIR.is_dir():
+            raise FileNotFoundError(f"Audio files dir not found: {AUDIO_FILES_DIR}")
+
+        files = [p for p in AUDIO_FILES_DIR.iterdir() if p.is_file()]
+        if not files:
+            raise FileNotFoundError(f"No files found in audio dir: {AUDIO_FILES_DIR}")
+
+        return random.choice(files)
 
     def _create_users(self, count):
         created = []

@@ -1,5 +1,5 @@
-import { collectionRemoveSong } from "@/modules/song-collections/mutations.ts";
-import { ICollectionSong } from "@/modules/song-collections/types.ts";
+import { collectionRemoveSong } from "@/modules/song-collections/api/mutations.ts";
+import { CollectionSong } from "@/modules/song-collections/types.ts";
 import { useQueueAddAPI } from "@/modules/song-queue/hooks/useQueueAPI.ts";
 import { useSongPlayHandler } from "@/modules/songs/hooks/useSongPlayHandler.ts";
 import {
@@ -15,7 +15,7 @@ import { JSX } from "react";
 
 interface SongContextMenuProps {
     children: JSX.Element | JSX.Element[];
-    song: ICollectionSong;
+    song: CollectionSong;
     renderRemoveFromPlaylist?: boolean;
 }
 

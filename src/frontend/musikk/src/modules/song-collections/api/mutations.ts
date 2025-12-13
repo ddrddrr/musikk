@@ -15,7 +15,9 @@ interface ICollectionAddToLikedParams {
     collectionUUID: UUID;
 }
 
-export async function collectionAddToLiked({ collectionUUID }: ICollectionAddToLikedParams): Promise<void> {
+export async function collectionAddToLiked({
+    collectionUUID,
+}: ICollectionAddToLikedParams): Promise<void> {
     await api_client.post(CollectionURLs.collectionAddToLiked(collectionUUID));
 }
 
@@ -24,8 +26,13 @@ interface ICollectionRemoveSongParams {
     songCollectionSongUUID: UUID;
 }
 
-export async function collectionRemoveSong({ collectionUUID, songCollectionSongUUID }: ICollectionRemoveSongParams) {
-    await api_client.delete(CollectionURLs.collectionRemoveSong(collectionUUID, songCollectionSongUUID));
+export async function collectionRemoveSong({
+    collectionUUID,
+    songCollectionSongUUID,
+}: ICollectionRemoveSongParams) {
+    await api_client.delete(
+        CollectionURLs.collectionRemoveSong(collectionUUID, songCollectionSongUUID),
+    );
 }
 
 export interface IAddToLikedSongsParams {

@@ -7,7 +7,7 @@ import { Input } from "@/modules/ui/input";
 
 import { Attachment } from "@/modules/publications/types.ts";
 import { CollectionCard } from "@/modules/song-collections/CollectionCard.tsx";
-import { ICollection } from "@/modules/song-collections/types.ts";
+import { Collection } from "@/modules/song-collections/types.ts";
 import { SongCard } from "@/modules/songs/SongCard.tsx";
 import { SongContainer } from "@/modules/songs/SongContainer.tsx";
 import { UserCard } from "@/modules/user/components/UserCard.tsx";
@@ -79,7 +79,7 @@ export function SearchWindow({ onItemSelect, songMode = "card" }: SearchWindowPr
         );
     };
 
-    const renderCollections = (label: string, items: ICollection[]) => {
+    const renderCollections = (label: string, items: Collection[]) => {
         if (!items?.length) return null;
 
         return (

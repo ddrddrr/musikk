@@ -1,12 +1,12 @@
 import { CollectionContextMenu } from "@/modules/song-collections/CollectionContextMenu.tsx";
-import type { ICollection } from "@/modules/song-collections/types";
+import type { Collection } from "@/modules/song-collections/types";
 import { Card, CardContent } from "@/modules/ui/card";
 import { useNavigate } from "react-router-dom";
 
 interface SongCollectionCardProps {
-    collection: ICollection;
+    collection: Collection;
     size?: "small" | "medium" | "big";
-    onClick?: (c: ICollection) => void;
+    onClick?: (c: Collection) => void;
 }
 
 const sizeClasses = {
@@ -47,7 +47,7 @@ export function CollectionCard({
 
     const authorNames = authors.map((a) => a.display_name).join(", ");
 
-    function handleOnClick(collection: ICollection) {
+    function handleOnClick(collection: Collection) {
         if (onClick) {
             onClick(collection);
         } else {

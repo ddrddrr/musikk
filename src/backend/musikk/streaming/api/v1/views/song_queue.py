@@ -13,7 +13,7 @@ from streaming.permissions import IsPublicOrCollectionAuthor
 from streaming.playback_manager import PlaybackManager
 from websockets.event_helpers import send_ws_event
 
-
+# TODO LAST SONG IN THE QUEUE DOESNT PLAY??
 class SongQueueBaseView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -40,7 +40,7 @@ class SongQueueBaseView(APIView):
         send_ws_event(
             self._user_group(request),
             "playback.change",
-            playback=playback_manager.get_state(),
+            playback=playback_manager.is_playback_active(),
         )
 
 

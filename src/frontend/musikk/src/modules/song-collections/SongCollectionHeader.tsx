@@ -1,12 +1,12 @@
 import { CollectionAddToLikedButton } from "@/modules/song-collections/CollectionAddToLikedButton.tsx";
 import { CollectionAddToQueueButton } from "@/modules/song-collections/CollectionAddToQueueButton.tsx";
 import { SongCollectionPlayButton } from "@/modules/song-collections/SongCollectionPlayButton.tsx";
-import { ICollectionDetailed } from "@/modules/song-collections/types.ts";
+import { CollectionDetailed } from "@/modules/song-collections/types.ts";
 import { Button } from "@/modules/ui/button";
 import { memo } from "react";
 
 interface SongCollectionHeaderProps {
-    collection: ICollectionDetailed;
+    collection: CollectionDetailed;
     showComments: boolean;
     toggleComments: () => void;
     songsCount: number;

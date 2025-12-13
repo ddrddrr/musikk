@@ -13,7 +13,7 @@ from users.permissions import IsArtist
 from websockets.event_helpers import send_ws_event
 from streaming.api.v1.serializers.songs import (
     BaseSongCreateSerializer,
-    CollectionSongGetSerializer,
+    CollectionSongSerializer,
 )
 from streaming.audio.tasks import convert_audio
 from streaming.audio.validators import validate_audio
@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 class CollectionSongRetrieveView(RetrieveAPIView):
     permission_classes = [IsPublicOrCollectionAuthor]
     queryset = CollectionSong.objects.all()
-    serializer_class = CollectionSongGetSerializer
+    serializer_class = CollectionSongSerializer
     lookup_field = "uuid"
 
 

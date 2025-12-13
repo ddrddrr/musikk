@@ -1,19 +1,17 @@
 from streaming.api.v1.views.collections import (
-    PlaylistsLatestView,
+    CollectionListCreateView,
     CollectionPersonalView,
     CollectionRetrieveView,
     CollectionDetailView,
     CollectionAddLikedView,
     CollectionRemoveSong,
     CollectionAddSong,
-    CollectionCreateView,
     AlbumBySongView,
 )
 
-# from streaming.api.v1.views.connections import (
-#     FriendsLatestListenedView,
-#     FriendsLatestAddedCollectionsView
-# )
+from streaming.api.v1.views.connections import (
+    FriendsLatestListenedView,
+)
 from streaming.api.v1.views.song_queue import (
     SongQueueBaseView,
     SongQueueRetrieveView,

@@ -140,6 +140,11 @@ REST_FRAMEWORK = {
         # TODO: probably remove in prod
         "rest_framework.renderers.BrowsableAPIRenderer",
     ],
+    "DEFAULT_FILTER_BACKENDS": [
+        "django_filters.rest_framework.DjangoFilterBackend",
+    ],
+    "DEFAULT_PAGINATION_CLASS": "musikk.pagination.BaseLimitOffsetPagination",
+    "PAGE_SIZE": 10,
 }
 
 ### AUTH

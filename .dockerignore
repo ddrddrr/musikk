@@ -24,7 +24,7 @@ LICENCE*
 README*
 
 shadow
-samples
+src/backend/musikk/samples
 media
 
 Caddyfile*

@@ -1,5 +1,5 @@
 import { CollectionCard } from "@/modules/song-collections/CollectionCard.tsx";
-import { ICollection } from "@/modules/song-collections/types.ts";
+import { Collection } from "@/modules/song-collections/types.ts";
 import {
     Carousel,
     CarouselContent,
@@ -9,7 +9,7 @@ import {
 } from "@/modules/ui/carousel";
 
 interface SongCollectionsCarouselProps {
-    collections: ICollection[];
+    collections: Collection[];
     title: string;
 }
 

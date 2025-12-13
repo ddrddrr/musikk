@@ -15,7 +15,7 @@ class PlaybackManager:
         r = get_default_redis_conn()
         r.set(self.playback_key, "false")
 
-    def get_state(self) -> bool:
+    def is_playback_active(self) -> bool:
         r = get_default_redis_conn()
 
         return try_decode(r.get(self.playback_key)) == "true"

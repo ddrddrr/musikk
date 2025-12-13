@@ -1,11 +1,11 @@
 import { Button } from "@/modules/ui/button";
 import { useMutation } from "@tanstack/react-query";
 import { Check, Plus } from "lucide-react";
-import { collectionAddToLiked } from "./mutations";
-import { ICollection } from "./types";
+import { collectionAddToLiked } from "./api/mutations.ts";
+import { Collection } from "./types";
 
 interface CollectionAddToLikedButtonProps {
-    collection: ICollection;
+    collection: Collection;
     showComments: boolean;
 }
 
@@ -20,7 +20,7 @@ export function CollectionAddToLikedButton({
         return collection.is_liked ? <Check size={20} /> : <Plus size={20} />;
     };
 
-    function handleClick(collection: ICollection) {
+    function handleClick(collection: Collection) {
         if (collection.is_liked) {
             return; // remove from liked
         }

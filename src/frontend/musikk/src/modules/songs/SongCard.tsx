@@ -1,4 +1,4 @@
-import { ICollectionSong } from "@/modules/song-collections/types.ts";
+import { CollectionSong } from "@/modules/song-collections/types.ts";
 import { albumBySongRetrieve } from "@/modules/songs/queries.ts";
 import { SongContextMenu } from "@/modules/songs/SongContextMenu.tsx";
 import { Card, CardContent } from "@/modules/ui/card";
@@ -6,9 +6,9 @@ import { MediaBox } from "@/modules/ui/media";
 import { useNavigate } from "react-router-dom";
 
 interface SongCardProps {
-    collectionSong: ICollectionSong;
+    collectionSong: CollectionSong;
     size?: "small" | "medium" | "big";
-    onClick?: (s: ICollectionSong) => void;
+    onClick?: (s: CollectionSong) => void;
 }
 
 const sizeClasses = {
@@ -45,7 +45,7 @@ export function SongCard({ collectionSong, size = "medium", onClick = undefined 
 
     const authorNames = authors.map((a) => a.display_name).join(", ");
 
-    async function handleClick(s: ICollectionSong) {
+    async function handleClick(s: CollectionSong) {
         if (onClick) {
             onClick(s);
         } else {

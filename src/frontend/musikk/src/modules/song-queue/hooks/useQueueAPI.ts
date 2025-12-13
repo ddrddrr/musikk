@@ -1,4 +1,4 @@
-import type { ICollection, ICollectionSong } from "@/modules/song-collections/types.ts";
+import type { Collection, CollectionSong } from "@/modules/song-collections/types.ts";
 import {
     addCollection,
     addSong,
@@ -24,12 +24,12 @@ export function useQueue() {
 type AddSongAction = {
     type: "song";
     action: "add" | "setHead";
-    item: ICollectionSong;
+    item: CollectionSong;
 };
 type AddCollectionAction = {
     type: "collection";
     action: "add" | "setHead";
-    item: ICollection;
+    item: Collection;
 };
 type QueueAddInput = AddSongAction | AddCollectionAction;
 

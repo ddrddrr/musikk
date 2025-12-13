@@ -1,23 +1,25 @@
 import { UUID } from "@/api/types.ts";
-import { IBaseModel } from "@/modules/common/types.ts";
+import { BaseModel } from "@/modules/common/types.ts";
 import { ISong } from "@/modules/songs/types.ts";
 import { IUser } from "@/modules/user/types.ts";
 
-export interface ICollection extends IBaseModel {
+export type CollectionType = "playlist" | "album" | "history" | "liked";
+export interface Collection extends BaseModel {
     uuid: UUID;
     title: string;
     description: string;
     authors: IUser[];
     image?: string;
     is_liked: boolean;
+    type: CollectionType;
 }
 
-export interface ICollectionSong extends IBaseModel {
+export interface CollectionSong extends BaseModel {
     song: ISong;
     song_collection: UUID;
 }
 
-export interface ICollectionDetailed extends ICollection {
-    songs: ICollectionSong[];
+export interface CollectionDetailed extends Collection {
+    songs: CollectionSong[];
     description: string;
 }

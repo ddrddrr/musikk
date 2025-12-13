@@ -7,7 +7,7 @@ from social.api.v1.type_to_model_maps import (
 )
 from social.models import Publication
 from streaming.api.v1.serializers.collections import CollectionSerializerBasic
-from streaming.api.v1.serializers.songs import CollectionSongGetSerializer
+from streaming.api.v1.serializers.songs import CollectionSongSerializer
 from users.api.v1.serializers import BaseUserSerializer
 
 
@@ -175,7 +175,7 @@ class PublicationRetrieveSerializer(BaseModelSerializer):
 
         match self.get_attachment_type(obj):
             case "song":
-                return CollectionSongGetSerializer(
+                return CollectionSongSerializer(
                     obj.attachment_object, context=self.context
                 ).data
             case "collection":

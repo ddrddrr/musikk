@@ -1,7 +1,7 @@
 import { UUID } from "@/api/types.ts";
 import { useUserUUID } from "@/modules/auth/hooks/useUserUUID.ts";
 import { CommentBox } from "@/modules/publications/CommentBox";
-import { fetchCollectionDetailed } from "@/modules/song-collections/queries";
+import { fetchCollectionDetailed } from "@/modules/song-collections/api/queries.ts";
 import { SongCollectionHeader } from "@/modules/song-collections/SongCollectionHeader";
 import { SongContainer } from "@/modules/songs/SongContainer.tsx";
 import { UserCollectionsContext } from "@/modules/user/providers/userCollectionsContext.ts";

@@ -6,28 +6,45 @@ package "Reverse Proxy" as caddy
 
 package "Django" as django {
     [SQL Database] as db
-    [Event Channels] as eventstream
-    [Serializers] as serializers
+    [WebSocket Channels] as ws
+    [Data Serializers] as serializers
 }
-
 package "Audio Processor" as audioproc {
     [ffmpeg]
+    [shaka packager]
+}
+
+entity "Redis" as redis
+
+entity "RabbitMQ" as rmq
+
+package "Celery" as celery {
+    [Celery Worker] as worker
+    [Celery Beat] as beat
 }
 
 entity "Media Storage" as store
 
-caddy --> django: API Call (REST/Multipart)
-django --> db: Alter/Get Data
-django --> eventstream: Create Event
+caddy ---> django: API Calls (REST/Binary Data)
+django ---> db: Alter/Get Data
+django ---> ws: Create Event
 
 django --> serializers: Serialize Data
-serializers -up-> caddy: JSON Response
+serializers -up--> caddy: JSON Response
 
-caddy --> django: Open SSE Stream
-eventstream -up-> caddy: Send Event
+caddy ---> django: WebSocket Action
+ws -up--> caddy: WebSocket Event
 
-django --> ffmpeg: Process Uploaded Audio
-ffmpeg --> store: Upload Transcoded Audio
-django <-- store: Retrieve for Streaming/Presentation
+django ----> redis: Store WebSocket Connection Data\n Store Temporary User Information
+
+django ----> rmq: Publish Audio Processing Task
+beat --> rmq: Schedule Clean Up Task
+rmq --> worker: Deliver Task
+worker ---> ws: Notify About Task State
+
+worker --> audioproc: Process Audio
+[ffmpeg] -> [shaka packager]
+audioproc ---> store: Upload Audio Chunks/Manifests
+django <--- store: Retrieve for Streaming/Presentation
 
 @enduml

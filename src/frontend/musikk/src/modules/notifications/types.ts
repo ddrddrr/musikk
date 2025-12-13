@@ -1,7 +1,7 @@
-import { IBaseModel } from "@/modules/common/types.ts";
+import { BaseModel } from "@/modules/common/types.ts";
 import { IPublication } from "@/modules/publications/types.ts";
 
-interface INotification extends IBaseModel {
+interface INotification extends BaseModel {
     is_read: boolean;
 }
 

@@ -1,10 +1,10 @@
 import { useCollectionPlayHandler } from "@/modules/song-collections/hooks/useCollectionPlayHandler.tsx";
-import { ICollectionDetailed } from "@/modules/song-collections/types";
+import { CollectionDetailed } from "@/modules/song-collections/types";
 import { Button } from "@/modules/ui/button";
 import { Pause, Play } from "lucide-react";
 
 interface SongCollectionPlayButtonProps {
-    collection: ICollectionDetailed;
+    collection: CollectionDetailed;
     showComments: boolean;
 }
 

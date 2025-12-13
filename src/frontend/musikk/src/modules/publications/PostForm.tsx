@@ -7,7 +7,7 @@ import { UUID } from "@/api/types.ts";
 import { usePublicationCreateMutation } from "@/modules/publications/mutations";
 import { postSchema } from "@/modules/publications/schemas";
 import { Attachment, IPublication } from "@/modules/publications/types";
-import { ICollection } from "@/modules/song-collections/types.ts";
+import { Collection } from "@/modules/song-collections/types.ts";
 
 import { SearchBar } from "@/modules/search/SearchBar.tsx";
 import { Button } from "@/modules/ui/button";
@@ -36,7 +36,7 @@ export function PostForm({ replyTo, setReplyTo, onSuccess, feedUserUuid }: PostF
 
     const postMutation = usePublicationCreateMutation();
 
-    const isCollection = (obj: Attachment): obj is ICollection => {
+    const isCollection = (obj: Attachment): obj is Collection => {
         return "title" in obj && "authors" in obj;
     };
 

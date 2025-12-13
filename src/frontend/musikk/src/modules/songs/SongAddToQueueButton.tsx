@@ -1,10 +1,10 @@
-import { ICollectionSong } from "@/modules/song-collections/types.ts";
+import { CollectionSong } from "@/modules/song-collections/types.ts";
 import { useQueueAddAPI } from "@/modules/song-queue/hooks/useQueueAPI";
 import { Button } from "@/modules/ui/button.tsx";
 import { BetweenHorizonalStart } from "lucide-react";
 
 interface SongAddToQueueButtonProps {
-    collectionSong: ICollectionSong;
+    collectionSong: CollectionSong;
     size?: number;
     className?: string;
 }

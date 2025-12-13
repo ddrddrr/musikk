@@ -5,7 +5,7 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 
 from streaming.api.v1.serializers.songs import (
-    CollectionSongGetSerializer,
+    CollectionSongSerializer,
 )
 from streaming.api.v1.serializers.collections import CollectionSerializerBasic
 from streaming.models import BaseSong, Collection
@@ -82,6 +82,6 @@ class SearchView(APIView):
             song__in=matching_songs
         )
 
-        return CollectionSongGetSerializer(
+        return CollectionSongSerializer(
             sc_songs, many=True, context={"request": self.request}
         ).data

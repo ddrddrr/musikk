@@ -1,7 +1,7 @@
 import { useCurrentDevice } from "@/modules/playback/hooks/useCurrentDevice.ts";
 import { PlaybackContext } from "@/modules/playback/providers/playbackContext.ts";
 import { usePlaybackActions } from "@/modules/playback/ws/actionHooks.ts";
-import { ICollection, ICollectionSong } from "@/modules/song-collections/types.ts";
+import { Collection, CollectionSong } from "@/modules/song-collections/types.ts";
 import { useQueueAddAPI } from "@/modules/song-queue/hooks/useQueueAPI.ts";
 import { useContext } from "react";
 
@@ -15,8 +15,8 @@ export function useHandlePlay() {
         newCollection,
         newSong,
     }: {
-        newCollection?: ICollection;
-        newSong?: ICollectionSong;
+        newCollection?: Collection;
+        newSong?: CollectionSong;
     } = {}) {
         try {
             if (newCollection) {
@@ -45,8 +45,8 @@ export function useHandlePlay() {
         newCollection,
         newSong,
     }: {
-        newCollection?: ICollection;
-        newSong?: ICollectionSong;
+        newCollection?: Collection;
+        newSong?: CollectionSong;
     } = {}) {
         if (!getDeviceID()) return;
 

@@ -83,7 +83,7 @@ pyvenv.cfg
 pip-selfcheck.json
 
 ### Media
-samples
+src/backend/musikk/samples
 media
 media/*
 

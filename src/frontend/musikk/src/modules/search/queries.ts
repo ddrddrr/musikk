@@ -1,12 +1,12 @@
 import { api_client } from "@/api/axiosConf.ts";
 import { SearchURLs } from "@/api/endpoints.ts";
-import { ICollection, ICollectionSong } from "@/modules/song-collections/types.ts";
+import { Collection, CollectionSong } from "@/modules/song-collections/types.ts";
 import { IUser } from "@/modules/user/types.ts";
 
 interface PerformSearchResponse {
-    songs: ICollectionSong[];
-    playlists: ICollection[];
-    albums: ICollection[];
+    songs: CollectionSong[];
+    playlists: Collection[];
+    albums: Collection[];
     users: IUser[];
     artists: IUser[];
 }

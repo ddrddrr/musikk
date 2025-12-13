@@ -1,5 +1,5 @@
 import { useCollectionPlayHandler } from "@/modules/song-collections/hooks/useCollectionPlayHandler.tsx";
-import { ICollection } from "@/modules/song-collections/types.ts";
+import { Collection } from "@/modules/song-collections/types.ts";
 import { useQueueAddAPI } from "@/modules/song-queue/hooks/useQueueAPI.ts";
 import {
     ContextMenu,
@@ -13,7 +13,7 @@ import { JSX } from "react";
 
 interface SongContextMenuProps {
     children: JSX.Element | JSX.Element[];
-    collection: ICollection;
+    collection: Collection;
 }
 
 export function CollectionContextMenu({ children, collection }: SongContextMenuProps) {

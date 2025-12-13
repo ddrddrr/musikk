@@ -36,7 +36,7 @@ export const QueueURLs = {
 };
 export const CollectionURLs = {
     collectionCreate: `/collections`,
-    collectionLatest: `/collections/latest`,
+    collectionList: `/collections`,
     collectionPersonal: (userUUID: UUID) => `/collections/personal/${userUUID}`,
     collectionRetrieve: (collectionUUID: UUID) => `/collections/${collectionUUID}`,
     collectionDetail: (collectionUUID: UUID) => `/collections/detail/${collectionUUID}`,

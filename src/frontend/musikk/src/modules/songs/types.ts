@@ -1,7 +1,7 @@
-import { IBaseModel } from "@/modules/common/types.ts";
+import { BaseModel } from "@/modules/common/types.ts";
 import { IUser } from "@/modules/user/types.ts";
 
-export interface ISong extends IBaseModel {
+export interface ISong extends BaseModel {
     title: string;
     authors: IUser[];
     mpd: string;

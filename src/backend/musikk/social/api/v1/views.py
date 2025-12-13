@@ -81,6 +81,7 @@ class PublicationListCreateForObjView(APIView):
         )
 
 
+# TODO: rewrite with filters and new pagination class
 class PublicationFeedLatestView(APIView):
     def get(self, request, *args, **kwargs):
         queryset = Publication.objects.all()

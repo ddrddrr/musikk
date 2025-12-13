@@ -37,3 +37,15 @@ class BaseModelSerializer(UUIDRelatedModelSerializerMixin, serializers.ModelSeri
             "date_added": {"read_only": True},
             "date_modified": {"read_only": True},
         }
+
+
+class UUIDListField(serializers.ListField):
+    child = serializers.UUIDField()
+
+    def to_internal_value(self, data):
+        #  single UUID or a list of UUIDs
+        if data is None or data == "":
+            return []
+        if isinstance(data, str):
+            data = [data]
+        return super().to_internal_value(data)
