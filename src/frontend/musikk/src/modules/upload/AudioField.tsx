@@ -34,9 +34,11 @@ export function AudioField({
                                     {buttonText}
                                 </span>
 
-                                <span className="min-w-0 flex-1 truncate text-sm">
-                                    {value?.name ?? "No file selected"}
-                                </span>
+                                <div className="min-w-0 flex-1 w-0">
+                                    <span className="block truncate text-sm">
+                                        {value?.name ?? "No file selected"}
+                                    </span>
+                                </div>
 
                                 <Input
                                     type="file"

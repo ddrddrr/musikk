@@ -37,3 +37,14 @@ class BaseMeSerializer(BaseUserSerializer):
     class Meta(BaseUserSerializer.Meta):
         model = BaseUser
         fields = BaseUserSerializer.Meta.fields + ["email"]
+
+
+class MeUpdateSerializer(BaseMeSerializer):
+    class Meta(BaseMeSerializer.Meta):
+        model = BaseUser
+        fields = ["display_name", "bio", "avatar"]
+        extra_kwargs = {
+            "display_name": {"required": False},
+            "bio": {"required": False},
+            "avatar": {"required": False, "allow_null": True},
+        }

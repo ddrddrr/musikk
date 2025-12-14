@@ -34,7 +34,7 @@ class WebSocketManager {
 
         console.debug(`WS Manager Disconnect called (subscribers: ${this.subscribers})`);
 
-        // Only close when no components are using the connection
+        // close only when no components are using the connection
         if (this.subscribers === 0) {
             this.forceClose();
         }

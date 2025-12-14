@@ -48,7 +48,7 @@ export class WSClient {
             console.debug("WS conn established");
             this.currReconnects = 0;
 
-            // Flush pending messages
+            // flush pending messages
             if (this.pendingMessages.length > 0) {
                 console.debug(`WS Flushing ${this.pendingMessages.length} pending messages`);
                 for (const msg of this.pendingMessages) {

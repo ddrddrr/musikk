@@ -4,21 +4,20 @@ import { UUID } from "@/api/types.ts";
 import { useMutation } from "@tanstack/react-query";
 
 interface UserUpdateParams {
-    userUUID: UUID;
     display_name?: string;
     bio?: string;
     avatar?: File;
 }
 
-export function useUserUpdateMutation() {
+export function useMeUpdateMutation() {
     return useMutation({
-        mutationFn: ({ userUUID, display_name, bio, avatar }: UserUpdateParams) => {
+        mutationFn: ({ display_name, bio, avatar }: UserUpdateParams) => {
             const formData = new FormData();
             if (display_name !== undefined) formData.append("display_name", display_name);
             if (bio !== undefined) formData.append("bio", bio);
             if (avatar) formData.append("avatar", avatar);
 
-            return api_client.patch(UserURLs.userUpdate(userUUID), formData, {
+            return api_client.patch(UserURLs.meUpdate, formData, {
                 headers: { "Content-Type": "multipart/form-data" },
             });
         },

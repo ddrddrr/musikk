@@ -33,10 +33,11 @@ export function ImageField({
                                 <span className="shrink-0 bg-red-600 text-white border-2 border-black rounded px-2 py-1 text-sm font-medium">
                                     {buttonText}
                                 </span>
-
-                                <span className="min-w-0 flex-1 truncate text-sm">
-                                    {value?.name ?? "No file selected"}
-                                </span>
+                                {value?.name && (
+                                    <span className="min-w-0 flex-1 truncate text-sm">
+                                        {value?.name}
+                                    </span>
+                                )}
 
                                 <Input
                                     type="file"

@@ -14,18 +14,21 @@ interface SongCollectionsCarouselProps {
 }
 
 export function SongCollectionCarousel({ collections, title }: SongCollectionsCarouselProps) {
+    const shouldLoop = collections.length > 4; // lg shows 4 at once
+
     return (
         <div className="w-9/10 mx-auto">
             <h2 className="text-xl font-bold mb-4 text-black">{title}</h2>
-            <div className="relative">
-                <Carousel
-                    opts={{
-                        align: "start",
-                        loop: true,
-                    }}
-                    className="w-full"
-                >
-                    <CarouselContent className="-ml-0 min-h-[120px] flex items-center justify-center">
+
+            <Carousel
+                opts={{
+                    align: "start",
+                    loop: shouldLoop,
+                }}
+                className="w-full"
+            >
+                <div className="min-h-[120px]">
+                    <CarouselContent>
                         {collections.length > 0 ? (
                             collections.map((collection) => (
                                 <CarouselItem
@@ -36,19 +39,22 @@ export function SongCollectionCarousel({ collections, title }: SongCollectionsCa
                                 </CarouselItem>
                             ))
                         ) : (
-                            <div className="text-center text-gray-500 w-full">
-                                No collections available
-                            </div>
+                            <CarouselItem className="basis-full pl-0">
+                                <div className="w-full text-center text-gray-500">
+                                    No collections available
+                                </div>
+                            </CarouselItem>
                         )}
                     </CarouselContent>
-                    {collections.length > 0 && (
-                        <>
-                            <CarouselPrevious />
-                            <CarouselNext />
-                        </>
-                    )}
-                </Carousel>
-            </div>
+                </div>
+
+                {collections.length > 0 && (
+                    <>
+                        <CarouselPrevious />
+                        <CarouselNext />
+                    </>
+                )}
+            </Carousel>
         </div>
     );
 }

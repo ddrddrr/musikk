@@ -4,7 +4,7 @@ import { UserConnectionsContext } from "@/modules/user/providers/userConnections
 import { useContext, useState } from "react";
 
 export function Connections() {
-    const { friends, followed } = useContext(UserConnectionsContext);
+    const { friends, followed, followers } = useContext(UserConnectionsContext);
     const [tab, setTab] = useState("friends");
 
     return (
@@ -13,6 +13,7 @@ export function Connections() {
                 <TabsList className="mb-6">
                     <TabsTrigger value="friends">Friends</TabsTrigger>
                     <TabsTrigger value="followed">Followed</TabsTrigger>
+                    <TabsTrigger value="followers">Followers</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="friends">
@@ -33,6 +34,18 @@ export function Connections() {
                     ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                             {followed.map((user) => (
+                                <UserCard key={user.uuid} user={user} />
+                            ))}
+                        </div>
+                    )}
+                </TabsContent>
+
+                <TabsContent value="followers">
+                    {followers.length === 0 ? (
+                        <p className="text-muted-foreground">No followers.</p>
+                    ) : (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                            {followers.map((user) => (
                                 <UserCard key={user.uuid} user={user} />
                             ))}
                         </div>

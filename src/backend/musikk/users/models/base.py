@@ -62,8 +62,8 @@ class BaseUser(BaseModel, AbstractBaseUser, PermissionsMixin):
     def friends(self) -> models.QuerySet["BaseUser"]:
         return (
             BaseUser.objects.filter(
-                followed_users__from_user=self,  # us
-                followers__to_user=self,  # other users
+                followers__from_user=self,  # self -> X
+                followed_users__to_user=self,  # X -> self
             )
             .exclude(pk=self.pk)
             .distinct()

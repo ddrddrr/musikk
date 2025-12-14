@@ -16,7 +16,7 @@ export async function fetchUser(userUUID: UUID): Promise<IUser> {
 
 export function useUserFriendsQuery(userUUID: UUID | undefined, enabled: boolean = true) {
     return useQuery({
-        queryKey: ["user", "friends", userUUID],
+        queryKey: ["user", userUUID, "friends"],
         queryFn: userUUID
             ? async () => {
                   const res = await api_client.get(UserURLs.userFriends(userUUID));
@@ -29,7 +29,7 @@ export function useUserFriendsQuery(userUUID: UUID | undefined, enabled: boolean
 
 export function useUserFollowersQuery(userUUID: UUID | undefined, enabled: boolean = true) {
     return useQuery({
-        queryKey: ["user", "followers", userUUID],
+        queryKey: ["user", userUUID, "followers"],
         queryFn: userUUID
             ? async () => {
                   const res = await api_client.get(UserURLs.userFollowers(userUUID));
@@ -42,7 +42,7 @@ export function useUserFollowersQuery(userUUID: UUID | undefined, enabled: boole
 
 export function useUserFollowedQuery(userUUID: UUID | undefined, enabled: boolean = true) {
     return useQuery({
-        queryKey: ["user", "followed", userUUID],
+        queryKey: ["user", userUUID, "followed"],
         queryFn: userUUID
             ? async () => {
                   const res = await api_client.get(UserURLs.userFollowed(userUUID));

@@ -27,9 +27,9 @@ class CollectionFilter(filters.FilterSet):
                 )
 
         elif value == "followed":
-            for followed_user in UserFollow.objects.filter(from_user=self.request.user):
+            for follow_obj in UserFollow.objects.filter(from_user=self.request.user):
                 collection_ids.extend(
-                    followed_user.streamingprofile.followed_collections.values_list(
+                    follow_obj.to_user.streamingprofile.followed_collections.values_list(
                         "id", flat=True
                     )
                 )
