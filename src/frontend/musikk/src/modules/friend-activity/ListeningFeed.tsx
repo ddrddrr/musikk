@@ -1,5 +1,5 @@
 import { useFriendsListeningQuery } from "@/modules/friend-activity/queries.ts";
-import { SongContainer } from "@/modules/songs/SongContainer.tsx";
+import { SongContainer } from "@/modules/songs/components/SongContainer.tsx";
 import { UserIdentifier } from "@/modules/user/components/UserIdentifier.tsx";
 
 export function ListeningFeed() {

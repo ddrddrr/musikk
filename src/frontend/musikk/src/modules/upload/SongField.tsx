@@ -3,57 +3,93 @@ import { Spinner } from "@/modules/common/Spinner.tsx";
 import { FormControl, FormField, FormItem, FormLabel } from "@/modules/ui/form.tsx";
 import { Input } from "@/modules/ui/input.tsx";
 import { AudioField } from "@/modules/upload/AudioField.tsx";
-import { SongUploadStatus } from "@/modules/upload/types.ts";
+import { SongUploadStatus } from "@/modules/upload/types";
 
 interface SongUploadProps {
     songIndex: number;
-    status: SongUploadStatus;
 }
 
-export function SongField({ songIndex, status }: SongUploadProps) {
-    return (
-        <>
-            <FormField
-                name={`songs.${songIndex}.title`}
-                render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>Title</FormLabel>
-                        <FormControl>
-                            <Input {...field} />
-                        </FormControl>
-                    </FormItem>
-                )}
-            />
+function statusTone(status: SongUploadStatus) {
+    if (status === "ready") return "text-green-600 bg-green-50 border-green-200";
+    if (status === "processing" || status === "queued" || status === "creating")
+        return "text-amber-700 bg-amber-50 border-amber-200";
+    if (status === "unknown") return "text-muted-foreground bg-muted border-border";
+    return "text-red-600 bg-red-50 border-red-200";
+}
 
-            <FormField
-                name={`songs.${songIndex}.description`}
-                render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>Description</FormLabel>
-                        <FormControl>
-                            <Input {...field} />
-                        </FormControl>
-                    </FormItem>
-                )}
-            />
-
-            <ImageField name={`songs.${songIndex}.image`} />
-            <AudioField name={`songs.${songIndex}.audio`} />
-
-            <FormField name={`songs.${songIndex}.uuid`} render={({ field }) => <input type="hidden" {...field} />} />
-
-            <div className="mt-2">
-                {status === "processing" && <Spinner />}
-                {status !== "processing" && status !== "idle" && (
-                    <div
-                        className={`inline-block px-2 py-1 text-sm font-medium rounded ${
-                            status === "success" ? "text-green-600" : "text-red-600"
-                        }`}
-                    >
-                        {status}
-                    </div>
-                )}
+function StatusBadge({ status, detail }: { status: SongUploadStatus; detail?: string }) {
+    if (status === "processing") {
+        return (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Spinner />
+                <span>processing</span>
             </div>
-        </>
+        );
+    }
+
+    if (status === "unknown") return null;
+
+    return (
+        <div className="flex items-center gap-2">
+            <div
+                className={`inline-flex items-center rounded-sm border px-2.5 py-1 text-xs font-medium ${statusTone(
+                    status,
+                )}`}
+            >
+                {status}
+            </div>
+            {detail ? (
+                <div className="text-xs text-muted-foreground max-w-[50ch] truncate">{detail}</div>
+            ) : null}
+        </div>
     );
 }
+
+export function SongField({ songIndex }: SongUploadProps) {
+    return (
+        <div className="space-y-4">
+            <div className="grid gap-4 md:grid-cols-2">
+                <FormField
+                    name={`songs.${songIndex}.title`}
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Title</FormLabel>
+                            <FormControl>
+                                <Input {...field} />
+                            </FormControl>
+                        </FormItem>
+                    )}
+                />
+
+                <FormField
+                    name={`songs.${songIndex}.description`}
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Description</FormLabel>
+                            <FormControl>
+                                <Input {...field} />
+                            </FormControl>
+                        </FormItem>
+                    )}
+                />
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                    <ImageField name={`songs.${songIndex}.image`} />
+                </div>
+
+                <div className="space-y-2">
+                    <AudioField name={`songs.${songIndex}.audio`} />
+                </div>
+            </div>
+
+            <FormField
+                name={`songs.${songIndex}.uuid`}
+                render={({ field }) => <input type="hidden" {...field} />}
+            />
+        </div>
+    );
+}
+
+SongField.StatusBadge = StatusBadge;

@@ -16,7 +16,6 @@ class ConvertAudioWebsocketEventTest(TestCase):
         self.song = BaseSongFactory.create()
 
     @patch("streaming.audio.tasks.AudioProcessingPipeline.run")
-    @patch("streaming.audio.tasks.get_channel_layer")
     @patch("streaming.audio.tasks.default_storage")
     def test_convert_audio_sends_song_created_event_to_initiator(
         self, mock_default_storage, mock_get_channel_layer, mock_pipeline_run

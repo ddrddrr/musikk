@@ -31,17 +31,11 @@ class TestShakaPackagerWrapper(TestCase):
         cls.flac_mp4 = (
             tests_dir / "data" / "flac-None-7d83054b539f4e1ebfa772d2d609b0a0.mp4"
         )
-        cls.opus_256_mp4 = (
-            tests_dir / "data" / "libopus-256-d802e447dde24e1f94ae76299944bb47.mp4"
-        )
         cls.aac_320_mp4 = (
             tests_dir / "data" / "libfdk_aac-320-080c93c30bcd48c2accef375dac2fc68.mp4"
         )
 
         assert cls.flac_mp4.exists(), f"Test input file not found: {cls.flac_mp4}"
-        assert (
-            cls.opus_256_mp4.exists()
-        ), f"Test input file not found: {cls.opus_256_mp4}"
         assert cls.aac_320_mp4.exists(), f"Test input file not found: {cls.aac_320_mp4}"
 
     def test_package_flac_success(self):
@@ -72,7 +66,7 @@ class TestShakaPackagerWrapper(TestCase):
     def test_package_multiple_success(self):
         storage_subdir = uuid.uuid4().hex
         paths = []
-        for src in (self.flac_mp4, self.opus_256_mp4, self.aac_320_mp4):
+        for src in (self.flac_mp4, self.aac_320_mp4):
             storage_path = f"{storage_subdir}/{src.name}"
             with open(src, "rb") as fh:
                 default_storage.save(storage_path, ContentFile(fh.read()))

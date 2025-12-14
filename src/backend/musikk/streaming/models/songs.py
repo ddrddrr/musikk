@@ -3,6 +3,7 @@ from django.db import models
 
 from base.models import BaseModel
 from musikk.utils.paths import image_path, delete_dir_for_file
+from users.models import UserRole
 
 
 class BaseSongQuerySet(models.QuerySet):
@@ -13,14 +14,18 @@ class BaseSongQuerySet(models.QuerySet):
 BaseSongManager = models.Manager.from_queryset(BaseSongQuerySet)
 
 
-# TODO: add metadata model, add streams, hashtags, ratings
 class BaseSong(BaseModel):
     title = models.CharField(max_length=128)
     description = models.TextField(max_length=512, blank=True, default="")
     image = models.ImageField(upload_to=image_path, null=True, blank=True)
     draft = models.BooleanField(default=False)
 
-    authors = models.ManyToManyField("users.Artist", through="streaming.SongCredit")
+    authors = models.ManyToManyField(
+        "users.BaseUser",
+        through="streaming.SongCredit",
+        related_name="authored_songs",
+        limit_choices_to={"role": UserRole.ARTIST},
+    )
 
     content_path = models.CharField(
         default="",
@@ -43,30 +48,26 @@ class BaseSong(BaseModel):
 
     objects = BaseSongManager()
 
-    # TODO: django is kinda weird with deletes on relation
-    #  so probably add a scheduled task for cleanup instead
-    #  (check uuid -> doesn't exist -> delete)
     def delete(self, using=None, keep_parents=False):
         if self.mpd:
             delete_dir_for_file(self.mpd)
         return super().delete(using, keep_parents)
 
     def is_available(self) -> bool:
-        return self.mpd is not None
+        return bool(self.mpd)
 
     def __str__(self):
         return self.title
 
 
 class SongCredit(BaseModel):
-    song = models.ForeignKey(
-        BaseSong, on_delete=models.CASCADE, related_name="credits"
-    )
+    song = models.ForeignKey(BaseSong, on_delete=models.CASCADE, related_name="credits")
     author = models.ForeignKey(
-        "users.Artist",
+        "users.BaseUser",
         null=True,
         on_delete=models.SET_NULL,
         related_name="created_songs",
+        limit_choices_to={"role": UserRole.ARTIST},
     )
     author_priority = models.IntegerField(
         default=0, help_text="Priority in which the author will be displayed."

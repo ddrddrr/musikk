@@ -63,13 +63,16 @@ class PublicationListCreateForObjView(APIView):
         serializer.is_valid(raise_exception=True)
         obj = serializer.save()
 
-        # if obj.content_object:
-        #     send_ws_event(
-        #         f"user_{request.user.uuid}",
-        #         event_handler="base.event",
-        #         event_name="invalidate.query",
-        #         query_key=["publications", str(data["obj_type"]), str(data["obj_uuid"])],
-        #     )
+        if obj.content_object:
+            send_ws_event(
+                f"user_{request.user.uuid}",
+                event_name="invalidate.query",
+                query_key=[
+                    "publications",
+                    str(data["obj_type"]),
+                    str(data["obj_uuid"]),
+                ],
+            )
 
         return Response(
             status=status.HTTP_201_CREATED,

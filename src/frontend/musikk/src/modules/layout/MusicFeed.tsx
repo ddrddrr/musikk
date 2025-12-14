@@ -1,6 +1,6 @@
 import { PaginatedRes } from "@/api/types";
 import { fetchCollections } from "@/modules/song-collections/api/queries";
-import { SongCollectionCarousel } from "@/modules/song-collections/SongCollectionCarousel";
+import { SongCollectionCarousel } from "@/modules/song-collections/components/SongCollectionCarousel.tsx";
 import { Collection } from "@/modules/song-collections/types";
 import { useQueries } from "@tanstack/react-query";
 

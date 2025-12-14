@@ -85,7 +85,13 @@ export function SignUpForm() {
                             </FormItem>
                         )}
                     />
-                    <Button type="submit" variant="brand" disabled={isPending} size="lg" className="w-full">
+                    <Button
+                        type="submit"
+                        variant="brand"
+                        disabled={isPending}
+                        size="lg"
+                        className="w-full"
+                    >
                         {isPending ? <Spinner /> : "Sign Up"}
                     </Button>
                     {formMessage && (

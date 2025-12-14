@@ -46,19 +46,24 @@ class FFmpegStep(Step):
         self.wrapper = ffmpeg_wrapper
 
     def process(self, ctx: ProcessingContext) -> None:
-        converted = self.wrapper.convert_audio(
-            file_path=ctx.orig_audio_file_path, storage_dir=ctx.intermediate_dir
-        )
-        if not converted:
-            raise AudioProcessingPipelineError("FFmpeg step produced no outputs")
-        ctx.converted_paths = converted
+        try:
+            logger.debug(f"Starting FFmpeg conversion for {ctx.orig_audio_file_path}")
+
+            converted = self.wrapper.convert_audio(
+                file_path=ctx.orig_audio_file_path, storage_dir=ctx.intermediate_dir
+            )
+            if not converted:
+                raise AudioProcessingPipelineError("FFmpeg step produced no outputs")
+            ctx.converted_paths = converted
+
+            logger.debug(f"FFmpeg conversion completed: {len(converted)} files")
+        except Exception:
+            logger.exception("FFmpeg conversion failed")
+            raise
 
     def rollback(self, ctx: ProcessingContext) -> None:
-        try:
-            if ctx.intermediate_dir:
-                delete_django_storage_dir(storage_dir=ctx.intermediate_dir)
-        except Exception:
-            logger.exception("Could not rollback `FFmpegStep`")
+        if ctx.intermediate_dir:
+            delete_django_storage_dir(storage_dir=ctx.intermediate_dir)
 
 
 class ShakaPackagerStep(Step):
@@ -71,17 +76,24 @@ class ShakaPackagerStep(Step):
                 "No converted files available for packaging"
             )
 
-        song_repr = self.wrapper.package_audio_files(
-            input_storage_paths=ctx.converted_paths, storage_dir=ctx.final_dir
-        )
-        ctx.song_repr = song_repr
+        try:
+            logger.debug(
+                f"Starting Shaka Packager with {len(ctx.converted_paths)} input files"
+            )
+
+            song_repr = self.wrapper.package_audio_files(
+                input_storage_paths=ctx.converted_paths, storage_dir=ctx.final_dir
+            )
+            ctx.song_repr = song_repr
+
+            logger.debug(f"Shaka Packager completed: {ctx.final_dir}")
+        except Exception:
+            logger.exception("Shaka Packager failed")
+            raise
 
     def rollback(self, ctx: ProcessingContext) -> None:
-        try:
-            if ctx.final_dir:
-                delete_django_storage_dir(storage_dir=ctx.final_dir)
-        except Exception:
-            logger.exception("Could not rollback `ShakaPackagerStep`")
+        if ctx.final_dir:
+            delete_django_storage_dir(storage_dir=ctx.final_dir)
 
 
 class ProcessingResult:
@@ -109,6 +121,7 @@ class ProcessingPipeline:
 
         executed: list[Step] = []
         try:
+            logger.info(f"Starting audio processing pipeline for {source}")
             for step in self.steps:
                 step.process(ctx)
                 executed.append(step)
@@ -118,8 +131,12 @@ class ProcessingPipeline:
                     "Pipeline finished without a SongRepresentation"
                 )
 
+            logger.debug(f"Audio processing pipeline completed successfully")
             return ProcessingResult(song_repr=ctx.song_repr, context=ctx)
         except Exception:
+            logger.exception(
+                f"Audio processing pipeline failed, rolling back {len(executed)} steps"
+            )
             for step in reversed(executed):
                 step.rollback(ctx)
             raise

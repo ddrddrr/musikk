@@ -2,23 +2,19 @@ from django.contrib.postgres.search import TrigramSimilarity
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
 
-from streaming.api.v1.serializers.songs import (
-    CollectionSongSerializer,
-)
+from streaming.api.v1.serializers.songs import CollectionSongSerializer
 from streaming.api.v1.serializers.collections import CollectionSerializerBasic
 from streaming.models import BaseSong, Collection
 from streaming.models.songs import CollectionSong
-from users.api.v1.serializers import BaseUserSerializer, ArtistSerializer
-from users.models import BaseUser, Artist
+from users.api.v1.serializers import BaseUserSerializer
+from users.models import BaseUser, UserRole
 
 TRIGRAM_SIMILARITY_THRESHOLD = 0.3
 MAX_RESULTS = 10
 
 
 class SearchView(APIView):
-
     def get(self, request, *args, **kwargs):
         query = request.query_params.get("q", "").strip()
         if not query:
@@ -45,13 +41,14 @@ class SearchView(APIView):
                 query,
                 "display_name",
                 BaseUserSerializer,
-                extra_filters={"artist__isnull": True},
+                extra_filters={"role": UserRole.BASE},
             ),
             "artists": self.search(
-                Artist,
+                BaseUser,
                 query,
                 "display_name",
-                ArtistSerializer,
+                BaseUserSerializer,
+                extra_filters={"role": UserRole.ARTIST},
             ),
         }
 
@@ -78,8 +75,9 @@ class SearchView(APIView):
             .order_by("-similarity")[:MAX_RESULTS]
         )
 
-        sc_songs = CollectionSong.objects.filter(collection__private=False).filter(
-            song__in=matching_songs
+        sc_songs = CollectionSong.objects.filter(
+            collection__private=False,
+            song__in=matching_songs,
         )
 
         return CollectionSongSerializer(

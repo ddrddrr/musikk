@@ -1,6 +1,6 @@
 import { useFriendsLatestAddedQuery } from "@/modules/friend-activity/queries.ts";
-import { SongCollectionCarousel } from "@/modules/song-collections/SongCollectionCarousel.tsx";
-import { SongCarousel } from "@/modules/songs/SongCarousel.tsx";
+import { SongCollectionCarousel } from "@/modules/song-collections/components/SongCollectionCarousel.tsx";
+import { SongCarousel } from "@/modules/songs/components/SongCarousel.tsx";
 
 export function LatestAdded() {
     const { isPending, isError, data: latestAdded } = useFriendsLatestAddedQuery();

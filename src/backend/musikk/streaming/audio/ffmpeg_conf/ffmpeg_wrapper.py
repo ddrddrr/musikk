@@ -1,3 +1,4 @@
+import logging
 from enum import StrEnum
 from pathlib import Path
 import tempfile
@@ -9,13 +10,12 @@ from streaming.audio.ffmpeg_conf.converters import (
     FFMPEGAudioConverter,
     FLAC_CONVERTER,
     AACHEv2_CONVERTER,
-    OPUS_96_CONVERTER,
-    OPUS_160_CONVERTER,
-    OPUS_256_CONVERTER,
     AAC_96_CONVERTER,
     AAC_160_CONVERTER,
     AAC_320_CONVERTER,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class StreamingProtocol(StrEnum):
@@ -62,23 +62,29 @@ class FFMPEGWrapper:
                         file_path=file_path, storage_dir=Path(tmpdir)
                     )
                 except Exception:
+                    logger.exception(
+                        f"FFmpeg converter {converter.__class__.__name__} failed"
+                    )
                     if self.do_cleanup:
                         delete_django_storage_dir(storage_dir=storage_dir)
                     raise
 
-            orig_to_transferred_path_map = local_dir_to_django_storage(
-                local_dir=tmpdir, storage_prefix=storage_dir
-            )
-            return list(orig_to_transferred_path_map.values())
+            try:
+                orig_to_transferred_path_map = local_dir_to_django_storage(
+                    local_dir=tmpdir, storage_prefix=storage_dir
+                )
+                return list(orig_to_transferred_path_map.values())
+            except Exception:
+                logger.exception(f"Failed to upload converted files to storage")
+                if self.do_cleanup:
+                    delete_django_storage_dir(storage_dir=storage_dir)
+                raise
 
 
 FFMPEGFlacOnly = FFMPEGWrapper(audio_converters=[FLAC_CONVERTER])
 FFMPEGFull = FFMPEGWrapper(
     audio_converters=[
         FLAC_CONVERTER,
-        OPUS_96_CONVERTER,
-        OPUS_160_CONVERTER,
-        OPUS_256_CONVERTER,
         AACHEv2_CONVERTER,
         AAC_96_CONVERTER,
         AAC_160_CONVERTER,

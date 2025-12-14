@@ -1,6 +1,6 @@
 import { Player } from "@/modules/player/Player.tsx";
 import { PlayerBar } from "@/modules/player/PlayerBar.tsx";
-import { SongQueue } from "@/modules/song-queue/SongQueue.tsx";
+import { SongQueue } from "@/modules/song-queue/components/SongQueue.tsx";
 import { memo, useRef, useState } from "react";
 
 export const PlayerBox = memo(function PlayerBox() {

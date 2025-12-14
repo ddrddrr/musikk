@@ -1,6 +1,6 @@
 import { useHandlePlay } from "@/modules/playback/hooks/useHandlePlay.ts";
 import { PlaybackContext } from "@/modules/playback/providers/playbackContext.ts";
-import { ISongQueueNode } from "@/modules/song-queue/types.ts";
+import { ISongQueueNode } from "@/modules/song-queue/api/types.ts";
 import { useCallback, useContext } from "react";
 
 export function useQueuePlayHandler(node: ISongQueueNode) {

@@ -42,7 +42,7 @@ class Command(BaseCommand):
         parser.add_argument("--users", type=int, default=2)
         parser.add_argument("--artists", type=int, default=3)
         parser.add_argument("--songs", type=int, default=7)
-        parser.add_argument("--collections", type=int, default=2)
+        parser.add_argument("--collections", type=int, default=2) # TODO: rename to playlists
         parser.add_argument("--albums", type=int, default=2)
 
     def handle(self, *args, **options):
@@ -110,11 +110,8 @@ class Command(BaseCommand):
         created = []
         for _ in range(count):
             artist, pwd = create_user_with_password("artist")
-            artist.is_staff = True
-            artist.is_superuser = True
-            artist.save()
             created.append(artist)
-            self.stdout.write(f"- artist: {artist.email} / {pwd}")
+            self.stdout.write(f"- artist email:{artist.email}, password:{pwd}")
         return created
 
     def _create_song(self, audio_path: str, image_url: str, artists: list):

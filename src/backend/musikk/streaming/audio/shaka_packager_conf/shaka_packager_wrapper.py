@@ -1,3 +1,4 @@
+import logging
 import tempfile
 from enum import StrEnum
 from pathlib import Path
@@ -12,9 +13,9 @@ from musikk.utils.storage import (
     get_django_storage_files,
 )
 
-# TODO: its bad to mix all codecs in the same manifest
-# the m3u8 should have only aac stuff
-# the mpd all other
+logger = logging.getLogger(__name__)
+
+
 class ManifestType(StrEnum):
     MPD = "mpd"
     M3U8 = "m3u8"
@@ -116,15 +117,16 @@ class ShakaPackagerWrapper:
         with tempfile.TemporaryDirectory() as tmpdir:
             try:
                 local_paths = get_django_storage_files(input_storage_paths, tmpdir)
+
                 cmd, mpd_out, hls_master_out = ShakaPackagerCommand(
                     local_paths=local_paths, tmpdir=tmpdir
                 ).build()
 
                 run_shell_command(cmd)
-
                 orig_to_transferred_path_map = local_dir_to_django_storage(
                     local_dir=tmpdir, storage_prefix=storage_dir
                 )
+
                 manifests = {
                     ManifestType.MPD: orig_to_transferred_path_map[str(mpd_out)],
                     ManifestType.M3U8: orig_to_transferred_path_map[
@@ -134,6 +136,7 @@ class ShakaPackagerWrapper:
 
                 return SongRepresentation(content_path=storage_dir, manifests=manifests)
             except Exception:
+                logger.exception(f"Shaka Packager packaging failed for {storage_dir}")
                 if self.do_cleanup:
                     delete_django_storage_dir(storage_dir=storage_dir)
                 raise

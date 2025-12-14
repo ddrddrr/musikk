@@ -5,7 +5,7 @@ from faker import Faker
 
 from notifications.models import ReplyNotification
 from social.api.v1.tests.factories import PublicationFactory
-from social.api.v1.views import PublicationsListCreateView
+from social.api.v1.views import PublicationListCreateForObjView
 from social.models import Publication
 from streaming.tests.factories import CollectionFactory
 from users.tests.factories import BaseUserFactory
@@ -13,7 +13,8 @@ from users.tests.factories import BaseUserFactory
 fake = Faker()
 
 
-class TestPublicationsListCreateView(TestCase):
+# TODO: rewrite based on the new models
+class TestPublicationListCreateForObjView(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -29,7 +30,7 @@ class TestPublicationsListCreateView(TestCase):
         )
 
         url = reverse(
-            "api:publication-create-list",
+            "api:publication-create-list-for-obj",
             kwargs={
                 "obj_type": "collection",
                 "obj_uuid": str(self.collection.uuid),
@@ -37,7 +38,7 @@ class TestPublicationsListCreateView(TestCase):
         )
         request = self.factory.get(url)
         force_authenticate(request, user=self.user)
-        response = PublicationsListCreateView.as_view()(
+        response = PublicationListCreateForObjView.as_view()(
             request,
             obj_type="collection",
             obj_uuid=str(self.collection.uuid),
@@ -64,7 +65,7 @@ class TestPublicationsListCreateView(TestCase):
 
     def test_create_publication_requires_authentication(self):
         url = reverse(
-            "api:publication-create-list",
+            "api:publication-create-list-for-obj",
             kwargs={
                 "obj_type": "collection",
                 "obj_uuid": str(self.collection.uuid),
@@ -76,7 +77,7 @@ class TestPublicationsListCreateView(TestCase):
             "obj_uuid": str(self.collection.uuid),
         }
         request = self.factory.post(url, payload, format="json")
-        response = PublicationsListCreateView.as_view()(
+        response = PublicationListCreateForObjView.as_view()(
             request,
             obj_type="collection",
             obj_uuid=str(self.collection.uuid),
@@ -86,7 +87,7 @@ class TestPublicationsListCreateView(TestCase):
 
     def test_create_publication_with_valid_data(self):
         url = reverse(
-            "api:publication-create-list",
+            "api:publication-create-list-for-obj",
             kwargs={
                 "obj_type": "collection",
                 "obj_uuid": str(self.collection.uuid),
@@ -99,7 +100,7 @@ class TestPublicationsListCreateView(TestCase):
         }
         request = self.factory.post(url, payload, format="json")
         force_authenticate(request, user=self.user)
-        response = PublicationsListCreateView.as_view()(
+        response = PublicationListCreateForObjView.as_view()(
             request,
             obj_type="collection",
             obj_uuid=str(self.collection.uuid),
@@ -124,7 +125,7 @@ class TestPublicationsListCreateView(TestCase):
         )
 
         url = reverse(
-            "api:publication-create-list",
+            "api:publication-create-list-for-obj",
             kwargs={
                 "obj_type": "collection",
                 "obj_uuid": str(self.collection.uuid),
@@ -141,7 +142,7 @@ class TestPublicationsListCreateView(TestCase):
 
         self.assertEqual(ReplyNotification.objects.count(), 0)
 
-        response = PublicationsListCreateView.as_view()(
+        response = PublicationListCreateForObjView.as_view()(
             request,
             obj_type="collection",
             obj_uuid=str(self.collection.uuid),
@@ -159,7 +160,7 @@ class TestPublicationsListCreateView(TestCase):
 
     def test_create_publication_missing_obj_type_returns_400(self):
         url = reverse(
-            "api:publication-create-list",
+            "api:publication-create-list-for-obj",
             kwargs={
                 "obj_type": "collection",
                 "obj_uuid": str(self.collection.uuid),
@@ -171,7 +172,7 @@ class TestPublicationsListCreateView(TestCase):
         }
         request = self.factory.post(url, payload, format="json")
         force_authenticate(request, user=self.user)
-        response = PublicationsListCreateView.as_view()(
+        response = PublicationListCreateForObjView.as_view()(
             request,
             obj_type="collection",
             obj_uuid=str(self.collection.uuid),
@@ -181,7 +182,7 @@ class TestPublicationsListCreateView(TestCase):
 
     def test_create_publication_invalid_obj_type_returns_400(self):
         url = reverse(
-            "api:publication-create-list",
+            "api:publication-create-list-for-obj",
             kwargs={
                 "obj_type": "collection",
                 "obj_uuid": str(self.collection.uuid),
@@ -194,7 +195,7 @@ class TestPublicationsListCreateView(TestCase):
         }
         request = self.factory.post(url, payload, format="json")
         force_authenticate(request, user=self.user)
-        response = PublicationsListCreateView.as_view()(
+        response = PublicationListCreateForObjView.as_view()(
             request,
             obj_type="collection",
             obj_uuid=str(self.collection.uuid),

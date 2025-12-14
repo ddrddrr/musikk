@@ -1,48 +1,57 @@
 import os
-from io import BufferedReader
 from pathlib import Path
+from typing import Protocol, runtime_checkable, TypeAlias
 
 import magic
-from django.core.files.uploadedfile import InMemoryUploadedFile, TemporaryUploadedFile
 from rest_framework.exceptions import ValidationError
 
 from streaming.audio.config import MAX_FILE_SIZE, ALLOWED_FILE_TYPES
 
 
-# TODO: run ffprobe and reject extreme sample rates, huge channel counts, etc.
-def validate_audio(
-    song: (
-        bytes
-        | str
-        | Path
-        | BufferedReader
-        | InMemoryUploadedFile
-        | TemporaryUploadedFile
-    ),
-) -> None:
-    if isinstance(song, bytes):
-        size = len(song)
-        header = song[:2048]  # First 2KB
+BytesLike: TypeAlias = bytes | bytearray | memoryview
+Pathish: TypeAlias = str | os.PathLike[str]
 
-    elif isinstance(song, (str, Path)):
+
+@runtime_checkable
+class SeekableReader(Protocol):
+    def read(self, n: int = ...) -> bytes: ...
+    def seek(self, offset: int, whence: int = ...) -> int: ...
+    def tell(self) -> int: ...
+
+
+AudioInput: TypeAlias = BytesLike | Pathish | SeekableReader
+
+# TODO: run ffprobe and reject extreme sample rates, huge channel counts, etc.
+
+
+def validate_audio(song: AudioInput) -> None:
+    header: bytes
+    size: int
+
+    if isinstance(song, (bytes, bytearray, memoryview)):
+        data = bytes(song)
+        size = len(data)
+        header = data[:2048]
+
+    elif isinstance(song, (str, os.PathLike)):
         path = Path(song)
         size = path.stat().st_size
         with path.open("rb") as f:
             header = f.read(2048)
 
-    elif hasattr(song, "read"):
-        if hasattr(song, "size"):
-            size = song.size
-        else:
+    elif isinstance(song, SeekableReader):
+        if not (size := getattr(song, "size", None)):
             song.seek(0, os.SEEK_END)
             size = song.tell()
-
         song.seek(0)
         header = song.read(2048)
         song.seek(0)
 
     else:
-        raise ValidationError(f"Unsupported type of audio file - {type(song)}.")
+        assert False, f"Unsupported type of audio file - {type(song)}."
+
+    if not size:
+        raise ValidationError(f"Could not determine the size of the audio file.")
 
     if size > MAX_FILE_SIZE:
         raise ValidationError(
@@ -53,6 +62,7 @@ def validate_audio(
         mime = magic.from_buffer(header or b"", mime=True) or ""
     except Exception:
         raise ValidationError("Could not detect audio type.")
+
     if not mime.startswith("audio/"):
         raise ValidationError(
             f"Wrong mime type for audio file. Expected audio/*, got {mime}."

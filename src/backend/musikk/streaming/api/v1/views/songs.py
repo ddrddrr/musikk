@@ -7,6 +7,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from streaming.managers.upload_manager import UploadManager
 from streaming.models.profile import StreamingProfile
 from streaming.permissions import IsPublicOrCollectionAuthor
 from users.permissions import IsArtist
@@ -44,38 +45,34 @@ class SongAddLikedView(APIView):
         # whether the song is in the queue
         send_ws_event(
             f"user_{self.request.user.uuid}",
-            event_handler="base.event",
             event_name="invalidate.query",
             query_key=["queue"],
         )
         send_ws_event(
             f"user_{self.request.user.uuid}",
-            event_handler="base.event",
             event_name="invalidate.query",
             query_key=["openCollection"],
         )
         send_ws_event(
             f"user_{self.request.user.uuid}",
-            event_handler="base.event",
             event_name="invalidate.query",
             query_key=["friend-activity", "listening", self.request.user.uuid],
         )
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-# TODO: make client write to a url first and only then POST here
-# get/stream the file here
 class SongCreateView(APIView):
     parser_classes = [MultiPartParser, FormParser]
     permission_classes = [IsArtist]
 
-    def post(self, request, *args, **kwargs):
-        user = self.request.user
-        audio = request.FILES["audio"]
+    # TODO: add hash of the uploaded song to redis and check if processing
+    # return falsey response if in process
+    def post(self, *args, **kwargs):
+        audio = self.request.FILES["audio"]
         validate_audio(audio)
 
         serializer = BaseSongCreateSerializer(
-            data=request.data, context={"request": request}
+            data=self.request.data, context={"request": self.request}
         )
         serializer.is_valid(raise_exception=True)
         instance = serializer.save()
@@ -85,13 +82,22 @@ class SongCreateView(APIView):
                 tmp.write(chunk)
             temp_path = tmp.name
 
+        UploadManager(song_uuid=instance.uuid).set_status("queued")
         convert_audio.apply_async(
             kwargs={
                 "file_path": temp_path,
                 "song_uuid": str(instance.uuid),
-                "initiator_uuid": str(user.uuid),
+                "initiator_uuid": str(self.request.user.uuid),
             }
         )
         return Response(
             data={"uuid": str(instance.uuid)}, status=status.HTTP_202_ACCEPTED
         )
+
+
+class SongUploadStatusView(APIView):
+    permission_classes = [IsArtist]
+
+    def get(self, request, song_uuid: str):
+        um = UploadManager(song_uuid)
+        return Response({"uuid": song_uuid, "status": um.get_status() or "unknown"})

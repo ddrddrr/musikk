@@ -1,6 +1,6 @@
 import { api_client } from "@/api/axiosConf.ts";
 import { PublicationURLs } from "@/api/endpoints.ts";
-import { PostTree } from "@/modules/publications/PostTree.tsx";
+import { PostTree } from "@/modules/publications/components/PostTree.tsx";
 import { IPublication } from "@/modules/publications/types.ts";
 import { Card, CardContent } from "@/modules/ui/card.tsx";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/modules/ui/tabs.tsx";

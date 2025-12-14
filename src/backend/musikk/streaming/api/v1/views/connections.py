@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from streaming.api.v1.serializers import CollectionSongSerializer
-from streaming.playback_manager import PlaybackManager
+from streaming.managers.playback_manager import PlaybackManager
 from users.api.v1.serializers import BaseUserSerializer
 
 

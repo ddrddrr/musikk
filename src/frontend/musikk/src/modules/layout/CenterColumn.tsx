@@ -1,5 +1,5 @@
 import { MusicFeed } from "@/modules/layout/MusicFeed.tsx";
-import { SongCollectionContainer } from "@/modules/song-collections/SongCollectionContainer";
+import { SongCollectionContainer } from "@/modules/song-collections/components/SongCollectionContainer.tsx";
 import { Connections } from "@/modules/user/components/Connections.tsx";
 import { ProfilePage } from "@/modules/user/components/ProfilePage.tsx";
 import { UserFeed } from "@/modules/user/components/UserFeed.tsx";

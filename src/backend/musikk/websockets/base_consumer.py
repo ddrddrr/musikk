@@ -3,8 +3,8 @@ from logging import getLogger
 from asgiref.sync import async_to_sync as atos
 from channels.generic.websocket import JsonWebsocketConsumer
 
-from streaming.device_manager import DeviceManager
-from streaming.playback_manager import PlaybackManager
+from streaming.managers.device_manager import DeviceManager
+from streaming.managers.playback_manager import PlaybackManager
 from websockets.status_codes import WebSocketStatusCode
 
 logger = getLogger(__name__)
@@ -65,9 +65,10 @@ class BaseConsumer(JsonWebsocketConsumer):
             self.broadcast_devices()
 
     def receive_json(self, content, **kwargs):
-        logger.debug(f"Received WS event: {content}")
         action = content.get("action")
         payload = content.get("payload") or {}
+        if "device" not in action:
+            logger.debug(f"Received WS event: {content}")
 
         match action:
             case "device.register":
@@ -89,6 +90,10 @@ class BaseConsumer(JsonWebsocketConsumer):
 
     def ws_event(self, event):
         """Should be used to send all ws events to the client"""
+        if "device" not in event["event"]:
+            logger.debug(
+                f"Sending WS event event={event['event']} payload={event.get('payload')}",
+            )
         self.send_json(
             {
                 "event": event["event"],

@@ -3,7 +3,8 @@ import factory
 from base.tests.factories import BaseModelFactory
 from streaming.models import BaseSong, Collection
 
-from streaming.models.songs import CollectionSong
+from streaming.models.songs import CollectionSong, SongCredit
+from users.tests.factories import ArtistFactory
 
 fake = factory.Faker
 
@@ -18,7 +19,14 @@ class BaseSongFactory(BaseModelFactory):
     mpd = "audio/ba7af36a-d695-425b-b235-40b344c19880/manifest.mpd"
     m3u8 = "audio/ba7af36a-d695-425b-b235-40b344c19880/master.m3u8"
     image = None
-    # metadata = factory.SubFactory()
+
+    @factory.post_generation
+    def authors(self, create, extracted, **kwargs):
+        if not create:
+            return
+        authors = extracted or [ArtistFactory()]
+        for i, author in enumerate(authors):
+            SongCredit.objects.create(song=self, author=author, author_priority=i)
 
 
 class CollectionFactory(BaseModelFactory):

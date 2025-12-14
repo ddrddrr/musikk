@@ -70,7 +70,7 @@ class FollowedView(APIView):
         # TODO: friends for both, followers for the other, followed for this
         # send_ws_event(
         #     f"user_{user.uuid}",
-        #     event_handler="base.event",
+        #
         #     event_name="invalidate.query",
         #     query_key=["user", "followed", str(user.uuid)],
         # )
@@ -85,7 +85,7 @@ class FollowedView(APIView):
         # TODO: friends for both, followers for the other, followed for this
         # send_ws_event(
         #     f"user_{user.uuid}",
-        #     event_handler="base.event",
+        #
         #     event_name="invalidate.query",
         #     query_key=["user", "followed", str(user.uuid)],
         # )

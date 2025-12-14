@@ -10,7 +10,7 @@ from streaming.api.v1.serializers.song_queue import SongQueueSerializer
 from streaming.models import SongQueue, SongQueueNode, Collection
 from streaming.models.songs import CollectionSong
 from streaming.permissions import IsPublicOrCollectionAuthor
-from streaming.playback_manager import PlaybackManager
+from streaming.managers.playback_manager import PlaybackManager
 from websockets.event_helpers import send_ws_event
 
 # TODO LAST SONG IN THE QUEUE DOESNT PLAY??

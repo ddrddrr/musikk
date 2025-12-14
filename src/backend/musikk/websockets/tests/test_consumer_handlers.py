@@ -68,7 +68,7 @@ class TestEvents(TestCase):
         payload = {"device_id": "device1", "name": "My Device"}
         self.consumer.handle_device_register(payload)
 
-        self.consumer.device_manager.register_or_touch_device.assert_called_once_with(
+        self.consumer.device_manager.register_device.assert_called_once_with(
             device_id="device1", name="My Device"
         )
 
@@ -88,9 +88,9 @@ class TestEvents(TestCase):
         self.consumer.handle_device_register(payload)
         self.consumer.close.assert_called_once_with(
             code=WebSocketStatusCode.BadRequest,
-            reason="`device_id` is required for device.register action",
+            reason="`device_id` and `device_name` are required for device.register action",
         )
-        self.consumer.device_manager.register_or_touch_device.assert_not_called()
+        self.consumer.device_manager.register_device.assert_not_called()
 
     def test_device_heartbeat(self):
 
@@ -101,11 +101,9 @@ class TestEvents(TestCase):
         payload = {"device_id": "device1"}
         self.consumer.handle_device_heartbeat(payload)
 
-        self.consumer.device_manager.register_or_touch_device.assert_called_once_with(
+        self.consumer.device_manager.touch_device.assert_called_once_with(
             device_id="device1"
         )
-
-        self.mock_channel_layer.group_send.assert_not_called()
 
     def test_device_set_active(self):
 
@@ -174,7 +172,13 @@ class TestEvents(TestCase):
         self.mock_channel_layer.group_send.assert_called_once_with(
             f"user_{self.user.uuid}",
             {
+                "type": "ws_event",
                 "event": "device.list",
-                "payload": {"devices": devices},
+                "payload": {
+                    "devices": [
+                        {"id": "device1", "name": "Device 1", "is_active": True},
+                        {"id": "device2", "name": "Device 2", "is_active": False},
+                    ]
+                },
             },
         )

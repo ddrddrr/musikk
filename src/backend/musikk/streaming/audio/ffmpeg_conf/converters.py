@@ -7,7 +7,6 @@ from django.conf import settings
 from musikk.utils.cmd import run_shell_command
 
 
-
 class FFMPEGCommand:
     def __init__(
         self,
@@ -66,7 +65,7 @@ class FFMPEGCommand:
 class FFMPEGAudioConverter:
     def __init__(
         self,
-        encoder: Literal["flac", "libopus", "libfdk_aac"],
+        encoder: Literal["flac", "libfdk_aac"],
         bitrate: int | None = None,
         extras: list[str] | None = None,
         timeout: int | None = 60,
@@ -102,10 +101,6 @@ class FFMPEGAudioConverter:
 
 
 FLAC_CONVERTER = FFMPEGAudioConverter("flac")
-
-OPUS_96_CONVERTER = FFMPEGAudioConverter(encoder="libopus", bitrate=96)
-OPUS_160_CONVERTER = FFMPEGAudioConverter(encoder="libopus", bitrate=160)
-OPUS_256_CONVERTER = FFMPEGAudioConverter(encoder="libopus", bitrate=256)
 
 AACHEv2_CONVERTER = FFMPEGAudioConverter(
     encoder="libfdk_aac",

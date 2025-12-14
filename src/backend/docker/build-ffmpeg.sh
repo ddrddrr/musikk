@@ -1,5 +1,6 @@
 #!/bin/bash
 # Builds FFMPEG for Linux as a static binary(no dynamic libs)
+# partially taken and adapted from https://trac.ffmpeg.org/wiki/CompilationGuide/Ubuntu
 
 set -euo pipefail
 set -x
@@ -14,7 +15,6 @@ apt-get update -qq && apt-get install -y --no-install-recommends \
   libass-dev \
   libfreetype6-dev \
   libgnutls28-dev \
-  libmp3lame-dev \
   libtool \
   libvorbis-dev \
   meson \
@@ -26,6 +26,7 @@ apt-get update -qq && apt-get install -y --no-install-recommends \
   nasm \
   zlib1g-dev && \
 
+# TODO: remove opus support since only AAC is used from now on
 apt-get install -y libunistring-dev libaom-dev libdav1d-dev libopus-dev && \
 
 mkdir -p /opt/ffmpeg_sources /opt/bin && \

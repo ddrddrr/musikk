@@ -1,8 +1,7 @@
 import factory
-from factory import SubFactory
 
 from base.tests.factories import BaseModelFactory
-from users.models import BaseUser, Artist
+from users.models import BaseUser, UserRole
 
 fake = factory.Faker
 
@@ -13,11 +12,8 @@ class BaseUserFactory(BaseModelFactory):
 
     email = fake("ascii_email")
     is_staff = fake("boolean")
+    role = UserRole.BASE
 
 
-class ArtistFactory(BaseModelFactory):
-    class Meta:
-        model = Artist
-
-    email = fake("ascii_email")
-    is_staff = fake("boolean")
+class ArtistFactory(BaseUserFactory):
+    role = UserRole.ARTIST

@@ -1,6 +1,6 @@
 import { ThisDevice } from "@/modules/playback/hooks/useCurrentDevice.ts";
 import { CollectionSong } from "@/modules/song-collections/types.ts";
-import { ISongQueueNode } from "@/modules/song-queue/types.ts";
+import { ISongQueueNode } from "@/modules/song-queue/api/types.ts";
 import { createContext, Dispatch, SetStateAction } from "react";
 
 export interface PlaybackContextProps {

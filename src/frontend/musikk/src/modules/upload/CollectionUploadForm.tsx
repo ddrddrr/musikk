@@ -1,96 +1,162 @@
-import { Button } from "@/modules/ui/button.tsx";
-import { Form } from "@/modules/ui/form";
-import { createSong } from "@/modules/upload/mutations.ts";
-import { SongField } from "@/modules/upload/SongField.tsx";
-import { CollectionUploadFormValues, CollectionUploadSchema, SongUploadState } from "@/modules/upload/types";
-// import { useHandleUploadEvent } from "@/components/upload/useHandleUploadEvent.ts";
-// import { useUserEvent } from "@/events/useUserEvent.ts";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
-import { SubmitHandler, useFieldArray, useForm } from "react-hook-form";
+import type { UUID } from "@/api/types";
+import { ImageField } from "@/modules/common/ImageField";
+import { Button } from "@/modules/ui/button";
+import { Form, FormControl, FormField, FormItem, FormLabel } from "@/modules/ui/form";
+import { Input } from "@/modules/ui/input";
+import { SongUploadCard } from "./SongUploadCard";
+import { useCollectionUploadFormData } from "./useCollectionUploadFormData.ts";
 
 export function CollectionUploadForm() {
-    const [uploadStatuses, setUploadStatuses] = useState<SongUploadState[]>([]);
+    const {
+        form,
+        fields,
+        songs,
+        statusByUUID,
+        songsStateByFieldId,
+        canSubmit,
+        appendSong,
+        removeSong,
+        uploadSongs,
+        submitCollection,
+        submitState,
+        resetAll,
+    } = useCollectionUploadFormData();
 
-    const form = useForm<CollectionUploadFormValues>({
-        resolver: zodResolver(CollectionUploadSchema),
-        defaultValues: {
-            title: "",
-            private: false,
-            description: "",
-            image: undefined,
-            songs: [{ title: "", description: "", audio: new File([], ""), image: undefined }],
-        },
-    });
+    const borderClass =
+        submitState.status === "success"
+            ? "border-green-500"
+            : submitState.status === "error"
+              ? "border-red-500"
+              : "border-border";
 
-    const { fields, append, remove } = useFieldArray({
-        control: form.control,
-        name: "songs",
-    });
+    const message =
+        submitState.status === "success"
+            ? `Collection created successfully. Resetting in ${submitState.resetIn ?? 5}s.`
+            : submitState.status === "error"
+              ? (submitState.message ?? "Submit failed.")
+              : submitState.status === "submitting"
+                ? "Submitting..."
+                : null;
 
-    async function uploadSongs(data: CollectionUploadFormValues) {
-        console.log("▶ uploadSongs called with", data);
-
-        setUploadStatuses((prev) => prev.map((v) => (v.status === "failed" ? { ...v, status: "processing" } : v)));
-        for (let i = 0; i < data.songs.length; i++) {
-            const song = data.songs[i];
-            if (!song.uuid) {
-                try {
-                    const { uuid } = await createSong(song);
-                    form.setValue(`songs.${i}.uuid`, uuid);
-                    setUploadStatuses((prev) => [...prev, { uploadId: uuid, status: "processing" }]);
-                } catch {
-                    setUploadStatuses((prev) => [...prev, { uploadId: "", status: "failed" }]);
-                }
-            }
-        }
-    }
-
-    const onSubmit: SubmitHandler<CollectionUploadFormValues> = async (data) => {
-        console.log("submitted", data);
-    };
-
-    // useUserEvent({
-    //     handleEvent: useHandleUploadEvent(setUploadStatuses, form.setValue),
-    //     eventKey: "upload",
-    // });
-
-    // when all songs have a uuid, request to create a collection
-    // if some is in the error state - disable submit
-    // somehow allow to retry an upload of a specific song
+    const messageClass =
+        submitState.status === "success"
+            ? "text-green-700"
+            : submitState.status === "error"
+              ? "text-red-700"
+              : "text-muted-foreground";
 
     return (
         <div className="p-4 max-h-screen overflow-y-auto">
-            <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)}>
-                    {fields.map((field, i) => {
-                        const statusObj = uploadStatuses[i];
-                        const status = statusObj?.status ?? "idle";
+            <div className={`rounded-xl border-2 ${borderClass} bg-background p-4 shadow-sm`}>
+                {message ? <div className={`text-sm mb-4 ${messageClass}`}>{message}</div> : null}
 
-                        return (
-                            <div key={field.id}>
-                                <SongField songIndex={i} status={status} />
-                                <Button onClick={() => remove(i)}>Remove Song</Button>
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(submitCollection)} className="space-y-6">
+                        <div className="rounded-xl border bg-background p-4 shadow-sm space-y-4">
+                            <div className="text-sm font-semibold">Collection</div>
+
+                            <div className="grid gap-4 md:grid-cols-2">
+                                <FormField
+                                    name="title"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Title</FormLabel>
+                                            <FormControl>
+                                                <Input {...field} />
+                                            </FormControl>
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    name="description"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Description</FormLabel>
+                                            <FormControl>
+                                                <Input {...field} />
+                                            </FormControl>
+                                        </FormItem>
+                                    )}
+                                />
                             </div>
-                        );
-                    })}
-                    <Button
-                        onClick={() =>
-                            append({ title: "", description: "", audio: new File([], ""), image: undefined })
-                        }
-                    >
-                        Add Song
-                    </Button>
 
-                    <Button
-                        type="button"
-                        onClick={form.handleSubmit(uploadSongs, (errors) => console.log("validation errors", errors))}
-                    >
-                        Validate Songs
-                    </Button>
-                    <Button type="submit">Submit</Button>
-                </form>
-            </Form>
+                            <div className="grid gap-4 md:grid-cols-2">
+                                <div className="space-y-2">
+                                    <ImageField name="image" />
+                                </div>
+
+                                <FormField
+                                    name="private"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Visibility</FormLabel>
+                                            <div className="flex items-center gap-2 pt-2">
+                                                <FormControl>
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={!!field.value}
+                                                        onChange={(e) =>
+                                                            field.onChange(e.target.checked)
+                                                        }
+                                                    />
+                                                </FormControl>
+                                                <div className="text-sm">Private</div>
+                                            </div>
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="space-y-4">
+                            {fields.map((field, i) => (
+                                <SongUploadCard
+                                    key={field.id}
+                                    index={i}
+                                    fieldId={field.id}
+                                    uuid={songs?.[i]?.uuid as UUID | undefined}
+                                    statusByUUID={statusByUUID}
+                                    songsStateByFieldId={songsStateByFieldId}
+                                    onRemove={() => removeSong(i, field.id)}
+                                />
+                            ))}
+                        </div>
+
+                        <div className="flex flex-wrap gap-2 pt-2 border-t">
+                            <Button type="button" variant="outline" onClick={appendSong}>
+                                Add Song
+                            </Button>
+
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={form.handleSubmit(uploadSongs, (errors) =>
+                                    console.log("validation errors", errors),
+                                )}
+                            >
+                                Upload Songs
+                            </Button>
+
+                            <div className="flex-1" />
+
+                            {(submitState.status === "success" ||
+                                submitState.status === "error") && (
+                                <Button type="button" variant="outline" onClick={resetAll}>
+                                    Reset now
+                                </Button>
+                            )}
+
+                            <Button
+                                type="submit"
+                                disabled={!canSubmit || submitState.status === "submitting"}
+                            >
+                                Submit
+                            </Button>
+                        </div>
+                    </form>
+                </Form>
+            </div>
         </div>
     );
 }

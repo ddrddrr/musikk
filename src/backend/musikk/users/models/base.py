@@ -11,6 +11,11 @@ def default_display_name():
     return get_random_string(12)
 
 
+class UserRole(models.TextChoices):
+    BASE = "base", "Base"
+    ARTIST = "artist", "Artist"
+
+
 class UserManager(BaseUserManager):
     def create_user(self, email, password, **kwargs):
         if not email:
@@ -22,8 +27,9 @@ class UserManager(BaseUserManager):
         return user
 
     def create_superuser(self, email, password, **kwargs):
-        kwargs["is_staff"] = True
-        kwargs["is_superuser"] = True
+        kwargs.setdefault("is_staff", True)
+        kwargs.setdefault("is_superuser", True)
+        kwargs.setdefault("role", UserRole.BASE)
         return self.create_user(email=email, password=password, **kwargs)
 
 
@@ -37,15 +43,27 @@ class BaseUser(BaseModel, AbstractBaseUser, PermissionsMixin):
     avatar = models.ImageField(
         upload_to=image_path, max_length=255, blank=True, null=True
     )
+
+    role = models.CharField(
+        max_length=16,
+        choices=UserRole.choices,
+        default=UserRole.BASE,
+        db_index=True,
+    )
+
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
+
+    @property
+    def is_artist(self) -> bool:
+        return self.role == UserRole.ARTIST
 
     @property
     def friends(self) -> models.QuerySet["BaseUser"]:
         return (
             BaseUser.objects.filter(
                 followed_users__from_user=self,  # us
-                followers__to_user=self,  # others
+                followers__to_user=self,  # other users
             )
             .exclude(pk=self.pk)
             .distinct()

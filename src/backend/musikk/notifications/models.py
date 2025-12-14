@@ -8,12 +8,12 @@ class Notification(BaseModel):
     is_read = models.BooleanField(default=False)
 
 
+# TODO: move ws to api layer
 class ReplyNotificationManager(models.Manager):
     def create(self, **kwargs):
         obj = super().create(**kwargs)
         send_ws_event(
             f"user_{obj.orig_publication.author.uuid}",
-            event_handler="base.event",
             event_name="invalidate.query",
             query_key=["notifications"],
         )
@@ -39,7 +39,6 @@ class FollowerNotificationManager(models.Manager):
         obj = super().create(**kwargs)
         send_ws_event(
             f"user_{obj.receiver.uuid}",
-            event_handler="base.event",
             event_name="invalidate.query",
             query_key=["notifications"],
         )

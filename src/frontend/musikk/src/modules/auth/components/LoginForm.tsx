@@ -72,6 +72,7 @@ export function LoginForm() {
                         <p className="text-gray-700">
                             Don't have an account?
                             <Button
+                                type="button"
                                 onClick={() => navigate("/signup")}
                                 variant="link"
                                 size="sm"

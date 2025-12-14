@@ -17,6 +17,7 @@ export function Player({ audioRef, onDurationChange, onTimeUpdate }: PlayerProps
     const playerRef = useRef<shaka.Player | null>(null);
     const isAudioReadyRef = useRef(false);
 
+    // TODO: we need to split by OS not browser (ios -> m3u8, otherwise mpd)
     const isSafari = useMemo(() => {
         return /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
     }, []);

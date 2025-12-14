@@ -1,4 +1,6 @@
 import type { Collection, CollectionSong } from "@/modules/song-collections/types.ts";
+import { getSongQueue } from "@/modules/song-queue/api/queries.ts";
+import { ISongQueue } from "@/modules/song-queue/api/types.ts";
 import {
     addCollection,
     addSong,
@@ -8,8 +10,6 @@ import {
     shiftHead,
     shiftHeadBackwards,
 } from "@/modules/song-queue/mutations.ts";
-import { getSongQueue } from "@/modules/song-queue/queries.ts";
-import { ISongQueue } from "@/modules/song-queue/types.ts";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 export function useQueue() {

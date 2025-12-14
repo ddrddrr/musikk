@@ -268,29 +268,19 @@ LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
     "formatters": {
-        "simple": {"format": "%(asctime)s [%(levelname)s] %(name)s: %(message)s"},
+        "console": {
+            "format": "%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+        },
     },
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
-            "formatter": "simple",
+            "formatter": "console",
         },
     },
     "root": {
         "handlers": ["console"],
         "level": "DEBUG" if DEBUG else "INFO",
-    },
-    "loggers": {
-        "django": {
-            "handlers": ["console"],
-            "level": "INFO",
-            "propagate": False,
-        },
-        "musikk": {
-            "handlers": ["console"],
-            "level": "DEBUG",
-            "propagate": False,
-        },
     },
 }
 

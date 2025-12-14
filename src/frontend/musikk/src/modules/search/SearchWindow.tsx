@@ -6,10 +6,10 @@ import { Card, CardContent } from "@/modules/ui/card";
 import { Input } from "@/modules/ui/input";
 
 import { Attachment } from "@/modules/publications/types.ts";
-import { CollectionCard } from "@/modules/song-collections/CollectionCard.tsx";
+import { CollectionCard } from "@/modules/song-collections/components/CollectionCard.tsx";
 import { Collection } from "@/modules/song-collections/types.ts";
-import { SongCard } from "@/modules/songs/SongCard.tsx";
-import { SongContainer } from "@/modules/songs/SongContainer.tsx";
+import { SongCard } from "@/modules/songs/components/SongCard.tsx";
+import { SongContainer } from "@/modules/songs/components/SongContainer.tsx";
 import { UserCard } from "@/modules/user/components/UserCard.tsx";
 import { IUser } from "@/modules/user/types.ts";
 

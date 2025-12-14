@@ -100,13 +100,13 @@ class CollectionAddLikedView(APIView):
         # TODO: move?
         send_ws_event(
             f"user_{self.request.user.uuid}",
-            event_handler="base.event",
+
             event_name="invalidate.query",
             query_key=["openCollection"],
         )
         send_ws_event(
             f"user_{self.request.user.uuid}",
-            event_handler="base.event",
+
             event_name="invalidate.query",
             query_key=["collectionsPersonal"],
         )
@@ -127,7 +127,7 @@ class CollectionRemoveSong(APIView):
         collection_song.delete()
         send_ws_event(
             f"user_{self.request.user.uuid}",
-            event_handler="base.event",
+
             event_name="invalidate.query",
             query_key=["openCollection"],
         )
