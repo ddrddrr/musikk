@@ -398,9 +398,78 @@
       \verb https://dl.acm.org/doi/10.5555/561543
       \endverb
     \endentry
-    \entry{progressive_download}{online}{}{}
+    \entry{mime_octet_stream}{online}{}{}
       \field{sortinit}{2}
       \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{Multipurpose Internet Mail Extensions Part Two: Media Types. `octet-stream'}
+      \field{urlday}{30}
+      \field{urlmonth}{11}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://www.rfc-editor.org/rfc/rfc2046#section-4.5.1
+      \endverb
+      \verb{url}
+      \verb https://www.rfc-editor.org/rfc/rfc2046#section-4.5.1
+      \endverb
+    \endentry
+    \entry{pseudo_streaming}{online}{}{}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{Nginx pseudo-streaming implementation}
+      \field{urlday}{30}
+      \field{urlmonth}{11}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://nginx.org/en/docs/http/ngx_http_mp4_module.html
+      \endverb
+      \verb{url}
+      \verb https://nginx.org/en/docs/http/ngx_http_mp4_module.html
+      \endverb
+    \endentry
+    \entry{range_http_requests}{online}{}{}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{HTTP Range Requests}
+      \field{urlday}{7}
+      \field{urlmonth}{12}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Range_requests
+      \endverb
+      \verb{url}
+      \verb https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Range_requests
+      \endverb
+    \endentry
+    \entry{progressive_download}{online}{}{}
+      \name{author}{1}{}{%
+        {{hash=4a65b52cac50b10e03c1806ea435ecba}{%
+           family={Färber\bibnamedelima Nikolaus},
+           familyi={F\bibinitperiod\bibinitdelim N\bibinitperiod},
+           given={Issing\bibnamedelima Jochen},
+           giveni={I\bibinitperiod\bibinitdelim J\bibinitperiod},
+           suffix={Döhla\bibnamedelima Stefan},
+           suffixi={D\bibinitperiod\bibinitdelim S\bibinitperiod}}}%
+      }
+      \strng{namehash}{4a65b52cac50b10e03c1806ea435ecba}
+      \strng{fullhash}{4a65b52cac50b10e03c1806ea435ecba}
+      \strng{fullhashraw}{4a65b52cac50b10e03c1806ea435ecba}
+      \strng{bibnamehash}{4a65b52cac50b10e03c1806ea435ecba}
+      \strng{authorbibnamehash}{4a65b52cac50b10e03c1806ea435ecba}
+      \strng{authornamehash}{4a65b52cac50b10e03c1806ea435ecba}
+      \strng{authorfullhash}{4a65b52cac50b10e03c1806ea435ecba}
+      \strng{authorfullhashraw}{4a65b52cac50b10e03c1806ea435ecba}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
       \field{langid}{english}
       \field{title}{Adaptive progressive download based on the MPEG-4 file format}
@@ -430,6 +499,23 @@
       \endverb
       \verb{url}
       \verb https://ieeexplore.ieee.org/abstract/document/6077864
+      \endverb
+    \endentry
+    \entry{cdn_caching}{online}{}{}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{AWS CDN Caching}
+      \field{urlday}{14}
+      \field{urlmonth}{12}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://aws.amazon.com/caching/
+      \endverb
+      \verb{url}
+      \verb https://aws.amazon.com/caching/
       \endverb
     \endentry
     \entry{basic_auth}{online}{}{}
@@ -467,8 +553,8 @@
       \endverb
     \endentry
     \entry{basic_auth_mozilla_caching}{online}{}{}
-      \field{sortinit}{2}
-      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{sortinit}{3}
+      \field{sortinithash}{ad6fe7482ffbd7b9f99c9e8b5dccd3d7}
       \field{labeltitlesource}{title}
       \field{langid}{english}
       \field{title}{Mozilla Caching Behaviour Documentation}
@@ -484,8 +570,8 @@
       \endverb
     \endentry
     \entry{session_auth}{online}{}{}
-      \field{sortinit}{2}
-      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{sortinit}{3}
+      \field{sortinithash}{ad6fe7482ffbd7b9f99c9e8b5dccd3d7}
       \field{labeltitlesource}{title}
       \field{langid}{english}
       \field{title}{Session Authentication}
@@ -501,8 +587,8 @@
       \endverb
     \endentry
     \entry{redis}{online}{}{}
-      \field{sortinit}{2}
-      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{sortinit}{3}
+      \field{sortinithash}{ad6fe7482ffbd7b9f99c9e8b5dccd3d7}
       \field{labeltitlesource}{title}
       \field{langid}{english}
       \field{title}{Redis}
@@ -518,8 +604,8 @@
       \endverb
     \endentry
     \entry{oauth2}{online}{}{}
-      \field{sortinit}{2}
-      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{sortinit}{3}
+      \field{sortinithash}{ad6fe7482ffbd7b9f99c9e8b5dccd3d7}
       \field{labeltitlesource}{title}
       \field{langid}{english}
       \field{title}{OAuth2}
@@ -535,8 +621,8 @@
       \endverb
     \endentry
     \entry{long_polling}{online}{}{}
-      \field{sortinit}{2}
-      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{sortinit}{3}
+      \field{sortinithash}{ad6fe7482ffbd7b9f99c9e8b5dccd3d7}
       \field{labeltitlesource}{title}
       \field{langid}{english}
       \field{title}{Known Issues and Best Practices for the Use of Long Polling and Streaming in Bidirectional HTTP}
@@ -620,8 +706,8 @@
       \endverb
     \endentry
     \entry{http_caching}{online}{}{}
-      \field{sortinit}{3}
-      \field{sortinithash}{ad6fe7482ffbd7b9f99c9e8b5dccd3d7}
+      \field{sortinit}{4}
+      \field{sortinithash}{9381316451d1b9788675a07e972a12a7}
       \field{labeltitlesource}{title}
       \field{langid}{english}
       \field{title}{Http Caching}
@@ -637,8 +723,8 @@
       \endverb
     \endentry
     \entry{pushapi}{online}{}{}
-      \field{sortinit}{3}
-      \field{sortinithash}{ad6fe7482ffbd7b9f99c9e8b5dccd3d7}
+      \field{sortinit}{4}
+      \field{sortinithash}{9381316451d1b9788675a07e972a12a7}
       \field{labeltitlesource}{title}
       \field{langid}{english}
       \field{title}{Push API}
@@ -654,8 +740,8 @@
       \endverb
     \endentry
     \entry{http_push}{online}{}{}
-      \field{sortinit}{3}
-      \field{sortinithash}{ad6fe7482ffbd7b9f99c9e8b5dccd3d7}
+      \field{sortinit}{4}
+      \field{sortinithash}{9381316451d1b9788675a07e972a12a7}
       \field{labeltitlesource}{title}
       \field{langid}{english}
       \field{title}{Generic Event Delivery Using HTTP Push}
@@ -671,8 +757,8 @@
       \endverb
     \endentry
     \entry{service_workers_mdn}{online}{}{}
-      \field{sortinit}{3}
-      \field{sortinithash}{ad6fe7482ffbd7b9f99c9e8b5dccd3d7}
+      \field{sortinit}{4}
+      \field{sortinithash}{9381316451d1b9788675a07e972a12a7}
       \field{labeltitlesource}{title}
       \field{langid}{english}
       \field{title}{Service Worker API}
@@ -739,8 +825,8 @@
       \endverb
     \endentry
     \entry{pydantic}{online}{}{}
-      \field{sortinit}{4}
-      \field{sortinithash}{9381316451d1b9788675a07e972a12a7}
+      \field{sortinit}{5}
+      \field{sortinithash}{20e9b4b0b173788c5dace24730f47d8c}
       \field{labeltitlesource}{title}
       \field{langid}{english}
       \field{title}{Pydantic}
@@ -756,8 +842,8 @@
       \endverb
     \endentry
     \entry{fastapi_features}{online}{}{}
-      \field{sortinit}{4}
-      \field{sortinithash}{9381316451d1b9788675a07e972a12a7}
+      \field{sortinit}{5}
+      \field{sortinithash}{20e9b4b0b173788c5dace24730f47d8c}
       \field{labeltitlesource}{title}
       \field{langid}{english}
       \field{title}{FastAPI Features}
@@ -773,8 +859,8 @@
       \endverb
     \endentry
     \entry{fastapi_websockets}{online}{}{}
-      \field{sortinit}{4}
-      \field{sortinithash}{9381316451d1b9788675a07e972a12a7}
+      \field{sortinit}{5}
+      \field{sortinithash}{20e9b4b0b173788c5dace24730f47d8c}
       \field{labeltitlesource}{title}
       \field{langid}{english}
       \field{title}{FastAPI Websockets}
@@ -790,8 +876,8 @@
       \endverb
     \endentry
     \entry{so_2024_survey}{online}{}{}
-      \field{sortinit}{4}
-      \field{sortinithash}{9381316451d1b9788675a07e972a12a7}
+      \field{sortinit}{5}
+      \field{sortinithash}{20e9b4b0b173788c5dace24730f47d8c}
       \field{labeltitlesource}{title}
       \field{langid}{english}
       \field{title}{StackOverflow 2024 Developers Survey}
@@ -807,8 +893,8 @@
       \endverb
     \endentry
     \entry{django}{online}{}{}
-      \field{sortinit}{4}
-      \field{sortinithash}{9381316451d1b9788675a07e972a12a7}
+      \field{sortinit}{5}
+      \field{sortinithash}{20e9b4b0b173788c5dace24730f47d8c}
       \field{labeltitlesource}{title}
       \field{langid}{english}
       \field{title}{Django}
@@ -824,8 +910,8 @@
       \endverb
     \endentry
     \entry{drf}{online}{}{}
-      \field{sortinit}{4}
-      \field{sortinithash}{9381316451d1b9788675a07e972a12a7}
+      \field{sortinit}{5}
+      \field{sortinithash}{20e9b4b0b173788c5dace24730f47d8c}
       \field{labeltitlesource}{title}
       \field{langid}{english}
       \field{title}{DRF}
@@ -892,8 +978,8 @@
       \endverb
     \endentry
     \entry{flask}{online}{}{}
-      \field{sortinit}{5}
-      \field{sortinithash}{20e9b4b0b173788c5dace24730f47d8c}
+      \field{sortinit}{6}
+      \field{sortinithash}{b33bc299efb3c36abec520a4c896a66d}
       \field{labeltitlesource}{title}
       \field{langid}{english}
       \field{title}{Flask}
@@ -909,8 +995,8 @@
       \endverb
     \endentry
     \entry{socketio}{online}{}{}
-      \field{sortinit}{5}
-      \field{sortinithash}{20e9b4b0b173788c5dace24730f47d8c}
+      \field{sortinit}{6}
+      \field{sortinithash}{b33bc299efb3c36abec520a4c896a66d}
       \field{labeltitlesource}{title}
       \field{langid}{english}
       \field{title}{SocketIO}
@@ -926,8 +1012,8 @@
       \endverb
     \endentry
     \entry{django_instagram}{online}{}{}
-      \field{sortinit}{5}
-      \field{sortinithash}{20e9b4b0b173788c5dace24730f47d8c}
+      \field{sortinit}{6}
+      \field{sortinithash}{b33bc299efb3c36abec520a4c896a66d}
       \field{labeltitlesource}{title}
       \field{langid}{english}
       \field{title}{Web Service Efficiency at Instagram with Python}
@@ -943,8 +1029,8 @@
       \endverb
     \endentry
     \entry{oracle_pricing}{online}{}{}
-      \field{sortinit}{5}
-      \field{sortinithash}{20e9b4b0b173788c5dace24730f47d8c}
+      \field{sortinit}{6}
+      \field{sortinithash}{b33bc299efb3c36abec520a4c896a66d}
       \field{labeltitlesource}{title}
       \field{langid}{english}
       \field{title}{Oracle Price List}
@@ -960,8 +1046,8 @@
       \endverb
     \endentry
     \entry{postgres_fulltext}{online}{}{}
-      \field{sortinit}{5}
-      \field{sortinithash}{20e9b4b0b173788c5dace24730f47d8c}
+      \field{sortinit}{6}
+      \field{sortinithash}{b33bc299efb3c36abec520a4c896a66d}
       \field{labeltitlesource}{title}
       \field{langid}{english}
       \field{title}{PostgreSQL Full Text Search}
@@ -977,8 +1063,8 @@
       \endverb
     \endentry
     \entry{postgres}{online}{}{}
-      \field{sortinit}{5}
-      \field{sortinithash}{20e9b4b0b173788c5dace24730f47d8c}
+      \field{sortinit}{6}
+      \field{sortinithash}{b33bc299efb3c36abec520a4c896a66d}
       \field{labeltitlesource}{title}
       \field{langid}{english}
       \field{title}{PostgreSQL}
@@ -994,8 +1080,8 @@
       \endverb
     \endentry
     \entry{django_postgres}{online}{}{}
-      \field{sortinit}{5}
-      \field{sortinithash}{20e9b4b0b173788c5dace24730f47d8c}
+      \field{sortinit}{6}
+      \field{sortinithash}{b33bc299efb3c36abec520a4c896a66d}
       \field{labeltitlesource}{title}
       \field{langid}{english}
       \field{title}{Django PostgreSQL Support}
@@ -1079,8 +1165,8 @@
       \endverb
     \endentry
     \entry{yew_framework}{online}{}{}
-      \field{sortinit}{6}
-      \field{sortinithash}{b33bc299efb3c36abec520a4c896a66d}
+      \field{sortinit}{7}
+      \field{sortinithash}{108d0be1b1bee9773a1173443802c0a3}
       \field{labeltitlesource}{title}
       \field{langid}{english}
       \field{title}{Yew Framework}
@@ -1096,8 +1182,8 @@
       \endverb
     \endentry
     \entry{frameworkdata}{online}{}{}
-      \field{sortinit}{6}
-      \field{sortinithash}{b33bc299efb3c36abec520a4c896a66d}
+      \field{sortinit}{7}
+      \field{sortinithash}{108d0be1b1bee9773a1173443802c0a3}
       \field{labeltitlesource}{title}
       \field{langid}{english}
       \field{title}{Framework Usage}
@@ -1113,8 +1199,8 @@
       \endverb
     \endentry
     \entry{react}{online}{}{}
-      \field{sortinit}{6}
-      \field{sortinithash}{b33bc299efb3c36abec520a4c896a66d}
+      \field{sortinit}{7}
+      \field{sortinithash}{108d0be1b1bee9773a1173443802c0a3}
       \field{labeltitlesource}{title}
       \field{langid}{english}
       \field{title}{React}
@@ -1130,8 +1216,8 @@
       \endverb
     \endentry
     \entry{react_declarative_def}{online}{}{}
-      \field{sortinit}{6}
-      \field{sortinithash}{b33bc299efb3c36abec520a4c896a66d}
+      \field{sortinit}{7}
+      \field{sortinithash}{108d0be1b1bee9773a1173443802c0a3}
       \field{labeltitlesource}{title}
       \field{langid}{english}
       \field{title}{How declarative UI compares to imperative}
@@ -1147,8 +1233,8 @@
       \endverb
     \endentry
     \entry{react_devtools}{online}{}{}
-      \field{sortinit}{6}
-      \field{sortinithash}{b33bc299efb3c36abec520a4c896a66d}
+      \field{sortinit}{7}
+      \field{sortinithash}{108d0be1b1bee9773a1173443802c0a3}
       \field{labeltitlesource}{title}
       \field{langid}{english}
       \field{title}{React Developer Tools}
@@ -1164,8 +1250,8 @@
       \endverb
     \endentry
     \entry{so_react}{online}{}{}
-      \field{sortinit}{6}
-      \field{sortinithash}{b33bc299efb3c36abec520a4c896a66d}
+      \field{sortinit}{7}
+      \field{sortinithash}{108d0be1b1bee9773a1173443802c0a3}
       \field{labeltitlesource}{title}
       \field{langid}{english}
       \field{title}{StackOverflow React}
@@ -1232,8 +1318,8 @@
       \endverb
     \endentry
     \entry{mvc}{online}{}{}
-      \field{sortinit}{7}
-      \field{sortinithash}{108d0be1b1bee9773a1173443802c0a3}
+      \field{sortinit}{8}
+      \field{sortinithash}{a231b008ebf0ecbe0b4d96dcc159445f}
       \field{labeltitlesource}{title}
       \field{langid}{english}
       \field{title}{MVC}
@@ -1246,6 +1332,482 @@
       \endverb
       \verb{url}
       \verb https://developer.mozilla.org/en-US/docs/Glossary/MVC
+      \endverb
+    \endentry
+    \entry{dash}{online}{}{}
+      \field{sortinit}{8}
+      \field{sortinithash}{a231b008ebf0ecbe0b4d96dcc159445f}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{MPEG-DASH}
+      \field{urlday}{5}
+      \field{urlmonth}{5}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://www.mpeg.org/standards/MPEG-DASH/
+      \endverb
+      \verb{url}
+      \verb https://www.mpeg.org/standards/MPEG-DASH/
+      \endverb
+    \endentry
+    \entry{hls}{online}{}{}
+      \field{sortinit}{8}
+      \field{sortinithash}{a231b008ebf0ecbe0b4d96dcc159445f}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{HLS}
+      \field{urlday}{5}
+      \field{urlmonth}{5}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://developer.apple.com/streaming/
+      \endverb
+      \verb{url}
+      \verb https://developer.apple.com/streaming/
+      \endverb
+    \endentry
+    \entry{hls_vs_dash}{online}{}{}
+      \field{sortinit}{8}
+      \field{sortinithash}{a231b008ebf0ecbe0b4d96dcc159445f}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{Comparative Analysis of MPEG-DASH and HLS Protocols: Performance, Adaptation, and Future Directions in Adaptive Streaming}
+      \field{urlday}{5}
+      \field{urlmonth}{5}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://link.springer.com/article/10.1007/s40031-025-01244-x#Sec4
+      \endverb
+      \verb{url}
+      \verb https://link.springer.com/article/10.1007/s40031-025-01244-x#Sec4
+      \endverb
+    \endentry
+    \entry{mse}{online}{}{}
+      \field{sortinit}{8}
+      \field{sortinithash}{a231b008ebf0ecbe0b4d96dcc159445f}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{MSE}
+      \field{urlday}{5}
+      \field{urlmonth}{5}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://www.w3.org/TR/media-source-2/
+      \endverb
+      \verb{url}
+      \verb https://www.w3.org/TR/media-source-2/
+      \endverb
+    \endentry
+    \entry{msecaniuse}{online}{}{}
+      \field{sortinit}{8}
+      \field{sortinithash}{a231b008ebf0ecbe0b4d96dcc159445f}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{MSE Availability}
+      \field{urlday}{5}
+      \field{urlmonth}{5}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://caniuse.com/mediasource
+      \endverb
+      \verb{url}
+      \verb https://caniuse.com/mediasource
+      \endverb
+    \endentry
+    \entry{os_percentage}{online}{}{}
+      \field{sortinit}{8}
+      \field{sortinithash}{a231b008ebf0ecbe0b4d96dcc159445f}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{Operating System Market Share Worldwide}
+      \field{urlday}{13}
+      \field{urlmonth}{12}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://gs.statcounter.com/os-market-share
+      \endverb
+      \verb{url}
+      \verb https://gs.statcounter.com/os-market-share
+      \endverb
+    \endentry
+    \entry{packaging_def}{online}{}{}
+      \field{sortinit}{8}
+      \field{sortinithash}{a231b008ebf0ecbe0b4d96dcc159445f}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{Packaging explanation}
+      \field{urlday}{13}
+      \field{urlmonth}{12}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://shaka-project.github.io/shaka-packager/html/documentation.html
+      \endverb
+      \verb{url}
+      \verb https://shaka-project.github.io/shaka-packager/html/documentation.html
+      \endverb
+    \endentry
+    \entry{cmaf}{online}{}{}
+      \field{sortinit}{8}
+      \field{sortinithash}{a231b008ebf0ecbe0b4d96dcc159445f}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{CMAF}
+      \field{urlday}{13}
+      \field{urlmonth}{12}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://developer.apple.com/documentation/http-live-streaming/about-the-common-media-application-format-with-http-live-streaming-hls
+      \endverb
+      \verb{url}
+      \verb https://developer.apple.com/documentation/http-live-streaming/about-the-common-media-application-format-with-http-live-streaming-hls
+      \endverb
+    \endentry
+    \entry{apple_hls_specs_flac_container}{online}{}{}
+      \field{sortinit}{9}
+      \field{sortinithash}{0a5ebc79d83c96b6579069544c73c7d4}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{HTTP Live Streaming (HLS) authoring specification for Apple devices. Audio.}
+      \field{urlday}{13}
+      \field{urlmonth}{12}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://developer.apple.com/documentation/http-live-streaming/hls-authoring-specification-for-apple-devices#Audio
+      \endverb
+      \verb{url}
+      \verb https://developer.apple.com/documentation/http-live-streaming/hls-authoring-specification-for-apple-devices#Audio
+      \endverb
+    \endentry
+    \entry{flac_xiph}{online}{}{}
+      \field{sortinit}{9}
+      \field{sortinithash}{0a5ebc79d83c96b6579069544c73c7d4}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{FLAC}
+      \field{urlday}{14}
+      \field{urlmonth}{12}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://xiph.org/flac/
+      \endverb
+      \verb{url}
+      \verb https://xiph.org/flac/
+      \endverb
+    \endentry
+    \entry{mp3}{online}{}{}
+      \field{sortinit}{9}
+      \field{sortinithash}{0a5ebc79d83c96b6579069544c73c7d4}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{ISO/IEC 11172-3:1993 (MP3(}
+      \field{urlday}{14}
+      \field{urlmonth}{12}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://www.iso.org/standard/22412.html
+      \endverb
+      \verb{url}
+      \verb https://www.iso.org/standard/22412.html
+      \endverb
+    \endentry
+    \entry{aac}{online}{}{}
+      \field{sortinit}{9}
+      \field{sortinithash}{0a5ebc79d83c96b6579069544c73c7d4}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{ISO/IEC 13818-7:2006 (AAC)}
+      \field{urlday}{14}
+      \field{urlmonth}{12}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://www.iso.org/standard/43345.html
+      \endverb
+      \verb{url}
+      \verb https://www.iso.org/standard/43345.html
+      \endverb
+    \endentry
+    \entry{opus}{online}{}{}
+      \field{sortinit}{9}
+      \field{sortinithash}{0a5ebc79d83c96b6579069544c73c7d4}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{Opus Codec}
+      \field{urlday}{6}
+      \field{urlmonth}{5}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://opus-codec.org/
+      \endverb
+      \verb{url}
+      \verb https://opus-codec.org/
+      \endverb
+    \endentry
+    \entry{codec_evaluation_1}{online}{}{}
+      \field{sortinit}{9}
+      \field{sortinithash}{0a5ebc79d83c96b6579069544c73c7d4}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{EBU Evaluations of Mutlichannel Audio Codecs}
+      \field{urlday}{14}
+      \field{urlmonth}{12}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://tech.ebu.ch/docs/tech/tech3324.pdf
+      \endverb
+      \verb{url}
+      \verb https://tech.ebu.ch/docs/tech/tech3324.pdf
+      \endverb
+    \endentry
+    \entry{codec_evaluation_2}{online}{}{}
+      \field{sortinit}{9}
+      \field{sortinithash}{0a5ebc79d83c96b6579069544c73c7d4}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{Perceived Audio Quality for Streaming Stereo Music}
+      \field{urlday}{13}
+      \field{urlmonth}{12}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://dl.acm.org/doi/pdf/10.1145/2647868.2655025
+      \endverb
+      \verb{url}
+      \verb https://dl.acm.org/doi/pdf/10.1145/2647868.2655025
+      \endverb
+    \endentry
+    \entry{codec_evaluation_3}{online}{}{}
+      \field{sortinit}{9}
+      \field{sortinithash}{0a5ebc79d83c96b6579069544c73c7d4}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{BACHELOR THESIS Perceived Audio Quality in Ogg Vorbis and AAC in Compressed Popular Music in Bit Rates between 96 kbit/s, 128 kbit/s and 192 kbit/s}
+      \field{urlday}{14}
+      \field{urlmonth}{12}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://www.diva-portal.org/smash/get/diva2:1030609/FULLTEXT02.pdf
+      \endverb
+      \verb{url}
+      \verb https://www.diva-portal.org/smash/get/diva2:1030609/FULLTEXT02.pdf
+      \endverb
+    \endentry
+    \entry{apple_hls_specs_audio}{online}{}{}
+      \field{sortinit}{9}
+      \field{sortinithash}{0a5ebc79d83c96b6579069544c73c7d4}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{HTTP Live Streaming (HLS) authoring specification for Apple devices. Bitrate recommendations, section 2.25.}
+      \field{urlday}{13}
+      \field{urlmonth}{12}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://developer.apple.com/documentation/http-live-streaming/hls-authoring-specification-for-apple-devices#Bitrate-recommendations-for-Ambisonics-are-as-follows
+      \endverb
+      \verb{url}
+      \verb https://developer.apple.com/documentation/http-live-streaming/hls-authoring-specification-for-apple-devices#Bitrate-recommendations-for-Ambisonics-are-as-follows
+      \endverb
+    \endentry
+    \entry{cbr}{online}{}{}
+      \field{sortinit}{9}
+      \field{sortinithash}{0a5ebc79d83c96b6579069544c73c7d4}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{CBR}
+      \field{urlday}{6}
+      \field{urlmonth}{5}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://learn.microsoft.com/en-us/windows/win32/wmformat/constant-bit-rate--cbr--encoding
+      \endverb
+      \verb{url}
+      \verb https://learn.microsoft.com/en-us/windows/win32/wmformat/constant-bit-rate--cbr--encoding
+      \endverb
+    \endentry
+    \entry{vbr}{online}{}{}
+      \field{sortinit}{9}
+      \field{sortinithash}{0a5ebc79d83c96b6579069544c73c7d4}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{VBR}
+      \field{urlday}{6}
+      \field{urlmonth}{5}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://wiki.hydrogenaudio.org/index.php?title=Variable_Bitrate
+      \endverb
+      \verb{url}
+      \verb https://wiki.hydrogenaudio.org/index.php?title=Variable_Bitrate
+      \endverb
+    \endentry
+    \entry{cbrvbrcomp}{online}{}{}
+      \field{sortinit}{9}
+      \field{sortinithash}{0a5ebc79d83c96b6579069544c73c7d4}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{CBR vs VBR}
+      \field{urlday}{6}
+      \field{urlmonth}{5}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://ieeexplore.ieee.org/abstract/document/6774590
+      \endverb
+      \verb{url}
+      \verb https://ieeexplore.ieee.org/abstract/document/6774590
+      \endverb
+    \endentry
+    \entry{spotify_codecs}{online}{}{}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{Spotify Audio Quality}
+      \field{urlday}{14}
+      \field{urlmonth}{12}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://support.spotify.com/cz/article/audio-quality/
+      \endverb
+      \verb{url}
+      \verb https://support.spotify.com/cz/article/audio-quality/
+      \endverb
+    \endentry
+    \entry{mdn_aac}{online}{}{}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{Web audio codec guide}
+      \field{urlday}{14}
+      \field{urlmonth}{12}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb hhttps://developer.mozilla.org/en-US/docs/Web/Media/Guides/Formats/Audio_codecs#aac_advanced_audio_coding
+      \endverb
+      \verb{url}
+      \verb hhttps://developer.mozilla.org/en-US/docs/Web/Media/Guides/Formats/Audio_codecs#aac_advanced_audio_coding
+      \endverb
+    \endentry
+    \entry{ffmpeg}{online}{}{}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{FFMPEG}
+      \field{urlday}{5}
+      \field{urlmonth}{5}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://ffmpeg.org/
+      \endverb
+      \verb{url}
+      \verb https://ffmpeg.org/
+      \endverb
+    \endentry
+    \entry{ffmpeg_libfdkaac}{online}{}{}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{ffmpeg libfdkaac}
+      \field{urlday}{6}
+      \field{urlmonth}{5}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://trac.ffmpeg.org/wiki/Encode/AAC
+      \endverb
+      \verb{url}
+      \verb https://trac.ffmpeg.org/wiki/Encode/AAC
+      \endverb
+    \endentry
+    \entry{ffmpeg_flac}{online}{}{}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{ffmpeg flac codec}
+      \field{urlday}{14}
+      \field{urlmonth}{12}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://ffmpeg.org/ffmpeg-codecs.html#toc-flac-2
+      \endverb
+      \verb{url}
+      \verb https://ffmpeg.org/ffmpeg-codecs.html#toc-flac-2
+      \endverb
+    \endentry
+    \entry{moov}{online}{}{}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{Movie atom ('moov')}
+      \field{urlday}{14}
+      \field{urlmonth}{12}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://developer.apple.com/documentation/quicktime-file-format/movie_atom
+      \endverb
+      \verb{url}
+      \verb https://developer.apple.com/documentation/quicktime-file-format/movie_atom
+      \endverb
+    \endentry
+    \entry{shaka_player}{online}{}{}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{Shaka Player}
+      \field{urlday}{8}
+      \field{urlmonth}{5}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://github.com/shaka-project/shaka-player
+      \endverb
+      \verb{url}
+      \verb https://github.com/shaka-project/shaka-player
+      \endverb
+    \endentry
+    \entry{shaka_packager}{online}{}{}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{Shaka Packager}
+      \field{urlday}{13}
+      \field{urlmonth}{12}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://shaka-project.github.io/shaka-packager/html/
+      \endverb
+      \verb{url}
+      \verb https://shaka-project.github.io/shaka-packager/html/
       \endverb
     \endentry
   \enddatalist

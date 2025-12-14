@@ -552,6 +552,13 @@
     langid = {english}
 }
 
+@ONLINE{cdn_caching,
+    title = {AWS CDN Caching},
+    url = {https://aws.amazon.com/caching/},
+    urldate = {2025-12-14},
+    langid = {english}
+}
+
 @ONLINE{pushapi,
     title = {Push API},
     url = {https://developer.mozilla.org/en-US/docs/Web/API/Push_API},
@@ -611,8 +618,57 @@
 
 @ONLINE{mse,
     title = {MSE},
-    url = {https://developer.mozilla.org/en-US/docs/Web/API/Media_Source_Extensions_API/Transcoding_assets_for_MSE},
+    url = {https://www.w3.org/TR/media-source-2/},
     urldate = {2025-05-05},
+    langid = {english}
+}
+
+@ONLINE{os_percentage,
+    title = {Operating System Market Share Worldwide},
+    url = {https://gs.statcounter.com/os-market-share},
+    urldate = {2025-12-13},
+    langid = {english}
+}
+
+@ONLINE{packaging_def,
+    title = {Packaging explanation},
+    url = {https://shaka-project.github.io/shaka-packager/html/documentation.html},
+    urldate = {2025-12-13},
+    langid = {english}
+}
+
+@ONLINE{shaka_packager,
+    title = {Shaka Packager},
+    url = {https://shaka-project.github.io/shaka-packager/html/},
+    urldate = {2025-12-13},
+    langid = {english}
+}
+
+@ONLINE{cmaf,
+    title = {CMAF},
+    url = {https://developer.apple.com/documentation/http-live-streaming/about-the-common-media-application-format-with-http-live-streaming-hls},
+    urldate = {2025-12-13},
+    langid = {english}
+}
+
+@ONLINE{hls_vs_dash,
+    title = {Comparative Analysis of MPEG-DASH and HLS Protocols: Performance, Adaptation, and Future Directions in Adaptive Streaming},
+    url = {https://link.springer.com/article/10.1007/s40031-025-01244-x#Sec4},
+    urldate = {2025-05-05},
+    langid = {english}
+}
+
+@ONLINE{apple_hls_specs_flac_container,
+    title = {HTTP Live Streaming (HLS) authoring specification for Apple devices. Audio.},
+    url = {https://developer.apple.com/documentation/http-live-streaming/hls-authoring-specification-for-apple-devices#Audio},
+    urldate = {2025-12-13},
+    langid = {english}
+}
+
+@ONLINE{apple_hls_specs_audio,
+    title = {HTTP Live Streaming (HLS) authoring specification for Apple devices. Bitrate recommendations, section 2.25.},
+    url = {https://developer.apple.com/documentation/http-live-streaming/hls-authoring-specification-for-apple-devices#Bitrate-recommendations-for-Ambisonics-are-as-follows},
+    urldate = {2025-12-13},
     langid = {english}
 }
 
@@ -623,12 +679,41 @@
     langid = {english}
 }
 
+@ONLINE{flac_xiph,
+    title = {FLAC},
+    url = {https://xiph.org/flac/},
+    urldate = {2025-12-14},
+    langid = {english}
+}
+
+@ONLINE{aac,
+    title = {ISO/IEC 13818-7:2006 (AAC) },
+    url = {https://www.iso.org/standard/43345.html},
+    urldate = {2025-12-14},
+    langid = {english}
+}
+
+@ONLINE{mp3,
+    title = {ISO/IEC 11172-3:1993 (MP3(},
+    url = {https://www.iso.org/standard/22412.html},
+    urldate = {2025-12-14},
+    langid = {english}
+}
+
+@ONLINE{problems_with_ffmpeg_when_packaging,
+    title = {DIY Streaming Video 101},
+    url = {https://scottstuff.net/posts/2025/03/18/video-encoding-101/},
+    urldate = {2025-12-13},
+    langid = {english}
+}
+
 @ONLINE{ffmpeg,
     title = {FFMPEG},
     url = {https://ffmpeg.org/},
     urldate = {2025-05-05},
     langid = {english}
 }
+
 
 @ONLINE{ffmpegpython,
     title = {FFMPEG Python Library},
@@ -644,17 +729,24 @@
     langid = {english}
 }
 
-@ONLINE{libfdkaac,
-    title = {libfdkaac},
+@ONLINE{ffmpeg_libfdkaac,
+    title = {ffmpeg libfdkaac},
     url = {https://trac.ffmpeg.org/wiki/Encode/AAC},
     urldate = {2025-05-06},
     langid = {english}
 }
 
-@ONLINE{libopus,
-    title = {libopus},
-    url = {https://www.ffmpeg.org/ffmpeg-codecs.html#toc-opus},
-    urldate = {2025-05-06},
+@ONLINE{ffmpeg_flac,
+    title = {ffmpeg flac codec},
+    url = {https://ffmpeg.org/ffmpeg-codecs.html#toc-flac-2},
+    urldate = {2025-12-14},
+    langid = {english}
+}
+
+@ONLINE{moov,
+    title = {Movie atom ('moov')},
+    url = {https://developer.apple.com/documentation/quicktime-file-format/movie_atom},
+    urldate = {2025-12-14},
     langid = {english}
 }
 
@@ -679,17 +771,10 @@
     langid = {english}
 }
 
-@ONLINE{caniuseopus,
-    title = {Opus Availability},
-    url = {https://caniuse.com/opus},
-    urldate = {2025-05-06},
-    langid = {english}
-}
-
-@ONLINE{vialicensing,
+@ONLINE{vialicensing_aac,
     title = {Via Licensing},
-    url = {https://www.via-la.com/licensing/aac/},
-    urldate = {2025-05-06},
+    url = {https://via-la.com/licensing-programs/aac/#faqs},
+    urldate = {2025-12-14},
     langid = {english}
 }
 
@@ -709,9 +794,47 @@
 
 @ONLINE{cbrvbrcomp,
     title = {CBR vs VBR},
-    note = {The article explain bitrate adaptation methods for HTTP live streaming, however, it can be applied to the standard HTTP streaming as well},
     url = {https://ieeexplore.ieee.org/abstract/document/6774590},
     urldate = {2025-05-06},
+    langid = {english}
+}
+
+@ONLINE{mdn_aac,
+    title = {Web audio codec guide},
+    url = {hhttps://developer.mozilla.org/en-US/docs/Web/Media/Guides/Formats/Audio_codecs#aac_advanced_audio_coding},
+    urldate = {2025-12-14},
+    langid = {english}
+}
+
+@ONLINE{codec_evaluation_1,
+    title = {EBU Evaluations of Mutlichannel Audio Codecs},
+    url = {https://tech.ebu.ch/docs/tech/tech3324.pdf},
+    urldate = {2025-12-14},
+    langid = {english}
+}
+
+@ONLINE{codec_evaluation_2,
+    title = {Perceived Audio Quality for Streaming Stereo Music},
+    url = {https://dl.acm.org/doi/pdf/10.1145/2647868.2655025},
+    urldate = {2025-12-13},
+    langid = {english}
+}
+
+@ONLINE{codec_evaluation_3,
+    title = {BACHELOR THESIS
+Perceived Audio Quality in Ogg Vorbis
+and AAC in Compressed Popular Music in
+Bit Rates between 96 kbit/s, 128 kbit/s
+and 192 kbit/s},
+    url = {https://www.diva-portal.org/smash/get/diva2:1030609/FULLTEXT02.pdf},
+    urldate = {2025-12-14},
+    langid = {english}
+}
+
+@ONLINE{spotify_codecs,
+    title = {Spotify Audio Quality},
+    url = {https://support.spotify.com/cz/article/audio-quality/},
+    urldate = {2025-12-14},
     langid = {english}
 }
 
@@ -723,13 +846,6 @@
 }
 
 % TODO remove
-
-@ONLINE{simplejwt,
-    title = {simplejwt Package},
-    url = {https://django-rest-framework-simplejwt.readthedocs.io/en/latest/index.html},
-    urldate = {2025-05-07},
-    langid = {english}
-}
 
 @ONLINE{pythonmagic,
     title = {python-magic Package},
@@ -808,14 +924,7 @@
     langid = {english}
 }
 
-@ONLINE{eventsource,
-    title = {eventsource Package},
-    url = {https://www.npmjs.com/package/eventsource},
-    urldate = {2025-05-08},
-    langid = {english}
-}
-
-@ONLINE{shaka,
+@ONLINE{shaka_player,
     title = {Shaka Player},
     url = {https://github.com/shaka-project/shaka-player},
     urldate = {2025-05-08},

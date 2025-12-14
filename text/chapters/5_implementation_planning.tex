@@ -62,22 +62,14 @@ There are four main approaches used today: Basic Download, Progressive Download,
     in a compatible way, for example, corresponding parts of each track
     must cover the same playback time intervals and start at safe switching points.
 
-    \textbf{Segmented HTTP Streaming}\\
-    \footnote{
-        In its traditional usage, `Streaming' means real-time media
-        delivery over persistent transport protocols such as RTMP,
-        where the server sends data via UDP\@.
-        In this section, the term is used to refer to HTTP-based segmented
-        Streaming~(e.g., HLS, DASH), where the client fetches small parts of the file over HTTP\@.
-    }
-
+    \textbf{Segmented HTTP Streaming}\label{it:streaming}
     With Segmented HTTP Streaming, the audio file is first split into many small files (chunks),
     and a special manifest file is then generated that lists the chunks
-    and describes which time range each chunk covers.
+    and describes which time range each chunk covers.~\parencite{dash_technical}
     The client then downloads the individual chunks and uses them for playback instead
     of working with byte range requests for a single large file,
     as was the case with Progressive Download.
-    Since the manifest provides a mapping of chunks to audio time slots.~\parencite{dash_technical}
+    Since the manifest provides a mapping of chunks to audio time slots,
     this makes it possible to play the audio from any point and enables seeking.
 
     Moreover, the original audio file can first be encoded into multiple formats of different sizes.
@@ -90,7 +82,7 @@ There are four main approaches used today: Basic Download, Progressive Download,
     because the manifest provides a standardized way to describe multiple representations
     and their timing.
     It also simplifies retries and caching, since each chunk is fetched as a separate
-    HTTP resource and can be handled efficiently by standard HTTP caches and CDNs.
+    HTTP resource and can be handled efficiently by standard HTTP caches and CDNs.~\parencite{cdn_caching}
     Finally, the client logic becomes more straightforward: instead of computing byte
     ranges inside a large file, the player selects the next chunk from the manifest.
 
@@ -136,7 +128,7 @@ Token Authentication, and Third-Party Authentication~(OAuth2).
 
     The browser then usually caches those credentials after the first successful login and
     automatically attaches the header to subsequent requests.
-    \footnote{This is not usually clearly stated in the browser documentation.
+    \footnote{This is usually not clearly stated in the browser documentation.
     However, for example, in the case of Mozilla this is implied in bug tracker tickets and user
     documentation~\parencite{basic_auth_mozilla_bugtracker}~\parencite{basic_auth_mozilla_caching}. }
 

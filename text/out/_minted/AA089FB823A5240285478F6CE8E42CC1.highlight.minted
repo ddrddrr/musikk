@@ -1,0 +1,9 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+ffmpeg\PYG{+w}{ }\PYGZhy{}i\PYG{+w}{ }*input\PYG{+w}{ }file\PYG{+w}{ }path*
+\PYG{+w}{    }\PYGZhy{}vn\PYG{+w}{ }\PYGZhy{}sn\PYG{+w}{ }\PYGZhy{}dn
+\PYG{+w}{    }\PYGZhy{}c:a\PYG{+w}{ }*encoder*\PYG{+w}{ }*encoder\PYG{+w}{ }extras*
+\PYG{+w}{    }\PYGZhy{}b:a\PYG{+w}{ }*bitrate*
+\PYG{+w}{    }\PYGZhy{}movflags
+\PYG{+w}{    }+faststart
+\PYG{+w}{    }*resulting\PYG{+w}{ }file\PYG{+w}{ }path*
+\end{MintedVerbatim}
