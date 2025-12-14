@@ -18,9 +18,12 @@ export const NotificationBox = memo(function NotificationBox() {
 
     const unreadUUIDs = useMemo(() => {
         if (!data) return [];
-        const { replies = [] } = data;
+        const { replies = [], followers = [] } = data;
 
-        return [...replies.filter((n) => !n.is_read).map((n) => n.uuid)];
+        return [
+            ...replies.filter((n) => !n.is_read).map((n) => n.uuid),
+            ...followers.filter((n) => !n.is_read).map((n) => n.uuid),
+        ];
     }, [data]);
 
     async function handleOpenChange(open: boolean) {

@@ -17,6 +17,7 @@ from users.api.v1.serializers import (
 from users.models import BaseUser, UserFollow
 from users.permissions import IsSelfOrFriend
 from websockets.event_helpers import send_ws_event
+from notifications.models import FollowerNotification
 
 
 @ensure_csrf_cookie
@@ -108,9 +109,16 @@ class FollowedView(APIView):
 
     def post(self, *args, **kwargs):
         follow_user = get_object_or_404(BaseUser, uuid=kwargs["for_user_uuid"])
-        UserFollow.objects.get_or_create(
+        user_follow, created = UserFollow.objects.get_or_create(
             from_user=self.request.user, to_user=follow_user
         )
+
+        if created:
+            FollowerNotification.objects.create(
+                sender=self.request.user,
+                receiver=follow_user,
+            )
+
         # TODO: friends for both, followers for the other, followed for this
         send_ws_event(
             f"user_{self.request.user.uuid}",
@@ -135,6 +143,11 @@ class FollowedView(APIView):
             UserFollow, from_user=self.request.user, to_user=unfollow_user
         )
         user_connection.delete()
+
+        FollowerNotification.objects.filter(
+            sender=self.request.user,
+            receiver=unfollow_user,
+        ).delete()
 
         send_ws_event(
             f"user_{self.request.user.uuid}",

@@ -11,6 +11,7 @@ import {
 import { ProfileForm } from "@/modules/user/components/ProfileForm.tsx";
 import { UserAvatar } from "@/modules/user/components/UserAvatar.tsx";
 import { UserPosts } from "@/modules/user/components/UserPosts.tsx";
+import { useFollowUser } from "@/modules/user/hooks/useFollowUser.ts";
 import { fetchUser } from "@/modules/user/queries.ts";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
@@ -18,6 +19,8 @@ import { useParams } from "react-router-dom";
 export function ProfilePage() {
     const { uuid } = useParams<{ uuid: string }>();
     const currUserUUID = useUserUUID();
+    const { isFollowing, toggleFollow, isLoading: isFollowLoading } = useFollowUser(uuid);
+
     // TODO add handling if curr user uuid is undefined
     const {
         isLoading,
@@ -25,8 +28,11 @@ export function ProfilePage() {
         data: user,
     } = useQuery({
         queryKey: ["user", uuid],
-        queryFn: () => fetchUser(uuid),
+        queryFn: () => fetchUser(uuid!),
+        enabled: !!uuid,
     });
+
+    const isOwnProfile = currUserUUID === uuid;
 
     if (isLoading) {
         return <div className="p-8 text-center">Loading profile…</div>;
@@ -49,23 +55,36 @@ export function ProfilePage() {
                     <div className="text-sm text-muted-foreground mt-1 max-h-40 overflow-y-auto">
                         {user.bio}
                     </div>
-                    {currUserUUID === user.uuid && (
-                        <Dialog>
-                            <DialogTrigger asChild>
-                                <Button variant="outline" className="mt-4">
-                                    Edit Profile
-                                </Button>
-                            </DialogTrigger>
-                            <DialogContent>
-                                <DialogHeader>
-                                    <DialogTitle>Edit Profile</DialogTitle>
-                                    <DialogClose />
-                                </DialogHeader>
+                    <div className="mt-4 flex gap-2">
+                        {isOwnProfile && (
+                            <Dialog>
+                                <DialogTrigger asChild>
+                                    <Button variant="outline">Edit Profile</Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                    <DialogHeader>
+                                        <DialogTitle>Edit Profile</DialogTitle>
+                                        <DialogClose />
+                                    </DialogHeader>
 
-                                <ProfileForm />
-                            </DialogContent>
-                        </Dialog>
-                    )}
+                                    <ProfileForm />
+                                </DialogContent>
+                            </Dialog>
+                        )}
+                        {!isOwnProfile && (
+                            <Button
+                                variant={isFollowing ? "outline" : "brand"}
+                                onClick={toggleFollow}
+                                disabled={isFollowLoading}
+                            >
+                                {isFollowLoading
+                                    ? "Loading..."
+                                    : isFollowing
+                                      ? "Following"
+                                      : "Follow"}
+                            </Button>
+                        )}
+                    </div>
                 </div>
             </div>
             <div className="mt-8 w-full">

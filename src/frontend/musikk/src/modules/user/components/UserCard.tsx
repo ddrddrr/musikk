@@ -6,11 +6,9 @@ import {
     ContextMenuItem,
     ContextMenuTrigger,
 } from "@/modules/ui/context-menu.tsx";
-import { useFollowUserMutation, useUnfollowUserMutation } from "@/modules/user/mutations.tsx";
-import { UserConnectionsContext } from "@/modules/user/providers/userConnectionsContext.tsx";
+import { useFollowUser } from "@/modules/user/hooks/useFollowUser.ts";
 import { IUser } from "@/modules/user/types.ts";
 import { MoreHorizontal, Smile } from "lucide-react";
-import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 
 interface UserCardProps {
@@ -45,10 +43,8 @@ const sizeStyles = {
 
 export function UserCard({ user, size = "medium", onClick }: UserCardProps) {
     const navigate = useNavigate();
-    const followUserMutation = useFollowUserMutation();
-    const unfollowUserMutation = useUnfollowUserMutation();
     const myUuid = useUserUUID();
-    const { followed } = useContext(UserConnectionsContext);
+    const { isFollowing, toggleFollow } = useFollowUser(user.uuid);
 
     const styles = sizeStyles[size];
     const { avatar, display_name } = user;
@@ -58,16 +54,6 @@ export function UserCard({ user, size = "medium", onClick }: UserCardProps) {
             onClick(u);
         } else {
             navigate(`/users/${u.uuid}`);
-        }
-    }
-
-    const isFollowing = followed.map((f) => f.uuid).includes(user.uuid);
-
-    function handleToggleFollow() {
-        if (isFollowing) {
-            unfollowUserMutation.mutate(user.uuid);
-        } else {
-            followUserMutation.mutate(user.uuid);
         }
     }
 
@@ -106,7 +92,7 @@ export function UserCard({ user, size = "medium", onClick }: UserCardProps) {
             </ContextMenuTrigger>
             {!!myUuid && user.uuid !== myUuid && (
                 <ContextMenuContent panel="card" className="w-48">
-                    <ContextMenuItem onSelect={handleToggleFollow}>
+                    <ContextMenuItem onSelect={toggleFollow}>
                         <MoreHorizontal className="w-4 h-4 mr-2" />
                         {isFollowing ? "Unfollow" : "Follow"}
                     </ContextMenuItem>

@@ -7,6 +7,7 @@ from rest_framework import status
 
 from notifications.api.v1.serializers import (
     ReplyNotificationSerializer,
+    FollowerNotificationSerializer,
 )
 from notifications.models import (
     ReplyNotification,
@@ -23,7 +24,10 @@ class NotificationsPersonalListUpdateView(GenericAPIView):
         replies = ReplyNotificationSerializer(
             ReplyNotification.objects.filter(orig_publication__author=user), many=True
         ).data
-        return Response({"replies": replies})
+        followers = FollowerNotificationSerializer(
+            FollowerNotification.objects.filter(receiver=user), many=True
+        ).data
+        return Response({"replies": replies, "followers": followers})
 
     def patch(self, request, *args, **kwargs):
         notif_uuids = self.request.data["uuids"]
