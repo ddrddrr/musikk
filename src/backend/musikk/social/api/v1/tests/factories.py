@@ -9,32 +9,41 @@ from users.tests.factories import BaseUserFactory
 fake = factory.Faker
 
 
-class PublicationFactory(BaseModelFactory):
+class UserContentFactory(BaseModelFactory):
+    author = SubFactory(BaseUserFactory)
+    content = fake("paragraph", nb_sentences=2)
+    is_deleted = False
+
+    class Meta:
+        abstract = True
+
+
+class PublicationFactory(UserContentFactory):
     class Meta:
         model = Publication
 
-    author = SubFactory(BaseUserFactory)
-    content = fake("paragraph", nb_sentences=2)
     parent = None
-    is_deleted = False
-
     created_for_object = SubFactory(CollectionFactory)
+    attachment_object = None
 
     @classmethod
     def _create(cls, model_class, *args, **kwargs):
-        """Override create to handle GenericForeignKey."""
         parent = kwargs.pop("parent", None)
         created_for_object = kwargs.pop("created_for_object", None)
         attachment_object = kwargs.pop("attachment_object", None)
 
         instance = model_class(**kwargs)
 
-        if created_for_object:
-            instance.created_for_object = created_for_object
-        if attachment_object:
-            instance.attachment_object = attachment_object
         if parent:
             instance.parent = parent
-            
+            if not created_for_object:
+                created_for_object = parent.get_root().created_for_object
+
+        if created_for_object:
+            instance.created_for_object = created_for_object
+
+        if attachment_object:
+            instance.attachment_object = attachment_object
+
         instance.save()
         return instance

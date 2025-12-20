@@ -1,8 +1,7 @@
 from django.contrib.contenttypes.models import ContentType
-from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
-from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from social.api.v1.filters import PublicationFilter
 from social.api.v1.serializers import (
@@ -10,34 +9,35 @@ from social.api.v1.serializers import (
     PublicationRetrieveSerializer,
     PublicationRetrieveWithChildrenSerializer,
 )
-from social.api.v1.type_to_model_maps import CREATED_FOR_TYPE_TO_MODEL_MAP
+from social.api.v1.type_model_maps import (
+    CREATED_FOR_RESOLVER,
+    UnknownTypeError,
+    ObjectDoesNotExistError,
+    InvalidRefError,
+    TypeToModelError,
+)
 from social.models import Publication
 from users.models import BaseUser
 from websockets.event_helpers import send_ws_event
 
 
 class PublicationListCreateForObjView(APIView):
-    # TODO: proper access rights
     def get(self, request, obj_type, obj_uuid, *args, **kwargs):
-        related_model = CREATED_FOR_TYPE_TO_MODEL_MAP.get(obj_type)
-        if not related_model:
-            return Response(
-                {"detail": f"Unknown object type for Publication list: {obj_type}."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
         try:
-            target_obj = related_model.objects.get(uuid=obj_uuid)
-        except related_model.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            created_for_obj = CREATED_FOR_RESOLVER.resolve_model_instance(
+                {"type": obj_type, "uuid": str(obj_uuid)}
+            )
+        except (UnknownTypeError, InvalidRefError, TypeToModelError) as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except ObjectDoesNotExistError as e:
+            return Response({"detail": str(e)}, status=status.HTTP_404_NOT_FOUND)
 
-        content_type = ContentType.objects.get_for_model(related_model)
-        # TODO is this valid?
+        content_type = ContentType.objects.get_for_model(created_for_obj.__class__)
         if request.query_params.get("with_children"):
             queryset = (
                 Publication.objects.filter(
                     created_for_type=content_type,
-                    created_for_id=target_obj.pk,
+                    created_for_id=created_for_obj.pk,
                     parent__isnull=True,
                 )
                 .select_related("author")
@@ -47,7 +47,7 @@ class PublicationListCreateForObjView(APIView):
         else:
             queryset = Publication.objects.filter(
                 created_for_type=content_type,
-                created_for_id=target_obj.pk,
+                created_for_id=created_for_obj.pk,
             ).select_related("author")
             serializer = PublicationRetrieveSerializer
 
@@ -55,22 +55,23 @@ class PublicationListCreateForObjView(APIView):
         return Response(status=status.HTTP_200_OK, data=sz_instance.data)
 
     def post(self, request, *args, **kwargs):
-        data = request.data.copy()
-        # TODO: add logic for post creation for other users (make it impossible, only replies should be allowed)
         serializer = PublicationCreateSerializer(
-            data=data, context={"request": request}
+            data=request.data, context={"request": request}
         )
         serializer.is_valid(raise_exception=True)
         obj = serializer.save()
 
-        if obj.content_object:
+        if created_for := serializer.validated_data.get("created_for"):
+            created_for_ref = CREATED_FOR_RESOLVER.get_model_instance_representation(
+                created_for
+            )
             send_ws_event(
                 f"user_{request.user.uuid}",
                 event_name="invalidate.query",
                 query_key=[
                     "publications",
-                    str(data["obj_type"]),
-                    str(data["obj_uuid"]),
+                    created_for_ref["type"],
+                    created_for_ref["uuid"],
                 ],
             )
 
@@ -84,7 +85,6 @@ class PublicationListCreateForObjView(APIView):
         )
 
 
-# TODO: rewrite with filters and new pagination class
 class PublicationFeedLatestView(APIView):
     def get(self, request, *args, **kwargs):
         queryset = Publication.objects.all()
@@ -101,5 +101,4 @@ class PublicationFeedLatestView(APIView):
         serializer = PublicationRetrieveSerializer(
             filtered_qs, many=True, context={"request": request}
         )
-
         return Response(status=status.HTTP_200_OK, data=serializer.data)

@@ -11,7 +11,7 @@ class UserContent(BaseModel):
         null=True,
         related_name="content_objects",
     )
-    content = models.CharField(max_length=255)
+    content = models.CharField(max_length=2000)
     is_deleted = models.BooleanField(default=False)
 
     class Meta:

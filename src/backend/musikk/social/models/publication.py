@@ -18,7 +18,8 @@ class Publication(UserContent):
     created_for_type = models.ForeignKey(
         ContentType,
         on_delete=models.CASCADE,
-        help_text="The model for which this Publication is created. Can be SongCollection or User (as in user feed) etc.",
+        help_text="The model for which this Publication is created. "
+        "Can be SongCollection or User (as in user feed), etc.",
     )
     created_for_id = models.PositiveIntegerField()
     created_for_object = GenericForeignKey("created_for_type", "created_for_id")

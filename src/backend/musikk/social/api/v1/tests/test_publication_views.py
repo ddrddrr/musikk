@@ -7,13 +7,12 @@ from notifications.models import ReplyNotification
 from social.api.v1.tests.factories import PublicationFactory
 from social.api.v1.views import PublicationListCreateForObjView
 from social.models import Publication
-from streaming.tests.factories import CollectionFactory
+from streaming.tests.factories import CollectionFactory, CollectionSongFactory
 from users.tests.factories import BaseUserFactory
 
 fake = Faker()
 
 
-# TODO: rewrite based on the new models
 class TestPublicationListCreateForObjView(TestCase):
     @classmethod
     def setUpClass(cls):
@@ -22,27 +21,44 @@ class TestPublicationListCreateForObjView(TestCase):
 
     def setUp(self):
         self.user = BaseUserFactory()
+        self.other_user = BaseUserFactory()
         self.collection = CollectionFactory()
+        self.other_collection = CollectionFactory()
+
+    def _post(self, obj_type: str, obj_uuid: str, payload: dict, user=None):
+        url = reverse(
+            "api:publication-create-list-for-obj",
+            kwargs={"obj_type": obj_type, "obj_uuid": obj_uuid},
+        )
+        request = self.factory.post(url, payload, format="json")
+        if user is not None:
+            force_authenticate(request, user=user)
+        return PublicationListCreateForObjView.as_view()(
+            request, obj_type=obj_type, obj_uuid=obj_uuid
+        )
+
+    def _get(
+        self, obj_type: str, obj_uuid: str, user=None, with_children: bool = False
+    ):
+        url = reverse(
+            "api:publication-create-list-for-obj",
+            kwargs={"obj_type": obj_type, "obj_uuid": obj_uuid},
+        )
+        if with_children:
+            url = f"{url}?with_children=1"
+        request = self.factory.get(url)
+        if user is not None:
+            force_authenticate(request, user=user)
+        return PublicationListCreateForObjView.as_view()(
+            request, obj_type=obj_type, obj_uuid=obj_uuid
+        )
 
     def test_get_publications_list(self):
         publications = PublicationFactory.create_batch(
             3, author=self.user, created_for_object=self.collection
         )
 
-        url = reverse(
-            "api:publication-create-list-for-obj",
-            kwargs={
-                "obj_type": "collection",
-                "obj_uuid": str(self.collection.uuid),
-            },
-        )
-        request = self.factory.get(url)
-        force_authenticate(request, user=self.user)
-        response = PublicationListCreateForObjView.as_view()(
-            request,
-            obj_type="collection",
-            obj_uuid=str(self.collection.uuid),
-        )
+        response = self._get("collection", str(self.collection.uuid), user=self.user)
 
         self.assertEqual(response.status_code, 200)
         self.assertIsInstance(response.data, list)
@@ -57,148 +73,139 @@ class TestPublicationListCreateForObjView(TestCase):
             self.assertIn("author", item)
             self.assertIn("content", item)
             self.assertIn("is_deleted", item)
-            self.assertIn("obj_type", item)
-            self.assertIn("obj_uuid", item)
-            self.assertIn("attachment_type", item)
-            self.assertIn("attachment_uuid", item)
+            self.assertIn("created_for", item)
+            self.assertIn("attachment", item)
             self.assertIn("parent_uuid", item)
 
     def test_create_publication_requires_authentication(self):
-        url = reverse(
-            "api:publication-create-list-for-obj",
-            kwargs={
-                "obj_type": "collection",
-                "obj_uuid": str(self.collection.uuid),
-            },
-        )
         payload = {
             "content": fake.paragraph(nb_sentences=2),
-            "obj_type": "collection",
-            "obj_uuid": str(self.collection.uuid),
+            "created_for": {"type": "collection", "uuid": str(self.collection.uuid)},
         }
-        request = self.factory.post(url, payload, format="json")
-        response = PublicationListCreateForObjView.as_view()(
-            request,
-            obj_type="collection",
-            obj_uuid=str(self.collection.uuid),
+        response = self._post(
+            "collection", str(self.collection.uuid), payload, user=None
         )
-
         self.assertEqual(response.status_code, 403)
 
-    def test_create_publication_with_valid_data(self):
-        url = reverse(
-            "api:publication-create-list-for-obj",
-            kwargs={
-                "obj_type": "collection",
-                "obj_uuid": str(self.collection.uuid),
-            },
-        )
-        payload = {
-            "content": fake.paragraph(nb_sentences=2),
-            "obj_type": "collection",
-            "obj_uuid": str(self.collection.uuid),
-        }
-        request = self.factory.post(url, payload, format="json")
-        force_authenticate(request, user=self.user)
-        response = PublicationListCreateForObjView.as_view()(
-            request,
-            obj_type="collection",
-            obj_uuid=str(self.collection.uuid),
-        )
+    def test_root_publication_creation_for_all_created_for_types(self):
+        cases = [
+            ("collection", self.collection),
+            ("feed", self.user),
+        ]
 
-        self.assertEqual(response.status_code, 201, repr(response.data))
-        self.assertIn("publication", response.data)
+        for type_key, target_obj in cases:
+            payload = {
+                "content": fake.paragraph(nb_sentences=2),
+                "created_for": {"type": type_key, "uuid": str(target_obj.uuid)},
+            }
+            response = self._post(
+                type_key, str(target_obj.uuid), payload, user=self.user
+            )
 
-        publication_data = response.data["publication"]
-        self.assertEqual(publication_data["content"], payload["content"])
-        self.assertEqual(publication_data["obj_type"], "collection")
-        self.assertEqual(publication_data["obj_uuid"], str(self.collection.uuid))
+            self.assertEqual(response.status_code, 201, repr(response.data))
+            pub = response.data["publication"]
 
-        publication = Publication.objects.get(uuid=publication_data["uuid"])
-        self.assertEqual(publication.content, payload["content"])
-        self.assertEqual(publication.author, self.user)
-        self.assertEqual(publication.created_for_object, self.collection)
+            self.assertEqual(pub["content"], payload["content"])
+            self.assertEqual(pub["created_for"]["type"], type_key)
+            self.assertEqual(pub["created_for"]["uuid"], str(target_obj.uuid))
+            self.assertIsNone(pub["parent_uuid"])
 
-    def test_create_publication_with_parent_creates_notification(self):
-        parent_publication = PublicationFactory(
+            db_pub = Publication.objects.get(uuid=pub["uuid"])
+            self.assertEqual(db_pub.author, self.user)
+            self.assertEqual(db_pub.created_for_object.uuid, target_obj.uuid)
+
+    def test_publication_creation_with_attachment_for_all_attachment_types(self):
+        attachment_cases = [
+            ("collection", self.other_collection),
+            ("user", self.other_user),
+            ("song", CollectionSongFactory()),
+        ]
+
+        for attachment_type, attachment_obj in attachment_cases:
+            payload = {
+                "content": fake.paragraph(nb_sentences=2),
+                "created_for": {
+                    "type": "collection",
+                    "uuid": str(self.collection.uuid),
+                },
+                "attachment": {
+                    "type": attachment_type,
+                    "uuid": str(attachment_obj.uuid),
+                },
+            }
+
+            response = self._post(
+                "collection", str(self.collection.uuid), payload, user=self.user
+            )
+            self.assertEqual(response.status_code, 201, repr(response.data))
+
+            pub = response.data["publication"]
+            self.assertEqual(pub["attachment"]["type"], attachment_type)
+            self.assertEqual(pub["attachment"]["uuid"], str(attachment_obj.uuid))
+
+            db_pub = Publication.objects.get(uuid=pub["uuid"])
+            self.assertIsNotNone(db_pub.attachment_object)
+            self.assertEqual(db_pub.attachment_object.uuid, attachment_obj.uuid)
+
+    def test_created_for_inherited_from_root_when_reply_omits_created_for(self):
+        parent = PublicationFactory(
             author=self.user, created_for_object=self.collection
         )
 
-        url = reverse(
-            "api:publication-create-list-for-obj",
-            kwargs={
-                "obj_type": "collection",
-                "obj_uuid": str(self.collection.uuid),
-            },
-        )
         payload = {
             "content": fake.paragraph(nb_sentences=2),
-            "obj_type": "collection",
-            "obj_uuid": str(self.collection.uuid),
-            "parent_uuid": str(parent_publication.uuid),
+            "parent_uuid": str(parent.uuid),
+            # created_for omitted intentionally
         }
-        request = self.factory.post(url, payload, format="json")
-        force_authenticate(request, user=self.user)
 
         self.assertEqual(ReplyNotification.objects.count(), 0)
 
-        response = PublicationListCreateForObjView.as_view()(
-            request,
-            obj_type="collection",
-            obj_uuid=str(self.collection.uuid),
+        response = self._post(
+            "collection", str(self.collection.uuid), payload, user=self.user
         )
-
         self.assertEqual(response.status_code, 201, repr(response.data))
 
-        self.assertEqual(ReplyNotification.objects.count(), 1)
-        notification = ReplyNotification.objects.first()
-        self.assertEqual(notification.orig_publication, parent_publication)
-        self.assertEqual(
-            str(notification.reply_publication.uuid),
-            response.data["publication"]["uuid"],
-        )
+        pub = response.data["publication"]
+        self.assertEqual(pub["created_for"]["type"], "collection")
+        self.assertEqual(pub["created_for"]["uuid"], str(self.collection.uuid))
+        self.assertEqual(pub["parent_uuid"], str(parent.uuid))
 
-    def test_create_publication_missing_obj_type_returns_400(self):
-        url = reverse(
-            "api:publication-create-list-for-obj",
-            kwargs={
-                "obj_type": "collection",
-                "obj_uuid": str(self.collection.uuid),
-            },
-        )
+        db_pub = Publication.objects.get(uuid=pub["uuid"])
+        self.assertEqual(db_pub.parent.uuid, parent.uuid)
+        self.assertEqual(db_pub.created_for_object.uuid, self.collection.uuid)
+
+        self.assertEqual(ReplyNotification.objects.count(), 1)
+        n = ReplyNotification.objects.first()
+        self.assertEqual(n.orig_publication, parent)
+        self.assertEqual(n.reply_publication.uuid, db_pub.uuid)
+
+    def test_failure_when_created_for_type_is_wrong(self):
         payload = {
             "content": fake.paragraph(nb_sentences=2),
-            "obj_uuid": str(self.collection.uuid),
+            "created_for": {"type": "nope", "uuid": str(self.collection.uuid)},
         }
-        request = self.factory.post(url, payload, format="json")
-        force_authenticate(request, user=self.user)
-        response = PublicationListCreateForObjView.as_view()(
-            request,
-            obj_type="collection",
-            obj_uuid=str(self.collection.uuid),
+        response = self._post(
+            "collection", str(self.collection.uuid), payload, user=self.user
         )
-
         self.assertEqual(response.status_code, 400)
 
-    def test_create_publication_invalid_obj_type_returns_400(self):
-        url = reverse(
-            "api:publication-create-list-for-obj",
-            kwargs={
-                "obj_type": "collection",
-                "obj_uuid": str(self.collection.uuid),
-            },
-        )
+    def test_failure_when_attachment_type_is_wrong(self):
         payload = {
             "content": fake.paragraph(nb_sentences=2),
-            "obj_type": "invalid_type",
-            "obj_uuid": str(self.collection.uuid),
+            "created_for": {"type": "collection", "uuid": str(self.collection.uuid)},
+            "attachment": {"type": "nope", "uuid": str(self.collection.uuid)},
         }
-        request = self.factory.post(url, payload, format="json")
-        force_authenticate(request, user=self.user)
-        response = PublicationListCreateForObjView.as_view()(
-            request,
-            obj_type="collection",
-            obj_uuid=str(self.collection.uuid),
+        response = self._post(
+            "collection", str(self.collection.uuid), payload, user=self.user
         )
+        self.assertEqual(response.status_code, 400)
 
+    def test_failure_when_top_level_publication_omits_created_for(self):
+        payload = {
+            "content": fake.paragraph(nb_sentences=2),
+            # created_for omitted and no parent
+        }
+        response = self._post(
+            "collection", str(self.collection.uuid), payload, user=self.user
+        )
         self.assertEqual(response.status_code, 400)

@@ -1,25 +1,20 @@
 from rest_framework import serializers
 
 from base.serializers import BaseModelSerializer
-from social.api.v1.type_to_model_maps import (
-    CREATED_FOR_TYPE_TO_MODEL_MAP,
-    ATTACHMENT_TYPE_TO_MODEL_MAP,
-)
+from social.api.v1.type_model_maps import CREATED_FOR_RESOLVER, ATTACHMENT_RESOLVER
+from social.api.v1.fields import TypeModelRefField
 from social.models import Publication
-from streaming.api.v1.serializers.collections import CollectionSerializerBasic
-from streaming.api.v1.serializers.songs import CollectionSongSerializer
 from users.api.v1.serializers import BaseUserSerializer
 
 
 class PublicationCreateSerializer(BaseModelSerializer):
     author = serializers.HiddenField(default=serializers.CurrentUserDefault())
-    obj_type = serializers.CharField(write_only=True, required=False, allow_null=True)
-    obj_uuid = serializers.UUIDField(write_only=True, required=False, allow_null=True)
-    attachment_type = serializers.CharField(
-        write_only=True, allow_null=True, required=False
+
+    created_for = TypeModelRefField(
+        resolver=CREATED_FOR_RESOLVER, write_only=True, required=False, allow_null=True
     )
-    attachment_uuid = serializers.UUIDField(
-        write_only=True, allow_null=True, required=False
+    attachment = TypeModelRefField(
+        resolver=ATTACHMENT_RESOLVER, write_only=True, required=False, allow_null=True
     )
     parent_uuid = serializers.UUIDField(
         write_only=True, required=False, allow_null=True
@@ -30,107 +25,49 @@ class PublicationCreateSerializer(BaseModelSerializer):
         fields = BaseModelSerializer.Meta.fields + [
             "author",
             "content",
-            "obj_type",
-            "obj_uuid",
-            "attachment_type",
-            "attachment_uuid",
+            "created_for",
+            "attachment",
             "parent_uuid",
         ]
 
     def create(self, validated_data):
-        obj_type = validated_data.pop("obj_type", None)
-        obj_uuid = validated_data.pop("obj_uuid", None)
+        parent = None
         parent_uuid = validated_data.pop("parent_uuid", None)
+        if parent_uuid:
+            try:
+                parent = Publication.objects.get(uuid=parent_uuid)
+            except Publication.DoesNotExist:
+                raise serializers.ValidationError(
+                    {
+                        "parent_uuid": f"Parent publication does not exist: {parent_uuid}."
+                    }
+                )
 
-        parent = self._get_parent(parent_uuid)
-        created_for_obj = self._get_created_for_object(parent, obj_type, obj_uuid)
-
-        attachment_type = validated_data.pop("attachment_type", None)
-        attachment_uuid = validated_data.pop("attachment_uuid", None)
-        attachment_object = self._get_attachment_object(
-            attachment_type, attachment_uuid
-        )
+        if not (created_for_obj := validated_data.pop("created_for", None)):
+            if not parent_uuid:
+                raise serializers.ValidationError(
+                    {"created_for": "Required for root publications."}
+                )
+            created_for_obj = parent.get_root().created_for_object
 
         return Publication.objects.create(
             parent=parent,
             created_for_object=created_for_obj,
-            attachment_object=attachment_object,
+            attachment_object=validated_data.pop("attachment", None),
             **validated_data,
         )
 
-    def _get_parent(self, parent_uuid):
-        if not parent_uuid:
-            return None
 
-        try:
-            return Publication.objects.get(uuid=parent_uuid)
-        except Publication.DoesNotExist:
-            raise serializers.ValidationError(
-                f"Parent publication does not exist: {parent_uuid}."
-            )
-
-    def _get_created_for_object(self, parent, obj_type, obj_uuid):
-        # inherit from root when replying and target is not explicitly provided
-        if parent and (not obj_type or not obj_uuid):
-            root_publication = parent.get_root()
-            return root_publication.created_for_object
-
-        if not obj_type or not obj_uuid:
-            raise serializers.ValidationError(
-                "Both 'obj_type' and 'obj_uuid' must be provided when creating a top-level publication."
-            )
-
-        related_model = CREATED_FOR_TYPE_TO_MODEL_MAP.get(obj_type)
-        if not related_model:
-            raise serializers.ValidationError(
-                f"Unknown object type for `Publication` creation: {obj_type}."
-            )
-
-        try:
-            return related_model.objects.get(uuid=obj_uuid)
-        except related_model.DoesNotExist:
-            raise serializers.ValidationError(
-                f"Object for `Publication` creation does not exist: {obj_type} {obj_uuid}."
-            )
-
-    def _get_attachment_object(self, attachment_type, attachment_uuid):
-        if not attachment_type and not attachment_uuid:
-            return None
-
-        if (not attachment_type and attachment_uuid) or (
-            attachment_type and not attachment_uuid
-        ):
-            raise serializers.ValidationError(
-                [
-                    "Either provide both `attachment_type` and `attachment_uuid` or do not provide neither."
-                ]
-            )
-
-        attachment_model = ATTACHMENT_TYPE_TO_MODEL_MAP.get(attachment_type)
-        if not attachment_model:
-            raise serializers.ValidationError(
-                f"Unknown attachment type for `Publication` creation: {attachment_type}."
-            )
-
-        try:
-            return attachment_model.objects.get(uuid=attachment_uuid)
-        except attachment_model.DoesNotExist:
-            raise serializers.ValidationError(
-                [
-                    f"Attachment object does not exist: "
-                    f"{attachment_type} {attachment_uuid}."
-                ]
-            )
-
-
-# TODO add root_author_uuid
 class PublicationRetrieveSerializer(BaseModelSerializer):
     author = BaseUserSerializer(read_only=True)
     root_author_uuid = serializers.UUIDField(read_only=True)
-    obj_type = serializers.SerializerMethodField(allow_null=True, read_only=True)
-    obj_uuid = serializers.SerializerMethodField(allow_null=True, read_only=True)
-    attachment_type = serializers.SerializerMethodField(allow_null=True, read_only=True)
-    attachment = serializers.SerializerMethodField(allow_null=True, read_only=True)
+
+    created_for = TypeModelRefField(
+        resolver=CREATED_FOR_RESOLVER, read_only=True, source="created_for_object"
+    )
+    attachment = TypeModelRefField(
+        resolver=ATTACHMENT_RESOLVER, read_only=True, source="attachment_object"
+    )
     parent_uuid = serializers.SerializerMethodField(allow_null=True, read_only=True)
 
     class Meta(BaseModelSerializer.Meta):
@@ -141,49 +78,13 @@ class PublicationRetrieveSerializer(BaseModelSerializer):
             "content",
             "parent_uuid",
             "is_deleted",
-            "obj_type",
-            "obj_uuid",
-            "attachment_type",
+            "created_for",
             "attachment",
         ]
 
     def get_root_author_uuid(self, obj):
-        return obj.get_root().author.uuid
-
-    def get_obj_type(self, obj):
-        obj_type = obj.created_for_type.model_class()
-        for k, v in CREATED_FOR_TYPE_TO_MODEL_MAP.items():
-            if v == obj_type:
-                return k
-        assert False, f"The related class for Publication does not exist: {obj_type}"
-
-    def get_obj_uuid(self, obj):
-        return str(obj.created_for_object.uuid)
-
-    def get_attachment_type(self, obj):
-        if not obj.attachment_type:
-            return None
-        attachment_type = obj.attachment_type.model_class()
-        for k, v in ATTACHMENT_TYPE_TO_MODEL_MAP.items():
-            if v == attachment_type:
-                return k
-        assert False, f"The related Attachment class does not exist {attachment_type}"
-
-    def get_attachment(self, obj):
-        if not obj.attachment_object:
-            return None
-
-        match self.get_attachment_type(obj):
-            case "song":
-                return CollectionSongSerializer(
-                    obj.attachment_object, context=self.context
-                ).data
-            case "collection":
-                return CollectionSerializerBasic(
-                    obj.attachment_object, context=self.context
-                ).data
-            case _:
-                assert False, f"Unknown attachment type"
+        root = obj.get_root()
+        return root.author.uuid if root.author else None
 
     def get_parent_uuid(self, obj):
         return str(obj.parent.uuid) if obj.parent else None
