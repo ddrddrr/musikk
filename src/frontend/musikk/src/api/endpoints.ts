@@ -1,5 +1,5 @@
 import { UUID } from "@/api/types.ts";
-import { PublicationForType } from "@/modules/publications/types.ts";
+import { PublicationForType } from "@/features/publications/types.ts";
 
 export const WebsocketURLs = {
     userChannel: "/ws/user",
