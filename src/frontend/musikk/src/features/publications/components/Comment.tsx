@@ -1,11 +1,11 @@
-import { IPublication } from "@/features/publications/types.ts";
+import { Publication } from "@/features/publications/types.ts";
 import { UserIdentifier } from "@/features/user/components/UserIdentifier.tsx";
 
 interface CommentProps {
-    comment: IPublication;
-    setReplyTo: (comment: IPublication) => void;
+    comment: Publication;
+    setReplyTo: (comment: Publication) => void;
     repliedTo?: boolean;
-    parent?: IPublication;
+    parent?: Publication;
 }
 
 export function Comment({ comment, setReplyTo, repliedTo, parent }: CommentProps) {

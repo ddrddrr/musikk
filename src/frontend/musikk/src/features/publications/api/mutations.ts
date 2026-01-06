@@ -23,8 +23,6 @@ export async function publicationCreate({
 }: IPublicationCreateParams) {
     await api_client.post(PublicationURLs.publicationCreate(obj_type, obj_uuid), {
         content,
-        obj_type,
-        obj_uuid,
         attachment_type,
         attachment_uuid,
         parent_uuid,

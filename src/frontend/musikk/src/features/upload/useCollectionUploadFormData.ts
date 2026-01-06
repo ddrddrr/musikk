@@ -1,7 +1,11 @@
 import type { UUID } from "@/api/types";
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID";
 import { createCollection, createSong } from "@/features/upload/mutations";
-import type { CreateState, StatusByUUId, UploadEventPayload } from "@/features/upload/ws/eventHooks";
+import type {
+    CreateState,
+    StatusByUUId,
+    UploadEventPayload,
+} from "@/features/upload/ws/eventHooks";
 import { useSongUploadEvent } from "@/features/upload/ws/eventHooks";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -18,11 +22,11 @@ type SubmitStatus = "idle" | "submitting" | "success" | "error";
 type SubmitState = { status: SubmitStatus; message?: string; resetIn?: number };
 
 const DEFAULT_VALUES: CollectionUploadFormValues = {
-    title: "",
+    titleSize: "",
     private: false,
     description: "",
     image: undefined,
-    songs: [{ title: "", description: "", audio: new File([], ""), image: undefined }],
+    songs: [{ titleSize: "", description: "", audio: new File([], ""), image: undefined }],
 };
 
 export function useCollectionUploadFormData() {
@@ -96,9 +100,7 @@ export function useCollectionUploadFormData() {
 
     const removeSong = useCallback(
         (i: number, fieldId: string) => {
-            const uuid =
-                (form.getValues(`songs.${i}.uuid`) as UUID | undefined) ??
-                (songs?.[i]?.uuid as UUID | undefined);
+            const uuid = form.getValues(`songs.${i}.uuid`) ?? songs?.[i]?.uuid;
 
             clearUuidStatus(uuid);
             clearFieldCreateState(fieldId);
@@ -108,7 +110,7 @@ export function useCollectionUploadFormData() {
     );
 
     const appendSong = useCallback(() => {
-        append({ title: "", description: "", audio: new File([], ""), image: undefined });
+        append({ titleSize: "", description: "", audio: new File([], ""), image: undefined });
     }, [append]);
 
     const uploadSongs = useCallback(
@@ -126,7 +128,7 @@ export function useCollectionUploadFormData() {
                 if (!fieldId) throw { i, fieldId: "unknown", error: new Error("missing fieldId") };
 
                 try {
-                    if (song.uuid) return { i, fieldId, uuid: song.uuid as UUID };
+                    if (song.uuid) return { i, fieldId, uuid: song.uuid };
                     const { uuid } = await createSong(song);
                     return { i, fieldId, uuid: uuid as UUID };
                 } catch (error) {
@@ -213,12 +215,12 @@ export function useCollectionUploadFormData() {
             }
 
             try {
-                const songUuids = parsed.data.songs.map((s) => s.uuid!) as UUID[];
+                const songUuids = parsed.data.songs.map((s) => s.uuid!);
 
                 await createCollection({
                     type: "album",
                     private: parsed.data.private,
-                    title: parsed.data.title,
+                    titleSize: parsed.data.titleSize,
                     description: parsed.data.description,
                     image: parsed.data.image,
                     authors: [userUUID],

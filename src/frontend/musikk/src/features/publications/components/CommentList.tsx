@@ -1,10 +1,10 @@
 import { Comment } from "@/features/publications/components/Comment.tsx";
-import { IPublication } from "@/features/publications/types.ts";
+import { Publication } from "@/features/publications/types.ts";
 
 interface CommentListProps {
-    comments: IPublication[];
-    replyTo?: IPublication;
-    setReplyTo: (comment: IPublication) => void;
+    comments: Publication[];
+    replyTo?: Publication;
+    setReplyTo: (comment: Publication) => void;
 }
 
 export function CommentList({ comments, replyTo, setReplyTo }: CommentListProps) {

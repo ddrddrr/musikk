@@ -50,6 +50,7 @@ export const PublicationURLs = {
         `/publications/${objType}/${objUUID}`,
     publicationCreate: (objType: PublicationForType, objUUID: UUID) =>
         `/publications/${objType}/${objUUID}`,
+    publicationsRetrieve: (pubUUID: UUID) => `/publications/${pubUUID}`,
     publicationFeedLatest: `/publications/feed/latest`,
 };
 export const NotificationURLs = {

@@ -11,7 +11,7 @@ import { Collection } from "@/features/song-collections/types.ts";
 import { SongCard } from "@/features/songs/components/SongCard.tsx";
 import { SongContainer } from "@/features/songs/components/SongContainer.tsx";
 import { UserCard } from "@/features/user/components/UserCard.tsx";
-import { IUser } from "@/features/user/types.ts";
+import { BaseUser } from "@/features/user/types.ts";
 
 const QUERY_TIMEOUT = 300;
 
@@ -63,7 +63,7 @@ export function SearchWindow({ onItemSelect, songMode = "card" }: SearchWindowPr
                                 key={song.uuid}
                                 collectionSong={song}
                                 size="compact"
-                                className={onClick ? "cursor-pointer" : ""}
+                                extraStyle={onClick ? "cursor-pointer" : ""}
                             />
                         ) : (
                             <SongCard
@@ -109,7 +109,7 @@ export function SearchWindow({ onItemSelect, songMode = "card" }: SearchWindowPr
         );
     };
 
-    const renderUsers = (label: string, items: IUser[]) => {
+    const renderUsers = (label: string, items: BaseUser[]) => {
         if (!items?.length) return null;
 
         return (

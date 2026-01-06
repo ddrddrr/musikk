@@ -1,7 +1,7 @@
 import z from "zod";
 
 export const SongSchema = z.object({
-    title: z.string().min(1),
+    titleSize: z.string().min(1),
     audio: z.instanceof(File),
     description: z.string().optional(),
     image: z.instanceof(File).optional(),
@@ -9,7 +9,7 @@ export const SongSchema = z.object({
 });
 
 export const CollectionUploadSchemaDraft = z.object({
-    title: z.string().min(1, "Title is required"),
+    titleSize: z.string().min(1, "Title is required"),
     description: z.string().optional(),
     image: z.instanceof(File).optional(),
     private: z.boolean(),

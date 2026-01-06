@@ -1,7 +1,7 @@
 import { login as loginAPI, logout as logoutAPI } from "@/features/auth/api.ts";
 import { AuthContext } from "@/features/auth/providers/AuthContext.tsx";
 import { fetchMe } from "@/features/user/queries.ts";
-import { IUser } from "@/features/user/types.ts";
+import { BaseUser } from "@/features/user/types.ts";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Cookies from "js-cookie";
 import { ReactNode } from "react";
@@ -20,7 +20,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         isLoading,
         refetch,
         error,
-    } = useQuery<IUser | null>({
+    } = useQuery<BaseUser | null>({
         queryKey: ["user"],
         queryFn: fetchMe,
         retry: false,

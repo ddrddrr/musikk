@@ -41,7 +41,7 @@ export const NotificationBox = memo(function NotificationBox() {
         <Popover onOpenChange={handleOpenChange}>
             <PopoverTrigger asChild>
                 <div className="relative">
-                    <Button variant="ghost" className="text-white">
+                    <Button variant="ghost" size="icon" className="text-white">
                         <Sparkle className="w-5 h-5" />
                     </Button>
                     {unreadUUIDs.length > 0 && (

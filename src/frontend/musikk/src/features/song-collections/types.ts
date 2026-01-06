@@ -1,14 +1,14 @@
 import { UUID } from "@/api/types.ts";
 import { BaseModel } from "@/features/common/types.ts";
 import { ISong } from "@/features/songs/types.ts";
-import { IUser } from "@/features/user/types.ts";
+import { BaseUser } from "@/features/user/types.ts";
 
 export type CollectionType = "playlist" | "album" | "history" | "liked";
 export interface Collection extends BaseModel {
     uuid: UUID;
     title: string;
     description: string;
-    authors: IUser[];
+    authors: BaseUser[];
     image?: string;
     is_liked: boolean;
     type: CollectionType;

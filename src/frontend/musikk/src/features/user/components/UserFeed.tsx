@@ -1,7 +1,7 @@
 import { api_client } from "@/api/axiosConf.ts";
 import { PublicationURLs } from "@/api/endpoints.ts";
 import { PostTree } from "@/features/publications/components/PostTree.tsx";
-import { IPublication } from "@/features/publications/types.ts";
+import { Publication } from "@/features/publications/types.ts";
 import { Card, CardContent } from "@/features/ui/card.tsx";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/features/ui/tabs.tsx";
 import { useQuery } from "@tanstack/react-query";
@@ -10,7 +10,7 @@ import { useState } from "react";
 export function UserFeed() {
     const [tab, setTab] = useState("friends");
 
-    const { data: postsFriends } = useQuery<IPublication[]>({
+    const { data: postsFriends } = useQuery<Publication[]>({
         queryFn: async () => {
             const res = await api_client.get(PublicationURLs.publicationFeedLatest, {
                 params: { connection: "friends" },
@@ -19,7 +19,7 @@ export function UserFeed() {
         },
         queryKey: ["publications", "feed", "latest", "friends"],
     });
-    const { data: postsFollowed } = useQuery<IPublication[]>({
+    const { data: postsFollowed } = useQuery<Publication[]>({
         queryFn: async () => {
             const res = await api_client.get(PublicationURLs.publicationFeedLatest, {
                 params: { connection: "followed" },
@@ -28,7 +28,7 @@ export function UserFeed() {
         },
         queryKey: ["publications", "feed", "latest", "followed"],
     });
-    const { data: postsAll } = useQuery<IPublication[]>({
+    const { data: postsAll } = useQuery<Publication[]>({
         queryFn: async () => {
             const res = await api_client.get(PublicationURLs.publicationFeedLatest);
             return res.data;
@@ -36,7 +36,7 @@ export function UserFeed() {
         queryKey: ["publications", "feed", "latest", "all"],
     });
 
-    function renderPostTree(label: string, posts: IPublication[] | undefined) {
+    function renderPostTree(label: string, posts: Publication[] | undefined) {
         return (
             <TabsContent value={label}>
                 <div className="space-y-6">

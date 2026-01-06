@@ -7,6 +7,9 @@ export const api_client = axios.create({
     withCredentials: true,
 });
 
+// TODO: for err notifications do smth like this:
+// https://github.com/alan2207/bulletproof-react/blob/master/apps/react-vite/src/lib/api-client.ts
+
 api_client.interceptors.request.use((cfg) => {
     const method = (cfg.method || "get").toUpperCase();
     if (!["GET", "HEAD", "OPTIONS", "TRACE"].includes(method)) {

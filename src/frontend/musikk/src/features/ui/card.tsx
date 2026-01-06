@@ -2,14 +2,14 @@ import { cva, type VariantProps } from "class-variance-authority";
 import * as React from "react";
 
 import { cn } from "@/lib/utils";
-
-const cardVariants = cva("flex flex-col", {
+// TODO: remove flex/flex-col?
+const cardVariants = cva("flex flex-col rounded-sm", {
     variants: {
         variant: {
-            default: "bg-card text-card-foreground rounded-xl border shadow-sm",
-            panel: "bg-gray-50 border-2 border-black rounded-sm overflow-hidden",
-            flat: "bg-card text-card-foreground rounded-md border-none shadow-none",
-            elevated: "bg-card text-card-foreground rounded-xl border shadow-lg",
+            default: "bg-card text-card-foreground border shadow-sm",
+            panel: "bg-gray-50 border-2 border-black overflow-hidden",
+            flat: "bg-card text-card-foreground border-none shadow-none",
+            elevated: "bg-card text-card-foreground border shadow-lg",
         },
         spacing: {
             sm: "gap-4 py-3",

@@ -1,17 +1,17 @@
-import { cn } from "@/lib/utils.ts";
 import { PostForm } from "@/features/publications/components/PostForm.tsx";
-import { IPublication } from "@/features/publications/types.ts";
+import { Publication } from "@/features/publications/types.ts";
 import { CollectionCard } from "@/features/song-collections/components/CollectionCard.tsx";
 import { SongContainer } from "@/features/songs/components/SongContainer.tsx";
 import { Button } from "@/features/ui/button.tsx";
 import { Card, CardContent } from "@/features/ui/card.tsx";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/features/ui/collapsible.tsx";
 import { UserIdentifier } from "@/features/user/components/UserIdentifier.tsx";
+import { cn } from "@/lib/utils.ts";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
 
 interface PostTreeProps {
-    publication: IPublication;
+    publication: Publication;
     depth?: number;
 }
 
@@ -43,7 +43,6 @@ export function PostTree({ publication, depth = 0 }: PostTreeProps) {
                         <div className="mb-4">
                             <SongContainer
                                 collectionSong={publication.attachment}
-                                className="border border-gray-300 rounded-md p-3 bg-white"
                             />
                         </div>
                     );
@@ -125,7 +124,7 @@ export function PostTree({ publication, depth = 0 }: PostTreeProps) {
                         <CollapsibleContent>
                             <div className="relative pl-4 ml-2 space-y-0">
                                 <div className="left-0 top-0 bottom-0 w-[2px] bg-gray-200"></div>
-                                {publication.children.map((reply: IPublication) => (
+                                {publication.children.map((reply: Publication) => (
                                     <div key={reply.uuid} className="relative">
                                         <div className="left-0 top-3 w-2 h-[2px] bg-gray-200"></div>
                                         <PostTree publication={reply} depth={depth + 1} />

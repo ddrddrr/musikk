@@ -2,7 +2,6 @@ import { CollectionSong } from "@/features/song-collections/types.ts";
 import { SongContextMenu } from "@/features/songs/components/SongContextMenu.tsx";
 import { albumBySongRetrieve } from "@/features/songs/queries.ts";
 import { Card, CardContent } from "@/features/ui/card.tsx";
-import { MediaBox } from "@/features/ui/media.tsx";
 import { useNavigate } from "react-router-dom";
 
 interface SongCardProps {
@@ -53,6 +52,8 @@ export function SongCard({ collectionSong, size = "medium", onClick = undefined 
             navigate(`/collection/${albumUUID.uuid}/`);
         }
     }
+    const mediaBaseClass =
+        "bg-gray-200 flex items-center justify-center rounded-sm border border-black overflow-hidden";
 
     return (
         <SongContextMenu song={collectionSong}>
@@ -65,13 +66,13 @@ export function SongCard({ collectionSong, size = "medium", onClick = undefined 
             >
                 <CardContent className="p-0">
                     {image ? (
-                        <MediaBox className={`w-full ${sizes.image}`} asChild>
+                        <div className={`w-full ${sizes.image} ${mediaBaseClass}`}>
                             <img src={image} alt={title} className="w-full h-full object-cover" />
-                        </MediaBox>
+                        </div>
                     ) : (
-                        <MediaBox className={`w-full ${sizes.image}`}>
+                        <div className={`w-full ${sizes.image} ${mediaBaseClass}`}>
                             <span className={`text-gray-400 ${sizes.icon}`}>♪</span>
-                        </MediaBox>
+                        </div>
                     )}
                     <div className={`bg-gray-200 border-t-2 border-black ${sizes.padding}`}>
                         <p className={`truncate text-gray-600 ${sizes.authors}`}>{authorNames}</p>

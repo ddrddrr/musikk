@@ -2,7 +2,7 @@ import { UUID } from "@/api/types.ts";
 import { usePublicationListQuery } from "@/features/publications/api/queries.ts";
 import { CommentForm } from "@/features/publications/components/CommentForm.tsx";
 import { CommentList } from "@/features/publications/components/CommentList.tsx";
-import { IPublication, PublicationForType } from "@/features/publications/types.ts";
+import { Publication, PublicationForType } from "@/features/publications/types.ts";
 import { memo, useEffect, useRef, useState } from "react";
 
 interface CommentBoxProps {
@@ -11,7 +11,7 @@ interface CommentBoxProps {
 }
 
 export const CommentBox = memo(function CommentBox({ objType, objUUID }: CommentBoxProps) {
-    const [replyTo, setReplyTo] = useState<IPublication | undefined>(undefined);
+    const [replyTo, setReplyTo] = useState<Publication | undefined>(undefined);
     const { isPending, error, data } = usePublicationListQuery(objType, objUUID);
     const commentsContainerRef = useRef<HTMLDivElement | null>(null);
 
@@ -19,6 +19,7 @@ export const CommentBox = memo(function CommentBox({ objType, objUUID }: Comment
         if (commentsContainerRef.current) {
             commentsContainerRef.current.scrollTop = commentsContainerRef.current.scrollHeight;
         }
+        // TODO: probably shouldnt зависеть на дата, просто один раз проскроллить...?
     }, [data]);
 
     // todo use new shadcn spinner

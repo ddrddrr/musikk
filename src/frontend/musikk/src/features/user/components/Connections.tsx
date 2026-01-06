@@ -20,7 +20,7 @@ export function Connections() {
                     {friends.length === 0 ? (
                         <p className="text-muted-foreground">No friends yet.</p>
                     ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-1">
                             {friends.map((friend) => (
                                 <UserCard key={friend.uuid} user={friend} />
                             ))}
@@ -32,7 +32,7 @@ export function Connections() {
                     {followed.length === 0 ? (
                         <p className="text-muted-foreground">Not following anyone yet.</p>
                     ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-1">
                             {followed.map((user) => (
                                 <UserCard key={user.uuid} user={user} />
                             ))}
@@ -44,7 +44,7 @@ export function Connections() {
                     {followers.length === 0 ? (
                         <p className="text-muted-foreground">No followers.</p>
                     ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-1">
                             {followers.map((user) => (
                                 <UserCard key={user.uuid} user={user} />
                             ))}

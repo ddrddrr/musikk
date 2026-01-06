@@ -71,12 +71,11 @@ export function SongCollectionContainer({ collectionUUID }: SongCollectionContai
                         />
 
                         {songs.length > 0 ? (
-                            <ul className="space-y-2" role="list">
+                            <ul className="space-y-2">
                                 {songs.map((collectionSong, index) => (
                                     <li key={`${collectionSong.uuid}-${index}`}>
                                         <SongContainer
                                             collectionSong={collectionSong}
-                                            className="bg-white p-4 rounded-sm border border-gray-200 transition-colors hover:bg-gray-50"
                                             renderItems={{ removeFromPlaylistCtxBtn }}
                                         />
                                     </li>

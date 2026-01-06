@@ -1,15 +1,15 @@
 import { api_client } from "@/api/axiosConf.ts";
 import { UserURLs } from "@/api/endpoints.ts";
 import { UUID } from "@/api/types.ts";
-import { IUser } from "@/features/user/types.ts";
+import { BaseUser } from "@/features/user/types.ts";
 import { useQuery } from "@tanstack/react-query";
 
-export async function fetchMe(): Promise<IUser | null> {
+export async function fetchMe(): Promise<BaseUser | null> {
     const res = await api_client.get(UserURLs.me);
     return res.data.me;
 }
 
-export async function fetchUser(userUUID: UUID): Promise<IUser> {
+export async function fetchUser(userUUID: UUID): Promise<BaseUser> {
     const res = await api_client.get(UserURLs.userDetail(userUUID));
     return res.data;
 }

@@ -24,10 +24,10 @@ const reactRefreshRecommended = reactRefresh.configs?.vite ?? {
 };
 
 export default tseslint.config(
-    { ignores: ["dist"] },
+    { ignores: ["dist", "eslint.config.js", "vite.config.ts"] },
 
     {
-        files: ["**/*.{js,jsx,ts,tsx}"],
+        files: ["src/**/*.{js,jsx,ts,tsx}"],
         languageOptions: {
             ecmaVersion: 2020,
             sourceType: "module",
@@ -65,8 +65,14 @@ export default tseslint.config(
         },
     },
 
-    js.configs.recommended,
-
+    tseslint.configs.recommendedTypeChecked,
+    {
+        languageOptions: {
+            parserOptions: {
+                projectService: true,
+            },
+        },
+    },
     ...tseslint.configs.recommended,
 
     reactPlugin.configs.flat.recommended,
@@ -89,7 +95,15 @@ export default tseslint.config(
             "react/react-in-jsx-scope": "off",
             "import/no-named-as-default": "off",
             "react-refresh/only-export-components": "warn",
-            "no-unused-vars": ["warn", { varsIgnorePattern: "*" }],
+            "no-unused-vars": "off",
+            "@typescript-eslint/no-unused-vars": [
+                "warn",
+                {
+                    varsIgnorePattern: "^_",
+                    argsIgnorePattern: "^_",
+                    caughtErrorsIgnorePattern: "^_",
+                },
+            ],
         },
     },
 

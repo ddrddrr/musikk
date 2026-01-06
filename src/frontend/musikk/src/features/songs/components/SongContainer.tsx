@@ -1,18 +1,17 @@
-import { cn } from "@/lib/utils.ts";
 import { CollectionSong } from "@/features/song-collections/types.ts";
 import { SongAddToLikedButton } from "@/features/songs/components/SongAddToLikedButton.tsx";
 import { SongAddToQueueButton } from "@/features/songs/components/SongAddToQueueButton.tsx";
 import { SongContextMenu } from "@/features/songs/components/SongContextMenu.tsx";
 import { SongPlayButton } from "@/features/songs/components/SongPlayButton.tsx";
-import { MediaBox } from "@/features/ui/media.tsx";
+import { cn } from "@/lib/utils.ts";
 import { memo } from "react";
 
-type SongContainerSize = "compact" | "normal" | "comfortable";
+type SongContainerSize = "compact" | "normal";
 
 interface SongContainerProps {
     collectionSong: CollectionSong;
     size?: SongContainerSize;
-    className?: string;
+    extraStyle?: string;
     renderItems?: Partial<RenderItems>;
 }
 
@@ -26,41 +25,31 @@ interface RenderItems {
 
 const sizeConfig = {
     compact: {
-        container: "gap-2",
+        containerGap: "gap-2",
         image: "w-8 h-8",
-        title: "text-xs",
-        authors: "text-[10px]",
-        icon: "text-lg",
-        buttons: "gap-1",
+        titleSize: "text-xs",
+        authorsSize: "text-[10px]",
+        iconSize: "text-lg",
+        buttonsGap: "gap-1",
         buttonSize: 28,
-        buttonClass: "p-1",
+        buttonPadding: "p-1",
     },
     normal: {
-        container: "gap-3",
+        containerGap: "gap-4",
         image: "w-10 h-10",
-        title: "text-sm",
-        authors: "text-xs",
-        icon: "text-xl",
-        buttons: "gap-2",
+        titleSize: "text-sm",
+        authorsSize: "text-xs",
+        iconSize: "text-xl",
+        buttonsGap: "gap-2",
         buttonSize: 40,
-        buttonClass: "p-2",
-    },
-    comfortable: {
-        container: "gap-4",
-        image: "w-12 h-12",
-        title: "text-base",
-        authors: "text-sm",
-        icon: "text-2xl",
-        buttons: "gap-2",
-        buttonSize: 48,
-        buttonClass: "p-2",
+        buttonPadding: "p-2",
     },
 };
 
 export const SongContainer = memo(function SongContainer({
     collectionSong,
     size = "normal",
-    className,
+    extraStyle,
     renderItems = {},
 }: SongContainerProps) {
     const {
@@ -73,57 +62,66 @@ export const SongContainer = memo(function SongContainer({
 
     const song = collectionSong.song;
     const authors = song.authors.map((a) => a.display_name).join(", ");
-    const config = sizeConfig[size];
+    const sizeClass = sizeConfig[size];
+    const mediaBaseClass =
+        "flex items-center justify-center bg-gray-200 rounded-sm border border-black overflow-hidden";
 
     return (
         <SongContextMenu song={collectionSong} renderRemoveFromPlaylist={removeFromPlaylistCtxBtn}>
             <div
                 className={cn(
                     "flex items-center justify-between w-full overflow-hidden",
-                    config.container,
-                    className,
+                    "bg-white border-black border-2 rounded-sm p-4",
+                    "transition-colors hover:bg-gray-100",
+                    sizeClass.containerGap,
+                    extraStyle,
                 )}
             >
-                <div className={cn("flex items-center min-w-0", config.container)}>
+                <div className={cn("flex items-center", sizeClass.containerGap)}>
                     {image &&
                         (song.image ? (
-                            <MediaBox className={config.image} asChild>
-                                <img src={song.image} alt="" className="w-1/2 h-1/2 object-cover" />
-                            </MediaBox>
+                            <div className={cn(mediaBaseClass, sizeClass.image)}>
+                                <img
+                                    src={song.image}
+                                    alt=""
+                                    className="w-full h-full object-cover"
+                                />
+                            </div>
                         ) : (
-                            <MediaBox className={config.image}>
-                                <span className={cn("text-gray-400", config.icon)}>♪</span>
-                            </MediaBox>
+                            <div className={cn(mediaBaseClass, sizeClass.image)}>
+                                <span className={cn("text-gray-400", sizeClass.iconSize)}>♪</span>
+                            </div>
                         ))}
-
                     <div className="flex flex-col min-w-0">
-                        <p className={cn("font-bold text-black truncate", config.title)}>
+                        <p className={cn("font-bold text-black truncate", sizeClass.titleSize)}>
                             {song.title}
                         </p>
-                        <p className={cn("text-gray-600 truncate", config.authors)}>{authors}</p>
+                        <p className={cn("text-gray-600 truncate", sizeClass.authorsSize)}>
+                            {authors}
+                        </p>
                     </div>
                 </div>
 
-                <div className={cn("flex items-center shrink-0", config.buttons)}>
+                <div className={cn("flex items-center shrink-0", sizeClass.buttonsGap)}>
                     {playButton && (
                         <SongPlayButton
                             collectionSong={collectionSong}
-                            size={config.buttonSize}
-                            className={config.buttonClass}
+                            size={sizeClass.buttonSize}
+                            className={sizeClass.buttonPadding}
                         />
                     )}
                     {addToLikedButton && (
                         <SongAddToLikedButton
                             collectionSong={collectionSong}
-                            size={config.buttonSize}
-                            className={config.buttonClass}
+                            size={sizeClass.buttonSize}
+                            className={sizeClass.buttonPadding}
                         />
                     )}
                     {addToQueueButton && (
                         <SongAddToQueueButton
                             collectionSong={collectionSong}
-                            size={config.buttonSize}
-                            className={config.buttonClass}
+                            size={sizeClass.buttonSize}
+                            className={sizeClass.buttonPadding}
                         />
                     )}
                 </div>

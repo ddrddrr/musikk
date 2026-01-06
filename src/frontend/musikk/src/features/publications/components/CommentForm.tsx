@@ -1,7 +1,7 @@
 import { UUID } from "@/api/types.ts";
 import { usePublicationCreateMutation } from "@/features/publications/api/mutations.ts";
 import { commentSchema } from "@/features/publications/schemas.ts";
-import { IPublication, PublicationForType } from "@/features/publications/types.ts";
+import { Publication, PublicationForType } from "@/features/publications/types.ts";
 import { Button } from "@/features/ui/button.tsx";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -12,8 +12,8 @@ type CommentFormData = z.infer<typeof commentSchema>;
 interface CommentFormDataProps {
     objType: PublicationForType;
     objUUID: UUID;
-    replyTo?: IPublication;
-    setReplyTo?: (comment?: IPublication) => void;
+    replyTo?: Publication;
+    setReplyTo?: (comment?: Publication) => void;
 }
 
 export function CommentForm({ objType, objUUID, replyTo, setReplyTo }: CommentFormDataProps) {

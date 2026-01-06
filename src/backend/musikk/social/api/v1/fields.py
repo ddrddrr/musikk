@@ -1,11 +1,6 @@
 from rest_framework import serializers
 
-from social.api.v1.type_model_maps import (
-    TypeToModelResolver,
-    UnknownTypeError,
-    ObjectDoesNotExistError,
-    InvalidRefError,
-)
+from social.api.v1.type_model_maps import TypeToModelResolver
 
 
 class TypeModelRefField(serializers.Field):
@@ -20,7 +15,7 @@ class TypeModelRefField(serializers.Field):
             raise serializers.ValidationError("Expected a dictionary.")
         try:
             return self.resolver.resolve_model_instance(data)
-        except (UnknownTypeError, ObjectDoesNotExistError, InvalidRefError) as e:
+        except Exception as e:
             raise serializers.ValidationError(str(e))
 
     def to_representation(self, value):

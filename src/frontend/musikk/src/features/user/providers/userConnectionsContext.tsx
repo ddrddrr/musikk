@@ -1,10 +1,10 @@
-import { IUser } from "@/features/user/types.ts";
+import { BaseUser } from "@/features/user/types.ts";
 import { createContext } from "react";
 
 interface UserConnectionsContextProps {
-    friends: IUser[];
-    followers: IUser[];
-    followed: IUser[];
+    friends: BaseUser[];
+    followers: BaseUser[];
+    followed: BaseUser[];
 }
 
 export const UserConnectionsContext = createContext<UserConnectionsContextProps>({

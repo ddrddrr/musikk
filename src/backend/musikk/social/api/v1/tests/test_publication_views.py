@@ -37,15 +37,11 @@ class TestPublicationListCreateForObjView(TestCase):
             request, obj_type=obj_type, obj_uuid=obj_uuid
         )
 
-    def _get(
-        self, obj_type: str, obj_uuid: str, user=None, with_children: bool = False
-    ):
+    def _get(self, obj_type: str, obj_uuid: str, user=None):
         url = reverse(
             "api:publication-create-list-for-obj",
             kwargs={"obj_type": obj_type, "obj_uuid": obj_uuid},
         )
-        if with_children:
-            url = f"{url}?with_children=1"
         request = self.factory.get(url)
         if user is not None:
             force_authenticate(request, user=user)

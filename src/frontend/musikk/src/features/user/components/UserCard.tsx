@@ -7,14 +7,14 @@ import {
     ContextMenuTrigger,
 } from "@/features/ui/context-menu.tsx";
 import { useFollowUser } from "@/features/user/hooks/useFollowUser.ts";
-import { IUser } from "@/features/user/types.ts";
+import { BaseUser } from "@/features/user/types.ts";
 import { MoreHorizontal, Smile } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface UserCardProps {
-    user: IUser;
+    user: BaseUser;
     size?: "small" | "medium" | "big";
-    onClick?: (u: IUser) => void;
+    onClick?: (u: BaseUser) => void;
 }
 
 const sizeStyles = {
@@ -49,7 +49,7 @@ export function UserCard({ user, size = "medium", onClick }: UserCardProps) {
     const styles = sizeStyles[size];
     const { avatar, display_name } = user;
 
-    function handleOnClick(u: IUser) {
+    function handleOnClick(u: BaseUser) {
         if (onClick) {
             onClick(u);
         } else {

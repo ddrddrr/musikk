@@ -39,6 +39,7 @@ export const SongQueueContainer = memo(function SongContainer({
     const song = node.collection_song.song;
     const authors = song.authors.map((a) => a.display_name).join(", ");
 
+    // TODO: consolidate with song container!
     return (
         <SongContextMenu
             song={node.collection_song}

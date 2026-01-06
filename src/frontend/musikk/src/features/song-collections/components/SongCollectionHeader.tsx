@@ -20,28 +20,25 @@ export const SongCollectionHeader = memo(function SongCollectionHeader({
     songsCount,
     notPersonalCollection,
 }: SongCollectionHeaderProps) {
+    // TODO: make author clickable, probably factor out to a sep component
     const authors = collection.authors.map((author) => author.display_name).join(", ");
 
     return (
         <>
-            <div
-                className={`flex items-start bg-white p-6 rounded-lg 
-                   border-2 border-black
-                   transition-all duration-300 ease-in-out ${showComments ? "flex-col sm:flex-row gap-4" : "flex-row"}`}
-            >
+            <div className={`flex bg-white p-6 rounded-sm border-2 border-black gap-4`}>
                 {collection.image ? (
                     <img
                         src={collection.image}
-                        alt=""
-                        className={`object-cover border-2 border-black rounded-lg ${
-                            showComments ? "scale-100 w-24 h-24" : "scale-100 w-32 h-32"
+                        alt="♫"
+                        className={`object-cover rounded-sm border-2 border-black ${
+                            showComments ? "w-20 h-20" : "w-32 h-32"
                         }`}
                     />
                 ) : (
                     <div>♫</div>
                 )}
 
-                <div className="ml-0 sm:ml-6 flex-1 min-w-0">
+                <div className="flex-1">
                     {showComments ? (
                         <div className="mb-2">
                             <p className="font-bold text-sm truncate">{collection.title}</p>
@@ -67,15 +64,15 @@ export const SongCollectionHeader = memo(function SongCollectionHeader({
                     ) : (
                         <div className="flex items-center justify-between">
                             <div className="min-w-0">
-                                <p className="text-sm text-gray-500 truncate">{authors}</p>
                                 <p className="font-bold text-xl">{collection.title}</p>
+                                <p className="text-sm text-gray-500 truncate">{authors}</p>
                                 {collection.description && (
                                     <p className="text-gray-600 mt-2 line-clamp-2 text-base">
                                         {collection.description}
                                     </p>
                                 )}
                             </div>
-                            <div className="flex gap-3 ml-6 flex-shrink-0">
+                            <div className="flex gap-2 ml-2 flex-shrink-0">
                                 {songsCount > 0 && (
                                     <SongCollectionPlayButton
                                         collection={collection}
@@ -98,10 +95,10 @@ export const SongCollectionHeader = memo(function SongCollectionHeader({
                 </div>
             </div>
 
-            <div className="flex items-center justify-between px-2 mt-2">
-                <h3 className="text-black text-lg font-bold transition-all duration-300 ease-in-out">
-                    Songs • {songsCount}
-                </h3>
+            <div className="flex items-center justify-between">
+                <div className={"border-black bg-white border-2 rounded-sm"}>
+                    <h3 className="text-black  text-lg font-bold p-1">Songs • {songsCount}</h3>
+                </div>
                 {notPersonalCollection && (
                     <Button
                         onClick={toggleComments}

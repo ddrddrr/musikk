@@ -1,5 +1,4 @@
 import type { ISong } from "@/features/songs/types.ts";
-import { MediaBox } from "@/features/ui/media.tsx";
 import { UserIdentifier } from "@/features/user/components/UserIdentifier.tsx";
 
 interface SongDisplayProps {
@@ -15,22 +14,24 @@ export function SongDisplay({ song }: SongDisplayProps) {
         );
     }
 
+    const mediaBaseClass =
+        "bg-gray-200 flex items-center justify-center rounded-sm border border-black overflow-hidden";
+
     return (
         <div className="flex flex-col items-start gap-3 mb-4">
             <div className="w-full aspect-square max-w-2/5">
                 {song.image ? (
-                    <MediaBox className="w-full h-full" asChild>
-                        {/*TODO: consolidate with other images*/}
+                    <div className={`w-full h-full ${mediaBaseClass}`}>
                         <img
                             src={song.image}
                             alt={song.title}
                             className="w-full h-full object-cover"
                         />
-                    </MediaBox>
+                    </div>
                 ) : (
-                    <MediaBox className="w-full h-full">
+                    <div className={`w-full h-full ${mediaBaseClass}`}>
                         <span className="text-gray-400 text-3xl">♪</span>
-                    </MediaBox>
+                    </div>
                 )}
             </div>
             <div className="w-full text-start">

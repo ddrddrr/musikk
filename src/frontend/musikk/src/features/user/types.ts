@@ -1,7 +1,7 @@
 import { URL, UUID } from "@/api/types.ts";
 import { z } from "zod";
 
-export interface IUser {
+export interface BaseUser {
     uuid: UUID;
     display_name: string;
     avatar: URL;

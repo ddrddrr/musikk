@@ -63,10 +63,7 @@ class TypeToModelResolver:
         if not Model:
             raise UnknownTypeError(type_key)
 
-        try:
-            return Model.objects.get(uuid=uuid_val)
-        except Model.DoesNotExist:
-            raise ObjectDoesNotExistError(type_key, str(uuid_val))
+        return Model.objects.get(uuid=uuid_val)
 
     def get_model_instance_representation(self, obj: models.Model) -> TypeToModelRef:
         type_key = self.model_type_map.get(obj.__class__)

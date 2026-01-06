@@ -1,7 +1,7 @@
 import { CollectionSong } from "@/features/song-collections/types.ts";
-import { IUser } from "@/features/user/types.ts";
+import { BaseUser } from "@/features/user/types.ts";
 
 export interface UserSong {
-    user: IUser;
+    user: BaseUser;
     song: CollectionSong;
 }

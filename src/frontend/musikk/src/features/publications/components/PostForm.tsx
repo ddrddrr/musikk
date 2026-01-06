@@ -6,7 +6,7 @@ import z from "zod";
 import { UUID } from "@/api/types.ts";
 import { usePublicationCreateMutation } from "@/features/publications/api/mutations.ts";
 import { postSchema } from "@/features/publications/schemas.ts";
-import { Attachment, IPublication } from "@/features/publications/types.ts";
+import { Attachment, Publication } from "@/features/publications/types.ts";
 import { Collection } from "@/features/song-collections/types.ts";
 
 import { SearchBar } from "@/features/search/SearchBar.tsx";
@@ -16,8 +16,8 @@ import { Textarea } from "@/features/ui/textarea.tsx";
 type PostFormData = z.infer<typeof postSchema>;
 
 interface PostFormProps {
-    replyTo?: IPublication;
-    setReplyTo?: (reply?: IPublication) => void;
+    replyTo?: Publication;
+    setReplyTo?: (reply?: Publication) => void;
     onSuccess?: () => void;
     feedUserUuid?: UUID;
 }
@@ -89,7 +89,7 @@ export function PostForm({ replyTo, setReplyTo, onSuccess, feedUserUuid }: PostF
 
             {attachedObj && (
                 <div className="text-xs text-muted-foreground italic">
-                    Attached:{" "}
+                    Attached: {/*TODO: add reprs for all objects?*/}
                     {isCollection(attachedObj) ? attachedObj.title : attachedObj.song.title}
                 </div>
             )}

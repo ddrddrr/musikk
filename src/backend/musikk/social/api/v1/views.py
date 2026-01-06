@@ -2,6 +2,7 @@ from django.contrib.contenttypes.models import ContentType
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.generics import RetrieveAPIView
 
 from social.api.v1.filters import PublicationFilter
 from social.api.v1.serializers import (
@@ -11,10 +12,6 @@ from social.api.v1.serializers import (
 )
 from social.api.v1.type_model_maps import (
     CREATED_FOR_RESOLVER,
-    UnknownTypeError,
-    ObjectDoesNotExistError,
-    InvalidRefError,
-    TypeToModelError,
 )
 from social.models import Publication
 from users.models import BaseUser
@@ -27,32 +24,23 @@ class PublicationListCreateForObjView(APIView):
             created_for_obj = CREATED_FOR_RESOLVER.resolve_model_instance(
                 {"type": obj_type, "uuid": str(obj_uuid)}
             )
-        except (UnknownTypeError, InvalidRefError, TypeToModelError) as e:
+        except Exception as e:
+            # TODO: add exception name in resp data
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except ObjectDoesNotExistError as e:
-            return Response({"detail": str(e)}, status=status.HTTP_404_NOT_FOUND)
 
-        content_type = ContentType.objects.get_for_model(created_for_obj.__class__)
-        if request.query_params.get("with_children"):
-            queryset = (
-                Publication.objects.filter(
-                    created_for_type=content_type,
-                    created_for_id=created_for_obj.pk,
-                    parent__isnull=True,
-                )
-                .select_related("author")
-                .prefetch_related("replies__author")
-            )
-            serializer = PublicationRetrieveWithChildrenSerializer
-        else:
-            queryset = Publication.objects.filter(
-                created_for_type=content_type,
-                created_for_id=created_for_obj.pk,
-            ).select_related("author")
-            serializer = PublicationRetrieveSerializer
+        queryset = Publication.objects.filter(
+            created_for_type=ContentType.objects.get_for_model(
+                created_for_obj.__class__
+            ),
+            created_for_id=created_for_obj.pk,
+        ).select_related("author")
 
-        sz_instance = serializer(queryset, many=True, context={"request": request})
-        return Response(status=status.HTTP_200_OK, data=sz_instance.data)
+        return Response(
+            status=status.HTTP_200_OK,
+            data=PublicationRetrieveSerializer(
+                queryset, many=True, context={"request": request}
+            ).data,
+        )
 
     def post(self, request, *args, **kwargs):
         serializer = PublicationCreateSerializer(
@@ -83,6 +71,14 @@ class PublicationListCreateForObjView(APIView):
                 ).data,
             },
         )
+
+
+class PublicationRetrieveView(RetrieveAPIView):
+    queryset = Publication.objects.select_related("author", "parent").prefetch_related(
+        "replies__author"
+    )
+    serializer_class = PublicationRetrieveWithChildrenSerializer
+    lookup_field = "uuid"
 
 
 class PublicationFeedLatestView(APIView):

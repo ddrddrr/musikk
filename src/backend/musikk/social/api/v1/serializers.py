@@ -69,6 +69,8 @@ class PublicationRetrieveSerializer(BaseModelSerializer):
         resolver=ATTACHMENT_RESOLVER, read_only=True, source="attachment_object"
     )
     parent_uuid = serializers.SerializerMethodField(allow_null=True, read_only=True)
+    parent_author = serializers.SerializerMethodField(allow_null=True, read_only=True)
+    parent_repr = serializers.SerializerMethodField(allow_null=True, read_only=True)
 
     class Meta(BaseModelSerializer.Meta):
         model = Publication
@@ -76,18 +78,26 @@ class PublicationRetrieveSerializer(BaseModelSerializer):
             "author",
             "root_author_uuid",
             "content",
-            "parent_uuid",
             "is_deleted",
             "created_for",
             "attachment",
+            "parent_uuid",
+            "parent_author",
+            "parent_repr",
         ]
 
-    def get_root_author_uuid(self, obj):
+    def get_root_author_uuid(self, obj) -> str | None:
         root = obj.get_root()
-        return root.author.uuid if root.author else None
+        return str(root.author.uuid) if root.author else None
 
-    def get_parent_uuid(self, obj):
+    def get_parent_uuid(self, obj) -> str | None:
         return str(obj.parent.uuid) if obj.parent else None
+
+    def get_parent_author(self, obj) -> dict | None:
+        return BaseUserSerializer(obj.parent.author).data if obj.parent else None
+
+    def get_parent_repr(self, obj) -> str | None:
+        return obj.parent.content if obj.parent else None
 
 
 class PublicationRetrieveWithChildrenSerializer(PublicationRetrieveSerializer):
