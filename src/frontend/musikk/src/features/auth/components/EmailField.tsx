@@ -12,11 +12,11 @@ export function EmailField() {
                 <FormItem className="space-y-2">
                     <FormLabel className="text-lg font-bold text-gray-900">Email</FormLabel>
                     <FormControl>
-                        <div className="p-3 border-2 border-black rounded-md transition-colors">
+                        <div className="rounded-md border-2 border-black p-3 transition-colors">
                             <Input
                                 placeholder="Enter Email"
                                 {...field}
-                                className="border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 p-0 "
+                                className="border-0 bg-transparent p-0 focus-visible:ring-0 focus-visible:ring-offset-0"
                             />
                         </div>
                     </FormControl>

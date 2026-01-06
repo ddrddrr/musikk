@@ -114,7 +114,8 @@
 }
 
 @layer base {
-    html, body {
+    html,
+    body {
         overscroll-behavior: none;
     }
 
@@ -131,4 +132,3 @@
     scrollbar-width: thin;
     scrollbar-color: lightgrey white;
 }
-

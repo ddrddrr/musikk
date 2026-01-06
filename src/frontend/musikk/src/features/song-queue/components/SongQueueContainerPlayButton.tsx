@@ -23,7 +23,7 @@ export function SongQueuePlayButton({ node, className = "", size = 20 }: SongQue
             size="icon"
             style={{ width: size, height: size }}
             onClick={onClick}
-            className={`p-0 flex items-center justify-center ${className}`}
+            className={`flex items-center justify-center p-0 ${className}`}
         >
             {renderPlayPauseIcon()}
         </Button>

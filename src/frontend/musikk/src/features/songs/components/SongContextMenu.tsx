@@ -42,7 +42,7 @@ export function SongContextMenu({
                                 })
                             }
                         >
-                            <Trash2 className="w-4 h-4 mr-2" />
+                            <Trash2 className="mr-2 h-4 w-4" />
                             Remove from playlist
                         </ContextMenuItem>
                     )}
@@ -55,11 +55,11 @@ export function SongContextMenu({
                             })
                         }
                     >
-                        <BetweenHorizonalStart className="w-4 h-4 mr-2" />
+                        <BetweenHorizonalStart className="mr-2 h-4 w-4" />
                         Add to queue
                     </ContextMenuItem>
                     <ContextMenuItem onSelect={onSongPlayClick}>
-                        <Play className="w-4 h-4 mr-2" />
+                        <Play className="mr-2 h-4 w-4" />
                         Play
                     </ContextMenuItem>
                 </ContextMenuContent>

@@ -1,10 +1,10 @@
-import { useAuth } from "@/hooks/useAuth.ts";
 import { EmailField } from "@/features/auth/components/EmailField.tsx";
 import { PasswordField } from "@/features/auth/components/PasswordField.tsx";
 import { Spinner } from "@/features/common/Spinner.tsx";
 import { Button } from "@/features/ui/button.tsx";
 import { CardContent } from "@/features/ui/card.tsx";
 import { Form } from "@/features/ui/form.tsx";
+import { useAuth } from "@/hooks/useAuth.ts";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { isAxiosError } from "axios";
 import { useState } from "react";
@@ -63,7 +63,7 @@ export function LoginForm() {
                     </Button>
 
                     {message && (
-                        <div className="p-4 bg-red-700 border-2 border-red-900 text-white rounded-md">
+                        <div className="rounded-md border-2 border-red-900 bg-red-700 p-4 text-white">
                             <p className="font-medium">{message}</p>
                         </div>
                     )}

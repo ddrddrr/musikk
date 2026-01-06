@@ -1,4 +1,3 @@
-import { useAuth } from "@/hooks/useAuth.ts";
 import { ImageField } from "@/features/common/ImageField.tsx";
 import { Avatar, AvatarImage } from "@/features/ui/avatar.tsx";
 import { Button } from "@/features/ui/button.tsx";
@@ -14,6 +13,7 @@ import { Input } from "@/features/ui/input.tsx";
 import { Textarea } from "@/features/ui/textarea.tsx";
 import { useMeUpdateMutation } from "@/features/user/mutations.tsx";
 import { ProfileFormSchema, ProfileFormValues } from "@/features/user/types.ts";
+import { useAuth } from "@/hooks/useAuth.ts";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -74,11 +74,11 @@ export function ProfileForm() {
 
     return (
         <div className="p-4">
-            <div className={`max-w-xl mx-auto rounded-2xl border-2 ${borderClass} bg-white p-6`}>
-                {message ? <div className={`text-sm mb-4 ${messageClass}`}>{message}</div> : null}
+            <div className={`mx-auto max-w-xl rounded-2xl border-2 ${borderClass} bg-white p-6`}>
+                {message ? <div className={`mb-4 text-sm ${messageClass}`}>{message}</div> : null}
 
-                <div className="flex items-center space-x-4 mb-6">
-                    <Avatar className="rounded-md w-12 h-12">
+                <div className="mb-6 flex items-center space-x-4">
+                    <Avatar className="h-12 w-12 rounded-md">
                         <AvatarImage
                             src={user.avatar}
                             alt={user.display_name}
@@ -117,7 +117,7 @@ export function ProfileForm() {
                                     <FormControl>
                                         <Textarea
                                             {...field}
-                                            className="mt-1 resize-none max-h-40 overflow-y-auto"
+                                            className="mt-1 max-h-40 resize-none overflow-y-auto"
                                             rows={4}
                                         />
                                     </FormControl>
@@ -128,7 +128,7 @@ export function ProfileForm() {
 
                         <ImageField name="avatar" />
 
-                        <div className="pt-2 border-t">
+                        <div className="border-t pt-2">
                             <Button
                                 type="submit"
                                 disabled={submitStatus === "submitting"}

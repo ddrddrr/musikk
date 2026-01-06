@@ -52,7 +52,7 @@ export function ProfilePage() {
                 <UserAvatar src={user.avatar} alt={user.display_name} size="lg" />
                 <div>
                     <h1 className="text-2xl font-semibold">{user.display_name}</h1>
-                    <div className="text-sm text-muted-foreground mt-1 max-h-40 overflow-y-auto">
+                    <div className="mt-1 max-h-40 overflow-y-auto text-sm text-muted-foreground">
                         {user.bio}
                     </div>
                     <div className="mt-4 flex gap-2">

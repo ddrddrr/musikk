@@ -22,7 +22,7 @@ export function SongCollectionPlayButton({
             variant="brand"
             size="icon"
             onClick={onClick}
-            className={`p-0 flex items-center justify-center ${showComments ? "h-8 w-8" : "h-12 w-12"}`}
+            className={`flex items-center justify-center p-0 ${showComments ? "h-8 w-8" : "h-12 w-12"}`}
         >
             {renderPlayPauseIcon()}
         </Button>

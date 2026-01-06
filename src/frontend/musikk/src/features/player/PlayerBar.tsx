@@ -70,34 +70,34 @@ export function PlayerBar({
     const authorNames = playingCollectionSong?.song.authors.map((a) => a.display_name).join(", ");
 
     return (
-        <div className="bg-white border-t border-black px-4 py-2">
-            <div className="flex items-center justify-between w-full gap-4">
+        <div className="border-t border-black bg-white px-4 py-2">
+            <div className="flex w-full items-center justify-between gap-4">
                 {playingSong && (
-                    <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-14 h-14 border-2 border-black flex-shrink-0">
+                    <div className="flex min-w-0 items-center gap-3">
+                        <div className="h-14 w-14 flex-shrink-0 border-2 border-black">
                             {playingSong.image ? (
                                 <img
                                     src={playingSong.image}
                                     alt={playingSong.title}
-                                    className="w-full h-full object-cover"
+                                    className="h-full w-full object-cover"
                                 />
                             ) : (
-                                <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                                    <span className="text-gray-400 text-2xl">♪</span>
+                                <div className="flex h-full w-full items-center justify-center bg-gray-200">
+                                    <span className="text-2xl text-gray-400">♪</span>
                                 </div>
                             )}
                         </div>
-                        <div className="flex flex-col min-w-0">
-                            <p className="font-bold truncate text-sm">{playingSong.title}</p>
-                            <p className="text-xs text-gray-600 truncate">{authorNames}</p>
+                        <div className="flex min-w-0 flex-col">
+                            <p className="truncate text-sm font-bold">{playingSong.title}</p>
+                            <p className="truncate text-xs text-gray-600">{authorNames}</p>
                         </div>
                     </div>
                 )}
 
-                <div className="flex items-center gap-4 flex-1 justify-end min-w-0">
+                <div className="flex min-w-0 flex-1 items-center justify-end gap-4">
                     {isThisDeviceActive && playingCollectionSong && (
-                        <div className="flex items-center gap-1 basis-1/2 min-w-0 max-w-[350px]">
-                            <span className="text-xs text-right">{formatTime(displayTime)}</span>
+                        <div className="flex max-w-[350px] min-w-0 basis-1/2 items-center gap-1">
+                            <span className="text-right text-xs">{formatTime(displayTime)}</span>
                             <Slider
                                 value={[displayTime]}
                                 min={0}

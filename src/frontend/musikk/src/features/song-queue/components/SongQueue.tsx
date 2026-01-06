@@ -11,14 +11,14 @@ export function SongQueue() {
     const currentSong = queue?.nodes[0]?.collection_song?.song;
 
     return (
-        <div className="flex w-full h-full">
-            <div className="w-1/2 flex flex-col items-start justify-start p-8 border-r border-black">
+        <div className="flex h-full w-full">
+            <div className="flex w-1/2 flex-col items-start justify-start border-r border-black p-8">
                 <SongDisplay song={currentSong} />
             </div>
 
-            <div className="w-1/2 flex flex-col relative">
-                <div className="p-8 overflow-y-auto flex-1">
-                    <h2 className="text-2xl font-bold mb-4">Queue</h2>
+            <div className="relative flex w-1/2 flex-col">
+                <div className="flex-1 overflow-y-auto p-8">
+                    <h2 className="mb-4 text-2xl font-bold">Queue</h2>
                     <ul className="space-y-3">
                         {nodes.map((node) => (
                             <li key={node.uuid}>
@@ -28,13 +28,13 @@ export function SongQueue() {
                     </ul>
                 </div>
 
-                <div className="p-4 border-t border-black bg-white">
+                <div className="border-t border-black bg-white p-4">
                     <Button
                         onClick={() => clearQueueMutation.mutate({ action: "clear" })}
                         variant="destructive"
                         className="w-full"
                     >
-                        <Trash2 className="w-4 h-4 mr-2" />
+                        <Trash2 className="mr-2 h-4 w-4" />
                         Clear Queue
                     </Button>
                 </div>

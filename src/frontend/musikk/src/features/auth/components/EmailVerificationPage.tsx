@@ -42,13 +42,13 @@ export function EmailVerificationPage() {
     const getIcon = () => {
         switch (status) {
             case "loading":
-                return <Loader2 className="w-16 h-16 text-red-600 animate-spin" />;
+                return <Loader2 className="h-16 w-16 animate-spin text-red-600" />;
             case "success":
-                return <CheckCircle2 className="w-16 h-16 text-green-600" />;
+                return <CheckCircle2 className="h-16 w-16 text-green-600" />;
             case "error":
-                return <XCircle className="w-16 h-16 text-red-600" />;
+                return <XCircle className="h-16 w-16 text-red-600" />;
             case "invalid":
-                return <AlertCircle className="w-16 h-16 text-red-600" />;
+                return <AlertCircle className="h-16 w-16 text-red-600" />;
         }
     };
 
@@ -65,10 +65,10 @@ export function EmailVerificationPage() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50">
+        <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
             <Card className="w-full max-w-md border-2 border-red-600 shadow-lg">
                 <CardHeader className="border-b-2 border-red-600">
-                    <CardTitle className="text-2xl font-bold text-center text-gray-900">
+                    <CardTitle className="text-center text-2xl font-bold text-gray-900">
                         Email Verification
                     </CardTitle>
                 </CardHeader>

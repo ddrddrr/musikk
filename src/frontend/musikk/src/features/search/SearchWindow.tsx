@@ -45,7 +45,7 @@ export function SearchWindow({ onItemSelect, songMode = "card" }: SearchWindowPr
 
         return (
             <div>
-                <h3 className="text-sm font-semibold mb-2">Songs</h3>
+                <h3 className="mb-2 text-sm font-semibold">Songs</h3>
                 <div className={containerClass}>
                     {data.songs.map((song) => {
                         const onClick = onItemSelect
@@ -84,7 +84,7 @@ export function SearchWindow({ onItemSelect, songMode = "card" }: SearchWindowPr
 
         return (
             <div>
-                <h3 className="text-sm font-semibold mb-2">{label}</h3>
+                <h3 className="mb-2 text-sm font-semibold">{label}</h3>
                 <div className="grid grid-cols-2 gap-2">
                     {items.map((collection) => (
                         <CollectionCard
@@ -114,7 +114,7 @@ export function SearchWindow({ onItemSelect, songMode = "card" }: SearchWindowPr
 
         return (
             <div>
-                <h3 className="text-sm font-semibold mb-2">{label}</h3>
+                <h3 className="mb-2 text-sm font-semibold">{label}</h3>
                 <div className="grid grid-cols-2 gap-2">
                     {items.map((user) => (
                         <UserCard

@@ -42,26 +42,33 @@ class PublicationListCreateForObjView(APIView):
             ).data,
         )
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request, obj_type, obj_uuid, *args, **kwargs):
+        try:
+            created_for_obj = CREATED_FOR_RESOLVER.resolve_model_instance(
+                {"type": obj_type, "uuid": str(obj_uuid)}
+            )
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
         serializer = PublicationCreateSerializer(
-            data=request.data, context={"request": request}
+            data=request.data,
+            context={"request": request, "created_for_obj": created_for_obj},
         )
         serializer.is_valid(raise_exception=True)
         obj = serializer.save()
 
-        if created_for := serializer.validated_data.get("created_for"):
-            created_for_ref = CREATED_FOR_RESOLVER.get_model_instance_representation(
-                created_for
-            )
-            send_ws_event(
-                f"user_{request.user.uuid}",
-                event_name="invalidate.query",
-                query_key=[
-                    "publications",
-                    created_for_ref["type"],
-                    created_for_ref["uuid"],
-                ],
-            )
+        created_for_ref = CREATED_FOR_RESOLVER.get_model_instance_representation(
+            created_for_obj
+        )
+        send_ws_event(
+            f"user_{request.user.uuid}",
+            event_name="invalidate.query",
+            query_key=[
+                "publications",
+                created_for_ref["type"],
+                created_for_ref["uuid"],
+            ],
+        )
 
         return Response(
             status=status.HTTP_201_CREATED,

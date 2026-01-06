@@ -24,16 +24,16 @@ export function SearchBar({
     };
 
     return (
-        <div className="relative max-w-sm mx-4">
+        <div className="relative mx-4 max-w-sm">
             <Popover open={open} onOpenChange={setOpen}>
                 <PopoverTrigger asChild>
-                    <button className="flex items-center w-full bg-white hover:bg-white/90 transition-colors rounded-sm px-4 py-2 text-left text-sm text-black">
-                        <Search className="w-4 h-4 mr-2" />
+                    <button className="flex w-full items-center rounded-sm bg-white px-4 py-2 text-left text-sm text-black transition-colors hover:bg-white/90">
+                        <Search className="mr-2 h-4 w-4" />
                         <span className="opacity-70">{placeholder}</span>
                     </button>
                 </PopoverTrigger>
                 <PopoverContent
-                    className="w-[350px] max-h-[500px] overflow-y-auto p-0 bg-white border rounded-sm shadow-lg"
+                    className="max-h-[500px] w-[350px] overflow-y-auto rounded-sm border bg-white p-0 shadow-lg"
                     align="center"
                 >
                     <div className="p-4">

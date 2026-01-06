@@ -11,7 +11,7 @@ export const PlayerBox = memo(function PlayerBox() {
     const [seeking, setSeeking] = useState(false);
 
     return (
-        <div className="sticky bottom-0 left-0 right-0 z-10 border-t border-black bg-white">
+        <div className="sticky right-0 bottom-0 left-0 z-10 border-t border-black bg-white">
             {isQueueOpen && (
                 <div
                     className="overflow-y-auto border-t border-b border-black"

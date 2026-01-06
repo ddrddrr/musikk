@@ -39,7 +39,7 @@ function StatusBadge({ status, detail }: { status: SongUploadStatus; detail?: st
                 {status}
             </div>
             {detail ? (
-                <div className="text-xs text-muted-foreground max-w-[50ch] truncate">{detail}</div>
+                <div className="max-w-[50ch] truncate text-xs text-muted-foreground">{detail}</div>
             ) : null}
         </div>
     );

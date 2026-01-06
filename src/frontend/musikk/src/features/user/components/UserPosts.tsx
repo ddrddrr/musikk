@@ -10,16 +10,16 @@ export function UserPosts({ userUUID }: { userUUID: UUID }) {
     const currUserUUID = useUserUUID();
 
     if (error) {
-        return <div className="text-red-500 text-center">Failed to load posts.</div>;
+        return <div className="text-center text-red-500">Failed to load posts.</div>;
     }
 
     if (isPending) return null;
 
     return (
-        <div className="space-y-6 w-full max-w-2xl mx-auto">
+        <div className="mx-auto w-full max-w-2xl space-y-6">
             {currUserUUID == userUUID && (
                 <Card className="border-2 border-black shadow-md">
-                    <CardContent className="p-4 space-y-3">
+                    <CardContent className="space-y-3 p-4">
                         <h2 className="text-lg font-semibold">Add a Post :)</h2>
                         <PostForm feedUserUuid={userUUID} />
                     </CardContent>

@@ -10,9 +10,6 @@ from users.api.v1.serializers import BaseUserSerializer
 class PublicationCreateSerializer(BaseModelSerializer):
     author = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
-    created_for = TypeModelRefField(
-        resolver=CREATED_FOR_RESOLVER, write_only=True, required=False, allow_null=True
-    )
     attachment = TypeModelRefField(
         resolver=ATTACHMENT_RESOLVER, write_only=True, required=False, allow_null=True
     )
@@ -25,7 +22,6 @@ class PublicationCreateSerializer(BaseModelSerializer):
         fields = BaseModelSerializer.Meta.fields + [
             "author",
             "content",
-            "created_for",
             "attachment",
             "parent_uuid",
         ]
@@ -43,7 +39,8 @@ class PublicationCreateSerializer(BaseModelSerializer):
                     }
                 )
 
-        if not (created_for_obj := validated_data.pop("created_for", None)):
+        created_for_obj = self.context.get("created_for_obj")
+        if not created_for_obj:
             if not parent_uuid:
                 raise serializers.ValidationError(
                     {"created_for": "Required for root publications."}

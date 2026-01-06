@@ -25,13 +25,13 @@ export const SongCollectionHeader = memo(function SongCollectionHeader({
 
     return (
         <>
-            <div className={`flex bg-white p-6 rounded-sm border-2 border-black gap-4`}>
+            <div className={`flex gap-4 rounded-sm border-2 border-black bg-white p-6`}>
                 {collection.image ? (
                     <img
                         src={collection.image}
                         alt="♫"
-                        className={`object-cover rounded-sm border-2 border-black ${
-                            showComments ? "w-20 h-20" : "w-32 h-32"
+                        className={`rounded-sm border-2 border-black object-cover ${
+                            showComments ? "h-20 w-20" : "h-32 w-32"
                         }`}
                     />
                 ) : (
@@ -41,8 +41,8 @@ export const SongCollectionHeader = memo(function SongCollectionHeader({
                 <div className="flex-1">
                     {showComments ? (
                         <div className="mb-2">
-                            <p className="font-bold text-sm truncate">{collection.title}</p>
-                            <div className="flex gap-3 mt-2">
+                            <p className="truncate text-sm font-bold">{collection.title}</p>
+                            <div className="mt-2 flex gap-3">
                                 {songsCount > 0 && (
                                     <SongCollectionPlayButton
                                         collection={collection}
@@ -64,15 +64,15 @@ export const SongCollectionHeader = memo(function SongCollectionHeader({
                     ) : (
                         <div className="flex items-center justify-between">
                             <div className="min-w-0">
-                                <p className="font-bold text-xl">{collection.title}</p>
-                                <p className="text-sm text-gray-500 truncate">{authors}</p>
+                                <p className="text-xl font-bold">{collection.title}</p>
+                                <p className="truncate text-sm text-gray-500">{authors}</p>
                                 {collection.description && (
-                                    <p className="text-gray-600 mt-2 line-clamp-2 text-base">
+                                    <p className="mt-2 line-clamp-2 text-base text-gray-600">
                                         {collection.description}
                                     </p>
                                 )}
                             </div>
-                            <div className="flex gap-2 ml-2 flex-shrink-0">
+                            <div className="ml-2 flex flex-shrink-0 gap-2">
                                 {songsCount > 0 && (
                                     <SongCollectionPlayButton
                                         collection={collection}
@@ -96,8 +96,14 @@ export const SongCollectionHeader = memo(function SongCollectionHeader({
             </div>
 
             <div className="flex items-center justify-between">
-                <div className={"border-black bg-white border-2 rounded-sm"}>
-                    <h3 className="text-black  text-lg font-bold p-1">Songs • {songsCount}</h3>
+                <div className={"rounded-sm border-2 border-black bg-white"}>
+                    <h3
+                        className={`p-1 font-bold text-black ${
+                            showComments ? "text-sm" : "text-lg"
+                        }`}
+                    >
+                        Songs • {songsCount}
+                    </h3>
                 </div>
                 {notPersonalCollection && (
                     <Button

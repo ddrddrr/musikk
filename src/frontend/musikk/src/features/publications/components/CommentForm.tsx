@@ -50,19 +50,19 @@ export function CommentForm({ objType, objUUID, replyTo, setReplyTo }: CommentFo
     return (
         <form onSubmit={handleSubmit(submitHandler)} className="space-y-2">
             {replyTo && (
-                <div className="text-xs text-gray-600 border border-blue-300 bg-blue-100 p-2 mb-2 rounded flex justify-between items-start">
-                    <div className="truncate max-w-xs">
-                        <div className="font-medium truncate">
+                <div className="mb-2 flex items-start justify-between rounded-sm border border-black bg-blue-500 p-2 text-xs text-white">
+                    <div className="max-w-xs truncate">
+                        <div className="truncate font-medium">
                             {replyTo.author.display_name || "Anonymous"}
                         </div>
-                        <div className="italic truncate">{replyTo.content}</div>
+                        <div className="truncate italic">{replyTo.content}</div>
                     </div>
                     <Button
                         type="button"
                         variant="ghost"
                         size="sm"
                         onClick={() => setReplyTo?.(undefined)}
-                        className="ml-4 shrink-0"
+                        className="ml-4 shrink-0 text-white"
                     >
                         Cancel
                     </Button>
@@ -70,11 +70,11 @@ export function CommentForm({ objType, objUUID, replyTo, setReplyTo }: CommentFo
             )}
             <textarea
                 {...register("content")}
-                className="w-full p-2 text-sm bg-white border-2 border-black rounded shadow"
+                className="w-full rounded-sm border-2 border-black bg-white p-2 text-sm"
                 placeholder="Write a comment..."
             />
             {errors.content && <p className="text-xs text-red-500">{errors.content.message}</p>}
-            <Button type="submit" variant="brand" className="px-4 py-2 rounded-lg">
+            <Button type="submit" variant="brand" className="rounded-sm px-4 py-2">
                 Post Comment
             </Button>
         </form>

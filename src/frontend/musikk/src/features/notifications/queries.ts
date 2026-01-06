@@ -1,6 +1,6 @@
 import { api_client } from "@/api/axiosConf.ts";
 import { NotificationURLs } from "@/api/endpoints.ts";
-import { IReplyNotification, IFollowerNotification } from "@/features/notifications/types.ts";
+import { IFollowerNotification, IReplyNotification } from "@/features/notifications/types.ts";
 
 export interface NotificationListParams {
     replies: IReplyNotification[];

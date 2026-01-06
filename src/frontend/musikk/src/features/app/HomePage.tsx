@@ -10,7 +10,7 @@ export const HomePage = memo(function HomePage() {
     return (
         <UserCollectionsProvider>
             <UserConnectionsProvider>
-                <div className="h-screen flex flex-col bg-gray-200">
+                <div className="flex h-screen flex-col bg-gray-200">
                     <Header />
                     <div className="flex flex-1 overflow-hidden">
                         <MainContent />

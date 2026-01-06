@@ -1,3 +1,4 @@
+// SongCollectionContainer.tsx
 import { UUID } from "@/api/types.ts";
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
 import { CommentBox } from "@/features/publications/components/CommentBox.tsx";
@@ -38,14 +39,14 @@ export function SongCollectionContainer({ collectionUUID }: SongCollectionContai
 
     if (isPending)
         return (
-            <div className="min-h-[400px] flex items-center justify-center">
-                <div className="w-8 h-8 border-4 border-black border-t-transparent rounded-full animate-spin"></div>
+            <div className="flex min-h-[400px] items-center justify-center">
+                <div className="h-8 w-8 animate-spin rounded-full border-4 border-black border-t-transparent"></div>
             </div>
         );
 
     if (error)
         return (
-            <div className="text-white text-center p-6 bg-red-600 rounded-lg border-2 border-black">
+            <div className="rounded-lg border-2 border-black bg-red-600 p-6 text-center text-white">
                 An error has occurred: {error.message}
             </div>
         );
@@ -58,9 +59,9 @@ export function SongCollectionContainer({ collectionUUID }: SongCollectionContai
         !!currUserUUID && collection?.authors.map((a) => a.uuid).includes(currUserUUID);
 
     return (
-        <div className="max-w-7xl mx-auto p-4">
+        <div className="mx-auto max-w-7xl p-4">
             <div className={`flex gap-6 ${showComments ? "flex-row" : "flex-col"}`}>
-                <div className={showComments ? "flex-1 min-w-0" : "w-full"}>
+                <div className={showComments ? "min-w-0 flex-1" : "w-full"}>
                     <div className="space-y-4">
                         <SongCollectionHeader
                             collection={collection}
@@ -76,13 +77,19 @@ export function SongCollectionContainer({ collectionUUID }: SongCollectionContai
                                     <li key={`${collectionSong.uuid}-${index}`}>
                                         <SongContainer
                                             collectionSong={collectionSong}
-                                            renderItems={{ removeFromPlaylistCtxBtn }}
+                                            size={showComments ? "compact" : "normal"}
+                                            renderItems={{
+                                                removeFromPlaylistCtxBtn,
+                                                playButton: !showComments,
+                                                addToLikedButton: !showComments,
+                                                addToQueueButton: !showComments,
+                                            }}
                                         />
                                     </li>
                                 ))}
                             </ul>
                         ) : (
-                            <div className="text-center py-12 text-gray-700 bg-white rounded-lg border-2 border-black">
+                            <div className="rounded-lg border-2 border-black bg-white py-12 text-center text-gray-700">
                                 <p className="font-medium">No songs in this collection</p>
                             </div>
                         )}
@@ -90,7 +97,7 @@ export function SongCollectionContainer({ collectionUUID }: SongCollectionContai
                 </div>
 
                 {showComments && (
-                    <div className="flex-1 min-w-0">
+                    <div className="min-w-0 flex-1">
                         <CommentBox objType="collection" objUUID={collectionUUID} />
                     </div>
                 )}

@@ -3,11 +3,10 @@ import { Publication } from "@/features/publications/types.ts";
 
 interface CommentListProps {
     comments: Publication[];
-    replyTo?: Publication;
     setReplyTo: (comment: Publication) => void;
 }
 
-export function CommentList({ comments, replyTo, setReplyTo }: CommentListProps) {
+export function CommentList({ comments, setReplyTo }: CommentListProps) {
     return (
         <div className="space-y-4">
             {comments.map((comment) => {
@@ -21,7 +20,6 @@ export function CommentList({ comments, replyTo, setReplyTo }: CommentListProps)
                         comment={comment}
                         parent={parent}
                         setReplyTo={setReplyTo}
-                        repliedTo={replyTo?.uuid === comment.uuid}
                     />
                 );
             })}

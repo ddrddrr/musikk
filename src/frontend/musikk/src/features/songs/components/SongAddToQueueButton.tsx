@@ -30,7 +30,7 @@ export function SongAddToQueueButton({
             }
             disabled={addToQueueMutation.isPending}
             style={{ width: size, height: size }}
-            className={`p-0 flex items-center justify-center ${className}`}
+            className={`flex items-center justify-center p-0 ${className}`}
         >
             <BetweenHorizonalStart size={iconSize} />
         </Button>

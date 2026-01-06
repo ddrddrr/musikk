@@ -32,7 +32,7 @@ export function SongAddToLikedButton({ collectionSong, className = "", size = 40
             size="icon"
             onClick={() => handleClick(collectionSong)}
             style={{ width: size, height: size }}
-            className={`p-0 flex items-center justify-center ${className}`}
+            className={`flex items-center justify-center p-0 ${className}`}
         >
             {renderAddIcon()}
         </Button>

@@ -64,26 +64,26 @@ export function UserCard({ user, size = "medium", onClick }: UserCardProps) {
                     onClick={() => handleOnClick(user)}
                     variant="panel"
                     size={size === "small" ? "sm" : size === "big" ? "lg" : "md"}
-                    className={`py-0 cursor-pointer ${styles.card}`}
+                    className={`cursor-pointer py-0 ${styles.card}`}
                 >
-                    <CardContent className="p-0 flex flex-col">
+                    <CardContent className="flex flex-col p-0">
                         <div className={`${styles.avatarWrapper} bg-gray-200`}>
                             {avatar ? (
                                 <img
                                     src={avatar}
                                     alt={display_name}
-                                    className="w-full h-full object-cover"
+                                    className="h-full w-full object-cover"
                                 />
                             ) : (
-                                <div className="w-full h-full flex items-center justify-center">
+                                <div className="flex h-full w-full items-center justify-center">
                                     <Smile className={`${styles.icon}`} />
                                 </div>
                             )}
                         </div>
                         <div
-                            className={`bg-gray-200 border-t-2 border-black text-center flex items-center justify-center ${styles.padding}`}
+                            className={`flex items-center justify-center border-t-2 border-black bg-gray-200 text-center ${styles.padding}`}
                         >
-                            <p className={`font-bold truncate w-full ${styles.name}`}>
+                            <p className={`w-full truncate font-bold ${styles.name}`}>
                                 {display_name}
                             </p>
                         </div>
@@ -93,7 +93,7 @@ export function UserCard({ user, size = "medium", onClick }: UserCardProps) {
             {!!myUuid && user.uuid !== myUuid && (
                 <ContextMenuContent panel="card" className="w-48">
                     <ContextMenuItem onSelect={toggleFollow}>
-                        <MoreHorizontal className="w-4 h-4 mr-2" />
+                        <MoreHorizontal className="mr-2 h-4 w-4" />
                         {isFollowing ? "Unfollow" : "Follow"}
                     </ContextMenuItem>
                 </ContextMenuContent>

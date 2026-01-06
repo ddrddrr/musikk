@@ -17,8 +17,8 @@ export function SongCollectionCarousel({ collections, title }: SongCollectionsCa
     const shouldLoop = collections.length > 4; // lg shows 4 at once
 
     return (
-        <div className="w-9/10 mx-auto">
-            <h2 className="text-xl font-bold mb-4 text-black">{title}</h2>
+        <div className="mx-auto w-9/10">
+            <h2 className="mb-4 text-xl font-bold text-black">{title}</h2>
 
             <Carousel
                 opts={{
@@ -33,7 +33,7 @@ export function SongCollectionCarousel({ collections, title }: SongCollectionsCa
                             collections.map((collection) => (
                                 <CarouselItem
                                     key={collection.uuid}
-                                    className="pl-2 md:pl-4 basis-1/2 md:basis-1/3 lg:basis-1/4"
+                                    className="basis-1/2 pl-2 md:basis-1/3 md:pl-4 lg:basis-1/4"
                                 >
                                     <CollectionCard collection={collection} size="medium" />
                                 </CarouselItem>

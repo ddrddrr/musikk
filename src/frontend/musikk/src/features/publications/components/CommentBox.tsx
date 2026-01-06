@@ -19,14 +19,14 @@ export const CommentBox = memo(function CommentBox({ objType, objUUID }: Comment
         if (commentsContainerRef.current) {
             commentsContainerRef.current.scrollTop = commentsContainerRef.current.scrollHeight;
         }
-        // TODO: probably shouldnt зависеть на дата, просто один раз проскроллить...?
+        // TODO: probably shouldnt depend on data, just scroll once?
     }, [data]);
 
     // todo use new shadcn spinner
     if (isPending) {
         return (
-            <div className="min-h-[400px] flex items-center justify-center">
-                <div className="w-8 h-8 border-4 border-black border-t-transparent rounded-full animate-spin"></div>
+            <div className="flex min-h-[400px] items-center justify-center">
+                <div className="h-8 w-8 animate-spin rounded-full border-4 border-black border-t-transparent"></div>
             </div>
         );
     }
@@ -34,19 +34,18 @@ export const CommentBox = memo(function CommentBox({ objType, objUUID }: Comment
     // todo create a centralized err message?
     if (error) {
         return (
-            <div className="text-white text-center p-6 bg-red-600 rounded-lg border-2 border-black">
+            <div className="rounded-lg border-2 border-black bg-red-600 p-6 text-center text-white">
                 An error has occurred: {error.message}
             </div>
         );
     }
 
-    // todo some shadcn component?
     return (
-        <div className="flex flex-col border border-black rounded-lg bg-white h-full max-h-[600px] overflow-hidden">
-            <div className="flex-1 overflow-y-auto p-4 space-y-4" ref={commentsContainerRef}>
-                <CommentList comments={data} replyTo={replyTo} setReplyTo={setReplyTo} />
+        <div className="flex h-full max-h-[600px] flex-col overflow-hidden rounded-lg border-2 border-black bg-white">
+            <div className="flex-1 space-y-4 overflow-y-auto p-4" ref={commentsContainerRef}>
+                <CommentList comments={data} setReplyTo={setReplyTo} />
             </div>
-            <div className="border-t border-black p-4 bg-gray-100">
+            <div className="border-t-2 border-black bg-gray-100 p-4">
                 <CommentForm
                     objType={objType}
                     objUUID={objUUID}

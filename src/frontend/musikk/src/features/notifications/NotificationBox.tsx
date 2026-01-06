@@ -33,19 +33,19 @@ export const NotificationBox = memo(function NotificationBox() {
         }
     }
 
-    if (isPending) return <div className="text-center text-sm p-4">Loading...</div>;
+    if (isPending) return <div className="p-4 text-center text-sm">Loading...</div>;
     if (error)
-        return <div className="text-center text-sm text-red-500 p-4">Error: {error.message}</div>;
+        return <div className="p-4 text-center text-sm text-red-500">Error: {error.message}</div>;
 
     return (
         <Popover onOpenChange={handleOpenChange}>
             <PopoverTrigger asChild>
                 <div className="relative">
                     <Button variant="ghost" size="icon" className="text-white">
-                        <Sparkle className="w-5 h-5" />
+                        <Sparkle className="h-5 w-5" />
                     </Button>
                     {unreadUUIDs.length > 0 && (
-                        <span className="absolute -top-1 -right-1 bg-yellow-400 text-black text-xs font-bold px-1.5 py-0.5 rounded-full">
+                        <span className="absolute -top-1 -right-1 rounded-full bg-yellow-400 px-1.5 py-0.5 text-xs font-bold text-black">
                             {unreadUUIDs.length}
                         </span>
                     )}

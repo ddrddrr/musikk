@@ -13,7 +13,7 @@ export const Header = memo(function Header() {
 
     // using grid here is easier than flexbox due to buttons aligment and spacing issues
     return (
-        <header className="grid grid-cols-5 items-center p-4 bg-red-600 text-white">
+        <header className="grid grid-cols-5 items-center bg-red-600 p-4 text-white">
             <div className="col-span-1 flex justify-start gap-4">
                 <Button
                     variant="ghost"
@@ -33,12 +33,12 @@ export const Header = memo(function Header() {
                 </Button>
             </div>
 
-            <div className="col-span-3 flex justify-start items-center gap-4">
+            <div className="col-span-3 flex items-center justify-start gap-4">
                 <h1 className="text-xl font-bold">Musikk</h1>
                 <SearchBar />
             </div>
 
-            <div className="col-span-1 flex justify-end items-center gap-4">
+            <div className="col-span-1 flex items-center justify-end gap-4">
                 <ProfileDropdown />
                 <NotificationBox />
                 <Button
@@ -54,10 +54,10 @@ export const Header = memo(function Header() {
                     <Button
                         variant="outline"
                         size="sm"
-                        className="border-white text-white bg-transparent hover:bg-red-700"
+                        className="border-white bg-transparent text-white hover:bg-red-700"
                         onClick={() => navigate("/upload")}
                     >
-                        <Upload className="w-4 h-4 mr-1" />
+                        <Upload className="mr-1 h-4 w-4" />
                         Upload
                     </Button>
                 )}

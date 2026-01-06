@@ -28,9 +28,9 @@ export function ImageField({
                     <FormLabel>{label}</FormLabel>
 
                     <FormControl>
-                        <div className="bg-gray-200 p-4 border-2 border-black rounded-sm">
-                            <label className="flex w-full min-w-0 items-center gap-3 cursor-pointer overflow-hidden">
-                                <span className="shrink-0 bg-red-600 text-white border-2 border-black rounded px-2 py-1 text-sm font-medium">
+                        <div className="rounded-sm border-2 border-black bg-gray-200 p-4">
+                            <label className="flex w-full min-w-0 cursor-pointer items-center gap-3 overflow-hidden">
+                                <span className="shrink-0 rounded border-2 border-black bg-red-600 px-2 py-1 text-sm font-medium text-white">
                                     {buttonText}
                                 </span>
                                 {value?.name && (

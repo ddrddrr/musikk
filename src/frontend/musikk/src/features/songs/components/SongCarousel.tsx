@@ -15,8 +15,8 @@ interface SongCarouselProps {
 
 export function SongCarousel({ songs, title }: SongCarouselProps) {
     return (
-        <div className="w-9/10 mx-auto">
-            <h2 className="text-xl font-bold mb-4 text-black">{title}</h2>
+        <div className="mx-auto w-9/10">
+            <h2 className="mb-4 text-xl font-bold text-black">{title}</h2>
             <div className="relative">
                 <Carousel
                     opts={{
@@ -25,18 +25,18 @@ export function SongCarousel({ songs, title }: SongCarouselProps) {
                     }}
                     className="w-full"
                 >
-                    <CarouselContent className="-ml-0 min-h-[120px] flex items-center justify-center">
+                    <CarouselContent className="-ml-0 flex min-h-[120px] items-center justify-center">
                         {songs.length > 0 ? (
                             songs.map((song) => (
                                 <CarouselItem
                                     key={song.uuid}
-                                    className="pl-2 md:pl-4 basis-1/2 md:basis-1/3 lg:basis-1/4"
+                                    className="basis-1/2 pl-2 md:basis-1/3 md:pl-4 lg:basis-1/4"
                                 >
                                     <SongCard collectionSong={song} size={"medium"} />
                                 </CarouselItem>
                             ))
                         ) : (
-                            <div className="text-center text-gray-500 w-full">
+                            <div className="w-full text-center text-gray-500">
                                 No songs available
                             </div>
                         )}

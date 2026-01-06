@@ -26,7 +26,7 @@ export function PasswordField({
                 <FormItem className="space-y-2">
                     <FormLabel className="text-lg font-bold text-gray-900">{label}</FormLabel>
                     <FormControl>
-                        <div className="flex items-center gap-2  p-3 border-2 border-black rounded-md transition-colors">
+                        <div className="flex items-center gap-2 rounded-md border-2 border-black p-3 transition-colors">
                             <Input
                                 type={showPassword ? "text" : "password"}
                                 placeholder={placeholder}
@@ -41,9 +41,9 @@ export function PasswordField({
                                 className="h-8 w-8 shrink-0"
                             >
                                 {showPassword ? (
-                                    <EyeOff className="w-5 h-5" />
+                                    <EyeOff className="h-5 w-5" />
                                 ) : (
-                                    <Eye className="w-5 h-5" />
+                                    <Eye className="h-5 w-5" />
                                 )}
                             </Button>
                         </div>

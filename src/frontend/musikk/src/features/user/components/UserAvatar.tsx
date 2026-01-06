@@ -25,7 +25,7 @@ export function UserAvatar({ src, alt, size = "md" }: UserAvatarProps) {
 
     return (
         <div className={`flex items-center justify-center ${sizeClass} rounded-full bg-muted`}>
-            <Smile className="w-2/3 h-2/3 text-muted-foreground" />
+            <Smile className="h-2/3 w-2/3 text-muted-foreground" />
         </div>
     );
 }

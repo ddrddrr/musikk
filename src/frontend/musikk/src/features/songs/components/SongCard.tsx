@@ -62,21 +62,21 @@ export function SongCard({ collectionSong, size = "medium", onClick = undefined 
                 key={uuid}
                 variant="panel"
                 size={size === "small" ? "sm" : size === "big" ? "lg" : "md"}
-                className={`cursor-pointer transition-all duration-200 py-0 ${sizes.card}`}
+                className={`cursor-pointer py-0 transition-all duration-200 ${sizes.card}`}
             >
                 <CardContent className="p-0">
                     {image ? (
                         <div className={`w-full ${sizes.image} ${mediaBaseClass}`}>
-                            <img src={image} alt={title} className="w-full h-full object-cover" />
+                            <img src={image} alt={title} className="h-full w-full object-cover" />
                         </div>
                     ) : (
                         <div className={`w-full ${sizes.image} ${mediaBaseClass}`}>
                             <span className={`text-gray-400 ${sizes.icon}`}>♪</span>
                         </div>
                     )}
-                    <div className={`bg-gray-200 border-t-2 border-black ${sizes.padding}`}>
+                    <div className={`border-t-2 border-black bg-gray-200 ${sizes.padding}`}>
                         <p className={`truncate text-gray-600 ${sizes.authors}`}>{authorNames}</p>
-                        <p className={`font-bold truncate ${sizes.title}`}>{title}</p>
+                        <p className={`truncate font-bold ${sizes.title}`}>{title}</p>
                     </div>
                 </CardContent>
             </Card>

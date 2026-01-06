@@ -34,12 +34,12 @@ export function CollectionContextMenu({ children, collection }: SongContextMenuP
                             })
                         }
                     >
-                        <BetweenHorizonalStart className="w-4 h-4 mr-2" />
+                        <BetweenHorizonalStart className="mr-2 h-4 w-4" />
                         Add to queue
                     </ContextMenuItem>
 
                     <ContextMenuItem onSelect={onCollectionPlayClick}>
-                        <Play className="w-4 h-4 mr-2" />
+                        <Play className="mr-2 h-4 w-4" />
                         Play
                     </ContextMenuItem>
                 </ContextMenuContent>

@@ -8,7 +8,7 @@ interface SongDisplayProps {
 export function SongDisplay({ song }: SongDisplayProps) {
     if (!song) {
         return (
-            <div className="text-center p-4 bg-gray-100 border border-gray-300 rounded-sm mb-4">
+            <div className="mb-4 rounded-sm border border-gray-300 bg-gray-100 p-4 text-center">
                 <p className="text-gray-500">No song playing</p>
             </div>
         );
@@ -18,29 +18,29 @@ export function SongDisplay({ song }: SongDisplayProps) {
         "bg-gray-200 flex items-center justify-center rounded-sm border border-black overflow-hidden";
 
     return (
-        <div className="flex flex-col items-start gap-3 mb-4">
-            <div className="w-full aspect-square max-w-2/5">
+        <div className="mb-4 flex flex-col items-start gap-3">
+            <div className="aspect-square w-full max-w-2/5">
                 {song.image ? (
-                    <div className={`w-full h-full ${mediaBaseClass}`}>
+                    <div className={`h-full w-full ${mediaBaseClass}`}>
                         <img
                             src={song.image}
                             alt={song.title}
-                            className="w-full h-full object-cover"
+                            className="h-full w-full object-cover"
                         />
                     </div>
                 ) : (
-                    <div className={`w-full h-full ${mediaBaseClass}`}>
-                        <span className="text-gray-400 text-3xl">♪</span>
+                    <div className={`h-full w-full ${mediaBaseClass}`}>
+                        <span className="text-3xl text-gray-400">♪</span>
                     </div>
                 )}
             </div>
             <div className="w-full text-start">
-                <div className="flex flex-wrap gap-2 items-center mb-1">
+                <div className="mb-1 flex flex-wrap items-center gap-2">
                     {song.authors.map((author) => (
                         <UserIdentifier key={author.uuid} user={author} />
                     ))}
                 </div>
-                <p className="text-xl font-bold truncate">{song.title}</p>
+                <p className="truncate text-xl font-bold">{song.title}</p>
             </div>
         </div>
     );

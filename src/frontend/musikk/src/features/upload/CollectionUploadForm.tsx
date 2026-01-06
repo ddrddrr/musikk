@@ -46,13 +46,13 @@ export function CollectionUploadForm() {
               : "text-muted-foreground";
 
     return (
-        <div className="p-4 max-h-screen overflow-y-auto">
+        <div className="max-h-screen overflow-y-auto p-4">
             <div className={`rounded-xl border-2 ${borderClass} bg-background p-4 shadow-sm`}>
-                {message ? <div className={`text-sm mb-4 ${messageClass}`}>{message}</div> : null}
+                {message ? <div className={`mb-4 text-sm ${messageClass}`}>{message}</div> : null}
 
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(submitCollection)} className="space-y-6">
-                        <div className="rounded-xl border bg-background p-4 shadow-sm space-y-4">
+                        <div className="space-y-4 rounded-xl border bg-background p-4 shadow-sm">
                             <div className="text-sm font-semibold">Collection</div>
 
                             <div className="grid gap-4 md:grid-cols-2">
@@ -123,7 +123,7 @@ export function CollectionUploadForm() {
                             ))}
                         </div>
 
-                        <div className="flex flex-wrap gap-2 pt-2 border-t">
+                        <div className="flex flex-wrap gap-2 border-t pt-2">
                             <Button type="button" variant="outline" onClick={appendSong}>
                                 Add Song
                             </Button>

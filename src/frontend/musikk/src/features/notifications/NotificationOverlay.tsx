@@ -14,10 +14,10 @@ export const NotificationOverlay = memo(function NotificationOverlay({
     const navigate = useNavigate();
 
     function handleNavigateReplyClick(notification: IReplyNotification) {
-        if (notification.reply_publication.obj_type == "feed") {
+        if (notification.reply_publication.created_for.type == "feed") {
             navigate(`/users/${notification.reply_publication.root_author_uuid}`);
         } else {
-            navigate(`/collection/${notification.reply_publication.obj_uuid}/comments`);
+            navigate(`/collection/${notification.reply_publication.created_for.uuid}/comments`);
         }
     }
 
@@ -31,25 +31,25 @@ export const NotificationOverlay = memo(function NotificationOverlay({
         ...followers.map((n) => ({ ...n, _type: "follower" as const })),
     ].sort((a, b) => new Date(b.date_added).getTime() - new Date(a.date_added).getTime());
     return (
-        <div className="p-4 transition-opacity duration-200 ease-in-out max-h-96 overflow-y-auto">
+        <div className="max-h-96 overflow-y-auto p-4 transition-opacity duration-200 ease-in-out">
             {allNotifications.map((notification) => (
                 <div
                     key={notification.uuid}
-                    className={`border border-black rounded-lg p-3 mb-2 ${notification.is_read ? "bg-gray-50" : "bg-yellow-100"}`}
+                    className={`mb-2 rounded-lg border border-black p-3 ${notification.is_read ? "bg-gray-50" : "bg-yellow-100"}`}
                 >
                     {notification._type === "reply" && (
                         <>
-                            <div className="font-semibold text-sm">
+                            <div className="text-sm font-semibold">
                                 Reply:{" "}
                                 {notification.reply_publication.author.display_name ?? "Anonymous"}
                             </div>
-                            <div className="text-xs text-gray-600 mt-1">
+                            <div className="mt-1 text-xs text-gray-600">
                                 {notification.orig_publication.content}
                             </div>
-                            <div className="text-sm text-gray-800 mt-2">
+                            <div className="mt-2 text-sm text-gray-800">
                                 {notification.reply_publication.content}
                             </div>
-                            <div className="flex justify-between mt-2">
+                            <div className="mt-2 flex justify-between">
                                 <span className="text-xs text-gray-600">
                                     {new Date(notification.date_added).toLocaleString(undefined, {
                                         dateStyle: "medium",
@@ -58,7 +58,7 @@ export const NotificationOverlay = memo(function NotificationOverlay({
                                 </span>
                                 <Button
                                     variant="brand"
-                                    className="text-xs px-3 py-1 rounded"
+                                    className="rounded px-3 py-1 text-xs"
                                     onClick={() => handleNavigateReplyClick(notification)}
                                 >
                                     Go to reply
@@ -68,13 +68,13 @@ export const NotificationOverlay = memo(function NotificationOverlay({
                     )}
                     {notification._type === "follower" && (
                         <>
-                            <div className="font-semibold text-sm">
+                            <div className="text-sm font-semibold">
                                 New Follower: {notification.sender.display_name ?? "Anonymous"}
                             </div>
-                            <div className="text-sm text-gray-800 mt-2">
+                            <div className="mt-2 text-sm text-gray-800">
                                 @{notification.sender.display_name} started following you
                             </div>
-                            <div className="flex justify-between mt-2">
+                            <div className="mt-2 flex justify-between">
                                 <span className="text-xs text-gray-600">
                                     {new Date(notification.date_added).toLocaleString(undefined, {
                                         dateStyle: "medium",
@@ -83,7 +83,7 @@ export const NotificationOverlay = memo(function NotificationOverlay({
                                 </span>
                                 <Button
                                     variant="brand"
-                                    className="text-xs px-3 py-1 rounded"
+                                    className="rounded px-3 py-1 text-xs"
                                     onClick={() => handleNavigateFollowerClick(notification)}
                                 >
                                     View Profile

@@ -8,7 +8,7 @@ export function Connections() {
     const [tab, setTab] = useState("friends");
 
     return (
-        <div className="max-w-4xl mx-auto p-6">
+        <div className="mx-auto max-w-4xl p-6">
             <Tabs value={tab} onValueChange={setTab} className="w-full">
                 <TabsList className="mb-6">
                     <TabsTrigger value="friends">Friends</TabsTrigger>
@@ -20,7 +20,7 @@ export function Connections() {
                     {friends.length === 0 ? (
                         <p className="text-muted-foreground">No friends yet.</p>
                     ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-1">
+                        <div className="grid grid-cols-1 gap-1 sm:grid-cols-2 md:grid-cols-3">
                             {friends.map((friend) => (
                                 <UserCard key={friend.uuid} user={friend} />
                             ))}
@@ -32,7 +32,7 @@ export function Connections() {
                     {followed.length === 0 ? (
                         <p className="text-muted-foreground">Not following anyone yet.</p>
                     ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-1">
+                        <div className="grid grid-cols-1 gap-1 sm:grid-cols-2 md:grid-cols-3">
                             {followed.map((user) => (
                                 <UserCard key={user.uuid} user={user} />
                             ))}
@@ -44,7 +44,7 @@ export function Connections() {
                     {followers.length === 0 ? (
                         <p className="text-muted-foreground">No followers.</p>
                     ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-1">
+                        <div className="grid grid-cols-1 gap-1 sm:grid-cols-2 md:grid-cols-3">
                             {followers.map((user) => (
                                 <UserCard key={user.uuid} user={user} />
                             ))}

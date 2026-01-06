@@ -97,11 +97,11 @@ export function SignUpForm() {
                     {formMessage && (
                         <div
                             className={[
-                                "p-4 border-2 rounded-md font-medium",
+                                "rounded-md border-2 p-4 font-medium",
                                 isError
-                                    ? "bg-red-700 border-red-900 text-white"
+                                    ? "border-red-900 bg-red-700 text-white"
                                     : isSuccess
-                                      ? "bg-green-700 border-green-900 text-white"
+                                      ? "border-green-900 bg-green-700 text-white"
                                       : "",
                             ].join(" ")}
                         >

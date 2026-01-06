@@ -21,12 +21,26 @@ export async function publicationCreate({
     attachment_uuid,
     parent_uuid,
 }: IPublicationCreateParams) {
-    await api_client.post(PublicationURLs.publicationCreate(obj_type, obj_uuid), {
+    const payload: {
+        content: string;
+        attachment?: { type: string; uuid: string };
+        parent_uuid?: UUID;
+    } = {
         content,
-        attachment_type,
-        attachment_uuid,
-        parent_uuid,
-    });
+    };
+
+    if (attachment_type && attachment_uuid) {
+        payload.attachment = {
+            type: attachment_type,
+            uuid: attachment_uuid,
+        };
+    }
+
+    if (parent_uuid) {
+        payload.parent_uuid = parent_uuid;
+    }
+
+    await api_client.post(PublicationURLs.publicationCreate(obj_type, obj_uuid), payload);
 }
 
 export function usePublicationCreateMutation() {

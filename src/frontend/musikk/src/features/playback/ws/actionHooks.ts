@@ -1,5 +1,5 @@
-import { useWSClient } from "@/hooks/useWSClient.ts";
 import { ThisDevice } from "@/features/playback/hooks/useCurrentDevice.ts";
+import { useWSClient } from "@/hooks/useWSClient.ts";
 import { useCallback } from "react";
 
 export function useRegisterDeviceAction() {

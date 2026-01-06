@@ -1,3 +1,4 @@
+// SongContainer.tsx
 import { CollectionSong } from "@/features/song-collections/types.ts";
 import { SongAddToLikedButton } from "@/features/songs/components/SongAddToLikedButton.tsx";
 import { SongAddToQueueButton } from "@/features/songs/components/SongAddToQueueButton.tsx";
@@ -7,10 +8,12 @@ import { cn } from "@/lib/utils.ts";
 import { memo } from "react";
 
 type SongContainerSize = "compact" | "normal";
+type SongContainerVariant = "inline" | "stacked";
 
 interface SongContainerProps {
     collectionSong: CollectionSong;
     size?: SongContainerSize;
+    variant?: SongContainerVariant;
     extraStyle?: string;
     renderItems?: Partial<RenderItems>;
 }
@@ -33,6 +36,7 @@ const sizeConfig = {
         buttonsGap: "gap-1",
         buttonSize: 28,
         buttonPadding: "p-1",
+        containerPadding: "p-3",
     },
     normal: {
         containerGap: "gap-4",
@@ -43,12 +47,14 @@ const sizeConfig = {
         buttonsGap: "gap-2",
         buttonSize: 40,
         buttonPadding: "p-2",
+        containerPadding: "p-4",
     },
 };
 
 export const SongContainer = memo(function SongContainer({
     collectionSong,
     size = "normal",
+    variant = "inline",
     extraStyle,
     renderItems = {},
 }: SongContainerProps) {
@@ -66,65 +72,130 @@ export const SongContainer = memo(function SongContainer({
     const mediaBaseClass =
         "flex items-center justify-center bg-gray-200 rounded-sm border border-black overflow-hidden";
 
+    const buttons = (
+        <div className={cn("flex items-center", sizeClass.buttonsGap)}>
+            {playButton && (
+                <SongPlayButton
+                    collectionSong={collectionSong}
+                    size={sizeClass.buttonSize}
+                    className={sizeClass.buttonPadding}
+                />
+            )}
+            {addToLikedButton && (
+                <SongAddToLikedButton
+                    collectionSong={collectionSong}
+                    size={sizeClass.buttonSize}
+                    className={sizeClass.buttonPadding}
+                />
+            )}
+            {addToQueueButton && (
+                <SongAddToQueueButton
+                    collectionSong={collectionSong}
+                    size={sizeClass.buttonSize}
+                    className={sizeClass.buttonPadding}
+                />
+            )}
+        </div>
+    );
+
     return (
         <SongContextMenu song={collectionSong} renderRemoveFromPlaylist={removeFromPlaylistCtxBtn}>
             <div
                 className={cn(
-                    "flex items-center justify-between w-full overflow-hidden",
-                    "bg-white border-black border-2 rounded-sm p-4",
+                    "w-full overflow-hidden",
+                    "rounded-sm border-2 border-black bg-white",
                     "transition-colors hover:bg-gray-100",
-                    sizeClass.containerGap,
+                    sizeClass.containerPadding,
+                    variant === "stacked"
+                        ? cn("flex flex-col", sizeClass.containerGap)
+                        : cn("flex items-center justify-between", sizeClass.containerGap),
                     extraStyle,
                 )}
             >
-                <div className={cn("flex items-center", sizeClass.containerGap)}>
-                    {image &&
-                        (song.image ? (
-                            <div className={cn(mediaBaseClass, sizeClass.image)}>
-                                <img
-                                    src={song.image}
-                                    alt=""
-                                    className="w-full h-full object-cover"
-                                />
-                            </div>
-                        ) : (
-                            <div className={cn(mediaBaseClass, sizeClass.image)}>
-                                <span className={cn("text-gray-400", sizeClass.iconSize)}>♪</span>
-                            </div>
-                        ))}
-                    <div className="flex flex-col min-w-0">
-                        <p className={cn("font-bold text-black truncate", sizeClass.titleSize)}>
-                            {song.title}
-                        </p>
-                        <p className={cn("text-gray-600 truncate", sizeClass.authorsSize)}>
-                            {authors}
-                        </p>
-                    </div>
-                </div>
+                {variant === "stacked" ? (
+                    <>
+                        {/* row: image + title */}
+                        <div className={cn("flex min-w-0 items-center", sizeClass.containerGap)}>
+                            {image &&
+                                (song.image ? (
+                                    <div className={cn(mediaBaseClass, sizeClass.image)}>
+                                        <img
+                                            src={song.image}
+                                            alt=""
+                                            className="h-full w-full object-cover"
+                                        />
+                                    </div>
+                                ) : (
+                                    <div className={cn(mediaBaseClass, sizeClass.image)}>
+                                        <span className={cn("text-gray-400", sizeClass.iconSize)}>
+                                            ♪
+                                        </span>
+                                    </div>
+                                ))}
 
-                <div className={cn("flex items-center shrink-0", sizeClass.buttonsGap)}>
-                    {playButton && (
-                        <SongPlayButton
-                            collectionSong={collectionSong}
-                            size={sizeClass.buttonSize}
-                            className={sizeClass.buttonPadding}
-                        />
-                    )}
-                    {addToLikedButton && (
-                        <SongAddToLikedButton
-                            collectionSong={collectionSong}
-                            size={sizeClass.buttonSize}
-                            className={sizeClass.buttonPadding}
-                        />
-                    )}
-                    {addToQueueButton && (
-                        <SongAddToQueueButton
-                            collectionSong={collectionSong}
-                            size={sizeClass.buttonSize}
-                            className={sizeClass.buttonPadding}
-                        />
-                    )}
-                </div>
+                            <div className="flex min-w-0 flex-col">
+                                <p
+                                    className={cn(
+                                        "truncate font-bold text-black",
+                                        sizeClass.titleSize,
+                                    )}
+                                >
+                                    {song.title}
+                                </p>
+                                {/* hide authors in stacked mode */}
+                            </div>
+                        </div>
+
+                        {/* buttons: UNDER title (aligned with title start, not under the image) */}
+                        <div className="flex">
+                            {image ? (
+                                <div className={cn("shrink-0", sizeClass.image)} />
+                            ) : (
+                                <div className={cn("shrink-0", sizeClass.image)} />
+                            )}
+                            <div className={cn("flex flex-1", sizeClass.containerGap)}>
+                                {buttons}
+                            </div>
+                        </div>
+                    </>
+                ) : (
+                    <>
+                        <div className={cn("flex min-w-0 items-center", sizeClass.containerGap)}>
+                            {image &&
+                                (song.image ? (
+                                    <div className={cn(mediaBaseClass, sizeClass.image)}>
+                                        <img
+                                            src={song.image}
+                                            alt=""
+                                            className="h-full w-full object-cover"
+                                        />
+                                    </div>
+                                ) : (
+                                    <div className={cn(mediaBaseClass, sizeClass.image)}>
+                                        <span className={cn("text-gray-400", sizeClass.iconSize)}>
+                                            ♪
+                                        </span>
+                                    </div>
+                                ))}
+
+                            <div className="flex min-w-0 flex-col">
+                                <p
+                                    className={cn(
+                                        "truncate font-bold text-black",
+                                        sizeClass.titleSize,
+                                    )}
+                                >
+                                    {song.title}
+                                </p>
+                                <p className={cn("truncate text-gray-600", sizeClass.authorsSize)}>
+                                    {authors}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="shrink-0">{buttons}</div>
+                    </>
+                )}
             </div>
         </SongContextMenu>
     );

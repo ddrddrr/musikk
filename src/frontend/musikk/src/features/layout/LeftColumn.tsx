@@ -19,8 +19,8 @@ export function LeftColumn() {
     }, [liked_songs, history, followed_collections]);
 
     return (
-        <div className="w-1/5 bg-red-600 p-4 pb-40 overflow-y-auto">
-            <h2 className="text-xl font-bold text-white mb-4 text-center">Your stuff</h2>
+        <div className="w-1/5 overflow-y-auto bg-red-600 p-4 pb-40">
+            <h2 className="mb-4 text-center text-xl font-bold text-white">Your stuff</h2>
 
             {collections.length > 0 ? (
                 <ul className="space-y-6" role="list">
@@ -31,7 +31,7 @@ export function LeftColumn() {
                     ))}
                 </ul>
             ) : (
-                <div className="text-center py-8 text-white bg-red-600 rounded-sm border-2 border-black">
+                <div className="rounded-sm border-2 border-black bg-red-600 py-8 text-center text-white">
                     <p>No song collections found</p>
                 </div>
             )}

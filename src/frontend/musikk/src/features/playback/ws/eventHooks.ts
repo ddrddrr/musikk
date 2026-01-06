@@ -1,7 +1,7 @@
-import { useWSClient } from "@/hooks/useWSClient.ts";
 import { useDeviceList } from "@/features/playback/hooks/useDeviceList.ts";
 import { usePlaybackState } from "@/features/playback/hooks/usePlaybackState.ts";
 import { IPlaybackDevice } from "@/features/playback/types.ts";
+import { useWSClient } from "@/hooks/useWSClient.ts";
 import { useEffect } from "react";
 
 interface DeviceListPayload {

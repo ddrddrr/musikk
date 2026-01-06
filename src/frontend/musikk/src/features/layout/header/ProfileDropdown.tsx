@@ -1,4 +1,3 @@
-import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/features/ui/button";
 import {
     DropdownMenu,
@@ -8,6 +7,7 @@ import {
 } from "@/features/ui/dropdown-menu.tsx";
 import { Skeleton } from "@/features/ui/skeleton.tsx";
 import { UserAvatar } from "@/features/user/components/UserAvatar.tsx";
+import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 
 export function ProfileDropdown() {
@@ -15,7 +15,7 @@ export function ProfileDropdown() {
     const navigate = useNavigate();
 
     if (isLoading || !user) {
-        return <Skeleton className="w-8 h-8 rounded-full" />;
+        return <Skeleton className="h-8 w-8 rounded-full" />;
     }
 
     return (

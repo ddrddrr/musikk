@@ -45,7 +45,7 @@ export function UserFeed() {
                     ))}
                     {!posts?.length && (
                         <Card>
-                            <CardContent className="text-center text-muted-foreground py-6">
+                            <CardContent className="py-6 text-center text-muted-foreground">
                                 No posts yet.
                             </CardContent>
                         </Card>
@@ -56,9 +56,9 @@ export function UserFeed() {
     }
 
     return (
-        <div className="max-w-2xl mx-auto p-6">
+        <div className="mx-auto max-w-2xl p-6">
             <Tabs value={tab} onValueChange={setTab} className="w-full">
-                <TabsList className="mb-6">
+                <TabsList className="mb-6 rounded-sm">
                     <TabsTrigger value="random">Random</TabsTrigger>
                     <TabsTrigger value="friends">Friends</TabsTrigger>
                     <TabsTrigger value="followed">Followed</TabsTrigger>

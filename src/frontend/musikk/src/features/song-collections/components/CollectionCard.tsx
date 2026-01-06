@@ -63,7 +63,7 @@ export function CollectionCard({
                     key={uuid}
                     variant="panel"
                     spacing={size === "small" ? "sm" : size === "big" ? "lg" : "md"}
-                    className="cursor-pointer transition-all duration-200 py-0"
+                    className="cursor-pointer py-0 transition-all duration-200"
                 >
                     <CardContent className="p-0">
                         {image ? (
@@ -74,16 +74,16 @@ export function CollectionCard({
                             />
                         ) : (
                             <div
-                                className={`w-full ${sizes.image} bg-gray-200 flex items-center justify-center`}
+                                className={`w-full ${sizes.image} flex items-center justify-center bg-gray-200`}
                             >
                                 <span className={`text-gray-400 ${sizes.icon}`}>♪</span>
                             </div>
                         )}
-                        <div className={`bg-gray-200 border-t-2 border-black ${sizes.padding}`}>
+                        <div className={`border-t-2 border-black bg-gray-200 ${sizes.padding}`}>
                             <p className={`truncate text-gray-600 ${sizes.authors}`}>
                                 {authorNames}
                             </p>
-                            <p className={`font-bold truncate ${sizes.title}`}>{title}</p>
+                            <p className={`truncate font-bold ${sizes.title}`}>{title}</p>
                         </div>
                     </CardContent>
                 </Card>

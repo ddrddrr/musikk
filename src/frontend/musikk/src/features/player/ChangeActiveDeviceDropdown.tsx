@@ -28,7 +28,7 @@ export function ChangeActiveDeviceDropdown() {
                                 handleSwitchDevice(device);
                             }
                         }}
-                        className={device.is_active ? "font-semibold bg-muted" : ""}
+                        className={device.is_active ? "bg-muted font-semibold" : ""}
                     >
                         {device.name}
                     </DropdownMenuItem>

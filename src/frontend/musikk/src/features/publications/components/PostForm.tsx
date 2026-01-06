@@ -94,7 +94,7 @@ export function PostForm({ replyTo, setReplyTo, onSuccess, feedUserUuid }: PostF
                 </div>
             )}
 
-            <Button type="submit" variant="brand" className="px-4 py-2 rounded-sm">
+            <Button type="submit" variant="brand" className="rounded-sm px-4 py-2">
                 Submit
             </Button>
         </form>

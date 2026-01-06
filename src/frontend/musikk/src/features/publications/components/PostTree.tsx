@@ -41,9 +41,7 @@ export function PostTree({ publication, depth = 0 }: PostTreeProps) {
                 case "song":
                     return (
                         <div className="mb-4">
-                            <SongContainer
-                                collectionSong={publication.attachment}
-                            />
+                            <SongContainer collectionSong={publication.attachment} />
                         </div>
                     );
                 default:
@@ -54,8 +52,8 @@ export function PostTree({ publication, depth = 0 }: PostTreeProps) {
 
     return (
         <div className="relative">
-            <Card className={cn("border border-black rounded-md shadow-sm mb-2", getBgColor())}>
-                <CardContent className="py-0 px-3">
+            <Card className={cn("mb-2 rounded-md border border-black shadow-sm", getBgColor())}>
+                <CardContent className="px-3 py-0">
                     {publication.attachment && renderCardContent()}
 
                     <div className="flex items-center gap-2">
@@ -69,7 +67,7 @@ export function PostTree({ publication, depth = 0 }: PostTreeProps) {
                         </div>
                     </div>
 
-                    <div className="text-sm whitespace-pre-wrap p-2 rounded-sm bg-gray-50 border border-gray-100 my-2 max-h-[8rem] overflow-auto">
+                    <div className="my-2 max-h-[8rem] overflow-auto rounded-sm border border-gray-100 bg-gray-50 p-2 text-sm whitespace-pre-wrap">
                         {publication.content}
                     </div>
 
@@ -78,7 +76,7 @@ export function PostTree({ publication, depth = 0 }: PostTreeProps) {
                             variant="ghost"
                             size="sm"
                             onClick={() => setIsReplying((prev) => !prev)}
-                            className="text-xs text-blue-600 hover:underline px-0 h-auto"
+                            className="h-auto px-0 text-xs text-blue-600 hover:underline"
                         >
                             {isReplying ? "Cancel" : "Reply"}
                         </Button>
@@ -86,7 +84,7 @@ export function PostTree({ publication, depth = 0 }: PostTreeProps) {
 
                     {isReplying && (
                         <div className="mt-2 pl-2">
-                            <div className="border border-black rounded-sm p-3 bg-gray-50">
+                            <div className="rounded-sm border border-black bg-gray-50 p-3">
                                 <PostForm
                                     replyTo={publication}
                                     setReplyTo={() => setIsReplying(false)}
@@ -122,11 +120,11 @@ export function PostTree({ publication, depth = 0 }: PostTreeProps) {
                     </CollapsibleTrigger>
                     {areChildrenOpen && (
                         <CollapsibleContent>
-                            <div className="relative pl-4 ml-2 space-y-0">
-                                <div className="left-0 top-0 bottom-0 w-[2px] bg-gray-200"></div>
+                            <div className="relative ml-2 space-y-0 pl-4">
+                                <div className="top-0 bottom-0 left-0 w-[2px] bg-gray-200"></div>
                                 {publication.children.map((reply: Publication) => (
                                     <div key={reply.uuid} className="relative">
-                                        <div className="left-0 top-3 w-2 h-[2px] bg-gray-200"></div>
+                                        <div className="top-3 left-0 h-[2px] w-2 bg-gray-200"></div>
                                         <PostTree publication={reply} depth={depth + 1} />
                                     </div>
                                 ))}

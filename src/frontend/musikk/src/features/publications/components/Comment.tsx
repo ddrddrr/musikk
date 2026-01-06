@@ -4,26 +4,23 @@ import { UserIdentifier } from "@/features/user/components/UserIdentifier.tsx";
 interface CommentProps {
     comment: Publication;
     setReplyTo: (comment: Publication) => void;
-    repliedTo?: boolean;
     parent?: Publication;
 }
 
-export function Comment({ comment, setReplyTo, repliedTo, parent }: CommentProps) {
+export function Comment({ comment, setReplyTo, parent }: CommentProps) {
     return (
-        <div
-            className={`border border-black rounded-lg p-3 ${repliedTo ? "bg-yellow-100" : "bg-gray-50"}`}
-        >
+        <div className={`"bg-gray-50" : "bg-gray-50" rounded-lg border border-black p-3`}>
             {parent && (
-                <div className="text-xs text-gray-600 border border-gray-300 bg-gray-100 p-2 mb-2 rounded">
-                    <div className="font-medium truncate">
+                <div className="mb-2 rounded border border-gray-300 bg-gray-100 p-2 text-xs text-gray-600">
+                    <div className="truncate font-medium">
                         {parent.author.display_name || "Anonymous"}
                     </div>
-                    <div className="italic truncate">{parent.content}</div>
+                    <div className="truncate italic">{parent.content}</div>
                 </div>
             )}
-            <div className="flex items-center justify-between mb-1">
+            <div className="mb-1 flex items-center justify-between">
                 <UserIdentifier user={comment.author} />
-                <span className="text-[10px] text-gray-600 truncate text-right max-w-[50%]">
+                <span className="max-w-[50%] truncate text-right text-[10px] text-gray-600">
                     {new Date(comment.date_added).toLocaleString("en-US", {
                         dateStyle: "medium",
                         timeStyle: "short",
@@ -32,14 +29,14 @@ export function Comment({ comment, setReplyTo, repliedTo, parent }: CommentProps
             </div>
             <p className="text-sm text-gray-800">
                 {comment.is_deleted ? (
-                    <span className="italic text-gray-400">Deleted</span>
+                    <span className="text-gray-400 italic">Deleted</span>
                 ) : (
                     comment.content
                 )}
             </p>
             <button
                 onClick={() => setReplyTo(comment)}
-                className="text-xs text-blue-600 hover:underline mt-1"
+                className="mt-1 text-xs text-blue-600 hover:underline"
             >
                 Reply
             </button>

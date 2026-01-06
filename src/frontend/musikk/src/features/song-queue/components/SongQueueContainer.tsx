@@ -45,32 +45,32 @@ export const SongQueueContainer = memo(function SongContainer({
             song={node.collection_song}
             renderRemoveFromPlaylist={removeFromPlaylistCtxBtn}
         >
-            <div className="flex items-center justify-between w-full h-full overflow-hidden">
-                <div className="flex items-center gap-3 min-w-0">
+            <div className="flex h-full w-full items-center justify-between overflow-hidden">
+                <div className="flex min-w-0 items-center gap-3">
                     {image &&
                         (song.image ? (
                             <img
                                 src={song.image}
                                 alt=""
-                                className="w-10 h-10 object-cover rounded-sm border border-black"
+                                className="h-10 w-10 rounded-sm border border-black object-cover"
                             />
                         ) : (
-                            <div className="w-10 h-10 bg-gray-200 flex items-center justify-center rounded-sm border border-black">
-                                <span className="text-gray-400 text-xl">♪</span>
+                            <div className="flex h-10 w-10 items-center justify-center rounded-sm border border-black bg-gray-200">
+                                <span className="text-xl text-gray-400">♪</span>
                             </div>
                         ))}
 
-                    <div className="flex flex-col min-w-0">
-                        <p className={`font-bold text-sm text-black truncate ${titleMaxWidth}`}>
+                    <div className="flex min-w-0 flex-col">
+                        <p className={`truncate text-sm font-bold text-black ${titleMaxWidth}`}>
                             {song.title}
                         </p>
-                        <p className={`text-xs text-gray-600 truncate ${titleMaxWidth}`}>
+                        <p className={`truncate text-xs text-gray-600 ${titleMaxWidth}`}>
                             {authors}
                         </p>
                     </div>
                 </div>
 
-                <div className="flex items-center gap-2 shrink-0">
+                <div className="flex shrink-0 items-center gap-2">
                     {playButton && (
                         <SongQueuePlayButton
                             node={node}
