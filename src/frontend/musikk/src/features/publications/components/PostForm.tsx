@@ -89,8 +89,8 @@ export function PostForm({ replyTo, setReplyTo, onSuccess, feedUserUuid }: PostF
 
             {attachedObj && (
                 <div className="text-xs text-muted-foreground italic">
-                    Attached: {/*TODO: add reprs for all objects?*/}
-                    {isCollection(attachedObj) ? attachedObj.title : attachedObj.song.title}
+                    Attached: {/*TODO: DOESNT WORK, add reprs for all objects?*/}
+                    {isCollection(attachedObj) ? attachedObj.title : attachedObj.title}
                 </div>
             )}
 

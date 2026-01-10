@@ -39,6 +39,7 @@ class PublicationCreateSerializer(BaseModelSerializer):
                     }
                 )
 
+        # TODO: add validation that it is the same as for parent if parent exists
         created_for_obj = self.context.get("created_for_obj")
         if not created_for_obj:
             if not parent_uuid:
@@ -57,7 +58,7 @@ class PublicationCreateSerializer(BaseModelSerializer):
 
 class PublicationRetrieveSerializer(BaseModelSerializer):
     author = BaseUserSerializer(read_only=True)
-    root_author_uuid = serializers.UUIDField(read_only=True)
+    root_author_uuid = serializers.SerializerMethodField(read_only=True)
 
     created_for = TypeModelRefField(
         resolver=CREATED_FOR_RESOLVER, read_only=True, source="created_for_object"
@@ -78,6 +79,7 @@ class PublicationRetrieveSerializer(BaseModelSerializer):
             "is_deleted",
             "created_for",
             "attachment",
+            # TODO: probably make a single obj
             "parent_uuid",
             "parent_author",
             "parent_repr",

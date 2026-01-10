@@ -14,9 +14,16 @@ interface CommentFormDataProps {
     objUUID: UUID;
     replyTo?: Publication;
     setReplyTo?: (comment?: Publication) => void;
+    onCommentPosted?: () => void;
 }
 
-export function CommentForm({ objType, objUUID, replyTo, setReplyTo }: CommentFormDataProps) {
+export function CommentForm({
+    objType,
+    objUUID,
+    replyTo,
+    setReplyTo,
+    onCommentPosted,
+}: CommentFormDataProps) {
     const {
         register,
         handleSubmit,
@@ -39,6 +46,7 @@ export function CommentForm({ objType, objUUID, replyTo, setReplyTo }: CommentFo
                 onSuccess: () => {
                     reset();
                     setReplyTo?.(undefined);
+                    onCommentPosted?.();
                 },
                 onError: (error) => {
                     console.error("Failed to add comment:", error);
@@ -50,7 +58,7 @@ export function CommentForm({ objType, objUUID, replyTo, setReplyTo }: CommentFo
     return (
         <form onSubmit={handleSubmit(submitHandler)} className="space-y-2">
             {replyTo && (
-                <div className="mb-2 flex items-start justify-between rounded-sm border border-black bg-blue-500 p-2 text-xs text-white">
+                <div className="mb-2 flex justify-between rounded-sm border border-black bg-amber-100 p-2 text-xs text-gray-600">
                     <div className="max-w-xs truncate">
                         <div className="truncate font-medium">
                             {replyTo.author.display_name || "Anonymous"}
@@ -62,7 +70,7 @@ export function CommentForm({ objType, objUUID, replyTo, setReplyTo }: CommentFo
                         variant="ghost"
                         size="sm"
                         onClick={() => setReplyTo?.(undefined)}
-                        className="ml-4 shrink-0 text-white"
+                        className="shrink-0"
                     >
                         Cancel
                     </Button>
@@ -70,7 +78,7 @@ export function CommentForm({ objType, objUUID, replyTo, setReplyTo }: CommentFo
             )}
             <textarea
                 {...register("content")}
-                className="w-full rounded-sm border-2 border-black bg-white p-2 text-sm"
+                className="w-full rounded-sm border border-black bg-white p-2 text-sm"
                 placeholder="Write a comment..."
             />
             {errors.content && <p className="text-xs text-red-500">{errors.content.message}</p>}

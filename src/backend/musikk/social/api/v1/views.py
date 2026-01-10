@@ -2,7 +2,7 @@ from django.contrib.contenttypes.models import ContentType
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.generics import RetrieveAPIView
+from rest_framework.generics import RetrieveAPIView, ListCreateAPIView
 
 from social.api.v1.filters import PublicationFilter
 from social.api.v1.serializers import (
@@ -18,38 +18,29 @@ from users.models import BaseUser
 from websockets.event_helpers import send_ws_event
 
 
-class PublicationListCreateForObjView(APIView):
-    def get(self, request, obj_type, obj_uuid, *args, **kwargs):
-        try:
-            created_for_obj = CREATED_FOR_RESOLVER.resolve_model_instance(
-                {"type": obj_type, "uuid": str(obj_uuid)}
-            )
-        except Exception as e:
-            # TODO: add exception name in resp data
-            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+class PublicationListCreateForObjView(ListCreateAPIView):
+    serializer_class = PublicationRetrieveSerializer  # for GET
 
-        queryset = Publication.objects.filter(
-            created_for_type=ContentType.objects.get_for_model(
-                created_for_obj.__class__
-            ),
-            created_for_id=created_for_obj.pk,
-        ).select_related("author")
-
-        return Response(
-            status=status.HTTP_200_OK,
-            data=PublicationRetrieveSerializer(
-                queryset, many=True, context={"request": request}
-            ).data,
+    def get_created_for_obj(self):
+        return CREATED_FOR_RESOLVER.resolve_model_instance(
+            {"type": self.kwargs["obj_type"], "uuid": str(self.kwargs["obj_uuid"])}
         )
 
-    def post(self, request, obj_type, obj_uuid, *args, **kwargs):
-        try:
-            created_for_obj = CREATED_FOR_RESOLVER.resolve_model_instance(
-                {"type": obj_type, "uuid": str(obj_uuid)}
-            )
-        except Exception as e:
-            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    def get_queryset(self):
+        created_for_obj = self.get_created_for_obj()
+        return (
+            Publication.objects.filter(
+                created_for_type=ContentType.objects.get_for_model(
+                    created_for_obj.__class__
+                ),
+                created_for_id=created_for_obj.pk,
+            ).select_related("author", "parent", "parent__author")
+            # newest first
+            .order_by("-date_added")
+        )
 
+    def create(self, request, *args, **kwargs):
+        created_for_obj = self.get_created_for_obj()
         serializer = PublicationCreateSerializer(
             data=request.data,
             context={"request": request, "created_for_obj": created_for_obj},
@@ -75,11 +66,11 @@ class PublicationListCreateForObjView(APIView):
             data={
                 "publication": PublicationRetrieveSerializer(
                     obj, context={"request": request}
-                ).data,
+                ).data
             },
         )
 
-
+# TODO: this also should be a list view, but children arr should be only 1 level deep...
 class PublicationRetrieveView(RetrieveAPIView):
     queryset = Publication.objects.select_related("author", "parent").prefetch_related(
         "replies__author"

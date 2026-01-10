@@ -45,7 +45,7 @@ export const NotificationBox = memo(function NotificationBox() {
                         <Sparkle className="h-5 w-5" />
                     </Button>
                     {unreadUUIDs.length > 0 && (
-                        <span className="absolute -top-1 -right-1 rounded-full bg-yellow-400 px-1.5 py-0.5 text-xs font-bold text-black">
+                        <span className="absolute -top-1 -right-1 rounded-full bg-amber-200 px-1.5 py-0.5 text-xs font-bold text-black">
                             {unreadUUIDs.length}
                         </span>
                     )}

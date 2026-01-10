@@ -1,5 +1,5 @@
 import { PostForm } from "@/features/publications/components/PostForm.tsx";
-import { Publication } from "@/features/publications/types.ts";
+import { Publication, PublicationWChildren } from "@/features/publications/types.ts";
 import { CollectionCard } from "@/features/song-collections/components/CollectionCard.tsx";
 import { SongContainer } from "@/features/songs/components/SongContainer.tsx";
 import { Button } from "@/features/ui/button.tsx";
@@ -11,14 +11,14 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
 
 interface PostTreeProps {
-    publication: Publication;
+    publication: Publication | PublicationWChildren;
     depth?: number;
 }
 
 export function PostTree({ publication, depth = 0 }: PostTreeProps) {
     const [isReplying, setIsReplying] = useState(false);
     const [areChildrenOpen, setAreChildrenOpen] = useState(false);
-    const hasChildren = publication.children && publication.children.length > 0;
+    const children = (publication as PublicationWChildren).children;
 
     // nesting levels
     const getBgColor = () => {
@@ -72,6 +72,7 @@ export function PostTree({ publication, depth = 0 }: PostTreeProps) {
                     </div>
 
                     <div className="flex items-center gap-2 text-[11px]">
+                        {/*TODO: add reply button variant*/}
                         <Button
                             variant="ghost"
                             size="sm"
@@ -89,7 +90,7 @@ export function PostTree({ publication, depth = 0 }: PostTreeProps) {
                                     replyTo={publication}
                                     setReplyTo={() => setIsReplying(false)}
                                     onSuccess={() => setIsReplying(false)}
-                                    feedUserUuid={publication.obj_uuid}
+                                    feedUserUuid={publication.created_for.uuid}
                                 />
                             </div>
                         </div>
@@ -97,7 +98,7 @@ export function PostTree({ publication, depth = 0 }: PostTreeProps) {
                 </CardContent>
             </Card>
 
-            {hasChildren && (
+            {children && (
                 <Collapsible open={areChildrenOpen} onOpenChange={setAreChildrenOpen}>
                     <CollapsibleTrigger asChild>
                         <Button
@@ -112,8 +113,7 @@ export function PostTree({ publication, depth = 0 }: PostTreeProps) {
                                     <ChevronDown size={12} />
                                 )}
                                 <span className="flex items-center gap-1">
-                                    {publication.children.length}{" "}
-                                    {publication.children.length === 1 ? "reply" : "replies"}
+                                    {children.length} {children.length === 1 ? "reply" : "replies"}
                                 </span>
                             </span>
                         </Button>
@@ -122,7 +122,7 @@ export function PostTree({ publication, depth = 0 }: PostTreeProps) {
                         <CollapsibleContent>
                             <div className="relative ml-2 space-y-0 pl-4">
                                 <div className="top-0 bottom-0 left-0 w-[2px] bg-gray-200"></div>
-                                {publication.children.map((reply: Publication) => (
+                                {children.map((reply: Publication) => (
                                     <div key={reply.uuid} className="relative">
                                         <div className="top-3 left-0 h-[2px] w-2 bg-gray-200"></div>
                                         <PostTree publication={reply} depth={depth + 1} />

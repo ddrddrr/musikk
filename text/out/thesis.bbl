@@ -309,23 +309,6 @@
       \verb https://rateyourmusic.com/discover
       \endverb
     \endentry
-    \entry{2step}{online}{}{}
-      \field{sortinit}{1}
-      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
-      \field{labeltitlesource}{title}
-      \field{langid}{russian}
-      \field{title}{2step.ru}
-      \field{urlday}{25}
-      \field{urlmonth}{3}
-      \field{urlyear}{2025}
-      \field{urldateera}{ce}
-      \verb{urlraw}
-      \verb http://www.2step.ru/
-      \endverb
-      \verb{url}
-      \verb http://www.2step.ru/
-      \endverb
-    \endentry
     \entry{lastfm}{online}{}{}
       \field{sortinit}{1}
       \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
@@ -399,8 +382,8 @@
       \endverb
     \endentry
     \entry{mime_octet_stream}{online}{}{}
-      \field{sortinit}{2}
-      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
       \field{labeltitlesource}{title}
       \field{langid}{english}
       \field{title}{Multipurpose Internet Mail Extensions Part Two: Media Types. `octet-stream'}
@@ -553,8 +536,8 @@
       \endverb
     \endentry
     \entry{basic_auth_mozilla_caching}{online}{}{}
-      \field{sortinit}{3}
-      \field{sortinithash}{ad6fe7482ffbd7b9f99c9e8b5dccd3d7}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
       \field{labeltitlesource}{title}
       \field{langid}{english}
       \field{title}{Mozilla Caching Behaviour Documentation}
@@ -825,8 +808,8 @@
       \endverb
     \endentry
     \entry{pydantic}{online}{}{}
-      \field{sortinit}{5}
-      \field{sortinithash}{20e9b4b0b173788c5dace24730f47d8c}
+      \field{sortinit}{4}
+      \field{sortinithash}{9381316451d1b9788675a07e972a12a7}
       \field{labeltitlesource}{title}
       \field{langid}{english}
       \field{title}{Pydantic}
@@ -978,8 +961,8 @@
       \endverb
     \endentry
     \entry{flask}{online}{}{}
-      \field{sortinit}{6}
-      \field{sortinithash}{b33bc299efb3c36abec520a4c896a66d}
+      \field{sortinit}{5}
+      \field{sortinithash}{20e9b4b0b173788c5dace24730f47d8c}
       \field{labeltitlesource}{title}
       \field{langid}{english}
       \field{title}{Flask}
@@ -1165,8 +1148,8 @@
       \endverb
     \endentry
     \entry{yew_framework}{online}{}{}
-      \field{sortinit}{7}
-      \field{sortinithash}{108d0be1b1bee9773a1173443802c0a3}
+      \field{sortinit}{6}
+      \field{sortinithash}{b33bc299efb3c36abec520a4c896a66d}
       \field{labeltitlesource}{title}
       \field{langid}{english}
       \field{title}{Yew Framework}
@@ -1318,8 +1301,8 @@
       \endverb
     \endentry
     \entry{mvc}{online}{}{}
-      \field{sortinit}{8}
-      \field{sortinithash}{a231b008ebf0ecbe0b4d96dcc159445f}
+      \field{sortinit}{7}
+      \field{sortinithash}{108d0be1b1bee9773a1173443802c0a3}
       \field{labeltitlesource}{title}
       \field{langid}{english}
       \field{title}{MVC}
@@ -1471,8 +1454,8 @@
       \endverb
     \endentry
     \entry{apple_hls_specs_flac_container}{online}{}{}
-      \field{sortinit}{9}
-      \field{sortinithash}{0a5ebc79d83c96b6579069544c73c7d4}
+      \field{sortinit}{8}
+      \field{sortinithash}{a231b008ebf0ecbe0b4d96dcc159445f}
       \field{labeltitlesource}{title}
       \field{langid}{english}
       \field{title}{HTTP Live Streaming (HLS) authoring specification for Apple devices. Audio.}
@@ -1675,8 +1658,8 @@
       \endverb
     \endentry
     \entry{spotify_codecs}{online}{}{}
-      \field{sortinit}{1}
-      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{sortinit}{9}
+      \field{sortinithash}{0a5ebc79d83c96b6579069544c73c7d4}
       \field{labeltitlesource}{title}
       \field{langid}{english}
       \field{title}{Spotify Audio Quality}
@@ -1692,8 +1675,8 @@
       \endverb
     \endentry
     \entry{mdn_aac}{online}{}{}
-      \field{sortinit}{1}
-      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{sortinit}{9}
+      \field{sortinithash}{0a5ebc79d83c96b6579069544c73c7d4}
       \field{labeltitlesource}{title}
       \field{langid}{english}
       \field{title}{Web audio codec guide}
@@ -1810,7 +1793,59 @@
       \verb https://shaka-project.github.io/shaka-packager/html/
       \endverb
     \endentry
+    \entry{restdef}{online}{}{}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{REST Definition}
+      \field{urlday}{7}
+      \field{urlmonth}{5}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://ics.uci.edu/~fielding/pubs/dissertation/rest_arch_style.htm
+      \endverb
+      \verb{url}
+      \verb https://ics.uci.edu/~fielding/pubs/dissertation/rest_arch_style.htm
+      \endverb
+    \endentry
+    \entry{pythonmagic}{online}{}{}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{python-magic Package}
+      \field{urlday}{7}
+      \field{urlmonth}{5}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://pypi.org/project/python-magic/
+      \endverb
+      \verb{url}
+      \verb https://pypi.org/project/python-magic/
+      \endverb
+    \endentry
+    \entry{djangocontenttype}{online}{}{}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{Django Content Type Framework}
+      \field{urlday}{7}
+      \field{urlmonth}{5}
+      \field{urlyear}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://docs.djangoproject.com/en/5.2/ref/contrib/contenttypes/
+      \endverb
+      \verb{url}
+      \verb https://docs.djangoproject.com/en/5.2/ref/contrib/contenttypes/
+      \endverb
+    \endentry
   \enddatalist
+  \missing{simplejwt}
 \endrefsection
 \endinput
 

@@ -1,9 +1,17 @@
 import pandas as pd
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
 import os
 import textwrap
 
+mpl.rcParams.update(
+    {
+        "font.weight": "bold",
+        "axes.titleweight": "bold",
+        "axes.labelweight": "bold",
+    }
+)
 # def replace_commas_in_quotes(line: str) -> str:
 #     result = []
 #     in_quotes = False
@@ -141,7 +149,7 @@ def generate_charts(df):
                 ax.text(
                     bar.get_x() + bar.get_width() / 2,
                     val + max_val * 0.03,  # small offset above bar
-                    f"{val} ({val / series.shape[0] * 100:.1f}%)",
+                    f"{val}\n({val / series.shape[0] * 100:.1f}%)",
                     ha="center",
                     va="bottom",
                     fontsize=12,
@@ -167,14 +175,18 @@ def generate_charts(df):
                 subplot_kw=dict(aspect="equal"),
             )
             wedges, texts, autotexts = ax.pie(
-                counts, autopct="%1.1f%%", startangle=140, textprops={"fontsize": 7}
+                counts,
+                autopct="%1.1f%%",
+                startangle=140,
+                textprops={"fontsize": 6},
+                pctdistance=1.25,
             )
             ax.legend(
                 wedges,
                 labels,
                 title="Answers",
                 loc="center left",
-                bbox_to_anchor=(1, 0.5),
+                bbox_to_anchor=(1.25, 0.5),
                 prop={"size": 8},
                 title_fontsize=10,
             )
@@ -183,6 +195,7 @@ def generate_charts(df):
                     question_titles.get(col, col.replace("_", " ").capitalize()), 60
                 ),
                 fontsize=10,
+                pad=30
             )
             plt.savefig(
                 os.path.join(output_dir, f"{col}.png"), bbox_inches="tight", dpi=300

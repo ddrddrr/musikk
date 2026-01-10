@@ -6,7 +6,7 @@
 \contentsline {figure}{\numberline {2.3}{\ignorespaces Listening Frequency of Respondents}}{4}{figure.caption.10}%
 \contentsline {figure}{\numberline {2.4}{\ignorespaces Audio Media Consumption by Age Group}}{5}{figure.caption.11}%
 \contentsline {figure}{\numberline {2.5}{\ignorespaces Streaming Platforms Popularity}}{6}{figure.caption.12}%
-\contentsline {figure}{\numberline {2.6}{\ignorespaces Social Interaction Methods}}{7}{figure.caption.13}%
+\contentsline {figure}{\numberline {2.6}{\ignorespaces Social Interaction Methods}}{6}{figure.caption.13}%
 \contentsline {figure}{\numberline {2.7}{\ignorespaces Social Interactions Frequency}}{7}{figure.caption.14}%
 \contentsline {figure}{\numberline {2.8}{\ignorespaces Music Sharing Frequency}}{8}{figure.caption.15}%
 \contentsline {figure}{\numberline {2.9}{\ignorespaces Music Sharing Methods}}{8}{figure.caption.16}%
@@ -16,4 +16,7 @@
 \addvspace {4\p@ }
 \addvspace {4\p@ }
 \contentsline {figure}{\numberline {6.1}{\ignorespaces System Overview}}{39}{figure.caption.25}%
+\contentsline {figure}{\numberline {6.2}{\ignorespaces Backend}}{45}{figure.caption.26}%
+\contentsline {figure}{\numberline {6.3}{\ignorespaces Backend Class Diagram}}{47}{figure.caption.27}%
 \addvspace {4\p@ }
+\contentsline {figure}{\numberline {6.4}{\ignorespaces Frontend}}{67}{figure.caption.31}%

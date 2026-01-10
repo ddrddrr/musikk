@@ -4,18 +4,17 @@ import { UserIdentifier } from "@/features/user/components/UserIdentifier.tsx";
 interface CommentProps {
     comment: Publication;
     setReplyTo: (comment: Publication) => void;
-    parent?: Publication;
 }
 
-export function Comment({ comment, setReplyTo, parent }: CommentProps) {
+export function Comment({ comment, setReplyTo }: CommentProps) {
     return (
-        <div className={`"bg-gray-50" : "bg-gray-50" rounded-lg border border-black p-3`}>
-            {parent && (
-                <div className="mb-2 rounded border border-gray-300 bg-gray-100 p-2 text-xs text-gray-600">
+        <div className="rounded-lg border border-black bg-gray-50 p-3">
+            {comment.parent_uuid && comment.parent_author && comment.parent_repr && (
+                <div className="mb-2 rounded border border-gray-300 bg-amber-100 p-2 text-xs text-gray-600">
                     <div className="truncate font-medium">
-                        {parent.author.display_name || "Anonymous"}
+                        {comment.parent_author.display_name || "Anonymous"}
                     </div>
-                    <div className="truncate italic">{parent.content}</div>
+                    <div className="truncate italic">{comment.parent_repr}</div>
                 </div>
             )}
             <div className="mb-1 flex items-center justify-between">

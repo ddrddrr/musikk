@@ -1,12 +1,12 @@
 import { UUID } from "@/api/types.ts";
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
-import { usePublicationListQuery } from "@/features/publications/api/queries.ts";
+import { usePublicationListInfiniteQuery } from "@/features/publications/api/queries.ts";
 import { PostForm } from "@/features/publications/components/PostForm.tsx";
 import { PostTree } from "@/features/publications/components/PostTree.tsx";
 import { Card, CardContent } from "@/features/ui/card.tsx";
 
 export function UserPosts({ userUUID }: { userUUID: UUID }) {
-    const { data: posts, isPending, error } = usePublicationListQuery("feed", userUUID);
+    const { data: posts, isPending, error } = usePublicationListInfiniteQuery("feed", userUUID);
     const currUserUUID = useUserUUID();
 
     if (error) {
@@ -25,6 +25,7 @@ export function UserPosts({ userUUID }: { userUUID: UUID }) {
                     </CardContent>
                 </Card>
             )}
+            {/*TODO fix*/}
             {posts?.map((post) => (
                 <PostTree key={post.uuid} publication={post} />
             ))}

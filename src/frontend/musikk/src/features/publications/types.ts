@@ -19,8 +19,11 @@ export interface Publication extends BaseModel {
     created_for: PublicationForObject;
     attachment_type: AttachmentType | null;
     attachment: Attachment | null;
+    parent_uuid: UUID | null;
+    parent_author: BaseUser | null;
+    parent_repr: string | null;
+}
+
+export interface PublicationWChildren extends Publication {
     children: Publication[];
-    parent_uuid: UUID;
-    parent_author: BaseUser;
-    parent_repr: string;
 }

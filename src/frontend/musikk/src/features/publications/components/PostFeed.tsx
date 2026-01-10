@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/features/ui/tabs.tsx
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 
-export function UserFeed() {
+export function PostFeed() {
     const [tab, setTab] = useState("friends");
 
     const { data: postsFriends } = useQuery<Publication[]>({
