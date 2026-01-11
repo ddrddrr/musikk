@@ -1,10 +1,10 @@
-import { ISongQueueNode } from "@/features/song-queue/api/types.ts";
+import { SongQueueNode } from "@/features/song-queue/api/types.ts";
 import { useQueuePlayHandler } from "@/features/song-queue/hooks/useQueuePlayHandler.ts";
 import { Button } from "@/features/ui/button.tsx";
 import { Pause, Play } from "lucide-react";
 
 interface SongQueuePlayButtonProps {
-    node: ISongQueueNode;
+    node: SongQueueNode;
     className?: string;
     size?: number;
 }

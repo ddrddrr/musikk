@@ -1,10 +1,11 @@
 import { UUID } from "@/api/types.ts";
 import { BaseModel } from "@/features/common/types.ts";
-import { ISong } from "@/features/songs/types.ts";
+import { Song } from "@/features/songs/types.ts";
 import { BaseUser } from "@/features/user/types.ts";
 
 export type CollectionType = "playlist" | "album" | "history" | "liked";
 export interface Collection extends BaseModel {
+    kind?: "collection";
     uuid: UUID;
     title: string;
     description: string;
@@ -15,7 +16,8 @@ export interface Collection extends BaseModel {
 }
 
 export interface CollectionSong extends BaseModel {
-    song: ISong;
+    kind?: "collectionSong";
+    song: Song;
     song_collection: UUID;
 }
 

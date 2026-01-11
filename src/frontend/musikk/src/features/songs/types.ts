@@ -1,7 +1,8 @@
 import { BaseModel } from "@/features/common/types.ts";
 import { BaseUser } from "@/features/user/types.ts";
 
-export interface ISong extends BaseModel {
+export interface Song extends BaseModel {
+    kind?: "song";
     title: string;
     authors: BaseUser[];
     mpd: string;

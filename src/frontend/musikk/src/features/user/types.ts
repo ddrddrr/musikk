@@ -1,8 +1,9 @@
-import { URL, UUID } from "@/api/types.ts";
+import { URL } from "@/api/types.ts";
+import { BaseModel } from "@/features/common/types.ts";
 import { z } from "zod";
 
-export interface BaseUser {
-    uuid: UUID;
+export interface BaseUser extends BaseModel {
+    kind?: "user";
     display_name: string;
     avatar: URL;
     bio: string;

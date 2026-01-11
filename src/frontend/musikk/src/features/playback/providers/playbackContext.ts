@@ -1,6 +1,6 @@
 import { ThisDevice } from "@/features/playback/hooks/useCurrentDevice.ts";
 import { CollectionSong } from "@/features/song-collections/types.ts";
-import { ISongQueueNode } from "@/features/song-queue/api/types.ts";
+import { SongQueueNode } from "@/features/song-queue/api/types.ts";
 import { createContext, Dispatch, SetStateAction } from "react";
 
 export interface PlaybackContextProps {
@@ -9,7 +9,7 @@ export interface PlaybackContextProps {
     isPlaybackActive: boolean;
     setIsPlaybackActive: Dispatch<SetStateAction<boolean>> | undefined;
     playingCollectionSong: CollectionSong | undefined;
-    queueHead: ISongQueueNode | undefined;
+    queueHead: SongQueueNode | undefined;
 }
 
 export const PlaybackContext = createContext<PlaybackContextProps>({

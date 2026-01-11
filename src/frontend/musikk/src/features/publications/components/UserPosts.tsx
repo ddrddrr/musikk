@@ -2,11 +2,15 @@ import { UUID } from "@/api/types.ts";
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
 import { PostForm } from "@/features/publications/components/PostForm.tsx";
 import { PostTree } from "@/features/publications/components/PostTree.tsx";
-import { usePublicationsInfiniteFlat } from "@/features/publications/hooks/usePublicationsInfiniteFlat";
+import { usePublicationsInfiniteFlat } from "@/features/publications/hooks/usePublicationsInfiniteFlat.ts";
 import { Card, CardContent } from "@/features/ui/card.tsx";
 
 export function UserPosts({ userUUID }: { userUUID: UUID }) {
-    const { error, isPending, publicationsFlat } = usePublicationsInfiniteFlat("feed", userUUID);
+    const { error, isPending, publicationsFlat } = usePublicationsInfiniteFlat(
+        "feed",
+        userUUID,
+        false,
+    );
     const currUserUUID = useUserUUID();
 
     if (error) {

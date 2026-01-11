@@ -30,14 +30,14 @@ class CollectionSerializerBasic(BaseModelSerializer):
             "image": {"read_only": True},
         }
 
-    def get_is_liked(self, obj):
+    def get_is_liked(self, obj) -> bool:
         return (
             self.context["request"]
             .user.streamingprofile.followed_collections.filter(pk=obj.pk)
             .exists()
         )
 
-    def get_authors(self, obj):
+    def get_authors(self, obj) -> dict:
         collection_credits = CollectionCredit.objects.filter(
             collection=obj
         ).select_related("author")
@@ -62,7 +62,7 @@ class CollectionSerializerDetailed(CollectionSerializerBasic):
             "description": {"read_only": True},
         }
 
-    def get_songs(self, obj):
+    def get_songs(self, obj) -> dict:
         return CollectionSongSerializer(
             CollectionSong.objects.filter(collection=obj)
             .select_related("song")

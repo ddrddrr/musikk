@@ -1,6 +1,6 @@
 import type { Collection, CollectionSong } from "@/features/song-collections/types.ts";
 import { getSongQueue } from "@/features/song-queue/api/queries.ts";
-import { ISongQueue } from "@/features/song-queue/api/types.ts";
+import { SongQueue } from "@/features/song-queue/api/types.ts";
 import {
     addCollection,
     addSong,
@@ -13,7 +13,7 @@ import {
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 export function useQueue() {
-    return useQuery<ISongQueue>({
+    return useQuery<SongQueue>({
         queryKey: ["queue"],
         queryFn: getSongQueue,
     });

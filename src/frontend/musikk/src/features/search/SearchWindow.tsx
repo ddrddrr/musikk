@@ -5,7 +5,7 @@ import { performSearch } from "@/features/search/queries";
 import { Card, CardContent } from "@/features/ui/card";
 import { Input } from "@/features/ui/input";
 
-import { Attachment } from "@/features/publications/types.ts";
+import { SearchItem } from "@/features/search/types.ts";
 import { CollectionCard } from "@/features/song-collections/components/CollectionCard.tsx";
 import { Collection } from "@/features/song-collections/types.ts";
 import { SongCard } from "@/features/songs/components/SongCard.tsx";
@@ -13,11 +13,10 @@ import { SongContainer } from "@/features/songs/components/SongContainer.tsx";
 import { UserCard } from "@/features/user/components/UserCard.tsx";
 import { BaseUser } from "@/features/user/types.ts";
 
-const QUERY_TIMEOUT = 300;
+const QUERY_TIMEOUT = 300; // ms
 
-// TODO: fix this shouldn't be an attachment or should be defined a bit differently
 interface SearchWindowProps {
-    onItemSelect?: (obj: Attachment) => void;
+    onItemSelect?: (obj: SearchItem) => void;
     songMode?: "container" | "card";
 }
 
@@ -48,29 +47,18 @@ export function SearchWindow({ onItemSelect, songMode = "card" }: SearchWindowPr
                 <h3 className="mb-2 text-sm font-semibold">Songs</h3>
                 <div className={containerClass}>
                     {data.songs.map((song) => {
-                        const onClick = onItemSelect
-                            ? () =>
-                                  onItemSelect({
-                                      objType: "song",
-                                      objUUID: song.uuid,
-                                      repr: song.song.title,
-                                      image: song.song.image,
-                                  })
-                            : undefined;
-
                         return songMode === "container" ? (
                             <SongContainer
                                 key={song.uuid}
                                 collectionSong={song}
                                 size="compact"
-                                extraStyle={onClick ? "cursor-pointer" : ""}
+                                extraStyle={onItemSelect ? "cursor-pointer" : ""}
                             />
                         ) : (
                             <SongCard
                                 key={song.uuid}
                                 collectionSong={song}
-                                size="small"
-                                onClick={onClick}
+                                onClick={onItemSelect}
                             />
                         );
                     })}
@@ -91,17 +79,7 @@ export function SearchWindow({ onItemSelect, songMode = "card" }: SearchWindowPr
                             key={collection.uuid}
                             collection={collection}
                             size="small"
-                            onClick={
-                                onItemSelect
-                                    ? () =>
-                                          onItemSelect({
-                                              objType: "collection",
-                                              objUUID: collection.uuid,
-                                              repr: collection.title,
-                                              image: collection.image,
-                                          })
-                                    : undefined
-                            }
+                            onClick={onItemSelect}
                         />
                     ))}
                 </div>
@@ -117,21 +95,7 @@ export function SearchWindow({ onItemSelect, songMode = "card" }: SearchWindowPr
                 <h3 className="mb-2 text-sm font-semibold">{label}</h3>
                 <div className="grid grid-cols-2 gap-2">
                     {items.map((user) => (
-                        <UserCard
-                            key={user.uuid}
-                            user={user}
-                            onClick={
-                                onItemSelect
-                                    ? () =>
-                                          onItemSelect({
-                                              objType: "user",
-                                              objUUID: user.uuid,
-                                              repr: user.display_name,
-                                              image: user.avatar,
-                                          })
-                                    : undefined
-                            }
-                        />
+                        <UserCard key={user.uuid} user={user} onClick={onItemSelect} />
                     ))}
                 </div>
             </div>
@@ -140,12 +104,7 @@ export function SearchWindow({ onItemSelect, songMode = "card" }: SearchWindowPr
 
     return (
         <div className="w-full space-y-4">
-            <Input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                className="w-full"
-                autoFocus
-            />
+            <Input value={query} onChange={(e) => setQuery(e.target.value)} className="w-full" />
 
             <div className="results-container min-h-[200px]">
                 {error && (

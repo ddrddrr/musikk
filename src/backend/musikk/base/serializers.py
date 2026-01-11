@@ -29,14 +29,19 @@ class UUIDRelatedModelSerializerMixin:
 
 
 class BaseModelSerializer(UUIDRelatedModelSerializerMixin, serializers.ModelSerializer):
+    repr = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = BaseModel
-        fields = ["uuid", "date_added", "date_modified"]
+        fields = ["uuid", "date_added", "date_modified", "repr"]
         extra_kwargs = {
             "uuid": {"read_only": True},
             "date_added": {"read_only": True},
             "date_modified": {"read_only": True},
         }
+
+    def get_repr(self, obj) -> str:
+        return str(obj)
 
 
 class UUIDListField(serializers.ListField):

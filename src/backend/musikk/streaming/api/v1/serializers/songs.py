@@ -90,5 +90,5 @@ class CollectionSongSerializer(BaseModelSerializer):
         model = CollectionSong
         fields = BaseModelSerializer.Meta.fields + ["song", "collection"]
 
-    def get_song(self, obj):
+    def get_song(self, obj) -> dict:
         return BaseSongGetSerializer(obj.song, context=self.context).data

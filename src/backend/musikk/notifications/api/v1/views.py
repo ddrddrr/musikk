@@ -19,13 +19,15 @@ from users.models import BaseUser
 
 class NotificationsPersonalListUpdateView(GenericAPIView):
     def get(self, request, *args, **kwargs):
-        user = self.request.user
-
         replies = ReplyNotificationSerializer(
-            ReplyNotification.objects.filter(orig_publication__author=user), many=True
+            ReplyNotification.objects.exclude(
+                reply_publication__author=request.user
+            ).filter(orig_publication__author=request.user),
+            many=True,
+            context={"request": request},
         ).data
         followers = FollowerNotificationSerializer(
-            FollowerNotification.objects.filter(receiver=user), many=True
+            FollowerNotification.objects.filter(receiver=request.user), many=True
         ).data
         return Response({"replies": replies, "followers": followers})
 

@@ -70,6 +70,6 @@ class BaseUser(BaseModel, AbstractBaseUser, PermissionsMixin):
         )
 
     def __str__(self):
-        return self.email
+        return self.display_name
 
     objects = UserManager()

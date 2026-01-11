@@ -6,6 +6,7 @@ from rest_framework import status
 from streaming.api.v1.serializers.songs import CollectionSongSerializer
 from streaming.api.v1.serializers.collections import CollectionSerializerBasic
 from streaming.models import BaseSong, Collection
+from streaming.models.collections import CollectionType
 from streaming.models.songs import CollectionSong
 from users.api.v1.serializers import BaseUserSerializer
 from users.models import BaseUser, UserRole
@@ -76,6 +77,7 @@ class SearchView(APIView):
         )
 
         sc_songs = CollectionSong.objects.filter(
+            collection__type=CollectionType.ALBUM,
             collection__private=False,
             song__in=matching_songs,
         )

@@ -6,8 +6,7 @@ import z from "zod";
 import { UUID } from "@/api/types.ts";
 import { usePublicationCreateMutation } from "@/features/publications/api/mutations.ts";
 import { postSchema } from "@/features/publications/schemas.ts";
-import { Attachment, Publication } from "@/features/publications/types.ts";
-import { Collection } from "@/features/song-collections/types.ts";
+import { AttachmentObj, Publication } from "@/features/publications/types.ts";
 
 import { SearchBar } from "@/features/search/SearchBar.tsx";
 import { Button } from "@/features/ui/button.tsx";
@@ -32,13 +31,8 @@ export function PostForm({ replyTo, setReplyTo, onSuccess, feedUserUUID }: PostF
         resolver: zodResolver(postSchema),
     });
 
-    const [attachedObj, setAttachedObj] = useState<Attachment | undefined>(undefined);
-
+    const [attachedObj, setAttachedObj] = useState<AttachmentObj | undefined>(undefined);
     const postMutation = usePublicationCreateMutation();
-
-    const isCollection = (obj: Attachment): obj is Collection => {
-        return "title" in obj && "authors" in obj;
-    };
 
     const submitHandler = async (formData: PostFormData) => {
         const payload: {
@@ -46,7 +40,7 @@ export function PostForm({ replyTo, setReplyTo, onSuccess, feedUserUUID }: PostF
             obj_type: "feed";
             obj_uuid: UUID;
             parent_uuid?: UUID;
-            attachment_type?: "song" | "collection";
+            attachment_type?: "song" | "collection" | "user";
             attachment_uuid?: UUID;
         } = {
             content: formData.content,
@@ -59,13 +53,18 @@ export function PostForm({ replyTo, setReplyTo, onSuccess, feedUserUUID }: PostF
         }
 
         if (attachedObj) {
-            if (isCollection(attachedObj)) {
-                payload.attachment_type = "collection";
-                payload.attachment_uuid = attachedObj.uuid;
-            } else {
-                payload.attachment_type = "song";
-                payload.attachment_uuid = attachedObj.uuid;
+            switch (attachedObj.kind) {
+                case "collection":
+                    payload.attachment_type = "collection";
+                    break;
+                case "collectionSong":
+                    payload.attachment_type = "song";
+                    break;
+                case "user":
+                    payload.attachment_type = "user";
+                    break;
             }
+            payload.attachment_uuid = attachedObj.uuid;
         }
 
         await postMutation.mutateAsync(payload);
@@ -89,8 +88,8 @@ export function PostForm({ replyTo, setReplyTo, onSuccess, feedUserUUID }: PostF
 
             {attachedObj && (
                 <div className="text-xs text-muted-foreground italic">
-                    Attached: {/*TODO: DOESNT WORK, add reprs for all objects?*/}
-                    {attachedObj.title}
+                    Attached:
+                    {attachedObj.repr}
                 </div>
             )}
 

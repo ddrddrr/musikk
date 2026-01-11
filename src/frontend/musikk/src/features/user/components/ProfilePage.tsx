@@ -1,4 +1,5 @@
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
+import { UserPosts } from "@/features/publications/components/UserPosts.tsx";
 import { Button } from "@/features/ui/button.tsx";
 import {
     Dialog,
@@ -10,7 +11,6 @@ import {
 } from "@/features/ui/dialog.tsx";
 import { ProfileForm } from "@/features/user/components/ProfileForm.tsx";
 import { UserAvatar } from "@/features/user/components/UserAvatar.tsx";
-import { UserPosts } from "@/features/user/components/UserPosts.tsx";
 import { useFollowUser } from "@/features/user/hooks/useFollowUser.ts";
 import { fetchUser } from "@/features/user/queries.ts";
 import { useQuery } from "@tanstack/react-query";

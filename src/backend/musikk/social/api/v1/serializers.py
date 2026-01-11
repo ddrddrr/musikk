@@ -63,9 +63,7 @@ class PublicationRetrieveSerializer(BaseModelSerializer):
     created_for = TypeModelRefField(
         resolver=CREATED_FOR_RESOLVER, read_only=True, source="created_for_object"
     )
-    attachment = TypeModelRefField(
-        resolver=ATTACHMENT_RESOLVER, read_only=True, source="attachment_object"
-    )
+    attachment = serializers.SerializerMethodField(read_only=True)
     parent_uuid = serializers.SerializerMethodField(allow_null=True, read_only=True)
     parent_author = serializers.SerializerMethodField(allow_null=True, read_only=True)
     parent_repr = serializers.SerializerMethodField(allow_null=True, read_only=True)
@@ -90,6 +88,14 @@ class PublicationRetrieveSerializer(BaseModelSerializer):
     def get_root_author_uuid(self, obj) -> str | None:
         root = obj.get_root()
         return str(root.author.uuid) if root.author else None
+
+    def get_attachment(self, obj) -> dict | None:
+        if not obj.attachment_object:
+            return None
+
+        return ATTACHMENT_RESOLVER.serialize_model_instance(
+            obj.attachment_object, context=self.context
+        )
 
     def get_parent_uuid(self, obj) -> str | None:
         return str(obj.parent.uuid) if obj.parent else None

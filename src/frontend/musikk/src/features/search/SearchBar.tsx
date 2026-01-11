@@ -1,4 +1,4 @@
-import { Attachment } from "@/features/publications/types";
+import { AttachmentObj } from "@/features/publications/types";
 import { SearchWindow } from "@/features/search/SearchWindow";
 import { Popover, PopoverContent, PopoverTrigger } from "@/features/ui/popover";
 import { Search } from "lucide-react";
@@ -6,7 +6,7 @@ import { useState } from "react";
 import { Button } from "../ui/button";
 
 interface SearchBarProps {
-    onItemSelect?: (obj: Attachment) => void;
+    onItemSelect?: (obj: AttachmentObj) => void;
     placeholder?: string;
     songMode?: "container" | "card";
 }
@@ -18,7 +18,7 @@ export function SearchBar({
 }: SearchBarProps) {
     const [open, setOpen] = useState(false);
 
-    const handleSelect = (item: Attachment) => {
+    const handleSelect = (item: AttachmentObj) => {
         if (!onItemSelect) return;
         onItemSelect(item);
         setOpen(false);

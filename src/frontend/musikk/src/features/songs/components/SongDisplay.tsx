@@ -1,8 +1,8 @@
-import type { ISong } from "@/features/songs/types.ts";
+import type { Song } from "@/features/songs/types.ts";
 import { UserIdentifier } from "@/features/user/components/UserIdentifier.tsx";
 
 interface SongDisplayProps {
-    song: ISong | undefined;
+    song: Song | undefined;
 }
 
 export function SongDisplay({ song }: SongDisplayProps) {

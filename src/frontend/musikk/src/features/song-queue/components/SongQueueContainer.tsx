@@ -1,4 +1,4 @@
-import { ISongQueueNode } from "@/features/song-queue/api/types.ts";
+import { SongQueueNode } from "@/features/song-queue/api/types.ts";
 import { SongQueuePlayButton } from "@/features/song-queue/components/SongQueueContainerPlayButton.tsx";
 import { SongAddToLikedButton } from "@/features/songs/components/SongAddToLikedButton.tsx";
 import { SongAddToQueueButton } from "@/features/songs/components/SongAddToQueueButton.tsx";
@@ -6,7 +6,7 @@ import { SongContextMenu } from "@/features/songs/components/SongContextMenu.tsx
 import { memo } from "react";
 
 interface SongContainerProps {
-    node: ISongQueueNode;
+    node: SongQueueNode;
     buttonSize?: number;
     buttonClass?: string;
     titleMaxWidth?: string;
