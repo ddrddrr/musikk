@@ -4,7 +4,7 @@ import { UUID } from "@/api/types.ts";
 import { AttachmentType, PublicationForType } from "@/features/publications/types.ts";
 import { useMutation } from "@tanstack/react-query";
 
-interface IPublicationCreateParams {
+interface PublicationCreateParams {
     content: string;
     obj_type: PublicationForType;
     obj_uuid: UUID;
@@ -20,7 +20,7 @@ export async function publicationCreate({
     attachment_type,
     attachment_uuid,
     parent_uuid,
-}: IPublicationCreateParams) {
+}: PublicationCreateParams) {
     const payload: {
         content: string;
         attachment?: { type: string; uuid: string };

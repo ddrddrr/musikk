@@ -1,4 +1,3 @@
-// SongCollectionContainer.tsx
 import { UUID } from "@/api/types.ts";
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
 import { CommentBox } from "@/features/publications/components/CommentBox.tsx";
@@ -40,13 +39,13 @@ export function SongCollectionContainer({ collectionUUID }: SongCollectionContai
     if (isPending)
         return (
             <div className="flex min-h-[400px] items-center justify-center">
-                <div className="h-8 w-8 animate-spin rounded-full border-4 border-black border-t-transparent"></div>
+                <div className="h-8 w-8 animate-spin rounded-sm border-4 border-black border-t-transparent"></div>
             </div>
         );
 
     if (error)
         return (
-            <div className="rounded-lg border-2 border-black bg-red-600 p-6 text-center text-white">
+            <div className="rounded-sm border-2 border-black bg-red-600 p-6 text-center text-white">
                 An error has occurred: {error.message}
             </div>
         );
@@ -89,7 +88,7 @@ export function SongCollectionContainer({ collectionUUID }: SongCollectionContai
                                 ))}
                             </ul>
                         ) : (
-                            <div className="rounded-lg border-2 border-black bg-white py-12 text-center text-gray-700">
+                            <div className="rounded-sm border-2 border-black bg-white py-12 text-center text-gray-700">
                                 <p className="font-medium">No songs in this collection</p>
                             </div>
                         )}

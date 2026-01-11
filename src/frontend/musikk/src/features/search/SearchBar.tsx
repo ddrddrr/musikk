@@ -3,6 +3,7 @@ import { SearchWindow } from "@/features/search/SearchWindow";
 import { Popover, PopoverContent, PopoverTrigger } from "@/features/ui/popover";
 import { Search } from "lucide-react";
 import { useState } from "react";
+import { Button } from "../ui/button";
 
 interface SearchBarProps {
     onItemSelect?: (obj: Attachment) => void;
@@ -24,13 +25,13 @@ export function SearchBar({
     };
 
     return (
-        <div className="relative mx-4 max-w-sm">
+        <div className="relative max-w-sm">
             <Popover open={open} onOpenChange={setOpen}>
                 <PopoverTrigger asChild>
-                    <button className="flex w-full items-center rounded-sm bg-white px-4 py-2 text-left text-sm text-black transition-colors hover:bg-white/90">
+                    <Button variant={"outline"}>
                         <Search className="mr-2 h-4 w-4" />
-                        <span className="opacity-70">{placeholder}</span>
-                    </button>
+                        {placeholder}
+                    </Button>
                 </PopoverTrigger>
                 <PopoverContent
                     className="max-h-[500px] w-[350px] overflow-y-auto rounded-sm border bg-white p-0 shadow-lg"

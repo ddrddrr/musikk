@@ -31,10 +31,7 @@ export function SongCollectionCarousel({ collections, title }: SongCollectionsCa
                     <CarouselContent>
                         {collections.length > 0 ? (
                             collections.map((collection) => (
-                                <CarouselItem
-                                    key={collection.uuid}
-                                    className="basis-1/2 pl-2 md:basis-1/3 md:pl-4 lg:basis-1/4"
-                                >
+                                <CarouselItem key={collection.uuid} className="basis-1/5 pl-2 pl-4">
                                     <CollectionCard collection={collection} size="medium" />
                                 </CarouselItem>
                             ))

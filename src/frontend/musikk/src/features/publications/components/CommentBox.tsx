@@ -2,6 +2,7 @@ import { UUID } from "@/api/types.ts";
 import { usePublicationListInfiniteQuery } from "@/features/publications/api/queries.ts";
 import { CommentForm } from "@/features/publications/components/CommentForm.tsx";
 import { CommentList } from "@/features/publications/components/CommentList.tsx";
+import { usePublicationsInfiniteFlat } from "@/features/publications/hooks/usePublicationsInfiniteFlat.ts";
 import { Publication, PublicationForType } from "@/features/publications/types.ts";
 import { Button } from "@/features/ui/button.tsx";
 import { memo, useEffect, useMemo, useRef, useState } from "react";
@@ -14,16 +15,20 @@ interface CommentBoxProps {
 
 export const CommentBox = memo(function CommentBox({ objType, objUUID }: CommentBoxProps) {
     const [replyTo, setReplyTo] = useState<Publication | undefined>(undefined);
-    const { data, error, isPending, hasNextPage, isFetchingNextPage, fetchNextPage, refetch } =
-        usePublicationListInfiniteQuery(objType, objUUID);
+    const {
+        data,
+        error,
+        isPending,
+        hasNextPage,
+        isFetchingNextPage,
+        fetchNextPage,
+        refetch,
+        publicationsFlat,
+    } = usePublicationsInfiniteFlat(objType, objUUID);
     const commentsContainerRef = useRef<HTMLDivElement | null>(null);
     const didInitialScrollRef = useRef(false);
 
     // reverse since BE returns newest first
-    const comments = useMemo(() => {
-        const flat = data?.pages.flatMap((p) => p.results) ?? [];
-        return flat.slice().reverse();
-    }, [data]);
 
     useEffect(() => {
         if (isPending || didInitialScrollRef.current || !data || !commentsContainerRef.current)
@@ -67,7 +72,7 @@ export const CommentBox = memo(function CommentBox({ objType, objUUID }: Comment
                         </Button>
                     </div>
                 )}
-                <CommentList comments={comments} setReplyTo={setReplyTo} />
+                <CommentList comments={publicationsFlat} setReplyTo={setReplyTo} />
             </div>
 
             <div className="border-t-2 border-black bg-gray-100 p-4">

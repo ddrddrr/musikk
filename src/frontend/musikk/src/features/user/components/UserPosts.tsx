@@ -1,12 +1,12 @@
 import { UUID } from "@/api/types.ts";
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
-import { usePublicationListInfiniteQuery } from "@/features/publications/api/queries.ts";
 import { PostForm } from "@/features/publications/components/PostForm.tsx";
 import { PostTree } from "@/features/publications/components/PostTree.tsx";
+import { usePublicationsInfiniteFlat } from "@/features/publications/hooks/usePublicationsInfiniteFlat";
 import { Card, CardContent } from "@/features/ui/card.tsx";
 
 export function UserPosts({ userUUID }: { userUUID: UUID }) {
-    const { data: posts, isPending, error } = usePublicationListInfiniteQuery("feed", userUUID);
+    const { error, isPending, publicationsFlat } = usePublicationsInfiniteFlat("feed", userUUID);
     const currUserUUID = useUserUUID();
 
     if (error) {
@@ -21,12 +21,11 @@ export function UserPosts({ userUUID }: { userUUID: UUID }) {
                 <Card className="border-2 border-black shadow-md">
                     <CardContent className="space-y-3 p-4">
                         <h2 className="text-lg font-semibold">Add a Post :)</h2>
-                        <PostForm feedUserUuid={userUUID} />
+                        <PostForm feedUserUUID={userUUID} />
                     </CardContent>
                 </Card>
             )}
-            {/*TODO fix*/}
-            {posts?.map((post) => (
+            {publicationsFlat?.map((post) => (
                 <PostTree key={post.uuid} publication={post} />
             ))}
         </div>

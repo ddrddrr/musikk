@@ -69,6 +69,7 @@ class PublicationRetrieveSerializer(BaseModelSerializer):
     parent_uuid = serializers.SerializerMethodField(allow_null=True, read_only=True)
     parent_author = serializers.SerializerMethodField(allow_null=True, read_only=True)
     parent_repr = serializers.SerializerMethodField(allow_null=True, read_only=True)
+    has_children = serializers.SerializerMethodField(read_only=True)
 
     class Meta(BaseModelSerializer.Meta):
         model = Publication
@@ -83,6 +84,7 @@ class PublicationRetrieveSerializer(BaseModelSerializer):
             "parent_uuid",
             "parent_author",
             "parent_repr",
+            "has_children",
         ]
 
     def get_root_author_uuid(self, obj) -> str | None:
@@ -96,7 +98,10 @@ class PublicationRetrieveSerializer(BaseModelSerializer):
         return BaseUserSerializer(obj.parent.author).data if obj.parent else None
 
     def get_parent_repr(self, obj) -> str | None:
-        return obj.parent.content if obj.parent else None
+        return obj.parent.content[:100] if obj.parent else None
+
+    def get_has_children(self, obj) -> bool:
+        return obj.replies.exists()
 
 
 class PublicationRetrieveWithChildrenSerializer(PublicationRetrieveSerializer):

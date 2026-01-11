@@ -26,7 +26,6 @@ from streaming.permissions import IsPublicOrCollectionAuthor, IsCollecitonAuthor
 
 class CollectionListCreateView(ListCreateAPIView):
     queryset = Collection.objects.filter(private=False).order_by("-date_added")
-    filter_backends = [DjangoFilterBackend]
     filterset_class = CollectionFilter
     parser_classes = [MultiPartParser, FormParser, JSONParser]
 

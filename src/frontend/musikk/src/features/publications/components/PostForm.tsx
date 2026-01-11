@@ -19,10 +19,10 @@ interface PostFormProps {
     replyTo?: Publication;
     setReplyTo?: (reply?: Publication) => void;
     onSuccess?: () => void;
-    feedUserUuid?: UUID;
+    feedUserUUID?: UUID;
 }
 
-export function PostForm({ replyTo, setReplyTo, onSuccess, feedUserUuid }: PostFormProps) {
+export function PostForm({ replyTo, setReplyTo, onSuccess, feedUserUUID }: PostFormProps) {
     const {
         register,
         handleSubmit,
@@ -51,7 +51,7 @@ export function PostForm({ replyTo, setReplyTo, onSuccess, feedUserUuid }: PostF
         } = {
             content: formData.content,
             obj_type: "feed",
-            obj_uuid: feedUserUuid!,
+            obj_uuid: feedUserUUID!,
         };
 
         if (replyTo?.uuid) {
@@ -90,7 +90,7 @@ export function PostForm({ replyTo, setReplyTo, onSuccess, feedUserUuid }: PostF
             {attachedObj && (
                 <div className="text-xs text-muted-foreground italic">
                     Attached: {/*TODO: DOESNT WORK, add reprs for all objects?*/}
-                    {isCollection(attachedObj) ? attachedObj.title : attachedObj.title}
+                    {attachedObj.title}
                 </div>
             )}
 

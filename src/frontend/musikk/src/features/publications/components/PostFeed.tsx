@@ -1,5 +1,6 @@
 import { api_client } from "@/api/axiosConf.ts";
 import { PublicationURLs } from "@/api/endpoints.ts";
+import { PaginatedRes } from "@/api/types";
 import { PostTree } from "@/features/publications/components/PostTree.tsx";
 import { Publication } from "@/features/publications/types.ts";
 import { Card, CardContent } from "@/features/ui/card.tsx";
@@ -10,32 +11,33 @@ import { useState } from "react";
 export function PostFeed() {
     const [tab, setTab] = useState("friends");
 
-    const { data: postsFriends } = useQuery<Publication[]>({
+    const { data: postsFriends } = useQuery<PaginatedRes<Publication>>({
         queryFn: async () => {
-            const res = await api_client.get(PublicationURLs.publicationFeedLatest, {
+            const res = await api_client.get(PublicationURLs.publicationFeed, {
                 params: { connection: "friends" },
             });
             return res.data;
         },
         queryKey: ["publications", "feed", "latest", "friends"],
     });
-    const { data: postsFollowed } = useQuery<Publication[]>({
+    const { data: postsFollowed } = useQuery<PaginatedRes<Publication>>({
         queryFn: async () => {
-            const res = await api_client.get(PublicationURLs.publicationFeedLatest, {
+            const res = await api_client.get(PublicationURLs.publicationFeed, {
                 params: { connection: "followed" },
             });
             return res.data;
         },
         queryKey: ["publications", "feed", "latest", "followed"],
     });
-    const { data: postsAll } = useQuery<Publication[]>({
+    const { data: postsAll } = useQuery<PaginatedRes<Publication>>({
         queryFn: async () => {
-            const res = await api_client.get(PublicationURLs.publicationFeedLatest);
+            const res = await api_client.get(PublicationURLs.publicationFeed);
             return res.data;
         },
         queryKey: ["publications", "feed", "latest", "all"],
     });
 
+    // TODO: move to a sep component?
     function renderPostTree(label: string, posts: Publication[] | undefined) {
         return (
             <TabsContent value={label}>
@@ -43,13 +45,13 @@ export function PostFeed() {
                     {posts?.map((post) => (
                         <PostTree key={post.uuid} publication={post} />
                     ))}
-                    {!posts?.length && (
+                    {
                         <Card>
                             <CardContent className="py-6 text-center text-muted-foreground">
                                 No posts yet.
                             </CardContent>
                         </Card>
-                    )}
+                    }
                 </div>
             </TabsContent>
         );
@@ -64,9 +66,9 @@ export function PostFeed() {
                     <TabsTrigger value="followed">Followed</TabsTrigger>
                 </TabsList>
 
-                {renderPostTree("random", postsAll)}
-                {renderPostTree("friends", postsFriends)}
-                {renderPostTree("followed", postsFollowed)}
+                {renderPostTree("random", postsAll?.results)}
+                {renderPostTree("friends", postsFriends?.results)}
+                {renderPostTree("followed", postsFollowed?.results)}
             </Tabs>
         </div>
     );

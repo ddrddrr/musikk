@@ -1,6 +1,7 @@
 import { PostForm } from "@/features/publications/components/PostForm.tsx";
 import { Publication, PublicationWChildren } from "@/features/publications/types.ts";
 import { CollectionCard } from "@/features/song-collections/components/CollectionCard.tsx";
+import { Collection, CollectionSong } from "@/features/song-collections/types.ts";
 import { SongContainer } from "@/features/songs/components/SongContainer.tsx";
 import { Button } from "@/features/ui/button.tsx";
 import { Card, CardContent } from "@/features/ui/card.tsx";
@@ -24,24 +25,29 @@ export function PostTree({ publication, depth = 0 }: PostTreeProps) {
     const getBgColor = () => {
         if (!publication.parent_uuid) return "bg-white";
 
-        const colors = ["bg-gray-50", "bg-gray-100", "bg-gray-200", "bg-gray-300"];
+        const colors = ["bg-amber-50", "bg-amber-100", "bg-amber-200", "bg-amber-300"];
         return colors[depth % colors.length];
     };
 
-    function renderCardContent() {
+    // TODO: move
+    function renderAttachment() {
         if (publication.attachment) {
             switch (publication.attachment_type) {
-                // TODO: tighten types here
                 case "collection":
                     return (
                         <div className="mb-4">
-                            <CollectionCard collection={publication.attachment} size="medium" />
+                            <CollectionCard
+                                collection={publication.attachment as Collection}
+                                size="medium"
+                            />
                         </div>
                     );
                 case "song":
                     return (
                         <div className="mb-4">
-                            <SongContainer collectionSong={publication.attachment} />
+                            <SongContainer
+                                collectionSong={publication.attachment as CollectionSong}
+                            />
                         </div>
                     );
                 default:
@@ -52,14 +58,14 @@ export function PostTree({ publication, depth = 0 }: PostTreeProps) {
 
     return (
         <div className="relative">
-            <Card className={cn("mb-2 rounded-md border border-black shadow-sm", getBgColor())}>
+            <Card className={cn("mb-2 rounded-sm border border-black shadow-sm", getBgColor())}>
                 <CardContent className="px-3 py-0">
-                    {publication.attachment && renderCardContent()}
+                    {publication.attachment && renderAttachment()}
 
                     <div className="flex items-center gap-2">
-                        {/*<div className="text-xs font-medium">{publication.display_name || "Anonymous"}</div>*/}
                         <UserIdentifier user={publication.author} />
                         <div className="text-[10px] text-muted-foreground">
+                            {/*TODO: dont hardcode us*/}
                             {new Date(publication.date_added).toLocaleString("en-US", {
                                 dateStyle: "short",
                                 timeStyle: "short",
@@ -72,7 +78,7 @@ export function PostTree({ publication, depth = 0 }: PostTreeProps) {
                     </div>
 
                     <div className="flex items-center gap-2 text-[11px]">
-                        {/*TODO: add reply button variant*/}
+                        {/*TODO: add reply button variant, use here, in comments...*/}
                         <Button
                             variant="ghost"
                             size="sm"
@@ -90,7 +96,7 @@ export function PostTree({ publication, depth = 0 }: PostTreeProps) {
                                     replyTo={publication}
                                     setReplyTo={() => setIsReplying(false)}
                                     onSuccess={() => setIsReplying(false)}
-                                    feedUserUuid={publication.created_for.uuid}
+                                    feedUserUUID={publication.created_for.uuid}
                                 />
                             </div>
                         </div>
@@ -98,6 +104,7 @@ export function PostTree({ publication, depth = 0 }: PostTreeProps) {
                 </CardContent>
             </Card>
 
+            {/*TODO: move*/}
             {children && (
                 <Collapsible open={areChildrenOpen} onOpenChange={setAreChildrenOpen}>
                     <CollapsibleTrigger asChild>

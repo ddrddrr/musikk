@@ -1,8 +1,7 @@
 from django.contrib.contenttypes.models import ContentType
 from rest_framework import status
 from rest_framework.response import Response
-from rest_framework.views import APIView
-from rest_framework.generics import RetrieveAPIView, ListCreateAPIView
+from rest_framework.generics import RetrieveAPIView, ListAPIView, ListCreateAPIView
 
 from social.api.v1.filters import PublicationFilter
 from social.api.v1.serializers import (
@@ -20,6 +19,7 @@ from websockets.event_helpers import send_ws_event
 
 class PublicationListCreateForObjView(ListCreateAPIView):
     serializer_class = PublicationRetrieveSerializer  # for GET
+    filterset_class = PublicationFilter
 
     def get_created_for_obj(self):
         return CREATED_FOR_RESOLVER.resolve_model_instance(
@@ -70,7 +70,7 @@ class PublicationListCreateForObjView(ListCreateAPIView):
             },
         )
 
-# TODO: this also should be a list view, but children arr should be only 1 level deep...
+
 class PublicationRetrieveView(RetrieveAPIView):
     queryset = Publication.objects.select_related("author", "parent").prefetch_related(
         "replies__author"
@@ -79,20 +79,16 @@ class PublicationRetrieveView(RetrieveAPIView):
     lookup_field = "uuid"
 
 
-class PublicationFeedLatestView(APIView):
-    def get(self, request, *args, **kwargs):
-        queryset = Publication.objects.all()
+class PublicationFeedView(ListAPIView):
+    serializer_class = PublicationRetrieveSerializer
+    filterset_class = PublicationFilter
 
-        filterset = PublicationFilter(request.GET, queryset=queryset, request=request)
-        if filterset.is_valid():
-            filtered_qs = filterset.qs
-        else:
-            feed_content_type = ContentType.objects.get_for_model(BaseUser)
-            filtered_qs = queryset.filter(
-                parent__isnull=True, created_for_type=feed_content_type
-            ).order_by("-date_added")[:50]
-
-        serializer = PublicationRetrieveSerializer(
-            filtered_qs, many=True, context={"request": request}
+    def get_queryset(self):
+        return (
+            Publication.objects.filter(
+                # feed posts only
+                created_for_type=ContentType.objects.get_for_model(BaseUser),
+            ).select_related("author", "parent", "parent__author")
+            # newest first
+            .order_by("-date_added")
         )
-        return Response(status=status.HTTP_200_OK, data=serializer.data)

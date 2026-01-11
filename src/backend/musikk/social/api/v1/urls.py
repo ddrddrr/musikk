@@ -2,8 +2,8 @@ from django.urls import path
 
 from social.api.v1.views import (
     PublicationListCreateForObjView,
-    PublicationFeedLatestView,
     PublicationRetrieveView,
+    PublicationFeedView,
 )
 
 urlpatterns = [
@@ -18,8 +18,8 @@ urlpatterns = [
         name="publication-retrieve",
     ),
     path(
-        "publications/feed/latest",
-        PublicationFeedLatestView.as_view(),
+        "publications/feed",
+        PublicationFeedView.as_view(),
         name="publication-feed-latest",
     ),
 ]

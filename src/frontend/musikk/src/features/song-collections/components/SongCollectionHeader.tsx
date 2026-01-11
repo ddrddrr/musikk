@@ -96,15 +96,10 @@ export const SongCollectionHeader = memo(function SongCollectionHeader({
             </div>
 
             <div className="flex items-center justify-between">
-                <div className={"rounded-sm border-2 border-black bg-white"}>
-                    <h3
-                        className={`p-1 font-bold text-black ${
-                            showComments ? "text-sm" : "text-lg"
-                        }`}
-                    >
-                        Songs • {songsCount}
-                    </h3>
-                </div>
+                <h3 className={`p-1 font-bold text-black ${showComments ? "text-sm" : "text-lg"}`}>
+                    Songs • {songsCount}
+                </h3>
+
                 {notPersonalCollection && (
                     <Button
                         onClick={toggleComments}
