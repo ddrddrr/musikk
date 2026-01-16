@@ -6,7 +6,7 @@ from django.conf import settings
 
 
 # TODO: set images dir to settings
-def image_path(instance, filename):
+def DEFAULT_IMAGE_PATH(instance, filename):
     image_dir = Path(settings.MEDIA_ROOT) / "images" / instance.__class__.__name__
     image_dir.mkdir(parents=True, exist_ok=True)
 

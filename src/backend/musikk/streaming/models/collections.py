@@ -1,7 +1,7 @@
 from django.db import models
 
 from base.models import BaseModel
-from musikk.utils.paths import image_path
+from musikk.utils.paths import DEFAULT_IMAGE_PATH
 from streaming.models.songs import CollectionSong, BaseSong
 
 
@@ -32,7 +32,6 @@ class CollectionQuerySet(models.QuerySet):
 CollectionManager = models.Manager.from_queryset(CollectionQuerySet)
 
 
-# TODO: on user creation create history, liked songs classes
 class Collection(BaseModel):
     type = models.CharField(
         max_length=16,
@@ -46,7 +45,7 @@ class Collection(BaseModel):
     )
     title = models.CharField(max_length=128)
     description = models.TextField(max_length=512, blank=True, default="")
-    image = models.ImageField(upload_to=image_path, null=True, blank=True)
+    image = models.ImageField(upload_to=DEFAULT_IMAGE_PATH, null=True, blank=True)
     private = models.BooleanField(default=False)
 
     authors = models.ManyToManyField(

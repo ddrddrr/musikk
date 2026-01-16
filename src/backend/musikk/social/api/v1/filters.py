@@ -3,7 +3,7 @@ from django_filters import rest_framework as filters
 from social.models import Publication
 
 
-class PublicationFilter(filters.FilterSet):
+class PublicationConnectionFilter(filters.FilterSet):
     connection = filters.CharFilter(method="filter_connection_type")
 
     class Meta:

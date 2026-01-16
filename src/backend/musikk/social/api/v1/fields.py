@@ -12,11 +12,13 @@ class TypeModelRefField(serializers.Field):
         if data is None:
             return None
         if not isinstance(data, dict):
-            raise serializers.ValidationError("Expected a dictionary.")
+            # TODO:
+            raise serializers.ValidationError()
         try:
             return self.resolver.resolve_model_instance(data)
         except Exception as e:
-            raise serializers.ValidationError(str(e))
+            # TODO:
+            raise serializers.ValidationError()
 
     def to_representation(self, value):
         if value is None:

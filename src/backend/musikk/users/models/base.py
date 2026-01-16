@@ -4,7 +4,7 @@ from django.db import models
 from django.utils.crypto import get_random_string
 
 from base.models import BaseModel
-from musikk.utils.paths import image_path
+from musikk.utils.paths import DEFAULT_IMAGE_PATH
 
 
 def default_display_name():
@@ -41,7 +41,7 @@ class BaseUser(BaseModel, AbstractBaseUser, PermissionsMixin):
     display_name = models.CharField(max_length=50, default=default_display_name)
     bio = models.TextField(max_length=255, default="")
     avatar = models.ImageField(
-        upload_to=image_path, max_length=255, blank=True, null=True
+        upload_to=DEFAULT_IMAGE_PATH, max_length=255, blank=True, null=True
     )
 
     role = models.CharField(

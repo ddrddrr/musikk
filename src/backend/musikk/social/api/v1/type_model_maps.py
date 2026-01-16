@@ -99,29 +99,6 @@ class TypeToModelResolver:
         }
 
 
-CREATED_FOR_RESOLVER = TypeToModelResolver.from_map(
-    {
-        "collection": Collection,
-        "feed": BaseUser,
-    },
-)
-
-
-def _get_attachment_resolver() -> TypeToModelResolver:
-    return TypeToModelResolver.from_map(
-        type_model_map={
-            "collection": Collection,
-            "song": CollectionSong,
-            "user": BaseUser,
-        },
-        type_serializer_map={
-            "collection": CollectionSerializerBasic,
-            "song": CollectionSongSerializer,
-            "user": BaseUserSerializer,
-        },
-    )
-
-
 ATTACHMENT_RESOLVER = TypeToModelResolver.from_map(
     type_model_map={
         "collection": Collection,

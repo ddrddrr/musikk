@@ -2,7 +2,7 @@ from django.conf import settings
 from django.db import models
 
 from base.models import BaseModel
-from musikk.utils.paths import image_path, delete_dir_for_file
+from musikk.utils.paths import DEFAULT_IMAGE_PATH, delete_dir_for_file
 from users.models import UserRole
 
 
@@ -17,7 +17,7 @@ BaseSongManager = models.Manager.from_queryset(BaseSongQuerySet)
 class BaseSong(BaseModel):
     title = models.CharField(max_length=128)
     description = models.TextField(max_length=512, blank=True, default="")
-    image = models.ImageField(upload_to=image_path, null=True, blank=True)
+    image = models.ImageField(upload_to=DEFAULT_IMAGE_PATH, null=True, blank=True)
     draft = models.BooleanField(default=False)
 
     authors = models.ManyToManyField(

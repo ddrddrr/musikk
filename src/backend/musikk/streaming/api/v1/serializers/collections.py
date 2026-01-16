@@ -73,8 +73,8 @@ class CollectionSerializerDetailed(CollectionSerializerBasic):
 
 
 class CollectionCreateSerializer(serializers.ModelSerializer):
-    authors = UUIDListField(required=False, write_only=True)
-    songs = UUIDListField(write_only=True, required=False)
+    authors = UUIDListField(required=False, allow_empty=True, write_only=True)
+    songs = UUIDListField(required=False, write_only=True)
 
     class Meta:
         model = Collection

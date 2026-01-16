@@ -1,74 +1,24 @@
-from django.contrib.contenttypes.models import ContentType
-from rest_framework import status
-from rest_framework.response import Response
-from rest_framework.generics import RetrieveAPIView, ListAPIView, ListCreateAPIView
-
-from social.api.v1.filters import PublicationFilter
-from social.api.v1.serializers import (
-    PublicationCreateSerializer,
-    PublicationRetrieveSerializer,
-    PublicationRetrieveWithChildrenSerializer,
+from rest_framework.generics import (
+    RetrieveAPIView,
+    GenericAPIView,
+    ListCreateAPIView,
+    CreateAPIView,
 )
-from social.api.v1.type_model_maps import (
-    CREATED_FOR_RESOLVER,
+
+from social.api.v1.filters import PublicationConnectionFilter
+from social.api.v1.mixins import PublicationsListCreateMixin
+from social.api.v1.serializers import (
+    PublicationRetrieveWithChildrenSerializer,
+    UserChatRetrieveSerializer,
+    UserChatCreateSerializer,
+    ChatMembersCreateSerializer,
 )
 from social.models import Publication
+from social.models.chat import Chat, ChatMember
+from streaming.models import Collection
+from streaming.models.collections import CollectionType
 from users.models import BaseUser
 from websockets.event_helpers import send_ws_event
-
-
-class PublicationListCreateForObjView(ListCreateAPIView):
-    serializer_class = PublicationRetrieveSerializer  # for GET
-    filterset_class = PublicationFilter
-
-    def get_created_for_obj(self):
-        return CREATED_FOR_RESOLVER.resolve_model_instance(
-            {"type": self.kwargs["obj_type"], "uuid": str(self.kwargs["obj_uuid"])}
-        )
-
-    def get_queryset(self):
-        created_for_obj = self.get_created_for_obj()
-        return (
-            Publication.objects.filter(
-                created_for_type=ContentType.objects.get_for_model(
-                    created_for_obj.__class__
-                ),
-                created_for_id=created_for_obj.pk,
-            ).select_related("author", "parent", "parent__author")
-            # newest first
-            .order_by("-date_added")
-        )
-
-    def create(self, request, *args, **kwargs):
-        created_for_obj = self.get_created_for_obj()
-        serializer = PublicationCreateSerializer(
-            data=request.data,
-            context={"request": request, "created_for_obj": created_for_obj},
-        )
-        serializer.is_valid(raise_exception=True)
-        obj = serializer.save()
-
-        created_for_ref = CREATED_FOR_RESOLVER.get_model_instance_representation(
-            created_for_obj
-        )
-        send_ws_event(
-            f"user_{request.user.uuid}",
-            event_name="invalidate.query",
-            query_key=[
-                "publications",
-                created_for_ref["type"],
-                created_for_ref["uuid"],
-            ],
-        )
-
-        return Response(
-            status=status.HTTP_201_CREATED,
-            data={
-                "publication": PublicationRetrieveSerializer(
-                    obj, context={"request": request}
-                ).data
-            },
-        )
 
 
 class PublicationRetrieveView(RetrieveAPIView):
@@ -79,16 +29,104 @@ class PublicationRetrieveView(RetrieveAPIView):
     lookup_field = "uuid"
 
 
-class PublicationFeedView(ListAPIView):
-    serializer_class = PublicationRetrieveSerializer
-    filterset_class = PublicationFilter
+class CollectionCommentsListCreateView(PublicationsListCreateMixin, GenericAPIView):
+    filterset_class = PublicationConnectionFilter
+
+    def get_created_for(self) -> Collection:
+        return Collection.objects.get(uuid=self.kwargs["collection_uuid"])
+
+    def check_list_permission(self, created_for: Collection):
+        return created_for.private == False
+
+    def check_create_permission(self, created_for: Collection):
+        return created_for.private == False and created_for.type in (
+            CollectionType.ALBUM,
+            CollectionType.PLAYLIST,
+        )
+
+    def ws_on_create(self):
+        send_ws_event(
+            f"user_{self.request.user.uuid}",
+            event_name="invalidate.query",
+            query_key=[
+                "collection",
+                self.kwargs["collection_uuid"],
+                "comments",
+            ],
+        )
+
+
+class FeedPostsListCreateView(PublicationsListCreateMixin, GenericAPIView):
+    filterset_class = PublicationConnectionFilter
+
+    def get_created_for(self):
+        return BaseUser.objects.get(uuid=self.kwargs["user_uuid"])
+
+    def check_list_permission(self, created_for):
+        return True
+
+    def check_create_permission(self, created_for):
+        # top-level publications on their own feed
+        # or replies anywhere
+        return (
+            created_for == self.request.user
+            or Publication.objects.filter(
+                uuid=self.request.data.get("parent_uuid")
+            ).exists()
+        )
+
+    def ws_on_create(self):
+        send_ws_event(
+            f"user_{self.request.user.uuid}",
+            event_name="invalidate.query",
+            query_key=[
+                "feed",
+                self.kwargs["user_uuid"],
+                "comments",
+            ],
+        )
+
+
+class ChatMessagesListCreateView(PublicationsListCreateMixin, GenericAPIView):
+    def get_created_for(self) -> Chat:
+        return Chat.objects.get(uuid=self.kwargs["chat_uuid"])
+
+    def check_list_permission(self, created_for: Chat) -> bool:
+        return ChatMember.objects.filter(
+            chat=created_for, member=self.request.user
+        ).exists()
+
+    def check_create_permission(self, created_for: Chat) -> bool:
+        return ChatMember.objects.filter(
+            chat=created_for, member=self.request.user
+        ).exists()
+
+    def ws_on_create(self):
+        send_ws_event(
+            f"user_{self.request.user.uuid}",
+            event_name="invalidate.query",
+            query_key=[
+                "chat",
+                self.kwargs["chat_uuid"],
+                "messages",
+            ],
+        )
+
+
+class UserChatsListCreateView(ListCreateAPIView):
+    def get_serializer_class(self):
+        if self.request.method == "POST":
+            return UserChatCreateSerializer
+        return UserChatRetrieveSerializer
 
     def get_queryset(self):
-        return (
-            Publication.objects.filter(
-                # feed posts only
-                created_for_type=ContentType.objects.get_for_model(BaseUser),
-            ).select_related("author", "parent", "parent__author")
-            # newest first
-            .order_by("-date_added")
-        )
+        return [
+            cm.chat
+            for cm in ChatMember.objects.filter(
+                member=self.request.user
+            ).select_related("chat")
+        ]
+
+
+class ChatMembersCreateView(CreateAPIView):
+    serializer_class = ChatMembersCreateSerializer

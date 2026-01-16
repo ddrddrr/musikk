@@ -1,25 +1,45 @@
 from django.urls import path
 
 from social.api.v1.views import (
-    PublicationListCreateForObjView,
     PublicationRetrieveView,
-    PublicationFeedView,
+    CollectionCommentsListCreateView,
+    FeedPostsListCreateView,
+    ChatMessagesListCreateView,
+    UserChatsListCreateView,
+    ChatMembersCreateView,
 )
 
-urlpatterns = [
+chat_urlpatterns = [
     path(
-        "publications/<str:obj_type>/<uuid:obj_uuid>",
-        PublicationListCreateForObjView.as_view(),
-        name="publication-create-list-for-obj",
+        "users/<uuid:user_uuid>/chats",
+        UserChatsListCreateView.as_view(),
+        name="user-chats-list-create",
     ),
+    path(
+        "chat/<uuid:chat_uuid>/messages",
+        ChatMessagesListCreateView.as_view(),
+        name="chat-messages-list-create",
+    ),
+    path(
+        "chat/<uuid:chat_uuid>/members",
+        ChatMembersCreateView.as_view(),
+        name="chat-members-create",
+    ),
+]
+urlpatterns = [
     path(
         "publications/<uuid:uuid>",
         PublicationRetrieveView.as_view(),
         name="publication-retrieve",
     ),
     path(
-        "publications/feed",
-        PublicationFeedView.as_view(),
-        name="publication-feed-latest",
+        "feed/<uuid:user_uuid>/posts",  # future proofing with /posts
+        FeedPostsListCreateView.as_view(),
+        name="feed-list-retrieve",
     ),
-]
+    path(
+        "collections/<uuid:collection_uuid>/comments",
+        CollectionCommentsListCreateView.as_view(),
+        name="collection-comments-list-retrieve",
+    ),
+] + chat_urlpatterns

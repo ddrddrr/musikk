@@ -40,7 +40,7 @@ class Migration(migrations.Migration):
                 (
                     "image",
                     models.ImageField(
-                        blank=True, null=True, upload_to=musikk.utils.paths.image_path
+                        blank=True, null=True, upload_to=musikk.utils.paths.DEFAULT_IMAGE_PATH
                     ),
                 ),
                 ("draft", models.BooleanField(default=False)),
@@ -117,7 +117,7 @@ class Migration(migrations.Migration):
                 (
                     "image",
                     models.ImageField(
-                        blank=True, null=True, upload_to=musikk.utils.paths.image_path
+                        blank=True, null=True, upload_to=musikk.utils.paths.DEFAULT_IMAGE_PATH
                     ),
                 ),
                 ("private", models.BooleanField(default=False)),

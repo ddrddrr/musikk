@@ -66,7 +66,7 @@ class Migration(migrations.Migration):
                         blank=True,
                         max_length=255,
                         null=True,
-                        upload_to=musikk.utils.paths.image_path,
+                        upload_to=musikk.utils.paths.DEFAULT_IMAGE_PATH,
                     ),
                 ),
                 ("is_staff", models.BooleanField(default=False)),
