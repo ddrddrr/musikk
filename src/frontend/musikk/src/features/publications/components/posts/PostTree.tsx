@@ -1,19 +1,17 @@
-import { PostAttachment } from "@/features/publications/components/PostAttachment.tsx";
-import { PostComments } from "@/features/publications/components/PostComments.tsx";
-import { PostHeader } from "@/features/publications/components/PostHeader.tsx";
-import { PostReplySection } from "@/features/publications/components/PostReplySection.tsx";
-import { Publication, PublicationWChildren } from "@/features/publications/types.ts";
+import { PostAttachment } from "@/features/publications/components/posts/PostAttachment.tsx";
+import { PostHeader } from "@/features/publications/components/posts/PostHeader.tsx";
+import { PostReplies } from "@/features/publications/components/posts/PostReplies.tsx";
+import { PostReplySection } from "@/features/publications/components/posts/PostReplySection.tsx";
+import { Publication } from "@/features/publications/types.ts";
 import { Card, CardContent } from "@/features/ui/card.tsx";
 import { cn } from "@/lib/utils.ts";
 
 interface PostTreeProps {
-    publication: Publication | PublicationWChildren;
+    publication: Publication;
     depth?: number;
 }
 
 export function PostTree({ publication, depth = 0 }: PostTreeProps) {
-    const children = (publication as PublicationWChildren).children;
-
     const getBgColor = () => {
         if (!publication.parent_uuid) return "bg-white";
 
@@ -34,17 +32,14 @@ export function PostTree({ publication, depth = 0 }: PostTreeProps) {
 
                     <PostReplySection
                         publication={publication}
-                        feedUserUUID={publication.created_for.uuid}
+                        feedUserUUID={publication.author.uuid}
+                    />
+                    <PostReplies
+                        publication={publication}
+                        renderChild={(reply) => <PostTree publication={reply} depth={depth + 1} />}
                     />
                 </CardContent>
             </Card>
-            {/*TODO: FIX RENDERING!*/}
-            {children && (
-                <PostComments
-                    replies={children}
-                    renderChild={(reply) => <PostTree publication={reply} depth={depth + 1} />}
-                />
-            )}
         </div>
     );
 }

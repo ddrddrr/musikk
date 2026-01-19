@@ -1,16 +1,20 @@
 import { UUID } from "@/api/types.ts";
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
-import { PostForm } from "@/features/publications/components/PostForm.tsx";
-import { PostTree } from "@/features/publications/components/PostTree.tsx";
-import { usePublicationsInfiniteFlat } from "@/features/publications/hooks/usePublicationsInfiniteFlat.ts";
+import { LoadOlderButton } from "@/features/publications/components/LoadOlderButton.tsx";
+import { PostForm } from "@/features/publications/components/posts/PostForm.tsx";
+import { PostTree } from "@/features/publications/components/posts/PostTree.tsx";
+import { useFeedPostsFlat } from "@/features/publications/hooks/usePublicationsInfiniteFlat.ts";
 import { Card, CardContent } from "@/features/ui/card.tsx";
 
-export function UserPosts({ userUUID }: { userUUID: UUID }) {
-    const { error, isPending, publicationsFlat } = usePublicationsInfiniteFlat(
-        "feed",
-        userUUID,
-        false,
-    );
+export function UserFeed({ userUUID }: { userUUID: UUID }) {
+    const {
+        error,
+        isPending,
+        publicationsFlat,
+        hasNextPage,
+        isFetchingNextPage,
+        fetchNextPage,
+    } = useFeedPostsFlat(userUUID, false);
     const currUserUUID = useUserUUID();
 
     if (error) {
@@ -32,6 +36,13 @@ export function UserPosts({ userUUID }: { userUUID: UUID }) {
             {publicationsFlat?.map((post) => (
                 <PostTree key={post.uuid} publication={post} />
             ))}
+            <div className="flex justify-center py-4">
+                <LoadOlderButton
+                    hasNextPage={hasNextPage}
+                    isFetchingNextPage={isFetchingNextPage}
+                    fetchNextPage={fetchNextPage}
+                />
+            </div>
         </div>
     );
 }

@@ -1,6 +1,5 @@
 from rest_framework.generics import (
     RetrieveAPIView,
-    GenericAPIView,
     ListCreateAPIView,
     CreateAPIView,
 )
@@ -8,7 +7,7 @@ from rest_framework.generics import (
 from social.api.v1.filters import PublicationConnectionFilter
 from social.api.v1.mixins import PublicationsListCreateMixin
 from social.api.v1.serializers import (
-    PublicationRetrieveWithChildrenSerializer,
+    PublicationChildrenSerializer,
     UserChatRetrieveSerializer,
     UserChatCreateSerializer,
     ChatMembersCreateSerializer,
@@ -21,15 +20,13 @@ from users.models import BaseUser
 from websockets.event_helpers import send_ws_event
 
 
-class PublicationRetrieveView(RetrieveAPIView):
-    queryset = Publication.objects.select_related("author", "parent").prefetch_related(
-        "replies__author"
-    )
-    serializer_class = PublicationRetrieveWithChildrenSerializer
+class PublicationChildrenView(RetrieveAPIView):
+    queryset = Publication.objects.all()
+    serializer_class = PublicationChildrenSerializer
     lookup_field = "uuid"
 
 
-class CollectionCommentsListCreateView(PublicationsListCreateMixin, GenericAPIView):
+class CollectionCommentsListCreateView(PublicationsListCreateMixin, ListCreateAPIView):
     filterset_class = PublicationConnectionFilter
 
     def get_created_for(self) -> Collection:
@@ -56,7 +53,7 @@ class CollectionCommentsListCreateView(PublicationsListCreateMixin, GenericAPIVi
         )
 
 
-class FeedPostsListCreateView(PublicationsListCreateMixin, GenericAPIView):
+class FeedPostsListCreateView(PublicationsListCreateMixin, ListCreateAPIView):
     filterset_class = PublicationConnectionFilter
 
     def get_created_for(self):
@@ -81,13 +78,13 @@ class FeedPostsListCreateView(PublicationsListCreateMixin, GenericAPIView):
             event_name="invalidate.query",
             query_key=[
                 "feed",
-                self.kwargs["user_uuid"],
+                str(self.kwargs["user_uuid"]),
                 "comments",
             ],
         )
 
 
-class ChatMessagesListCreateView(PublicationsListCreateMixin, GenericAPIView):
+class ChatMessagesListCreateView(PublicationsListCreateMixin, ListCreateAPIView):
     def get_created_for(self) -> Chat:
         return Chat.objects.get(uuid=self.kwargs["chat_uuid"])
 
@@ -107,7 +104,7 @@ class ChatMessagesListCreateView(PublicationsListCreateMixin, GenericAPIView):
             event_name="invalidate.query",
             query_key=[
                 "chat",
-                self.kwargs["chat_uuid"],
+                str(self.kwargs["chat_uuid"]),
                 "messages",
             ],
         )

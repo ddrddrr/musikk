@@ -17,7 +17,7 @@ export function Player({ audioRef, onDurationChange, onTimeUpdate }: PlayerProps
     const playerRef = useRef<shaka.Player | null>(null);
     const isAudioReadyRef = useRef(false);
 
-    // TODO: we need to split by OS not browser (ios -> m3u8, otherwise mpd)
+    // TODO: we need to split by OS not browser (ios -> m3u8, otherwise mpd...?)
     const isSafari = useMemo(() => {
         return /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
     }, []);
@@ -27,12 +27,12 @@ export function Player({ audioRef, onDurationChange, onTimeUpdate }: PlayerProps
         return isSafari ? playingCollectionSong.song.m3u8 : playingCollectionSong.song.mpd;
     }, [queueHead, playingCollectionSong, isSafari]);
 
-    // removes browser incompatibilities, see
-    // https://shaka-player-demo.appspot.com/docs/api/tutorial-basic-usage.html
     useEffect(() => {
+        // removes browser incompatibilities, see
+        // https://shaka-player-demo.appspot.com/docs/api/tutorial-basic-usage.html
         shaka.polyfill.installAll();
         if (!shaka.Player.isBrowserSupported()) {
-            // TODO: show msg for user
+            // TODO: show err to user
             console.error("Browser not supported!");
         }
 
@@ -73,6 +73,7 @@ export function Player({ audioRef, onDurationChange, onTimeUpdate }: PlayerProps
         initPlayback();
     }, [queueHead?.uuid, url]);
 
+    // TODO: improve, try to remove
     useEffect(() => {
         const audio = audioRef.current;
         if (!audio) return;
@@ -100,12 +101,13 @@ export function Player({ audioRef, onDurationChange, onTimeUpdate }: PlayerProps
         };
     }, [queueHead?.uuid, isThisDeviceActive, isPlaybackActive]);
 
-    async function handleOnEnded() {
+    function handleOnEnded() {
         isAudioReadyRef.current = false;
         useShiftHeadMutation.mutate({ action: "shift" });
     }
 
     // handles badly padded song ends, needed, e.g., for very short audio
+    // TODO: try to remove as well
     useEffect(() => {
         const audio = audioRef.current;
         if (!audio) return;
@@ -124,7 +126,7 @@ export function Player({ audioRef, onDurationChange, onTimeUpdate }: PlayerProps
         }, 1000);
 
         return () => clearInterval(interval);
-    }, [queueHead?.uuid, isThisDeviceActive]);
+    }, [queueHead?.uuid, isThisDeviceActive, useShiftHeadMutation]);
 
     function handleLoadedMetadata() {
         const audio = audioRef.current;

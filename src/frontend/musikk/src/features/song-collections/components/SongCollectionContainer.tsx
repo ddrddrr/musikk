@@ -1,6 +1,6 @@
 import { UUID } from "@/api/types.ts";
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
-import { CommentBox } from "@/features/publications/components/CommentBox.tsx";
+import { CommentBox } from "@/features/publications/components/collection-comments/CommentBox.tsx";
 import { fetchCollectionDetailed } from "@/features/song-collections/api/queries.ts";
 import { SongCollectionHeader } from "@/features/song-collections/components/SongCollectionHeader.tsx";
 import { SongContainer } from "@/features/songs/components/SongContainer.tsx";
@@ -97,7 +97,7 @@ export function SongCollectionContainer({ collectionUUID }: SongCollectionContai
 
                 {showComments && (
                     <div className="min-w-0 flex-1">
-                        <CommentBox objType="collection" objUUID={collectionUUID} />
+                        <CommentBox collectionUUID={collectionUUID} />
                     </div>
                 )}
             </div>

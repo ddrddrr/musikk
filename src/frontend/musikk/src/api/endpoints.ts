@@ -1,11 +1,12 @@
 import { UUID } from "@/api/types.ts";
-import { PublicationForType } from "@/features/publications/types.ts";
 
 export const WebsocketURLs = {
     userChannel: "/ws/user",
 };
 
 export const BaseAPIURL = "/api/v1";
+
+// TODO: move urls to relative feature dirs
 export const AuthURLs = {
     csrf: "/csrf",
     register: "/auth/registration",
@@ -44,14 +45,6 @@ export const CollectionURLs = {
     collectionRemoveSong: (collectionUUID: UUID, songCollectionSongUUID: UUID) =>
         `/collections/${collectionUUID}/songs/${songCollectionSongUUID}`,
     likedSongsAddSong: (songUUID: UUID) => `/liked-songs/add-song/${songUUID}`,
-};
-export const PublicationURLs = {
-    publicationList: (objType: PublicationForType, objUUID: UUID) =>
-        `/publications/${objType}/${objUUID}`,
-    publicationCreate: (objType: PublicationForType, objUUID: UUID) =>
-        `/publications/${objType}/${objUUID}`,
-    publicationsRetrieve: (pubUUID: UUID) => `/publications/${pubUUID}`,
-    publicationFeed: `/publications/feed`,
 };
 export const NotificationURLs = {
     notificationsSetRead: `/notifications`,

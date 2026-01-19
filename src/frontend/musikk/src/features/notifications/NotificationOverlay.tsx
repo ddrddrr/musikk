@@ -7,22 +7,22 @@ import { useNavigate } from "react-router-dom";
 interface NotificationOverlayProps {
     notifications: NotificationListParams;
 }
-
+// TODO: rewrite as different sections? replies, friend stuff, new music etc?
 export const NotificationOverlay = memo(function NotificationOverlay({
     notifications,
 }: NotificationOverlayProps) {
     const navigate = useNavigate();
 
     function handleNavigateReplyClick(notification: IReplyNotification) {
-        if (notification.reply_publication.created_for.type == "feed") {
-            navigate(`/users/${notification.reply_publication.root_author_uuid}`);
-        } else {
-            navigate(`/collection/${notification.reply_publication.created_for.uuid}/comments`);
-        }
+        // if (notification.reply_publication.created_for.type == "feed") {
+        //     navigate(`/users/${notification.reply_publication.root_author_uuid}`);
+        // } else {
+        //     navigate(`/collection/${notification.reply_publication.created_for.uuid}/comments`);
+        // }
     }
 
     function handleNavigateFollowerClick(notification: IFollowerNotification) {
-        navigate(`/users/${notification.sender.uuid}`);
+        // navigate(`/users/${notification.sender.uuid}`);
     }
 
     const { replies = [], followers = [] } = notifications;

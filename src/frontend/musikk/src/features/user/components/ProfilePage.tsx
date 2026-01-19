@@ -1,5 +1,5 @@
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
-import { UserPosts } from "@/features/publications/components/UserPosts.tsx";
+import { UserFeed } from "@/features/publications/components/posts/UserFeed.tsx";
 import { Button } from "@/features/ui/button.tsx";
 import {
     Dialog,
@@ -88,7 +88,7 @@ export function ProfilePage() {
                 </div>
             </div>
             <div className="mt-8 w-full">
-                <UserPosts userUUID={uuid} />
+                <UserFeed userUUID={uuid} />
             </div>
         </div>
     );

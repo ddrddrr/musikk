@@ -10,8 +10,8 @@ export function PostHeader({ author, dateAdded }: PostHeaderProps) {
     return (
         <div className="flex items-center gap-2">
             <UserIdentifier user={author} />
-            <div className="text-[10px] text-muted-foreground">
-                {new Date(dateAdded).toLocaleString("en-US", {
+            <div className="text-xs text-muted-foreground">
+                {new Date(dateAdded).toLocaleString(undefined, {
                     dateStyle: "short",
                     timeStyle: "short",
                 })}

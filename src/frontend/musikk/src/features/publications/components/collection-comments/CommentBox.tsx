@@ -1,19 +1,18 @@
 import { UUID } from "@/api/types.ts";
-import { usePublicationListInfiniteQuery } from "@/features/publications/api/queries.ts";
-import { CommentForm } from "@/features/publications/components/CommentForm.tsx";
-import { CommentList } from "@/features/publications/components/CommentList.tsx";
-import { usePublicationsInfiniteFlat } from "@/features/publications/hooks/usePublicationsInfiniteFlat.ts";
-import { Publication, PublicationForType } from "@/features/publications/types.ts";
+import { CommentForm } from "@/features/publications/components/collection-comments/CommentForm.tsx";
+import { CommentList } from "@/features/publications/components/collection-comments/CommentList.tsx";
+import { LoadOlderButton } from "@/features/publications/components/LoadOlderButton.tsx";
+import { useCollectionCommentsFlat } from "@/features/publications/hooks/usePublicationsInfiniteFlat.ts";
+import { Publication } from "@/features/publications/types.ts";
 import { Button } from "@/features/ui/button.tsx";
-import { memo, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 
 interface CommentBoxProps {
-    objType: PublicationForType;
-    objUUID: UUID;
+    collectionUUID: UUID;
 }
 // TODO: add proper infinite scroll, read about https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API
 
-export const CommentBox = memo(function CommentBox({ objType, objUUID }: CommentBoxProps) {
+export const CommentBox = memo(function CommentBox({ collectionUUID }: CommentBoxProps) {
     const [replyTo, setReplyTo] = useState<Publication | undefined>(undefined);
     const {
         data,
@@ -24,11 +23,9 @@ export const CommentBox = memo(function CommentBox({ objType, objUUID }: Comment
         fetchNextPage,
         refetch,
         publicationsFlat,
-    } = usePublicationsInfiniteFlat(objType, objUUID);
+    } = useCollectionCommentsFlat(collectionUUID);
     const commentsContainerRef = useRef<HTMLDivElement | null>(null);
     const didInitialScrollRef = useRef(false);
-
-    // reverse since BE returns newest first
 
     useEffect(() => {
         if (isPending || didInitialScrollRef.current || !data || !commentsContainerRef.current)
@@ -51,7 +48,7 @@ export const CommentBox = memo(function CommentBox({ objType, objUUID }: Comment
         return (
             <div className="rounded-sm border-2 border-black bg-red-600 p-4 text-white">
                 <div className="text-sm font-medium">Failed to load comments</div>
-                <Button variant="brand" size="lg" onClick={refetch}>
+                <Button variant="brand" size="lg" onClick={void refetch}>
                     Retry
                 </Button>
             </div>
@@ -61,24 +58,19 @@ export const CommentBox = memo(function CommentBox({ objType, objUUID }: Comment
     return (
         <div className="flex h-full max-h-[600px] flex-col overflow-hidden rounded-sm border-2 border-black bg-white">
             <div className="min-h-0 flex-1 overflow-y-auto p-4" ref={commentsContainerRef}>
-                {hasNextPage && (
-                    <div className="mb-4 flex justify-center">
-                        <Button
-                            variant="brand"
-                            onClick={fetchNextPage}
-                            disabled={isFetchingNextPage}
-                        >
-                            {isFetchingNextPage ? "Loading..." : "Load older"}
-                        </Button>
-                    </div>
-                )}
+                <div className="mb-4 flex justify-center">
+                    <LoadOlderButton
+                        hasNextPage={hasNextPage}
+                        isFetchingNextPage={isFetchingNextPage}
+                        fetchNextPage={fetchNextPage}
+                    />
+                </div>
                 <CommentList comments={publicationsFlat} setReplyTo={setReplyTo} />
             </div>
 
             <div className="border-t-2 border-black bg-gray-100 p-4">
                 <CommentForm
-                    objType={objType}
-                    objUUID={objUUID}
+                    collectionUUID={collectionUUID}
                     replyTo={replyTo}
                     setReplyTo={setReplyTo}
                     onCommentPosted={() => {

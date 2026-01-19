@@ -1,7 +1,7 @@
 import { UUID } from "@/api/types.ts";
-import { usePublicationCreateMutation } from "@/features/publications/api/mutations.ts";
+import { useCreateCollectionComment } from "@/features/publications/api/mutations.ts";
 import { commentSchema } from "@/features/publications/schemas.ts";
-import { Publication, PublicationForType } from "@/features/publications/types.ts";
+import { Publication } from "@/features/publications/types.ts";
 import { Button } from "@/features/ui/button.tsx";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -10,16 +10,14 @@ import { z } from "zod";
 type CommentFormData = z.infer<typeof commentSchema>;
 
 interface CommentFormDataProps {
-    objType: PublicationForType;
-    objUUID: UUID;
+    collectionUUID: UUID;
     replyTo?: Publication;
     setReplyTo?: (comment?: Publication) => void;
     onCommentPosted?: () => void;
 }
 
 export function CommentForm({
-    objType,
-    objUUID,
+    collectionUUID,
     replyTo,
     setReplyTo,
     onCommentPosted,
@@ -33,14 +31,13 @@ export function CommentForm({
         resolver: zodResolver(commentSchema),
     });
 
-    const addCommentMutation = usePublicationCreateMutation();
+    const createCollectionCommentMutation = useCreateCollectionComment();
     const submitHandler = (data: CommentFormData) => {
-        addCommentMutation.mutate(
+        createCollectionCommentMutation.mutate(
             {
-                obj_type: objType,
-                obj_uuid: objUUID,
+                collectionUUID,
                 content: data.content,
-                parent_uuid: replyTo?.uuid,
+                parentUUID: replyTo?.uuid,
             },
             {
                 onSuccess: () => {

@@ -1,44 +1,79 @@
 import { api_client } from "@/api/axiosConf.ts";
-import { PublicationURLs } from "@/api/endpoints.ts";
 import { PaginatedRes, UUID } from "@/api/types.ts";
-import { Publication, PublicationForType } from "@/features/publications/types.ts";
+import { PublicationURLs } from "@/features/publications/api/urls.ts";
+import { Publication } from "@/features/publications/types.ts";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 
-export async function fetchPublicationListPage(
-    objType: PublicationForType,
-    objUUID: UUID,
+async function fetchPublicationPage(
+    url: string,
     limit = 10,
     offset = 0,
-) {
-    const res = await api_client.get(PublicationURLs.publicationList(objType, objUUID), {
-        params: { limit, offset },
+    additionalParams?: Record<string, string>,
+): Promise<PaginatedRes<Publication>> {
+    const res = await api_client.get<PaginatedRes<Publication>>(url, {
+        params: { limit, offset, ...additionalParams },
     });
-    return res.data as PaginatedRes<Publication>;
+    return res.data;
 }
 
-export function usePublicationListInfiniteQuery(objType: PublicationForType, objUUID: UUID) {
+function usePublicationListInfinite(
+    url: string,
+    queryKey: unknown[],
+    additionalParams?: Record<string, string>,
+) {
     const limit = 10;
 
     return useInfiniteQuery({
-        queryKey: ["publications", objType, objUUID, "infinite", limit],
+        queryKey: [...queryKey, url, "infinite", limit, additionalParams],
         initialPageParam: 0,
-        queryFn: ({ pageParam }) => fetchPublicationListPage(objType, objUUID, limit, pageParam),
+        queryFn: ({ pageParam }) => fetchPublicationPage(url, limit, pageParam, additionalParams),
         getNextPageParam: (lastPage) => {
             if (!lastPage.next) return undefined;
-            // drf returns a `next` field which contains the limit/offset
             const offsetStr = new URL(lastPage.next).searchParams.get("offset");
             return offsetStr ? Number(offsetStr) : undefined;
         },
     });
 }
+
+export function useFeedPosts(userUUID: UUID, connection?: "friends" | "followed") {
+    const params = connection ? { connection } : undefined;
+    return usePublicationListInfinite(
+        PublicationURLs.feedPosts(userUUID),
+        ["feed-posts", userUUID, connection],
+        params,
+    );
+}
+
+export function useCollectionComments(collectionUUID: UUID) {
+    return usePublicationListInfinite(PublicationURLs.collectionComments(collectionUUID), [
+        "collection-comments",
+        collectionUUID,
+    ]);
+}
+
 export async function fetchPublicationDetail(pubUUID: UUID): Promise<Publication> {
-    const res = await api_client.get(PublicationURLs.publicationsRetrieve(pubUUID));
+    const res = await api_client.get<Publication>(PublicationURLs.publicationRetrieve(pubUUID));
     return res.data;
 }
 
-export function usePublicationDetailQuery(pubUUID: UUID) {
+export function usePublicationDetail(pubUUID: UUID) {
     return useQuery<Publication>({
         queryFn: () => fetchPublicationDetail(pubUUID),
-        queryKey: ["publications", pubUUID],
+        queryKey: ["publication", pubUUID],
+    });
+}
+
+export async function fetchPublicationChildren(pubUUID: UUID): Promise<Publication[]> {
+    const res = await api_client.get<{ children: Publication[] }>(
+        PublicationURLs.publicationChildren(pubUUID),
+    );
+    return res.data.children;
+}
+
+export function usePublicationChildren(pubUUID: UUID, enabled = true) {
+    return useQuery<Publication[]>({
+        queryFn: () => fetchPublicationChildren(pubUUID),
+        queryKey: ["publication-children", pubUUID],
+        enabled,
     });
 }

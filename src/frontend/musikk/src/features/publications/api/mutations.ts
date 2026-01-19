@@ -1,50 +1,71 @@
 import { api_client } from "@/api/axiosConf.ts";
-import { PublicationURLs } from "@/api/endpoints.ts";
 import { UUID } from "@/api/types.ts";
-import { AttachmentType, PublicationForType } from "@/features/publications/types.ts";
+import { PublicationURLs } from "@/features/publications/api/urls.ts";
+import { AttachmentType } from "@/features/publications/types.ts";
 import { useMutation } from "@tanstack/react-query";
 
-interface PublicationCreateParams {
+interface PublicationPayload {
     content: string;
-    obj_type: PublicationForType;
-    obj_uuid: UUID;
-    attachment_type?: AttachmentType;
-    attachment_uuid?: UUID;
+    attachment?: { type: AttachmentType; uuid: UUID };
     parent_uuid?: UUID;
 }
 
-export async function publicationCreate({
-    content,
-    obj_type,
-    obj_uuid,
-    attachment_type,
-    attachment_uuid,
-    parent_uuid,
-}: PublicationCreateParams) {
-    const payload: {
-        content: string;
-        attachment?: { type: string; uuid: string };
-        parent_uuid?: UUID;
-    } = {
-        content,
-    };
-
-    if (attachment_type && attachment_uuid) {
-        payload.attachment = {
-            type: attachment_type,
-            uuid: attachment_uuid,
-        };
-    }
-
-    if (parent_uuid) {
-        payload.parent_uuid = parent_uuid;
-    }
-
-    await api_client.post(PublicationURLs.publicationCreate(obj_type, obj_uuid), payload);
+async function createPublication(url: string, payload: PublicationPayload) {
+    await api_client.post(url, payload);
 }
 
-export function usePublicationCreateMutation() {
+interface CreatePostParams {
+    userUUID: UUID;
+    content: string;
+    attachmentType?: AttachmentType;
+    attachmentUUID?: UUID;
+    parentUUID?: UUID;
+}
+
+export function useCreatePost() {
     return useMutation({
-        mutationFn: publicationCreate,
+        mutationFn: async ({
+            userUUID,
+            content,
+            attachmentType,
+            attachmentUUID,
+            parentUUID,
+        }: CreatePostParams) => {
+            const payload: PublicationPayload = { content };
+
+            if (attachmentType && attachmentUUID) {
+                payload.attachment = { type: attachmentType, uuid: attachmentUUID };
+            }
+
+            if (parentUUID) {
+                payload.parent_uuid = parentUUID;
+            }
+
+            await createPublication(PublicationURLs.feedPosts(userUUID), payload);
+        },
+    });
+}
+
+interface CreateCollectionCommentParams {
+    collectionUUID: UUID;
+    content: string;
+    parentUUID?: UUID;
+}
+
+export function useCreateCollectionComment() {
+    return useMutation({
+        mutationFn: async ({
+            collectionUUID,
+            content,
+            parentUUID,
+        }: CreateCollectionCommentParams) => {
+            const payload: PublicationPayload = { content };
+
+            if (parentUUID) {
+                payload.parent_uuid = parentUUID;
+            }
+
+            await createPublication(PublicationURLs.collectionComments(collectionUUID), payload);
+        },
     });
 }

@@ -1,7 +1,7 @@
 from django.urls import path
 
 from social.api.v1.views import (
-    PublicationRetrieveView,
+    PublicationChildrenView,
     CollectionCommentsListCreateView,
     FeedPostsListCreateView,
     ChatMessagesListCreateView,
@@ -28,9 +28,9 @@ chat_urlpatterns = [
 ]
 urlpatterns = [
     path(
-        "publications/<uuid:uuid>",
-        PublicationRetrieveView.as_view(),
-        name="publication-retrieve",
+        "publications/<uuid:uuid>/children",
+        PublicationChildrenView.as_view(),
+        name="publication-children",
     ),
     path(
         "feed/<uuid:user_uuid>/posts",  # future proofing with /posts

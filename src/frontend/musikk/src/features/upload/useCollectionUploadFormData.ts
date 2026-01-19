@@ -69,7 +69,7 @@ export function useCollectionUploadFormData() {
         setStatusByUUID((prev) => ({ ...prev, [p.uuid]: p }));
     }, []);
     useSongUploadEvent(onWsEvent);
-
+    // TODO: fix
     const songs = useWatch({ control: form.control, name: "songs" }) ?? [];
     const title = useWatch({ control: form.control, name: "title" }) ?? "";
 
@@ -88,7 +88,7 @@ export function useCollectionUploadFormData() {
         });
     }, []);
 
-    const clearUuidStatus = useCallback((uuid?: UUID) => {
+    const clearUUIDStatus = useCallback((uuid?: UUID) => {
         if (!uuid) return;
         setStatusByUUID((prev) => {
             if (!(uuid in prev)) return prev;
@@ -102,11 +102,11 @@ export function useCollectionUploadFormData() {
         (i: number, fieldId: string) => {
             const uuid = form.getValues(`songs.${i}.uuid`) ?? songs?.[i]?.uuid;
 
-            clearUuidStatus(uuid);
+            clearUUIDStatus(uuid);
             clearFieldCreateState(fieldId);
             remove(i);
         },
-        [clearFieldCreateState, clearUuidStatus, form, remove, songs],
+        [clearFieldCreateState, clearUUIDStatus, form, remove, songs],
     );
 
     const appendSong = useCallback(() => {
@@ -215,7 +215,7 @@ export function useCollectionUploadFormData() {
             }
 
             try {
-                const songUuids = parsed.data.songs.map((s) => s.uuid!);
+                const songUUIDs = parsed.data.songs.map((s) => s.uuid!);
 
                 await createCollection({
                     type: "album",
@@ -224,7 +224,7 @@ export function useCollectionUploadFormData() {
                     description: parsed.data.description,
                     image: parsed.data.image,
                     authors: [userUUID],
-                    songs: songUuids,
+                    songs: songUUIDs,
                 });
 
                 setSubmitState({

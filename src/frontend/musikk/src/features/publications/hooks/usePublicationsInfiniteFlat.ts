@@ -1,20 +1,19 @@
+import { useInfiniteFlat } from "@/api/hooks";
 import { UUID } from "@/api/types.ts";
-import { usePublicationListInfiniteQuery } from "@/features/publications/api/queries.ts";
-import { PublicationForType } from "@/features/publications/types.ts";
-import { useMemo } from "react";
+import { useCollectionComments, useFeedPosts } from "@/features/publications/api/queries.ts";
 
-export function usePublicationsInfiniteFlat(
-    objType: PublicationForType,
-    objUUID: UUID,
+export function useFeedPostsFlat(
+    userUUID: UUID,
     reverse = true,
+    connection?: "friends" | "followed",
 ) {
-    const query = usePublicationListInfiniteQuery(objType, objUUID);
+    const query = useFeedPosts(userUUID, connection);
+    const result = useInfiniteFlat(query, reverse);
+    return { ...result, publicationsFlat: result.itemsFlat };
+}
 
-    // BE returns newest first; optionally reverse for oldest-first UI
-    const publicationsFlat = useMemo(() => {
-        const flat = query.data?.pages.flatMap((p) => p.results) ?? [];
-        return reverse ? flat.slice().reverse() : flat;
-    }, [query.data, reverse]);
-
-    return { ...query, publicationsFlat };
+export function useCollectionCommentsFlat(collectionUUID: UUID, reverse = true) {
+    const query = useCollectionComments(collectionUUID);
+    const result = useInfiniteFlat(query, reverse);
+    return { ...result, publicationsFlat: result.itemsFlat };
 }

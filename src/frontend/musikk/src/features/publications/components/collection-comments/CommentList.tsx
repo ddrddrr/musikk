@@ -1,4 +1,4 @@
-import { Comment } from "@/features/publications/components/Comment.tsx";
+import { Comment } from "@/features/publications/components/collection-comments/Comment.tsx";
 import { Publication } from "@/features/publications/types.ts";
 
 interface CommentListProps {

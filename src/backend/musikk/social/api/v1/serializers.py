@@ -42,7 +42,7 @@ class PublicationCreateSerializer(BaseModelSerializer):
                     }
                 )
             if not (
-                validated_data["created_for_obj"].__class__
+                validated_data["created_for_object"].__class__
                 is parent.get_root().created_for_object.__class__
             ):
                 raise serializers.ValidationError(
@@ -109,11 +109,12 @@ class PublicationRetrieveSerializer(BaseModelSerializer):
         return obj.replies.exists()
 
 
-class PublicationRetrieveWithChildrenSerializer(PublicationRetrieveSerializer):
+class PublicationChildrenSerializer(BaseModelSerializer):
     children = serializers.SerializerMethodField()
 
     class Meta(PublicationRetrieveSerializer.Meta):
-        fields = PublicationRetrieveSerializer.Meta.fields + ["children"]
+        model = Publication
+        fields = ["children"]
 
     def get_children(self, obj):
         qs = obj.replies.all().order_by("date_added")

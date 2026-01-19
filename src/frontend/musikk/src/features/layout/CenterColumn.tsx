@@ -1,5 +1,5 @@
 import { MusicFeed } from "@/features/layout/MusicFeed.tsx";
-import { PostFeed } from "@/features/publications/components/PostFeed.tsx";
+import { GlobalFeed } from "@/features/publications/components/posts/GlobalFeed.tsx";
 import { SongCollectionContainer } from "@/features/song-collections/components/SongCollectionContainer.tsx";
 import { Connections } from "@/features/user/components/Connections.tsx";
 import { ProfilePage } from "@/features/user/components/ProfilePage.tsx";
@@ -11,7 +11,7 @@ export function CenterColumn() {
             <div className="flex-1 overflow-y-auto p-4">
                 <Routes>
                     <Route path="/" element={<MusicFeed />} />
-                    <Route path="/feed" element={<PostFeed />} />
+                    <Route path="/feed" element={<GlobalFeed />} />
                     <Route path="collection/:uuid/*" element={<SongCollectionContainerWrapper />} />
                     <Route path="users/:uuid" element={<ProfilePage />} />
                     <Route path="users/:uuid/connections" element={<Connections />} />

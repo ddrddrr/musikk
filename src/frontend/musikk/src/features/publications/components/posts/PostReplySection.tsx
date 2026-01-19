@@ -1,7 +1,7 @@
-import { PostForm } from "@/features/publications/components/PostForm.tsx";
+import { UUID } from "@/api/types.ts";
+import { PostForm } from "@/features/publications/components/posts/PostForm.tsx";
 import { Publication } from "@/features/publications/types.ts";
 import { Button } from "@/features/ui/button.tsx";
-import { UUID } from "@/api/types.ts";
 import { useState } from "react";
 
 type PostReplySectionProps = {

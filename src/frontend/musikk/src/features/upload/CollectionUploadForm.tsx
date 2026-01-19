@@ -47,12 +47,12 @@ export function CollectionUploadForm() {
 
     return (
         <div className="max-h-screen overflow-y-auto p-4">
-            <div className={`rounded-xl border-2 ${borderClass} bg-background p-4 shadow-sm`}>
+            <div className={`rounded-sm border-2 ${borderClass} bg-background p-4 shadow-sm`}>
                 {message ? <div className={`mb-4 text-sm ${messageClass}`}>{message}</div> : null}
 
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(submitCollection)} className="space-y-6">
-                        <div className="space-y-4 rounded-xl border bg-background p-4 shadow-sm">
+                        <div className="space-y-4 rounded-sm border bg-background p-4 shadow-sm">
                             <div className="text-sm font-semibold">Collection</div>
 
                             <div className="grid gap-4 md:grid-cols-2">
@@ -115,7 +115,7 @@ export function CollectionUploadForm() {
                                     key={field.id}
                                     index={i}
                                     fieldId={field.id}
-                                    uuid={songs?.[i]?.uuid as UUID | undefined}
+                                    uuid={songs?.[i]?.uuid}
                                     statusByUUID={statusByUUID}
                                     songsStateByFieldId={songsStateByFieldId}
                                     onRemove={() => removeSong(i, field.id)}
