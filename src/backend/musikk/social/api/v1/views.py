@@ -117,13 +117,21 @@ class UserChatsListCreateView(ListCreateAPIView):
         return UserChatRetrieveSerializer
 
     def get_queryset(self):
-        return [
-            cm.chat
-            for cm in ChatMember.objects.filter(
-                member=self.request.user
-            ).select_related("chat")
-        ]
+        return Chat.objects.filter(chatmember_set__member=self.request.user).distinct()
 
 
 class ChatMembersCreateView(CreateAPIView):
     serializer_class = ChatMembersCreateSerializer
+
+
+# TODO: check that this is user's chat
+class ChatRetrieveView(RetrieveAPIView):
+    serializer_class = UserChatRetrieveSerializer
+    lookup_field = "uuid"
+
+    def get_queryset(self):
+        return Chat.objects.filter(
+            id__in=ChatMember.objects.filter(member=self.request.user).values_list(
+                "chat_id", flat=True
+            )
+        )

@@ -8,3 +8,7 @@ export const commentSchema = z.object({
 export const postSchema = z.object({
     content: z.string().min(1, "Post cannot be empty").max(2000),
 });
+
+export const chatMessageSchema = z.object({
+    content: z.string().min(1, "Message cannot be empty").max(2000),
+});

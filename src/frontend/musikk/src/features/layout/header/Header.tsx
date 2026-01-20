@@ -19,7 +19,7 @@ export const Header = memo(function Header() {
                     variant="ghost"
                     size="icon"
                     className="text-white"
-                    onClick={() => navigate("/")}
+                    onClick={() => void navigate("/")}
                 >
                     <Disc3 />
                 </Button>
@@ -27,7 +27,7 @@ export const Header = memo(function Header() {
                     variant="ghost"
                     size="icon"
                     className="text-white"
-                    onClick={() => navigate("/feed")}
+                    onClick={() => void navigate("/feed")}
                 >
                     <MessageSquareText />
                 </Button>
@@ -45,7 +45,7 @@ export const Header = memo(function Header() {
                     variant="ghost"
                     size="icon"
                     className="text-white"
-                    onClick={() => navigate("/settings")}
+                    onClick={() => void navigate("/settings")}
                 >
                     <Cog />
                 </Button>
@@ -55,7 +55,7 @@ export const Header = memo(function Header() {
                         variant="outline"
                         size="sm"
                         className="border-white bg-transparent text-white hover:bg-red-700"
-                        onClick={() => navigate("/upload")}
+                        onClick={() => void navigate("/upload")}
                     >
                         <Upload className="mr-1 h-4 w-4" />
                         Upload

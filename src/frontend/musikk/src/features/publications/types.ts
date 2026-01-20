@@ -33,3 +33,11 @@ export interface Publication extends BaseModel {
 export interface PublicationWChildren extends Publication {
     children: Publication[];
 }
+
+export interface Chat extends BaseModel {
+    title: string;
+    image: string | null;
+    is_direct: boolean;
+    last_message: Publication | null;
+    is_read: boolean;
+}

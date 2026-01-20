@@ -39,7 +39,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         await logoutAPI();
         queryClient.clear();
         if (Cookies.get("csrftoken")) Cookies.remove("csrftoken");
-        navigate("/login");
+        void navigate("/login");
     };
 
     return (

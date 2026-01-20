@@ -26,11 +26,14 @@ export function ProfileDropdown() {
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-                <DropdownMenuItem onSelect={() => navigate(`/users/${user.uuid}`)}>
+                <DropdownMenuItem onSelect={() => void navigate(`/users/${user.uuid}`)}>
                     Profile
                 </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => navigate(`/users/${user.uuid}/connections`)}>
+                <DropdownMenuItem onSelect={() => void navigate(`/users/${user.uuid}/connections`)}>
                     Connections
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => void navigate(`/users/${user.uuid}/chats`)}>
+                    Chats
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>

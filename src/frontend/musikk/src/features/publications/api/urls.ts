@@ -7,6 +7,8 @@ export const PublicationURLs = {
 };
 export const ChatURLs = {
     userChats: (userUUID: UUID) => `/users/${userUUID}/chats`,
-    chatMessages: (chatUUID: UUID) => `/chat/${chatUUID}/messages`,
-    chatMembers: (chatUUID: UUID) => `/chat/${chatUUID}/members`,
+    chatMessages: (userUUID: UUID, chatUUID: UUID) =>
+        `/users/${userUUID}/chats/${chatUUID}/messages`,
+    chatMembers: (userUUID: UUID, chatUUID: UUID) => `/users/${userUUID}/chats/${chatUUID}/members`,
+    chatDetail: (userUUID: UUID, chatUUID: UUID) => `/users/${userUUID}/chats/${chatUUID}`,
 };

@@ -1,7 +1,7 @@
 import { api_client } from "@/api/axiosConf.ts";
 import { PaginatedRes, UUID } from "@/api/types.ts";
-import { PublicationURLs } from "@/features/publications/api/urls.ts";
-import { Publication } from "@/features/publications/types.ts";
+import { ChatURLs, PublicationURLs } from "@/features/publications/api/urls.ts";
+import { Chat, Publication } from "@/features/publications/types.ts";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 
 async function fetchPublicationPage(
@@ -51,18 +51,6 @@ export function useCollectionComments(collectionUUID: UUID) {
     ]);
 }
 
-export async function fetchPublicationDetail(pubUUID: UUID): Promise<Publication> {
-    const res = await api_client.get<Publication>(PublicationURLs.publicationRetrieve(pubUUID));
-    return res.data;
-}
-
-export function usePublicationDetail(pubUUID: UUID) {
-    return useQuery<Publication>({
-        queryFn: () => fetchPublicationDetail(pubUUID),
-        queryKey: ["publication", pubUUID],
-    });
-}
-
 export async function fetchPublicationChildren(pubUUID: UUID): Promise<Publication[]> {
     const res = await api_client.get<{ children: Publication[] }>(
         PublicationURLs.publicationChildren(pubUUID),
@@ -75,5 +63,37 @@ export function usePublicationChildren(pubUUID: UUID, enabled = true) {
         queryFn: () => fetchPublicationChildren(pubUUID),
         queryKey: ["publication-children", pubUUID],
         enabled,
+    });
+}
+
+async function fetchUserChats(userUUID: UUID): Promise<Chat[]> {
+    const res = await api_client.get<Chat[]>(ChatURLs.userChats(userUUID));
+    return res.data;
+}
+
+export function useUserChats(userUUID: UUID) {
+    return useQuery<Chat[]>({
+        queryFn: () => fetchUserChats(userUUID),
+        queryKey: ["user-chats", userUUID],
+    });
+}
+
+export function useChatMessages(userUUID: UUID, chatUUID: UUID) {
+    return usePublicationListInfinite(ChatURLs.chatMessages(userUUID, chatUUID), [
+        "chat-messages",
+        userUUID,
+        chatUUID,
+    ]);
+}
+
+async function fetchChatDetail(userUUID: UUID, chatUUID: UUID): Promise<Chat> {
+    const res = await api_client.get<Chat>(ChatURLs.chatDetail(userUUID, chatUUID));
+    return res.data;
+}
+
+export function useChatDetail(userUUID: UUID, chatUUID: UUID) {
+    return useQuery<Chat>({
+        queryFn: () => fetchChatDetail(userUUID, chatUUID),
+        queryKey: ["chat-detail", userUUID, chatUUID],
     });
 }

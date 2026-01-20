@@ -7,6 +7,7 @@ from social.api.v1.views import (
     ChatMessagesListCreateView,
     UserChatsListCreateView,
     ChatMembersCreateView,
+    ChatRetrieveView,
 )
 
 chat_urlpatterns = [
@@ -16,12 +17,18 @@ chat_urlpatterns = [
         name="user-chats-list-create",
     ),
     path(
-        "chat/<uuid:chat_uuid>/messages",
+        "users/<uuid:user_uuid>/chats/<uuid:chat_uuid>",
+        ChatRetrieveView.as_view(),
+        name="chat-messages-list-create",
+    ),
+    # TODO: messages/members initially should be returned in the retrieve view
+    path(
+        "users/<uuid:user_uuid>/chats/<uuid:chat_uuid>/messages",
         ChatMessagesListCreateView.as_view(),
         name="chat-messages-list-create",
     ),
     path(
-        "chat/<uuid:chat_uuid>/members",
+        "users/<uuid:user_uuid>/chats/<uuid:chat_uuid>/members",
         ChatMembersCreateView.as_view(),
         name="chat-members-create",
     ),

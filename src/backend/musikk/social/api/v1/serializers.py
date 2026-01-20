@@ -207,6 +207,8 @@ class UserChatCreateSerializer(BaseModelSerializer):
         user = validated_data["user"]
 
         filtered_friends = validate_participants_are_friends(user, participants)
+        if validated_data["is_direct"]:
+            validated_data["title"] = filtered_friends[0].display_name
 
         with transaction.atomic():
             chat = Chat.objects.create(**validated_data)

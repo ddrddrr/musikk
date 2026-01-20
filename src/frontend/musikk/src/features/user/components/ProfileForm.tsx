@@ -78,7 +78,7 @@ export function ProfileForm() {
                 {message ? <div className={`mb-4 text-sm ${messageClass}`}>{message}</div> : null}
 
                 <div className="mb-6 flex items-center space-x-4">
-                    <Avatar className="h-12 w-12 rounded-md">
+                    <Avatar className="h-12 w-12 rounded-sm">
                         <AvatarImage
                             src={user.avatar}
                             alt={user.display_name}

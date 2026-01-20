@@ -20,7 +20,7 @@ export function SongUploadCard(props: {
     });
 
     return (
-        <div className="space-y-4 rounded-xl border bg-background p-4 shadow-sm">
+        <div className="space-y-4 rounded-sm border bg-background p-4 shadow-sm">
             <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
                     <div className="text-sm font-semibold">Song {props.index + 1}</div>

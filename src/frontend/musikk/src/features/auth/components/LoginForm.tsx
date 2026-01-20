@@ -33,7 +33,7 @@ export function LoginForm() {
         setLoading(true);
         try {
             await login(values.email, values.password);
-            navigate("/");
+            void navigate("/");
         } catch (error) {
             const resMessage = isAxiosError(error)
                 ? error.response?.data?.message || error.message
@@ -63,7 +63,7 @@ export function LoginForm() {
                     </Button>
 
                     {message && (
-                        <div className="rounded-md border-2 border-red-900 bg-red-700 p-4 text-white">
+                        <div className="rounded-sm border-2 border-red-900 bg-red-700 p-4 text-white">
                             <p className="font-medium">{message}</p>
                         </div>
                     )}
@@ -73,7 +73,7 @@ export function LoginForm() {
                             Don't have an account?
                             <Button
                                 type="button"
-                                onClick={() => navigate("/signup")}
+                                onClick={() => void navigate("/signup")}
                                 variant="link"
                                 size="sm"
                                 className="ml-1 text-red-600 hover:text-red-700"

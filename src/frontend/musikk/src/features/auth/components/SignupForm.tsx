@@ -97,7 +97,7 @@ export function SignUpForm() {
                     {formMessage && (
                         <div
                             className={[
-                                "rounded-md border-2 p-4 font-medium",
+                                "rounded-sm border-2 p-4 font-medium",
                                 isError
                                     ? "border-red-900 bg-red-700 text-white"
                                     : isSuccess

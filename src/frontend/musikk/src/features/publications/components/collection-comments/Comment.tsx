@@ -8,7 +8,7 @@ interface CommentProps {
 
 export function Comment({ comment, setReplyTo }: CommentProps) {
     return (
-        <div className="rounded-lg border border-black bg-gray-50 p-3">
+        <div className="rounded-sm border border-black bg-gray-50 p-3">
             {comment.parent_uuid && comment.parent_author && comment.parent_repr && (
                 <div className="mb-2 rounded border border-gray-300 bg-amber-100 p-2 text-xs text-gray-600">
                     <div className="truncate font-medium">

@@ -26,7 +26,7 @@ export function PasswordField({
                 <FormItem className="space-y-2">
                     <FormLabel className="text-lg font-bold text-gray-900">{label}</FormLabel>
                     <FormControl>
-                        <div className="flex items-center gap-2 rounded-md border-2 border-black p-3 transition-colors">
+                        <div className="flex items-center gap-2 rounded-sm border-2 border-black p-3 transition-colors">
                             <Input
                                 type={showPassword ? "text" : "password"}
                                 placeholder={placeholder}

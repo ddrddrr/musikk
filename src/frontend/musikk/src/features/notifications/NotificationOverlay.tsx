@@ -35,7 +35,7 @@ export const NotificationOverlay = memo(function NotificationOverlay({
             {allNotifications.map((notification) => (
                 <div
                     key={notification.uuid}
-                    className={`mb-2 rounded-lg border border-black p-3 ${notification.is_read ? "bg-gray-50" : "bg-yellow-100"}`}
+                    className={`mb-2 rounded-sm border border-black p-3 ${notification.is_read ? "bg-gray-50" : "bg-yellow-100"}`}
                 >
                     {notification._type === "reply" && (
                         <>
@@ -58,7 +58,7 @@ export const NotificationOverlay = memo(function NotificationOverlay({
                                 </span>
                                 <Button
                                     variant="brand"
-                                    className="rounded px-3 py-1 text-xs"
+                                    className="rounded-sm px-3 py-1 text-xs"
                                     onClick={() => handleNavigateReplyClick(notification)}
                                 >
                                     Go to reply
@@ -83,7 +83,7 @@ export const NotificationOverlay = memo(function NotificationOverlay({
                                 </span>
                                 <Button
                                     variant="brand"
-                                    className="rounded px-3 py-1 text-xs"
+                                    className="px-3 py-1 text-xs"
                                     onClick={() => handleNavigateFollowerClick(notification)}
                                 >
                                     View Profile

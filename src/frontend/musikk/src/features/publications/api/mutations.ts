@@ -1,6 +1,6 @@
 import { api_client } from "@/api/axiosConf.ts";
 import { UUID } from "@/api/types.ts";
-import { PublicationURLs } from "@/features/publications/api/urls.ts";
+import { ChatURLs, PublicationURLs } from "@/features/publications/api/urls.ts";
 import { AttachmentType } from "@/features/publications/types.ts";
 import { useMutation } from "@tanstack/react-query";
 
@@ -66,6 +66,82 @@ export function useCreateCollectionComment() {
             }
 
             await createPublication(PublicationURLs.collectionComments(collectionUUID), payload);
+        },
+    });
+}
+
+interface CreateChatParams {
+    userUUID: UUID;
+    participants: UUID[];
+    isDirect: boolean;
+    title?: string;
+    image?: File;
+}
+
+export function useCreateChat() {
+    return useMutation({
+        mutationFn: async ({ userUUID, participants, isDirect, title, image }: CreateChatParams) => {
+            const formData = new FormData();
+
+            participants.forEach((uuid) => {
+                formData.append("participants", uuid);
+            });
+            formData.append("is_direct", String(isDirect));
+
+            if (title) {
+                formData.append("title", title);
+            }
+            if (image) {
+                formData.append("image", image);
+            }
+
+            await api_client.post(ChatURLs.userChats(userUUID), formData, {
+                headers: { "Content-Type": "multipart/form-data" },
+            });
+        },
+    });
+}
+
+interface CreateChatMessageParams {
+    userUUID: UUID;
+    chatUUID: UUID;
+    content: string;
+    attachmentType?: AttachmentType;
+    attachmentUUID?: UUID;
+}
+
+export function useCreateChatMessage() {
+    return useMutation({
+        mutationFn: async ({
+            userUUID,
+            chatUUID,
+            content,
+            attachmentType,
+            attachmentUUID,
+        }: CreateChatMessageParams) => {
+            const payload: PublicationPayload = { content };
+
+            if (attachmentType && attachmentUUID) {
+                payload.attachment = { type: attachmentType, uuid: attachmentUUID };
+            }
+
+            await createPublication(ChatURLs.chatMessages(userUUID, chatUUID), payload);
+        },
+    });
+}
+
+interface AddChatMembersParams {
+    userUUID: UUID;
+    chatUUID: UUID;
+    participants: UUID[];
+}
+
+export function useAddChatMembers() {
+    return useMutation({
+        mutationFn: async ({ userUUID, chatUUID, participants }: AddChatMembersParams) => {
+            await api_client.post(ChatURLs.chatMembers(userUUID, chatUUID), {
+                participants,
+            });
         },
     });
 }

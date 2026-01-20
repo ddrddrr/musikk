@@ -81,7 +81,7 @@ export function EmailVerificationPage() {
                                 variant="brand"
                                 size="lg"
                                 className="w-full"
-                                onClick={() => navigate("/login")}
+                                onClick={() => void navigate("/login")}
                             >
                                 Go to Login
                             </Button>
@@ -91,7 +91,7 @@ export function EmailVerificationPage() {
                                 variant="brand"
                                 size="lg"
                                 className="w-full"
-                                onClick={() => navigate("/signup")}
+                                onClick={() => void navigate("/signup")}
                             >
                                 Back to Sign Up
                             </Button>

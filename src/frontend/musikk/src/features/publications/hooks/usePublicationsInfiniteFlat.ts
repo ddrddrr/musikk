@@ -1,6 +1,10 @@
 import { useInfiniteFlat } from "@/api/hooks";
 import { UUID } from "@/api/types.ts";
-import { useCollectionComments, useFeedPosts } from "@/features/publications/api/queries.ts";
+import {
+    useChatMessages,
+    useCollectionComments,
+    useFeedPosts,
+} from "@/features/publications/api/queries.ts";
 
 export function useFeedPostsFlat(
     userUUID: UUID,
@@ -14,6 +18,12 @@ export function useFeedPostsFlat(
 
 export function useCollectionCommentsFlat(collectionUUID: UUID, reverse = true) {
     const query = useCollectionComments(collectionUUID);
+    const result = useInfiniteFlat(query, reverse);
+    return { ...result, publicationsFlat: result.itemsFlat };
+}
+
+export function useChatMessagesFlat(userUUID: UUID, chatUUID: UUID, reverse = true) {
+    const query = useChatMessages(userUUID, chatUUID);
     const result = useInfiniteFlat(query, reverse);
     return { ...result, publicationsFlat: result.itemsFlat };
 }
