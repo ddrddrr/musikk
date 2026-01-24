@@ -11,7 +11,7 @@ ENV PYTHONUNBUFFERED 1
 ENV PATH="/opt/bin:$PATH"
 ENV LD_LIBRARY_PATH="/opt/ffmpeg_build/lib:$LD_LIBRARY_PATH"
 ENV UV_LINK_MODE=copy
-# TODO: add shaka packager
+# TODO: ADD SHAKA PACKAGER!
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     libpq-dev \

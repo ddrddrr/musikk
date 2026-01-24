@@ -1,5 +1,5 @@
 #!/bin/bash
-# Builds FFMPEG for Linux as a static binary(no dynamic libs)
+# Builds FFMPEG for Linux as a static binary (no dynamic libs)
 # partially taken and adapted from https://trac.ffmpeg.org/wiki/CompilationGuide/Ubuntu
 
 set -euo pipefail
@@ -26,8 +26,7 @@ apt-get update -qq && apt-get install -y --no-install-recommends \
   nasm \
   zlib1g-dev && \
 
-# TODO: remove opus support since only AAC is used from now on
-apt-get install -y libunistring-dev libaom-dev libdav1d-dev libopus-dev && \
+apt-get install -y libunistring-dev libaom-dev libdav1d-dev && \
 
 mkdir -p /opt/ffmpeg_sources /opt/bin && \
 pushd /opt/ffmpeg_sources &&
@@ -40,18 +39,10 @@ autoreconf -fiv && \
 make && \
 make install &&
 
-cd ~/ffmpeg_sources && \
-git -C opus pull 2> /dev/null || git clone --depth 1 https://github.com/xiph/opus.git && \
-cd opus && \
-./autogen.sh && \
-./configure --prefix="/opt/ffmpeg_build" --disable-shared && \
-make && \
-make install &&
-
 cd .. &&
 
-wget -O ffmpeg-snapshot.tar.bz2 https://ffmpeg.org/releases/ffmpeg-snapshot.tar.bz2 && \
-tar xjvf ffmpeg-snapshot.tar.bz2 && \
+wget -O ffmpeg-snapshot.tar.bz2 https://ffmpeg.org/releases/ffmpeg-8.0.1.tar.bz2    && \
+tar xjvf ffmpeg-8.0.1.tar.bz2 && \
 cd ffmpeg && \
 PATH="/opt/bin:$PATH" PKG_CONFIG_PATH="/opt/ffmpeg_build/lib/pkgconfig" ./configure \
   --prefix="/opt/ffmpeg_build" \
