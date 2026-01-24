@@ -5,19 +5,22 @@ import { Toaster } from "@/features/ui/sonner";
 import { UserCollectionsProvider } from "@/features/user/providers/UserCollectionsProvider.tsx";
 import { UserConnectionsProvider } from "@/features/user/providers/UserConnectionsProvider.tsx";
 import { memo } from "react";
+import { UserChatsProvider } from "../publications/providers/UserChatsProvider";
 
 export const HomePage = memo(function HomePage() {
     return (
         <UserCollectionsProvider>
             <UserConnectionsProvider>
-                <div className="flex h-screen flex-col bg-gray-200">
-                    <Header />
-                    <div className="flex flex-1 overflow-hidden">
-                        <MainContent />
+                <UserChatsProvider>
+                    <div className="flex h-screen flex-col bg-gray-200">
+                        <Header />
+                        <div className="flex flex-1 overflow-hidden">
+                            <MainContent />
+                        </div>
+                        <Toaster />
+                        <PlayerBox />
                     </div>
-                    <Toaster />
-                    <PlayerBox />
-                </div>
+                </UserChatsProvider>
             </UserConnectionsProvider>
         </UserCollectionsProvider>
     );

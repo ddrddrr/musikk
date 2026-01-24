@@ -40,4 +40,5 @@ export interface Chat extends BaseModel {
     is_direct: boolean;
     last_message: Publication | null;
     is_read: boolean;
+    members: BaseUser[];
 }

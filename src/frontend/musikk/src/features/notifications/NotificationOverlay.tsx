@@ -12,7 +12,7 @@ export const NotificationOverlay = memo(function NotificationOverlay({
     notifications,
 }: NotificationOverlayProps) {
     const navigate = useNavigate();
-
+    // TODO: fix!
     function handleNavigateReplyClick(notification: IReplyNotification) {
         // if (notification.reply_publication.created_for.type == "feed") {
         //     navigate(`/users/${notification.reply_publication.root_author_uuid}`);

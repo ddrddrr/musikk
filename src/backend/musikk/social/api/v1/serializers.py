@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from django.db import transaction
+from django.contrib.contenttypes.models import ContentType
 
 from base.serializers import BaseModelSerializer, UUIDListField
 from social.api.v1.type_model_maps import ATTACHMENT_RESOLVER
@@ -123,29 +124,32 @@ class PublicationChildrenSerializer(BaseModelSerializer):
 
 
 class UserChatRetrieveSerializer(BaseModelSerializer):
-    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
-
     title = serializers.CharField(read_only=True)
     image = serializers.ImageField(allow_null=True, read_only=True)
     last_message = serializers.SerializerMethodField(allow_null=True)
     is_read = serializers.SerializerMethodField()
+    members = serializers.SerializerMethodField()
 
     class Meta(BaseModelSerializer.Meta):
         model = Chat
         fields = BaseModelSerializer.Meta.fields + [
-            "user",
             "title",
             "image",
             "last_message",
             "is_read",
+            "members",
         ]
 
     def to_representation(self, instance):
+        ct = ContentType.objects.get_for_model(instance)
         self._last_pub = (
-            Publication.objects.filter(created_for_object=instance)
-            .order_by("-date_added")
+            Publication.objects.filter(
+                created_for_type=ct, created_for_id=instance.pk, parent__isnull=True
+            )
+            .order_by("-date_added")  # - in front makes it reversed
             .first()
         )
+
         return super().to_representation(instance)
 
     def get_last_message(self, obj):
@@ -158,13 +162,17 @@ class UserChatRetrieveSerializer(BaseModelSerializer):
 
     def get_is_read(self, obj):
         if not (pub := getattr(self, "_last_pub", None)):
-            return True
+            return False
 
-        cm = ChatMember.objects.get(
-            chat=obj,
-            member=self.validated_data["user"],
-        )
-        return cm.last_read_message == pub
+        user = getattr(self.context.get("request"), "user", None)
+        cm = ChatMember.objects.get(chat=obj, member=user)  # validated in the view
+        return cm.last_read_message_id == pub.id
+
+    def get_members(self, obj):
+        # expects prefetch_related('chatmember_set__member') in the view
+        return BaseUserSerializer(
+            [cm.member for cm in obj.chatmember_set.all()], many=True
+        ).data
 
 
 class UserChatCreateSerializer(BaseModelSerializer):
@@ -204,7 +212,7 @@ class UserChatCreateSerializer(BaseModelSerializer):
 
     def create(self, validated_data):
         participants = list(validated_data.pop("participants"))
-        user = validated_data["user"]
+        user = validated_data.pop("user")
 
         filtered_friends = validate_participants_are_friends(user, participants)
         if validated_data["is_direct"]:
@@ -247,7 +255,7 @@ class ChatMembersCreateSerializer(BaseModelSerializer):
             )
 
         participants = list(validated_data.pop("participants"))
-        user = validated_data["user"]
+        user = validated_data.pop("user")
 
         filtered_friends = validate_participants_are_friends(user, participants)
 

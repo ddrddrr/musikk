@@ -117,21 +117,25 @@ class UserChatsListCreateView(ListCreateAPIView):
         return UserChatRetrieveSerializer
 
     def get_queryset(self):
-        return Chat.objects.filter(chatmember_set__member=self.request.user).distinct()
+        return Chat.objects.filter(
+            id__in=ChatMember.objects.filter(member=self.request.user).values_list(
+                "chat_id", flat=True
+            )
+        ).prefetch_related("chatmember_set__member")
 
 
 class ChatMembersCreateView(CreateAPIView):
     serializer_class = ChatMembersCreateSerializer
 
-
-# TODO: check that this is user's chat
+# TODO: remove, the chats are pre-retrieved I guess
 class ChatRetrieveView(RetrieveAPIView):
     serializer_class = UserChatRetrieveSerializer
     lookup_field = "uuid"
+    lookup_url_kwarg = "chat_uuid"
 
     def get_queryset(self):
         return Chat.objects.filter(
             id__in=ChatMember.objects.filter(member=self.request.user).values_list(
                 "chat_id", flat=True
             )
-        )
+        ).prefetch_related("chatmember_set__member")

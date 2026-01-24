@@ -15,6 +15,7 @@ interface ChatBoxProps {
 }
 
 export function ChatBox({ chatUUID }: ChatBoxProps) {
+    // TODO: add member count in serializer, render in header
     const userUUID = useUserUUID();
     const {
         data: chat,

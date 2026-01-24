@@ -1,4 +1,5 @@
 import { MusicFeed } from "@/features/layout/MusicFeed.tsx";
+import { ChatBoxRouteHandler } from "@/features/publications/components/chat/ChatBoxRouteHandler.tsx";
 import { ChatPreviewList } from "@/features/publications/components/chat/ChatPreviewList.tsx";
 import { GlobalFeed } from "@/features/publications/components/posts/GlobalFeed.tsx";
 import { SongCollectionContainer } from "@/features/song-collections/components/SongCollectionContainer.tsx";
@@ -17,8 +18,10 @@ export function CenterColumn() {
                     <Route path="users/:uuid" element={<ProfilePage />} />
                     <Route path="users/:uuid/connections" element={<Connections />} />
                     <Route path="users/:uuid/chats" element={<ChatPreviewList />} />
-                    {/*TODO: retrieve chat with messages*/}
-                    {/*<Route path="users/:uuid/chats/:uuid" element={<ChatBox />} />*/}
+                    <Route
+                        path="users/:userUUID/chats/:chatUUID"
+                        element={<ChatBoxRouteHandler />}
+                    />
                 </Routes>
             </div>
         </div>

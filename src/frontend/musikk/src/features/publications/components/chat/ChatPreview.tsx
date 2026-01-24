@@ -10,8 +10,8 @@ interface ChatPreviewProps {
 export function ChatPreview({ chat }: ChatPreviewProps) {
     const userUUID = useUserUUID();
     const navigate = useNavigate();
+
     return (
-        // TODO: proper button
         <button
             onClick={() => void navigate(`/users/${userUUID}/chats/${chat.uuid}`)}
             className={cn(
@@ -19,38 +19,46 @@ export function ChatPreview({ chat }: ChatPreviewProps) {
                 !chat.is_read && "font-bold",
             )}
         >
-            <div className="flex items-center gap-3">
+            <div className="flex items-start gap-3">
                 {chat.image && (
                     <img
                         src={chat.image}
-                        className="h-12 w-12 rounded-sm border-2 border-black object-cover"
+                        className="h-12 w-12 flex-shrink-0 rounded-sm border-2 border-black object-cover"
                     />
                 )}
-                <div className="min-w-0 flex-1">
-                    <div className="flex items-baseline justify-between gap-2">
-                        <h3 className="truncate text-sm font-bold">{chat.title}</h3>
-                        {chat.last_message && (
-                            <span className="shrink-0 text-[10px] text-gray-600">
-                                {new Date(chat.last_message.date_added).toLocaleString(undefined, {
-                                    dateStyle: "short",
-                                })}
+                <div className="min-w-0 flex-1 space-y-1">
+                    <h3 className="truncate text-sm font-bold">
+                        {chat.title}
+                        {!chat.is_direct && (
+                            <span className="ml-2 text-xs font-normal text-gray-600">
+                                {chat.members.length} members
                             </span>
                         )}
-                    </div>
+                    </h3>
                     {chat.last_message && (
-                        <p className="truncate text-xs text-gray-600">
-                            {/*TODO: show last not deleted...*/}
-                            {!chat.last_message.is_deleted ? (
-                                <span className="italic">Message deleted</span>
-                            ) : (
-                                <>
-                                    <span className="font-medium">
-                                        {chat.last_message.author.display_name}:
-                                    </span>{" "}
-                                    {chat.last_message.content}
-                                </>
-                            )}
-                        </p>
+                        <>
+                            <p className="truncate text-xs text-gray-600">
+                                {chat.last_message.is_deleted ? (
+                                    <span className="italic">Message deleted</span>
+                                ) : (
+                                    <>
+                                        <span className="font-medium">
+                                            {chat.last_message.author.uuid === userUUID
+                                                ? "You"
+                                                : chat.last_message.author.display_name}
+                                            :
+                                        </span>{" "}
+                                        {chat.last_message.content}
+                                    </>
+                                )}
+                            </p>
+                            <p className="text-[10px] text-gray-600">
+                                {new Date(chat.last_message.date_added).toLocaleString(undefined, {
+                                    dateStyle: "short",
+                                    timeStyle: "short",
+                                })}
+                            </p>
+                        </>
                     )}
                 </div>
             </div>

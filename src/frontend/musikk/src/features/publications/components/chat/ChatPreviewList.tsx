@@ -1,5 +1,6 @@
 import { ChatNewGroupForm } from "@/features/publications/components/chat/ChatNewGroupForm.tsx";
 import { ChatPreview } from "@/features/publications/components/chat/ChatPreview.tsx";
+import { ChatStartDirectList } from "@/features/publications/components/chat/ChatStartDirectList.tsx";
 import { useUserChatsContext } from "@/features/publications/hooks/useUserChats.ts";
 import { Button } from "@/features/ui/button.tsx";
 import { Plus } from "lucide-react";
@@ -25,9 +26,7 @@ export function ChatPreviewList() {
             />
         );
     }
-
-    // TODO: add a new component that will render the user avatars + names, when clicked will call api
-    // to create new chat and open the newly created chat
+    // TODO: on err show that
 
     return (
         <div className="space-y-4 p-4">
@@ -42,6 +41,8 @@ export function ChatPreviewList() {
             <div className="space-y-2">
                 {chats && chats.map((chat) => <ChatPreview key={chat.uuid} chat={chat} />)}
             </div>
+
+            <ChatStartDirectList />
         </div>
     );
 }

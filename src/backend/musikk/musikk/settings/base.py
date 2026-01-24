@@ -26,6 +26,7 @@ DEBUG = config("DEBUG", default=True, cast=bool)
 ALLOWED_HOSTS = config(
     "DJANGO_ALLOWED_HOSTS", default="localhost,127.0.0.1", cast=Csv()
 )
+# TODO: remove, we dont need cross-origin requests
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = (
     *default_headers,
@@ -143,7 +144,7 @@ REST_FRAMEWORK = {
     "DEFAULT_FILTER_BACKENDS": [
         "django_filters.rest_framework.DjangoFilterBackend",
     ],
-    "DEFAULT_PAGINATION_CLASS": "musikk.pagination.BaseLimitOffsetPagination",
+    # "DEFAULT_PAGINATION_CLASS": "musikk.pagination.BaseLimitOffsetPagination",
     "PAGE_SIZE": 10,
 }
 

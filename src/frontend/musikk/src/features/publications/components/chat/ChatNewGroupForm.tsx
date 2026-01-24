@@ -94,7 +94,7 @@ export function ChatNewGroupForm({ onSuccess, onCancel }: ChatNewGroupFormProps)
             <h2 className="mb-4 text-xl font-bold">Create Group Chat</h2>
 
             <Form {...form}>
-                <form onSubmit={onSubmit} className="space-y-4">
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                     <FormField
                         name="title"
                         render={({ field }) => (
@@ -124,10 +124,7 @@ export function ChatNewGroupForm({ onSuccess, onCancel }: ChatNewGroupFormProps)
                                                 type="button"
                                                 onClick={() => void toggleParticipant(friend.uuid)}
                                                 className={cn(
-                                                    "w-full rounded-sm border-2 border-black p-2 text-left transition-colors",
-                                                    selectedParticipants.includes(friend.uuid)
-                                                        ? "bg-blue-100"
-                                                        : "bg-white hover:bg-gray-50",
+                                                    "w-full rounded-sm border-2 border-black bg-white p-2 text-left transition-colors hover:bg-gray-50",
                                                 )}
                                             >
                                                 <div className="flex items-center gap-2">

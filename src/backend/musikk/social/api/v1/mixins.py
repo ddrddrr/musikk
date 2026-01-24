@@ -2,6 +2,7 @@ from rest_framework.mixins import ListModelMixin, CreateModelMixin
 from django.db.models import Model
 from django.contrib.contenttypes.models import ContentType
 
+from musikk.pagination import BaseLimitOffsetPagination
 from social.models import Publication
 from social.api.v1.serializers import (
     PublicationCreateSerializer,
@@ -10,6 +11,8 @@ from social.api.v1.serializers import (
 
 
 class PublicationsListCreateMixin(ListModelMixin, CreateModelMixin):
+    pagination_class = BaseLimitOffsetPagination
+
     def get_created_for(self) -> Model:
         raise NotImplementedError
 

@@ -25,9 +25,11 @@ export function GlobalFeed() {
         return (
             <TabsContent value={label}>
                 <div className="space-y-6">
-                    {posts?.map((post) => <PostTree key={post.uuid} publication={post} />)}
+                    {posts?.map((post) => (
+                        <PostTree key={post.uuid} publication={post} />
+                    ))}
                     {!posts?.length && (
-                        <Card>
+                        <Card className={"border border-black"}>
                             <CardContent className="py-6 text-center text-muted-foreground">
                                 No posts yet.
                             </CardContent>

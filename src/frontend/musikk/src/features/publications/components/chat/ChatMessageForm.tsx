@@ -1,7 +1,9 @@
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
 import { useCreateChatMessage } from "@/features/publications/api/mutations.ts";
+import { AttachmentPicker } from "@/features/publications/components/AttachmentPicker.tsx";
+import { useAttachment } from "@/features/publications/hooks/useAttachment.ts";
 import { chatMessageSchema } from "@/features/publications/schemas.ts";
-import { Chat } from "@/features/publications/types.ts";
+import { Chat, Publication } from "@/features/publications/types.ts";
 import { Button } from "@/features/ui/button.tsx";
 import { Textarea } from "@/features/ui/textarea.tsx";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -12,9 +14,13 @@ type ChatMessageFormData = z.infer<typeof chatMessageSchema>;
 
 interface ChatMessageFormProps {
     chat: Chat;
+    replyTo?: Publication;
+    setReplyTo?: (message?: Publication) => void;
     onMessagePosted?: () => void;
 }
-
+// TODO: message style as in comments + attachment picker + avatar for the user who sent
+// move chats to header as button instead of a context menu for profile
+// same for connections
 export function ChatMessageForm({ chat, onMessagePosted }: ChatMessageFormProps) {
     const userUUID = useUserUUID();
     const {
@@ -55,14 +61,16 @@ export function ChatMessageForm({ chat, onMessagePosted }: ChatMessageFormProps)
                 {...register("content")}
                 placeholder="Type a message..."
                 rows={2}
+                className={"border border-black bg-white"}
             />
             {errors.content && <p className="text-xs text-red-500">{errors.content.message}</p>}
+
             <Button
                 type="submit"
                 variant="brand"
                 size="lg"
                 disabled={createChatMessageMutation.isPending}
-                className="w-full"
+                className={"w-1/3"}
             >
                 {createChatMessageMutation.isPending ? "Sending..." : "Send"}
             </Button>

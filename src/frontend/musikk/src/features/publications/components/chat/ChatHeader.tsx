@@ -5,7 +5,6 @@ interface ChatHeaderProps {
 }
 
 export function ChatHeader({ chat }: ChatHeaderProps) {
-
     return (
         <div className="border-b-2 border-black bg-gray-100 p-4">
             <div className="flex items-center gap-3">

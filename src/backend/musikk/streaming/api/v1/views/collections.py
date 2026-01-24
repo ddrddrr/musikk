@@ -11,6 +11,7 @@ from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from musikk.pagination import BaseLimitOffsetPagination
 from users.permissions import IsArtist
 from websockets.event_helpers import send_ws_event
 from streaming.api.v1.filters import CollectionFilter
@@ -27,6 +28,7 @@ from streaming.permissions import IsPublicOrCollectionAuthor, IsCollecitonAuthor
 class CollectionListCreateView(ListCreateAPIView):
     queryset = Collection.objects.filter(private=False).order_by("-date_added")
     filterset_class = CollectionFilter
+    pagination_class = BaseLimitOffsetPagination
     parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def get_serializer_class(self):
@@ -99,13 +101,11 @@ class CollectionAddLikedView(APIView):
         # TODO: move?
         send_ws_event(
             f"user_{self.request.user.uuid}",
-
             event_name="invalidate.query",
             query_key=["openCollection"],
         )
         send_ws_event(
             f"user_{self.request.user.uuid}",
-
             event_name="invalidate.query",
             query_key=["collectionsPersonal"],
         )
@@ -126,7 +126,6 @@ class CollectionRemoveSong(APIView):
         collection_song.delete()
         send_ws_event(
             f"user_{self.request.user.uuid}",
-
             event_name="invalidate.query",
             query_key=["openCollection"],
         )
