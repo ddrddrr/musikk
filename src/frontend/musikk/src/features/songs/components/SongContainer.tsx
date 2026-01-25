@@ -1,4 +1,4 @@
-import { CollectionSong } from "@/features/song-collections/types.ts";
+import { CollectionSong } from "@/features/collections/types.ts";
 import { SongAddToLikedButton } from "@/features/songs/components/SongAddToLikedButton.tsx";
 import { SongAddToQueueButton } from "@/features/songs/components/SongAddToQueueButton.tsx";
 import { SongContextMenu } from "@/features/songs/components/SongContextMenu.tsx";

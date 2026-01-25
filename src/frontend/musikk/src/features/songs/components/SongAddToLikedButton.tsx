@@ -1,5 +1,5 @@
-import { addToLikedSongs } from "@/features/song-collections/api/mutations.ts";
-import { CollectionSong } from "@/features/song-collections/types.ts";
+import { addToLikedSongs } from "@/features/collections/api/mutations.ts";
+import { CollectionSong } from "@/features/collections/types.ts";
 import { Button } from "@/features/ui/button.tsx";
 import { useMutation } from "@tanstack/react-query";
 import { Check, Plus } from "lucide-react";

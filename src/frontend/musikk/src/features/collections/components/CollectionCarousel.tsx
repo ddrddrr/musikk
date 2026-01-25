@@ -1,5 +1,5 @@
-import { CollectionCard } from "@/features/song-collections/components/CollectionCard.tsx";
-import { Collection } from "@/features/song-collections/types.ts";
+import { CollectionCard } from "@/features/collections/components/CollectionCard.tsx";
+import { Collection } from "@/features/collections/types.ts";
 import {
     Carousel,
     CarouselContent,
@@ -8,12 +8,12 @@ import {
     CarouselPrevious,
 } from "@/features/ui/carousel.tsx";
 
-interface SongCollectionsCarouselProps {
+interface CollectionsCarouselProps {
     collections: Collection[];
     title: string;
 }
 
-export function SongCollectionCarousel({ collections, title }: SongCollectionsCarouselProps) {
+export function CollectionCarousel({ collections, title }: CollectionsCarouselProps) {
     const shouldLoop = collections.length > 4; // lg shows 4 at once
 
     return (

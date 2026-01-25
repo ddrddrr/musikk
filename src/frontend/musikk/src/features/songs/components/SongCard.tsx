@@ -1,4 +1,4 @@
-import { CollectionSong } from "@/features/song-collections/types.ts";
+import { CollectionSong } from "@/features/collections/types.ts";
 import { SongContextMenu } from "@/features/songs/components/SongContextMenu.tsx";
 import { albumBySongRetrieve } from "@/features/songs/queries.ts";
 import { Card, CardContent } from "@/features/ui/card.tsx";

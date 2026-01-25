@@ -5,9 +5,9 @@ import { performSearch } from "@/features/search/queries";
 import { Card, CardContent } from "@/features/ui/card";
 import { Input } from "@/features/ui/input";
 
+import { CollectionCard } from "@/features/collections/components/CollectionCard.tsx";
+import { Collection } from "@/features/collections/types.ts";
 import { SearchItem } from "@/features/search/types.ts";
-import { CollectionCard } from "@/features/song-collections/components/CollectionCard.tsx";
-import { Collection } from "@/features/song-collections/types.ts";
 import { SongCard } from "@/features/songs/components/SongCard.tsx";
 import { SongContainer } from "@/features/songs/components/SongContainer.tsx";
 import { UserCard } from "@/features/user/components/UserCard.tsx";

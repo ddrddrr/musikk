@@ -1,8 +1,8 @@
 import { api_client } from "@/api/axiosConf.ts";
 import { FriendActivityURLs } from "@/api/endpoints.ts";
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
+import { Collection, CollectionSong } from "@/features/collections/types.ts";
 import { UserSong } from "@/features/friend-activity/types.ts";
-import { Collection, CollectionSong } from "@/features/song-collections/types.ts";
 import { useQuery } from "@tanstack/react-query";
 
 export function useFriendsListeningQuery() {

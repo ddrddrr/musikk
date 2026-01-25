@@ -1,4 +1,4 @@
-import { CollectionSong } from "@/features/song-collections/types.ts";
+import { CollectionSong } from "@/features/collections/types.ts";
 import { useQueueAddAPI } from "@/features/song-queue/hooks/useQueueAPI.ts";
 import { Button } from "@/features/ui/button.tsx";
 import { BetweenHorizonalStart } from "lucide-react";

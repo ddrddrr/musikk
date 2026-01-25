@@ -1,9 +1,9 @@
-import { CollectionContextMenu } from "@/features/song-collections/components/CollectionContextMenu.tsx";
-import type { Collection } from "@/features/song-collections/types.ts";
+import { CollectionContextMenu } from "@/features/collections/components/CollectionContextMenu.tsx";
+import type { Collection } from "@/features/collections/types.ts";
 import { Card, CardContent } from "@/features/ui/card.tsx";
 import { useNavigate } from "react-router-dom";
 
-interface SongCollectionCardProps {
+interface CollectionCardProps {
     collection: Collection;
     size?: "small" | "medium" | "big";
     onClick?: (c: Collection) => void;
@@ -40,7 +40,7 @@ export function CollectionCard({
     collection,
     size = "medium",
     onClick = undefined,
-}: SongCollectionCardProps) {
+}: CollectionCardProps) {
     const navigate = useNavigate();
     const { uuid, title, image, authors } = collection;
     const sizes = sizeClasses[size];

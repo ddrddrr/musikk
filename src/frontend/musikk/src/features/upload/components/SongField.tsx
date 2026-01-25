@@ -2,8 +2,8 @@ import { ImageField } from "@/features/common/ImageField.tsx";
 import { Spinner } from "@/features/common/Spinner.tsx";
 import { FormControl, FormField, FormItem, FormLabel } from "@/features/ui/form.tsx";
 import { Input } from "@/features/ui/input.tsx";
-import { AudioField } from "@/features/upload/AudioField.tsx";
-import { SongUploadStatus } from "@/features/upload/types";
+import { AudioField } from "@/features/upload/components/AudioField.tsx";
+import { SongUploadStatus } from "@/features/upload/types.ts";
 
 interface SongUploadProps {
     songIndex: number;

@@ -1,6 +1,6 @@
 import { UUID } from "@/api/types.ts";
+import { Collection, CollectionSong } from "@/features/collections/types.ts";
 import { BaseModel } from "@/features/common/types.ts";
-import { Collection, CollectionSong } from "@/features/song-collections/types.ts";
 import { BaseUser } from "@/features/user/types.ts";
 
 export type AttachmentType = "collection" | "song" | "user";

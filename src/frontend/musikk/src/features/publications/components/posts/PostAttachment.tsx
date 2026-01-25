@@ -1,6 +1,6 @@
+import { CollectionCard } from "@/features/collections/components/CollectionCard.tsx";
+import { Collection, CollectionSong } from "@/features/collections/types.ts";
 import { Attachment } from "@/features/publications/types.ts";
-import { CollectionCard } from "@/features/song-collections/components/CollectionCard.tsx";
-import { Collection, CollectionSong } from "@/features/song-collections/types.ts";
 import { SongContainer } from "@/features/songs/components/SongContainer.tsx";
 
 type PostAttachmentProps = {

@@ -1,4 +1,4 @@
-import { CollectionSong } from "@/features/song-collections/types.ts";
+import { CollectionSong } from "@/features/collections/types.ts";
 import { useSongPlayHandler } from "@/features/songs/hooks/useSongPlayHandler.ts";
 import { Button } from "@/features/ui/button.tsx";
 import { Pause, Play } from "lucide-react";

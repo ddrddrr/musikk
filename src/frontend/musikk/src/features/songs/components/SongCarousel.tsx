@@ -1,4 +1,4 @@
-import { CollectionSong } from "@/features/song-collections/types.ts";
+import { CollectionSong } from "@/features/collections/types.ts";
 import { SongCard } from "@/features/songs/components/SongCard.tsx";
 import {
     Carousel,

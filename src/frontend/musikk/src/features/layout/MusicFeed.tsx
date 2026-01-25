@@ -1,7 +1,7 @@
 import { PaginatedRes } from "@/api/types";
-import { fetchCollections } from "@/features/song-collections/api/queries";
-import { SongCollectionCarousel } from "@/features/song-collections/components/SongCollectionCarousel.tsx";
-import { Collection } from "@/features/song-collections/types";
+import { fetchCollections } from "@/features/collections/api/queries";
+import { CollectionCarousel } from "@/features/collections/components/CollectionCarousel.tsx";
+import { Collection } from "@/features/collections/types";
 import { useQueries } from "@tanstack/react-query";
 
 export function MusicFeed() {
@@ -51,16 +51,16 @@ export function MusicFeed() {
 
     return (
         <div className="flex flex-col gap-8">
-            <SongCollectionCarousel collections={playlists.data} title="New Playlists" />
+            <CollectionCarousel collections={playlists.data} title="New Playlists" />
 
-            <SongCollectionCarousel collections={albums.data} title="New Albums" />
+            <CollectionCarousel collections={albums.data} title="New Albums" />
 
-            <SongCollectionCarousel
+            <CollectionCarousel
                 collections={followedCollections.data}
                 title="Latest Added by Followed Users"
             />
 
-            <SongCollectionCarousel
+            <CollectionCarousel
                 collections={friendsCollections.data}
                 title="Latest Added by Friends"
             />

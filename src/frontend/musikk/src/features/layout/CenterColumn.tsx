@@ -1,8 +1,8 @@
+import { CollectionContainer } from "@/features/collections/components/CollectionContainer.tsx";
 import { MusicFeed } from "@/features/layout/MusicFeed.tsx";
 import { ChatBoxRouteHandler } from "@/features/publications/components/chat/ChatBoxRouteHandler.tsx";
 import { ChatPreviewList } from "@/features/publications/components/chat/ChatPreviewList.tsx";
 import { GlobalFeed } from "@/features/publications/components/posts/GlobalFeed.tsx";
-import { SongCollectionContainer } from "@/features/song-collections/components/SongCollectionContainer.tsx";
 import { Connections } from "@/features/user/components/Connections.tsx";
 import { ProfilePage } from "@/features/user/components/ProfilePage.tsx";
 import { Route, Routes, useParams } from "react-router-dom";
@@ -31,5 +31,5 @@ export function CenterColumn() {
 function SongCollectionContainerWrapper() {
     const { uuid } = useParams();
     if (!uuid) return null;
-    return <SongCollectionContainer collectionUUID={uuid} />;
+    return <CollectionContainer collectionUUID={uuid} />;
 }

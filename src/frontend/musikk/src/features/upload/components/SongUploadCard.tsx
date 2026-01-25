@@ -1,15 +1,15 @@
-import type { UUID } from "@/api/types";
-import { Button } from "@/features/ui/button";
-import { SongField } from "@/features/upload/SongField";
-import type { CreateState, StatusByUUId } from "@/features/upload/ws/eventHooks";
-import { getSongUploadStatus } from "./songUploadStatus.ts";
+import type { UUID } from "@/api/types.ts";
+import { Button } from "@/features/ui/button.tsx";
+import { SongField } from "@/features/upload/components/SongField.tsx";
+import { SongCreationState, SongStatusByUUID } from "@/features/upload/types.ts";
+import { getSongUploadStatus } from "../songUploadStatus.ts";
 
 export function SongUploadCard(props: {
     index: number;
     fieldId: string;
     uuid?: UUID;
-    statusByUUID: StatusByUUId;
-    songsStateByFieldId: CreateState;
+    statusByUUID: SongStatusByUUID;
+    songsStateByFieldId: SongCreationState;
     onRemove: () => void;
 }) {
     const { status, detail } = getSongUploadStatus({

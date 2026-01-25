@@ -1,5 +1,5 @@
-import { collectionRemoveSong } from "@/features/song-collections/api/mutations.ts";
-import { CollectionSong } from "@/features/song-collections/types.ts";
+import { collectionRemoveSong } from "@/features/collections/api/mutations.ts";
+import { CollectionSong } from "@/features/collections/types.ts";
 import { useQueueAddAPI } from "@/features/song-queue/hooks/useQueueAPI.ts";
 import { useSongPlayHandler } from "@/features/songs/hooks/useSongPlayHandler.ts";
 import {

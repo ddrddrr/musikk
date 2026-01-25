@@ -1,10 +1,10 @@
-import type { UUID } from "@/api/types";
-import { ImageField } from "@/features/common/ImageField";
-import { Button } from "@/features/ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel } from "@/features/ui/form";
-import { Input } from "@/features/ui/input";
-import { SongUploadCard } from "./SongUploadCard";
-import { useCollectionUploadFormData } from "./useCollectionUploadFormData.ts";
+import type { UUID } from "@/api/types.ts";
+import { ImageField } from "@/features/common/ImageField.tsx";
+import { Button } from "@/features/ui/button.tsx";
+import { Form, FormControl, FormField, FormItem, FormLabel } from "@/features/ui/form.tsx";
+import { Input } from "@/features/ui/input.tsx";
+import { useCollectionUploadFormData } from "../useCollectionUploadFormData.ts";
+import { SongUploadCard } from "./SongUploadCard.tsx";
 
 export function CollectionUploadForm() {
     const {

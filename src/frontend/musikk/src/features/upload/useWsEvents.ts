@@ -16,6 +16,3 @@ export function useSongUploadEvent(onEvent: (p: UploadEventPayload) => void) {
         return ws.subscribe("song.upload", (payload: UploadEventPayload) => onEvent(payload));
     }, [ws, onEvent]);
 }
-
-export type CreateState = Record<string, { status: SongUploadStatus; detail?: string }>;
-export type StatusByUUId = Record<UUID, UploadEventPayload>;

@@ -1,5 +1,5 @@
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
-import { fetchCollectionsPersonal } from "@/features/song-collections/api/queries.ts";
+import { fetchCollectionsPersonal } from "@/features/collections/api/queries.ts";
 import { UserCollectionsContext } from "@/features/user/providers/userCollectionsContext.ts";
 import { useQuery } from "@tanstack/react-query";
 import { ReactNode } from "react";

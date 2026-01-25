@@ -1,5 +1,5 @@
+import { CollectionSong } from "@/features/collections/types.ts";
 import { ThisDevice } from "@/features/playback/hooks/useCurrentDevice.ts";
-import { CollectionSong } from "@/features/song-collections/types.ts";
 import { SongQueueNode } from "@/features/song-queue/api/types.ts";
 import { createContext, Dispatch, SetStateAction } from "react";
 

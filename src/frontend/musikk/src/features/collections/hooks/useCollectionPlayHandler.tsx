@@ -1,6 +1,6 @@
+import { Collection } from "@/features/collections/types";
 import { useHandlePlay } from "@/features/playback/hooks/useHandlePlay.ts";
 import { PlaybackContext } from "@/features/playback/providers/playbackContext.ts";
-import { Collection } from "@/features/song-collections/types";
 import { useCallback, useContext } from "react";
 
 export function useCollectionPlayHandler(collection: Collection) {

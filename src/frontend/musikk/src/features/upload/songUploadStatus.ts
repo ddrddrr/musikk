@@ -1,24 +1,36 @@
 import type { UUID } from "@/api/types";
-import type { SongUploadStatus } from "@/features/upload/types";
-import type { CreateState, StatusByUUId } from "@/features/upload/ws/eventHooks";
+import type {
+    SongCreationState,
+    SongStatusByUUID,
+    SongUploadStatus,
+} from "@/features/upload/types";
 
-export function getSongUploadStatus(args: {
+interface GetSongUploadStatusArgs {
     uuid?: UUID;
     fieldId: string;
-    statusByUUID: StatusByUUId;
-    songsStateByFieldId: CreateState;
-}): { status: SongUploadStatus; detail?: string } {
-    const { uuid, fieldId, statusByUUID, songsStateByFieldId } = args;
+    statusByUUID: SongStatusByUUID;
+    songsStateByFieldId: SongCreationState;
+}
+interface SongUploadStatusResult {
+    status: SongUploadStatus;
+    detail?: string;
+}
 
+export function getSongUploadStatus({
+    uuid,
+    fieldId,
+    statusByUUID,
+    songsStateByFieldId,
+}: GetSongUploadStatusArgs): SongUploadStatusResult {
     if (uuid) {
         return {
-            status: (statusByUUID[uuid]?.status ?? "unknown") as SongUploadStatus,
+            status: statusByUUID[uuid]?.status ?? "unknown",
             detail: statusByUUID[uuid]?.detail,
         };
     }
 
     return {
-        status: (songsStateByFieldId[fieldId]?.status ?? "unknown") as SongUploadStatus,
+        status: songsStateByFieldId[fieldId]?.status ?? "unknown",
         detail: songsStateByFieldId[fieldId]?.detail,
     };
 }

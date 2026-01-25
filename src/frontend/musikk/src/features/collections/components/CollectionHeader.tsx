@@ -1,7 +1,7 @@
-import { CollectionAddToLikedButton } from "@/features/song-collections/components/CollectionAddToLikedButton.tsx";
-import { CollectionAddToQueueButton } from "@/features/song-collections/components/CollectionAddToQueueButton.tsx";
-import { SongCollectionPlayButton } from "@/features/song-collections/components/SongCollectionPlayButton.tsx";
-import { CollectionDetailed } from "@/features/song-collections/types.ts";
+import { CollectionAddToLikedButton } from "@/features/collections/components/CollectionAddToLikedButton.tsx";
+import { CollectionAddToQueueButton } from "@/features/collections/components/CollectionAddToQueueButton.tsx";
+import { CollectionPlayButton } from "@/features/collections/components/CollectionPlayButton.tsx";
+import { CollectionDetailed } from "@/features/collections/types.ts";
 import { Button } from "@/features/ui/button.tsx";
 import { memo } from "react";
 
@@ -13,7 +13,7 @@ interface SongCollectionHeaderProps {
     notPersonalCollection: boolean;
 }
 
-export const SongCollectionHeader = memo(function SongCollectionHeader({
+export const CollectionHeader = memo(function SongCollectionHeader({
     collection,
     showComments,
     toggleComments,
@@ -44,7 +44,7 @@ export const SongCollectionHeader = memo(function SongCollectionHeader({
                             <p className="truncate text-sm font-bold">{collection.title}</p>
                             <div className="mt-2 flex gap-3">
                                 {songsCount > 0 && (
-                                    <SongCollectionPlayButton
+                                    <CollectionPlayButton
                                         collection={collection}
                                         showComments={showComments}
                                     />
@@ -74,7 +74,7 @@ export const SongCollectionHeader = memo(function SongCollectionHeader({
                             </div>
                             <div className="ml-2 flex flex-shrink-0 gap-2">
                                 {songsCount > 0 && (
-                                    <SongCollectionPlayButton
+                                    <CollectionPlayButton
                                         collection={collection}
                                         showComments={showComments}
                                     />

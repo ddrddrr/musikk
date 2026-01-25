@@ -1,12 +1,9 @@
 import type { UUID } from "@/api/types";
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID";
 import { createCollection, createSong } from "@/features/upload/mutations";
-import type {
-    CreateState,
-    StatusByUUId,
-    UploadEventPayload,
-} from "@/features/upload/ws/eventHooks";
-import { useSongUploadEvent } from "@/features/upload/ws/eventHooks";
+import { SongCreationState, SongStatusByUUID } from "@/features/upload/types.ts";
+import type { UploadEventPayload } from "@/features/upload/useWsEvents.ts";
+import { useSongUploadEvent } from "@/features/upload/useWsEvents.ts";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { FieldPath } from "react-hook-form";
@@ -39,8 +36,8 @@ export function useCollectionUploadFormData() {
 
     const { fields, append, remove } = useFieldArray({ control: form.control, name: "songs" });
 
-    const [songsStateByFieldId, setSongsStateByFieldId] = useState<CreateState>({});
-    const [statusByUUID, setStatusByUUID] = useState<StatusByUUId>({});
+    const [songsStateByFieldId, setSongsStateByFieldId] = useState<SongCreationState>({});
+    const [statusByUUID, setStatusByUUID] = useState<SongStatusByUUID>({});
     const [submitState, setSubmitState] = useState<SubmitState>({ status: "idle" });
 
     const resetTimeoutRef = useRef<number | null>(null);

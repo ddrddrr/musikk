@@ -1,4 +1,4 @@
-import { CollectionCard } from "@/features/song-collections/components/CollectionCard.tsx";
+import { CollectionCard } from "@/features/collections/components/CollectionCard.tsx";
 import { UserCollectionsContext } from "@/features/user/providers/userCollectionsContext.ts";
 import { useContext, useMemo } from "react";
 

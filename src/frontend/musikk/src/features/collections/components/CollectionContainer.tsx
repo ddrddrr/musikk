@@ -1,19 +1,19 @@
 import { UUID } from "@/api/types.ts";
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
+import { fetchCollectionDetailed } from "@/features/collections/api/queries.ts";
+import { CollectionHeader } from "@/features/collections/components/CollectionHeader.tsx";
 import { CommentBox } from "@/features/publications/components/collection-comments/CommentBox.tsx";
-import { fetchCollectionDetailed } from "@/features/song-collections/api/queries.ts";
-import { SongCollectionHeader } from "@/features/song-collections/components/SongCollectionHeader.tsx";
 import { SongContainer } from "@/features/songs/components/SongContainer.tsx";
 import { UserCollectionsContext } from "@/features/user/providers/userCollectionsContext.ts";
 import { useQuery } from "@tanstack/react-query";
 import { useContext } from "react";
 import { useMatch, useNavigate } from "react-router-dom";
 
-interface SongCollectionContainerProps {
+interface CollectionContainerProps {
     collectionUUID: UUID;
 }
 
-export function SongCollectionContainer({ collectionUUID }: SongCollectionContainerProps) {
+export function CollectionContainer({ collectionUUID }: CollectionContainerProps) {
     const navigate = useNavigate();
     const currUserUUID = useUserUUID();
     const { liked_songs, history } = useContext(UserCollectionsContext);
@@ -62,7 +62,7 @@ export function SongCollectionContainer({ collectionUUID }: SongCollectionContai
             <div className={`flex gap-6 ${showComments ? "flex-row" : "flex-col"}`}>
                 <div className={showComments ? "min-w-0 flex-1" : "w-full"}>
                     <div className="space-y-4">
-                        <SongCollectionHeader
+                        <CollectionHeader
                             collection={collection}
                             toggleComments={toggleComments}
                             songsCount={songs.length}

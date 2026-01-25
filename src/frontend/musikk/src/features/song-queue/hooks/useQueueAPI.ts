@@ -1,4 +1,4 @@
-import type { Collection, CollectionSong } from "@/features/song-collections/types.ts";
+import type { Collection, CollectionSong } from "@/features/collections/types.ts";
 import { getSongQueue } from "@/features/song-queue/api/queries.ts";
 import { SongQueue } from "@/features/song-queue/api/types.ts";
 import {

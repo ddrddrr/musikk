@@ -1,5 +1,5 @@
-import { useCollectionPlayHandler } from "@/features/song-collections/hooks/useCollectionPlayHandler.tsx";
-import { CollectionDetailed } from "@/features/song-collections/types.ts";
+import { useCollectionPlayHandler } from "@/features/collections/hooks/useCollectionPlayHandler.tsx";
+import { CollectionDetailed } from "@/features/collections/types.ts";
 import { Button } from "@/features/ui/button.tsx";
 import { Pause, Play } from "lucide-react";
 
@@ -8,10 +8,7 @@ interface SongCollectionPlayButtonProps {
     showComments: boolean;
 }
 
-export function SongCollectionPlayButton({
-    collection,
-    showComments,
-}: SongCollectionPlayButtonProps) {
+export function CollectionPlayButton({ collection, showComments }: SongCollectionPlayButtonProps) {
     const { isThisCollectionPlaying, onClick } = useCollectionPlayHandler(collection);
 
     const renderPlayPauseIcon = () => {

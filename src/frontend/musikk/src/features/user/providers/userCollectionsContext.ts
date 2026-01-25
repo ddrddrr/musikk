@@ -1,4 +1,4 @@
-import { Collection } from "@/features/song-collections/types.ts";
+import { Collection } from "@/features/collections/types.ts";
 import { createContext } from "react";
 
 interface UserCollectionsContextType {

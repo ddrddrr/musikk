@@ -1,6 +1,6 @@
 import { BackButton } from "@/features/common/BackButton.tsx";
 import { Header } from "@/features/layout/header/Header.tsx";
-import { CollectionUploadForm } from "@/features/upload/CollectionUploadForm.tsx";
+import { CollectionUploadForm } from "@/features/upload/components/CollectionUploadForm.tsx";
 
 // TODO: only artists should have access
 export function UploadPage() {
