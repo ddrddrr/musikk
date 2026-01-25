@@ -45,12 +45,13 @@ class MeView(RetrieveUpdateAPIView):
         serializer = self.get_serializer(user, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        user_data = BaseMeSerializer(user).data
         send_ws_event(
             f"user_{self.request.user.uuid}",
-            "invalidate.query",
-            query_key=["user"],
+            "user.updated",
+            user=user_data,
         )
-        return Response(data={"me": BaseMeSerializer(user).data})
+        return Response(data={"me": user_data})
 
 
 class UserRetrieveView(RetrieveAPIView):
@@ -119,21 +120,17 @@ class FollowedView(APIView):
                 receiver=follow_user,
             )
 
-        # TODO: friends for both, followers for the other, followed for this
         send_ws_event(
             f"user_{self.request.user.uuid}",
-            event_name="invalidate.query",
-            query_key=["user", str(self.request.user.uuid), "followed"],
-        )
-        send_ws_event(
-            f"user_{self.request.user.uuid}",
-            event_name="invalidate.query",
-            query_key=["user", str(self.request.user.uuid), "friends"],
+            "user.followed",
+            from_uuid=str(self.request.user.uuid),
+            to_uuid=str(follow_user.uuid),
         )
         send_ws_event(
             f"user_{follow_user.uuid}",
-            event_name="invalidate.query",
-            query_key=["user", str(self.request.user.uuid), "followers"],
+            "user.followed",
+            from_uuid=str(self.request.user.uuid),
+            to_uuid=str(follow_user.uuid),
         )
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -151,17 +148,14 @@ class FollowedView(APIView):
 
         send_ws_event(
             f"user_{self.request.user.uuid}",
-            event_name="invalidate.query",
-            query_key=["user", str(self.request.user.uuid), "followed"],
-        )
-        send_ws_event(
-            f"user_{self.request.user.uuid}",
-            event_name="invalidate.query",
-            query_key=["user", str(self.request.user.uuid), "friends"],
+            "user.unfollowed",
+            from_uuid=str(self.request.user.uuid),
+            to_uuid=str(unfollow_user.uuid),
         )
         send_ws_event(
             f"user_{unfollow_user.uuid}",
-            event_name="invalidate.query",
-            query_key=["user", str(self.request.user.uuid), "followers"],
+            "user.unfollowed",
+            from_uuid=str(self.request.user.uuid),
+            to_uuid=str(unfollow_user.uuid),
         )
         return Response(status=status.HTTP_204_NO_CONTENT)

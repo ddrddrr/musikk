@@ -2,21 +2,21 @@ import { useFollowUserMutation, useUnfollowUserMutation } from "@/features/user/
 import { UserConnectionsContext } from "@/features/user/providers/userConnectionsContext.tsx";
 import { useContext } from "react";
 
-export function useFollowUser(userUuid: string | undefined) {
+export function useFollowUser(userUUID: string | undefined) {
     const followMutation = useFollowUserMutation();
     const unfollowMutation = useUnfollowUserMutation();
     const { followed } = useContext(UserConnectionsContext);
 
-    const isFollowing = userUuid ? followed.some((u) => u.uuid === userUuid) : false;
+    const isFollowing = userUUID ? followed.some((u) => u.uuid === userUUID) : false;
 
     const toggleFollow = async () => {
-        if (!userUuid) return;
+        if (!userUUID) return;
 
         try {
             if (isFollowing) {
-                await unfollowMutation.mutateAsync(userUuid);
+                await unfollowMutation.mutateAsync(userUUID);
             } else {
-                await followMutation.mutateAsync(userUuid);
+                await followMutation.mutateAsync(userUUID);
             }
         } catch (error) {
             console.error("Error following/unfollowing user:", error);
