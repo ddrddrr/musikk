@@ -51,7 +51,7 @@ export function CollectionCard({
         if (onClick) {
             onClick(collection);
         } else {
-            navigate(`/collection/${collection.uuid}/`);
+            void navigate(`/collection/${collection.uuid}/`);
         }
     }
 

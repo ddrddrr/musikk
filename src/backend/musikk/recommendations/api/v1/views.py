@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
-from streaming.api.v1.serializers.songs import CollectionSongSerializer
+from streaming.api.v1.serializers.songs import CollectionSongRetrieveSerializer
 from streaming.api.v1.serializers.collections import CollectionSerializerBasic
 from streaming.models import BaseSong, Collection
 from streaming.models.collections import CollectionType
@@ -82,6 +82,6 @@ class SearchView(APIView):
             song__in=matching_songs,
         )
 
-        return CollectionSongSerializer(
+        return CollectionSongRetrieveSerializer(
             sc_songs, many=True, context={"request": self.request}
         ).data

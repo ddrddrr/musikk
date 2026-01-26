@@ -21,7 +21,7 @@ export function LeftColumn() {
     return (
         <div className="w-1/5 overflow-y-auto bg-red-600 p-4 pb-40">
             <h2 className="mb-4 text-center text-xl font-bold text-white">Your stuff</h2>
-
+            {/*button -> click = add new collection*/}
             {collections.length > 0 ? (
                 <ul className="space-y-6" role="list">
                     {collections.map((collection) => (

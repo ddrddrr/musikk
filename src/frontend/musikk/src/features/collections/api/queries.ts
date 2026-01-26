@@ -1,6 +1,6 @@
 import { api_client } from "@/api/axiosConf.ts";
-import { CollectionURLs } from "@/api/endpoints.ts";
 import { PaginatedRes, UUID } from "@/api/types.ts";
+import { CollectionURLs } from "@/features/collections/api/endpoints.ts";
 import { Collection, CollectionDetailed, CollectionType } from "@/features/collections/types.ts";
 import { ConnectionType } from "@/features/user/types.ts";
 

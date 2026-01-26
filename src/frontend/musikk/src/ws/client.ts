@@ -48,7 +48,6 @@ export class WSClient {
             console.debug("WS conn established");
             this.currReconnects = 0;
 
-            // flush pending messages
             if (this.pendingMessages.length > 0) {
                 console.debug(`WS Flushing ${this.pendingMessages.length} pending messages`);
                 for (const msg of this.pendingMessages) {
@@ -98,6 +97,7 @@ export class WSClient {
             console.debug(`WS Connection closed (code: ${event.code}, reason: ${reason})`);
             this.ws = null;
 
+            // TODO: add exp backoff
             // reconnect on non-standard close
             if (
                 this.shouldReconnect &&
@@ -160,13 +160,5 @@ export class WSClient {
                 console.debug(`WS Unsubscribed from event '${event}'`);
             }
         };
-    }
-
-    getReadyState(): number {
-        return this.ws?.readyState ?? WebSocket.CLOSED;
-    }
-
-    isConnected(): boolean {
-        return this.ws?.readyState === WebSocket.OPEN;
     }
 }

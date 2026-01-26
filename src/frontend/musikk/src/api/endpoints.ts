@@ -16,7 +16,6 @@ export const AuthURLs = {
 };
 export const SongURLs = {
     songList: `/songs`,
-    songsCreate: `/songs`,
     songRetrieve: (songUUID: UUID) => `/songs/${songUUID}`,
     albumBySong: (songUUID: UUID) => `/songs/${songUUID}/album`,
 };
@@ -32,19 +31,6 @@ export const QueueURLs = {
     removeNode: (nodeUUID: UUID) => `/song-queue/remove-node/${nodeUUID}`,
     clearQueue: `/song-queue/clear`,
     appendRandom: `/song-queue/append-random`,
-};
-export const CollectionURLs = {
-    collectionCreate: `/collections`,
-    collectionList: `/collections`,
-    collectionPersonal: (userUUID: UUID) => `/collections/personal/${userUUID}`,
-    collectionRetrieve: (collectionUUID: UUID) => `/collections/${collectionUUID}`,
-    collectionDetail: (collectionUUID: UUID) => `/collections/detail/${collectionUUID}`,
-    collectionAddToLiked: (collectionUUID: UUID) => `/collections/${collectionUUID}/like`,
-    collectionAddSong: (collectionUUID: UUID, songUUID: UUID) =>
-        `/collections/${collectionUUID}/songs/${songUUID}`,
-    collectionRemoveSong: (collectionUUID: UUID, songCollectionSongUUID: UUID) =>
-        `/collections/${collectionUUID}/songs/${songCollectionSongUUID}`,
-    likedSongsAddSong: (songUUID: UUID) => `/liked-songs/add-song/${songUUID}`,
 };
 export const NotificationURLs = {
     notificationsSetRead: `/notifications`,

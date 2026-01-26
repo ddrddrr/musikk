@@ -2,7 +2,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from streaming.api.v1.serializers import CollectionSongSerializer
+from streaming.api.v1.serializers import CollectionSongRetrieveSerializer
 from streaming.managers.playback_manager import PlaybackManager
 from users.api.v1.serializers import BaseUserSerializer
 
@@ -17,7 +17,7 @@ class FriendsLatestListenedView(APIView):
                         "user": BaseUserSerializer(
                             f, context={"request": request}
                         ).data,
-                        "song": CollectionSongSerializer(
+                        "song": CollectionSongRetrieveSerializer(
                             f.song_queue.head.song, context={"request": request}
                         ).data,
                     }

@@ -3,7 +3,7 @@ from rest_framework import serializers
 
 from base.serializers import BaseModelSerializer, UUIDListField
 from streaming.api.v1.serializers.songs import (
-    CollectionSongSerializer,
+    CollectionSongRetrieveSerializer,
 )
 from streaming.api.v1.serializers.validators import validate_authors
 from streaming.models import BaseSong
@@ -63,7 +63,7 @@ class CollectionSerializerDetailed(CollectionSerializerBasic):
         }
 
     def get_songs(self, obj) -> dict:
-        return CollectionSongSerializer(
+        return CollectionSongRetrieveSerializer(
             CollectionSong.objects.filter(collection=obj)
             .select_related("song")
             .filter(song__draft=False),
@@ -72,52 +72,36 @@ class CollectionSerializerDetailed(CollectionSerializerBasic):
         ).data
 
 
-class CollectionCreateSerializer(serializers.ModelSerializer):
+class CollectionCreateSerializer(BaseModelSerializer):
     authors = UUIDListField(required=False, allow_empty=True, write_only=True)
-    songs = UUIDListField(required=False, write_only=True)
 
-    class Meta:
+    class Meta(BaseModelSerializer.Meta):
         model = Collection
-        fields = [
+        fields = BaseModelSerializer.Meta.fields + [
             "authors",
-            "songs",
             "title",
             "description",
             "image",
             "type",
             "private",
         ]
+        extra_kwargs = {
+            **BaseModelSerializer.Meta.extra_kwargs,
+        }
 
     def create(self, validated_data):
         author_uuids = validated_data.pop("authors", None)
         authors = validate_authors(author_uuids or [self.context["request"].user.uuid])
 
-        song_uuids = validated_data.pop("songs", None)
-        if song_uuids:
-            songs_qs = BaseSong.objects.filter(authors__in=authors).filter(
-                uuid__in=song_uuids
-            )
-            if len(songs_qs) != len(song_uuids):
-                raise serializers.ValidationError("Some of the songs were not found.")
-
         with transaction.atomic():
             collection = Collection.objects.create(**validated_data)
-            if song_uuids:
-                CollectionSong.objects.bulk_create(
-                    [
-                        CollectionSong(collection=collection, song=song, position=i)
-                        for i, song in enumerate(songs_qs)
-                    ]
-                )
-                CollectionCredit.objects.bulk_create(
-                    [
-                        CollectionCredit(
-                            collection=collection, author=author, author_priority=i
-                        )
-                        for i, author in enumerate(authors)
-                    ]
-                )
-
-                songs_qs.update(draft=False)
+            CollectionCredit.objects.bulk_create(
+                [
+                    CollectionCredit(
+                        collection=collection, author=author, author_priority=i
+                    )
+                    for i, author in enumerate(authors)
+                ]
+            )
 
         return collection

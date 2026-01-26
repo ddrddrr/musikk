@@ -76,7 +76,7 @@ class SongCredit(BaseModel):
     class Meta:
         ordering = ("author_priority",)
 
-
+# TODO: if song is in draft state, dont show this somehow
 class CollectionSong(BaseModel):
     song = models.ForeignKey(
         BaseSong, on_delete=models.CASCADE, related_name="collectionsongs"

@@ -9,7 +9,7 @@ from rest_framework.exceptions import ValidationError
 from faker import Faker
 
 from streaming.api.v1.views.songs import (
-    SongCreateView,
+    CollectionSongCreateView,
     CollectionSongRetrieveView,
     SongAddLikedView,
 )
@@ -47,7 +47,7 @@ class TestSongCreateView(TestCase):
 
         request = self.factory.post(url, payload, format="multipart")
         force_authenticate(request, user=self.user)
-        response = SongCreateView.as_view()(request)
+        response = CollectionSongCreateView.as_view()(request)
 
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
 
@@ -69,7 +69,7 @@ class TestSongCreateView(TestCase):
 
         request = self.factory.post(url, payload, format="multipart")
         force_authenticate(request, user=self.user)
-        response = SongCreateView.as_view()(request)
+        response = CollectionSongCreateView.as_view()(request)
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         mock_validate.assert_called_once()

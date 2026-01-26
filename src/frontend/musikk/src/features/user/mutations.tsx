@@ -17,9 +17,7 @@ export function useMeUpdateMutation() {
             if (bio !== undefined) formData.append("bio", bio);
             if (avatar) formData.append("avatar", avatar);
 
-            return api_client.patch(UserURLs.meUpdate, formData, {
-                headers: { "Content-Type": "multipart/form-data" },
-            });
+            return api_client.patch(UserURLs.meUpdate, formData);
         },
     });
 }

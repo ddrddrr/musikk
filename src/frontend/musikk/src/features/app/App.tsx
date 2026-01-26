@@ -4,7 +4,6 @@ import { HomePage } from "@/features/app/HomePage.tsx";
 import { LoginPage } from "@/features/app/LoginPage.tsx";
 import { SettingsPage } from "@/features/app/SettingsPage.tsx";
 import { SignUpPage } from "@/features/app/SignupPage.tsx";
-import { UploadPage } from "@/features/app/UploadPage.tsx";
 import { EmailVerificationPage } from "@/features/auth/components/EmailVerificationPage.tsx";
 import { RequireAuth } from "@/features/auth/components/RequireAuth.tsx";
 import { AuthProvider } from "@/features/auth/providers/AuthProvider.tsx";
@@ -14,6 +13,7 @@ import { useQueryInvalidateEvent } from "@/ws/useQueryInvalidateEvent.ts";
 import { DeviceListProvider } from "../playback/providers/DeviceListProvider";
 import { PlaybackProvider } from "../playback/providers/PlaybackProvider";
 import { useDeviceListEvent, usePlaybackChangeEvent } from "../playback/ws/eventHooks";
+import { AlbumUploadPage } from "./AlbumUploadPage.tsx";
 
 function AuthenticatedApp() {
     // TODO: probably move and centralize
@@ -24,7 +24,7 @@ function AuthenticatedApp() {
     return (
         <Routes>
             <Route path="/*" element={<HomePage />} />
-            <Route path="/upload" element={<UploadPage />} />
+            <Route path="/upload" element={<AlbumUploadPage />} />
             <Route path="/settings" element={<SettingsPage />} />
         </Routes>
     );

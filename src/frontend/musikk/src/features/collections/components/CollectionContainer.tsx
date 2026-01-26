@@ -29,7 +29,7 @@ export function CollectionContainer({ collectionUUID }: CollectionContainerProps
     });
 
     const toggleComments = () => {
-        navigate(
+        void navigate(
             showComments
                 ? `/collection/${collectionUUID}`
                 : `/collection/${collectionUUID}/comments`,

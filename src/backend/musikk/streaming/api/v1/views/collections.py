@@ -1,8 +1,8 @@
+import tempfile
+
 from django.db import transaction
-from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
 from rest_framework.generics import (
-    ListAPIView,
     RetrieveAPIView,
     get_object_or_404,
     ListCreateAPIView,
@@ -12,6 +12,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from musikk.pagination import BaseLimitOffsetPagination
+from streaming.api.v1.serializers import BaseSongCreateSerializer
+from streaming.audio.validators import validate_audio
+from streaming.managers.upload_manager import UploadManager
 from users.permissions import IsArtist
 from websockets.event_helpers import send_ws_event
 from streaming.api.v1.filters import CollectionFilter
@@ -21,8 +24,9 @@ from streaming.api.v1.serializers.collections import (
     CollectionCreateSerializer,
 )
 from streaming.models.collections import Collection, CollectionType
-from streaming.models.songs import CollectionSong
+from streaming.models.songs import CollectionSong, BaseSong
 from streaming.permissions import IsPublicOrCollectionAuthor, IsCollecitonAuthor
+from streaming.audio.tasks import convert_audio
 
 
 class CollectionListCreateView(ListCreateAPIView):
@@ -134,61 +138,74 @@ class CollectionRemoveSong(APIView):
         )
 
 
-class CollectionAddSong(APIView):
+# TODO: ws events should be not per-user, but per-object
+class CollectionSongCreateView(APIView):
     permission_classes = [IsCollecitonAuthor]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
-    def post(self, *args, **kwargs):
-        with transaction.atomic():
-            collection = get_object_or_404(
-                Collection,
-                uuid=kwargs["collection_uuid"],
-                authors__in=[self.request.user],
-            )
-            collection_song = get_object_or_404(
-                CollectionSong, uuid=kwargs["song_uuid"]
-            )
+    def post(self, request, *args, **kwargs):
+        collection = get_object_or_404(Collection, uuid=kwargs["collection_uuid"])
+        self.check_object_permissions(request, collection)
 
-            CollectionSong.objects.create(
-                song=collection_song.song, collection=collection
-            )
+        # TODO: split into diff views probably
+        if collection.type == CollectionType.ALBUM:
+            return self._create_album_song(request, collection)
 
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        song_uuid = request.data.get("song_uuid")
+        base_song_inst = get_object_or_404(BaseSong, uuid=song_uuid)
+        collection_song_inst = CollectionSong.objects.create(
+            collection=collection, song=base_song_inst
+        )
+        send_ws_event(
+            f"user_{request.user.uuid}",
+            event_name="invalidate.query",
+            query_key=["openCollection"],
+        )
+        return Response(
+            data={
+                "song_uuid": str(base_song_inst.uuid),
+                "collection_song_uuid": str(collection_song_inst.uuid),
+            },
+            status=status.HTTP_204_NO_CONTENT,
+        )
 
+    def _create_album_song(self, request, collection):
+        if not request.data.get("operation_id"):
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
-# class CollectionCreateView(APIView):
-#     """
-#     { title, description, image?, private, authors: [UUID], songs: [UUID,...], type }
-#     """
-#
-#     permission_classes = [IsArtist]
-#     parser_classes = [MultiPartParser, FormParser]
-#
-#     def post(self, *args, **kwargs):
-#         data = self.request.data.copy()
-#
-#         authors = data.getlist("authors", [])
-#         if not isinstance(authors, list):
-#             authors = [authors]
-#
-#         songs = data.getlist("songs", [])
-#         if not isinstance(songs, list):
-#             songs = [songs]
-#
-#         serializer = CollectionCreateSerializer(
-#             data={
-#                 "title": data["title"],
-#                 "description": data.get("description", ""),
-#                 "image": self.request.FILES.get("image"),
-#                 "authors": authors,
-#                 "songs": songs,
-#                 "type": data["type"],
-#             },
-#             context={"request": self.request},
-#         )
-#
-#         serializer.is_valid(raise_exception=True)
-#         serializer.save()
-#         return Response(status=status.HTTP_201_CREATED)
+        audio = request.data.get("audio")
+        validate_audio(audio)
+
+        serializer = BaseSongCreateSerializer(
+            data=request.data, context={"request": request}
+        )
+        serializer.is_valid(raise_exception=True)
+
+        base_song_inst = serializer.save()
+        collection_song_inst = CollectionSong.objects.create(
+            collection=collection, song=base_song_inst
+        )
+        with tempfile.NamedTemporaryFile(delete=False) as tmp:
+            for chunk in audio.chunks():
+                tmp.write(chunk)
+            temp_path = tmp.name
+
+        UploadManager(song_uuid=base_song_inst.uuid).set_status("queued")
+        convert_audio.apply_async(
+            kwargs={
+                "file_path": temp_path,
+                "song_uuid": str(base_song_inst.uuid),
+                "initiator_uuid": str(request.user.uuid),
+                "operation_id": request.data["operation_id"],
+            }
+        )
+        return Response(
+            data={
+                "song_uuid": str(base_song_inst.uuid),
+                "collection_song_uuid": str(collection_song_inst.uuid),
+            },
+            status=status.HTTP_202_ACCEPTED,
+        )
 
 
 class AlbumBySongView(APIView):

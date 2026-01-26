@@ -8,7 +8,6 @@ type UserAvatarProps = {
 };
 
 export function UserAvatar({ src, alt, size = "md" }: UserAvatarProps) {
-    // TODO rewrite
     const sizeClass = {
         sm: "w-8 h-8",
         md: "w-16 h-16",

@@ -80,7 +80,13 @@ interface CreateChatParams {
 
 export function useCreateChat() {
     return useMutation({
-        mutationFn: async ({ userUUID, participants, isDirect, title, image }: CreateChatParams): Promise<Chat> => {
+        mutationFn: async ({
+            userUUID,
+            participants,
+            isDirect,
+            title,
+            image,
+        }: CreateChatParams): Promise<Chat> => {
             const formData = new FormData();
 
             participants.forEach((uuid) => {
@@ -95,9 +101,7 @@ export function useCreateChat() {
                 formData.append("image", image);
             }
 
-            const response = await api_client.post<Chat>(ChatURLs.userChats(userUUID), formData, {
-                headers: { "Content-Type": "multipart/form-data" },
-            });
+            const response = await api_client.post<Chat>(ChatURLs.userChats(userUUID), formData);
             return response.data;
         },
     });

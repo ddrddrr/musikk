@@ -8,7 +8,7 @@ from streaming.models import BaseSong, CollectionSong, SongCredit
 from users.api.v1.serializers import BaseUserSerializer
 
 
-class BaseSongGetSerializer(BaseModelSerializer):
+class BaseSongRetrieveSerializer(BaseModelSerializer):
     mpd = serializers.SerializerMethodField(read_only=True)
     m3u8 = serializers.SerializerMethodField(read_only=True)
     is_liked = serializers.SerializerMethodField(read_only=True, allow_null=True)
@@ -83,7 +83,7 @@ class BaseSongCreateSerializer(serializers.ModelSerializer):
         return instance
 
 
-class CollectionSongSerializer(BaseModelSerializer):
+class CollectionSongRetrieveSerializer(BaseModelSerializer):
     song = serializers.SerializerMethodField()
 
     class Meta:
@@ -91,4 +91,4 @@ class CollectionSongSerializer(BaseModelSerializer):
         fields = BaseModelSerializer.Meta.fields + ["song", "collection"]
 
     def get_song(self, obj) -> dict:
-        return BaseSongGetSerializer(obj.song, context=self.context).data
+        return BaseSongRetrieveSerializer(obj.song, context=self.context).data

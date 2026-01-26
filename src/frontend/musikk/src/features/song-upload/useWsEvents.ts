@@ -1,10 +1,11 @@
 import { UUID } from "@/api/types.ts";
-import { SongUploadStatus } from "@/features/upload/types.ts";
+import { SongUploadStatus } from "@/features/song-upload/types.ts";
 import { useWSClient } from "@/hooks/useWSClient.ts";
 import { useEffect } from "react";
 
 export interface UploadEventPayload {
     uuid: UUID;
+    operation_id: UUID;
     status: SongUploadStatus;
     detail?: string;
 }

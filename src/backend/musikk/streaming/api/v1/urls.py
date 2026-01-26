@@ -7,7 +7,6 @@ from streaming.api.v1.views.profile import StreamingProfileRetrieveView
 
 from streaming.api.v1.views.songs import (
     SongAddLikedView,
-    SongCreateView,
     CollectionSongRetrieveView,
 )
 from streaming.api.v1.views.collections import (
@@ -16,9 +15,8 @@ from streaming.api.v1.views.collections import (
     CollectionDetailView,
     CollectionAddLikedView,
     CollectionRemoveSong,
-    CollectionAddSong,
     AlbumBySongView,
-    CollectionRetrieveView,
+    CollectionRetrieveView, CollectionSongCreateView,
 )
 
 from streaming.api.v1.views.song_queue import (
@@ -35,7 +33,6 @@ from streaming.api.v1.views.song_queue import (
 )
 
 song_urls = [
-    path("songs", SongCreateView.as_view(), name="song-create"),
     path(
         "liked-songs/add-song/<uuid:uuid>",
         SongAddLikedView.as_view(),
@@ -54,14 +51,14 @@ collection_urls = [
         "collections", CollectionListCreateView.as_view(), name="collection-list-create"
     ),
     path(
+        "collections/<uuid:collection_uuid>/songs",
+        CollectionSongCreateView.as_view(),
+        name="collection-song-create",
+    ),
+    path(
         "collections/<uuid:collection_uuid>/songs/<uuid:song_uuid>/remove",
         CollectionRemoveSong.as_view(),
         name="collection-remove-song",
-    ),
-    path(
-        "collections/<uuid:collection_uuid>/songs/<uuid:song_uuid>/add",
-        CollectionAddSong.as_view(),
-        name="collection-add-song",
     ),
     path(
         "collections/personal/<uuid:uuid>",

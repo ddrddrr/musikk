@@ -5,7 +5,7 @@ from streaming.api.v1.views.collections import (
     CollectionDetailView,
     CollectionAddLikedView,
     CollectionRemoveSong,
-    CollectionAddSong,
+    CollectionSongCreateView,
     AlbumBySongView,
 )
 
@@ -28,5 +28,4 @@ from streaming.api.v1.views.song_queue import (
 from streaming.api.v1.views.songs import (
     CollectionSongRetrieveView,
     SongAddLikedView,
-    SongCreateView,
 )

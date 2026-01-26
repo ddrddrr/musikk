@@ -12,14 +12,12 @@ logger = getLogger(__name__)
 
 class BaseConsumer(JsonWebsocketConsumer):
     """
-    client -> server:
-      { "action": "device.register", "payload": { "device_id"?: str, "name"?: str } }
-      { "action": "device.heartbeat", "payload": { "device_id"?: str } }
-      { "action": "device.set_active", "payload": { "device_id": str } }
+    Examples:
+        client -> server:
+          - { "action": "device.register", "payload": { "device_id"?: str, "name"?: str } }
 
-    server -> client:
-      { "event": "device.list", "payload": { "devices": [...] } }
-      { "event": "device.active_changed", "payload": { "from": str|null, "to": str|null } }
+        server -> client:
+          - { "event": "device.list", "payload": { "devices": [...] } }
     """
 
     def __init__(self, *args, **kwargs):

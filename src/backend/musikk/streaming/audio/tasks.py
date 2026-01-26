@@ -18,50 +18,24 @@ from websockets.event_helpers import send_ws_event
 logger = logging.getLogger(__name__)
 
 
-def send_upload_event(
-    initiator_uuid: str | UUID | None,
-    song_uuid: str | UUID,
-    success: bool,
-    detail: str | None = None,
-) -> None:
-    if not initiator_uuid:
-        return
-
-    try:
-        payload = {
-            "success": success,
-            "uuid": str(song_uuid),
-        }
-        if detail:
-            payload["detail"] = detail
-
-        send_ws_event(
-            f"user_{initiator_uuid}",
-            event_name="song.upload",
-            **payload,
-        )
-    except Exception:
-        logger.exception(
-            f"Failed to send WebSocket event for song {song_uuid}, success={success}"
-        )
-
-
 @shared_task(bind=True)
 def convert_audio(
     self,
     file_path: str | Path,
     song_uuid: str | UUID,
     initiator_uuid: str | UUID = None,
+    operation_id: str | UUID = None,
     delete_orig_file: bool = True,
 ):
     str_uuid = str(song_uuid)
-    um = UploadManager(str(song_uuid))
-    um.set_status("processing")
+    upload_manager = UploadManager(str(song_uuid))
+    upload_manager.set_status("processing")
     send_ws_event(
         f"user_{initiator_uuid}",
         event_name="song.upload",
         uuid=str(song_uuid),
         status="processing",
+        operation_id=operation_id,
     )
 
     try:
@@ -85,11 +59,12 @@ def convert_audio(
 
     except Exception:
         logger.exception(f"Audio processing failed for song {song_uuid}")
-        send_upload_event(
-            initiator_uuid=initiator_uuid,
-            song_uuid=song_uuid,
-            success=False,
-            detail="Audio processing failed. Please try again.",
+        send_ws_event(
+            f"user_{initiator_uuid}",
+            event_name="song.upload",
+            uuid=str(song_uuid),
+            status="failed",
+            operation_id=operation_id,
         )
         raise
 
@@ -102,12 +77,13 @@ def convert_audio(
             song.save()
 
         def notify():
-            um.set_status("ready")
+            upload_manager.set_status("ready")
             send_ws_event(
                 f"user_{initiator_uuid}",
                 event_name="song.upload",
                 uuid=str(song_uuid),
                 status="ready",
+                operation_id=operation_id,
             )
 
         transaction.on_commit(notify)
@@ -123,12 +99,13 @@ def convert_audio(
                 f"Failed to cleanup storage after DB error for song {song_uuid}"
             )
 
-        um.set_status("failed")
+        upload_manager.set_status("failed")
         send_ws_event(
             f"user_{initiator_uuid}",
             event_name="song.upload",
             uuid=str(song_uuid),
             status="failed",
+            operation_id=operation_id,
             detail="Audio processing failed. Please try again.",
         )
         raise

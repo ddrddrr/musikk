@@ -1,9 +1,7 @@
 import logging
-import tempfile
 
 from rest_framework import status
 from rest_framework.generics import get_object_or_404, RetrieveAPIView
-from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -12,12 +10,7 @@ from streaming.models.profile import StreamingProfile
 from streaming.permissions import IsPublicOrCollectionAuthor
 from users.permissions import IsArtist
 from websockets.event_helpers import send_ws_event
-from streaming.api.v1.serializers.songs import (
-    BaseSongCreateSerializer,
-    CollectionSongSerializer,
-)
-from streaming.audio.tasks import convert_audio
-from streaming.audio.validators import validate_audio
+from streaming.api.v1.serializers.songs import CollectionSongRetrieveSerializer
 from streaming.models.songs import CollectionSong
 
 logger = logging.getLogger(__name__)
@@ -26,7 +19,7 @@ logger = logging.getLogger(__name__)
 class CollectionSongRetrieveView(RetrieveAPIView):
     permission_classes = [IsPublicOrCollectionAuthor]
     queryset = CollectionSong.objects.all()
-    serializer_class = CollectionSongSerializer
+    serializer_class = CollectionSongRetrieveSerializer
     lookup_field = "uuid"
 
 
@@ -61,38 +54,6 @@ class SongAddLikedView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class SongCreateView(APIView):
-    parser_classes = [MultiPartParser, FormParser]
-    permission_classes = [IsArtist]
-
-    # TODO: add hash of the uploaded song to redis and check if processing
-    # return falsey response if in process
-    def post(self, *args, **kwargs):
-        audio = self.request.FILES["audio"]
-        validate_audio(audio)
-
-        serializer = BaseSongCreateSerializer(
-            data=self.request.data, context={"request": self.request}
-        )
-        serializer.is_valid(raise_exception=True)
-        instance = serializer.save()
-
-        with tempfile.NamedTemporaryFile(delete=False) as tmp:
-            for chunk in audio.chunks():
-                tmp.write(chunk)
-            temp_path = tmp.name
-
-        UploadManager(song_uuid=instance.uuid).set_status("queued")
-        convert_audio.apply_async(
-            kwargs={
-                "file_path": temp_path,
-                "song_uuid": str(instance.uuid),
-                "initiator_uuid": str(self.request.user.uuid),
-            }
-        )
-        return Response(
-            data={"uuid": str(instance.uuid)}, status=status.HTTP_202_ACCEPTED
-        )
 
 
 class SongUploadStatusView(APIView):

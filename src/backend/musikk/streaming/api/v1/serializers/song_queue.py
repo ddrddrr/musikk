@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from base.serializers import BaseModelSerializer
 from streaming.api.v1.serializers.songs import (
-    CollectionSongSerializer,
+    CollectionSongRetrieveSerializer,
 )
 from streaming.models.song_queue import SongQueue, SongQueueNode
 
@@ -15,7 +15,7 @@ class SongQueueNodeSerializer(BaseModelSerializer):
         fields = BaseModelSerializer.Meta.fields + ["collection_song", "prev", "next"]
 
     def get_collection_song(self, obj):
-        return CollectionSongSerializer(obj.song, context=self.context).data
+        return CollectionSongRetrieveSerializer(obj.song, context=self.context).data
 
 
 class SongQueueSerializer(BaseModelSerializer):

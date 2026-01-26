@@ -39,7 +39,8 @@ class BaseUser(BaseModel, AbstractBaseUser, PermissionsMixin):
 
     email = models.EmailField(unique=True)
     display_name = models.CharField(max_length=50, default=default_display_name)
-    bio = models.TextField(max_length=255, default="")
+    bio = models.TextField(max_length=2000, default="")
+    # TODO: what should be the actual max len?
     avatar = models.ImageField(
         upload_to=DEFAULT_IMAGE_PATH, max_length=255, blank=True, null=True
     )

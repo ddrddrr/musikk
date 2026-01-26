@@ -4,7 +4,7 @@ from django.db import models
 
 from streaming.api.v1.serializers import (
     CollectionSerializerBasic,
-    CollectionSongSerializer,
+    CollectionSongRetrieveSerializer,
 )
 from users.api.v1.serializers import BaseUserSerializer
 from streaming.models import Collection, CollectionSong
@@ -107,7 +107,7 @@ ATTACHMENT_RESOLVER = TypeToModelResolver.from_map(
     },
     type_serializer_map={
         "collection": CollectionSerializerBasic,
-        "song": CollectionSongSerializer,
+        "song": CollectionSongRetrieveSerializer,
         "user": BaseUserSerializer,
     },
 )
