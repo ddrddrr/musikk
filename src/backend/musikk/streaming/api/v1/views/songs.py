@@ -8,6 +8,7 @@ from rest_framework.views import APIView
 from streaming.managers.upload_manager import UploadManager
 from streaming.models.profile import StreamingProfile
 from streaming.permissions import IsPublicOrCollectionAuthor
+from users.models import BaseUser
 from users.permissions import IsArtist
 from websockets.event_helpers import send_ws_event
 from streaming.api.v1.serializers.songs import CollectionSongRetrieveSerializer
@@ -54,11 +55,27 @@ class SongAddLikedView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-
-
 class SongUploadStatusView(APIView):
     permission_classes = [IsArtist]
 
+    # TODO: rewrite with operation id!
     def get(self, request, song_uuid: str):
         um = UploadManager(song_uuid)
         return Response({"uuid": song_uuid, "status": um.get_status() or "unknown"})
+
+
+class SongUserCollections(APIView):
+    def get(self, request, collection_song_uuid: str):
+        collection_song = get_object_or_404(CollectionSong, uuid=collection_song_uuid)
+
+        profile: StreamingProfile = request.user.streamingprofile
+        user_collection_ids = list(
+            profile.created_collections.values_list("id", flat=True)
+        )
+        user_collection_ids.append(profile.liked_songs.id)
+
+        collection_uuids = CollectionSong.objects.filter(
+            song=collection_song.song, collection__id__in=user_collection_ids
+        ).values_list("collection__uuid", flat=True)
+
+        return Response({"collection_uuids": list(collection_uuids)})

@@ -1,4 +1,4 @@
-import { useCollectionPlayHandler } from "@/features/collections/hooks/useCollectionPlayHandler.tsx";
+import { useCollectionPlayHandler } from "@/features/collections/hooks/useCollectionPlayHandler.ts";
 import { CollectionDetailed } from "@/features/collections/types.ts";
 import { Button } from "@/features/ui/button.tsx";
 import { Pause, Play } from "lucide-react";

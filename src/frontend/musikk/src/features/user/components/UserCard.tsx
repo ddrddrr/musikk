@@ -53,7 +53,7 @@ export function UserCard({ user, size = "medium", onClick }: UserCardProps) {
         if (onClick) {
             onClick(u);
         } else {
-            navigate(`/users/${u.uuid}`);
+            void navigate(`/users/${u.uuid}`);
         }
     }
 
@@ -63,7 +63,6 @@ export function UserCard({ user, size = "medium", onClick }: UserCardProps) {
                 <Card
                     onClick={() => handleOnClick(user)}
                     variant="panel"
-                    size={size === "small" ? "sm" : size === "big" ? "lg" : "md"}
                     className={`cursor-pointer py-0 ${styles.card}`}
                 >
                     <CardContent className="flex flex-col p-0">

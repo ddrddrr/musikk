@@ -12,3 +12,14 @@ export async function albumBySongRetrieve(songUUID: UUID): Promise<Collection> {
     const res = await api_client.get(SongURLs.albumBySong(songUUID));
     return res.data;
 }
+
+interface SongUserCollectionsResponse {
+    collection_uuids: UUID[];
+}
+
+export async function songUserCollections(collectionSongUUID: UUID): Promise<UUID[]> {
+    const res = await api_client.get<SongUserCollectionsResponse>(
+        SongURLs.songUserCollections(collectionSongUUID)
+    );
+    return res.data.collection_uuids;
+}

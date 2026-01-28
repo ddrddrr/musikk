@@ -54,10 +54,6 @@ export function EmailVerificationPage() {
 
     const getStatusColor = () => {
         switch (status) {
-            case "loading":
-                return "text-gray-700";
-            case "success":
-                return "text-green-700";
             case "error":
             case "invalid":
                 return "text-red-700";
@@ -66,8 +62,8 @@ export function EmailVerificationPage() {
 
     return (
         <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
-            <Card className="w-full max-w-md border-2 border-red-600 shadow-lg">
-                <CardHeader className="border-b-2 border-red-600">
+            <Card className="w-full max-w-md border-2 border-black shadow-lg">
+                <CardHeader className="border-b-2 border-black">
                     <CardTitle className="text-center text-2xl font-bold text-gray-900">
                         Email Verification
                     </CardTitle>
@@ -75,7 +71,7 @@ export function EmailVerificationPage() {
                 <CardContent className="pt-8 pb-6">
                     <div className="flex flex-col items-center gap-6 text-center">
                         {getIcon()}
-                        <p className={`text-lg font-medium ${getStatusColor()}`}>{message}</p>
+                        <p className={`text-lg  ${getStatusColor()}`}>{message}</p>
                         {status === "success" && (
                             <Button
                                 variant="brand"

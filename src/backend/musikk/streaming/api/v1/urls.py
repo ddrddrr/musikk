@@ -8,6 +8,7 @@ from streaming.api.v1.views.profile import StreamingProfileRetrieveView
 from streaming.api.v1.views.songs import (
     SongAddLikedView,
     CollectionSongRetrieveView,
+    SongUserCollections,
 )
 from streaming.api.v1.views.collections import (
     CollectionListCreateView,
@@ -16,7 +17,8 @@ from streaming.api.v1.views.collections import (
     CollectionAddLikedView,
     CollectionRemoveSong,
     AlbumBySongView,
-    CollectionRetrieveView, CollectionSongCreateView,
+    CollectionRetrieveView,
+    CollectionSongCreateView,
 )
 
 from streaming.api.v1.views.song_queue import (
@@ -44,6 +46,11 @@ song_urls = [
         name="song-retrieve",
     ),
     path("songs/<uuid:uuid>/album", AlbumBySongView.as_view(), name="album-by-song"),
+    path(
+        "songs/<uuid:collection_song_uuid>/collections",
+        SongUserCollections.as_view(),
+        name="song-user-collections",
+    ),
 ]
 
 collection_urls = [
@@ -55,6 +62,7 @@ collection_urls = [
         CollectionSongCreateView.as_view(),
         name="collection-song-create",
     ),
+    # TODO: make a single path and route by http methods as usual
     path(
         "collections/<uuid:collection_uuid>/songs/<uuid:song_uuid>/remove",
         CollectionRemoveSong.as_view(),

@@ -89,28 +89,28 @@ Every member can write reviews and set ratings for music releases,
 contribute to the ``wiki'' consisting of genres, thematic lists, and charts,
 and connect with other members of the forum.
 
-\subsection{2step.ru}
-2step.ru is one of the better representatives of ``old school'' forums that is still active.
-This is a country-specific resource, and as a result,
-it provides not only the regular forum and article sections but also
-includes elements that are usually absent from larger portals.
-For example, a section about upcoming parties or
-a page dedicated to local and upcoming DJs.
-% TODO: sounds unfinished
 \subsection{last.fm}
 Last.fm is primarily a listening statistics and music discovery service.
-% TODO: discussion groups for what, comments where mentioned in SC description
-Notable social features public discussion groups,
-and the ability to comment on artist and track pages~\parencite{lastfm}.
-Additionally, the ``Events'' section aggregates concert listings, and allows users to
-indicate that they are interested.
-Moreover, it is also possible to add comments under each event post,
-somewhat bridging online listening activity with real-world music events.
+However, it also has a couple of notable social features:
+\begin{enumerate}
+    \item A global and personal events pages.
+    In the former, users are able to browse the upcoming events near their location, and in the latter
+    they are able to showcase which events they plan to attend.
+    Other users can then see, either on the event page or on that user’s profile,
+    which events the user is interested in and/or plans to attend.
+    \item A ``Neighbours’’ tab.
+    The ``Neighbours’’ tab shows other users with similar listening habits,
+    based on shared artists and an overall compatibility score.
+    \item ``Shouts'' section.
+    The ``Shouts'' section is a profile-scoped feed, where the users can leave comments
+    and reply to what others have written.
+\end{enumerate}
 
 This section has introduced a couple of possible features not previously seen
-in the listed streaming services, such as discussion forums or
+in the listed streaming services, such as discussion forums and profile feeds.
+
 The following section examines platforms that are not primarily focused
-on music but influence how people engage with it.
+on music but still influence how people engage with it.
 
 
 \section{General-Purpose Platforms}
@@ -123,7 +123,7 @@ In recent years, these platforms have started to promote music more directly by 
 embed tracks within their platform-native content.
 
 Instagram, for example, added a special audio tool that lets users include music in their short
-videos (`Reels'~\parencite{inst_audio}), helping songs reach more people through visual content.
+videos (``Reels''~\parencite{inst_audio}), helping songs reach more people through visual content.
 
 YouTube automatically identifies songs used in videos and displays them in the description,
 making it easier to find and listen to them.
@@ -156,12 +156,12 @@ in the sections above.\\
         \textbf{Feature} & \textbf{Interaction Level} & \textbf{Mode} & \textbf{Difficulty} \\
         \midrule
         Chat                          & Very High & Pair        & High      \\
-        Spotify Jam                   & High      & Group       & Very High \\
+        Common Listening              & High      & Group       & Very High \\
         Forums/Wiki                   & High      & Group       & Medium    \\
-        Personal/Friends Feed         & High      & Individual  & Low       \\
+        Personal Feed                & High      & Individual  & Low       \\
         Song/Playlist Comments        & High      & Group       & Low       \\
-        Spotify Listening Parties     & Medium    & Group       & Very High \\
-        Embedding Music Into Posts    & Medium    & Group       & Medium    \\
+        Listening Parties             & Medium    & Group       & Very High \\
+        Post Embeddings             & Medium    & Group       & Medium    \\
         Friends' Listening Activity   & Medium    & Pair        & Low       \\
 %       TODO: probably not genres, but newly added content in general
         Following Genres Display      & Low       & Individual  & Medium    \\
@@ -184,10 +184,11 @@ for implementation, as they provide a good balance between the complexity of imp
 and the level of social interaction:
 
 \begin{itemize}
-    \item Personal/Friends Feed.
+    \item Chat.
+    \item Personal/Global Feed.\footnote{In comparison to \texttt{last.fm}, a common view with posts
+    from multiple authors is going to be implemented as well.}
     \item Song/Playlist Comments.
     \item Friends' Listening Activity.
-    \item Chat.
 \end{itemize}
 
 These and further requirements for the application are listed in the next chapter \chapterref{ch:specification}.

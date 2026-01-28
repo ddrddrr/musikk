@@ -1,6 +1,6 @@
 import { login as loginAPI, logout as logoutAPI } from "@/features/auth/api.ts";
 import { AuthContext } from "@/features/auth/providers/AuthContext.tsx";
-import { fetchMe } from "@/features/user/queries.ts";
+import { fetchMe } from "@/features/user/api/queries.ts";
 import { BaseUser } from "@/features/user/types.ts";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Cookies from "js-cookie";

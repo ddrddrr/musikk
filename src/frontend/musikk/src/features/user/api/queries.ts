@@ -1,8 +1,8 @@
 import { api_client } from "@/api/axiosConf.ts";
-import { UserURLs } from "@/api/endpoints.ts";
 import { UUID } from "@/api/types.ts";
 import { BaseUser } from "@/features/user/types.ts";
 import { useQuery } from "@tanstack/react-query";
+import { UserURLs } from "@/features/user/api/endpoints.ts";
 
 export async function fetchMe(): Promise<BaseUser | null> {
     const res = await api_client.get(UserURLs.me);
@@ -10,7 +10,7 @@ export async function fetchMe(): Promise<BaseUser | null> {
 }
 
 export async function fetchUser(userUUID: UUID): Promise<BaseUser> {
-    const res = await api_client.get(UserURLs.userDetail(userUUID));
+    const res = await api_client.get(UserURLs.userRetrieve(userUUID));
     return res.data;
 }
 

@@ -1,4 +1,4 @@
-import { useFollowUserMutation, useUnfollowUserMutation } from "@/features/user/mutations.tsx";
+import { useFollowUserMutation, useUnfollowUserMutation } from "@/features/user/api/mutations.ts";
 import { UserConnectionsContext } from "@/features/user/providers/userConnectionsContext.tsx";
 import { useContext } from "react";
 

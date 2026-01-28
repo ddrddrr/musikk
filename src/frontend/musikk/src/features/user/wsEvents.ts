@@ -12,13 +12,16 @@ type UserFollowPayload = {
     to_uuid: string;
 };
 
-export function useWsEvents() {
+export function useUserWsEvents() {
     const ws = useWSClient();
     const client = useQueryClient();
 
     useEffect(() => {
         ws.subscribe("user.updated", (payload: UserUpdatedPayload) => {
-            client.setQueryData(["user"], { me: payload.user });
+            // TODO: set the data instead of invalidating
+            // not sure yet whether we want to show the update of the profile to other users that
+            // have it open
+            void client.invalidateQueries({ queryKey: ["user"] });
         });
 
         ws.subscribe("user.followed", (payload: UserFollowPayload) => {

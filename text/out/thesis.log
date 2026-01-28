@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=pdflatex 2025.11.16)  10 JAN 2026 13:28
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=pdflatex 2025.11.16)  17 JAN 2026 12:21
 entering extended mode
  \write18 enabled.
  %&-line parsing enabled.
@@ -1938,7 +1938,7 @@ File: mt-ppl.cfg 2005/11/16 v1.6 microtype config. file: Palatino (RS)
 )
 \@logowidth=\skip106
 \@logoheight=\skip107
-<fithesis/logo/mu/fithesis-base-english.pdf, id=226, 202.7575pt x 52.195pt>
+<fithesis/logo/mu/fithesis-base-english.pdf, id=222, 202.7575pt x 52.195pt>
 File: fithesis/logo/mu/fithesis-base-english.pdf Graphic file (type pdf)
 <use fithesis/logo/mu/fithesis-base-english.pdf>
 Package pdftex.def Info: fithesis/logo/mu/fithesis-base-english.pdf  used on in
@@ -1985,7 +1985,7 @@ al/texlive/2025/texmf-dist/fonts/enc/dvips/tex-gyre/q-ec.enc} <./fithesis/logo/
 mu/fithesis-base-english.pdf>]
 \@logowidth=\skip108
 \@logoheight=\skip109
-<fithesis/logo/mu/fithesis-base-english-color.pdf, id=235, 202.7575pt x 52.195p
+<fithesis/logo/mu/fithesis-base-english-color.pdf, id=231, 202.7575pt x 52.195p
 t>
 File: fithesis/logo/mu/fithesis-base-english-color.pdf Graphic file (type pdf)
 <use fithesis/logo/mu/fithesis-base-english-color.pdf>
@@ -2007,7 +2007,7 @@ Package pdftex.def Info: fithesis/logo/mu/fithesis-base-english-color.pdf  used
 [1 <./fithesis/logo/mu/fithesis-base-english-color.pdf>]
 \@logowidth=\skip110
 \@logoheight=\skip111
-<fithesis/logo/mu/fithesis-fi-color.pdf, id=241, 291.0875pt x 291.0875pt>
+<fithesis/logo/mu/fithesis-fi-color.pdf, id=237, 291.0875pt x 291.0875pt>
 File: fithesis/logo/mu/fithesis-fi-color.pdf Graphic file (type pdf)
 <use fithesis/logo/mu/fithesis-fi-color.pdf>
 Package pdftex.def Info: fithesis/logo/mu/fithesis-fi-color.pdf  used on input 
@@ -2157,7 +2157,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 21--21
  _ SfuHV4xy6JoDaRsM5uCElYn _
  []
 
-<charts/age.png, id=398, 256.5585pt x 165.4983pt>
+<charts/age.png, id=393, 256.5585pt x 165.4983pt>
 File: charts/age.png Graphic file (type png)
 <use charts/age.png>
 Package pdftex.def Info: charts/age.png  used on input line 33.
@@ -2168,18 +2168,18 @@ Underfull \vbox (badness 6063) has occurred while \output is active []
 
 
 [2]
-<charts/song amount month.png, id=410, 650.43pt x 433.62pt>
+<charts/song amount month.png, id=405, 650.43pt x 433.62pt>
 File: charts/song amount month.png Graphic file (type png)
 <use charts/song amount month.png>
 Package pdftex.def Info: charts/song amount month.png  used on input line 51.
 (pdftex.def)             Requested size: 327.89388pt x 218.59666pt.
-<charts/listening regularity.png, id=411, 650.43pt x 433.62pt>
+<charts/listening regularity.png, id=406, 650.43pt x 433.62pt>
 File: charts/listening regularity.png Graphic file (type png)
 <use charts/listening regularity.png>
 Package pdftex.def Info: charts/listening regularity.png  used on input line 58
 .
 (pdftex.def)             Requested size: 327.89388pt x 218.59666pt.
-<charts/constumption_method.png, id=413, 1353.1353pt x 649.7073pt>
+<charts/constumption_method.png, id=408, 1353.1353pt x 649.7073pt>
 File: charts/constumption_method.png Graphic file (type png)
 <use charts/constumption_method.png>
 Package pdftex.def Info: charts/constumption_method.png  used on input line 72.
@@ -2205,12 +2205,12 @@ Package microtype Info: Character `029' is missing
 charts/age.png>]
 
 [4 <./charts/song amount month.png> <./charts/listening regularity.png>]
-<charts/streaming platform.png, id=429, 650.43pt x 433.62pt>
+<charts/streaming platform.png, id=424, 650.43pt x 433.62pt>
 File: charts/streaming platform.png Graphic file (type png)
 <use charts/streaming platform.png>
 Package pdftex.def Info: charts/streaming platform.png  used on input line 93.
 (pdftex.def)             Requested size: 327.89388pt x 218.59666pt.
-<charts/listen together method.png, id=431, 650.43pt x 433.62pt>
+<charts/listen together method.png, id=426, 650.43pt x 433.62pt>
 File: charts/listen together method.png Graphic file (type png)
 <use charts/listen together method.png>
 Package pdftex.def Info: charts/listen together method.png  used on input line 
@@ -2221,18 +2221,18 @@ Package pdftex.def Info: charts/listen together method.png  used on input line
 [5 <./charts/constumption_method.png>]
 
 [6 <./charts/streaming platform.png> <./charts/listen together method.png>]
-<charts/listen together freq.png, id=446, 467.346pt x 163.812pt>
+<charts/listen together freq.png, id=441, 467.346pt x 163.812pt>
 File: charts/listen together freq.png Graphic file (type png)
 <use charts/listen together freq.png>
 Package pdftex.def Info: charts/listen together freq.png  used on input line 12
 4.
 (pdftex.def)             Requested size: 361.34999pt x 126.65802pt.
-<charts/share freq.png, id=448, 463.9734pt x 163.812pt>
+<charts/share freq.png, id=443, 463.9734pt x 163.812pt>
 File: charts/share freq.png Graphic file (type png)
 <use charts/share freq.png>
 Package pdftex.def Info: charts/share freq.png  used on input line 141.
 (pdftex.def)             Requested size: 361.34999pt x 127.58037pt.
-<charts/share method.png, id=450, 650.43pt x 433.62pt>
+<charts/share method.png, id=445, 650.43pt x 433.62pt>
 File: charts/share method.png Graphic file (type png)
 <use charts/share method.png>
 Package pdftex.def Info: charts/share method.png  used on input line 157.
@@ -2246,7 +2246,7 @@ Package pdftex.def Info: charts/share method.png  used on input line 157.
 
 [9]
 Chapter 3.
-<charts/discovery methods.png, id=468, 650.43pt x 433.62pt>
+<charts/discovery methods.png, id=463, 650.43pt x 433.62pt>
 File: charts/discovery methods.png Graphic file (type png)
 <use charts/discovery methods.png>
 Package pdftex.def Info: charts/discovery methods.png  used on input line 18.
@@ -2263,13 +2263,13 @@ Underfull \hbox (badness 10000) in paragraph at lines 83--85
 
 
 [12]
+
+[13]
 Underfull \hbox (badness 10000) in paragraph at lines 144--149
 
  []
 
 
-
-[13]
 Overfull \hbox (5.3342pt too wide) in paragraph at lines 172--172
 []|\T1/qpl/b/n/12 (-20) Interaction
  []
@@ -2305,7 +2305,7 @@ Chapter 4.
 [16]
 
 [17]
-Overfull \hbox (17.29947pt too wide) in paragraph at lines 41--42
+Overfull \hbox (17.29947pt too wide) in paragraph at lines 50--51
 []\T1/qpl/m/n/12 (-20) The sys-tem shall al-low Users to change pro-vided in-fo
 r-ma-tion (name,
  []
@@ -2316,35 +2316,32 @@ r-ma-tion (name,
 
 ]
 
-[19]) (./chapters/5_implementation_planning.tex
+[19]
 
 [20
 
-]
-Chapter 5.
-
-Overfull \vbox (2.6915pt too high) has occurred while \output is active []
-
-
+]) (./chapters/5_implementation_planning.tex
 
 [21]
-Overfull \hbox (0.88503pt too wide) in paragraph at lines 40--46
+Chapter 5.
+
+
+[22]
+Overfull \hbox (0.88503pt too wide) in paragraph at lines 43--49
 []\T1/qpl/m/n/12 (-20) This is usu-ally im-ple-mented with HTTP byte-range re-q
-uests. [[]22[]]
+uests. [[]21[]]
  []
 
 
-Overfull \hbox (1.46078pt too wide) in paragraph at lines 40--46
+Overfull \hbox (1.46078pt too wide) in paragraph at lines 43--49
 \T1/qpl/m/n/12 (-20) To make this pos-si-ble, the client re-lies on con-tainer 
 meta-data (e.g.,
  []
 
 
-Underfull \vbox (badness 1292) has occurred while \output is active []
+Overfull \vbox (3.98737pt too high) has occurred while \output is active []
 
 
-
-[22]
 
 [23]
 
@@ -2359,86 +2356,88 @@ Underfull \vbox (badness 1292) has occurred while \output is active []
 [28]
 
 [29]
+
+[30]
 Underfull \vbox (badness 5345) has occurred while \output is active []
 
 
 
-[30]
-Underfull \hbox (badness 10000) in paragraph at lines 378--380
+[31]
+Underfull \hbox (badness 10000) in paragraph at lines 381--383
 
  []
 
 
 
-[31]
-
 [32]
 
 [33]
+
+[34]
 Overfull \vbox (0.28873pt too high) has occurred while \output is active []
 
 
-
-[34]
 
 [35]
 
 [36]
 
-[37]) (./chapters/6_implementation.tex
+[37]
 
-[38]
+[38]) (./chapters/6_implementation.tex
+
+[39]
 Chapter 6.
-<diagrams/system.png, id=759, 1611.01875pt x 1250.6725pt>
+<diagrams/system.png, id=763, 1611.01875pt x 1250.6725pt>
 File: diagrams/system.png Graphic file (type png)
 <use diagrams/system.png>
 Package pdftex.def Info: diagrams/system.png  used on input line 12.
 (pdftex.def)             Requested size: 361.34999pt x 280.51132pt.
 
 
-[39 <./diagrams/system.png (PNG copy)>]
+[40 <./diagrams/system.png (PNG copy)>]
 Overfull \vbox (5.06474pt too high) has occurred while \output is active []
 
 
 
-[40]
+[41]
 Overfull \hbox (12.85402pt too wide) in paragraph at lines 101--104
 \T1/qpl/m/n/12 (-20) dis-tin-guish be-tween two en-cod-ing strate-gies: Con-sta
-nt Bi-trate (CBR) [[]91[]]
+nt Bi-trate (CBR) [[]90[]]
  []
 
 
 
-[41]
+[42]
 \pydata@fh@_2EF71E68B4AD97F630480BCEBC1842FB.data.minted=\write14
 \openout14 = `_2EF71E68B4AD97F630480BCEBC1842FB.data.minted'.
 
-runsystem(latexminted config  --timestamp 20260110132855 2EF71E68B4AD97F630480B
+runsystem(latexminted config  --timestamp 20260117122134 2EF71E68B4AD97F630480B
 CEBC1842FB)...executed.
 
  (out/_2EF71E68B4AD97F630480BCEBC1842FB.config.minted)
-runsystem(latexminted cleanconfig  --timestamp 20260110132855 2EF71E68B4AD97F63
+runsystem(latexminted cleanconfig  --timestamp 20260117122134 2EF71E68B4AD97F63
 0480BCEBC1842FB)...executed.
 
 
 (./out/_minted/default.style.minted)
 (./out/_minted/AA089FB823A5240285478F6CE8E42CC1.highlight.minted
 
-[42])
+[43])
 Overfull \hbox (10.58221pt too wide) in paragraph at lines 157--159
 []\T1/lmtt/c/it/12 -movflags +fast-start \T1/qpl/m/n/12 (-20) moves the MP4 met
-a-data (\T1/lmtt/c/it/12 moov \T1/qpl/m/n/12 (-20) atom [[]99[]])
+a-data (\T1/lmtt/c/it/12 moov \T1/qpl/m/n/12 (-20) atom [[]98[]])
  []
 
 
 Overfull \hbox (5.08939pt too wide) in paragraph at lines 167--170
 []\T1/qpl/m/n/12 (-20) Therefore, Shaka Pack-ager was se-lected for the pack-ag
--ing step. [[]101[]]
+-ing step. [[]100[]]
  []
 
 (./out/_minted/66F001044DE6C9E2471AB6E3685E35D9.highlight.minted
 
-[43])
+[44])
 Overfull \hbox (29.88768pt too wide) in paragraph at lines 193--195
 []\T1/lmtt/c/it/12 "input=*file path N*,stream=audio,init_-seg-ment=*path*, seg
 -
@@ -2470,16 +2469,16 @@ es a static MPD with, which
 
 
 
-[44]
-<diagrams/backend.png, id=852, 2185.16376pt x 925.4575pt>
+[45]
+<diagrams/backend.png, id=856, 2185.16376pt x 925.4575pt>
 File: diagrams/backend.png Graphic file (type png)
 <use diagrams/backend.png>
 Package pdftex.def Info: diagrams/backend.png  used on input line 213.
 (pdftex.def)             Requested size: 361.34999pt x 153.0328pt.
 
 
-[45 <./diagrams/backend.png (PNG copy)>]
-<diagrams/class.png, id=862, 3697.815pt x 3294.3075pt>
+[46 <./diagrams/backend.png (PNG copy)>]
+<diagrams/class.png, id=865, 3697.815pt x 3294.3075pt>
 File: diagrams/class.png Graphic file (type png)
 <use diagrams/class.png>
 Package pdftex.def Info: diagrams/class.png  used on input line 241.
@@ -2489,26 +2488,26 @@ Package pdftex.def Info: diagrams/class.png  used on input line 241.
 LaTeX Warning: Float too large for page by 45.85153pt on input line 245.
 
 
-LaTeX Warning: Reference `enumattack' on page 46 undefined on input line 255.
+LaTeX Warning: Reference `enumattack' on page 47 undefined on input line 255.
 
 (./out/_minted/7F1DAE501E60A1AACA71BB88FBBE9CC2.highlight.minted)
 
-[46]
+[47]
 
-[47 <./diagrams/class.png (PNG copy)>]
+[48 <./diagrams/class.png (PNG copy)>]
 Overfull \hbox (1.25212pt too wide) in paragraph at lines 289--292
 []\T1/qpl/m/n/12 (-20) Relations to other users: \T1/lmtt/c/it/12 friends\T1/qp
 l/m/n/12 (-20) , which are other \T1/lmtt/c/it/12 Streamin-
  []
 
 
-LaTeX Warning: Citation 'simplejwt' on page 48 undefined on input line 304.
+LaTeX Warning: Citation 'simplejwt' on page 49 undefined on input line 304.
 
 
 
-[48]
+[49]
 
-[49] (./out/_minted/B25196584FD08253950AB0D9C49AA604.highlight.minted)
+[50] (./out/_minted/B25196584FD08253950AB0D9C49AA604.highlight.minted)
 Overfull \hbox (18.0pt too wide) in paragraph at lines 356--374
 []$[]$ 
  []
@@ -2534,46 +2533,46 @@ Package microtype Info: Character `texttrademark ' is missing
 (microtype)             Ignoring protrusion settings for this character.
 )
 
-[50{/usr/local/texlive/2025/texmf-dist/fonts/enc/dvips/lm/lm-ts1.enc}]
+[51{/usr/local/texlive/2025/texmf-dist/fonts/enc/dvips/lm/lm-ts1.enc}]
 
-[51]
+[52]
 
-[52] (./out/_minted/3A25F9F24E004971402461571CFAF153.highlight.minted)
-
-[53]
+[53] (./out/_minted/3A25F9F24E004971402461571CFAF153.highlight.minted)
 
 [54]
 
-LaTeX Warning: Reference `subsec:fedevices' on page 55 undefined on input line 
+[55]
+
+LaTeX Warning: Reference `subsec:fedevices' on page 56 undefined on input line 
 560.
 
 
 
-[55] (./out/_minted/688DDA1799C8DFE825F91B67F1E92BF5.highlight.minted
+[56] (./out/_minted/688DDA1799C8DFE825F91B67F1E92BF5.highlight.minted
 
-[56])
+[57])
 
-[57]
+[58]
 Overfull \hbox (36.74965pt too wide) in paragraph at lines 669--673
 \T1/qpl/m/n/12 (-20) first-class sup-port for it through the \T1/lmtt/c/it/12 d
 jango.contrib.postgres.search
  []
 
-<diagrams/frontend.png, id=932, 1854.93pt x 952.55875pt>
+<diagrams/frontend.png, id=935, 1854.93pt x 952.55875pt>
 File: diagrams/frontend.png Graphic file (type png)
 <use diagrams/frontend.png>
 Package pdftex.def Info: diagrams/frontend.png  used on input line 682.
 (pdftex.def)             Requested size: 361.34999pt x 185.55199pt.
 ) (./chapters/appendix.tex
 
-[58]
+[59]
 Appendix A.
-<../extras/survey-questions.pdf, id=939, 614.295pt x 794.97pt>
+<../extras/survey-questions.pdf, id=942, 614.295pt x 794.97pt>
 File: ../extras/survey-questions.pdf Graphic file (type pdf)
 <use ../extras/survey-questions.pdf>
 Package pdftex.def Info: ../extras/survey-questions.pdf  used on input line 8.
 (pdftex.def)             Requested size: 614.29349pt x 794.96806pt.
-<../extras/survey-questions.pdf, id=941, page=1, 614.295pt x 794.97pt>
+<../extras/survey-questions.pdf, id=944, page=1, 614.295pt x 794.97pt>
 File: ../extras/survey-questions.pdf Graphic file (type pdf)
 <use ../extras/survey-questions.pdf, page 1>
 Package pdftex.def Info: ../extras/survey-questions.pdf , page1 used on input l
@@ -2586,7 +2585,7 @@ ine 8.
 (pdftex.def)             Requested size: 1016.73932pt x 1315.78033pt.
 
 
-[59]
+[60]
 File: ../extras/survey-questions.pdf Graphic file (type pdf)
 <use ../extras/survey-questions.pdf, page 1>
 Package pdftex.def Info: ../extras/survey-questions.pdf , page1 used on input l
@@ -2602,139 +2601,139 @@ ine 8.
 File: ../extras/survey-questions.pdf Graphic file (type pdf)
 <use ../extras/survey-questions.pdf, page 1>
 Package pdftex.def Info: ../extras/survey-questions.pdf , page1 used on input l
-ine 8.
-(pdftex.def)             Requested size: 1016.73932pt x 1315.78033pt.
-[60
-
- <out/../extras/survey-questions.pdf>]
-<../extras/survey-questions.pdf, id=964, page=2, 614.295pt x 794.97pt>
-File: ../extras/survey-questions.pdf Graphic file (type pdf)
-<use ../extras/survey-questions.pdf, page 2>
-Package pdftex.def Info: ../extras/survey-questions.pdf , page2 used on input l
-ine 8.
-(pdftex.def)             Requested size: 1016.73932pt x 1315.78033pt.
-File: ../extras/survey-questions.pdf Graphic file (type pdf)
-<use ../extras/survey-questions.pdf, page 2>
-Package pdftex.def Info: ../extras/survey-questions.pdf , page2 used on input l
-ine 8.
-(pdftex.def)             Requested size: 1016.73932pt x 1315.78033pt.
-
-
-File: ../extras/survey-questions.pdf Graphic file (type pdf)
-<use ../extras/survey-questions.pdf, page 2>
-Package pdftex.def Info: ../extras/survey-questions.pdf , page2 used on input l
 ine 8.
 (pdftex.def)             Requested size: 1016.73932pt x 1315.78033pt.
 [61
 
  <out/../extras/survey-questions.pdf>]
-<../extras/survey-questions.pdf, id=969, page=3, 614.295pt x 794.97pt>
+<../extras/survey-questions.pdf, id=967, page=2, 614.295pt x 794.97pt>
 File: ../extras/survey-questions.pdf Graphic file (type pdf)
-<use ../extras/survey-questions.pdf, page 3>
-Package pdftex.def Info: ../extras/survey-questions.pdf , page3 used on input l
+<use ../extras/survey-questions.pdf, page 2>
+Package pdftex.def Info: ../extras/survey-questions.pdf , page2 used on input l
 ine 8.
 (pdftex.def)             Requested size: 1016.73932pt x 1315.78033pt.
 File: ../extras/survey-questions.pdf Graphic file (type pdf)
-<use ../extras/survey-questions.pdf, page 3>
-Package pdftex.def Info: ../extras/survey-questions.pdf , page3 used on input l
+<use ../extras/survey-questions.pdf, page 2>
+Package pdftex.def Info: ../extras/survey-questions.pdf , page2 used on input l
 ine 8.
 (pdftex.def)             Requested size: 1016.73932pt x 1315.78033pt.
 
 
 File: ../extras/survey-questions.pdf Graphic file (type pdf)
-<use ../extras/survey-questions.pdf, page 3>
-Package pdftex.def Info: ../extras/survey-questions.pdf , page3 used on input l
+<use ../extras/survey-questions.pdf, page 2>
+Package pdftex.def Info: ../extras/survey-questions.pdf , page2 used on input l
 ine 8.
 (pdftex.def)             Requested size: 1016.73932pt x 1315.78033pt.
 [62
 
  <out/../extras/survey-questions.pdf>]
-<../extras/survey-questions.pdf, id=974, page=4, 614.295pt x 794.97pt>
+<../extras/survey-questions.pdf, id=972, page=3, 614.295pt x 794.97pt>
 File: ../extras/survey-questions.pdf Graphic file (type pdf)
-<use ../extras/survey-questions.pdf, page 4>
-Package pdftex.def Info: ../extras/survey-questions.pdf , page4 used on input l
+<use ../extras/survey-questions.pdf, page 3>
+Package pdftex.def Info: ../extras/survey-questions.pdf , page3 used on input l
 ine 8.
 (pdftex.def)             Requested size: 1016.73932pt x 1315.78033pt.
 File: ../extras/survey-questions.pdf Graphic file (type pdf)
-<use ../extras/survey-questions.pdf, page 4>
-Package pdftex.def Info: ../extras/survey-questions.pdf , page4 used on input l
+<use ../extras/survey-questions.pdf, page 3>
+Package pdftex.def Info: ../extras/survey-questions.pdf , page3 used on input l
 ine 8.
 (pdftex.def)             Requested size: 1016.73932pt x 1315.78033pt.
 
 
 File: ../extras/survey-questions.pdf Graphic file (type pdf)
-<use ../extras/survey-questions.pdf, page 4>
-Package pdftex.def Info: ../extras/survey-questions.pdf , page4 used on input l
+<use ../extras/survey-questions.pdf, page 3>
+Package pdftex.def Info: ../extras/survey-questions.pdf , page3 used on input l
 ine 8.
 (pdftex.def)             Requested size: 1016.73932pt x 1315.78033pt.
 [63
 
  <out/../extras/survey-questions.pdf>]
-<../extras/survey-questions.pdf, id=980, page=5, 614.295pt x 794.97pt>
+<../extras/survey-questions.pdf, id=978, page=4, 614.295pt x 794.97pt>
 File: ../extras/survey-questions.pdf Graphic file (type pdf)
-<use ../extras/survey-questions.pdf, page 5>
-Package pdftex.def Info: ../extras/survey-questions.pdf , page5 used on input l
+<use ../extras/survey-questions.pdf, page 4>
+Package pdftex.def Info: ../extras/survey-questions.pdf , page4 used on input l
 ine 8.
 (pdftex.def)             Requested size: 1016.73932pt x 1315.78033pt.
 File: ../extras/survey-questions.pdf Graphic file (type pdf)
-<use ../extras/survey-questions.pdf, page 5>
-Package pdftex.def Info: ../extras/survey-questions.pdf , page5 used on input l
+<use ../extras/survey-questions.pdf, page 4>
+Package pdftex.def Info: ../extras/survey-questions.pdf , page4 used on input l
 ine 8.
 (pdftex.def)             Requested size: 1016.73932pt x 1315.78033pt.
 
 
 File: ../extras/survey-questions.pdf Graphic file (type pdf)
-<use ../extras/survey-questions.pdf, page 5>
-Package pdftex.def Info: ../extras/survey-questions.pdf , page5 used on input l
+<use ../extras/survey-questions.pdf, page 4>
+Package pdftex.def Info: ../extras/survey-questions.pdf , page4 used on input l
 ine 8.
 (pdftex.def)             Requested size: 1016.73932pt x 1315.78033pt.
 [64
 
  <out/../extras/survey-questions.pdf>]
-<../extras/survey-questions.pdf, id=985, page=6, 614.295pt x 794.97pt>
+<../extras/survey-questions.pdf, id=983, page=5, 614.295pt x 794.97pt>
 File: ../extras/survey-questions.pdf Graphic file (type pdf)
-<use ../extras/survey-questions.pdf, page 6>
-Package pdftex.def Info: ../extras/survey-questions.pdf , page6 used on input l
+<use ../extras/survey-questions.pdf, page 5>
+Package pdftex.def Info: ../extras/survey-questions.pdf , page5 used on input l
 ine 8.
 (pdftex.def)             Requested size: 1016.73932pt x 1315.78033pt.
 File: ../extras/survey-questions.pdf Graphic file (type pdf)
-<use ../extras/survey-questions.pdf, page 6>
-Package pdftex.def Info: ../extras/survey-questions.pdf , page6 used on input l
+<use ../extras/survey-questions.pdf, page 5>
+Package pdftex.def Info: ../extras/survey-questions.pdf , page5 used on input l
 ine 8.
 (pdftex.def)             Requested size: 1016.73932pt x 1315.78033pt.
 
 
 File: ../extras/survey-questions.pdf Graphic file (type pdf)
-<use ../extras/survey-questions.pdf, page 6>
-Package pdftex.def Info: ../extras/survey-questions.pdf , page6 used on input l
+<use ../extras/survey-questions.pdf, page 5>
+Package pdftex.def Info: ../extras/survey-questions.pdf , page5 used on input l
 ine 8.
 (pdftex.def)             Requested size: 1016.73932pt x 1315.78033pt.
 [65
 
  <out/../extras/survey-questions.pdf>]
-<../extras/survey-questions.pdf, id=994, page=7, 614.295pt x 794.97pt>
+<../extras/survey-questions.pdf, id=988, page=6, 614.295pt x 794.97pt>
 File: ../extras/survey-questions.pdf Graphic file (type pdf)
-<use ../extras/survey-questions.pdf, page 7>
-Package pdftex.def Info: ../extras/survey-questions.pdf , page7 used on input l
+<use ../extras/survey-questions.pdf, page 6>
+Package pdftex.def Info: ../extras/survey-questions.pdf , page6 used on input l
 ine 8.
 (pdftex.def)             Requested size: 1016.73932pt x 1315.78033pt.
 File: ../extras/survey-questions.pdf Graphic file (type pdf)
-<use ../extras/survey-questions.pdf, page 7>
-Package pdftex.def Info: ../extras/survey-questions.pdf , page7 used on input l
+<use ../extras/survey-questions.pdf, page 6>
+Package pdftex.def Info: ../extras/survey-questions.pdf , page6 used on input l
 ine 8.
 (pdftex.def)             Requested size: 1016.73932pt x 1315.78033pt.
 
 
 File: ../extras/survey-questions.pdf Graphic file (type pdf)
-<use ../extras/survey-questions.pdf, page 7>
-Package pdftex.def Info: ../extras/survey-questions.pdf , page7 used on input l
+<use ../extras/survey-questions.pdf, page 6>
+Package pdftex.def Info: ../extras/survey-questions.pdf , page6 used on input l
 ine 8.
 (pdftex.def)             Requested size: 1016.73932pt x 1315.78033pt.
 [66
 
+ <out/../extras/survey-questions.pdf>]
+<../extras/survey-questions.pdf, id=997, page=7, 614.295pt x 794.97pt>
+File: ../extras/survey-questions.pdf Graphic file (type pdf)
+<use ../extras/survey-questions.pdf, page 7>
+Package pdftex.def Info: ../extras/survey-questions.pdf , page7 used on input l
+ine 8.
+(pdftex.def)             Requested size: 1016.73932pt x 1315.78033pt.
+File: ../extras/survey-questions.pdf Graphic file (type pdf)
+<use ../extras/survey-questions.pdf, page 7>
+Package pdftex.def Info: ../extras/survey-questions.pdf , page7 used on input l
+ine 8.
+(pdftex.def)             Requested size: 1016.73932pt x 1315.78033pt.
+
+
+File: ../extras/survey-questions.pdf Graphic file (type pdf)
+<use ../extras/survey-questions.pdf, page 7>
+Package pdftex.def Info: ../extras/survey-questions.pdf , page7 used on input l
+ine 8.
+(pdftex.def)             Requested size: 1016.73932pt x 1315.78033pt.
+[67
+
  <out/../extras/survey-questions.pdf>])
 
-[67 <./diagrams/frontend.png (PNG copy)>]
+[68 <./diagrams/frontend.png (PNG copy)>]
 Underfull \hbox (badness 2717) in paragraph at lines 104--104
 \T1/lmtt/c/it/12 664508917489819 ? helpref = faq _ content$[] \T1/qpl/m/n/12 (+
 20) (vis-ited on
@@ -2742,7 +2741,7 @@ Underfull \hbox (badness 2717) in paragraph at lines 104--104
 
 
 
-[68]
+[69]
 Underfull \hbox (badness 10000) in paragraph at lines 104--104
 []\T1/qpl/m/it/12 (+20) Mozilla Caching Be-haviour Doc-u-men-ta-tion\T1/qpl/m/n
 /12 (+20) . \T1/qpl/m/sc/12 (+20) url\T1/qpl/m/n/12 (+20) : []$\T1/lmtt/c/it/12
@@ -2757,7 +2756,7 @@ Underfull \hbox (badness 1303) in paragraph at lines 104--104
 
 
 
-[69]
+[70]
 Underfull \hbox (badness 4713) in paragraph at lines 104--104
 []\T1/qpl/m/it/12 (+20) Generic Event De-liv-ery Us-ing HTTP Push\T1/qpl/m/n/12
  (+20) . \T1/qpl/m/sc/12 (+20) url\T1/qpl/m/n/12 (+20) : []$\T1/lmtt/c/it/12 ht
@@ -2780,7 +2779,7 @@ ps : / /
 
 
 
-[70]
+[71]
 Underfull \hbox (badness 3746) in paragraph at lines 104--104
 \T1/lmtt/c/it/12 org / docs / current / textsearch . html$[] \T1/qpl/m/n/12 (+2
 0) (vis-ited on
@@ -2807,14 +2806,14 @@ m/n/12 (+20) . \T1/qpl/m/sc/12 (+20) url\T1/qpl/m/n/12 (+20) : []$\T1/lmtt/c/it
  []
 
 
-
-[71]
 Underfull \hbox (badness 1337) in paragraph at lines 104--104
 \T1/lmtt/c/it/12 questions / tagged / reactjs ? tab = Newest$[] \T1/qpl/m/n/12 
 (+20) (vis-ited on
  []
 
 
+
+[72]
 Underfull \hbox (badness 1845) in paragraph at lines 104--104
 \T1/lmtt/c/it/12 academia . edu / 44039524 / IRJET _ Addressing _ the _
  []
@@ -2833,7 +2832,7 @@ n for Ap-
 
 
 
-[72]
+[73]
 Underfull \hbox (badness 1968) in paragraph at lines 104--104
 \T1/qpl/m/it/12 (+20) de-vices. Bi-trate rec-om-men-da-tions, sec-tion 2.25. \T
 1/qpl/m/sc/12 (+20) url\T1/qpl/m/n/12 (+20) : []$\T1/lmtt/c/it/12 https :
@@ -2841,7 +2840,7 @@ Underfull \hbox (badness 1968) in paragraph at lines 104--104
 
 
 
-[73]
+[74]
 Underfull \hbox (badness 2726) in paragraph at lines 104--104
 []\T1/qpl/m/it/12 (+20) Django Con-tent Type Frame-work\T1/qpl/m/n/12 (+20) . \
 T1/qpl/m/sc/12 (+20) url\T1/qpl/m/n/12 (+20) : []$\T1/lmtt/c/it/12 https : / / 
@@ -2850,7 +2849,7 @@ docs .
 
 
 
-[74] (out/thesis.aux)
+[75] (out/thesis.aux)
  ***********
 LaTeX2e <2024-11-01> patch level 2
 L3 programming layer <2020/03/25>
@@ -2863,17 +2862,17 @@ LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 LaTeX Warning: There were undefined references.
 
 Package rerunfilecheck Info: File `thesis.out' has not changed.
-(rerunfilecheck)             Checksum: 83C3B3AEB98168841463F2C6B9B6252A;3555.
+(rerunfilecheck)             Checksum: 36D3478E46CFB3B32689EC17E0704912;3493.
 Package logreq Info: Writing requests to 'thesis.run.xml'.
 \openout1 = `thesis.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 47541 strings out of 473190
- 959833 string characters out of 5715799
- 1917026 words of memory out of 5000000
- 69403 multiletter control sequences out of 15000+600000
- 641373 words of font info for 222 fonts, out of 8000000 for 9000
+ 47547 strings out of 473190
+ 959764 string characters out of 5715799
+ 1917976 words of memory out of 5000000
+ 69399 multiletter control sequences out of 15000+600000
+ 641679 words of font info for 225 fonts, out of 8000000 for 9000
  1143 hyphenation exceptions out of 8191
  100i,17n,123p,1183b,2431s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/local/texlive/2025/texmf-dist/fonts/type1/public/lm/lmtk10.pfb></usr/lo
@@ -2885,10 +2884,10 @@ s/type1/public/tex-gyre/qplb.pfb></usr/local/texlive/2025/texmf-dist/fonts/type
 1/public/tex-gyre/qplbi.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/pub
 lic/tex-gyre/qplr.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/te
 x-gyre/qplri.pfb>
-Output written on out/thesis.pdf (84 pages, 3460715 bytes).
+Output written on out/thesis.pdf (85 pages, 3462336 bytes).
 PDF statistics:
- 1340 PDF objects out of 1440 (max. 8388607)
- 1181 compressed objects within 12 object streams
- 285 named destinations out of 1000 (max. 500000)
- 45655 words of extra memory for PDF output out of 51595 (max. 10000000)
+ 1345 PDF objects out of 1440 (max. 8388607)
+ 1185 compressed objects within 12 object streams
+ 289 named destinations out of 1000 (max. 500000)
+ 45647 words of extra memory for PDF output out of 51595 (max. 10000000)
 

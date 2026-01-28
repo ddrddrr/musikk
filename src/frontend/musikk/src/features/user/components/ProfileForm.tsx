@@ -1,4 +1,3 @@
-import { FileField } from "@/features/common/FileField.tsx";
 import { ImageField } from "@/features/common/ImageField.tsx";
 import { Avatar, AvatarImage } from "@/features/ui/avatar.tsx";
 import { Button } from "@/features/ui/button.tsx";
@@ -12,7 +11,7 @@ import {
 } from "@/features/ui/form.tsx";
 import { Input } from "@/features/ui/input.tsx";
 import { Textarea } from "@/features/ui/textarea.tsx";
-import { useMeUpdateMutation } from "@/features/user/mutations.tsx";
+import { useMeUpdateMutation } from "@/features/user/api/mutations.ts";
 import { ProfileFormSchema, ProfileFormValues } from "@/features/user/types.ts";
 import { useAuth } from "@/hooks/useAuth.ts";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -38,6 +37,7 @@ export function ProfileForm() {
 
     const mutation = useMeUpdateMutation();
 
+    // TODO: rewrite so that this is consistent across forms...
     const borderClass =
         submitStatus === "success"
             ? "border-green-500"
@@ -47,7 +47,7 @@ export function ProfileForm() {
 
     const messageClass =
         submitStatus === "success"
-            ? "text-green-700"
+            ? "text-black"
             : submitStatus === "error"
               ? "text-red-700"
               : "text-muted-foreground";
@@ -61,11 +61,11 @@ export function ProfileForm() {
             {
                 onError: (err: any) => {
                     setSubmitStatus("error");
-                    setMessage(err?.message ?? "Profile update failed.");
+                    setMessage(err?.message ?? "Profile update failed");
                 },
                 onSuccess: () => {
                     setSubmitStatus("success");
-                    setMessage("Profile updated successfully.");
+                    setMessage("Profile updated successfully");
                 },
             },
         );
@@ -75,8 +75,8 @@ export function ProfileForm() {
 
     return (
         <div className="p-4">
-            <div className={`mx-auto max-w-xl rounded-2xl border-2 ${borderClass} bg-white p-6`}>
-                {message ? <div className={`mb-4 text-sm ${messageClass}`}>{message}</div> : null}
+            <div className={`mx-auto max-w-xl rounded-sm border-2 ${borderClass} bg-white p-6`}>
+                {message && <div className={`mb-4 text-sm ${messageClass}`}>{message}</div>}
 
                 <div className="mb-6 flex items-center space-x-4">
                     <Avatar className="h-12 w-12 rounded-sm">

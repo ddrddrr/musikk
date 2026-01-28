@@ -4,7 +4,7 @@ import { useUserChatsContext } from "@/features/publications/hooks/useUserChats.
 import { UserCard } from "@/features/user/components/UserCard.tsx";
 import { UserConnectionsContext } from "@/features/user/providers/userConnectionsContext.tsx";
 import { BaseUser } from "@/features/user/types.ts";
-import { useContext, useMemo, useState } from "react";
+import { useContext, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 
 export function ChatStartDirectList() {
@@ -15,7 +15,8 @@ export function ChatStartDirectList() {
     const createChatMutation = useCreateChat();
 
     const friendsWithoutDirectChat = useMemo(() => {
-        if (!friends || !chats) return friends;
+        // TODO add a hook for chats so we dont check for null here
+        if (!friends || !chats) return [];
 
         const directChatMemberUUIDs = new Set(
             chats
@@ -60,7 +61,7 @@ export function ChatStartDirectList() {
         return (
             <div className="rounded-sm border-2 border-black bg-gray-50 p-6 text-center">
                 <p className="text-sm text-gray-600">
-                    You already have direct chats with all your friends! Or you don't have any :(
+                    You have direct chats with all your friends!
                 </p>
             </div>
         );

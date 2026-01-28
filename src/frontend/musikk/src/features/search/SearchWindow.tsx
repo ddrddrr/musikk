@@ -59,6 +59,7 @@ export function SearchWindow({ onItemSelect, songMode = "card" }: SearchWindowPr
                                 key={song.uuid}
                                 collectionSong={song}
                                 onClick={onItemSelect}
+                                size={"small"}
                             />
                         );
                     })}
@@ -103,10 +104,16 @@ export function SearchWindow({ onItemSelect, songMode = "card" }: SearchWindowPr
     };
 
     return (
-        <div className="w-full space-y-4">
-            <Input value={query} onChange={(e) => setQuery(e.target.value)} className="w-full" />
+        <div className="flex w-full flex-col">
+            <div className="flex-shrink-0">
+                <Input
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    className="w-full"
+                />
+            </div>
 
-            <div className="results-container min-h-[200px]">
+            <div className="results-container min-h-[200px] flex-1 overflow-y-auto pt-4">
                 {error && (
                     <Card>
                         <CardContent className="p-4 text-red-500">

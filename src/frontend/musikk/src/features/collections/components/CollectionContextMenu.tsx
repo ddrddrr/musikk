@@ -1,4 +1,4 @@
-import { useCollectionPlayHandler } from "@/features/collections/hooks/useCollectionPlayHandler.tsx";
+import { useCollectionPlayHandler } from "@/features/collections/hooks/useCollectionPlayHandler.ts";
 import { Collection } from "@/features/collections/types.ts";
 import { useQueueAddAPI } from "@/features/song-queue/hooks/useQueueAPI.ts";
 import {
@@ -10,7 +10,7 @@ import {
 } from "@/features/ui/context-menu.tsx";
 import { BetweenHorizonalStart, Play } from "lucide-react";
 import { JSX } from "react";
-
+// TODO: make a button just like the song
 interface SongContextMenuProps {
     children: JSX.Element | JSX.Element[];
     collection: Collection;

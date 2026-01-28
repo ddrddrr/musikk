@@ -138,6 +138,7 @@ class UserChatRetrieveSerializer(BaseModelSerializer):
             "last_message",
             "is_read",
             "members",
+            "is_direct",
         ]
 
     def to_representation(self, instance):

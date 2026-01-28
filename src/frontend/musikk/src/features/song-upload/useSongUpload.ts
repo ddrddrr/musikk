@@ -1,5 +1,5 @@
 import type { UUID } from "@/api/types.ts";
-import { createCollectionSong } from "@/features/song-upload/mutations.ts";
+import { uploadCollectionSong } from "@/features/song-upload/mutations.ts";
 import type { SongUploadState } from "@/features/song-upload/types.ts";
 import type { UploadEventPayload } from "@/features/song-upload/useWsEvents.ts";
 import { useSongUploadEvent } from "@/features/song-upload/useWsEvents.ts";
@@ -80,7 +80,7 @@ export function useSongUpload() {
                         return { operationID: job.operationID, songUUID: job.data.uuid };
                     }
 
-                    const res = await createCollectionSong({
+                    const res = await uploadCollectionSong({
                         operationID: job.operationID,
                         collectionUUID,
                         title: job.data.title,

@@ -10,15 +10,18 @@ interface SongCollectionHeaderProps {
     showComments: boolean;
     toggleComments: () => void;
     songsCount: number;
-    notPersonalCollection: boolean;
+    renderAddToLikedButton: boolean;
+    renderCommentsButton: boolean;
 }
 
+// TODO: make user-created playlists deletable
 export const CollectionHeader = memo(function SongCollectionHeader({
     collection,
     showComments,
     toggleComments,
     songsCount,
-    notPersonalCollection,
+    renderAddToLikedButton,
+    renderCommentsButton,
 }: SongCollectionHeaderProps) {
     // TODO: make author clickable, probably factor out to a sep component
     const authors = collection.authors.map((author) => author.display_name).join(", ");
@@ -49,7 +52,7 @@ export const CollectionHeader = memo(function SongCollectionHeader({
                                         showComments={showComments}
                                     />
                                 )}
-                                {notPersonalCollection && (
+                                {renderAddToLikedButton && (
                                     <CollectionAddToLikedButton
                                         collection={collection}
                                         showComments={showComments}
@@ -79,7 +82,7 @@ export const CollectionHeader = memo(function SongCollectionHeader({
                                         showComments={showComments}
                                     />
                                 )}
-                                {notPersonalCollection && (
+                                {renderAddToLikedButton && (
                                     <CollectionAddToLikedButton
                                         collection={collection}
                                         showComments={showComments}
@@ -99,8 +102,7 @@ export const CollectionHeader = memo(function SongCollectionHeader({
                 <h3 className={`p-1 font-bold text-black ${showComments ? "text-sm" : "text-lg"}`}>
                     Songs • {songsCount}
                 </h3>
-
-                {notPersonalCollection && (
+                {renderCommentsButton && (
                     <Button
                         onClick={toggleComments}
                         variant="accent"

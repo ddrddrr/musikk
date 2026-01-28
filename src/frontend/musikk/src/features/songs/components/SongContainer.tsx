@@ -1,7 +1,7 @@
 import { CollectionSong } from "@/features/collections/types.ts";
 import { SongAddToLikedButton } from "@/features/songs/components/SongAddToLikedButton.tsx";
 import { SongAddToQueueButton } from "@/features/songs/components/SongAddToQueueButton.tsx";
-import { SongContextMenu } from "@/features/songs/components/SongContextMenu.tsx";
+import { SongMenuButton } from "@/features/songs/components/SongMenuButton.tsx";
 import { SongPlayButton } from "@/features/songs/components/SongPlayButton.tsx";
 import { cn } from "@/lib/utils.ts";
 import { memo } from "react";
@@ -22,6 +22,7 @@ interface RenderItems {
     addToQueueButton: boolean;
     addToLikedButton: boolean;
     playButton: boolean;
+    songMenuButton: boolean;
     removeFromPlaylistCtxBtn: boolean;
 }
 
@@ -62,6 +63,7 @@ export const SongContainer = memo(function SongContainer({
         addToQueueButton = true,
         addToLikedButton = true,
         playButton = true,
+        songMenuButton = true,
         removeFromPlaylistCtxBtn = false,
     } = renderItems;
 
@@ -94,108 +96,100 @@ export const SongContainer = memo(function SongContainer({
                     className={sizeClass.buttonPadding}
                 />
             )}
+            {songMenuButton && (
+                <SongMenuButton
+                    collectionSong={collectionSong}
+                    size={sizeClass.buttonSize}
+                    className={sizeClass.buttonPadding}
+                    iconSize={sizeClass.iconSize}
+                    showRemoveFromPlaylist={removeFromPlaylistCtxBtn}
+                />
+            )}
         </div>
     );
 
     return (
-        <SongContextMenu song={collectionSong} renderRemoveFromPlaylist={removeFromPlaylistCtxBtn}>
-            <div
-                className={cn(
-                    "w-full overflow-hidden",
-                    "rounded-sm border-2 border-black bg-white",
-                    "transition-colors hover:bg-gray-100",
-                    sizeClass.containerPadding,
-                    variant === "stacked"
-                        ? cn("flex flex-col", sizeClass.containerGap)
-                        : cn("flex items-center justify-between", sizeClass.containerGap),
-                    extraStyle,
-                )}
-            >
-                {variant === "stacked" ? (
-                    <>
-                        {/* row: image + title */}
-                        <div className={cn("flex min-w-0 items-center", sizeClass.containerGap)}>
-                            {image &&
-                                (song.image ? (
-                                    <div className={cn(mediaBaseClass, sizeClass.image)}>
-                                        <img
-                                            src={song.image}
-                                            alt=""
-                                            className="h-full w-full object-cover"
-                                        />
-                                    </div>
-                                ) : (
-                                    <div className={cn(mediaBaseClass, sizeClass.image)}>
-                                        <span className={cn("text-gray-400", sizeClass.iconSize)}>
-                                            ♪
-                                        </span>
-                                    </div>
-                                ))}
-
-                            <div className="flex min-w-0 flex-col">
-                                <p
-                                    className={cn(
-                                        "truncate font-bold text-black",
-                                        sizeClass.titleSize,
-                                    )}
-                                >
-                                    {song.title}
-                                </p>
-                                {/* hide authors in stacked mode */}
-                            </div>
-                        </div>
-
-                        {/* buttons: UNDER title (aligned with title start, not under the image) */}
-                        <div className="flex">
-                            {image ? (
-                                <div className={cn("shrink-0", sizeClass.image)} />
+        <div
+            className={cn(
+                "w-full overflow-hidden",
+                "rounded-sm border-2 border-black bg-white",
+                "transition-colors hover:bg-gray-100",
+                sizeClass.containerPadding,
+                variant === "stacked"
+                    ? cn("flex flex-col", sizeClass.containerGap)
+                    : cn("flex items-center justify-between", sizeClass.containerGap),
+                extraStyle,
+            )}
+        >
+            {variant === "stacked" ? (
+                <>
+                    <div className={cn("flex min-w-0 items-center", sizeClass.containerGap)}>
+                        {image &&
+                            (song.image ? (
+                                <div className={cn(mediaBaseClass, sizeClass.image)}>
+                                    <img
+                                        src={song.image}
+                                        alt=""
+                                        className="h-full w-full object-cover"
+                                    />
+                                </div>
                             ) : (
-                                <div className={cn("shrink-0", sizeClass.image)} />
-                            )}
-                            <div className={cn("flex flex-1", sizeClass.containerGap)}>
-                                {buttons}
-                            </div>
-                        </div>
-                    </>
-                ) : (
-                    <>
-                        <div className={cn("flex min-w-0 items-center", sizeClass.containerGap)}>
-                            {image &&
-                                (song.image ? (
-                                    <div className={cn(mediaBaseClass, sizeClass.image)}>
-                                        <img
-                                            src={song.image}
-                                            alt=""
-                                            className="h-full w-full object-cover"
-                                        />
-                                    </div>
-                                ) : (
-                                    <div className={cn(mediaBaseClass, sizeClass.image)}>
-                                        <span className={cn("text-gray-400", sizeClass.iconSize)}>
-                                            ♪
-                                        </span>
-                                    </div>
-                                ))}
+                                <div className={cn(mediaBaseClass, sizeClass.image)}>
+                                    <span className={cn("text-gray-400", sizeClass.iconSize)}>
+                                        ♪
+                                    </span>
+                                </div>
+                            ))}
 
-                            <div className="flex min-w-0 flex-col">
-                                <p
-                                    className={cn(
-                                        "truncate font-bold text-black",
-                                        sizeClass.titleSize,
-                                    )}
-                                >
-                                    {song.title}
-                                </p>
-                                <p className={cn("truncate text-gray-600", sizeClass.authorsSize)}>
-                                    {authors}
-                                </p>
-                            </div>
+                        <div className="flex min-w-0 flex-col">
+                            <p className={cn("truncate font-bold text-black", sizeClass.titleSize)}>
+                                {song.title}
+                            </p>
                         </div>
+                    </div>
 
-                        <div className="shrink-0">{buttons}</div>
-                    </>
-                )}
-            </div>
-        </SongContextMenu>
+                    <div className="flex">
+                        {image ? (
+                            <div className={cn("shrink-0", sizeClass.image)} />
+                        ) : (
+                            <div className={cn("shrink-0", sizeClass.image)} />
+                        )}
+                        <div className={cn("flex flex-1", sizeClass.containerGap)}>{buttons}</div>
+                    </div>
+                </>
+            ) : (
+                <>
+                    <div className={cn("flex min-w-0 items-center", sizeClass.containerGap)}>
+                        {image &&
+                            (song.image ? (
+                                <div className={cn(mediaBaseClass, sizeClass.image)}>
+                                    <img
+                                        src={song.image}
+                                        alt=""
+                                        className="h-full w-full object-cover"
+                                    />
+                                </div>
+                            ) : (
+                                <div className={cn(mediaBaseClass, sizeClass.image)}>
+                                    <span className={cn("text-gray-400", sizeClass.iconSize)}>
+                                        ♪
+                                    </span>
+                                </div>
+                            ))}
+
+                        <div className="flex min-w-0 flex-col">
+                            <p className={cn("truncate font-bold text-black", sizeClass.titleSize)}>
+                                {song.title}
+                            </p>
+                            <p className={cn("truncate text-gray-600", sizeClass.authorsSize)}>
+                                {authors}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="shrink-0">{buttons}</div>
+                </>
+            )}
+        </div>
     );
 });

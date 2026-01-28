@@ -13,6 +13,7 @@ export interface Collection extends BaseModel {
     image?: string;
     is_liked: boolean;
     type: CollectionType;
+    private: boolean;
 }
 
 export interface CollectionSong extends BaseModel {

@@ -12,6 +12,7 @@ export function UserCollectionsProvider({ children }: UserCollectionsProviderPro
     const userUUID = useUserUUID();
 
     const { data } = useQuery({
+        // TODO: should useruuid be in the key or not
         queryKey: ["collectionsPersonal"],
         queryFn: userUUID ? () => fetchCollectionsPersonal(userUUID) : undefined,
         enabled: !!userUUID,
@@ -19,6 +20,7 @@ export function UserCollectionsProvider({ children }: UserCollectionsProviderPro
     const contextValue = {
         history: data?.history ?? null,
         liked_songs: data?.liked_songs ?? null,
+        created_collections: data?.created_collections ?? null,
         followed_collections: data?.followed_collections ?? null,
     };
     return (

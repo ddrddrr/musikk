@@ -4,7 +4,7 @@ import {
     useUserFollowedQuery,
     useUserFollowersQuery,
     useUserFriendsQuery,
-} from "@/features/user/queries.ts";
+} from "@/features/user/api/queries.ts";
 import { ReactNode } from "react";
 
 interface UserConnectionsProviderProps {

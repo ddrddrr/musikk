@@ -1,7 +1,6 @@
 from django.db import models, transaction
 from django.conf import settings
 
-
 from base.models import BaseModel
 from streaming.models import Collection, CollectionCredit, SongQueue
 from streaming.models.collections import CollectionType
@@ -52,5 +51,11 @@ class StreamingProfile(BaseModel):
     @property
     def liked_songs(self):
         return Collection.objects.liked().get(collection_credits__author=self.user)
+
+    @property
+    def created_collections(self):
+        return Collection.objects.filter(
+            collection_credits__author=self.user
+        ).exclude(type__in=[CollectionType.HISTORY, CollectionType.LIKED])
 
     objects = StreamingProfileManager()

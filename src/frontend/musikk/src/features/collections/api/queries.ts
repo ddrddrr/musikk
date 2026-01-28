@@ -23,6 +23,7 @@ export async function fetchCollections(
 interface FetchCollectionsPersonalParams {
     history: Collection;
     liked_songs: Collection;
+    created_collections: Collection[];
     followed_collections: Collection[];
 }
 

@@ -18,6 +18,7 @@ export const SongURLs = {
     songList: `/songs`,
     songRetrieve: (songUUID: UUID) => `/songs/${songUUID}`,
     albumBySong: (songUUID: UUID) => `/songs/${songUUID}/album`,
+    songUserCollections: (collectionSongUUID: UUID) => `/songs/${collectionSongUUID}/collections`,
 };
 export const QueueURLs = {
     queue: `/song-queue`,
@@ -36,16 +37,6 @@ export const NotificationURLs = {
     notificationsSetRead: `/notifications`,
     notificationsList: `/notifications`,
     notificationsDelete: (notificationUUID: UUID) => `/notifications/${notificationUUID}`,
-};
-export const UserURLs = {
-    me: "/users/me",
-    meUpdate: "/users/me",
-    userDetail: (userUUID: UUID) => `/users/${userUUID}`,
-    userFriends: (userUUID: UUID) => `/users/${userUUID}/friends`,
-    userFollowers: (userUUID: UUID) => `/users/${userUUID}/followers`,
-    userFollowed: (userUUID: UUID) => `/users/${userUUID}/followed`,
-    followUser: (userUUID: UUID) => `/users/${userUUID}/followed`,
-    unfollowUser: (userUUID: UUID) => `/users/${userUUID}/followed`,
 };
 export const SearchURLs = {
     searchMain: (query: string) => `/search?q=${query}`,

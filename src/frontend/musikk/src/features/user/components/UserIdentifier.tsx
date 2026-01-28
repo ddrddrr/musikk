@@ -11,7 +11,7 @@ export function UserIdentifier({ user }: { user: BaseUser }) {
             <Button
                 className="p-0"
                 variant={"ghost"}
-                onClick={() => navigate(`/users/${user.uuid}`)}
+                onClick={() => void navigate(`/users/${user.uuid}`)}
             >
                 {user.display_name}
             </Button>

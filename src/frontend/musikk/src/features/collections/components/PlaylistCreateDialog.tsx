@@ -1,5 +1,5 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/features/ui/dialog.tsx";
-import { useCollectionCreation } from "../useCollectionCreation.ts";
+import { useCollectionCreation } from "../hooks/useCollectionCreation.ts";
 import { CollectionForm } from "./CollectionForm.tsx";
 
 type PlaylistCreateDialogProps = {
@@ -11,9 +11,9 @@ type PlaylistCreateDialogProps = {
 export function PlaylistCreateDialog({ open, onOpenChange, onSuccess }: PlaylistCreateDialogProps) {
     const { form, submit, isSubmitting } = useCollectionCreation({
         type: "playlist",
-        onSuccess: (uuid) => {
+        onSuccess: (collection) => {
             onOpenChange(false);
-            onSuccess?.(uuid);
+            onSuccess?.(collection.uuid);
         },
     });
 

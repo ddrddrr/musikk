@@ -1,6 +1,7 @@
 import tempfile
 
 from django.db import transaction
+from django.db.models import Q
 from rest_framework import status
 from rest_framework.generics import (
     RetrieveAPIView,
@@ -48,12 +49,20 @@ class CollectionListCreateView(ListCreateAPIView):
             return permissions + [IsArtist()]
         return permissions
 
+    def post(self, request, *args, **kwargs):
+        send_ws_event(
+            f"user_{self.request.user.uuid}",
+            event_name="invalidate.query",
+            query_key=["collectionsPersonal"],
+        )
+        return super().post(request, *args, **kwargs)
+
 
 class CollectionPersonalView(APIView):
     serializer_class = CollectionSerializerBasic
 
     def get(self, request, *args, **kwargs):
-        profile = self.request.user.streamingprofile
+        profile = request.user.streamingprofile
 
         history = CollectionSerializerBasic(
             profile.history, context={"request": request}
@@ -62,8 +71,16 @@ class CollectionPersonalView(APIView):
             profile.liked_songs, context={"request": request}
         ).data
 
+        created_collections = CollectionSerializerBasic(
+            profile.created_collections,
+            context={"request": request},
+            many=True,
+        ).data
+
         followed_collections = CollectionSerializerBasic(
-            profile.followed_collections.all(),
+            profile.followed_collections.exclude(
+                id__in=profile.created_collections.values_list("id", flat=True)
+            ),
             context={"request": request},
             many=True,
         ).data
@@ -73,6 +90,7 @@ class CollectionPersonalView(APIView):
             data={
                 "history": history,
                 "liked_songs": liked_songs,
+                "created_collections": created_collections,
                 "followed_collections": followed_collections,
             },
         )
@@ -171,7 +189,10 @@ class CollectionSongCreateView(APIView):
 
     def _create_album_song(self, request, collection):
         if not request.data.get("operation_id"):
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                data={"detail": "Can not upload a Song without an `operation_id`"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         audio = request.data.get("audio")
         validate_audio(audio)
@@ -208,6 +229,7 @@ class CollectionSongCreateView(APIView):
         )
 
 
+# todo pass collection song uuid not base song uuid
 class AlbumBySongView(APIView):
     permission_classes = [IsPublicOrCollectionAuthor]
 

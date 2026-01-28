@@ -49,7 +49,7 @@ export function SongCard({ collectionSong, size = "medium", onClick = undefined 
             onClick(s);
         } else {
             const albumUUID = await albumBySongRetrieve(s.uuid);
-            navigate(`/collection/${albumUUID.uuid}/`);
+            void navigate(`/collection/${albumUUID.uuid}/`);
         }
     }
     const mediaBaseClass =
@@ -58,10 +58,9 @@ export function SongCard({ collectionSong, size = "medium", onClick = undefined 
     return (
         <SongContextMenu song={collectionSong}>
             <Card
-                onClick={() => handleClick(collectionSong)}
+                onClick={() => void handleClick(collectionSong)}
                 key={uuid}
                 variant="panel"
-                size={size === "small" ? "sm" : size === "big" ? "lg" : "md"}
                 className={`cursor-pointer py-0 transition-all duration-200 ${sizes.card}`}
             >
                 <CardContent className="p-0">

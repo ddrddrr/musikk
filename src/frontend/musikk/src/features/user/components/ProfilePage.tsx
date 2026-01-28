@@ -9,10 +9,10 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/features/ui/dialog.tsx";
+import { fetchUser } from "@/features/user/api/queries.ts";
 import { ProfileForm } from "@/features/user/components/ProfileForm.tsx";
 import { UserAvatar } from "@/features/user/components/UserAvatar.tsx";
 import { useFollowUser } from "@/features/user/hooks/useFollowUser.ts";
-import { fetchUser } from "@/features/user/queries.ts";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 
@@ -21,7 +21,6 @@ export function ProfilePage() {
     const currUserUUID = useUserUUID();
     const { isFollowing, toggleFollow, isLoading: isFollowLoading } = useFollowUser(uuid);
 
-    // TODO add handling if curr user uuid is undefined
     const {
         isLoading,
         isError,
@@ -34,12 +33,13 @@ export function ProfilePage() {
 
     const isOwnProfile = currUserUUID === uuid;
 
+    // TODO: think about the loading/err handling logic here and in other components
     if (isLoading) {
-        return <div className="p-8 text-center">Loading profile…</div>;
+        return <div className="p-8 text-center">Loading profile...</div>;
     }
 
     if (isError) {
-        return <div className="p-8 text-center text-red-600">Error loading profile.</div>;
+        return <div className="p-8 text-center text-red-600">Error</div>;
     }
 
     if (!user || !uuid) {

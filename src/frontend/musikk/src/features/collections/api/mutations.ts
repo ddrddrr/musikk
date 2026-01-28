@@ -59,3 +59,18 @@ export async function createCollection(input: CreateCollectionInput): Promise<Co
     const res = await api_client.post<Collection>(CollectionURLs.collectionCreate, formData);
     return res.data;
 }
+
+interface CollectionSongPayload {
+    collectionUUID: UUID;
+    songUUID: UUID;
+}
+
+export async function createCollectionSong(payload: CollectionSongPayload) {
+    const formData = new FormData();
+    formData.append("song_uuid", payload.songUUID);
+    const res = await api_client.post<{ song_uuid: UUID; collection_song_uuid: UUID }>(
+        CollectionURLs.collectionSongCreate(payload.collectionUUID),
+        formData,
+    );
+    return res.data;
+}

@@ -28,6 +28,7 @@ class PublicationChildrenView(RetrieveAPIView):
 
 class CollectionCommentsListCreateView(PublicationsListCreateMixin, ListCreateAPIView):
     filterset_class = PublicationConnectionFilter
+    list_top_level_only = False
 
     def get_created_for(self) -> Collection:
         return Collection.objects.get(uuid=self.kwargs["collection_uuid"])
@@ -47,7 +48,7 @@ class CollectionCommentsListCreateView(PublicationsListCreateMixin, ListCreateAP
             event_name="invalidate.query",
             query_key=[
                 "collection",
-                self.kwargs["collection_uuid"],
+                str(self.kwargs["collection_uuid"]),
                 "comments",
             ],
         )
@@ -85,6 +86,8 @@ class FeedPostsListCreateView(PublicationsListCreateMixin, ListCreateAPIView):
 
 
 class ChatMessagesListCreateView(PublicationsListCreateMixin, ListCreateAPIView):
+    list_top_level_only = False
+
     def get_created_for(self) -> Chat:
         return Chat.objects.get(uuid=self.kwargs["chat_uuid"])
 

@@ -12,6 +12,7 @@ from social.api.v1.serializers import (
 
 class PublicationsListCreateMixin(ListModelMixin, CreateModelMixin):
     pagination_class = BaseLimitOffsetPagination
+    list_top_level_only = True
 
     def get_created_for(self) -> Model:
         raise NotImplementedError
@@ -40,13 +41,12 @@ class PublicationsListCreateMixin(ListModelMixin, CreateModelMixin):
         created_for = self.get_created_for()
         self.check_list_permission(created_for)
         ct = ContentType.objects.get_for_model(created_for)
-        return (
-            Publication.objects.filter(
-                created_for_type=ct, created_for_id=created_for.pk, parent__isnull=True
-            )
-            .select_related("author")
-            .order_by("-date_added")
+        qs = Publication.objects.filter(
+            created_for_type=ct, created_for_id=created_for.pk
         )
+        if self.list_top_level_only:
+            qs = qs.filter(parent__isnull=True)
+        return qs.select_related("author").order_by("-date_added")
 
     def get_serializer_class(self):
         return (

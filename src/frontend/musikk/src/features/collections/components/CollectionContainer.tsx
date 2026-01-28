@@ -16,7 +16,7 @@ interface CollectionContainerProps {
 export function CollectionContainer({ collectionUUID }: CollectionContainerProps) {
     const navigate = useNavigate();
     const currUserUUID = useUserUUID();
-    const { liked_songs, history } = useContext(UserCollectionsContext);
+    const { liked_songs, history, created_collections } = useContext(UserCollectionsContext);
     let showComments = !!useMatch("/collection/:uuid/comments");
 
     const {
@@ -51,9 +51,14 @@ export function CollectionContainer({ collectionUUID }: CollectionContainerProps
         );
 
     const songs = collection.songs;
+
     const notPersonalCollection =
         collection?.uuid !== liked_songs?.uuid && collection?.uuid !== history?.uuid;
-    showComments = showComments && notPersonalCollection;
+    const isUserCreatedCollection = created_collections
+        ?.map((c) => c.uuid)
+        .includes(collection?.uuid);
+
+    showComments = showComments && notPersonalCollection && !collection?.private;
     const removeFromPlaylistCtxBtn =
         !!currUserUUID && collection?.authors.map((a) => a.uuid).includes(currUserUUID);
 
@@ -66,7 +71,10 @@ export function CollectionContainer({ collectionUUID }: CollectionContainerProps
                             collection={collection}
                             toggleComments={toggleComments}
                             songsCount={songs.length}
-                            notPersonalCollection={notPersonalCollection}
+                            renderAddToLikedButton={
+                                notPersonalCollection && !isUserCreatedCollection
+                            }
+                            renderCommentsButton={notPersonalCollection && !collection?.private}
                             showComments={showComments}
                         />
 

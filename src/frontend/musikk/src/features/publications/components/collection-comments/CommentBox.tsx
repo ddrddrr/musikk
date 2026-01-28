@@ -15,7 +15,6 @@ interface CommentBoxProps {
 export const CommentBox = memo(function CommentBox({ collectionUUID }: CommentBoxProps) {
     const [replyTo, setReplyTo] = useState<Publication | undefined>(undefined);
     const {
-        data,
         error,
         isPending,
         hasNextPage,
@@ -28,12 +27,11 @@ export const CommentBox = memo(function CommentBox({ collectionUUID }: CommentBo
     const didInitialScrollRef = useRef(false);
 
     useEffect(() => {
-        if (isPending || didInitialScrollRef.current || !data || !commentsContainerRef.current)
-            return;
+        if (didInitialScrollRef.current || !commentsContainerRef.current) return;
 
         commentsContainerRef.current.scrollTop = commentsContainerRef.current.scrollHeight;
         didInitialScrollRef.current = true;
-    }, [isPending, data]);
+    }, []);
 
     // todo use new shadcn spinner
     if (isPending) {

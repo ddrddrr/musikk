@@ -12,7 +12,7 @@ export const NotificationOverlay = memo(function NotificationOverlay({
     notifications,
 }: NotificationOverlayProps) {
     const navigate = useNavigate();
-    // TODO: fix!
+    // TODO: fix, can be reply for comments/posts (but not chats)
     function handleNavigateReplyClick(notification: IReplyNotification) {
         // if (notification.reply_publication.created_for.type == "feed") {
         //     navigate(`/users/${notification.reply_publication.root_author_uuid}`);
@@ -22,7 +22,7 @@ export const NotificationOverlay = memo(function NotificationOverlay({
     }
 
     function handleNavigateFollowerClick(notification: IFollowerNotification) {
-        // navigate(`/users/${notification.sender.uuid}`);
+        void navigate(`/users/${notification.sender.uuid}`);
     }
 
     const { replies = [], followers = [] } = notifications;

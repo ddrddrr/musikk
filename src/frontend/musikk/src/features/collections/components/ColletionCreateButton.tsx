@@ -1,4 +1,5 @@
 import { Button } from "@/features/ui/button.tsx";
+import { Plus } from "lucide-react";
 import { useState } from "react";
 import { PlaylistCreateDialog } from "./PlaylistCreateDialog.tsx";
 
@@ -7,11 +8,10 @@ export function ColletionCreateButton() {
 
     return (
         <>
-            <Button onClick={() => setOpen(true)}>Create Playlist</Button>
-            <PlaylistCreateDialog
-                open={open}
-                onOpenChange={setOpen}
-            />
+            <Button variant={"outline"} className={"p-2"} onClick={() => setOpen(true)}>
+                <Plus size={20} />
+            </Button>
+            <PlaylistCreateDialog open={open} onOpenChange={setOpen} />
         </>
     );
 }

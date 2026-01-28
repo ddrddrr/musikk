@@ -6,7 +6,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AlbumSongUploadSection } from "../collections/components/AlbumSongUploadSection.tsx";
 import { CollectionForm } from "../collections/components/CollectionForm.tsx";
-import { useCollectionCreation } from "../collections/useCollectionCreation.ts";
+import { useCollectionCreation } from "../collections/hooks/useCollectionCreation.ts";
 
 export function AlbumUploadPage() {
     const navigate = useNavigate();

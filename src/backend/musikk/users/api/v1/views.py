@@ -20,6 +20,7 @@ from websockets.event_helpers import send_ws_event
 from notifications.models import FollowerNotification
 
 
+# not strictly needed, but already implemented so...
 @ensure_csrf_cookie
 def csrf(request):
     return HttpResponse(status=204)
@@ -51,7 +52,7 @@ class MeView(RetrieveUpdateAPIView):
             "user.updated",
             user=user_data,
         )
-        return Response(data={"me": user_data})
+        return Response(data={"user": user_data})
 
 
 class UserRetrieveView(RetrieveAPIView):

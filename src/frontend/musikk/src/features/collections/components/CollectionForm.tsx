@@ -3,7 +3,7 @@ import { Button } from "@/features/ui/button.tsx";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/features/ui/form.tsx";
 import { Input } from "@/features/ui/input.tsx";
 import { UseFormReturn } from "react-hook-form";
-import { CollectionCreationFormValues } from "../useCollectionCreation.ts";
+import { CollectionCreationFormValues } from "../hooks/useCollectionCreation.ts";
 
 type CollectionFormProps = {
     form: UseFormReturn<CollectionCreationFormValues>;

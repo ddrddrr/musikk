@@ -283,6 +283,13 @@ LOGGING = {
         "handlers": ["console"],
         "level": "DEBUG" if DEBUG else "INFO",
     },
+    "loggers": {
+        # suppress websocket packet/frame debug spam
+        "daphne.ws_protocol": {
+            "level": "INFO",
+            "propagate": True,
+        },
+    },
 }
 
 ### MISC

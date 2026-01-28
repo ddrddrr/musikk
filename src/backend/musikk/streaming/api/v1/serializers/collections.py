@@ -24,10 +24,12 @@ class CollectionSerializerBasic(BaseModelSerializer):
             "authors",
             "is_liked",
             "type",
+            "private",
         ]
         extra_kwargs = BaseModelSerializer.Meta.extra_kwargs | {
             "title": {"read_only": True},
             "image": {"read_only": True},
+            "private": {"read_only": True},
         }
 
     def get_is_liked(self, obj) -> bool:

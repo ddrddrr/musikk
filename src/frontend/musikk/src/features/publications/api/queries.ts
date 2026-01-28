@@ -39,15 +39,16 @@ export function useFeedPosts(userUUID: UUID, connection?: "friends" | "followed"
     const params = connection ? { connection } : undefined;
     return usePublicationListInfinite(
         PublicationURLs.feedPosts(userUUID),
-        ["feed-posts", userUUID, connection],
+        ["feed", userUUID, "comments"],
         params,
     );
 }
 
 export function useCollectionComments(collectionUUID: UUID) {
     return usePublicationListInfinite(PublicationURLs.collectionComments(collectionUUID), [
-        "collection-comments",
+        "collection",
         collectionUUID,
+        "comments",
     ]);
 }
 
