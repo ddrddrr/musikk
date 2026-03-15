@@ -1,5 +1,5 @@
-from django.conf import settings
 from django.db import transaction
+from django.core.files.storage import default_storage
 from rest_framework import serializers
 
 from base.serializers import BaseModelSerializer
@@ -27,10 +27,10 @@ class BaseSongRetrieveSerializer(BaseModelSerializer):
         ]
 
     def get_mpd(self, obj):
-        return settings.DJANGO_BASE_URL + settings.MEDIA_URL + obj.mpd
+        return default_storage.url(obj.mpd)
 
     def get_m3u8(self, obj):
-        return settings.DJANGO_BASE_URL + settings.MEDIA_URL + obj.m3u8
+        return default_storage.url(obj.m3u8)
 
     def get_is_liked(self, obj):
         user = self.context["request"].user

@@ -72,8 +72,8 @@ def convert_audio(
         with transaction.atomic():
             song = BaseSong.objects.get(uuid=song_uuid)
             song.content_path = song_repr.content_path
-            song.mpd = default_storage.url(song_repr.manifests[ManifestType.MPD])
-            song.m3u8 = default_storage.url(song_repr.manifests[ManifestType.M3U8])
+            song.mpd = song_repr.manifests[ManifestType.MPD]
+            song.m3u8 = song_repr.manifests[ManifestType.M3U8]
             song.save()
 
         def notify():
