@@ -9,6 +9,7 @@ services:
       - .env
     depends_on:
       - database
+      - redis
     expose:
       - ${DJANGO_PORT}
     volumes:
@@ -25,6 +26,23 @@ services:
       - ${POSTGRES_PORT}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - main
+
+  celery_worker:
+    build:
+      context: ./src/backend/
+      dockerfile: docker/Dockerfile
+    command: docker/start-celery-worker.sh
+    env_file:
+      - .env
+    depends_on:
+      redis:
+        condition: service_healthy
+      broker:
+        condition: service_healthy
+      database:
+        condition: service_healthy
     networks:
       - main
 
@@ -51,8 +69,6 @@ services:
     build:
       context: ./src/frontend
       dockerfile: docker/Dockerfile
-      args:
-        VITE_API_BASE_URL: ${VITE_API_BASE_URL}
     env_file:
       - .env
     restart: unless-stopped

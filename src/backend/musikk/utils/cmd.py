@@ -1,4 +1,5 @@
-import subprocess, shlex
+import subprocess
+import shlex
 
 
 def run_shell_command(

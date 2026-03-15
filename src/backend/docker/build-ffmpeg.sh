@@ -1,6 +1,7 @@
 #!/bin/bash
 # Builds FFMPEG for Linux as a static binary (no dynamic libs)
 # partially taken and adapted from https://trac.ffmpeg.org/wiki/CompilationGuide/Ubuntu
+FFMPEG_VERSION=8.0.1
 
 set -euo pipefail
 set -x
@@ -41,8 +42,8 @@ make install &&
 
 cd .. &&
 
-wget -O ffmpeg-snapshot.tar.bz2 https://ffmpeg.org/releases/ffmpeg-8.0.1.tar.bz2    && \
-tar xjvf ffmpeg-8.0.1.tar.bz2 && \
+wget -O ffmpeg-snapshot.tar.bz2 https://ffmpeg.org/releases/ffmpeg-${FFMPEG_VERSION}.tar.bz2    && \
+tar xjvf ffmpeg-${FFMPEG_VERSION}.tar.bz2 && \
 cd ffmpeg && \
 PATH="/opt/bin:$PATH" PKG_CONFIG_PATH="/opt/ffmpeg_build/lib/pkgconfig" ./configure \
   --prefix="/opt/ffmpeg_build" \

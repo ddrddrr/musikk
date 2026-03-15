@@ -1,4 +1,3 @@
-import os
 import shutil
 import tempfile
 import uuid
@@ -8,7 +7,7 @@ from unittest.mock import patch, Mock
 from django.test import TestCase, override_settings
 from django.core.files.storage import default_storage
 
-from musikk.utils.storage import delete_django_storage_dir
+from utils.storage import delete_django_storage_dir
 from streaming.audio.processing_pipeline import (
     ProcessingContext,
     FFmpegStep,
@@ -18,7 +17,6 @@ from streaming.audio.processing_pipeline import (
 )
 from streaming.audio.shaka_packager_conf.shaka_packager_wrapper import ManifestType
 from streaming.audio.exceptions import AudioProcessingPipelineError
-from streaming.audio.ffmpeg_conf.ffmpeg_wrapper import FFMPEGFull
 
 
 class TestProcessingPipelineSteps(TestCase):

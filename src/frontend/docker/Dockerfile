@@ -4,9 +4,6 @@ WORKDIR /app
 COPY musikk/package.json musikk/package-lock.json ./
 RUN --mount=type=cache,target=/root/.npm npm install
 
-ARG VITE_API_BASE_URL
-ENV VITE_API_BASE_URL=${VITE_API_BASE_URL}
-
 COPY musikk/ ./
 RUN npm run build
 

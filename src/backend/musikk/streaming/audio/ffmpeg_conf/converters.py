@@ -4,7 +4,7 @@ from uuid import uuid4
 
 from django.conf import settings
 
-from musikk.utils.cmd import run_shell_command
+from utils.cmd import run_shell_command
 
 
 class FFMPEGCommand:

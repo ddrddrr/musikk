@@ -18,8 +18,8 @@ def local_dir_to_django_storage(
 
     For local FS:
      writes files under `MEDIA_ROOT` directory
-     hence, the path must be a relative path to that directory.
-     E.g. to write files under /media/audio/... specify `storage_prefix='audio'`.
+     (the path must be a relative path to that directory).
+     E.g., to write files under /media/audio/... specify `storage_prefix='audio'`.
 
     Returns:
         Mapping of format {`original path`: `storage path`}
@@ -53,7 +53,6 @@ def local_dir_to_django_storage(
 
 
 def delete_django_storage_dir(storage_dir: str | Path) -> None:
-    """Delete a dir from Django storage"""
     storage_dir = str(storage_dir)
 
     try:

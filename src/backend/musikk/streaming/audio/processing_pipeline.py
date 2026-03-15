@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
 import logging
 
-from musikk.utils.storage import delete_django_storage_dir
+from utils.storage import delete_django_storage_dir
 from streaming.audio.exceptions import AudioProcessingPipelineError
 from streaming.audio.ffmpeg_conf.ffmpeg_wrapper import FFMPEGWrapper, FFMPEGFull
 from streaming.audio.shaka_packager_conf.shaka_packager_wrapper import (

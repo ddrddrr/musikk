@@ -6,8 +6,8 @@ from dataclasses import dataclass
 
 from django.conf import settings
 
-from musikk.utils.cmd import run_shell_command
-from musikk.utils.storage import (
+from utils.cmd import run_shell_command
+from utils.storage import (
     local_dir_to_django_storage,
     delete_django_storage_dir,
     get_django_storage_files,

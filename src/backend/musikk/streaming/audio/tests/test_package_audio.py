@@ -6,7 +6,7 @@ from pathlib import Path
 from django.test import TestCase, override_settings
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
-from musikk.utils.storage import delete_django_storage_dir
+from utils.storage import delete_django_storage_dir
 
 from streaming.audio.shaka_packager_conf.shaka_packager_wrapper import (
     ShakaPackagerMPDAndM3U8,

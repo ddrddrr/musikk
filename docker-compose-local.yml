@@ -12,15 +12,6 @@ services:
     networks:
       - main
 
-  #  broker:
-  #    image: rabbitmq:4.1.1
-  #    ports:
-  #      - "${RABBITMQ_PORT}:5672"
-  #    env_file:
-  #      - .env
-  #    networks:
-  #      - main
-  #
   redis:
     image: redis:8.0-alpine
     command: [ "redis-server","--requirepass","${REDIS_PASSWORD}" ]

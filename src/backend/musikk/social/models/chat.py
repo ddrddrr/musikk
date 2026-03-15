@@ -1,13 +1,13 @@
 from django.db import models
 
 from base.models import BaseModel
-from musikk.utils.paths import DEFAULT_IMAGE_PATH
+from utils.paths import deafult_image_path
 
 
 # TODO: guard against multiple chats for the same pair of people when is_direct=True
 class Chat(BaseModel):
     title = models.CharField(max_length=2000, blank=True, default="")
-    image = models.ImageField(upload_to=DEFAULT_IMAGE_PATH, null=True, blank=True)
+    image = models.ImageField(upload_to=deafult_image_path, null=True, blank=True)
     is_direct = models.BooleanField(
         default=True,
         help_text="Indicates, whether the Chat is between two people only.",

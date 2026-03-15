@@ -1,7 +1,7 @@
 from django.db import models
 
 from base.models import BaseModel
-from musikk.utils.paths import DEFAULT_IMAGE_PATH
+from utils.paths import deafult_image_path
 from streaming.models.songs import CollectionSong, BaseSong
 
 
@@ -45,7 +45,7 @@ class Collection(BaseModel):
     )
     title = models.CharField(max_length=128)
     description = models.TextField(max_length=512, blank=True, default="")
-    image = models.ImageField(upload_to=DEFAULT_IMAGE_PATH, null=True, blank=True)
+    image = models.ImageField(upload_to=deafult_image_path, null=True, blank=True)
     private = models.BooleanField(default=False)
 
     authors = models.ManyToManyField(

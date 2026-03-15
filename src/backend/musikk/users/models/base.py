@@ -4,7 +4,7 @@ from django.db import models
 from django.utils.crypto import get_random_string
 
 from base.models import BaseModel
-from musikk.utils.paths import DEFAULT_IMAGE_PATH
+from utils.paths import deafult_image_path
 
 
 def default_display_name():
@@ -42,7 +42,7 @@ class BaseUser(BaseModel, AbstractBaseUser, PermissionsMixin):
     bio = models.TextField(max_length=2000, default="")
     # TODO: what should be the actual max len?
     avatar = models.ImageField(
-        upload_to=DEFAULT_IMAGE_PATH, max_length=255, blank=True, null=True
+        upload_to=deafult_image_path, max_length=255, blank=True, null=True
     )
 
     role = models.CharField(

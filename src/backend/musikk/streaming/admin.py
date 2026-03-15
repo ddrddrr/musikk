@@ -3,10 +3,8 @@ import tempfile
 
 from django.contrib import admin
 from django import forms
-from django.core.files.storage import default_storage
-from django.core.files.base import File
 
-from musikk.utils.storage import delete_django_storage_dir
+from utils.storage import delete_django_storage_dir
 from streaming.audio.processing_pipeline import AudioProcessingPipeline
 from streaming.audio.shaka_packager_conf.shaka_packager_wrapper import ManifestType
 from streaming.models.collections import Collection

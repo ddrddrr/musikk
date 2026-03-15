@@ -8,7 +8,7 @@ from django.conf import settings
 from django.db import transaction
 from django.core.files.storage import default_storage
 
-from musikk.utils.storage import delete_django_storage_dir
+from utils.storage import delete_django_storage_dir
 from streaming.audio.processing_pipeline import AudioProcessingPipeline
 from streaming.audio.shaka_packager_conf.shaka_packager_wrapper import ManifestType
 from streaming.managers.upload_manager import UploadManager

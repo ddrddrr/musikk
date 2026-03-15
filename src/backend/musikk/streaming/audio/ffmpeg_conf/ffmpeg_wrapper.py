@@ -5,7 +5,7 @@ import tempfile
 
 from django.conf import settings
 
-from musikk.utils.storage import local_dir_to_django_storage, delete_django_storage_dir
+from utils.storage import local_dir_to_django_storage, delete_django_storage_dir
 from streaming.audio.ffmpeg_conf.converters import (
     FFMPEGAudioConverter,
     FLAC_CONVERTER,
