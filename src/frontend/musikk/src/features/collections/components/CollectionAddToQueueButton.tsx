@@ -27,7 +27,7 @@ export const CollectionAddToQueueButton = memo(function CollectionAddToQueueButt
                 })
             }
             disabled={addToQueueMutation.isPending}
-            className={`flex items-center justify-center p-0 ${showComments ? "h-8 w-8" : "h-12 w-12"}`}
+            className={showComments ? "h-8 w-8" : "h-12 w-12"}
         >
             <BetweenHorizonalStart size={20} />
         </Button>

@@ -19,7 +19,7 @@ export function CollectionPlayButton({ collection, showComments }: SongCollectio
             variant="brand"
             size="icon"
             onClick={onClick}
-            className={`flex items-center justify-center p-0 ${showComments ? "h-8 w-8" : "h-12 w-12"}`}
+            className={showComments ? "h-8 w-8" : "h-12 w-12"}
         >
             {renderPlayPauseIcon()}
         </Button>

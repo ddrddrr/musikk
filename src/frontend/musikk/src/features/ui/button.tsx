@@ -19,13 +19,13 @@ const buttonVariants = cva(
                 destructive: "bg-destructive text-white",
                 outline:
                     "bg-background text-black hover:bg-gray-100 hover:border-gray-300 border-2",
-                link: "underline text-primary bg-transparent p-0",
             },
             size: {
                 default: "h-9 px-4",
                 sm: "h-8 px-3 text-sm",
                 lg: "h-10 px-6 text-base",
                 icon: "h-9 w-9 p-0",
+                fit: "h-auto px-2 py-1",
             },
         },
         defaultVariants: {

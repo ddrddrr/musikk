@@ -39,6 +39,7 @@ export const Header = memo(function Header() {
             </div>
 
             <div className="col-span-1 flex items-center justify-end gap-4">
+                {/*TODO: chats, should be a dropdown when clicked on the "MessageSquareText" button not profile */}
                 <ProfileDropdown />
                 <NotificationBox />
                 <Button

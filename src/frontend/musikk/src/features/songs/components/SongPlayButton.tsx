@@ -23,7 +23,7 @@ export function SongPlayButton({ collectionSong, className = "", size = 20 }: So
             size="icon"
             style={{ width: size, height: size }}
             onClick={onClick}
-            className={`flex items-center justify-center p-0 ${className}`}
+            className={className}
         >
             {renderPlayPauseIcon()}
         </Button>

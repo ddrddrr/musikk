@@ -32,7 +32,7 @@ export function CollectionAddToLikedButton({
             variant={collection.is_liked ? "brand" : "muted"}
             size="icon"
             onClick={() => handleClick(collection)}
-            className={`flex items-center justify-center p-0 ${sizeClass}`}
+            className={sizeClass}
         >
             {renderAddIcon()}
         </Button>

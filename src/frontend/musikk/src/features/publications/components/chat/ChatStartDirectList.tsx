@@ -27,6 +27,7 @@ export function ChatStartDirectList() {
         return friends.filter((friend) => !directChatMemberUUIDs.has(friend.uuid));
     }, [friends, chats]);
 
+    // TODO: create chat only on first message
     const handleFriendClick = (friend: BaseUser) => {
         if (!userUUID || createChatMutation.isPending) return;
 

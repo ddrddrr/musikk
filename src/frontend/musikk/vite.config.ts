@@ -4,7 +4,7 @@ import path from "path";
 import { defineConfig, loadEnv } from "vite";
 
 export default defineConfig(({ mode }) => {
-    const env = loadEnv(mode, process.cwd(), "VITE_");
+    const env = loadEnv(mode, process.cwd(), "");
     const backendPort = env.DJANGO_PORT || "8005";
 
     return {
@@ -17,6 +17,10 @@ export default defineConfig(({ mode }) => {
         server: {
             proxy: {
                 "/api": {
+                    target: `http://localhost:${backendPort}`,
+                    changeOrigin: true,
+                },
+                "/media": {
                     target: `http://localhost:${backendPort}`,
                     changeOrigin: true,
                 },

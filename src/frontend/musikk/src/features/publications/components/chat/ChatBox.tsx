@@ -85,6 +85,7 @@ export function ChatBox({ chatUUID }: ChatBoxProps) {
                         fetchNextPage={fetchNextPage}
                     />
                 </div>
+                {/*TODO: add ws to load messages on new pub*/}
                 <ChatMessageList messages={publicationsFlat} />
             </div>
 

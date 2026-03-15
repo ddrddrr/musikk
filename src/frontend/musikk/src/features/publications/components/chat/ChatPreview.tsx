@@ -1,5 +1,7 @@
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
+import { useChatImage } from "@/features/publications/hooks/useChatImage.ts";
 import { Chat } from "@/features/publications/types.ts";
+import { UserAvatar } from "@/features/user/components/UserAvatar.tsx";
 import { cn } from "@/lib/utils.ts";
 import { useNavigate } from "react-router-dom";
 
@@ -10,6 +12,7 @@ interface ChatPreviewProps {
 export function ChatPreview({ chat }: ChatPreviewProps) {
     const userUUID = useUserUUID();
     const navigate = useNavigate();
+    const { chatImg, chatImgAlt } = useChatImage(chat);
 
     return (
         <button
@@ -20,21 +23,9 @@ export function ChatPreview({ chat }: ChatPreviewProps) {
             )}
         >
             <div className="flex items-start gap-3">
-                {chat.image && (
-                    <img
-                        src={chat.image}
-                        className="h-12 w-12 flex-shrink-0 rounded-sm border-2 border-black object-cover"
-                    />
-                )}
+                <UserAvatar src={chatImg} alt={chatImgAlt} size="sm" />
                 <div className="min-w-0 flex-1 space-y-1">
-                    <h3 className="truncate text-sm font-bold">
-                        {chat.title}
-                        {!chat.is_direct && (
-                            <span className="ml-2 text-xs font-normal text-gray-600">
-                                {chat.members.length} members
-                            </span>
-                        )}
-                    </h3>
+                    <h3 className="truncate text-base font-bold">{chat.title}</h3>
                     {chat.last_message && (
                         <>
                             <p className="truncate text-xs text-gray-600">

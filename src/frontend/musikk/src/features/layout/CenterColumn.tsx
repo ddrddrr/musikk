@@ -18,6 +18,7 @@ export function CenterColumn() {
                     <Route path="users/:uuid" element={<ProfilePage />} />
                     <Route path="users/:uuid/connections" element={<Connections />} />
                     <Route path="users/:uuid/chats" element={<ChatPreviewList />} />
+                    {/*TODO: just chats without users prefix?*/}
                     <Route
                         path="users/:userUUID/chats/:chatUUID"
                         element={<ChatBoxRouteHandler />}
@@ -28,6 +29,7 @@ export function CenterColumn() {
     );
 }
 
+// TODO: move, name in the same way as ChatBoxRouteHandler?
 function SongCollectionContainerWrapper() {
     const { uuid } = useParams();
     if (!uuid) return null;

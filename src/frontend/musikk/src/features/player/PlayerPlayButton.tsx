@@ -17,7 +17,7 @@ export function PlayerPlayButton() {
             variant="brand"
             size="icon"
             onClick={() => handlePlay()}
-            className="flex items-center justify-center rounded-sm p-0"
+            className="rounded-sm"
         >
             {renderPlayPauseIcon()}
         </Button>

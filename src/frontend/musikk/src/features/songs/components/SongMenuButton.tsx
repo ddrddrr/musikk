@@ -35,7 +35,7 @@ export function SongMenuButton({
         <div className="flex items-center gap-1">
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                    <Button variant={"ghost"} className={"p-0 hover:text-accent-foreground"}>
+                    <Button variant={"ghost"} size="icon" className={"hover:text-accent-foreground"}>
                         <EllipsisVertical className={iconSize} />
                     </Button>
                 </DropdownMenuTrigger>
