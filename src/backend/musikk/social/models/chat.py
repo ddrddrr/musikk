@@ -6,7 +6,7 @@ from utils.paths import deafult_image_path
 
 # TODO: guard against multiple chats for the same pair of people when is_direct=True
 class Chat(BaseModel):
-    title = models.CharField(max_length=2000, blank=True, default="")
+    title = models.CharField(max_length=200, blank=True, default="")
     image = models.ImageField(upload_to=deafult_image_path, null=True, blank=True)
     is_direct = models.BooleanField(
         default=True,
