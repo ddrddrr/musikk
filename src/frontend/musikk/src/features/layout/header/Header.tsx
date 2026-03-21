@@ -1,9 +1,10 @@
-import { ProfileDropdown } from "@/features/layout/header/ProfileDropdown.tsx";
+import { SocialDropdown } from "@/features/layout/header/SocialDropdown.tsx";
 import { NotificationBox } from "@/features/notifications/NotificationBox";
 import { SearchBar } from "@/features/search/SearchBar.tsx";
 import { Button } from "@/features/ui/button";
+import { UserAvatar } from "@/features/user/components/UserAvatar.tsx";
 import { useAuth } from "@/hooks/useAuth";
-import { Cog, Disc3, MessageSquareText, Upload } from "lucide-react";
+import { Cog, Disc3, Upload, Users } from "lucide-react";
 import { memo } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -23,13 +24,14 @@ export const Header = memo(function Header() {
                 >
                     <Disc3 />
                 </Button>
+                <SocialDropdown />
                 <Button
                     variant="ghost"
                     size="icon"
                     className="text-white"
-                    onClick={() => void navigate("/feed")}
+                    onClick={() => void navigate(`/users/${user?.uuid}/connections`)}
                 >
-                    <MessageSquareText />
+                    <Users />
                 </Button>
             </div>
 
@@ -39,8 +41,14 @@ export const Header = memo(function Header() {
             </div>
 
             <div className="col-span-1 flex items-center justify-end gap-4">
-                {/*TODO: chats, should be a dropdown when clicked on the "MessageSquareText" button not profile */}
-                <ProfileDropdown />
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="hover:bg-red-700"
+                    onClick={() => void navigate(`/users/${user?.uuid}`)}
+                >
+                    <UserAvatar src={user?.avatar} alt={user?.display_name} size="sm" />
+                </Button>
                 <NotificationBox />
                 <Button
                     variant="ghost"

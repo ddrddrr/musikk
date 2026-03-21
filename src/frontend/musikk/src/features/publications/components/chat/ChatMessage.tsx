@@ -2,6 +2,7 @@ import { Publication } from "@/features/publications/types.ts";
 import { UserIdentifier } from "@/features/user/components/UserIdentifier.tsx";
 import { useAuth } from "@/hooks/useAuth.ts";
 import { cn } from "@/lib/utils.ts";
+import { formatDateTime } from "@/utils/formatDate.ts";
 
 interface ChatMessageProps {
     message: Publication;
@@ -34,10 +35,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
                     )}
                 </p>
                 <span className="mt-1 block text-right text-[10px] text-gray-600">
-                    {new Date(message.date_added).toLocaleString(undefined, {
-                        dateStyle: "medium",
-                        timeStyle: "short",
-                    })}
+                    {formatDateTime(message.date_added)}
                 </span>
             </div>
         </div>

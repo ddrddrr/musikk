@@ -47,22 +47,11 @@ export function ChatBox({ chatUUID }: ChatBoxProps) {
         );
     }
 
-    if (chatError) {
+    if (chatError || error) {
         return (
             <div className="rounded-sm border-2 border-black bg-red-600 p-4 text-white">
                 <div className="text-sm font-medium">Failed to load chat</div>
                 <Button variant="brand" size="lg" onClick={() => void refetchChat()}>
-                    Retry
-                </Button>
-            </div>
-        );
-    }
-
-    if (error) {
-        return (
-            <div className="rounded-sm border-2 border-black bg-red-600 p-4 text-white">
-                <div className="text-sm font-medium">Failed to load messages</div>
-                <Button variant="brand" size="lg" onClick={() => void refetch}>
                     Retry
                 </Button>
             </div>

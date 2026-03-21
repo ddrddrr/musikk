@@ -1,5 +1,6 @@
 import { UserIdentifier } from "@/features/user/components/UserIdentifier.tsx";
 import { BaseUser } from "@/features/user/types.ts";
+import { formatDateTime } from "@/utils/formatDate.ts";
 
 type PostHeaderProps = {
     author: BaseUser;
@@ -11,10 +12,7 @@ export function PostHeader({ author, dateAdded }: PostHeaderProps) {
         <div className="flex items-center gap-2">
             <UserIdentifier user={author} />
             <div className="text-xs text-muted-foreground">
-                {new Date(dateAdded).toLocaleString(undefined, {
-                    dateStyle: "short",
-                    timeStyle: "short",
-                })}
+                {formatDateTime(dateAdded)}
             </div>
         </div>
     );

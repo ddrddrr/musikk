@@ -1,5 +1,6 @@
 import { Publication } from "@/features/publications/types.ts";
 import { UserIdentifier } from "@/features/user/components/UserIdentifier.tsx";
+import { formatDateTime } from "@/utils/formatDate.ts";
 
 interface CommentProps {
     comment: Publication;
@@ -20,10 +21,7 @@ export function Comment({ comment, setReplyTo }: CommentProps) {
             <div className="mb-1 flex items-center justify-between">
                 <UserIdentifier user={comment.author} />
                 <span className="max-w-[50%] truncate text-right text-[10px] text-gray-600">
-                    {new Date(comment.date_added).toLocaleString("en-US", {
-                        dateStyle: "medium",
-                        timeStyle: "short",
-                    })}
+                    {formatDateTime(comment.date_added)}
                 </span>
             </div>
             <p className="text-sm text-gray-800">

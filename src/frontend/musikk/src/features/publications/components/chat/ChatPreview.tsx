@@ -3,6 +3,7 @@ import { useChatImage } from "@/features/publications/hooks/useChatImage.ts";
 import { Chat } from "@/features/publications/types.ts";
 import { UserAvatar } from "@/features/user/components/UserAvatar.tsx";
 import { cn } from "@/lib/utils.ts";
+import { formatDateTime } from "@/utils/formatDate.ts";
 import { useNavigate } from "react-router-dom";
 
 interface ChatPreviewProps {
@@ -44,10 +45,7 @@ export function ChatPreview({ chat }: ChatPreviewProps) {
                                 )}
                             </p>
                             <p className="text-[10px] text-gray-600">
-                                {new Date(chat.last_message.date_added).toLocaleString(undefined, {
-                                    dateStyle: "short",
-                                    timeStyle: "short",
-                                })}
+                                {formatDateTime(chat.last_message.date_added)}
                             </p>
                         </>
                     )}

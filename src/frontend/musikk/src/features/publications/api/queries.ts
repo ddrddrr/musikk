@@ -20,13 +20,13 @@ function usePublicationListInfinite(
     url: string,
     queryKey: unknown[],
     additionalParams?: Record<string, string>,
+    limit = 10,
 ) {
-    const limit = 10;
-
     return useInfiniteQuery({
         queryKey: [...queryKey, url, "infinite", limit, additionalParams],
         initialPageParam: 0,
         queryFn: ({ pageParam }) => fetchPublicationPage(url, limit, pageParam, additionalParams),
+        // TODO: make a separate function, this is the same for every paginated query
         getNextPageParam: (lastPage) => {
             if (!lastPage.next) return undefined;
             const offsetStr = new URL(lastPage.next).searchParams.get("offset");

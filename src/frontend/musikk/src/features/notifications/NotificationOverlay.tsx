@@ -1,6 +1,7 @@
 import { NotificationListParams } from "@/features/notifications/queries.ts";
 import { IFollowerNotification, IReplyNotification } from "@/features/notifications/types.ts";
 import { Button } from "@/features/ui/button.tsx";
+import { formatDateTime } from "@/utils/formatDate.ts";
 import { memo } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -51,10 +52,7 @@ export const NotificationOverlay = memo(function NotificationOverlay({
                             </div>
                             <div className="mt-2 flex justify-between">
                                 <span className="text-xs text-gray-600">
-                                    {new Date(notification.date_added).toLocaleString(undefined, {
-                                        dateStyle: "medium",
-                                        timeStyle: "short",
-                                    })}
+                                    {formatDateTime(notification.date_added)}
                                 </span>
                                 <Button
                                     variant="brand"
@@ -76,10 +74,7 @@ export const NotificationOverlay = memo(function NotificationOverlay({
                             </div>
                             <div className="mt-2 flex justify-between">
                                 <span className="text-xs text-gray-600">
-                                    {new Date(notification.date_added).toLocaleString(undefined, {
-                                        dateStyle: "medium",
-                                        timeStyle: "short",
-                                    })}
+                                    {formatDateTime(notification.date_added)}
                                 </span>
                                 <Button
                                     variant="brand"

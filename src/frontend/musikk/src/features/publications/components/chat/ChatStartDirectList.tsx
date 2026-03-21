@@ -15,7 +15,7 @@ export function ChatStartDirectList() {
     const createChatMutation = useCreateChat();
 
     const friendsWithoutDirectChat = useMemo(() => {
-        // TODO add a hook for chats so we dont check for null here
+        // TODO add a hook for chats so we dont check for null here?
         if (!friends || !chats) return [];
 
         const directChatMemberUUIDs = new Set(
@@ -27,7 +27,6 @@ export function ChatStartDirectList() {
         return friends.filter((friend) => !directChatMemberUUIDs.has(friend.uuid));
     }, [friends, chats]);
 
-    // TODO: create chat only on first message
     const handleFriendClick = (friend: BaseUser) => {
         if (!userUUID || createChatMutation.isPending) return;
 
