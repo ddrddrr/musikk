@@ -1,3 +1,4 @@
+import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { ChatNewGroupForm } from "@/features/publications/components/chat/ChatNewGroupForm.tsx";
 import { ChatPreview } from "@/features/publications/components/chat/ChatPreview.tsx";
 import { ChatStartDirectList } from "@/features/publications/components/chat/ChatStartDirectList.tsx";
@@ -7,7 +8,7 @@ import { Plus } from "lucide-react";
 import { useState } from "react";
 
 export function ChatPreviewList() {
-    const { chats, isLoading } = useUserChatsContext();
+    const { chats, isLoading, error, refetch } = useUserChatsContext();
     const [showNewGroupForm, setShowNewGroupForm] = useState(false);
 
     if (isLoading) {
@@ -26,7 +27,10 @@ export function ChatPreviewList() {
             />
         );
     }
-    // TODO: on err show that
+
+    if (error) {
+        return <QueryErrorBox message="Failed to load chats" onRetry={refetch} />;
+    }
 
     return (
         <div className="space-y-4 p-4">

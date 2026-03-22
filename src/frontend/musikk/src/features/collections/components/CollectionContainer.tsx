@@ -2,6 +2,7 @@ import { UUID } from "@/api/types.ts";
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
 import { fetchCollectionDetailed } from "@/features/collections/api/queries.ts";
 import { CollectionHeader } from "@/features/collections/components/CollectionHeader.tsx";
+import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { CommentBox } from "@/features/publications/components/collection-comments/CommentBox.tsx";
 import { SongContainer } from "@/features/songs/components/SongContainer.tsx";
 import { UserCollectionsContext } from "@/features/user/providers/userCollectionsContext.ts";
@@ -23,6 +24,7 @@ export function CollectionContainer({ collectionUUID }: CollectionContainerProps
         isPending,
         error,
         data: collection,
+        refetch,
     } = useQuery({
         queryKey: ["openCollection", collectionUUID],
         queryFn: () => fetchCollectionDetailed(collectionUUID),
@@ -45,9 +47,10 @@ export function CollectionContainer({ collectionUUID }: CollectionContainerProps
 
     if (error)
         return (
-            <div className="rounded-sm border-2 border-black bg-red-600 p-6 text-center text-white">
-                An error has occurred: {error.message}
-            </div>
+            <QueryErrorBox
+                message="Failed to load collection"
+                onRetry={() => void refetch()}
+            />
         );
 
     const songs = collection.songs;

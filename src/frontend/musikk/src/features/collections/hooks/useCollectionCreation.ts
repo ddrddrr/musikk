@@ -1,3 +1,4 @@
+import { getErrorDetail } from "@/api/errorUtils.ts";
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
 import { createCollection } from "@/features/collections/api/mutations.ts";
 import { CollectionCreationSchema } from "@/features/collections/schemas.ts";
@@ -5,6 +6,7 @@ import { Collection, CollectionType } from "@/features/collections/types.ts";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import z from "zod";
 
 export type CollectionCreationFormValues = z.infer<typeof CollectionCreationSchema>;
@@ -36,7 +38,7 @@ export function useCollectionCreation({ type, onSuccess }: UseCollectionCreation
 
             try {
                 const collection = await createCollection({
-                    // todo
+                    // TODO: tighten the allowed type
                     type,
                     private: data.private,
                     title: data.title,
@@ -48,8 +50,7 @@ export function useCollectionCreation({ type, onSuccess }: UseCollectionCreation
                 form.reset(DEFAULT_VALUES);
                 onSuccess?.(collection);
             } catch (error) {
-                console.warn("createCollection failed", error);
-                throw error;
+                toast.error(getErrorDetail(error, "Failed to create collection"));
             } finally {
                 setIsSubmitting(false);
             }

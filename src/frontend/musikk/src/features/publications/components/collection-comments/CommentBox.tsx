@@ -1,10 +1,10 @@
 import { UUID } from "@/api/types.ts";
+import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { CommentForm } from "@/features/publications/components/collection-comments/CommentForm.tsx";
 import { CommentList } from "@/features/publications/components/collection-comments/CommentList.tsx";
 import { LoadOlderButton } from "@/features/publications/components/LoadOlderButton.tsx";
 import { useCollectionCommentsFlat } from "@/features/publications/hooks/usePublicationsInfiniteFlat.ts";
 import { Publication } from "@/features/publications/types.ts";
-import { Button } from "@/features/ui/button.tsx";
 import { memo, useEffect, useRef, useState } from "react";
 
 interface CommentBoxProps {
@@ -44,12 +44,7 @@ export const CommentBox = memo(function CommentBox({ collectionUUID }: CommentBo
 
     if (error) {
         return (
-            <div className="rounded-sm border-2 border-black bg-red-600 p-4 text-white">
-                <div className="text-sm font-medium">Failed to load comments</div>
-                <Button variant="brand" size="lg" onClick={void refetch}>
-                    Retry
-                </Button>
-            </div>
+            <QueryErrorBox message="Failed to load comments" onRetry={() => void refetch()} />
         );
     }
 

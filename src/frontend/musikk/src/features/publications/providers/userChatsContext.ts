@@ -4,9 +4,13 @@ import { createContext } from "react";
 interface UserChatsContextType {
     chats: Chat[] | null;
     isLoading: boolean;
+    error: Error | null;
+    refetch: () => void;
 }
 
 export const UserChatsContext = createContext<UserChatsContextType>({
     chats: null,
     isLoading: false,
+    error: null,
+    refetch: () => {},
 });

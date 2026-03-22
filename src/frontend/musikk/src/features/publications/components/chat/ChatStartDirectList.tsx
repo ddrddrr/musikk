@@ -1,3 +1,4 @@
+import { getErrorDetail } from "@/api/errorUtils.ts";
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
 import { useCreateChat } from "@/features/publications/api/mutations.ts";
 import { useUserChatsContext } from "@/features/publications/hooks/useUserChats.ts";
@@ -6,6 +7,7 @@ import { UserConnectionsContext } from "@/features/user/providers/userConnection
 import { BaseUser } from "@/features/user/types.ts";
 import { useContext, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 export function ChatStartDirectList() {
     const userUUID = useUserUUID();
@@ -41,7 +43,7 @@ export function ChatStartDirectList() {
                     void navigate(`/users/${userUUID}/chats/${chat.uuid}`);
                 },
                 onError: (error) => {
-                    console.error("Failed to create direct chat:", error);
+                    toast.error(getErrorDetail(error, "Failed to create a chat"));
                 },
             },
         );

@@ -1,6 +1,8 @@
+import { getErrorDetail } from "@/api/errorUtils.ts";
 import { Button } from "@/features/ui/button.tsx";
 import { useMutation } from "@tanstack/react-query";
 import { Check, Plus } from "lucide-react";
+import { toast } from "sonner";
 import { collectionAddToLiked } from "../api/mutations.ts";
 import { Collection } from "../types.ts";
 
@@ -13,7 +15,15 @@ export function CollectionAddToLikedButton({
     collection,
     showComments,
 }: CollectionAddToLikedButtonProps) {
-    const collectionAddToLikedMutation = useMutation({ mutationFn: collectionAddToLiked });
+    const collectionAddToLikedMutation = useMutation({
+        mutationFn: collectionAddToLiked,
+        onSuccess: () => {
+            toast.success("Added to liked collections");
+        },
+        onError: (error) => {
+            toast.error(getErrorDetail(error, "Failed to add collection to liked"));
+        },
+    });
     const sizeClass = showComments ? "h-8 w-8" : "h-12 w-12";
 
     const renderAddIcon = () => {

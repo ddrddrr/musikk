@@ -1,3 +1,4 @@
+import { getErrorDetail } from "@/api/errorUtils.ts";
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
 import { useCreateChatMessage } from "@/features/publications/api/mutations.ts";
 import { AttachmentPicker } from "@/features/publications/components/AttachmentPicker.tsx";
@@ -8,6 +9,7 @@ import { Button } from "@/features/ui/button.tsx";
 import { Textarea } from "@/features/ui/textarea.tsx";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
 type ChatMessageFormData = z.infer<typeof chatMessageSchema>;
@@ -49,7 +51,7 @@ export function ChatMessageForm({ chat, onMessagePosted }: ChatMessageFormProps)
                     onMessagePosted?.();
                 },
                 onError: (error) => {
-                    console.error("Failed to send message:", error);
+                    toast.error(getErrorDetail(error, "Failed to send message"));
                 },
             },
         );

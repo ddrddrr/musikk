@@ -1,3 +1,4 @@
+import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { usePublicationChildren } from "@/features/publications/api/queries.ts";
 import { Publication } from "@/features/publications/types.ts";
 import { Button } from "@/features/ui/button.tsx";
@@ -14,10 +15,12 @@ export function PostReplies({ publication, renderChild }: PostRepliesProps) {
     // TODO: add proper ws invalidate event
     const [areChildrenOpen, setAreChildrenOpen] = useState(false);
 
-    const { data: replies, isPending } = usePublicationChildren(
-        publication.uuid,
-        publication.has_children,
-    );
+    const {
+        data: replies,
+        isPending,
+        error,
+        refetch,
+    } = usePublicationChildren(publication.uuid, publication.has_children);
 
     if (!publication.has_children || !replies) return null;
     return (
@@ -42,16 +45,24 @@ export function PostReplies({ publication, renderChild }: PostRepliesProps) {
             </CollapsibleTrigger>
             {areChildrenOpen && (
                 <CollapsibleContent>
+                    {/*TODO: move to a sep component?*/}
                     <div className="relative pl-2">
-                        {isPending ? (
+                        {error && (
+                            <QueryErrorBox
+                                message="Failed to load replies"
+                                onRetry={() => void refetch()}
+                            />
+                        )}
+                        {!error && isPending && (
                             <div className="py-2 text-sm text-muted-foreground">Loading...</div>
-                        ) : (
-                            replies.map((reply) => (
+                        )}
+                        {!error &&
+                            !isPending &&
+                            replies?.map((reply) => (
                                 <div key={reply.uuid} className="relative">
                                     {renderChild(reply)}
                                 </div>
-                            ))
-                        )}
+                            ))}
                     </div>
                 </CollapsibleContent>
             )}

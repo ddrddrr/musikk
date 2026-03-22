@@ -1,3 +1,4 @@
+import { getErrorDetail } from "@/api/errorUtils.ts";
 import { UUID } from "@/api/types.ts";
 import { useCreateCollectionComment } from "@/features/publications/api/mutations.ts";
 import { commentSchema } from "@/features/publications/schemas.ts";
@@ -5,6 +6,7 @@ import { Publication } from "@/features/publications/types.ts";
 import { Button } from "@/features/ui/button.tsx";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
 type CommentFormData = z.infer<typeof commentSchema>;
@@ -45,8 +47,9 @@ export function CommentForm({
                     setReplyTo?.(undefined);
                     onCommentPosted?.();
                 },
+                // TODO: move to mutation def?
                 onError: (error) => {
-                    console.error("Failed to add comment:", error);
+                    toast.error(getErrorDetail(error, "Failed to add comment"));
                 },
             },
         );

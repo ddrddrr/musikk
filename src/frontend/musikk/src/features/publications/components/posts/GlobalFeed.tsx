@@ -1,4 +1,5 @@
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
+import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { LoadOlderButton } from "@/features/publications/components/LoadOlderButton.tsx";
 import { PostTree } from "@/features/publications/components/posts/PostTree.tsx";
 import { useFeedPostsFlat } from "@/features/publications/hooks/usePublicationsInfiniteFlat.ts";
@@ -15,9 +16,12 @@ export function GlobalFeed() {
     const queryFollowed = useFeedPostsFlat(userUUID!, false, "followed");
     const queryAll = useFeedPostsFlat(userUUID!, false);
 
+    // TODO: move to a sep component
     function renderPostTree(
         label: string,
         posts: Publication[] | undefined,
+        error: Error | null,
+        refetch: () => void,
         hasNextPage: boolean,
         isFetchingNextPage: boolean,
         fetchNextPage: () => Promise<unknown> | void,
@@ -25,10 +29,17 @@ export function GlobalFeed() {
         return (
             <TabsContent value={label}>
                 <div className="space-y-6">
-                    {posts?.map((post) => (
-                        <PostTree key={post.uuid} publication={post} />
-                    ))}
-                    {!posts?.length && (
+                    {error && (
+                        <QueryErrorBox
+                            message="Failed to load posts"
+                            onRetry={() => void refetch()}
+                        />
+                    )}
+                    {!error &&
+                        posts?.map((post) => (
+                            <PostTree key={post.uuid} publication={post} />
+                        ))}
+                    {!error && !posts?.length && (
                         <Card className={"border border-black"}>
                             <CardContent className="py-6 text-center text-muted-foreground">
                                 No posts yet.
@@ -61,6 +72,8 @@ export function GlobalFeed() {
                 {renderPostTree(
                     "random",
                     queryAll.publicationsFlat,
+                    queryAll.error,
+                    queryAll.refetch,
                     queryAll.hasNextPage,
                     queryAll.isFetchingNextPage,
                     queryAll.fetchNextPage,
@@ -68,6 +81,8 @@ export function GlobalFeed() {
                 {renderPostTree(
                     "friends",
                     queryFriends.publicationsFlat,
+                    queryFriends.error,
+                    queryFriends.refetch,
                     queryFriends.hasNextPage,
                     queryFriends.isFetchingNextPage,
                     queryFriends.fetchNextPage,
@@ -75,6 +90,8 @@ export function GlobalFeed() {
                 {renderPostTree(
                     "followed",
                     queryFollowed.publicationsFlat,
+                    queryFollowed.error,
+                    queryFollowed.refetch,
                     queryFollowed.hasNextPage,
                     queryFollowed.isFetchingNextPage,
                     queryFollowed.fetchNextPage,

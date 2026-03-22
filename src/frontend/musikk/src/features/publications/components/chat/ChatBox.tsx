@@ -1,5 +1,6 @@
 import { UUID } from "@/api/types.ts";
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
+import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { useChatDetail } from "@/features/publications/api/queries.ts";
 import { LoadOlderButton } from "@/features/publications/components/LoadOlderButton.tsx";
 import { ChatHeader } from "@/features/publications/components/chat/ChatHeader.tsx";
@@ -7,7 +8,6 @@ import { ChatMessageForm } from "@/features/publications/components/chat/ChatMes
 import { ChatMessageList } from "@/features/publications/components/chat/ChatMessageList.tsx";
 import { useAutoScrollToBottom } from "@/features/publications/hooks/useAutoScrollToBottom.ts";
 import { useChatMessagesFlat } from "@/features/publications/hooks/usePublicationsInfiniteFlat.ts";
-import { Button } from "@/features/ui/button.tsx";
 import { useRef } from "react";
 
 interface ChatBoxProps {
@@ -26,20 +26,20 @@ export function ChatBox({ chatUUID }: ChatBoxProps) {
 
     const {
         data: messages,
-        error,
-        isPending,
+        error: messagesError,
+        isPending: isMessagesPending,
         hasNextPage,
         isFetchingNextPage,
         fetchNextPage,
-        refetch,
         publicationsFlat,
+        refetch: refetchMessages,
     } = useChatMessagesFlat(userUUID!, chatUUID);
 
     const messagesContainerRef = useRef<HTMLDivElement>(null);
-    const scrollToBottom = useAutoScrollToBottom(messagesContainerRef, isPending, messages);
+    const scrollToBottom = useAutoScrollToBottom(messagesContainerRef, isMessagesPending, messages);
 
     // TODO: use common spinner
-    if (isChatPending || isPending) {
+    if (isChatPending || isMessagesPending) {
         return (
             <div className="flex min-h-[400px] items-center justify-center">
                 <div className="h-8 w-8 animate-spin rounded-sm border-2 border-black border-t-transparent"></div>
@@ -47,14 +47,15 @@ export function ChatBox({ chatUUID }: ChatBoxProps) {
         );
     }
 
-    if (chatError || error) {
+    if (chatError) {
+        return <QueryErrorBox message="Failed to load chat" onRetry={() => void refetchChat()} />;
+    }
+    if (messagesError) {
         return (
-            <div className="rounded-sm border-2 border-black bg-red-600 p-4 text-white">
-                <div className="text-sm font-medium">Failed to load chat</div>
-                <Button variant="brand" size="lg" onClick={() => void refetchChat()}>
-                    Retry
-                </Button>
-            </div>
+            <QueryErrorBox
+                message="Failed to load messages"
+                onRetry={() => void refetchMessages()}
+            />
         );
     }
 

@@ -1,16 +1,16 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import z from "zod";
-
+import { getErrorDetail } from "@/api/errorUtils.ts";
 import { UUID } from "@/api/types.ts";
 import { useCreatePost } from "@/features/publications/api/mutations.ts";
 import { AttachmentPicker } from "@/features/publications/components/AttachmentPicker.tsx";
 import { useAttachment } from "@/features/publications/hooks/useAttachment.ts";
 import { postSchema } from "@/features/publications/schemas.ts";
 import { Publication } from "@/features/publications/types.ts";
-
 import { Button } from "@/features/ui/button.tsx";
 import { Textarea } from "@/features/ui/textarea.tsx";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import z from "zod";
 
 type PostFormData = z.infer<typeof postSchema>;
 
@@ -34,21 +34,30 @@ export function PostForm({ replyTo, setReplyTo, onSuccess, feedUserUUID }: PostF
     const { attachedObj, setAttachedObj, getAttachmentData, clearAttachment } = useAttachment();
     const createPostMutation = useCreatePost();
 
-    const submitHandler = async (formData: PostFormData) => {
+    const submitHandler = (formData: PostFormData) => {
         const { attachmentType, attachmentUUID } = getAttachmentData();
 
-        await createPostMutation.mutateAsync({
-            userUUID: feedUserUUID!,
-            content: formData.content,
-            parentUUID: replyTo?.uuid,
-            attachmentType,
-            attachmentUUID,
-        });
-
-        reset();
-        setReplyTo?.(undefined);
-        clearAttachment();
-        onSuccess?.();
+        createPostMutation.mutate(
+            {
+                userUUID: feedUserUUID!,
+                content: formData.content,
+                parentUUID: replyTo?.uuid,
+                attachmentType,
+                attachmentUUID,
+            },
+            {
+                onSuccess: () => {
+                    reset();
+                    setReplyTo?.(undefined);
+                    clearAttachment();
+                    onSuccess?.();
+                },
+                // TODOL move to def?
+                onError: (error) => {
+                    toast.error(getErrorDetail(error, "Failed to create post"));
+                },
+            },
+        );
     };
 
     return (

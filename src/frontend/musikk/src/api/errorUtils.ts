@@ -1,26 +1,20 @@
-export class ResponseError extends Error {
-    override name: "ResponseError" = "ResponseError";
-    constructor(
-        public response: Response,
-        msg?: string,
-    ) {
-        super(msg);
-    }
-}
+import { isAxiosError } from "axios";
 
-export const getErrorDetail = async (
+export function getErrorDetail(
     error: unknown,
-    defaultMessage = "Please try again.",
-): Promise<string> => {
-    if (error instanceof ResponseError) {
-        try {
-            const errorData = await error.response.json();
-            if (errorData.detail) {
-                return errorData.detail;
-            }
-        } catch {
-            // Failed to parse error response, use default message
+    defaultMessage = "Something went wrong. Please try again.",
+): string {
+    if (isAxiosError(error)) {
+        const data = error.response?.data;
+        if (data && typeof data === "object") {
+            // TODO: consolidate on be
+            if (typeof data.detail === "string") return data.detail;
+            if (typeof data.error === "string") return data.error;
+            if (typeof data.message === "string") return data.message;
         }
     }
+    if (error instanceof Error) {
+        return error.message;
+    }
     return defaultMessage;
-};
+}

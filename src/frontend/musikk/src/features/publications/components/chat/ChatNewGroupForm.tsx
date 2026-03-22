@@ -1,3 +1,4 @@
+import { getErrorDetail } from "@/api/errorUtils.ts";
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
 import { useCreateChat } from "@/features/publications/api/mutations.ts";
 import { Button } from "@/features/ui/button.tsx";
@@ -15,6 +16,7 @@ import { cn } from "@/lib/utils.ts";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useContext } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
 const chatNewGroupFormSchema = z.object({
@@ -68,7 +70,7 @@ export function ChatNewGroupForm({ onSuccess, onCancel }: ChatNewGroupFormProps)
                     onSuccess?.();
                 },
                 onError: (error) => {
-                    console.error("Failed to create group chat:", error);
+                    toast.error(getErrorDetail(error, "Failed to create group chat"));
                 },
             },
         );

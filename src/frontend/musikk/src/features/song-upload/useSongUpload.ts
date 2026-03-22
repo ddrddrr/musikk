@@ -1,9 +1,11 @@
+import { getErrorDetail } from "@/api/errorUtils.ts";
 import type { UUID } from "@/api/types.ts";
 import { uploadCollectionSong } from "@/features/song-upload/mutations.ts";
 import type { SongUploadState } from "@/features/song-upload/types.ts";
 import type { UploadEventPayload } from "@/features/song-upload/useWsEvents.ts";
 import { useSongUploadEvent } from "@/features/song-upload/useWsEvents.ts";
 import { useCallback, useState } from "react";
+import { toast } from "sonner";
 
 export interface SongUploadData {
     title: string;
@@ -105,8 +107,9 @@ export function useSongUpload() {
                         songUUIDByOperationID.set(operationID, songUUID);
                         return;
                     }
+                    const { error } = r.reason as { operationID: UUID; error: unknown };
+                    toast.error(getErrorDetail(error, "Failed to upload song"));
                 });
-                // todo some err handling if not fulfilled
                 return songUUIDByOperationID;
             };
 

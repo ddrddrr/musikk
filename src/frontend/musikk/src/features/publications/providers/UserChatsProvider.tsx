@@ -7,11 +7,13 @@ type UserChatsProviderProps = {
 };
 export function UserChatsProvider({ children }: UserChatsProviderProps) {
     const userUUID = useUserUUID();
-    const { data, isLoading } = useUserChats(userUUID!);
+    const { data, isLoading, error, refetch } = useUserChats(userUUID!);
 
     const contextValue = {
         chats: data ?? null,
         isLoading,
+        error: error ?? null,
+        refetch: () => void refetch(),
     };
 
     return <UserChatsContext value={contextValue}>{children}</UserChatsContext>;
