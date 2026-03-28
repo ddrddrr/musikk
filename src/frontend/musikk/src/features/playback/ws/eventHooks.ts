@@ -12,7 +12,7 @@ export function useDeviceListEvent() {
     const { setDeviceList } = useDeviceList();
 
     useEffect(() => {
-        ws.subscribe("device.list", (payload: DeviceListPayload) => setDeviceList(payload.devices));
+        return ws.subscribe("device.list", (payload: DeviceListPayload) => setDeviceList(payload.devices));
     }, [ws, setDeviceList]);
 }
 
@@ -24,7 +24,7 @@ export function usePlaybackChangeEvent() {
     const { setIsPlaying } = usePlaybackState();
 
     useEffect(() => {
-        ws.subscribe("playback.change", (payload: PlaybackChangeEvent) => {
+        return ws.subscribe("playback.change", (payload: PlaybackChangeEvent) => {
             if (setIsPlaying) {
                 setIsPlaying(payload.playback);
             }

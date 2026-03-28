@@ -7,7 +7,7 @@ export function useQueryInvalidateEvent() {
     const client = useQueryClient();
 
     useEffect(() => {
-        ws.subscribe("invalidate.query", (payload) =>
+        return ws.subscribe("invalidate.query", (payload) =>
             client.invalidateQueries({ queryKey: payload["query_key"] }),
         );
     }, [ws, client]);

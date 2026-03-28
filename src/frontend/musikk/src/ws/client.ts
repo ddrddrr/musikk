@@ -143,6 +143,8 @@ export class WSClient {
         }
     }
 
+    // returns a func that should be called in useEffect, since we need to clear
+    // the listener list eventually, otherwise there'll be a memory leak
     subscribe(event: string, handler: MessageHandler): () => void {
         let listeners = this.listeners.get(event);
         if (!listeners) {
