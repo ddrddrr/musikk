@@ -1,9 +1,10 @@
+import { MediaThumbnail } from "@/features/common/MediaThumbnail.tsx";
 import type { Song } from "@/features/songs/types.ts";
 import { UserIdentifier } from "@/features/user/components/UserIdentifier.tsx";
 
-interface SongDisplayProps {
+type SongDisplayProps = {
     song: Song | undefined;
-}
+};
 
 export function SongDisplay({ song }: SongDisplayProps) {
     if (!song) {
@@ -14,25 +15,14 @@ export function SongDisplay({ song }: SongDisplayProps) {
         );
     }
 
-    const mediaBaseClass =
-        "bg-gray-200 flex items-center justify-center rounded-sm border border-black overflow-hidden";
-
     return (
         <div className="mb-4 flex flex-col items-start gap-3">
             <div className="aspect-square w-full max-w-2/5">
-                {song.image ? (
-                    <div className={`h-full w-full ${mediaBaseClass}`}>
-                        <img
-                            src={song.image}
-                            alt={song.title}
-                            className="h-full w-full object-cover"
-                        />
-                    </div>
-                ) : (
-                    <div className={`h-full w-full ${mediaBaseClass}`}>
-                        <span className="text-3xl text-gray-400">♪</span>
-                    </div>
-                )}
+                <MediaThumbnail
+                    src={song.image}
+                    alt={song.title}
+                    className="h-full w-full"
+                />
             </div>
             <div className="w-full text-start">
                 <div className="mb-1 flex flex-wrap items-center gap-2">

@@ -1,4 +1,7 @@
+import { cva } from "class-variance-authority";
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
+import { type CardSize, cardTitleVariants } from "@/features/common/card-variants.ts";
+import { MediaThumbnail } from "@/features/common/MediaThumbnail.tsx";
 import { Card, CardContent } from "@/features/ui/card.tsx";
 import {
     ContextMenu,
@@ -11,42 +14,42 @@ import { BaseUser } from "@/features/user/types.ts";
 import { MoreHorizontal, Smile } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-interface UserCardProps {
+type UserCardProps = {
     user: BaseUser;
-    size?: "small" | "medium" | "big";
+    size?: CardSize;
     onClick?: (u: BaseUser) => void;
-}
-
-const sizeStyles = {
-    small: {
-        card: "w-24",
-        avatarWrapper: "aspect-square",
-        name: "text-sm",
-        icon: "text-xl",
-        padding: "py-2 px-1",
-    },
-    medium: {
-        card: "w-40",
-        avatarWrapper: "aspect-square",
-        name: "text-base",
-        icon: "text-2xl",
-        padding: "py-2 px-2",
-    },
-    big: {
-        card: "w-44",
-        avatarWrapper: "aspect-square",
-        name: "text-lg",
-        icon: "text-3xl",
-        padding: "py-3 px-3",
-    },
 };
+
+const userCardWidthVariants = cva("", {
+    variants: {
+        size: {
+            small: "w-24",
+            medium: "w-40",
+            big: "w-44",
+        },
+    },
+    defaultVariants: { size: "medium" },
+});
+
+const userCardPaddingVariants = cva(
+    "flex items-center justify-center border-t-2 border-black bg-gray-200 text-center",
+    {
+        variants: {
+            size: {
+                small: "py-2 px-1",
+                medium: "py-2 px-2",
+                big: "py-3 px-3",
+            },
+        },
+        defaultVariants: { size: "medium" },
+    },
+);
 
 export function UserCard({ user, size = "medium", onClick }: UserCardProps) {
     const navigate = useNavigate();
     const myUuid = useUserUUID();
     const { isFollowing, toggleFollow } = useFollowUser(user.uuid);
 
-    const styles = sizeStyles[size];
     const { avatar, display_name } = user;
 
     function handleOnClick(u: BaseUser) {
@@ -63,26 +66,17 @@ export function UserCard({ user, size = "medium", onClick }: UserCardProps) {
                 <Card
                     onClick={() => handleOnClick(user)}
                     variant="panel"
-                    className={`cursor-pointer py-0 ${styles.card}`}
+                    className={userCardWidthVariants({ size, className: "cursor-pointer py-0" })}
                 >
                     <CardContent className="flex flex-col p-0">
-                        <div className={`${styles.avatarWrapper} bg-gray-200`}>
-                            {avatar ? (
-                                <img
-                                    src={avatar}
-                                    alt={display_name}
-                                    className="h-full w-full object-cover"
-                                />
-                            ) : (
-                                <div className="flex h-full w-full items-center justify-center">
-                                    <Smile className={`${styles.icon}`} />
-                                </div>
-                            )}
-                        </div>
-                        <div
-                            className={`flex items-center justify-center border-t-2 border-black bg-gray-200 text-center ${styles.padding}`}
-                        >
-                            <p className={`w-full truncate font-bold ${styles.name}`}>
+                        <MediaThumbnail
+                            src={avatar}
+                            alt={display_name}
+                            className="aspect-square"
+                            fallback={<Smile />}
+                        />
+                        <div className={userCardPaddingVariants({ size })}>
+                            <p className={cardTitleVariants({ size, className: "w-full" })}>
                                 {display_name}
                             </p>
                         </div>

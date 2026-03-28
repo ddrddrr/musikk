@@ -1,7 +1,9 @@
 import { Spinner } from "@/components/ui/spinner";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
-import { SongQueueContainer } from "@/features/song-queue/components/SongQueueContainer.tsx";
+import { SongQueuePlayButton } from "@/features/song-queue/components/SongQueueContainerPlayButton.tsx";
 import { useQueue, useQueueChangeAPI } from "@/features/song-queue/hooks/useQueueAPI.ts";
+import { SongContextMenu } from "@/features/songs/components/SongContextMenu.tsx";
+import { SongContainer } from "@/features/songs/components/SongContainer.tsx";
 import { SongDisplay } from "@/features/songs/components/SongDisplay.tsx";
 import { Button } from "@/features/ui/button.tsx";
 import { Trash2 } from "lucide-react";
@@ -37,7 +39,19 @@ export function SongQueue() {
                     <ul className="space-y-3">
                         {nodes.map((node) => (
                             <li key={node.uuid}>
-                                <SongQueueContainer node={node} />
+                                <SongContextMenu song={node.collection_song}>
+                                    <SongContainer
+                                        collectionSong={node.collection_song}
+                                        renderItems={{ songMenuButton: false }}
+                                        playButtonSlot={
+                                            <SongQueuePlayButton
+                                                node={node}
+                                                size={40}
+                                                className="p-2"
+                                            />
+                                        }
+                                    />
+                                </SongContextMenu>
                             </li>
                         ))}
                     </ul>
