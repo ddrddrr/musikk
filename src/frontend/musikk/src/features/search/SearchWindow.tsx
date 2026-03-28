@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
+import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { performSearch } from "@/features/search/queries";
-import { Card, CardContent } from "@/features/ui/card";
 import { Input } from "@/features/ui/input";
 
 import { CollectionCard } from "@/features/collections/components/CollectionCard.tsx";
@@ -29,7 +29,7 @@ export function SearchWindow({ onItemSelect, songMode = "card" }: SearchWindowPr
         return () => clearTimeout(handler);
     }, [query]);
 
-    const { isPending, isSuccess, error, data } = useQuery({
+    const { isPending, isSuccess, error, data, refetch } = useQuery({
         queryKey: ["search", debouncedQuery],
         queryFn: () => performSearch(debouncedQuery),
         enabled: !!debouncedQuery.trim(),
@@ -115,11 +115,10 @@ export function SearchWindow({ onItemSelect, songMode = "card" }: SearchWindowPr
 
             <div className="results-container min-h-[200px] flex-1 overflow-y-auto pt-4">
                 {error && (
-                    <Card>
-                        <CardContent className="p-4 text-red-500">
-                            Something went wrong.
-                        </CardContent>
-                    </Card>
+                    <QueryErrorBox
+                        message="Search failed"
+                        onRetry={() => void refetch()}
+                    />
                 )}
 
                 {isPending && (

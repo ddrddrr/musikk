@@ -1,3 +1,4 @@
+import { getErrorDetail } from "@/api/errorUtils.ts";
 import { collectionRemoveSong } from "@/features/collections/api/mutations.ts";
 import { CollectionSong } from "@/features/collections/types.ts";
 import { useQueueAddAPI } from "@/features/song-queue/hooks/useQueueAPI.ts";
@@ -11,6 +12,7 @@ import {
 } from "@/features/ui/dropdown-menu.tsx";
 import { useMutation } from "@tanstack/react-query";
 import { BetweenHorizonalStart, EllipsisVertical, Play, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { SongAddToPlaylistSubmenu } from "./SongAddToPlaylistSubmenu.tsx";
 
 interface SongMenuButtonProps {
@@ -26,7 +28,12 @@ export function SongMenuButton({
     iconSize,
     showRemoveFromPlaylist = false,
 }: SongMenuButtonProps) {
-    const collectionRemoveSongMutation = useMutation({ mutationFn: collectionRemoveSong });
+    const collectionRemoveSongMutation = useMutation({
+        mutationFn: collectionRemoveSong,
+        onError: (error) => {
+            toast.error(getErrorDetail(error, "Failed to remove song"));
+        },
+    });
     const { onClick: onSongPlayClick } = useSongPlayHandler(collectionSong);
     const addToQueueMutation = useQueueAddAPI();
 

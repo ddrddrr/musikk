@@ -1,3 +1,4 @@
+import { getErrorDetail } from "@/api/errorUtils.ts";
 import { collectionRemoveSong } from "@/features/collections/api/mutations.ts";
 import { CollectionSong } from "@/features/collections/types.ts";
 import { useQueueAddAPI } from "@/features/song-queue/hooks/useQueueAPI.ts";
@@ -12,6 +13,7 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import { BetweenHorizonalStart, Play, Trash2 } from "lucide-react";
 import { JSX } from "react";
+import { toast } from "sonner";
 
 interface SongContextMenuProps {
     children: JSX.Element | JSX.Element[];
@@ -24,7 +26,12 @@ export function SongContextMenu({
     song,
     renderRemoveFromPlaylist = false,
 }: SongContextMenuProps) {
-    const collectionRemoveSongMutation = useMutation({ mutationFn: collectionRemoveSong });
+    const collectionRemoveSongMutation = useMutation({
+        mutationFn: collectionRemoveSong,
+        onError: (error) => {
+            toast.error(getErrorDetail(error, "Failed to remove song"));
+        },
+    });
     const { onClick: onSongPlayClick } = useSongPlayHandler(song);
     const addToQueueMutation = useQueueAddAPI();
 

@@ -6,6 +6,8 @@ interface UserCollectionsContextType {
     created_collections: Collection[] | null;
     followed_collections: Collection[] | null;
     history: Collection | null;
+    error: Error | null;
+    isLoading: boolean;
 }
 
 export const UserCollectionsContext = createContext<UserCollectionsContextType>({
@@ -13,4 +15,6 @@ export const UserCollectionsContext = createContext<UserCollectionsContextType>(
     created_collections: null,
     followed_collections: null,
     history: null,
+    error: null,
+    isLoading: false,
 });

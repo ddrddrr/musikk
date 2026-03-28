@@ -1,8 +1,10 @@
+import { getErrorDetail } from "@/api/errorUtils.ts";
 import { CollectionSong } from "@/features/collections/types.ts";
 import { SongContextMenu } from "@/features/songs/components/SongContextMenu.tsx";
 import { albumBySongRetrieve } from "@/features/songs/queries.ts";
 import { Card, CardContent } from "@/features/ui/card.tsx";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 interface SongCardProps {
     collectionSong: CollectionSong;
@@ -47,9 +49,13 @@ export function SongCard({ collectionSong, size = "medium", onClick = undefined 
     async function handleClick(s: CollectionSong) {
         if (onClick) {
             onClick(s);
-        } else {
+            return;
+        }
+        try {
             const albumUUID = await albumBySongRetrieve(s.uuid);
             void navigate(`/collection/${albumUUID.uuid}/`);
+        } catch (error) {
+            toast.error(getErrorDetail(error, "Failed to load album"));
         }
     }
     const mediaBaseClass =

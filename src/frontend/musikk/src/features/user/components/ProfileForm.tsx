@@ -1,3 +1,4 @@
+import { getErrorDetail } from "@/api/errorUtils.ts";
 import { ImageField } from "@/features/common/ImageField.tsx";
 import { Avatar, AvatarImage } from "@/features/ui/avatar.tsx";
 import { Button } from "@/features/ui/button.tsx";
@@ -59,9 +60,9 @@ export function ProfileForm() {
         mutation.mutate(
             { ...values },
             {
-                onError: (err: any) => {
+                onError: (error) => {
                     setSubmitStatus("error");
-                    setMessage(err?.message ?? "Profile update failed");
+                    setMessage(getErrorDetail(error, "Profile update failed"));
                 },
                 onSuccess: () => {
                     setSubmitStatus("success");

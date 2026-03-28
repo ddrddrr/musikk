@@ -1,3 +1,4 @@
+import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { SongQueueContainer } from "@/features/song-queue/components/SongQueueContainer.tsx";
 import { useQueue, useQueueChangeAPI } from "@/features/song-queue/hooks/useQueueAPI.ts";
 import { SongDisplay } from "@/features/songs/components/SongDisplay.tsx";
@@ -6,7 +7,21 @@ import { Trash2 } from "lucide-react";
 
 export function SongQueue() {
     const clearQueueMutation = useQueueChangeAPI();
-    const { data: queue } = useQueue();
+    const { data: queue, error, isPending, refetch } = useQueue();
+
+    if (error) {
+        return <QueryErrorBox message="Failed to load queue" onRetry={() => void refetch()} />;
+    }
+
+    // TODO: use shadcn spinner
+    if (isPending) {
+        return (
+            <div className="flex h-full items-center justify-center">
+                <div className="h-8 w-8 animate-spin rounded-sm border-2 border-black border-t-transparent" />
+            </div>
+        );
+    }
+
     const nodes = queue?.nodes ?? [];
     const currentSong = queue?.nodes[0]?.collection_song?.song;
 

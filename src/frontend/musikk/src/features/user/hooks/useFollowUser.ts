@@ -1,6 +1,8 @@
+import { getErrorDetail } from "@/api/errorUtils.ts";
 import { useFollowUserMutation, useUnfollowUserMutation } from "@/features/user/api/mutations.ts";
 import { UserConnectionsContext } from "@/features/user/providers/userConnectionsContext.tsx";
 import { useContext } from "react";
+import { toast } from "sonner";
 
 export function useFollowUser(userUUID: string | undefined) {
     const followMutation = useFollowUserMutation();
@@ -19,7 +21,7 @@ export function useFollowUser(userUUID: string | undefined) {
                 await followMutation.mutateAsync(userUUID);
             }
         } catch (error) {
-            console.error("Error following/unfollowing user:", error);
+            toast.error(getErrorDetail(error, "Failed to update follow status"));
         }
     };
 

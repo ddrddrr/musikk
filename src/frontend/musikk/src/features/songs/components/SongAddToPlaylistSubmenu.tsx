@@ -1,3 +1,4 @@
+import { getErrorDetail } from "@/api/errorUtils.ts";
 import { createCollectionSong } from "@/features/collections/api/mutations.ts";
 import { Collection, CollectionSong } from "@/features/collections/types.ts";
 import {
@@ -30,8 +31,8 @@ export function SongAddToPlaylistSubmenu({ collectionSong }: SongAddToPlaylistSu
         onSuccess: () => {
             toast.success("Added successfully");
         },
-        onError: () => {
-            toast.error("Failed to add song to playlist");
+        onError: (error) => {
+            toast.error(getErrorDetail(error, "Failed to add song to playlist"));
         },
     });
 

@@ -11,7 +11,7 @@ interface UserCollectionsProviderProps {
 export function UserCollectionsProvider({ children }: UserCollectionsProviderProps) {
     const userUUID = useUserUUID();
 
-    const { data } = useQuery({
+    const { data, error, isPending } = useQuery({
         // TODO: add useruuid in the key
         queryKey: ["collectionsPersonal"],
         queryFn: () => fetchCollectionsPersonal(userUUID),
@@ -21,6 +21,8 @@ export function UserCollectionsProvider({ children }: UserCollectionsProviderPro
         liked_songs: data?.liked_songs ?? null,
         created_collections: data?.created_collections ?? null,
         followed_collections: data?.followed_collections ?? null,
+        error: error ?? null,
+        isLoading: isPending,
     };
     return (
         <UserCollectionsContext.Provider value={contextValue}>

@@ -1,11 +1,25 @@
+import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/features/ui/tabs.tsx";
 import { UserCard } from "@/features/user/components/UserCard.tsx";
 import { UserConnectionsContext } from "@/features/user/providers/userConnectionsContext.tsx";
 import { useContext, useState } from "react";
 
 export function Connections() {
-    const { friends, followed, followers } = useContext(UserConnectionsContext);
+    const { friends, followed, followers, error, isLoading } = useContext(UserConnectionsContext);
     const [tab, setTab] = useState("friends");
+
+    if (error) {
+        return <QueryErrorBox message="Failed to load connections" />;
+    }
+
+    // TODO: use shadcn spinner
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center p-8">
+                <div className="h-8 w-8 animate-spin rounded-sm border-2 border-black border-t-transparent" />
+            </div>
+        );
+    }
 
     return (
         <div className="mx-auto max-w-4xl p-6">

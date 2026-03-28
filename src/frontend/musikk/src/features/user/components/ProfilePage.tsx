@@ -1,4 +1,5 @@
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
+import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { UserFeed } from "@/features/publications/components/posts/UserFeed.tsx";
 import { Button } from "@/features/ui/button.tsx";
 import {
@@ -25,6 +26,7 @@ export function ProfilePage() {
         isLoading,
         isError,
         data: user,
+        refetch,
     } = useQuery({
         queryKey: ["user", uuid],
         queryFn: () => fetchUser(uuid!),
@@ -39,7 +41,7 @@ export function ProfilePage() {
     }
 
     if (isError) {
-        return <div className="p-8 text-center text-red-600">Error</div>;
+        return <QueryErrorBox message="Failed to load profile" onRetry={() => void refetch()} />;
     }
 
     if (!user || !uuid) {

@@ -13,15 +13,24 @@ interface UserConnectionsProviderProps {
 
 export function UserConnectionsProvider({ children }: UserConnectionsProviderProps) {
     const userUUID = useUserUUID();
-    const { isPending: friendsPending, data: friends } = useUserFriendsQuery(userUUID, !!userUUID);
-    const { isPending: followersPending, data: followers } = useUserFollowersQuery(
-        userUUID,
-        !!userUUID,
-    );
-    const { isPending: followedPending, data: followed } = useUserFollowedQuery(
-        userUUID,
-        !!userUUID,
-    );
+    const {
+        isPending: friendsPending,
+        data: friends,
+        error: friendsError,
+    } = useUserFriendsQuery(userUUID, !!userUUID);
+    const {
+        isPending: followersPending,
+        data: followers,
+        error: followersError,
+    } = useUserFollowersQuery(userUUID, !!userUUID);
+    const {
+        isPending: followedPending,
+        data: followed,
+        error: followedError,
+    } = useUserFollowedQuery(userUUID, !!userUUID);
+
+    const isLoading = friendsPending || followersPending || followedPending;
+    const error = friendsError ?? followersError ?? followedError ?? null;
 
     return (
         <UserConnectionsContext.Provider
@@ -29,6 +38,8 @@ export function UserConnectionsProvider({ children }: UserConnectionsProviderPro
                 friends: friendsPending ? [] : friends,
                 followers: followersPending ? [] : followers,
                 followed: followedPending ? [] : followed,
+                error,
+                isLoading,
             }}
         >
             {children}

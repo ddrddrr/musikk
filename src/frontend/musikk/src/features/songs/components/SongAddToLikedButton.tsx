@@ -1,8 +1,10 @@
+import { getErrorDetail } from "@/api/errorUtils.ts";
 import { addToLikedSongs } from "@/features/collections/api/mutations.ts";
 import { CollectionSong } from "@/features/collections/types.ts";
 import { Button } from "@/features/ui/button.tsx";
 import { useMutation } from "@tanstack/react-query";
 import { Check, Plus } from "lucide-react";
+import { toast } from "sonner";
 
 interface SongCardProps {
     collectionSong: CollectionSong;
@@ -11,7 +13,12 @@ interface SongCardProps {
 }
 
 export function SongAddToLikedButton({ collectionSong, className = "", size = 40 }: SongCardProps) {
-    const addToLikedSongsMutation = useMutation({ mutationFn: addToLikedSongs });
+    const addToLikedSongsMutation = useMutation({
+        mutationFn: addToLikedSongs,
+        onError: (error) => {
+            toast.error(getErrorDetail(error, "Failed to like song"));
+        },
+    });
 
     const iconSize = Math.floor(size * 0.6);
 
