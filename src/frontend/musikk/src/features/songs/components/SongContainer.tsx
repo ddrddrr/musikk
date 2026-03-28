@@ -1,10 +1,7 @@
 import { cva } from "class-variance-authority";
 import { CollectionSong } from "@/features/collections/types.ts";
 import { MediaThumbnail } from "@/features/common/MediaThumbnail.tsx";
-import { SongAddToLikedButton } from "@/features/songs/components/SongAddToLikedButton.tsx";
-import { SongAddToQueueButton } from "@/features/songs/components/SongAddToQueueButton.tsx";
-import { SongMenuButton } from "@/features/songs/components/SongMenuButton.tsx";
-import { SongPlayButton } from "@/features/songs/components/SongPlayButton.tsx";
+import { DefaultSongActions } from "@/features/songs/components/DefaultSongActions.tsx";
 import { cn } from "@/lib/utils.ts";
 import { type ReactNode, memo } from "react";
 
@@ -16,17 +13,8 @@ type SongContainerProps = {
     size?: SongContainerSize;
     variant?: SongContainerVariant;
     extraStyle?: string;
-    renderItems?: Partial<RenderItems>;
-    playButtonSlot?: ReactNode;
-};
-
-type RenderItems = {
-    image: boolean;
-    addToQueueButton: boolean;
-    addToLikedButton: boolean;
-    playButton: boolean;
-    songMenuButton: boolean;
-    removeFromPlaylistCtxBtn: boolean;
+    showImage?: boolean;
+    actions?: ReactNode;
 };
 
 const containerVariants = cva(
@@ -86,76 +74,26 @@ const gapVariants = cva("", {
     defaultVariants: { size: "normal" },
 });
 
-const buttonProps = {
-    compact: { size: 28, padding: "p-1", gap: "gap-1", iconSize: "text-lg" },
-    normal: { size: 40, padding: "p-2", gap: "gap-2", iconSize: "text-xl" },
-} as const;
-
 export const SongContainer = memo(function SongContainer({
     collectionSong,
     size = "normal",
     variant = "inline",
     extraStyle,
-    renderItems = {},
-    playButtonSlot,
+    showImage = true,
+    actions,
 }: SongContainerProps) {
-    const {
-        image = true,
-        addToQueueButton = true,
-        addToLikedButton = true,
-        playButton = true,
-        songMenuButton = true,
-        removeFromPlaylistCtxBtn = false,
-    } = renderItems;
-
     const song = collectionSong.song;
     const authors = song.authors.map((a) => a.display_name).join(", ");
-    const btn = buttonProps[size];
 
-    const playButtonElement =
-        playButtonSlot ??
-        (playButton && (
-            <SongPlayButton
-                collectionSong={collectionSong}
-                size={btn.size}
-                className={btn.padding}
-            />
-        ));
-
-    const buttons = (
-        <div className={cn("flex items-center", btn.gap)}>
-            {playButtonElement}
-            {addToLikedButton && (
-                <SongAddToLikedButton
-                    collectionSong={collectionSong}
-                    size={btn.size}
-                    className={btn.padding}
-                />
-            )}
-            {addToQueueButton && (
-                <SongAddToQueueButton
-                    collectionSong={collectionSong}
-                    size={btn.size}
-                    className={btn.padding}
-                />
-            )}
-            {songMenuButton && (
-                <SongMenuButton
-                    collectionSong={collectionSong}
-                    size={btn.size}
-                    className={btn.padding}
-                    iconSize={btn.iconSize}
-                    showRemoveFromPlaylist={removeFromPlaylistCtxBtn}
-                />
-            )}
-        </div>
+    const renderedActions = actions ?? (
+        <DefaultSongActions collectionSong={collectionSong} size={size} />
     );
 
     const gapClass = gapVariants({ size });
 
     const mediaAndTitle = (
         <div className={cn("flex min-w-0 items-center", gapClass)}>
-            {image && <MediaThumbnail src={song.image} className={imageVariants({ size })} />}
+            {showImage && <MediaThumbnail src={song.image} className={imageVariants({ size })} />}
             <div className="flex min-w-0 flex-col">
                 <p className={titleVariants({ size })}>{song.title}</p>
                 {variant === "inline" && (
@@ -171,7 +109,7 @@ export const SongContainer = memo(function SongContainer({
                 {mediaAndTitle}
                 <div className="flex">
                     <div className={cn("shrink-0", imageVariants({ size }))} />
-                    <div className={cn("flex flex-1", gapClass)}>{buttons}</div>
+                    <div className={cn("flex flex-1", gapClass)}>{renderedActions}</div>
                 </div>
             </div>
         );
@@ -180,7 +118,7 @@ export const SongContainer = memo(function SongContainer({
     return (
         <div className={containerVariants({ size, variant, className: extraStyle })}>
             {mediaAndTitle}
-            <div className="shrink-0">{buttons}</div>
+            <div className="shrink-0">{renderedActions}</div>
         </div>
     );
 });

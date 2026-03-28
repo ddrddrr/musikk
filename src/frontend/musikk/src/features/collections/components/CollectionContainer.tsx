@@ -5,8 +5,11 @@ import { useCollectionDetailQuery } from "@/features/collections/api/queries.ts"
 import { CollectionHeader } from "@/features/collections/components/CollectionHeader.tsx";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { CommentBox } from "@/features/publications/components/collection-comments/CommentBox.tsx";
+import { DefaultSongActions, songButtonProps } from "@/features/songs/components/DefaultSongActions.tsx";
 import { SongContainer } from "@/features/songs/components/SongContainer.tsx";
+import { SongMenuButton } from "@/features/songs/components/SongMenuButton.tsx";
 import { UserCollectionsContext } from "@/features/user/providers/userCollectionsContext.ts";
+import { cn } from "@/lib/utils.ts";
 import { useContext } from "react";
 import { useMatch, useNavigate } from "react-router-dom";
 
@@ -62,6 +65,9 @@ export function CollectionContainer({ collectionUUID }: CollectionContainerProps
     const removeFromPlaylistCtxBtn =
         !!currUserUUID && collection?.authors.map((a) => a.uuid).includes(currUserUUID);
 
+    const songSize = showComments ? "compact" : "normal";
+    const btn = songButtonProps[songSize];
+
     return (
         <div className="mx-auto max-w-7xl p-4">
             <div className={`flex gap-6 ${showComments ? "flex-row" : "flex-col"}`}>
@@ -80,20 +86,35 @@ export function CollectionContainer({ collectionUUID }: CollectionContainerProps
 
                         {songs.length > 0 ? (
                             <ul className="space-y-2">
-                                {songs.map((collectionSong, index) => (
-                                    <li key={`${collectionSong.uuid}-${index}`}>
-                                        <SongContainer
+                                {songs.map((collectionSong, index) => {
+                                    const songActions = showComments ? (
+                                        <div className={cn("flex items-center", btn.gap)}>
+                                            <SongMenuButton
+                                                collectionSong={collectionSong}
+                                                size={btn.size}
+                                                className={btn.padding}
+                                                iconSize={btn.iconSize}
+                                                showRemoveFromPlaylist={removeFromPlaylistCtxBtn}
+                                            />
+                                        </div>
+                                    ) : (
+                                        <DefaultSongActions
                                             collectionSong={collectionSong}
-                                            size={showComments ? "compact" : "normal"}
-                                            renderItems={{
-                                                removeFromPlaylistCtxBtn,
-                                                playButton: !showComments,
-                                                addToLikedButton: !showComments,
-                                                addToQueueButton: !showComments,
-                                            }}
+                                            size={songSize}
+                                            showRemoveFromPlaylist={removeFromPlaylistCtxBtn}
                                         />
-                                    </li>
-                                ))}
+                                    );
+
+                                    return (
+                                        <li key={`${collectionSong.uuid}-${index}`}>
+                                            <SongContainer
+                                                collectionSong={collectionSong}
+                                                size={songSize}
+                                                actions={songActions}
+                                            />
+                                        </li>
+                                    );
+                                })}
                             </ul>
                         ) : (
                             <div className="rounded-sm border-2 border-black bg-white py-12 text-center text-gray-700">

@@ -20,7 +20,7 @@ export function ListeningFeed() {
                                 <SongContainer
                                     collectionSong={song}
                                     size="compact"
-                                    renderItems={{ image: false }}
+                                    showImage={false}
                                 />
                             </div>
                         </div>

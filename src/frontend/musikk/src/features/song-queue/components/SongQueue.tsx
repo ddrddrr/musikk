@@ -1,12 +1,43 @@
 import { Spinner } from "@/components/ui/spinner";
+import { CollectionSong } from "@/features/collections/types.ts";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
+import { SongQueueNode } from "@/features/song-queue/api/types.ts";
 import { SongQueuePlayButton } from "@/features/song-queue/components/SongQueueContainerPlayButton.tsx";
 import { useQueue, useQueueChangeAPI } from "@/features/song-queue/hooks/useQueueAPI.ts";
+import { SongAddToLikedButton } from "@/features/songs/components/SongAddToLikedButton.tsx";
+import { SongAddToQueueButton } from "@/features/songs/components/SongAddToQueueButton.tsx";
+import { songButtonProps } from "@/features/songs/components/DefaultSongActions.tsx";
 import { SongContextMenu } from "@/features/songs/components/SongContextMenu.tsx";
 import { SongContainer } from "@/features/songs/components/SongContainer.tsx";
 import { SongDisplay } from "@/features/songs/components/SongDisplay.tsx";
 import { Button } from "@/features/ui/button.tsx";
+import { cn } from "@/lib/utils.ts";
 import { Trash2 } from "lucide-react";
+
+function SongQueueActions({
+    node,
+    collectionSong,
+}: {
+    node: SongQueueNode;
+    collectionSong: CollectionSong;
+}) {
+    const btn = songButtonProps.normal;
+    return (
+        <div className={cn("flex items-center", btn.gap)}>
+            <SongQueuePlayButton node={node} size={btn.size} className={btn.padding} />
+            <SongAddToLikedButton
+                collectionSong={collectionSong}
+                size={btn.size}
+                className={btn.padding}
+            />
+            <SongAddToQueueButton
+                collectionSong={collectionSong}
+                size={btn.size}
+                className={btn.padding}
+            />
+        </div>
+    );
+}
 
 export function SongQueue() {
     const clearQueueMutation = useQueueChangeAPI();
@@ -42,12 +73,10 @@ export function SongQueue() {
                                 <SongContextMenu song={node.collection_song}>
                                     <SongContainer
                                         collectionSong={node.collection_song}
-                                        renderItems={{ songMenuButton: false }}
-                                        playButtonSlot={
-                                            <SongQueuePlayButton
+                                        actions={
+                                            <SongQueueActions
                                                 node={node}
-                                                size={40}
-                                                className="p-2"
+                                                collectionSong={node.collection_song}
                                             />
                                         }
                                     />
