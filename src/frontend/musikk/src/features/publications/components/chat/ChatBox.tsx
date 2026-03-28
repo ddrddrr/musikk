@@ -1,5 +1,6 @@
 import { UUID } from "@/api/types.ts";
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
+import { Spinner } from "@/components/ui/spinner";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { useChatDetail } from "@/features/publications/api/queries.ts";
 import { LoadOlderButton } from "@/features/publications/components/LoadOlderButton.tsx";
@@ -38,11 +39,10 @@ export function ChatBox({ chatUUID }: ChatBoxProps) {
     const messagesContainerRef = useRef<HTMLDivElement>(null);
     const scrollToBottom = useAutoScrollToBottom(messagesContainerRef, isMessagesPending, messages);
 
-    // TODO: use common spinner
     if (isChatPending || isMessagesPending) {
         return (
             <div className="flex min-h-[400px] items-center justify-center">
-                <div className="h-8 w-8 animate-spin rounded-sm border-2 border-black border-t-transparent"></div>
+                <Spinner className="size-8" />
             </div>
         );
     }

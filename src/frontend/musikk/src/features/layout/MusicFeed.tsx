@@ -1,4 +1,5 @@
 import { PaginatedRes } from "@/api/types";
+import { Spinner } from "@/components/ui/spinner";
 import { collectionKeys } from "@/features/collections/api/queryKeys.ts";
 import { fetchCollections } from "@/features/collections/api/queries";
 import { CollectionCarousel } from "@/features/collections/components/CollectionCarousel.tsx";
@@ -47,8 +48,12 @@ export function MusicFeed() {
         followedCollections.isError ||
         friendsCollections.isError;
 
-    // TODO: use shadcn spinner
-    if (isLoading) return <div>Loading...</div>;
+    if (isLoading)
+        return (
+            <div className="flex items-center justify-center p-8">
+                <Spinner className="size-8" />
+            </div>
+        );
     if (isError)
         return (
             <QueryErrorBox

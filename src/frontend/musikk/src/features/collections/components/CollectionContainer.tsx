@@ -1,4 +1,5 @@
 import { UUID } from "@/api/types.ts";
+import { Spinner } from "@/components/ui/spinner";
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
 import { useCollectionDetailQuery } from "@/features/collections/api/queries.ts";
 import { CollectionHeader } from "@/features/collections/components/CollectionHeader.tsx";
@@ -37,7 +38,7 @@ export function CollectionContainer({ collectionUUID }: CollectionContainerProps
     if (isPending)
         return (
             <div className="flex min-h-[400px] items-center justify-center">
-                <div className="h-8 w-8 animate-spin rounded-sm border-4 border-black border-t-transparent"></div>
+                <Spinner className="size-8" />
             </div>
         );
 

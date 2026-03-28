@@ -1,3 +1,4 @@
+import { Spinner } from "@/components/ui/spinner";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/features/ui/tabs.tsx";
 import { UserCard } from "@/features/user/components/UserCard.tsx";
@@ -12,11 +13,10 @@ export function Connections() {
         return <QueryErrorBox message="Failed to load connections" />;
     }
 
-    // TODO: use shadcn spinner
     if (isLoading) {
         return (
             <div className="flex items-center justify-center p-8">
-                <div className="h-8 w-8 animate-spin rounded-sm border-2 border-black border-t-transparent" />
+                <Spinner className="size-8" />
             </div>
         );
     }

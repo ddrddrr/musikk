@@ -1,3 +1,4 @@
+import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/features/ui/button.tsx";
 
 type LoadOlderButtonProps = {
@@ -21,7 +22,7 @@ export function LoadOlderButton({
             }}
             disabled={isFetchingNextPage}
         >
-            {isFetchingNextPage ? "Loading..." : "Load older"}
+            {isFetchingNextPage ? <Spinner /> : "Load older"}
         </Button>
     );
 }

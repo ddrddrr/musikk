@@ -1,4 +1,5 @@
 import { UUID } from "@/api/types.ts";
+import { Spinner } from "@/components/ui/spinner";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { CommentForm } from "@/features/publications/components/collection-comments/CommentForm.tsx";
 import { CommentList } from "@/features/publications/components/collection-comments/CommentList.tsx";
@@ -33,11 +34,10 @@ export const CommentBox = memo(function CommentBox({ collectionUUID }: CommentBo
         didInitialScrollRef.current = true;
     }, []);
 
-    // todo use new shadcn spinner
     if (isPending) {
         return (
             <div className="flex min-h-[400px] items-center justify-center">
-                <div className="h-8 w-8 animate-spin rounded-sm border-2 border-black border-t-transparent"></div>
+                <Spinner className="size-8" />
             </div>
         );
     }

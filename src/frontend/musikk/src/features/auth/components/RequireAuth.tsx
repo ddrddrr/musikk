@@ -1,4 +1,4 @@
-import { Spinner } from "@/features/common/Spinner.tsx";
+import { Spinner } from "@/components/ui/spinner";
 import { useAuth } from "@/hooks/useAuth.ts";
 import { ReactNode } from "react";
 import { Navigate, useLocation } from "react-router-dom";
@@ -14,7 +14,7 @@ export function RequireAuth({ children }: RequireAuthProps) {
     if (isLoading) {
         return (
             <div className="flex min-h-screen items-center justify-center">
-                <Spinner />
+                <Spinner className="size-8" />
             </div>
         );
     }

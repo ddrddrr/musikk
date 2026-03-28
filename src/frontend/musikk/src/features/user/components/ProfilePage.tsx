@@ -1,3 +1,4 @@
+import { Spinner } from "@/components/ui/spinner";
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { UserFeed } from "@/features/publications/components/posts/UserFeed.tsx";
@@ -36,9 +37,12 @@ export function ProfilePage() {
 
     const isOwnProfile = currUserUUID === uuid;
 
-    // TODO: think about the loading/err handling logic here and in other components
     if (isLoading) {
-        return <div className="p-8 text-center">Loading profile...</div>;
+        return (
+            <div className="flex items-center justify-center p-8">
+                <Spinner className="size-8" />
+            </div>
+        );
     }
 
     if (isError) {
@@ -80,11 +84,13 @@ export function ProfilePage() {
                                 onClick={toggleFollow}
                                 disabled={isFollowLoading}
                             >
-                                {isFollowLoading
-                                    ? "Loading..."
-                                    : isFollowing
-                                      ? "Following"
-                                      : "Follow"}
+                                {isFollowLoading ? (
+                                    <Spinner />
+                                ) : isFollowing ? (
+                                    "Following"
+                                ) : (
+                                    "Follow"
+                                )}
                             </Button>
                         )}
                     </div>

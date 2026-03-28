@@ -1,3 +1,4 @@
+import { Spinner } from "@/components/ui/spinner";
 import { setNotificationRead } from "@/features/notifications/mutations.ts";
 import { NotificationOverlay } from "@/features/notifications/NotificationOverlay.tsx";
 import { useNotificationsQuery } from "@/features/notifications/queries.ts";
@@ -31,7 +32,12 @@ export const NotificationBox = memo(function NotificationBox() {
         }
     }
 
-    if (isPending) return <div className="p-4 text-center text-sm">Loading...</div>;
+    if (isPending)
+        return (
+            <div className="flex items-center justify-center p-4">
+                <Spinner />
+            </div>
+        );
     if (error)
         return <div className="p-4 text-center text-sm text-red-500">Error: {error.message}</div>;
 

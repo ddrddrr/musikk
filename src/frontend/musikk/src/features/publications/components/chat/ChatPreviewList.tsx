@@ -1,3 +1,4 @@
+import { Spinner } from "@/components/ui/spinner";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { ChatNewGroupForm } from "@/features/publications/components/chat/ChatNewGroupForm.tsx";
 import { ChatPreview } from "@/features/publications/components/chat/ChatPreview.tsx";
@@ -14,7 +15,7 @@ export function ChatPreviewList() {
     if (isLoading) {
         return (
             <div className="flex min-h-[400px] items-center justify-center">
-                <div className="h-8 w-8 animate-spin rounded-sm border-2 border-black border-t-transparent"></div>
+                <Spinner className="size-8" />
             </div>
         );
     }

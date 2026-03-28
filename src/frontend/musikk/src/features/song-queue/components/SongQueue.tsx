@@ -1,3 +1,4 @@
+import { Spinner } from "@/components/ui/spinner";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { SongQueueContainer } from "@/features/song-queue/components/SongQueueContainer.tsx";
 import { useQueue, useQueueChangeAPI } from "@/features/song-queue/hooks/useQueueAPI.ts";
@@ -13,11 +14,10 @@ export function SongQueue() {
         return <QueryErrorBox message="Failed to load queue" onRetry={() => void refetch()} />;
     }
 
-    // TODO: use shadcn spinner
     if (isPending) {
         return (
             <div className="flex h-full items-center justify-center">
-                <div className="h-8 w-8 animate-spin rounded-sm border-2 border-black border-t-transparent" />
+                <Spinner className="size-8" />
             </div>
         );
     }

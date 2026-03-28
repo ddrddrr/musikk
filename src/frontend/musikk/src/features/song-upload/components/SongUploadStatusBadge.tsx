@@ -1,4 +1,4 @@
-import { Spinner } from "@/features/common/Spinner.tsx";
+import { Spinner } from "@/components/ui/spinner";
 import { SongUploadStatus } from "@/features/song-upload/types.ts";
 
 function statusTone(status: SongUploadStatus) {

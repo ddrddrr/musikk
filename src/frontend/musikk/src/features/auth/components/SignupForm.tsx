@@ -7,7 +7,7 @@ import { getErrorDetail } from "@/api/errorUtils.ts";
 import { register } from "@/features/auth/api.ts";
 import { EmailField } from "@/features/auth/components/EmailField.tsx";
 import { PasswordField } from "@/features/auth/components/PasswordField.tsx";
-import { Spinner } from "@/features/common/Spinner.tsx";
+import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/features/ui/button.tsx";
 import { CardContent } from "@/features/ui/card.tsx";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/features/ui/form.tsx";

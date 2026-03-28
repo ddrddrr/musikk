@@ -1,3 +1,4 @@
+import { Spinner } from "@/components/ui/spinner";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
@@ -123,9 +124,10 @@ export function SearchWindow({ onItemSelect, songMode = "card" }: SearchWindowPr
                     />
                 )}
 
-                {/*TODO: improve*/}
                 {isPlaceholderData && (
-                    <div className="py-2 text-center text-sm text-gray-500">Loading...</div>
+                    <div className="flex items-center justify-center py-2">
+                        <Spinner />
+                    </div>
                 )}
 
                 {shouldShowResults && data && (

@@ -1,9 +1,10 @@
+import { Spinner } from "@/components/ui/spinner";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { usePublicationChildren } from "@/features/publications/api/queries.ts";
 import { Publication } from "@/features/publications/types.ts";
 import { Button } from "@/features/ui/button.tsx";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/features/ui/collapsible.tsx";
-import { ChevronDown, ChevronUp, Loader2 } from "lucide-react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { ReactNode, useState } from "react";
 
 type PostRepliesProps = {
@@ -29,7 +30,7 @@ export function PostReplies({ publication, renderChild }: PostRepliesProps) {
                 <Button variant="ghost" size="sm" className="text-xs">
                     <span className="flex items-center gap-1">
                         {isPending && areChildrenOpen ? (
-                            <Loader2 size={12} className="animate-spin" />
+                            <Spinner className="size-3" />
                         ) : areChildrenOpen ? (
                             <ChevronUp size={12} />
                         ) : (
@@ -54,7 +55,9 @@ export function PostReplies({ publication, renderChild }: PostRepliesProps) {
                             />
                         )}
                         {!error && isPending && (
-                            <div className="py-2 text-sm text-muted-foreground">Loading...</div>
+                            <div className="flex items-center py-2">
+                                <Spinner className="size-4" />
+                            </div>
                         )}
                         {!error &&
                             !isPending &&
