@@ -10,7 +10,8 @@ import {
     ContextMenuPortal,
     ContextMenuTrigger,
 } from "@/features/ui/context-menu.tsx";
-import { useMutation } from "@tanstack/react-query";
+import { collectionKeys } from "@/features/collections/api/queryKeys.ts";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { BetweenHorizonalStart, Play, Trash2 } from "lucide-react";
 import { JSX } from "react";
 import { toast } from "sonner";
@@ -26,8 +27,14 @@ export function SongContextMenu({
     song,
     renderRemoveFromPlaylist = false,
 }: SongContextMenuProps) {
+    const queryClient = useQueryClient();
     const collectionRemoveSongMutation = useMutation({
         mutationFn: collectionRemoveSong,
+        onSuccess: (_data, variables) => {
+            void queryClient.invalidateQueries({
+                queryKey: collectionKeys.detail(variables.collectionUUID),
+            });
+        },
         onError: (error) => {
             toast.error(getErrorDetail(error, "Failed to remove song"));
         },

@@ -2,6 +2,8 @@ import { api_client } from "@/api/axiosConf.ts";
 import { SongURLs } from "@/api/endpoints.ts";
 import { UUID } from "@/api/types.ts";
 import { Collection, CollectionSong } from "@/features/collections/types.ts";
+import { songKeys } from "@/features/songs/queryKeys.ts";
+import { useQuery } from "@tanstack/react-query";
 
 export async function songRetrieve(songUUID: UUID): Promise<CollectionSong> {
     const res = await api_client.get(SongURLs.songRetrieve(songUUID));
@@ -22,4 +24,11 @@ export async function songUserCollections(collectionSongUUID: UUID): Promise<UUI
         SongURLs.songUserCollections(collectionSongUUID)
     );
     return res.data.collection_uuids;
+}
+
+export function useSongUserCollectionsQuery(collectionSongUUID: UUID) {
+    return useQuery({
+        queryKey: songKeys.userCollections(collectionSongUUID),
+        queryFn: () => songUserCollections(collectionSongUUID),
+    });
 }

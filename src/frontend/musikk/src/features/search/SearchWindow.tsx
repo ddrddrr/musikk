@@ -1,7 +1,8 @@
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
+import { searchKeys } from "@/features/search/queryKeys.ts";
 import { performSearch } from "@/features/search/queries";
 import { Input } from "@/features/ui/input";
 
@@ -29,10 +30,11 @@ export function SearchWindow({ onItemSelect, songMode = "card" }: SearchWindowPr
         return () => clearTimeout(handler);
     }, [query]);
 
-    const { isPending, isSuccess, error, data, refetch } = useQuery({
-        queryKey: ["search", debouncedQuery],
+    const { isSuccess, error, data, refetch, isPlaceholderData } = useQuery({
+        queryKey: searchKeys.result(debouncedQuery),
         queryFn: () => performSearch(debouncedQuery),
         enabled: !!debouncedQuery.trim(),
+        placeholderData: keepPreviousData,
     });
 
     const shouldShowResults = debouncedQuery.trim().length > 0 && isSuccess;
@@ -121,7 +123,8 @@ export function SearchWindow({ onItemSelect, songMode = "card" }: SearchWindowPr
                     />
                 )}
 
-                {isPending && (
+                {/*TODO: improve*/}
+                {isPlaceholderData && (
                     <div className="py-2 text-center text-sm text-gray-500">Loading...</div>
                 )}
 

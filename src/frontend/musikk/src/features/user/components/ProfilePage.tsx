@@ -11,6 +11,7 @@ import {
     DialogTrigger,
 } from "@/features/ui/dialog.tsx";
 import { fetchUser } from "@/features/user/api/queries.ts";
+import { userKeys } from "@/features/user/api/queryKeys.ts";
 import { ProfileForm } from "@/features/user/components/ProfileForm.tsx";
 import { UserAvatar } from "@/features/user/components/UserAvatar.tsx";
 import { useFollowUser } from "@/features/user/hooks/useFollowUser.ts";
@@ -28,7 +29,7 @@ export function ProfilePage() {
         data: user,
         refetch,
     } = useQuery({
-        queryKey: ["user", uuid],
+        queryKey: userKeys.detail(uuid!),
         queryFn: () => fetchUser(uuid!),
         enabled: !!uuid,
     });

@@ -1,19 +1,17 @@
 import { setNotificationRead } from "@/features/notifications/mutations.ts";
 import { NotificationOverlay } from "@/features/notifications/NotificationOverlay.tsx";
-import { fetchNotificationList } from "@/features/notifications/queries.ts";
+import { useNotificationsQuery } from "@/features/notifications/queries.ts";
+import { notificationKeys } from "@/features/notifications/queryKeys.ts";
 import { Button } from "@/features/ui/button.tsx";
 import { Popover, PopoverContent, PopoverTrigger } from "@/features/ui/popover.tsx";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Sparkle } from "lucide-react";
 import { memo, useMemo } from "react";
 
 export const NotificationBox = memo(function NotificationBox() {
     const client = useQueryClient();
 
-    const { isPending, error, data } = useQuery({
-        queryKey: ["notifications"],
-        queryFn: fetchNotificationList,
-    });
+    const { isPending, error, data } = useNotificationsQuery();
     const setNotificationsReadMutation = useMutation({ mutationFn: setNotificationRead });
 
     const unreadUUIDs = useMemo(() => {
@@ -29,7 +27,7 @@ export const NotificationBox = memo(function NotificationBox() {
     async function handleOpenChange(open: boolean) {
         if (!open && unreadUUIDs.length > 0) {
             await setNotificationsReadMutation.mutateAsync({ notificationUUIDs: unreadUUIDs });
-            client.invalidateQueries({ queryKey: ["notifications"] });
+            client.invalidateQueries({ queryKey: notificationKeys.base });
         }
     }
 

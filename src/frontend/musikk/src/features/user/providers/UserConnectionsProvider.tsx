@@ -17,17 +17,17 @@ export function UserConnectionsProvider({ children }: UserConnectionsProviderPro
         isPending: friendsPending,
         data: friends,
         error: friendsError,
-    } = useUserFriendsQuery(userUUID, !!userUUID);
+    } = useUserFriendsQuery(userUUID);
     const {
         isPending: followersPending,
         data: followers,
         error: followersError,
-    } = useUserFollowersQuery(userUUID, !!userUUID);
+    } = useUserFollowersQuery(userUUID);
     const {
         isPending: followedPending,
         data: followed,
         error: followedError,
-    } = useUserFollowedQuery(userUUID, !!userUUID);
+    } = useUserFollowedQuery(userUUID);
 
     const isLoading = friendsPending || followersPending || followedPending;
     const error = friendsError ?? followersError ?? followedError ?? null;

@@ -1,7 +1,8 @@
 import { api_client } from "@/api/axiosConf.ts";
 import { UUID } from "@/api/types.ts";
 import { UserURLs } from "@/features/user/api/endpoints.ts";
-import { useMutation } from "@tanstack/react-query";
+import { userKeys } from "@/features/user/api/queryKeys.ts";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface UserUpdateParams {
     display_name?: string;
@@ -10,6 +11,7 @@ interface UserUpdateParams {
 }
 
 export function useMeUpdateMutation() {
+    const queryClient = useQueryClient();
     return useMutation({
         mutationFn: ({ display_name, bio, avatar }: UserUpdateParams) => {
             const formData = new FormData();
@@ -18,6 +20,9 @@ export function useMeUpdateMutation() {
             if (avatar) formData.append("avatar", avatar);
 
             return api_client.patch(UserURLs.meUpdate, formData);
+        },
+        onSuccess: () => {
+            void queryClient.invalidateQueries({ queryKey: userKeys.base });
         },
     });
 }

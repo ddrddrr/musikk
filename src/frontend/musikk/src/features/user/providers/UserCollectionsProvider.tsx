@@ -1,5 +1,6 @@
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
 import { fetchCollectionsPersonal } from "@/features/collections/api/queries.ts";
+import { userKeys } from "@/features/user/api/queryKeys.ts";
 import { UserCollectionsContext } from "@/features/user/providers/userCollectionsContext.ts";
 import { useQuery } from "@tanstack/react-query";
 import { ReactNode } from "react";
@@ -12,8 +13,7 @@ export function UserCollectionsProvider({ children }: UserCollectionsProviderPro
     const userUUID = useUserUUID();
 
     const { data, error, isPending } = useQuery({
-        // TODO: add useruuid in the key
-        queryKey: ["collectionsPersonal"],
+        queryKey: userKeys.collectionsPersonal(userUUID),
         queryFn: () => fetchCollectionsPersonal(userUUID),
     });
     const contextValue = {

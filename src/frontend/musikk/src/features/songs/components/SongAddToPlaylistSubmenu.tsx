@@ -8,27 +8,29 @@ import {
     DropdownMenuSubTrigger,
 } from "@/features/ui/dropdown-menu.tsx";
 import { UserCollectionsContext } from "@/features/user/providers/userCollectionsContext.ts";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useSongUserCollectionsQuery } from "@/features/songs/queries.ts";
+import { songKeys } from "@/features/songs/queryKeys.ts";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Check, ListPlus, Plus } from "lucide-react";
 import { useContext } from "react";
 import { toast } from "sonner";
-import { songUserCollections } from "../queries.ts";
 
 interface SongAddToPlaylistSubmenuProps {
     collectionSong: CollectionSong;
 }
 
 export function SongAddToPlaylistSubmenu({ collectionSong }: SongAddToPlaylistSubmenuProps) {
+    const queryClient = useQueryClient();
     const { created_collections, liked_songs } = useContext(UserCollectionsContext);
 
-    const { data: collectionUUIDs = [] } = useQuery({
-        queryKey: ["songUserCollections", collectionSong.uuid],
-        queryFn: () => songUserCollections(collectionSong.uuid),
-    });
+    const { data: collectionUUIDs = [] } = useSongUserCollectionsQuery(collectionSong.uuid);
 
     const createCollectionSongMutation = useMutation({
         mutationFn: createCollectionSong,
         onSuccess: () => {
+            void queryClient.invalidateQueries({
+                queryKey: songKeys.userCollections(collectionSong.uuid),
+            });
             toast.success("Added successfully");
         },
         onError: (error) => {

@@ -10,7 +10,8 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/features/ui/dropdown-menu.tsx";
-import { useMutation } from "@tanstack/react-query";
+import { collectionKeys } from "@/features/collections/api/queryKeys.ts";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { BetweenHorizonalStart, EllipsisVertical, Play, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { SongAddToPlaylistSubmenu } from "./SongAddToPlaylistSubmenu.tsx";
@@ -28,8 +29,14 @@ export function SongMenuButton({
     iconSize,
     showRemoveFromPlaylist = false,
 }: SongMenuButtonProps) {
+    const queryClient = useQueryClient();
     const collectionRemoveSongMutation = useMutation({
         mutationFn: collectionRemoveSong,
+        onSuccess: (_data, variables) => {
+            void queryClient.invalidateQueries({
+                queryKey: collectionKeys.detail(variables.collectionUUID),
+            });
+        },
         onError: (error) => {
             toast.error(getErrorDetail(error, "Failed to remove song"));
         },

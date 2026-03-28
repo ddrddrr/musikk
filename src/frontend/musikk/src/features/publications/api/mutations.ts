@@ -1,9 +1,10 @@
 import { api_client } from "@/api/axiosConf.ts";
 import { getErrorDetail } from "@/api/errorUtils.ts";
 import { UUID } from "@/api/types.ts";
+import { publicationKeys } from "@/features/publications/api/queryKeys.ts";
 import { ChatURLs, PublicationURLs } from "@/features/publications/api/urls.ts";
 import { AttachmentType, Chat } from "@/features/publications/types.ts";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 interface PublicationPayload {
@@ -25,6 +26,7 @@ interface CreatePostParams {
 }
 
 export function useCreatePost() {
+    const queryClient = useQueryClient();
     return useMutation({
         mutationFn: async ({
             userUUID,
@@ -45,6 +47,14 @@ export function useCreatePost() {
 
             await createPublication(PublicationURLs.feedPosts(userUUID), payload);
         },
+        onSuccess: (_data, variables) => {
+            void queryClient.invalidateQueries({
+                queryKey: publicationKeys.feed(variables.userUUID),
+            });
+        },
+        onError: (error) => {
+            toast.error(getErrorDetail(error, "Failed to create post"));
+        },
     });
 }
 
@@ -55,6 +65,7 @@ interface CreateCollectionCommentParams {
 }
 
 export function useCreateCollectionComment() {
+    const queryClient = useQueryClient();
     return useMutation({
         mutationFn: async ({
             collectionUUID,
@@ -68,6 +79,11 @@ export function useCreateCollectionComment() {
             }
 
             await createPublication(PublicationURLs.collectionComments(collectionUUID), payload);
+        },
+        onSuccess: (_data, variables) => {
+            void queryClient.invalidateQueries({
+                queryKey: publicationKeys.collectionComments(variables.collectionUUID),
+            });
         },
         onError: (error) => {
             toast.error(getErrorDetail(error, "Failed to add comment"));
@@ -84,6 +100,7 @@ interface CreateChatParams {
 }
 
 export function useCreateChat() {
+    const queryClient = useQueryClient();
     return useMutation({
         mutationFn: async ({
             userUUID,
@@ -109,6 +126,14 @@ export function useCreateChat() {
             const response = await api_client.post<Chat>(ChatURLs.userChats(userUUID), formData);
             return response.data;
         },
+        onSuccess: (_data, variables) => {
+            void queryClient.invalidateQueries({
+                queryKey: publicationKeys.userChats(variables.userUUID),
+            });
+        },
+        onError: (error) => {
+            toast.error(getErrorDetail(error, "Failed to create chat"));
+        },
     });
 }
 
@@ -121,6 +146,7 @@ interface CreateChatMessageParams {
 }
 
 export function useCreateChatMessage() {
+    const queryClient = useQueryClient();
     return useMutation({
         mutationFn: async ({
             userUUID,
@@ -137,6 +163,14 @@ export function useCreateChatMessage() {
 
             await createPublication(ChatURLs.chatMessages(userUUID, chatUUID), payload);
         },
+        onSuccess: (_data, variables) => {
+            void queryClient.invalidateQueries({
+                queryKey: publicationKeys.chatMessages(variables.userUUID, variables.chatUUID),
+            });
+        },
+        onError: (error) => {
+            toast.error(getErrorDetail(error, "Failed to send message"));
+        },
     });
 }
 
@@ -147,11 +181,20 @@ interface AddChatMembersParams {
 }
 
 export function useAddChatMembers() {
+    const queryClient = useQueryClient();
     return useMutation({
         mutationFn: async ({ userUUID, chatUUID, participants }: AddChatMembersParams) => {
             await api_client.post(ChatURLs.chatMembers(userUUID, chatUUID), {
                 participants,
             });
+        },
+        onSuccess: (_data, variables) => {
+            void queryClient.invalidateQueries({
+                queryKey: publicationKeys.chatDetail(variables.userUUID, variables.chatUUID),
+            });
+        },
+        onError: (error) => {
+            toast.error(getErrorDetail(error, "Failed to add members"));
         },
     });
 }

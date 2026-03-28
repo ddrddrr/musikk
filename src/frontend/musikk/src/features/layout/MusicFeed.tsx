@@ -1,32 +1,33 @@
 import { PaginatedRes } from "@/api/types";
+import { collectionKeys } from "@/features/collections/api/queryKeys.ts";
 import { fetchCollections } from "@/features/collections/api/queries";
 import { CollectionCarousel } from "@/features/collections/components/CollectionCarousel.tsx";
 import { Collection } from "@/features/collections/types";
-import { useQueries } from "@tanstack/react-query";
+import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
+import { useQueries, useQueryClient } from "@tanstack/react-query";
 
 export function MusicFeed() {
+    const queryClient = useQueryClient();
     const [playlists, albums, followedCollections, friendsCollections] = useQueries({
         queries: [
             {
-                queryKey: ["collections", "playlists", "latest"],
+                queryKey: collectionKeys.latest("playlists"),
                 queryFn: () => fetchCollections({ type: "playlist" }),
                 select: (data: PaginatedRes<Collection>) => data.results,
-                staleTime: 60_000,
             },
             {
-                queryKey: ["collections", "albums", "latest"],
+                queryKey: collectionKeys.latest("albums"),
                 queryFn: () => fetchCollections({ type: "album" }),
                 select: (data: PaginatedRes<Collection>) => data.results,
-                staleTime: 60_000,
             },
             {
-                queryKey: ["collections", "followed", "latest"],
+                queryKey: collectionKeys.latest("followed"),
                 queryFn: () => fetchCollections({ connection: "followed" }),
                 select: (data: PaginatedRes<Collection>) => data.results,
                 staleTime: 30_000,
             },
             {
-                queryKey: ["collections", "friends", "latest"],
+                queryKey: collectionKeys.latest("friends"),
                 queryFn: () => fetchCollections({ connection: "friends" }),
                 select: (data: PaginatedRes<Collection>) => data.results,
                 staleTime: 30_000,
@@ -46,8 +47,15 @@ export function MusicFeed() {
         followedCollections.isError ||
         friendsCollections.isError;
 
+    // TODO: use shadcn spinner
     if (isLoading) return <div>Loading...</div>;
-    if (isError) return <div>Something went wrong.</div>;
+    if (isError)
+        return (
+            <QueryErrorBox
+                message="Failed to load music feed"
+                onRetry={() => void queryClient.invalidateQueries({ queryKey: collectionKeys.base })}
+            />
+        );
 
     return (
         <div className="flex flex-col gap-8">

@@ -7,7 +7,14 @@ import { ErrorBoundary } from "@/features/errors/ErrorBoundary.tsx";
 import { CustomErrorPage } from "@/features/errors/GenericErrorFallback.tsx";
 import "./index.css";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+    defaultOptions: {
+        queries: {
+            staleTime: 60_000,
+            retry: 1,
+        },
+    },
+});
 createRoot(document.getElementById("root")!).render(
     <StrictMode>
         <QueryClientProvider client={queryClient}>

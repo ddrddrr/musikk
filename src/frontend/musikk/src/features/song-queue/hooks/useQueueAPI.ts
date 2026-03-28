@@ -11,12 +11,13 @@ import {
     shiftHead,
     shiftHeadBackwards,
 } from "@/features/song-queue/mutations.ts";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { queueKeys } from "@/features/song-queue/queryKeys.ts";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 export function useQueue() {
     return useQuery<SongQueue>({
-        queryKey: ["queue"],
+        queryKey: queueKeys.base,
         queryFn: getSongQueue,
     });
 }
@@ -36,6 +37,8 @@ type AddCollectionAction = {
 type QueueAddInput = AddSongAction | AddCollectionAction;
 
 export function useQueueAddAPI() {
+    const queryClient = useQueryClient();
+
     function handleQueueAddAction(input: QueueAddInput): Promise<unknown> {
         switch (input.type) {
             case "song":
@@ -53,6 +56,9 @@ export function useQueueAddAPI() {
 
     return useMutation({
         mutationFn: (input: QueueAddInput) => handleQueueAddAction(input),
+        onSuccess: () => {
+            void queryClient.invalidateQueries({ queryKey: queueKeys.base });
+        },
         onError: (error) => {
             toast.error(getErrorDetail(error, "Failed to add to queue"));
         },
@@ -72,6 +78,8 @@ type ShiftHeadBackQueueAction = {
 type QueueChangeInput = ClearQueueAction | ShiftHeadQueueAction | ShiftHeadBackQueueAction;
 
 export function useQueueChangeAPI() {
+    const queryClient = useQueryClient();
+
     function handleQueueChangeAction(input: QueueChangeInput): Promise<unknown> {
         switch (input.action) {
             case "clear":
@@ -87,6 +95,9 @@ export function useQueueChangeAPI() {
 
     return useMutation<unknown, Error, QueueChangeInput>({
         mutationFn: handleQueueChangeAction,
+        onSuccess: () => {
+            void queryClient.invalidateQueries({ queryKey: queueKeys.base });
+        },
         onError: (error) => {
             toast.error(getErrorDetail(error, "Failed to update queue"));
         },

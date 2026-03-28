@@ -1,6 +1,7 @@
 import { login as loginAPI, logout as logoutAPI } from "@/features/auth/api.ts";
 import { AuthContext } from "@/features/auth/providers/AuthContext.tsx";
 import { fetchMe } from "@/features/user/api/queries.ts";
+import { userKeys } from "@/features/user/api/queryKeys.ts";
 import { BaseUser } from "@/features/user/types.ts";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Cookies from "js-cookie";
@@ -21,10 +22,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
         refetch,
         error,
     } = useQuery<BaseUser | null>({
-        queryKey: ["user"],
+        queryKey: userKeys.base,
         queryFn: fetchMe,
         retry: false,
-        refetchOnWindowFocus: false,
         staleTime: 30 * 60 * 1000, // 30 minutes
     });
 

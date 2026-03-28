@@ -1,5 +1,7 @@
 import { api_client } from "@/api/axiosConf.ts";
+import { getOffsetFromNextUrl } from "@/api/hooks.ts";
 import { PaginatedRes, UUID } from "@/api/types.ts";
+import { publicationKeys } from "@/features/publications/api/queryKeys.ts";
 import { ChatURLs, PublicationURLs } from "@/features/publications/api/urls.ts";
 import { Chat, Publication } from "@/features/publications/types.ts";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
@@ -26,12 +28,7 @@ function usePublicationListInfinite(
         queryKey: [...queryKey, url, "infinite", limit, additionalParams],
         initialPageParam: 0,
         queryFn: ({ pageParam }) => fetchPublicationPage(url, limit, pageParam, additionalParams),
-        // TODO: make a separate function, this is the same for every paginated query
-        getNextPageParam: (lastPage) => {
-            if (!lastPage.next) return undefined;
-            const offsetStr = new URL(lastPage.next).searchParams.get("offset");
-            return offsetStr ? Number(offsetStr) : undefined;
-        },
+        getNextPageParam: getOffsetFromNextUrl,
     });
 }
 
@@ -39,16 +36,14 @@ export function useFeedPosts(userUUID: UUID, connection?: "friends" | "followed"
     const params = connection ? { connection } : undefined;
     return usePublicationListInfinite(
         PublicationURLs.feedPosts(userUUID),
-        ["feed", userUUID, "comments"],
+        [...publicationKeys.feed(userUUID)],
         params,
     );
 }
 
 export function useCollectionComments(collectionUUID: UUID) {
     return usePublicationListInfinite(PublicationURLs.collectionComments(collectionUUID), [
-        "collection",
-        collectionUUID,
-        "comments",
+        ...publicationKeys.collectionComments(collectionUUID),
     ]);
 }
 
@@ -62,7 +57,7 @@ export async function fetchPublicationChildren(pubUUID: UUID): Promise<Publicati
 export function usePublicationChildren(pubUUID: UUID, enabled = true) {
     return useQuery<Publication[]>({
         queryFn: () => fetchPublicationChildren(pubUUID),
-        queryKey: ["publication-children", pubUUID],
+        queryKey: publicationKeys.children(pubUUID),
         enabled,
     });
 }
@@ -75,15 +70,13 @@ async function fetchUserChats(userUUID: UUID): Promise<Chat[]> {
 export function useUserChats(userUUID: UUID) {
     return useQuery<Chat[]>({
         queryFn: () => fetchUserChats(userUUID),
-        queryKey: ["user-chats", userUUID],
+        queryKey: publicationKeys.userChats(userUUID),
     });
 }
 
 export function useChatMessages(userUUID: UUID, chatUUID: UUID) {
     return usePublicationListInfinite(ChatURLs.chatMessages(userUUID, chatUUID), [
-        "chat-messages",
-        userUUID,
-        chatUUID,
+        ...publicationKeys.chatMessages(userUUID, chatUUID),
     ]);
 }
 
@@ -95,6 +88,6 @@ async function fetchChatDetail(userUUID: UUID, chatUUID: UUID): Promise<Chat> {
 export function useChatDetail(userUUID: UUID, chatUUID: UUID) {
     return useQuery<Chat>({
         queryFn: () => fetchChatDetail(userUUID, chatUUID),
-        queryKey: ["chat-detail", userUUID, chatUUID],
+        queryKey: publicationKeys.chatDetail(userUUID, chatUUID),
     });
 }

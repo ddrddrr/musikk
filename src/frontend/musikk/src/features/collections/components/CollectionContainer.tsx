@@ -1,12 +1,11 @@
 import { UUID } from "@/api/types.ts";
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
-import { fetchCollectionDetailed } from "@/features/collections/api/queries.ts";
+import { useCollectionDetailQuery } from "@/features/collections/api/queries.ts";
 import { CollectionHeader } from "@/features/collections/components/CollectionHeader.tsx";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { CommentBox } from "@/features/publications/components/collection-comments/CommentBox.tsx";
 import { SongContainer } from "@/features/songs/components/SongContainer.tsx";
 import { UserCollectionsContext } from "@/features/user/providers/userCollectionsContext.ts";
-import { useQuery } from "@tanstack/react-query";
 import { useContext } from "react";
 import { useMatch, useNavigate } from "react-router-dom";
 
@@ -25,10 +24,7 @@ export function CollectionContainer({ collectionUUID }: CollectionContainerProps
         error,
         data: collection,
         refetch,
-    } = useQuery({
-        queryKey: ["openCollection", collectionUUID],
-        queryFn: () => fetchCollectionDetailed(collectionUUID),
-    });
+    } = useCollectionDetailQuery(collectionUUID);
 
     const toggleComments = () => {
         void navigate(

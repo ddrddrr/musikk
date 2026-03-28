@@ -1,8 +1,10 @@
 import { api_client } from "@/api/axiosConf.ts";
 import { PaginatedRes, UUID } from "@/api/types.ts";
 import { CollectionURLs } from "@/features/collections/api/endpoints.ts";
+import { collectionKeys } from "@/features/collections/api/queryKeys.ts";
 import { Collection, CollectionDetailed, CollectionType } from "@/features/collections/types.ts";
 import { ConnectionType } from "@/features/user/types.ts";
+import { useQuery } from "@tanstack/react-query";
 
 export interface CollectionListParams {
     type?: CollectionType;
@@ -42,4 +44,11 @@ export async function fetchCollectionDetailed(collectionUUID: string): Promise<C
 export async function fetchCollectionBasic(collectionUUID: UUID) {
     const res = await api_client.get(CollectionURLs.collectionRetrieve(collectionUUID));
     return res.data;
+}
+
+export function useCollectionDetailQuery(collectionUUID: UUID) {
+    return useQuery({
+        queryKey: collectionKeys.detail(collectionUUID),
+        queryFn: () => fetchCollectionDetailed(collectionUUID),
+    });
 }
