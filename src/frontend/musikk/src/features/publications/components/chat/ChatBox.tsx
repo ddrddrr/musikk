@@ -22,7 +22,7 @@ export function ChatBox({ chatUUID }: ChatBoxProps) {
         error: chatError,
         isPending: isChatPending,
         refetch: refetchChat,
-    } = useChatDetail(userUUID!, chatUUID);
+    } = useChatDetail(userUUID, chatUUID);
 
     const {
         data: messages,
@@ -33,7 +33,7 @@ export function ChatBox({ chatUUID }: ChatBoxProps) {
         fetchNextPage,
         publicationsFlat,
         refetch: refetchMessages,
-    } = useChatMessagesFlat(userUUID!, chatUUID);
+    } = useChatMessagesFlat(userUUID, chatUUID);
 
     const messagesContainerRef = useRef<HTMLDivElement>(null);
     const scrollToBottom = useAutoScrollToBottom(messagesContainerRef, isMessagesPending, messages);

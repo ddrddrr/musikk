@@ -10,6 +10,8 @@ export interface PlaybackContextProps {
     setIsPlaybackActive: Dispatch<SetStateAction<boolean>> | undefined;
     playingCollectionSong: CollectionSong | undefined;
     queueHead: SongQueueNode | undefined;
+    queueError: Error | null;
+    queueRefetch: () => void;
 }
 
 export const PlaybackContext = createContext<PlaybackContextProps>({
@@ -19,4 +21,6 @@ export const PlaybackContext = createContext<PlaybackContextProps>({
     setIsPlaybackActive: undefined,
     playingCollectionSong: undefined,
     queueHead: undefined,
+    queueError: null,
+    queueRefetch: () => {},
 });

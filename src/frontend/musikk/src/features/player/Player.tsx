@@ -1,6 +1,7 @@
 import { PlaybackContext } from "@/features/playback/providers/playbackContext.ts";
 import { useQueueChangeAPI } from "@/features/song-queue/hooks/useQueueAPI.ts";
 import { useContext, useEffect, useMemo, useRef } from "react";
+import { toast } from "sonner";
 
 import shaka from "shaka-player";
 
@@ -32,12 +33,17 @@ export function Player({ audioRef, onDurationChange, onTimeUpdate }: PlayerProps
         // https://shaka-player-demo.appspot.com/docs/api/tutorial-basic-usage.html
         shaka.polyfill.installAll();
         if (!shaka.Player.isBrowserSupported()) {
-            // TODO: show err to user
-            console.error("Browser not supported!");
+            toast.error("Your browser is not supported for audio playback.");
+            return;
         }
 
         const player = new shaka.Player();
         playerRef.current = player;
+
+        player.addEventListener("error", (event: Event) => {
+            const detail = (event as CustomEvent).detail;
+            toast.error(detail?.message ?? "An audio streaming error occurred.");
+        });
         return () => {
             player.destroy();
             playerRef.current = null;
@@ -57,8 +63,8 @@ export function Player({ audioRef, onDurationChange, onTimeUpdate }: PlayerProps
                     await player.attach(audio);
                     await player.load(url);
                     isAudioReadyRef.current = true;
-                } catch (err) {
-                    console.error("Error during playback:", err);
+                } catch {
+                    toast.error("Failed to load audio. Please try again.");
                 }
             } else {
                 try {
@@ -84,7 +90,10 @@ export function Player({ audioRef, onDurationChange, onTimeUpdate }: PlayerProps
             if (queueHead && isThisDeviceActive) {
                 if (isAudioReadyRef.current) {
                     if (isPlaybackActive) {
-                        audio.play().catch(console.warn);
+                        audio.play().catch((err: unknown) => {
+                            if (err instanceof DOMException && err.name === "AbortError") return;
+                            toast.error("Playback failed. Please try again.");
+                        });
                     } else {
                         audio.pause();
                     }

@@ -36,9 +36,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
     };
 
     const logout = async () => {
-        await logoutAPI();
+        try {
+            await logoutAPI();
+        } catch {
+            console.error("Could not reach server, logged out locally only.");
+        }
         queryClient.clear();
-        if (Cookies.get("csrftoken")) Cookies.remove("csrftoken");
+        Cookies.remove("csrftoken");
+        Cookies.remove("sessionid");
         void navigate("/login");
     };
 

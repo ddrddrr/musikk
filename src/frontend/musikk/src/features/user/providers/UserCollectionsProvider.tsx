@@ -12,10 +12,9 @@ export function UserCollectionsProvider({ children }: UserCollectionsProviderPro
     const userUUID = useUserUUID();
 
     const { data } = useQuery({
-        // TODO: should useruuid be in the key or not
+        // TODO: add useruuid in the key
         queryKey: ["collectionsPersonal"],
-        queryFn: userUUID ? () => fetchCollectionsPersonal(userUUID) : undefined,
-        enabled: !!userUUID,
+        queryFn: () => fetchCollectionsPersonal(userUUID),
     });
     const contextValue = {
         history: data?.history ?? null,

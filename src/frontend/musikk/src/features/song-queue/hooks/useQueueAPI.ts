@@ -1,3 +1,4 @@
+import { getErrorDetail } from "@/api/errorUtils.ts";
 import type { Collection, CollectionSong } from "@/features/collections/types.ts";
 import { getSongQueue } from "@/features/song-queue/api/queries.ts";
 import { SongQueue } from "@/features/song-queue/api/types.ts";
@@ -11,6 +12,7 @@ import {
     shiftHeadBackwards,
 } from "@/features/song-queue/mutations.ts";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 export function useQueue() {
     return useQuery<SongQueue>({
@@ -51,6 +53,9 @@ export function useQueueAddAPI() {
 
     return useMutation({
         mutationFn: (input: QueueAddInput) => handleQueueAddAction(input),
+        onError: (error) => {
+            toast.error(getErrorDetail(error, "Failed to add to queue"));
+        },
     });
 }
 
@@ -82,5 +87,8 @@ export function useQueueChangeAPI() {
 
     return useMutation<unknown, Error, QueueChangeInput>({
         mutationFn: handleQueueChangeAction,
+        onError: (error) => {
+            toast.error(getErrorDetail(error, "Failed to update queue"));
+        },
     });
 }

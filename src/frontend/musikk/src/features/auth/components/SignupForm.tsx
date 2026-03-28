@@ -1,9 +1,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import { isAxiosError } from "axios";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 
+import { getErrorDetail } from "@/api/errorUtils.ts";
 import { register } from "@/features/auth/api.ts";
 import { EmailField } from "@/features/auth/components/EmailField.tsx";
 import { PasswordField } from "@/features/auth/components/PasswordField.tsx";
@@ -38,11 +38,7 @@ export function SignUpForm() {
     const { mutate, isPending, isError, isSuccess } = useMutation({
         mutationFn: register,
         onError(error) {
-            const msg = isAxiosError(error)
-                ? error.response?.data?.error || error.message
-                : "An error occurred";
-            console.error(`Registration failed, ${msg}`);
-            setFormMessage("Could not perform registration, please try again.");
+            setFormMessage(getErrorDetail(error, "Could not perform registration, please try again."));
         },
         onSuccess() {
             setFormMessage(

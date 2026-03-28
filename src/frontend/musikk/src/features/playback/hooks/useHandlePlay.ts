@@ -32,8 +32,8 @@ export function useHandlePlay() {
                     action: "setHead",
                 });
             }
-        } catch (error) {
-            console.error("Queue add failed", error);
+        } catch {
+            // useQueueAddAPI.onError already shows a toast to the user
             return;
         }
 
@@ -51,7 +51,7 @@ export function useHandlePlay() {
         if (!getDeviceID()) return;
 
         if (newCollection || newSong) {
-            playItem({ newCollection, newSong });
+            await playItem({ newCollection, newSong });
             return;
         }
 

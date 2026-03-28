@@ -4,9 +4,9 @@ import { Spinner } from "@/features/common/Spinner.tsx";
 import { Button } from "@/features/ui/button.tsx";
 import { CardContent } from "@/features/ui/card.tsx";
 import { Form } from "@/features/ui/form.tsx";
+import { getErrorDetail } from "@/api/errorUtils.ts";
 import { useAuth } from "@/hooks/useAuth.ts";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { isAxiosError } from "axios";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
@@ -35,11 +35,9 @@ export function LoginForm() {
             await login(values.email, values.password);
             void navigate("/");
         } catch (error) {
-            const resMessage = isAxiosError(error)
-                ? error.response?.data?.message || error.message
-                : String(error);
-            console.error(`Login failed, ${resMessage}`);
-            setmessage("Could not perform login, please check your credentials and try again.");
+            setmessage(
+                getErrorDetail(error, "Could not perform login, please check your credentials and try again."),
+            );
         } finally {
             setLoading(false);
         }
@@ -70,10 +68,11 @@ export function LoginForm() {
 
                     <div className="text-center">
                         <p className="text-gray-700">
-                            Don't have an account?
+                            Don&#39;t have an account?
                             <Button
                                 type="button"
                                 onClick={() => void navigate("/signup")}
+                                {/*TODO: proper variant*/}
                                 variant="link"
                                 size="sm"
                                 className="ml-1 text-red-600 hover:text-red-700"

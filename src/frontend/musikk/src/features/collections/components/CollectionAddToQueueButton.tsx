@@ -1,10 +1,8 @@
-import { getErrorDetail } from "@/api/errorUtils.ts";
 import { CollectionDetailed } from "@/features/collections/types.ts";
 import { useQueueAddAPI } from "@/features/song-queue/hooks/useQueueAPI.ts";
 import { Button } from "@/features/ui/button.tsx";
 import { BetweenHorizonalStart } from "lucide-react";
 import { memo } from "react";
-import { toast } from "sonner";
 
 interface CollectionAddToQueueButtonProps {
     collection: CollectionDetailed;
@@ -22,19 +20,11 @@ export const CollectionAddToQueueButton = memo(function CollectionAddToQueueButt
             variant="muted"
             size="icon"
             onClick={() =>
-                addToQueueMutation.mutate(
-                    {
-                        type: "collection",
-                        item: collection,
-                        action: "add",
-                    },
-                    // TODO: move to mutation def?
-                    {
-                        onError: (error) => {
-                            toast.error(getErrorDetail(error, "Failed to add to queue"));
-                        },
-                    },
-                )
+                addToQueueMutation.mutate({
+                    type: "collection",
+                    item: collection,
+                    action: "add",
+                })
             }
             disabled={addToQueueMutation.isPending}
             className={showComments ? "h-8 w-8" : "h-12 w-12"}

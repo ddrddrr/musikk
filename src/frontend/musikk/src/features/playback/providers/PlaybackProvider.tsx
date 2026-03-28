@@ -9,7 +9,7 @@ interface PlaybackProviderProps {
 }
 
 export function PlaybackProvider({ children }: PlaybackProviderProps) {
-    const { data: queue } = useQueue();
+    const { data: queue, error: queueError, refetch: queueRefetch } = useQueue();
     const { getDeviceID, getDeviceName } = useCurrentDevice();
     const { activeDevice } = useDeviceList();
     const [isPlaybackActive, setIsPlaybackActive] = useState(false);
@@ -28,6 +28,8 @@ export function PlaybackProvider({ children }: PlaybackProviderProps) {
                 setIsPlaybackActive,
                 playingCollectionSong: queueHead?.collection_song,
                 queueHead,
+                queueError: queueError ?? null,
+                queueRefetch: () => void queueRefetch(),
             }}
         >
             {children}

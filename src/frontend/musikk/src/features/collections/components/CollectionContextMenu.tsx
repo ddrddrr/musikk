@@ -1,4 +1,3 @@
-import { getErrorDetail } from "@/api/errorUtils.ts";
 import { useCollectionPlayHandler } from "@/features/collections/hooks/useCollectionPlayHandler.ts";
 import { Collection } from "@/features/collections/types.ts";
 import { useQueueAddAPI } from "@/features/song-queue/hooks/useQueueAPI.ts";
@@ -11,7 +10,6 @@ import {
 } from "@/features/ui/context-menu.tsx";
 import { BetweenHorizonalStart, Play } from "lucide-react";
 import { JSX } from "react";
-import { toast } from "sonner";
 // TODO: make a button just like the song
 interface SongContextMenuProps {
     children: JSX.Element | JSX.Element[];
@@ -29,21 +27,11 @@ export function CollectionContextMenu({ children, collection }: SongContextMenuP
                 <ContextMenuContent panel="card" className="w-48">
                     <ContextMenuItem
                         onSelect={() =>
-                            addToQueueMutation.mutate(
-                                {
-                                    type: "collection",
-                                    item: collection,
-                                    action: "add",
-                                },
-                                // TODO: move to mutation def?
-                                {
-                                    onError: (error) => {
-                                        toast.error(
-                                            getErrorDetail(error, "Failed to add to queue"),
-                                        );
-                                    },
-                                },
-                            )
+                            addToQueueMutation.mutate({
+                                type: "collection",
+                                item: collection,
+                                action: "add",
+                            })
                         }
                     >
                         <BetweenHorizonalStart className="mr-2 h-4 w-4" />

@@ -12,9 +12,9 @@ export function GlobalFeed() {
     const [tab, setTab] = useState("friends");
     const userUUID = useUserUUID();
 
-    const queryFriends = useFeedPostsFlat(userUUID!, false, "friends");
-    const queryFollowed = useFeedPostsFlat(userUUID!, false, "followed");
-    const queryAll = useFeedPostsFlat(userUUID!, false);
+    const queryFriends = useFeedPostsFlat(userUUID, false, "friends");
+    const queryFollowed = useFeedPostsFlat(userUUID, false, "followed");
+    const queryAll = useFeedPostsFlat(userUUID, false);
 
     // TODO: move to a sep component
     function renderPostTree(
@@ -57,8 +57,6 @@ export function GlobalFeed() {
             </TabsContent>
         );
     }
-
-    if (!userUUID) return null;
 
     return (
         <div className="mx-auto max-w-2xl p-6">

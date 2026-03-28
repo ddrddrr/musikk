@@ -1,8 +1,10 @@
 import { api_client } from "@/api/axiosConf.ts";
+import { getErrorDetail } from "@/api/errorUtils.ts";
 import { UUID } from "@/api/types.ts";
 import { ChatURLs, PublicationURLs } from "@/features/publications/api/urls.ts";
 import { AttachmentType, Chat } from "@/features/publications/types.ts";
 import { useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 interface PublicationPayload {
     content: string;
@@ -66,6 +68,9 @@ export function useCreateCollectionComment() {
             }
 
             await createPublication(PublicationURLs.collectionComments(collectionUUID), payload);
+        },
+        onError: (error) => {
+            toast.error(getErrorDetail(error, "Failed to add comment"));
         },
     });
 }
