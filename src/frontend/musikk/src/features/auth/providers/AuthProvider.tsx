@@ -1,3 +1,4 @@
+import { authRef } from "@/api/authRef.ts";
 import { login as loginAPI, logout as logoutAPI } from "@/features/auth/api.ts";
 import { AuthContext } from "@/features/auth/providers/AuthContext.tsx";
 import { fetchMe } from "@/features/user/api/queries.ts";
@@ -5,7 +6,7 @@ import { userKeys } from "@/features/user/api/queryKeys.ts";
 import { BaseUser } from "@/features/user/types.ts";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Cookies from "js-cookie";
-import { ReactNode } from "react";
+import { ReactNode, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 interface AuthProviderProps {
@@ -35,7 +36,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         await refetch();
     };
 
-    const logout = async () => {
+    const logout = useCallback(async () => {
         try {
             await logoutAPI();
         } catch {
@@ -45,7 +46,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
         Cookies.remove("csrftoken");
         Cookies.remove("sessionid");
         void navigate("/login");
-    };
+    }, [queryClient, navigate]);
+
+    useEffect(() => {
+        authRef.logout = logout;
+        return () => {
+            authRef.logout = null;
+        };
+    }, [logout]);
 
     return (
         <AuthContext.Provider
