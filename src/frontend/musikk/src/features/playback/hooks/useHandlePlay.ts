@@ -2,14 +2,15 @@ import { Collection, CollectionSong } from "@/features/collections/types.ts";
 import { useCurrentDevice } from "@/features/playback/hooks/useCurrentDevice.ts";
 import { PlaybackContext } from "@/features/playback/providers/playbackContext.ts";
 import { usePlaybackActions } from "@/features/playback/ws/actionHooks.ts";
-import { useQueueAddAPI } from "@/features/song-queue/hooks/useQueueAPI.ts";
+import { usePlayCollection, usePlaySong } from "@/features/song-queue/hooks/useQueueAPI.ts";
 import { useContext } from "react";
 
 export function useHandlePlay() {
     const { queueHead, isPlaybackActive } = useContext(PlaybackContext);
     const { getDeviceID } = useCurrentDevice();
     const { activatePlaybackAction, stopPlaybackAction } = usePlaybackActions();
-    const addToQueueMutation = useQueueAddAPI();
+    const playSongMutation = usePlaySong();
+    const playCollectionMutation = usePlayCollection();
 
     async function playItem({
         newCollection,
@@ -20,20 +21,12 @@ export function useHandlePlay() {
     } = {}) {
         try {
             if (newCollection) {
-                await addToQueueMutation.mutateAsync({
-                    type: "collection",
-                    item: newCollection,
-                    action: "setHead",
-                });
+                await playCollectionMutation.mutateAsync(newCollection.uuid);
             } else if (newSong) {
-                await addToQueueMutation.mutateAsync({
-                    type: "song",
-                    item: newSong,
-                    action: "setHead",
-                });
+                await playSongMutation.mutateAsync(newSong.uuid);
             }
         } catch {
-            // useQueueAddAPI.onError already shows a toast to the user
+            // onError in the mutation hooks already shows a toast
             return;
         }
 

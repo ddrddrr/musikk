@@ -9,28 +9,28 @@ export async function addCollection(collectionUUID: string) {
     await api_client.post(QueueURLs.addCollection(collectionUUID));
 }
 
-export async function setHeadSong(songUUID: string) {
-    await api_client.post(QueueURLs.setHeadSong(songUUID));
+export async function playSong(songUUID: string) {
+    await api_client.post(QueueURLs.playSong(songUUID));
 }
 
-export async function setHeadCollection(collectionUUID: string) {
-    await api_client.post(QueueURLs.setHeadCollection(collectionUUID));
+export async function playCollection(collectionUUID: string) {
+    await api_client.post(QueueURLs.playCollection(collectionUUID));
 }
 
-export async function shiftHead() {
-    await api_client.post(QueueURLs.shiftHead);
+export async function next() {
+    await api_client.post(QueueURLs.next);
 }
 
-export async function shiftHeadTo(nodeUUID: string) {
-    await api_client.post(QueueURLs.shiftHeadTo(nodeUUID));
+export async function skipTo(itemUUID: string) {
+    await api_client.post(QueueURLs.skipTo(itemUUID));
 }
 
-export async function shiftHeadBackwards() {
-    await api_client.post(QueueURLs.shiftHeadBackwards);
+export async function prev() {
+    await api_client.post(QueueURLs.prev);
 }
 
-export async function removeNode(nodeUUID: string) {
-    await api_client.post(QueueURLs.removeNode(nodeUUID));
+export async function removeItem(itemUUID: string) {
+    await api_client.post(QueueURLs.removeItem(itemUUID));
 }
 
 export async function clearQueue() {
@@ -39,4 +39,16 @@ export async function clearQueue() {
 
 export async function appendRandom() {
     await api_client.post(QueueURLs.appendRandom);
+}
+
+export async function reorderItem(
+    itemUUID: string,
+    beforeUUID: string | null,
+    afterUUID: string | null,
+) {
+    await api_client.post(QueueURLs.reorder, {
+        item: itemUUID,
+        before: beforeUUID,
+        after: afterUUID,
+    });
 }

@@ -1,5 +1,5 @@
 import { PlaybackContext } from "@/features/playback/providers/playbackContext.ts";
-import { useQueueChangeAPI } from "@/features/song-queue/hooks/useQueueAPI.ts";
+import { useQueueNext } from "@/features/song-queue/hooks/useQueueAPI.ts";
 import { useContext, useEffect, useMemo, useRef } from "react";
 import { toast } from "sonner";
 
@@ -14,7 +14,7 @@ interface PlayerProps {
 export function Player({ audioRef, onDurationChange, onTimeUpdate }: PlayerProps) {
     const { isThisDeviceActive, isPlaybackActive, queueHead, playingCollectionSong } =
         useContext(PlaybackContext);
-    const useShiftHeadMutation = useQueueChangeAPI();
+    const nextMutation = useQueueNext();
     const playerRef = useRef<shaka.Player | null>(null);
     const isAudioReadyRef = useRef(false);
 
@@ -112,7 +112,7 @@ export function Player({ audioRef, onDurationChange, onTimeUpdate }: PlayerProps
 
     function handleOnEnded() {
         isAudioReadyRef.current = false;
-        useShiftHeadMutation.mutate({ action: "shift" });
+        nextMutation.mutate();
     }
 
     // handles badly padded song ends, needed, e.g., for very short audio
@@ -135,7 +135,7 @@ export function Player({ audioRef, onDurationChange, onTimeUpdate }: PlayerProps
         }, 1000);
 
         return () => clearInterval(interval);
-    }, [queueHead?.uuid, isThisDeviceActive, useShiftHeadMutation]);
+    }, [queueHead?.uuid, isThisDeviceActive, nextMutation]);
 
     function handleLoadedMetadata() {
         const audio = audioRef.current;

@@ -1,7 +1,7 @@
 import { getErrorDetail } from "@/api/errorUtils.ts";
 import { collectionRemoveSong } from "@/features/collections/api/mutations.ts";
 import { CollectionSong } from "@/features/collections/types.ts";
-import { useQueueAddAPI } from "@/features/song-queue/hooks/useQueueAPI.ts";
+import { useAddSong } from "@/features/song-queue/hooks/useQueueAPI.ts";
 import { useSongPlayHandler } from "@/features/songs/hooks/useSongPlayHandler.ts";
 import { Button } from "@/features/ui/button";
 import {
@@ -42,7 +42,7 @@ export function SongMenuButton({
         },
     });
     const { onClick: onSongPlayClick } = useSongPlayHandler(collectionSong);
-    const addToQueueMutation = useQueueAddAPI();
+    const addSongMutation = useAddSong();
 
     // TODO: improve styling
     return (
@@ -70,13 +70,7 @@ export function SongMenuButton({
                     )}
                     <SongAddToPlaylistSubmenu collectionSong={collectionSong} />
                     <DropdownMenuItem
-                        onSelect={() =>
-                            addToQueueMutation.mutate({
-                                type: "song",
-                                item: collectionSong,
-                                action: "add",
-                            })
-                        }
+                        onSelect={() => addSongMutation.mutate(collectionSong.uuid)}
                     >
                         <BetweenHorizonalStart className="mr-2 h-4 w-4" />
                         Add to queue

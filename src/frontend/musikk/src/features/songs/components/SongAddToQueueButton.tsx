@@ -1,5 +1,5 @@
 import { CollectionSong } from "@/features/collections/types.ts";
-import { useQueueAddAPI } from "@/features/song-queue/hooks/useQueueAPI.ts";
+import { useAddSong } from "@/features/song-queue/hooks/useQueueAPI.ts";
 import { Button } from "@/features/ui/button.tsx";
 import { BetweenHorizonalStart } from "lucide-react";
 
@@ -14,21 +14,15 @@ export function SongAddToQueueButton({
     size = 40,
     className = "",
 }: SongAddToQueueButtonProps) {
-    const addToQueueMutation = useQueueAddAPI();
+    const addSongMutation = useAddSong();
     const iconSize = Math.floor(size * 0.6);
 
     return (
         <Button
             variant="muted"
             size="icon"
-            onClick={() =>
-                addToQueueMutation.mutate({
-                    type: "song",
-                    item: collectionSong,
-                    action: "add",
-                })
-            }
-            disabled={addToQueueMutation.isPending}
+            onClick={() => addSongMutation.mutate(collectionSong.uuid)}
+            disabled={addSongMutation.isPending}
             style={{ width: size, height: size }}
             className={className}
         >

@@ -1,15 +1,14 @@
 import { getErrorDetail } from "@/api/errorUtils.ts";
-import type { Collection, CollectionSong } from "@/features/collections/types.ts";
 import { getSongQueue } from "@/features/song-queue/api/queries.ts";
 import { SongQueue } from "@/features/song-queue/api/types.ts";
 import {
     addCollection,
     addSong,
     clearQueue,
-    setHeadCollection,
-    setHeadSong,
-    shiftHead,
-    shiftHeadBackwards,
+    next,
+    playCollection,
+    playSong,
+    prev,
 } from "@/features/song-queue/mutations.ts";
 import { queueKeys } from "@/features/song-queue/queryKeys.ts";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -22,84 +21,46 @@ export function useQueue() {
     });
 }
 
-// typescript doesn't allow for interface type matching
-// rewrite and improve somehow...
-type AddSongAction = {
-    type: "song";
-    action: "add" | "setHead";
-    item: CollectionSong;
-};
-type AddCollectionAction = {
-    type: "collection";
-    action: "add" | "setHead";
-    item: Collection;
-};
-type QueueAddInput = AddSongAction | AddCollectionAction;
-
-export function useQueueAddAPI() {
+function useQueueMutation<TVariables = void>(
+    mutationFn: (variables: TVariables) => Promise<void>,
+    errorMessage: string,
+) {
     const queryClient = useQueryClient();
-
-    function handleQueueAddAction(input: QueueAddInput): Promise<unknown> {
-        switch (input.type) {
-            case "song":
-                return input.action === "add"
-                    ? addSong(input.item.uuid)
-                    : setHeadSong(input.item.uuid);
-            case "collection":
-                return input.action === "add"
-                    ? addCollection(input.item.uuid)
-                    : setHeadCollection(input.item.uuid);
-            default:
-                return Promise.reject(new Error("Invalid action"));
-        }
-    }
-
     return useMutation({
-        mutationFn: (input: QueueAddInput) => handleQueueAddAction(input),
+        mutationFn,
         onSuccess: () => {
             void queryClient.invalidateQueries({ queryKey: queueKeys.base });
         },
-        onError: (error) => {
-            toast.error(getErrorDetail(error, "Failed to add to queue"));
+        onError: (error: Error) => {
+            toast.error(getErrorDetail(error, errorMessage));
         },
     });
 }
 
-type ClearQueueAction = {
-    action: "clear";
-};
-type ShiftHeadQueueAction = {
-    action: "shift";
-};
-type ShiftHeadBackQueueAction = {
-    action: "shift-back";
-};
+export function useQueueNext() {
+    return useQueueMutation(next, "Failed to skip to next");
+}
 
-type QueueChangeInput = ClearQueueAction | ShiftHeadQueueAction | ShiftHeadBackQueueAction;
+export function useQueuePrev() {
+    return useQueueMutation(prev, "Failed to go to previous");
+}
 
-export function useQueueChangeAPI() {
-    const queryClient = useQueryClient();
+export function useQueueClear() {
+    return useQueueMutation(clearQueue, "Failed to clear queue");
+}
 
-    function handleQueueChangeAction(input: QueueChangeInput): Promise<unknown> {
-        switch (input.action) {
-            case "clear":
-                return clearQueue();
-            case "shift":
-                return shiftHead();
-            case "shift-back":
-                return shiftHeadBackwards();
-            default:
-                return Promise.reject(new Error("Invalid action"));
-        }
-    }
+export function useAddSong() {
+    return useQueueMutation(addSong, "Failed to add song to queue");
+}
 
-    return useMutation<unknown, Error, QueueChangeInput>({
-        mutationFn: handleQueueChangeAction,
-        onSuccess: () => {
-            void queryClient.invalidateQueries({ queryKey: queueKeys.base });
-        },
-        onError: (error) => {
-            toast.error(getErrorDetail(error, "Failed to update queue"));
-        },
-    });
+export function usePlaySong() {
+    return useQueueMutation(playSong, "Failed to play song");
+}
+
+export function useAddCollection() {
+    return useQueueMutation(addCollection, "Failed to add collection to queue");
+}
+
+export function usePlayCollection() {
+    return useQueueMutation(playCollection, "Failed to play collection");
 }

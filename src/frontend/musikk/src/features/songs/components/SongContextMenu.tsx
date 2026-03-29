@@ -1,7 +1,7 @@
 import { getErrorDetail } from "@/api/errorUtils.ts";
 import { collectionRemoveSong } from "@/features/collections/api/mutations.ts";
 import { CollectionSong } from "@/features/collections/types.ts";
-import { useQueueAddAPI } from "@/features/song-queue/hooks/useQueueAPI.ts";
+import { useAddSong } from "@/features/song-queue/hooks/useQueueAPI.ts";
 import { useSongPlayHandler } from "@/features/songs/hooks/useSongPlayHandler.ts";
 import {
     ContextMenu,
@@ -40,7 +40,7 @@ export function SongContextMenu({
         },
     });
     const { onClick: onSongPlayClick } = useSongPlayHandler(song);
-    const addToQueueMutation = useQueueAddAPI();
+    const addSongMutation = useAddSong();
 
     return (
         <ContextMenu>
@@ -61,13 +61,7 @@ export function SongContextMenu({
                         </ContextMenuItem>
                     )}
                     <ContextMenuItem
-                        onSelect={() =>
-                            addToQueueMutation.mutate({
-                                type: "song",
-                                item: song,
-                                action: "add",
-                            })
-                        }
+                        onSelect={() => addSongMutation.mutate(song.uuid)}
                     >
                         <BetweenHorizonalStart className="mr-2 h-4 w-4" />
                         Add to queue

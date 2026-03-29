@@ -72,7 +72,6 @@ export function LoginForm() {
                             <Button
                                 type="button"
                                 onClick={() => void navigate("/signup")}
-                                {/*TODO: proper variant*/}
                                 variant="link"
                                 size="sm"
                                 className="ml-1 text-red-600 hover:text-red-700"

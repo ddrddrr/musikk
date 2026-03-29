@@ -1,6 +1,6 @@
 import { useCollectionPlayHandler } from "@/features/collections/hooks/useCollectionPlayHandler.ts";
 import { Collection } from "@/features/collections/types.ts";
-import { useQueueAddAPI } from "@/features/song-queue/hooks/useQueueAPI.ts";
+import { useAddCollection } from "@/features/song-queue/hooks/useQueueAPI.ts";
 import {
     ContextMenu,
     ContextMenuContent,
@@ -17,7 +17,7 @@ interface SongContextMenuProps {
 }
 
 export function CollectionContextMenu({ children, collection }: SongContextMenuProps) {
-    const addToQueueMutation = useQueueAddAPI();
+    const addCollectionMutation = useAddCollection();
     const { onClick: onCollectionPlayClick } = useCollectionPlayHandler(collection);
 
     return (
@@ -26,13 +26,7 @@ export function CollectionContextMenu({ children, collection }: SongContextMenuP
             <ContextMenuPortal>
                 <ContextMenuContent panel="card" className="w-48">
                     <ContextMenuItem
-                        onSelect={() =>
-                            addToQueueMutation.mutate({
-                                type: "collection",
-                                item: collection,
-                                action: "add",
-                            })
-                        }
+                        onSelect={() => addCollectionMutation.mutate(collection.uuid)}
                     >
                         <BetweenHorizonalStart className="mr-2 h-4 w-4" />
                         Add to queue

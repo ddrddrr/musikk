@@ -1,7 +1,7 @@
 import { PlaybackContext } from "@/features/playback/providers/playbackContext.ts";
 import { ChangeActiveDeviceDropdown } from "@/features/player/ChangeActiveDeviceDropdown.tsx";
 import { PlayerPlayButton } from "@/features/player/PlayerPlayButton.tsx";
-import { useQueueChangeAPI } from "@/features/song-queue/hooks/useQueueAPI.ts";
+import { useQueueNext, useQueuePrev } from "@/features/song-queue/hooks/useQueueAPI.ts";
 import { Button } from "@/features/ui/button";
 import { Slider } from "@/features/ui/slider";
 import { ListMusic, SkipBack, SkipForward, Volume2 } from "lucide-react";
@@ -28,7 +28,8 @@ export function PlayerBar({
     const { playingCollectionSong, isThisDeviceActive } = useContext(PlaybackContext);
     const [volume, setVolume] = useState(100);
     const [seekTime, setSeekTime] = useState(0);
-    const shiftHeadMutation = useQueueChangeAPI();
+    const nextMutation = useQueueNext();
+    const prevMutation = useQueuePrev();
 
     useEffect(() => {
         if (audioRef.current) {
@@ -113,7 +114,7 @@ export function PlayerBar({
 
                     <div className="flex items-center gap-1">
                         <Button
-                            onClick={() => shiftHeadMutation.mutate({ action: "shift-back" })}
+                            onClick={() => prevMutation.mutate()}
                             variant="ghost"
                             size="icon"
                         >
@@ -121,7 +122,7 @@ export function PlayerBar({
                         </Button>
                         <PlayerPlayButton />
                         <Button
-                            onClick={() => shiftHeadMutation.mutate({ action: "shift" })}
+                            onClick={() => nextMutation.mutate()}
                             variant="ghost"
                             size="icon"
                         >

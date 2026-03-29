@@ -1,13 +1,15 @@
-import { UUID } from "@/api/types.ts";
 import { CollectionSong } from "@/features/collections/types.ts";
 import { BaseModel } from "@/features/common/types.ts";
 
-export interface SongQueueNode extends BaseModel {
+export type QueueItemOrigin = "context" | "source" | "user";
+
+export interface QueueItem extends BaseModel {
     collection_song: CollectionSong;
-    prev: UUID | null;
-    next: UUID | null;
+    origin: QueueItemOrigin;
+    position: string;
 }
 
 export interface SongQueue extends BaseModel {
-    nodes: SongQueueNode[];
+    current_song: CollectionSong | null;
+    items: QueueItem[];
 }
