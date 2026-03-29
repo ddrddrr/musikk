@@ -1,339 +1,517 @@
-import random
-from typing import Callable
+from decimal import Decimal
+from uuid import UUID
 
-from django.db import models
-from django.db import transaction
+from django.contrib.postgres.fields import ArrayField
+from django.core.exceptions import ObjectDoesNotExist
+from django.db import models, transaction
 
 from base.models import BaseModel
 from streaming.models.collections import Collection
-from streaming.models.songs import BaseSong, CollectionSong
+from streaming.models.songs import CollectionSong
+
+POSITION_GAP = Decimal("1000")
+REFILL_THRESHOLD = 30
+FILL_BATCH = 20
 
 
-class SongQueueNode(BaseModel):
-    song = models.ForeignKey("streaming.CollectionSong", on_delete=models.CASCADE)
-    song_queue = models.ForeignKey(
-        "streaming.SongQueue", on_delete=models.CASCADE, related_name="nodes"
-    )
+class SourceType(models.TextChoices):
+    SONG = "song", "Song"
+    COLLECTION = "collection", "Collection"
 
-    # TODO: add proper processing for on_delete
-    next = models.OneToOneField(
-        "self",
-        default=None,
-        null=True,
-        on_delete=models.SET_NULL,
+
+class ItemOrigin(models.TextChoices):
+    CONTEXT = "context", "Context"
+    SOURCE = "source", "Source"
+    USER = "user", "User"
+
+
+# not using GenericRelations as they complicate the logic -> it is not worth it when we have only
+# two possible item types that could be added to the Queue
+# can be implemented in the future if other item types will be supported by the Queue
+class QueueSource(BaseModel):
+    queue = models.ForeignKey(
+        "streaming.SongQueue",
+        on_delete=models.CASCADE,
         related_name="+",
     )
-    prev = models.OneToOneField(
-        "self",
-        default=None,
+    source_type = models.CharField(max_length=16, choices=SourceType.choices)
+
+    collection_song = models.ForeignKey(
+        "streaming.CollectionSong",
         null=True,
-        on_delete=models.SET_NULL,
+        on_delete=models.CASCADE,
         related_name="+",
     )
 
-    # TODO: add error handling in order not to lose objects
-    def delete(self, using=None, keep_parents=False):
-        with transaction.atomic():
-            if self.prev:
-                self.prev.next = self.next
-                self.prev.save()
-            else:
-                self.song_queue.head = self.next
+    collection = models.ForeignKey(
+        "streaming.Collection",
+        null=True,
+        on_delete=models.CASCADE,
+        related_name="+",
+    )
+    collection_cursor = models.IntegerField(default=-1)
 
-            if self.next:
-                self.next.prev = self.prev
-                self.next.save()
-            else:
-                self.song_queue.tail = self.prev
-
-            if self is self.song_queue.add_after:
-                self.song_queue.add_after = self.prev
-
-            self.song_queue.save()
-            return super().delete(using, keep_parents)
+    class Meta:
+        ordering = ("date_added",)
 
 
-class SongQueueManager(models.Manager):
-    # TODO: add init_random method
-    pass
+class QueueItem(BaseModel):
+    queue = models.ForeignKey(
+        "streaming.SongQueue",
+        on_delete=models.CASCADE,
+        related_name="+",
+    )
+    position = models.DecimalField(max_digits=24, decimal_places=12)
+    collection_song = models.ForeignKey(
+        "streaming.CollectionSong",
+        on_delete=models.CASCADE,
+        related_name="+",
+    )
+    origin = models.CharField(
+        max_length=16,
+        choices=ItemOrigin.choices,
+        default=ItemOrigin.SOURCE,
+    )
+
+    class Meta:
+        ordering = ("position",)
+        indexes = [
+            models.Index(fields=["queue", "position"]),
+        ]
 
 
-# TODO: make transactions more fine-grained
 class SongQueue(BaseModel):
-    class AddAction:
-        """
-        `CHANGE_HEAD` removes the current head and sets it to the provided song
-        `ADD` uses `song_queue.add_after` to figure out, where to add the song
-        `APPEND` appends the song to the end
-        """
+    """
+    SongQueue is modeled as a lazily filled object with a length limit.
 
-        CHANGE_HEAD = "change_head"
-        ADD = "add"
-        APPEND = "append"
+    Queue Context represents the currently playing Collection, e.g., if the User clicks on the play button
+    of the `Liked Songs` collection, the `context_collection` would be set to it. The cursor (`context_cursor`)
+    stores the CollectionSong.position of the last song consumed from that Collection. -1 means nothing has
+    been consumed yet. Queries use `position__gt=cursor` to find the next song, so cursor=0 means "position 0
+    was consumed, start from position 1." (QueueSource has `collection_cursor` for similar purposes)
 
-    default_size = 30
+    QueueItems represent items which should be rendered on the Frontend and can be manipulated with.
 
-    head = models.OneToOneField(
-        SongQueueNode,
-        default=None,
+    Queue Sources represent items that were manually added by User on top of the current Context.
+    If the currently playing Collection is `Liked Songs` and the User opens another
+    Collection `MyPlaylist` and then clicks `Add To Queue` on some song inside it, it would become one
+    of the Queue Sources (same for whole Collections). The Queue Source is then used to fill the Queue when there is
+    empty space in the Queue.
+
+    Filling is the process of converting Sources and Context into concrete QueueItems. It is lazy:
+    `_refill()` only runs when the item count drops below REFILL_THRESHOLD and then creates up to
+    FILL_BATCH new items. Sources are processed first (user-added content takes priority),
+    then Context fills the remaining slots. This means the queue fluctuates between ~REFILL_THRESHOLD
+    and ~REFILL_THRESHOLD+FILL_BATCH items, without adding entire collections upfront.
+
+    `context_skip_indices` tracks positions of context songs the user explicitly deleted from the queue.
+    Without it, deleted context songs would be re-processed on the next refill cycle. Example: playing a
+    100-song collection, first 30 processed, user deletes the item at position 25. When the queue drops
+    below the refill threshold and _refill() runs, position 25 is still ahead of the playback cursor and no
+    longer in the existing items set -- so it would come back. `context_skip_indices` prevents that.
+
+    Use-cases:
+        - User clicks on Collection's play button -> set current context to the selected Collection, reset cursor.
+        Queue sources stay unchanged.
+        - User clicks on a Song inside a Collection -> set current context to the Song's Collection,
+        cursor to the Song's position. Queue sources stay unchanged.
+        - User clicks on a Queue Item inside the Queue Window -> if the Queue Item's Song came from the Queue Context,
+        move Context's cursor to the Queue Item's Song position. Delete all the Queue Items before the selected one.
+        Otherwise just delete all the Queue Items before the selected one (the Queue Item came from a Queue Source).
+        - User deletes a Queue Item -> delete the Queue Item. If it came from context and is ahead of the cursor,
+        add its position to context_skip_indices so it won't be re-processed.
+        - User drags a Queue Item to another place:
+            * To the top -> selected item position = first item position - POSITION_GAP
+            * To the bottom -> selected item position = last item position + POSITION_GAP
+            * Somewhere in the middle -> (prev item position + next item position) / 2
+        - User clears the Queue:
+            * Currently resets everything (context + items + sources).
+            * May change to "clear overlays only" (keep context, remove user-added items/sources, refill).
+        - User presses Play Previous button:
+            * Once: history_cursor increments by 1, retrieves the last played song from history,
+            pushes current song back to the front of the queue.
+            * Multiple times: history_cursor keeps incrementing, walking back through history.
+            Resets to 0 on choose()/next().
+        - User adds to Queue an already existing Queue Item -> creates a second independent item, no dedup.
+    """
+
+    current_collection_song = models.ForeignKey(
+        "streaming.CollectionSong",
         null=True,
+        default=None,
         on_delete=models.SET_NULL,
         related_name="+",
     )
-    add_after = models.OneToOneField(
-        SongQueueNode,
-        default=None,
+    context_collection = models.ForeignKey(
+        "streaming.Collection",
         null=True,
-        on_delete=models.SET_NULL,
-        related_name="+",
-        help_text="The node after which the songs will be appended when `Add To Queue` is used. "
-        "If the song/collection is appended, equal to this song/last song in collection."
-        "Otherwise is equal to `head`.",
-    )
-    tail = models.OneToOneField(
-        SongQueueNode,
         default=None,
-        null=True,
         on_delete=models.SET_NULL,
         related_name="+",
     )
-    # INFO: used instead of calling `COUNT()`, as this is accessed frequently
-    song_count = models.IntegerField(default=0)
+    context_cursor = models.IntegerField(default=-1)
+    context_skip_indices = ArrayField(
+        models.IntegerField(),
+        default=list,
+        blank=True,
+    )
+    next_item_position = models.DecimalField(
+        max_digits=24,
+        decimal_places=12,
+        default=POSITION_GAP,
+    )
+    history_cursor = models.PositiveIntegerField(default=0)
 
-    objects = SongQueueManager()
-
-    # TODO: wrap all in transactions?
-    def add_song(
-        self, song: CollectionSong, action: str = AddAction.ADD
-    ) -> SongQueueNode | None:
+    def choose(self, item_uuid: UUID) -> CollectionSong | None:
         with transaction.atomic():
-            node = SongQueueNode.objects.create(song=song, song_queue=self)
+            item = QueueItem.objects.get(queue=self, uuid=item_uuid)
 
-            match action:
-                case self.AddAction.CHANGE_HEAD:
-                    self._set_head(node)
-                case self.AddAction.APPEND:
-                    self._append_node(node)
-                case self.AddAction.ADD:
-                    after = self.add_after if self.add_after else self.head
-                    if after is None:  # no queued songs
-                        self._set_head(node)
-                        self.add_after = node
-                    else:
-                        self._add_node_after(node, after)
-                case _:
-                    raise f"Got an unknown add action type {action} for `add_song` action"
+            self._add_to_history()
+            self._skip_context_items_below(item.position)
 
+            QueueItem.objects.filter(queue=self, position__lte=item.position).delete()
+
+            if (
+                item.origin == ItemOrigin.CONTEXT
+                and item.collection_song.position is not None
+            ):
+                self.context_cursor = item.collection_song.position
+
+            self.current_collection_song = item.collection_song
+            self.history_cursor = 0
             self.save()
-            return node
 
-    def add_collection(
-        self, collection: Collection, action=AddAction.ADD
-    ) -> list[SongQueueNode]:
+            self._fill()
+            return self.current_collection_song
+
+    # TODO: rename
+    def next(self) -> CollectionSong | None:
+        first = QueueItem.objects.filter(queue=self).order_by("position").first()
+        if first:
+            return self.choose(first.uuid)
+        return self._advance_context()
+
+    def insert_song(
+        self, song: CollectionSong, position: Decimal | None = None
+    ) -> QueueItem | QueueSource:
         with transaction.atomic():
-            songs = collection.collectionsongs.all()
-            if len(songs) == 0:
-                return []
+            if position is not None:
+                item = QueueItem.objects.create(
+                    queue=self,
+                    collection_song=song,
+                    position=position,
+                    origin=ItemOrigin.USER,
+                )
+                if position >= self.next_item_position:
+                    self.next_item_position = position + POSITION_GAP
+                    self.save()
+                return item
 
-            nodes = []
-            old_add_after = self.add_after
-            match action:
-                case self.AddAction.CHANGE_HEAD:
-                    new_head = self.add_song(
-                        songs[0], action=self.AddAction.CHANGE_HEAD
-                    )
-                    nodes.append(new_head)
+            item = QueueItem.objects.create(
+                queue=self,
+                collection_song=song,
+                position=self._calculate_append_position(),
+                origin=ItemOrigin.SOURCE,
+            )
+            self.save()
+            return item
 
-                    if len(songs) > 1:
-                        self.add_after = new_head
-                        for song in songs[1:]:
-                            node = self.add_song(song, action=self.AddAction.ADD)
-                            nodes.append(node)
-                        self.add_after = old_add_after
-                        self.save()
+    def insert_collection(self, collection: Collection) -> QueueSource:
+        with transaction.atomic():
+            source = QueueSource.objects.create(
+                queue=self,
+                source_type=SourceType.COLLECTION,
+                collection=collection,
+                collection_cursor=-1,
+            )
+            self._fill()
+            return source
 
-                case self.AddAction.APPEND | self.AddAction.ADD:
-                    for song in songs:
-                        self.add_song(song, action=action)
-                        nodes.append(song)
-                case _:
-                    raise ValueError(
-                        f"Got an unknown add action type {action} for `add_collection_songs` action"
-                    )
-            return nodes
+    def insert(
+        self, obj: CollectionSong | Collection, position: Decimal | None = None
+    ) -> QueueItem | QueueSource:
+        if isinstance(obj, CollectionSong):
+            return self.insert_song(obj, position)
+        if isinstance(obj, Collection):
+            return self.insert_collection(obj)
+        raise TypeError(f"Cannot insert {type(obj)} into Queue")
 
-    def shift_head_forward(self, to: SongQueueNode | None) -> None:
-        if self.is_empty():
+    def remove(self, item_uuid: UUID) -> None:
+        with transaction.atomic():
+            item = QueueItem.objects.get(queue=self, uuid=item_uuid)
+
+            if (
+                item.origin == ItemOrigin.CONTEXT
+                and item.collection_song.position is not None
+            ):
+                if item.collection_song.position > self.context_cursor:
+                    self.context_skip_indices.append(item.collection_song.position)
+                    self.save()
+
+            item.delete()
+            self._fill()
+
+    def prev(self) -> CollectionSong | None:
+        with transaction.atomic():
+            history = self.streamingprofile.history
+            entry = (
+                CollectionSong.objects.filter(collection=history)
+                .order_by("-position")[self.history_cursor : self.history_cursor + 1]
+                .first()
+            )
+
+            if not entry:
+                return None
+
+            if self.current_collection_song:
+                first = (
+                    QueueItem.objects.filter(queue=self).order_by("position").first()
+                )
+                pos = (
+                    (first.position - POSITION_GAP)
+                    if first
+                    else self._calculate_append_position()
+                )
+                QueueItem.objects.create(
+                    queue=self,
+                    collection_song=self.current_collection_song,
+                    position=pos,
+                    origin=ItemOrigin.USER,
+                )
+
+            self.current_collection_song = entry
+            self.history_cursor += 1
+            self.save()
+            return self.current_collection_song
+
+    def window(self, cap: int = 50) -> list[QueueItem]:
+        return list(
+            QueueItem.objects.filter(queue=self)
+            .order_by("position")
+            .select_related("collection_song", "collection_song__song")[:cap]
+        )
+
+    def play_song(self, collection_song: CollectionSong) -> None:
+        with transaction.atomic():
+            self._add_to_history()
+            QueueItem.objects.filter(queue=self, origin=ItemOrigin.CONTEXT).delete()
+
+            self.current_collection_song = collection_song
+            self.context_collection = collection_song.collection
+            self.context_cursor = (
+                collection_song.position if collection_song.position is not None else -1
+            )
+            self.context_skip_indices = []
+            self.history_cursor = 0
+            self.save()
+
+            self._fill()
+
+    def play_collection(self, collection: Collection) -> None:
+        first_song = (
+            CollectionSong.objects.filter(collection=collection)
+            .order_by("position")
+            .first()
+        )
+        if not first_song:
             return
+
+        self.play_song(first_song)
+
+    def clear(self) -> None:
         with transaction.atomic():
-            shifted_nodes = []
-            curr = self.head
+            QueueItem.objects.filter(queue=self).delete()
+            QueueSource.objects.filter(queue=self).delete()
+            self.context_skip_indices = []
+            self.next_item_position = POSITION_GAP
+            self.history_cursor = 0
+            self.save()
+            self._fill()
 
-            if to is None:
-                return self._shift_head_to_next()
-
-            while curr is not to and curr is not None:
-                shifted_nodes.append(curr)
-                curr = curr.next
-            if curr:
-                if self.add_after in shifted_nodes:
-                    self.add_after = None
-                self.song_count -= len(shifted_nodes)
-
-            CollectionSong.objects.create(
-                collection=self.streamingprofile.history,
-                song=self.head.song.song,
+    def reorder(
+        self,
+        item_uuid: UUID,
+        before_uuid: UUID | None = None,
+        after_uuid: UUID | None = None,
+    ) -> None:
+        with transaction.atomic():
+            item = QueueItem.objects.get(queue=self, uuid=item_uuid)
+            before = (
+                QueueItem.objects.get(queue=self, uuid=before_uuid)
+                if before_uuid
+                else None
+            )
+            after = (
+                QueueItem.objects.get(queue=self, uuid=after_uuid)
+                if after_uuid
+                else None
             )
 
-            self.head = curr
-            self.save()
+            if before and after:
+                item.position = (before.position + after.position) / 2
+            elif before:
+                item.position = before.position + POSITION_GAP
+            elif after:
+                item.position = after.position - POSITION_GAP
 
-    def _shift_head_to_next(self) -> None:
+            item.save()
+
+    def is_empty(self) -> bool:
+        return (
+            self.current_collection_song is None
+            and not QueueItem.objects.filter(queue=self).exists()
+        )
+
+    def _advance_context(self) -> CollectionSong | None:
         with transaction.atomic():
-            head_next = self.head.next
-            if head_next is None:
-                self.clear()
-                return
+            self._add_to_history()
 
-            self.song_count -= 1
-            self.head = head_next
+            if self.context_collection:
+                next_song = (
+                    CollectionSong.objects.filter(
+                        collection=self.context_collection,
+                        position__gt=self.context_cursor,
+                    )
+                    .exclude(position__in=self.context_skip_indices)
+                    .order_by("position")
+                    .first()
+                )
+                if next_song:
+                    self.current_collection_song = next_song
+                    self.context_cursor = next_song.position
+                    self.history_cursor = 0
+                    self.save()
+                    self._fill()
+                    return self.current_collection_song
+
+            self.current_collection_song = None
+            self.history_cursor = 0
             self.save()
-
-            CollectionSong.objects.create(
-                collection=self.streamingprofile.history,
-                song=self.head.song.song,
-            )
-
             return None
 
-    def shift_head_backwards(self) -> SongQueueNode | None:
-        if not self.head or not self.head.prev:
-            return None
-        with transaction.atomic():
-            self.head = self.head.prev
-            self.song_count += 1
-
+    def _add_to_history(self) -> None:
+        if not self.current_collection_song:
+            return
+        try:
+            history = self.streamingprofile.history
             CollectionSong.objects.create(
-                collection=self.streamingprofile.history,
-                song=self.head.song.song,
+                collection=history,
+                song=self.current_collection_song.song,
             )
+        except ObjectDoesNotExist:
+            pass
 
-            self.save()
+    def _skip_context_items_below(self, position: Decimal) -> None:
+        context_items = QueueItem.objects.filter(
+            queue=self,
+            position__lt=position,
+            origin=ItemOrigin.CONTEXT,
+        )
+        for ctx_item in context_items.select_related("collection_song"):
+            ctx_pos = ctx_item.collection_song.position
+            if ctx_pos is not None and ctx_pos > self.context_cursor:
+                self.context_skip_indices.append(ctx_pos)
 
-    def clear(self):
-        # doesn't call `delete` of the individual nodes, safe
+    def _calculate_append_position(self) -> Decimal:
+        pos = self.next_item_position
+        self.next_item_position += POSITION_GAP
+        return pos
+
+    def _fill(self, n=FILL_BATCH) -> None:
+        if QueueItem.objects.filter(queue=self).count() >= REFILL_THRESHOLD:
+            return
+
         with transaction.atomic():
-            self.nodes.all().delete()
-            self.head, self.tail, self.add_after = None, None, None
-            self.song_count = 0
+            for source in list(
+                QueueSource.objects.filter(queue=self).order_by("date_added")
+            ):
+                if n <= 0:
+                    break
+                n = self._fill_from_source(source, n)
+
+            if n > 0:
+                self._fill_from_context(n)
+
             self.save()
 
-    def _add_node_after(
-        self, node: SongQueueNode, target: SongQueueNode
-    ) -> SongQueueNode:
-        """Used for enqueueing"""
-        with transaction.atomic():
-            if target is self.tail:
-                self._append_node(node)
-            else:
-                node.next = target.next
-                node.prev = target
+    def _fill_from_source(self, source: QueueSource, limit: int) -> int:
+        if source.source_type == SourceType.SONG:
+            return self._process_song_source(source, limit)
+        return self._process_collection_source(source, limit)
 
-                if target.next:
-                    target.next.prev = node
-                    target.next.save()
-                else:
-                    self.tail = node
+    def _process_song_source(self, source: QueueSource, limit: int) -> int:
+        if source.collection_song:
+            QueueItem.objects.create(
+                queue=self,
+                collection_song=source.collection_song,
+                position=self._calculate_append_position(),
+                origin=ItemOrigin.SOURCE,
+            )
+            limit -= 1
+        source.delete()
+        return limit
 
-                target.next = node
-                self.song_count += 1
+    def _process_collection_source(self, source: QueueSource, limit: int) -> int:
+        # we fetch limit + 1 songs, and if we get limit + 1 songs, this means that the source is not yet exhausted
+        songs = list(
+            CollectionSong.objects.filter(
+                collection=source.collection,
+                position__gt=source.collection_cursor,
+            )
+            .order_by("position")
+            .select_related("song")[: limit + 1]
+        )
 
-            self.add_after = node
+        songs = songs[:limit]
+        items = []
+        for cs in songs:
+            items.append(
+                QueueItem(
+                    queue=self,
+                    collection_song=cs,
+                    position=self._calculate_append_position(),
+                    origin=ItemOrigin.SOURCE,
+                )
+            )
+            source.collection_cursor = cs.position
+        QueueItem.objects.bulk_create(items)
 
-            target.save()
-            node.save()
-            self.save()
-            return node
+        if songs:
+            source.save()
+        if not len(songs) > limit:
+            source.delete()
 
-    def _set_head(self, node: SongQueueNode) -> SongQueueNode:
-        """Used when play is clicked"""
-        with transaction.atomic():
-            if self.is_empty():
-                self.head = node
-                self.tail = node
-                self.song_count += 1
-            else:
-                second = self.head.next
-                self.head.next = node
-                self.head.save()
-                if second:
-                    node.next = second
-                    second.prev = node
-                    second.save()
-                else:
-                    self.tail = node  # only one node was in the queue
+        return limit - len(items)
 
-                self.head = node
+    def _fill_from_context(self, limit: int) -> None:
+        if not self.context_collection:
+            return
 
-            node.save()
-            self.save()
+        existing_song_ids = set(
+            QueueItem.objects.filter(queue=self, origin=ItemOrigin.CONTEXT).values_list(
+                "collection_song_id", flat=True
+            )
+        )
 
-            return node
+        songs = list(
+            CollectionSong.objects.filter(
+                collection=self.context_collection,
+                position__gt=self.context_cursor,
+            )
+            .exclude(position__in=self.context_skip_indices)
+            .exclude(id__in=existing_song_ids)
+            .order_by("position")
+            .select_related("song")[:limit]
+        )
 
-    def _append_node(self, node: SongQueueNode) -> SongQueueNode:
-        """
-        Warning: should be used only for appending to the end!
-        Does not update the `add_after` attr.
-        """
-        with transaction.atomic():
-            if self.is_empty():
-                self.head = node
-            else:
-                tail = self.tail
-                tail.next = node
-                node.prev = tail
-                tail.save()
-            self.tail = node
-            self.song_count += 1
-
-            node.save()
-            self.save()
-            return node
-
-    def delete_node(self, node: SongQueueNode) -> bool:
-        # TODO: probably a try-catch block and return based on its res
-        with transaction.atomic():
-            node.delete()
-            self.song_count -= 1
-            self.save()
-            return True
-
-        # TODO: implement, complete the table approach
-        # from likedsongs --> filter on likedsongs id
-        # total random --> all available songs in the sys
-        # radom on hastags --> all available with hashtag
-
-    # TODO: implement
-    # def append_random_songs(
-    #     self,
-    #     amount: int = default_size,
-    # ) -> list[SongQueueNode]:
-    #     # query = (
-    #     #     f"SELECT * FROM {BaseSong._meta.db_table} TABLESAMPLE SYSTEM_ROWS({size})"
-    #     # )
-    #     # query = query + where
-    #     if amount < self.song_count:
-    #         return []
-    #     with transaction.atomic():
-    #         qs = BaseSong.objects.all()
-    #         songs = random.choices(qs, k=min(amount, len(qs)))
-    #         return [self.add_song(song, action=self.AddAction.APPEND) for song in songs]
-
-    def is_empty(self):
-        return self.head is None
-
-    def apply(self, func: Callable) -> None:
-        current = self.head
-        while current:
-            func(current)
-            current = current.next
+        QueueItem.objects.bulk_create(
+            [
+                QueueItem(
+                    queue=self,
+                    collection_song=cs,
+                    position=self._calculate_append_position(),
+                    origin=ItemOrigin.CONTEXT,
+                )
+                for cs in songs
+            ]
+        )
