@@ -25,13 +25,14 @@ from streaming.api.v1.views.song_queue import (
     SongQueueRetrieveView,
     SongQueueAddSongView,
     SongQueueAddCollectionView,
-    SongQueueSetSongHeadView,
-    SongQueueSetCollectionHeadView,
+    SongQueuePlaySongView,
+    SongQueuePlayCollectionView,
     SongQueueAppendRandomSongsView,
-    SongQueueRemoveNodeView,
+    SongQueueRemoveItemView,
     SongQueueClearView,
-    SongQueueShiftHeadView,
-    SongQueueShiftHeadBackwardsView,
+    SongQueueNextView,
+    SongQueuePrevView,
+    SongQueueReorderView,
 )
 
 song_urls = [
@@ -104,17 +105,17 @@ song_queue_urls = [
     ),
     path(
         "song-queue/set-head-song/<uuid:uuid>",
-        SongQueueSetSongHeadView.as_view(),
+        SongQueuePlaySongView.as_view(),
         name="song-queue-set-head-song",
     ),
     path(
         "song-queue/set-head-collection/<uuid:uuid>",
-        SongQueueSetCollectionHeadView.as_view(),
+        SongQueuePlayCollectionView.as_view(),
         name="song-queue-set-head-collection",
     ),
     path(
         "song-queue/remove-node/<uuid:uuid>",
-        SongQueueRemoveNodeView.as_view(),
+        SongQueueRemoveItemView.as_view(),
         name="song-queue-remove-node",
     ),
     path("song-queue/clear", SongQueueClearView.as_view(), name="song-queue-clear"),
@@ -125,18 +126,23 @@ song_queue_urls = [
     ),
     path(
         "song-queue/shift-head",
-        SongQueueShiftHeadView.as_view(),
+        SongQueueNextView.as_view(),
         name="song-queue-shift-head",
     ),
     path(
         "song-queue/shift-head-backwards",
-        SongQueueShiftHeadBackwardsView.as_view(),
+        SongQueuePrevView.as_view(),
         name="song-queue-shift-head-backwards",
     ),
     path(
         "song-queue/shift-head/<uuid:uuid>",
-        SongQueueShiftHeadView.as_view(),
+        SongQueueNextView.as_view(),
         name="song-queue-shift-head-to",
+    ),
+    path(
+        "song-queue/reorder",
+        SongQueueReorderView.as_view(),
+        name="song-queue-reorder",
     ),
 ]
 

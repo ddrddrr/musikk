@@ -13,17 +13,17 @@ from streaming.api.v1.views.connections import (
     FriendsLatestListenedView,
 )
 from streaming.api.v1.views.song_queue import (
-    SongQueueBaseView,
+    SongQueueMixin,
     SongQueueRetrieveView,
     SongQueueAddSongView,
     SongQueueAddCollectionView,
-    SongQueueSetSongHeadView,
-    SongQueueSetCollectionHeadView,
+    SongQueuePlaySongView,
+    SongQueuePlayCollectionView,
     SongQueueAppendRandomSongsView,
-    SongQueueRemoveNodeView,
+    SongQueueRemoveItemView,
     SongQueueClearView,
-    SongQueueShiftHeadView,
-    SongQueueShiftHeadBackwardsView,
+    SongQueueNextView,
+    SongQueuePrevView,
 )
 from streaming.api.v1.views.songs import (
     CollectionSongRetrieveView,

@@ -1,31 +1,27 @@
+from uuid import UUID as PyUUID
+
 from django.db import transaction
 from rest_framework import status
 from rest_framework.generics import RetrieveAPIView, get_object_or_404
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
-from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.response import Response
 
 from streaming.api.v1.serializers.song_queue import SongQueueSerializer
-from streaming.models import SongQueue, SongQueueNode, Collection
+from streaming.models import SongQueue, QueueItem, Collection
 from streaming.models.songs import CollectionSong
 from streaming.permissions import IsPublicOrCollectionAuthor
 from streaming.managers.playback_manager import PlaybackManager
-from websockets.event_helpers import send_ws_event
+from websockets.event_helpers import send_ws_event, user_group
 
-# TODO LAST SONG IN THE QUEUE DOESNT PLAY??
-class SongQueueBaseView(APIView):
-    permission_classes = [IsAuthenticated]
 
+class SongQueueMixin(APIView):
     def get_song_queue(self, request: Request) -> SongQueue:
         return request.user.streamingprofile.song_queue
 
-    def _user_group(self, request: Request) -> str:
-        return f"user_{request.user.uuid}"
-
-    def _invalidate_queue(self, request: Request) -> None:
+    def _broadcast_queue_invalidation(self, request: Request) -> None:
         send_ws_event(
-            self._user_group(request),
+            user_group(request.user.uuid),
             "invalidate.query",
             query_key=["queue"],
         )
@@ -38,134 +34,162 @@ class SongQueueBaseView(APIView):
     def _broadcast_playback_state(self, request: Request) -> None:
         playback_manager = PlaybackManager(user_uuid=str(request.user.uuid))
         send_ws_event(
-            self._user_group(request),
+            user_group(request.user.uuid),
             "playback.change",
             playback=playback_manager.is_playback_active(),
         )
 
 
-class SongQueueRetrieveView(SongQueueBaseView, RetrieveAPIView):
+class SongQueueRetrieveView(SongQueueMixin, RetrieveAPIView):
     serializer_class = SongQueueSerializer
 
     def get_object(self):
         return self.get_song_queue(self.request)
 
 
-class SongQueueAddSongView(SongQueueBaseView):
+class SongQueueAddSongView(SongQueueMixin):
     permission_classes = [IsPublicOrCollectionAuthor]
 
     def post(self, request, *args, **kwargs):
         song = get_object_or_404(CollectionSong, uuid=kwargs["uuid"])
         self.check_object_permissions(request, song)
 
-        self.get_song_queue(request).add_song(song=song, action=SongQueue.AddAction.ADD)
-        self._invalidate_queue(request)
+        self.get_song_queue(request).insert(song)
+        self._broadcast_queue_invalidation(request)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class SongQueueAddCollectionView(SongQueueBaseView):
+class SongQueueAddCollectionView(SongQueueMixin):
     permission_classes = [IsPublicOrCollectionAuthor]
 
     def post(self, request, *args, **kwargs):
         collection = get_object_or_404(Collection, uuid=kwargs["uuid"])
         self.check_object_permissions(request, collection)
 
-        self.get_song_queue(request).add_collection(
-            collection=collection, action=SongQueue.AddAction.ADD
-        )
-        self._invalidate_queue(request)
+        self.get_song_queue(request).insert(collection)
+        self._broadcast_queue_invalidation(request)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class SongQueueSetSongHeadView(SongQueueBaseView):
+class SongQueuePlaySongView(SongQueueMixin):
     permission_classes = [IsPublicOrCollectionAuthor]
 
     def post(self, request, *args, **kwargs):
         song = get_object_or_404(CollectionSong, uuid=kwargs["uuid"])
         self.check_object_permissions(request, song)
 
-        self.get_song_queue(request).add_song(
-            song=song, action=SongQueue.AddAction.CHANGE_HEAD
-        )
-        self._invalidate_queue(request)
+        self.get_song_queue(request).play_song(song)
+        self._broadcast_queue_invalidation(request)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class SongQueueSetCollectionHeadView(SongQueueBaseView):
+class SongQueuePlayCollectionView(SongQueueMixin):
     permission_classes = [IsPublicOrCollectionAuthor]
 
     def post(self, request, *args, **kwargs):
         collection = get_object_or_404(Collection, uuid=kwargs["uuid"])
         self.check_object_permissions(request, collection)
 
-        self.get_song_queue(request).add_collection(
-            collection=collection, action=SongQueue.AddAction.CHANGE_HEAD
-        )
-        self._invalidate_queue(request)
+        self.get_song_queue(request).play_collection(collection)
+        self._broadcast_queue_invalidation(request)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 # TODO
-class SongQueueAppendRandomSongsView(SongQueueBaseView):
+class SongQueueAppendRandomSongsView(SongQueueMixin):
     def post(self, request, *args, **kwargs):
-        self.get_song_queue(request).append_random_songs()
-        self._invalidate_queue(request)
-        return Response(status=status.HTTP_201_CREATED)
+        return Response(status=status.HTTP_501_NOT_IMPLEMENTED)
 
 
-class SongQueueRemoveNodeView(SongQueueBaseView):
+class SongQueueRemoveItemView(SongQueueMixin):
     def post(self, request, *args, **kwargs):
         song_queue = self.get_song_queue(request)
-        node = get_object_or_404(SongQueueNode, uuid=kwargs["uuid"])
+        item = get_object_or_404(QueueItem, uuid=kwargs["uuid"])
 
-        if song_queue is not node.song_queue:
+        if song_queue != item.queue:
             return Response(
                 status=status.HTTP_403_FORBIDDEN,
-                data={"error": "Node does not belong to this user's queue."},
+                data={"error": "Item does not belong to this user's queue."},
             )
 
-        node.delete()
-        self._invalidate_queue(request)
+        song_queue.remove(item.uuid)
+        self._broadcast_queue_invalidation(request)
         if song_queue.is_empty():
             self._stop_playback_and_broadcast(request)
 
         return Response(status=status.HTTP_200_OK)
 
 
-class SongQueueClearView(SongQueueBaseView):
+class SongQueueClearView(SongQueueMixin):
     def post(self, request, *args, **kwargs):
         with transaction.atomic():
             self.get_song_queue(request).clear()
 
         self._stop_playback_and_broadcast(request)
-        self._invalidate_queue(request)
+        self._broadcast_queue_invalidation(request)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class SongQueueShiftHeadView(SongQueueBaseView):
+class SongQueueNextView(SongQueueMixin):
     def post(self, request, *args, **kwargs):
         song_queue = self.get_song_queue(request)
         if song_queue.is_empty():
             return Response(status=status.HTTP_204_NO_CONTENT)
 
-        shift_to_node = None
         if node_uuid := kwargs.get("uuid"):
-            shift_to_node = get_object_or_404(SongQueueNode, uuid=node_uuid)
+            item = get_object_or_404(QueueItem, uuid=node_uuid)
+            song_queue.choose(item.uuid)
+        else:
+            song_queue.next()
 
-        song_queue.shift_head_forward(to=shift_to_node)
-        self._invalidate_queue(request)
+        self._broadcast_queue_invalidation(request)
         if song_queue.is_empty():
             self._stop_playback_and_broadcast(request)
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class SongQueueShiftHeadBackwardsView(SongQueueBaseView):
+class SongQueuePrevView(SongQueueMixin):
     def post(self, request, *args, **kwargs):
         song_queue = self.get_song_queue(request)
         if song_queue.is_empty():
             return Response(status=status.HTTP_204_NO_CONTENT)
 
-        song_queue.shift_head_backwards()
-        self._invalidate_queue(request)
+        song_queue.prev()
+        self._broadcast_queue_invalidation(request)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class SongQueueReorderView(SongQueueMixin):
+    def post(self, request, *args, **kwargs):
+        song_queue = self.get_song_queue(request)
+
+        item_uuid = request.data.get("item")
+        before_uuid = request.data.get("before")
+        after_uuid = request.data.get("after")
+
+        if not item_uuid:
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST,
+                data={"error": "'item' is required."},
+            )
+        if not before_uuid and not after_uuid:
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST,
+                data={"error": "At least one of 'before' or 'after' is required."},
+            )
+
+        item = get_object_or_404(QueueItem, uuid=item_uuid)
+        if item.queue != song_queue:
+            return Response(
+                status=status.HTTP_403_FORBIDDEN,
+                data={"error": "Item does not belong to this user's queue."},
+            )
+
+        song_queue.reorder(
+            item_uuid=PyUUID(item_uuid),
+            before_uuid=PyUUID(before_uuid) if before_uuid else None,
+            after_uuid=PyUUID(after_uuid) if after_uuid else None,
+        )
+        self._broadcast_queue_invalidation(request)
         return Response(status=status.HTTP_204_NO_CONTENT)

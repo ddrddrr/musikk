@@ -4,7 +4,7 @@ from streaming.api.v1.serializers.collections import (
     CollectionCreateSerializer,
 )
 from streaming.api.v1.serializers.song_queue import (
-    SongQueueNodeSerializer,
+    QueueItemSerializer,
     SongQueueSerializer,
 )
 from streaming.api.v1.serializers.songs import (

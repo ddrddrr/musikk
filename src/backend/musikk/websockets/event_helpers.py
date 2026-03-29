@@ -1,5 +1,11 @@
+from uuid import UUID as PyUUID
+
 from asgiref.sync import async_to_sync as atos
 from channels.layers import get_channel_layer
+
+
+def user_group(uuid: str | PyUUID) -> str:
+    return f"user_{uuid}"
 
 
 def send_ws_event(group_name: str, event_name: str, **kwargs):

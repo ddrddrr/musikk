@@ -21,7 +21,6 @@ chat_urlpatterns = [
         ChatRetrieveView.as_view(),
         name="chat-messages-list-create",
     ),
-    # TODO: messages/members initially should be returned in the retrieve view
     path(
         "users/<uuid:user_uuid>/chats/<uuid:chat_uuid>/messages",
         ChatMessagesListCreateView.as_view(),
