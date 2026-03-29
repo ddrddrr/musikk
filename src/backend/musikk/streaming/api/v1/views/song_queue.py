@@ -20,16 +20,18 @@ class SongQueueMixin(APIView):
         return request.user.streamingprofile.song_queue
 
     def _broadcast_queue_invalidation(self, request: Request) -> None:
+        # TODO: redo
         send_ws_event(
             user_group(request.user.uuid),
             "invalidate.query",
             query_key=["queue"],
         )
 
-    def _stop_playback_and_broadcast(self, request: Request) -> None:
-        playback_manager = PlaybackManager(user_uuid=str(request.user.uuid))
-        playback_manager.stop()
-        self._broadcast_playback_state(request)
+    # TODO: will be used in the playback views
+    # def _stop_playback_and_broadcast(self, request: Request) -> None:
+    #     playback_manager = PlaybackManager(user_uuid=str(request.user.uuid))
+    #     playback_manager.stop()
+    #     self._broadcast_playback_state(request)
 
     def _broadcast_playback_state(self, request: Request) -> None:
         playback_manager = PlaybackManager(user_uuid=str(request.user.uuid))
@@ -114,9 +116,6 @@ class SongQueueRemoveItemView(SongQueueMixin):
 
         song_queue.remove(item.uuid)
         self._broadcast_queue_invalidation(request)
-        if song_queue.is_empty():
-            self._stop_playback_and_broadcast(request)
-
         return Response(status=status.HTTP_200_OK)
 
 
@@ -125,11 +124,13 @@ class SongQueueClearView(SongQueueMixin):
         with transaction.atomic():
             self.get_song_queue(request).clear()
 
-        self._stop_playback_and_broadcast(request)
         self._broadcast_queue_invalidation(request)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-
+# TODO: shouldn't be song queue related views
+# there should be three playback-related views: play+pause/prev/next corresponding to the buttons
+# we should also track the playback state be-side
+# and the curr seconds and broadcast that pos to other clients
 class SongQueueNextView(SongQueueMixin):
     def post(self, request, *args, **kwargs):
         song_queue = self.get_song_queue(request)
@@ -143,9 +144,6 @@ class SongQueueNextView(SongQueueMixin):
             song_queue.next()
 
         self._broadcast_queue_invalidation(request)
-        if song_queue.is_empty():
-            self._stop_playback_and_broadcast(request)
-
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
