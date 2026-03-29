@@ -1,17 +1,27 @@
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { PlaybackContext } from "@/features/playback/providers/playbackContext.ts";
-import { Player } from "@/features/player/Player.tsx";
+import { usePlayer } from "@/features/player/hooks/usePlayer.ts";
 import { PlayerBar } from "@/features/player/PlayerBar.tsx";
-import { SongQueue } from "@/features/song-queue/components/SongQueue.tsx";
-import { memo, useContext, useRef, useState } from "react";
+import React, { memo, useContext, useRef, useState } from "react";
 
-export const PlayerBox = memo(function PlayerBox() {
+export const PlayerBox = memo(function PlayerBox({
+    setIsQueueOpen,
+}: {
+    setIsQueueOpen: React.Dispatch<React.SetStateAction<boolean>>;
+}) {
     const audioRef = useRef<HTMLAudioElement>(null);
-    const [isQueueOpen, setIsQueueOpen] = useState(false);
     const [totalDuration, setTotalDuration] = useState(0);
     const [time, setTime] = useState(0);
     const [seeking, setSeeking] = useState(false);
     const { queueError, queueRefetch } = useContext(PlaybackContext);
+
+    const { handleLoadedMetadata, handleTimeUpdate, handleOnEnded } = usePlayer({
+        audioRef,
+        onDurationChange: setTotalDuration,
+        onTimeUpdate: (currentTime) => {
+            if (!seeking) setTime(currentTime);
+        },
+    });
 
     // TODO: fine for now, but probably move
     if (queueError) {
@@ -24,15 +34,6 @@ export const PlayerBox = memo(function PlayerBox() {
 
     return (
         <div className="sticky right-0 bottom-0 left-0 z-10 border-t border-black bg-white">
-            {isQueueOpen && (
-                <div
-                    className="overflow-y-auto border-t border-b border-black"
-                    style={{ maxHeight: "calc(100vh - 64px - 72px)" }}
-                >
-                    <SongQueue />
-                </div>
-            )}
-
             <PlayerBar
                 audioRef={audioRef}
                 totalDuration={totalDuration}
@@ -43,15 +44,13 @@ export const PlayerBox = memo(function PlayerBox() {
                 onSeekCommit={(t) => setTime(t)}
             />
 
-            <div className="hidden">
-                <Player
-                    audioRef={audioRef}
-                    onDurationChange={setTotalDuration}
-                    onTimeUpdate={(currentTime) => {
-                        if (!seeking) setTime(currentTime);
-                    }}
-                />
-            </div>
+            <audio
+                ref={audioRef}
+                onLoadedMetadata={handleLoadedMetadata}
+                onTimeUpdate={handleTimeUpdate}
+                onEnded={handleOnEnded}
+                className="hidden"
+            />
         </div>
     );
 });

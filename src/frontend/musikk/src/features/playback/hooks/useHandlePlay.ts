@@ -6,7 +6,7 @@ import { usePlayCollection, usePlaySong } from "@/features/song-queue/hooks/useQ
 import { useContext } from "react";
 
 export function useHandlePlay() {
-    const { queueHead, isPlaybackActive } = useContext(PlaybackContext);
+    const { playingCollectionSong, isPlaybackActive } = useContext(PlaybackContext);
     const { getDeviceID } = useCurrentDevice();
     const { activatePlaybackAction, stopPlaybackAction } = usePlaybackActions();
     const playSongMutation = usePlaySong();
@@ -41,6 +41,7 @@ export function useHandlePlay() {
         newCollection?: Collection;
         newSong?: CollectionSong;
     } = {}) {
+        // TODO: probably remove this check
         if (!getDeviceID()) return;
 
         if (newCollection || newSong) {
@@ -48,7 +49,7 @@ export function useHandlePlay() {
             return;
         }
 
-        if (queueHead) {
+        if (playingCollectionSong) {
             if (isPlaybackActive) {
                 stopPlaybackAction();
             } else {

@@ -1,8 +1,8 @@
 import { useDeviceList } from "@/features/playback/hooks/useDeviceList.ts";
-import { usePlaybackState } from "@/features/playback/hooks/usePlaybackState.ts";
+import { PlaybackContext } from "@/features/playback/providers/playbackContext.ts";
 import { IPlaybackDevice } from "@/features/playback/types.ts";
 import { useWSClient } from "@/hooks/useWSClient.ts";
-import { useEffect } from "react";
+import { useContext, useEffect } from "react";
 
 interface DeviceListPayload {
     devices: IPlaybackDevice[];
@@ -21,13 +21,13 @@ interface PlaybackChangeEvent {
 }
 export function usePlaybackChangeEvent() {
     const ws = useWSClient();
-    const { setIsPlaying } = usePlaybackState();
+    const { setIsPlaybackActive } = useContext(PlaybackContext);
 
     useEffect(() => {
         return ws.subscribe("playback.change", (payload: PlaybackChangeEvent) => {
-            if (setIsPlaying) {
-                setIsPlaying(payload.playback);
+            if (setIsPlaybackActive) {
+                setIsPlaybackActive(payload.playback);
             }
         });
-    }, [ws, setIsPlaying]);
+    }, [ws, setIsPlaybackActive]);
 }

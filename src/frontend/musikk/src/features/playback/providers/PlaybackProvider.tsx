@@ -12,8 +12,9 @@ export function PlaybackProvider({ children }: PlaybackProviderProps) {
     const { data: queue, error: queueError, refetch: queueRefetch } = useQueue();
     const { getDeviceID, getDeviceName } = useCurrentDevice();
     const { activeDevice } = useDeviceList();
+    // TODO: should not be device-specific but tracked on BE
     const [isPlaybackActive, setIsPlaybackActive] = useState(false);
-    const queueHead = queue?.current_song ?? null;
+    const playingCollectionSong = queue?.current_song ?? undefined;
     const isThisDeviceActive = !!getDeviceID() && getDeviceID() === activeDevice?.id;
     // todo handle if device is not yet set(id/name params)
     return (
@@ -23,11 +24,10 @@ export function PlaybackProvider({ children }: PlaybackProviderProps) {
                     id: getDeviceID(),
                     name: getDeviceName(),
                 },
-                isThisDeviceActive: isThisDeviceActive,
+                isThisDeviceActive,
                 isPlaybackActive,
                 setIsPlaybackActive,
-                playingCollectionSong: queueHead ?? undefined,
-                queueHead,
+                playingCollectionSong,
                 queueError: queueError ?? null,
                 queueRefetch: () => void queueRefetch(),
             }}

@@ -8,9 +8,11 @@ import { SongAddToLikedButton } from "@/features/songs/components/SongAddToLiked
 import { SongAddToQueueButton } from "@/features/songs/components/SongAddToQueueButton.tsx";
 import { songButtonProps } from "@/features/songs/components/DefaultSongActions.tsx";
 import { SongContextMenu } from "@/features/songs/components/SongContextMenu.tsx";
+import { SongMenuButton } from "@/features/songs/components/SongMenuButton.tsx";
 import { SongContainer } from "@/features/songs/components/SongContainer.tsx";
 import { SongDisplay } from "@/features/songs/components/SongDisplay.tsx";
 import { Button } from "@/features/ui/button.tsx";
+import { ScrollArea } from "@/features/ui/scroll-area.tsx";
 import { cn } from "@/lib/utils.ts";
 import { Trash2 } from "lucide-react";
 
@@ -34,6 +36,12 @@ function SongQueueActions({
                 collectionSong={collectionSong}
                 size={btn.size}
                 className={btn.padding}
+            />
+            <SongMenuButton
+                collectionSong={collectionSong}
+                size={btn.size}
+                className={btn.padding}
+                iconSize={btn.iconSize}
             />
         </div>
     );
@@ -64,12 +72,13 @@ export function SongQueue() {
                 <SongDisplay song={currentSong} />
             </div>
 
-            <div className="relative flex w-1/2 flex-col">
-                <div className="flex-1 overflow-y-auto p-8">
-                    <h2 className="mb-4 text-2xl font-bold">Queue</h2>
-                    <ul className="space-y-3">
+            <div className="relative flex min-h-0 w-1/2 flex-col">
+                <h2 className="p-8 pb-0 text-2xl font-bold">Queue</h2>
+                <ScrollArea className="min-h-0 flex-1">
+                    <ul className="space-y-3 p-8">
                         {items.map((item) => (
                             <li key={item.uuid}>
+                                {/*TODO: factor out to a component here and in collection*/}
                                 <SongContextMenu song={item.collection_song}>
                                     <SongContainer
                                         collectionSong={item.collection_song}
@@ -84,7 +93,7 @@ export function SongQueue() {
                             </li>
                         ))}
                     </ul>
-                </div>
+                </ScrollArea>
 
                 <div className="border-t border-black bg-white p-4">
                     <Button
