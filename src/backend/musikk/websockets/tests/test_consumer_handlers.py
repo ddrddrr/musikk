@@ -4,7 +4,6 @@ from django.test import TestCase
 
 from users.tests.factories import BaseUserFactory
 from websockets.base_consumer import BaseConsumer
-from websockets.status_codes import WebSocketStatusCode
 
 
 class TestEvents(TestCase):
@@ -23,6 +22,7 @@ class TestEvents(TestCase):
         self.consumer.channel_layer = self.mock_channel_layer
         self.consumer.accept = Mock()
         self.consumer.close = Mock()
+        self.consumer.send_json = Mock()
 
     @patch("websockets.base_consumer.DeviceManager")
     def test_connect_authenticated_user(self, mock_device_manager_class):
@@ -45,14 +45,11 @@ class TestEvents(TestCase):
 
         consumer = BaseConsumer()
         consumer.scope = {"user": anonymous_user}
-        consumer.close = Mock()
+        consumer.accept = Mock()
 
         consumer.connect()
 
-        consumer.close.assert_called_once_with(
-            code=WebSocketStatusCode.Unauthorized,
-            reason="User is not Authenticated.",
-        )
+        consumer.accept.assert_not_called()
 
     def test_device_register_action_is_called_and_sends_device_event(self):
         self.mock_redis.get.return_value = None
@@ -79,21 +76,21 @@ class TestEvents(TestCase):
         self.assertIn("devices", call_args[0][1]["payload"])
 
     def test_device_register_missing_device_id(self):
-
         self.consumer.user = self.user
         self.consumer.device_manager = Mock()
 
         payload = {"name": "My Device"}
 
         self.consumer.handle_device_register(payload)
-        self.consumer.close.assert_called_once_with(
-            code=WebSocketStatusCode.BadRequest,
-            reason="`device_id` and `device_name` are required for device.register action",
+        self.consumer.send_json.assert_called_once_with(
+            {
+                "event": "error",
+                "payload": {"message": "'device_id' and 'name' are required for device.register"},
+            }
         )
         self.consumer.device_manager.register_device.assert_not_called()
 
     def test_device_heartbeat(self):
-
         self.consumer.user = self.user
         self.consumer.user_uuid = str(self.user.uuid)
         self.consumer.device_manager = Mock()
@@ -105,8 +102,20 @@ class TestEvents(TestCase):
             device_id="device1"
         )
 
-    def test_device_set_active(self):
+    def test_device_heartbeat_missing_device_id(self):
+        self.consumer.user = self.user
+        self.consumer.device_manager = Mock()
 
+        self.consumer.handle_device_heartbeat({})
+        self.consumer.send_json.assert_called_once_with(
+            {
+                "event": "error",
+                "payload": {"message": "'device_id' is required for device.heartbeat"},
+            }
+        )
+        self.consumer.device_manager.touch_device.assert_not_called()
+
+    def test_device_set_active(self):
         self.consumer.user = self.user
         self.consumer.user_uuid = str(self.user.uuid)
         self.consumer.group_name = f"user_{self.user.uuid}"
@@ -128,8 +137,20 @@ class TestEvents(TestCase):
         self.assertEqual(call_args[0][0], f"user_{self.user.uuid}")
         self.assertEqual(call_args[0][1]["event"], "device.list")
 
-    def test_disconnect_clears_device_and_broadcasts(self):
+    def test_device_set_active_missing_device_id(self):
+        self.consumer.user = self.user
+        self.consumer.device_manager = Mock()
 
+        self.consumer.handle_device_set_active({})
+        self.consumer.send_json.assert_called_once_with(
+            {
+                "event": "error",
+                "payload": {"message": "'device_id' is required for device.set_active"},
+            }
+        )
+        self.consumer.device_manager.set_active_device.assert_not_called()
+
+    def test_disconnect_clears_device_and_broadcasts(self):
         self.consumer.user = self.user
         self.consumer.user_uuid = str(self.user.uuid)
         self.consumer.group_name = f"user_{self.user.uuid}"
@@ -153,7 +174,6 @@ class TestEvents(TestCase):
         self.assertEqual(call_args[0][1]["event"], "device.list")
 
     def test_broadcast_devices(self):
-
         self.consumer.user = self.user
         self.consumer.user_uuid = str(self.user.uuid)
         self.consumer.group_name = f"user_{self.user.uuid}"
@@ -181,4 +201,28 @@ class TestEvents(TestCase):
                     ]
                 },
             },
+        )
+
+    def test_receive_json_missing_action(self):
+        self.consumer.user = self.user
+        self.consumer.device_manager = Mock()
+
+        self.consumer.receive_json({"payload": {}})
+        self.consumer.send_json.assert_called_once_with(
+            {
+                "event": "error",
+                "payload": {"message": "Missing 'action' field"},
+            }
+        )
+
+    def test_receive_json_unknown_action(self):
+        self.consumer.user = self.user
+        self.consumer.device_manager = Mock()
+
+        self.consumer.receive_json({"action": "foo.bar"})
+        self.consumer.send_json.assert_called_once_with(
+            {
+                "event": "error",
+                "payload": {"message": "Unknown action: foo.bar"},
+            }
         )

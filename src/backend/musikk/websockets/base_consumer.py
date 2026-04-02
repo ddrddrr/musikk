@@ -5,7 +5,7 @@ from channels.generic.websocket import JsonWebsocketConsumer
 
 from streaming.managers.device_manager import DeviceManager
 from streaming.managers.playback_manager import PlaybackManager
-from websockets.status_codes import WebSocketStatusCode
+from websockets.event_helpers import user_group
 
 logger = getLogger(__name__)
 
@@ -32,21 +32,16 @@ class BaseConsumer(JsonWebsocketConsumer):
     def connect(self):
         user = self.scope.get("user")
         if user is None or getattr(user, "is_anonymous", True):
-            self.close(
-                code=WebSocketStatusCode.Unauthorized,
-                reason="User is not Authenticated.",
-            )
             return
 
         self.user = user
         self.user_uuid = str(user.uuid)
-        self.group_name = f"user_{self.user_uuid}"
+        self.group_name = user_group(self.user_uuid)
 
         try:
             atos(self.channel_layer.group_add)(self.group_name, self.channel_name)
         except Exception as e:
             logger.error(f"Failed to add to channel layer: {e}")
-            self.close()
             return
 
         self.accept()
@@ -65,8 +60,12 @@ class BaseConsumer(JsonWebsocketConsumer):
     def receive_json(self, content, **kwargs):
         action = content.get("action")
         payload = content.get("payload") or {}
-        if "device" not in action:
-            logger.debug(f"Received WS event: {content}")
+
+        if not action:
+            self.send_error("Missing 'action' field")
+            return
+
+        logger.debug(f"Received WS event: {content}")
 
         match action:
             case "device.register":
@@ -80,18 +79,13 @@ class BaseConsumer(JsonWebsocketConsumer):
             case "playback.stop":
                 self.handle_playback_stop()
             case _:
-                self.close(
-                    code=WebSocketStatusCode.UnknownEvent,
-                    reason=f"Unknown WebSocket action received: {action}",
-                )
-                return
+                self.send_error(f"Unknown action: {action}")
 
     def ws_event(self, event):
         """Should be used to send all ws events to the client"""
-        if "device" not in event["event"]:
-            logger.debug(
-                f"Sending WS event event={event['event']} payload={event.get('payload')}",
-            )
+        logger.debug(
+            f"Sending WS event event={event['event']} payload={event.get('payload')}",
+        )
         self.send_json(
             {
                 "event": event["event"],
@@ -99,14 +93,14 @@ class BaseConsumer(JsonWebsocketConsumer):
             }
         )
 
+    def send_error(self, message: str):
+        self.send_json({"event": "error", "payload": {"message": message}})
+
     def handle_device_register(self, payload: dict):
         device_id = payload.get("device_id")
         device_name = payload.get("name")
         if not device_id or not device_name:
-            self.close(
-                code=WebSocketStatusCode.BadRequest,
-                reason="`device_id` and `device_name` are required for device.register action",
-            )
+            self.send_error("'device_id' and 'name' are required for device.register")
             return
 
         self.device_id = device_id
@@ -116,10 +110,7 @@ class BaseConsumer(JsonWebsocketConsumer):
     def handle_device_heartbeat(self, payload: dict):
         device_id: str = payload.get("device_id")
         if not device_id:
-            self.close(
-                code=WebSocketStatusCode.BadRequest,
-                reason="`device_id` is required for device.heartbeat WS action",
-            )
+            self.send_error("'device_id' is required for device.heartbeat")
             return
 
         self.device_manager.touch_device(device_id=device_id)
@@ -128,20 +119,17 @@ class BaseConsumer(JsonWebsocketConsumer):
     def handle_device_set_active(self, payload: dict):
         device_id = payload.get("device_id")
         if not device_id:
-            self.close(
-                code=WebSocketStatusCode.BadRequest,
-                reason="`device_id` is required for device.set_active WS action",
-            )
+            self.send_error("'device_id' is required for device.set_active")
             return
 
         self.device_manager.set_active_device(device_id=device_id)
         self.broadcast_devices()
 
-    def handle_playback_activate(self, *args, **kwargs):
+    def handle_playback_activate(self):
         self.playback_manager.activate()
         self.broadcast_playback_state()
 
-    def handle_playback_stop(self, *args, **kwargs):
+    def handle_playback_stop(self):
         self.playback_manager.stop()
         self.broadcast_playback_state()
 

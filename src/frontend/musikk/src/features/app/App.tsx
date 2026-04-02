@@ -10,6 +10,7 @@ import { AuthProvider } from "@/features/auth/providers/AuthProvider.tsx";
 import { useDeviceLifecycle } from "@/features/playback/hooks/useDeviceLifecycle.ts";
 import { useUserWsEvents } from "@/features/user/wsEvents.ts";
 import { WebSocketProvider } from "@/providers/WebSocketProvider";
+import { useErrorEvent } from "@/ws/useErrorEvent.ts";
 import { useQueryInvalidateEvent } from "@/ws/useQueryInvalidateEvent.ts";
 import { DeviceListProvider } from "../playback/providers/DeviceListProvider";
 import { PlaybackProvider } from "../playback/providers/PlaybackProvider";
@@ -19,6 +20,7 @@ import { AlbumUploadPage } from "./AlbumUploadPage.tsx";
 function AuthenticatedApp() {
     // TODO: move and centralize
     useQueryInvalidateEvent();
+    useErrorEvent();
     useDeviceListEvent();
     usePlaybackChangeEvent();
     useDeviceLifecycle();
