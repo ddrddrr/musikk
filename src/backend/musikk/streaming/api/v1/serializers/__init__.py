@@ -5,7 +5,7 @@ from streaming.api.v1.serializers.collections import (
 )
 from streaming.api.v1.serializers.song_queue import (
     QueueItemSerializer,
-    SongQueueSerializer,
+    PlayerStateSerializer,
 )
 from streaming.api.v1.serializers.songs import (
     BaseSongRetrieveSerializer,

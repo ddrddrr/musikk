@@ -5,6 +5,7 @@ import {
     addCollection,
     addSong,
     clearQueue,
+    moveToQueue,
     next,
     playCollection,
     playSong,
@@ -63,4 +64,15 @@ export function useAddCollection() {
 
 export function usePlayCollection() {
     return useQueueMutation(playCollection, "Failed to play collection");
+}
+
+export function useMoveToQueue() {
+    return useQueueMutation(
+        ({ collectionSongUUID, beforeUUID, afterUUID }: {
+            collectionSongUUID: string;
+            beforeUUID: string | null;
+            afterUUID: string | null;
+        }) => moveToQueue(collectionSongUUID, beforeUUID, afterUUID),
+        "Failed to move song to queue",
+    );
 }

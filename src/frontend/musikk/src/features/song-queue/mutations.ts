@@ -52,3 +52,15 @@ export async function reorderItem(
         after: afterUUID,
     });
 }
+
+export async function moveToQueue(
+    collectionSongUUID: string,
+    beforeUUID: string | null,
+    afterUUID: string | null,
+) {
+    await api_client.post(QueueURLs.moveToQueue, {
+        collection_song: collectionSongUUID,
+        before: beforeUUID,
+        after: afterUUID,
+    });
+}

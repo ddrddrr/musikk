@@ -16,7 +16,7 @@ import { ScrollArea } from "@/features/ui/scroll-area.tsx";
 import { cn } from "@/lib/utils.ts";
 import { Trash2 } from "lucide-react";
 
-function SongQueueActions({
+function QueueItemActions({
     item,
     collectionSong,
 }: {
@@ -27,6 +27,30 @@ function SongQueueActions({
     return (
         <div className={cn("flex items-center", btn.gap)}>
             <SongQueuePlayButton item={item} size={btn.size} className={btn.padding} />
+            <SongAddToLikedButton
+                collectionSong={collectionSong}
+                size={btn.size}
+                className={btn.padding}
+            />
+            <SongAddToQueueButton
+                collectionSong={collectionSong}
+                size={btn.size}
+                className={btn.padding}
+            />
+            <SongMenuButton
+                collectionSong={collectionSong}
+                size={btn.size}
+                className={btn.padding}
+                iconSize={btn.iconSize}
+            />
+        </div>
+    );
+}
+
+function ContextSongActions({ collectionSong }: { collectionSong: CollectionSong }) {
+    const btn = songButtonProps.normal;
+    return (
+        <div className={cn("flex items-center", btn.gap)}>
             <SongAddToLikedButton
                 collectionSong={collectionSong}
                 size={btn.size}
@@ -64,6 +88,7 @@ export function SongQueue() {
     }
 
     const items = queue?.items ?? [];
+    const contextItems = queue?.context_items ?? [];
     const currentSong = queue?.current_song?.song;
 
     return (
@@ -78,12 +103,11 @@ export function SongQueue() {
                     <ul className="space-y-3 p-8">
                         {items.map((item) => (
                             <li key={item.uuid}>
-                                {/*TODO: factor out to a component here and in collection*/}
                                 <SongContextMenu song={item.collection_song}>
                                     <SongContainer
                                         collectionSong={item.collection_song}
                                         actions={
-                                            <SongQueueActions
+                                            <QueueItemActions
                                                 item={item}
                                                 collectionSong={item.collection_song}
                                             />
@@ -93,6 +117,26 @@ export function SongQueue() {
                             </li>
                         ))}
                     </ul>
+
+                    {contextItems.length > 0 && (
+                        <>
+                            <h3 className="px-8 pt-4 text-lg font-semibold text-muted-foreground">
+                                Up Next
+                            </h3>
+                            <ul className="space-y-3 p-8 pt-2">
+                                {contextItems.map((cs) => (
+                                    <li key={cs.uuid}>
+                                        <SongContextMenu song={cs}>
+                                            <SongContainer
+                                                collectionSong={cs}
+                                                actions={<ContextSongActions collectionSong={cs} />}
+                                            />
+                                        </SongContextMenu>
+                                    </li>
+                                ))}
+                            </ul>
+                        </>
+                    )}
                 </ScrollArea>
 
                 <div className="border-t border-black bg-white p-4">

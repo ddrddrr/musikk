@@ -22,17 +22,18 @@ from streaming.api.v1.views.collections import (
 )
 
 from streaming.api.v1.views.song_queue import (
-    SongQueueRetrieveView,
-    SongQueueAddSongView,
-    SongQueueAddCollectionView,
-    SongQueuePlaySongView,
-    SongQueuePlayCollectionView,
-    SongQueueAppendRandomSongsView,
-    SongQueueRemoveItemView,
-    SongQueueClearView,
-    SongQueueNextView,
-    SongQueuePrevView,
-    SongQueueReorderView,
+    PlayerStateRetrieveView,
+    QueueAddSongView,
+    QueueAddCollectionView,
+    PlayerPlaySongView,
+    PlayerPlayCollectionView,
+    QueueAppendRandomSongsView,
+    QueueRemoveItemView,
+    PlayerClearView,
+    PlayerNextView,
+    PlayerPrevView,
+    QueueReorderView,
+    MoveContextToQueueView,
 )
 
 song_urls = [
@@ -92,57 +93,62 @@ collection_urls = [
 ]
 
 song_queue_urls = [
-    path("song-queue", SongQueueRetrieveView.as_view(), name="song-queue-retrieve"),
+    path("song-queue", PlayerStateRetrieveView.as_view(), name="song-queue-retrieve"),
     path(
         "song-queue/add-song/<uuid:uuid>",
-        SongQueueAddSongView.as_view(),
+        QueueAddSongView.as_view(),
         name="song-queue-add-song",
     ),
     path(
         "song-queue/add-collection/<uuid:uuid>",
-        SongQueueAddCollectionView.as_view(),
+        QueueAddCollectionView.as_view(),
         name="song-queue-add-collection",
     ),
     path(
         "song-queue/set-head-song/<uuid:uuid>",
-        SongQueuePlaySongView.as_view(),
+        PlayerPlaySongView.as_view(),
         name="song-queue-set-head-song",
     ),
     path(
         "song-queue/set-head-collection/<uuid:uuid>",
-        SongQueuePlayCollectionView.as_view(),
+        PlayerPlayCollectionView.as_view(),
         name="song-queue-set-head-collection",
     ),
     path(
         "song-queue/remove-node/<uuid:uuid>",
-        SongQueueRemoveItemView.as_view(),
+        QueueRemoveItemView.as_view(),
         name="song-queue-remove-node",
     ),
-    path("song-queue/clear", SongQueueClearView.as_view(), name="song-queue-clear"),
+    path("song-queue/clear", PlayerClearView.as_view(), name="song-queue-clear"),
     path(
         "song-queue/append-random",
-        SongQueueAppendRandomSongsView.as_view(),
+        QueueAppendRandomSongsView.as_view(),
         name="song-queue-append-random",
     ),
     path(
         "song-queue/shift-head",
-        SongQueueNextView.as_view(),
+        PlayerNextView.as_view(),
         name="song-queue-shift-head",
     ),
     path(
         "song-queue/shift-head-backwards",
-        SongQueuePrevView.as_view(),
+        PlayerPrevView.as_view(),
         name="song-queue-shift-head-backwards",
     ),
     path(
         "song-queue/shift-head/<uuid:uuid>",
-        SongQueueNextView.as_view(),
+        PlayerNextView.as_view(),
         name="song-queue-shift-head-to",
     ),
     path(
         "song-queue/reorder",
-        SongQueueReorderView.as_view(),
+        QueueReorderView.as_view(),
         name="song-queue-reorder",
+    ),
+    path(
+        "song-queue/move-to-queue",
+        MoveContextToQueueView.as_view(),
+        name="song-queue-move-to-queue",
     ),
 ]
 
