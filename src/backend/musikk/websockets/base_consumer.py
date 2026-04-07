@@ -1,13 +1,28 @@
+from enum import StrEnum
 from logging import getLogger
 
 from asgiref.sync import async_to_sync as atos
 from channels.generic.websocket import JsonWebsocketConsumer
 
+from streaming.api.v1.ws_conf import ServerEvent as StreamingEvent
 from streaming.managers.device_manager import DeviceManager
 from streaming.managers.playback_manager import PlaybackManager
 from websockets.event_helpers import user_group
 
 logger = getLogger(__name__)
+
+
+class ServerEvent(StrEnum):
+    DEVICE_LIST = "device.list"
+    ERROR = "error"
+
+
+class ClientAction(StrEnum):
+    DEVICE_REGISTER = "device.register"
+    DEVICE_SET_ACTIVE = "device.set_active"
+    DEVICE_HEARTBEAT = "device.heartbeat"
+    PLAYBACK_ACTIVATE = "playback.activate"
+    PLAYBACK_STOP = "playback.stop"
 
 
 class BaseConsumer(JsonWebsocketConsumer):
@@ -68,15 +83,15 @@ class BaseConsumer(JsonWebsocketConsumer):
         logger.debug(f"Received WS event: {content}")
 
         match action:
-            case "device.register":
+            case ClientAction.DEVICE_REGISTER:
                 self.handle_device_register(payload)
-            case "device.set_active":
+            case ClientAction.DEVICE_SET_ACTIVE:
                 self.handle_device_set_active(payload)
-            case "device.heartbeat":
+            case ClientAction.DEVICE_HEARTBEAT:
                 self.handle_device_heartbeat(payload)
-            case "playback.activate":
+            case ClientAction.PLAYBACK_ACTIVATE:
                 self.handle_playback_activate()
-            case "playback.stop":
+            case ClientAction.PLAYBACK_STOP:
                 self.handle_playback_stop()
             case _:
                 self.send_error(f"Unknown action: {action}")
@@ -94,7 +109,7 @@ class BaseConsumer(JsonWebsocketConsumer):
         )
 
     def send_error(self, message: str):
-        self.send_json({"event": "error", "payload": {"message": message}})
+        self.send_json({"event": ServerEvent.ERROR, "payload": {"message": message}})
 
     def handle_device_register(self, payload: dict):
         device_id = payload.get("device_id")
@@ -139,7 +154,7 @@ class BaseConsumer(JsonWebsocketConsumer):
             self.group_name,
             {
                 "type": "ws_event",
-                "event": "device.list",
+                "event": ServerEvent.DEVICE_LIST,
                 "payload": {"devices": devices},
             },
         )
@@ -149,7 +164,7 @@ class BaseConsumer(JsonWebsocketConsumer):
             self.group_name,
             {
                 "type": "ws_event",
-                "event": "playback.change",
+                "event": StreamingEvent.PLAYBACK_CHANGE,
                 "payload": {"playback": self.playback_manager.is_playback_active()},
             },
         )

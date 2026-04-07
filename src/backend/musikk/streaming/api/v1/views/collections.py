@@ -17,6 +17,7 @@ from streaming.api.v1.serializers import BaseSongCreateSerializer
 from streaming.audio.validators import validate_audio
 from streaming.managers.upload_manager import UploadManager
 from users.permissions import IsArtist
+from streaming.api.v1.ws_conf import ServerEvent
 from websockets.event_helpers import send_ws_event, user_group
 from streaming.api.v1.filters import CollectionFilter
 from streaming.api.v1.serializers.collections import (
@@ -52,7 +53,7 @@ class CollectionListCreateView(ListCreateAPIView):
     def post(self, request, *args, **kwargs):
         send_ws_event(
             user_group(self.request.user.uuid),
-            "collections.personal.changed",
+            ServerEvent.COLLECTIONS_PERSONAL_CHANGED,
         )
         return super().post(request, *args, **kwargs)
 
@@ -120,9 +121,8 @@ class CollectionAddLikedView(APIView):
             self.request.user.streamingprofile.followed_collections.add(collection)
 
         group = user_group(self.request.user.uuid)
-        # TODO: rename to open collection changed
-        send_ws_event(group, "collection.changed")
-        send_ws_event(group, "collections.personal.changed")
+        send_ws_event(group, ServerEvent.COLLECTION_CHANGED)
+        send_ws_event(group, ServerEvent.COLLECTIONS_PERSONAL_CHANGED)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -140,7 +140,7 @@ class CollectionRemoveSong(APIView):
         collection_song.delete()
         send_ws_event(
             user_group(self.request.user.uuid),
-            "collection.changed",
+            ServerEvent.COLLECTION_CHANGED,
         )
         return Response(
             status=status.HTTP_200_OK,
@@ -167,7 +167,7 @@ class CollectionSongCreateView(APIView):
         )
         send_ws_event(
             user_group(request.user.uuid),
-            "collection.changed",
+            ServerEvent.COLLECTION_CHANGED,
         )
         return Response(
             data={

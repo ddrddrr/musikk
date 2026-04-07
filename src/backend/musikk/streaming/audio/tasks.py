@@ -13,7 +13,8 @@ from streaming.audio.processing_pipeline import AudioProcessingPipeline
 from streaming.audio.shaka_packager_conf.shaka_packager_wrapper import ManifestType
 from streaming.managers.upload_manager import UploadManager
 from streaming.models.songs import BaseSong
-from websockets.event_helpers import send_ws_event
+from streaming.api.v1.ws_conf import ServerEvent
+from websockets.event_helpers import send_ws_event, user_group
 
 logger = logging.getLogger(__name__)
 
@@ -31,8 +32,8 @@ def convert_audio(
     upload_manager = UploadManager(str(song_uuid))
     upload_manager.set_status("processing")
     send_ws_event(
-        f"user_{initiator_uuid}",
-        event_name="song.upload",
+        user_group(initiator_uuid),
+        event_name=ServerEvent.SONG_UPLOAD,
         uuid=str(song_uuid),
         status="processing",
         operation_id=operation_id,
@@ -60,8 +61,8 @@ def convert_audio(
     except Exception:
         logger.exception(f"Audio processing failed for song {song_uuid}")
         send_ws_event(
-            f"user_{initiator_uuid}",
-            event_name="song.upload",
+            user_group(initiator_uuid),
+            event_name=ServerEvent.SONG_UPLOAD,
             uuid=str(song_uuid),
             status="failed",
             operation_id=operation_id,
@@ -79,8 +80,8 @@ def convert_audio(
         def notify():
             upload_manager.set_status("ready")
             send_ws_event(
-                f"user_{initiator_uuid}",
-                event_name="song.upload",
+                user_group(initiator_uuid),
+                event_name=ServerEvent.SONG_UPLOAD,
                 uuid=str(song_uuid),
                 status="ready",
                 operation_id=operation_id,
@@ -101,8 +102,8 @@ def convert_audio(
 
         upload_manager.set_status("failed")
         send_ws_event(
-            f"user_{initiator_uuid}",
-            event_name="song.upload",
+            user_group(initiator_uuid),
+            event_name=ServerEvent.SONG_UPLOAD,
             uuid=str(song_uuid),
             status="failed",
             operation_id=operation_id,

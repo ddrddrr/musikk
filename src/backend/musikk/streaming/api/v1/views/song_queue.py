@@ -1,5 +1,3 @@
-from uuid import UUID as PyUUID
-
 from django.db import transaction
 from rest_framework import status
 from rest_framework.generics import RetrieveAPIView, get_object_or_404
@@ -10,6 +8,7 @@ from rest_framework.response import Response
 from streaming.api.v1.serializers.song_queue import SongQueueSerializer
 from streaming.models import SongQueue, QueueItem, Collection
 from streaming.models.songs import CollectionSong
+from streaming.api.v1.ws_conf import ServerEvent
 from streaming.permissions import IsPublicOrCollectionAuthor
 from streaming.managers.playback_manager import PlaybackManager
 from websockets.event_helpers import send_ws_event, user_group
@@ -22,7 +21,7 @@ class SongQueueMixin(APIView):
     def _broadcast_queue_invalidation(self, request: Request) -> None:
         send_ws_event(
             user_group(request.user.uuid),
-            "queue.changed",
+            ServerEvent.QUEUE_CHANGED,
         )
 
     # TODO: will be used in the playback views
@@ -35,7 +34,7 @@ class SongQueueMixin(APIView):
         playback_manager = PlaybackManager(user_uuid=str(request.user.uuid))
         send_ws_event(
             user_group(request.user.uuid),
-            "playback.change",
+            ServerEvent.PLAYBACK_CHANGE,
             playback=playback_manager.is_playback_active(),
         )
 
@@ -112,7 +111,7 @@ class SongQueueRemoveItemView(SongQueueMixin):
                 data={"error": "Item does not belong to this user's queue."},
             )
 
-        song_queue.remove(item.uuid)
+        song_queue.remove(item)
         self._broadcast_queue_invalidation(request)
         return Response(status=status.HTTP_200_OK)
 
@@ -134,7 +133,7 @@ class SongQueueNextView(SongQueueMixin):
 
         if node_uuid := kwargs.get("uuid"):
             item = get_object_or_404(QueueItem, uuid=node_uuid)
-            song_queue.choose(item.uuid)
+            song_queue.choose(item)
         else:
             song_queue.advance()
 
@@ -179,10 +178,9 @@ class SongQueueReorderView(SongQueueMixin):
                 data={"error": "Item does not belong to this user's queue."},
             )
 
-        song_queue.reorder(
-            item_uuid=PyUUID(item_uuid),
-            left_uuid=PyUUID(before_uuid) if before_uuid else None,
-            right_uuid=PyUUID(after_uuid) if after_uuid else None,
-        )
+        before = get_object_or_404(QueueItem, uuid=before_uuid) if before_uuid else None
+        after = get_object_or_404(QueueItem, uuid=after_uuid) if after_uuid else None
+
+        song_queue.reorder(item, before=before, after=after)
         self._broadcast_queue_invalidation(request)
         return Response(status=status.HTTP_204_NO_CONTENT)

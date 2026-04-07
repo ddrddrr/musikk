@@ -3,7 +3,7 @@ from unittest.mock import Mock, patch, MagicMock, AsyncMock
 from django.test import TestCase
 
 from users.tests.factories import BaseUserFactory
-from websockets.base_consumer import BaseConsumer
+from websockets.base_consumer import BaseConsumer, ServerEvent, ClientAction
 
 
 class TestEvents(TestCase):
@@ -72,7 +72,7 @@ class TestEvents(TestCase):
         self.mock_channel_layer.group_send.assert_called_once()
         call_args = self.mock_channel_layer.group_send.call_args
         self.assertEqual(call_args[0][0], f"user_{self.user.uuid}")
-        self.assertEqual(call_args[0][1]["event"], "device.list")
+        self.assertEqual(call_args[0][1]["event"], ServerEvent.DEVICE_LIST)
         self.assertIn("devices", call_args[0][1]["payload"])
 
     def test_device_register_missing_device_id(self):
@@ -84,7 +84,7 @@ class TestEvents(TestCase):
         self.consumer.handle_device_register(payload)
         self.consumer.send_json.assert_called_once_with(
             {
-                "event": "error",
+                "event": ServerEvent.ERROR,
                 "payload": {"message": "'device_id' and 'name' are required for device.register"},
             }
         )
@@ -109,7 +109,7 @@ class TestEvents(TestCase):
         self.consumer.handle_device_heartbeat({})
         self.consumer.send_json.assert_called_once_with(
             {
-                "event": "error",
+                "event": ServerEvent.ERROR,
                 "payload": {"message": "'device_id' is required for device.heartbeat"},
             }
         )
@@ -135,7 +135,7 @@ class TestEvents(TestCase):
         self.mock_channel_layer.group_send.assert_called_once()
         call_args = self.mock_channel_layer.group_send.call_args
         self.assertEqual(call_args[0][0], f"user_{self.user.uuid}")
-        self.assertEqual(call_args[0][1]["event"], "device.list")
+        self.assertEqual(call_args[0][1]["event"], ServerEvent.DEVICE_LIST)
 
     def test_device_set_active_missing_device_id(self):
         self.consumer.user = self.user
@@ -144,7 +144,7 @@ class TestEvents(TestCase):
         self.consumer.handle_device_set_active({})
         self.consumer.send_json.assert_called_once_with(
             {
-                "event": "error",
+                "event": ServerEvent.ERROR,
                 "payload": {"message": "'device_id' is required for device.set_active"},
             }
         )
@@ -171,7 +171,7 @@ class TestEvents(TestCase):
         self.mock_channel_layer.group_send.assert_called_once()
         call_args = self.mock_channel_layer.group_send.call_args
         self.assertEqual(call_args[0][0], f"user_{self.user.uuid}")
-        self.assertEqual(call_args[0][1]["event"], "device.list")
+        self.assertEqual(call_args[0][1]["event"], ServerEvent.DEVICE_LIST)
 
     def test_broadcast_devices(self):
         self.consumer.user = self.user
@@ -193,7 +193,7 @@ class TestEvents(TestCase):
             f"user_{self.user.uuid}",
             {
                 "type": "ws_event",
-                "event": "device.list",
+                "event": ServerEvent.DEVICE_LIST,
                 "payload": {
                     "devices": [
                         {"id": "device1", "name": "Device 1", "is_active": True},
@@ -210,7 +210,7 @@ class TestEvents(TestCase):
         self.consumer.receive_json({"payload": {}})
         self.consumer.send_json.assert_called_once_with(
             {
-                "event": "error",
+                "event": ServerEvent.ERROR,
                 "payload": {"message": "Missing 'action' field"},
             }
         )
@@ -222,7 +222,7 @@ class TestEvents(TestCase):
         self.consumer.receive_json({"action": "foo.bar"})
         self.consumer.send_json.assert_called_once_with(
             {
-                "event": "error",
+                "event": ServerEvent.ERROR,
                 "payload": {"message": "Unknown action: foo.bar"},
             }
         )

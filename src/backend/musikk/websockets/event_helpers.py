@@ -1,14 +1,15 @@
-from uuid import UUID as PyUUID
+from enum import StrEnum
+from uuid import UUID
 
 from asgiref.sync import async_to_sync as atos
 from channels.layers import get_channel_layer
 
 
-def user_group(uuid: str | PyUUID) -> str:
+def user_group(uuid: str | UUID) -> str:
     return f"user_{uuid}"
 
 
-def send_ws_event(group_name: str, event_name: str, **kwargs):
+def send_ws_event(group_name: str, event_name: str | StrEnum, **kwargs):
     """
     Send event to WebSocket group.
 

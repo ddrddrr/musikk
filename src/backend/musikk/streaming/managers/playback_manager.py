@@ -3,6 +3,7 @@ from utils.data import try_decode
 
 
 # TODO: celery task to remove inactive states?
+# TODO: add curr song pos in seconds
 class PlaybackManager:
     def __init__(self, user_uuid: str):
         self.playback_key = f"user:{user_uuid}:playback"

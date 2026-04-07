@@ -16,7 +16,8 @@ from users.api.v1.serializers import (
 )
 from users.models import BaseUser, UserFollow
 from users.permissions import IsSelfOrFriend
-from websockets.event_helpers import send_ws_event
+from users.api.v1.ws_conf import ServerEvent
+from websockets.event_helpers import send_ws_event, user_group
 from notifications.models import FollowerNotification
 
 
@@ -48,8 +49,8 @@ class MeView(RetrieveUpdateAPIView):
         serializer.save()
         user_data = BaseMeSerializer(user).data
         send_ws_event(
-            f"user_{self.request.user.uuid}",
-            "user.updated",
+            user_group(self.request.user.uuid),
+            ServerEvent.USER_UPDATED,
             user=user_data,
         )
         return Response(data={"user": user_data})
@@ -122,14 +123,14 @@ class FollowedView(APIView):
             )
 
         send_ws_event(
-            f"user_{self.request.user.uuid}",
-            "user.followed",
+            user_group(self.request.user.uuid),
+            ServerEvent.USER_FOLLOWED,
             from_uuid=str(self.request.user.uuid),
             to_uuid=str(follow_user.uuid),
         )
         send_ws_event(
-            f"user_{follow_user.uuid}",
-            "user.followed",
+            user_group(follow_user.uuid),
+            ServerEvent.USER_FOLLOWED,
             from_uuid=str(self.request.user.uuid),
             to_uuid=str(follow_user.uuid),
         )
@@ -148,14 +149,14 @@ class FollowedView(APIView):
         ).delete()
 
         send_ws_event(
-            f"user_{self.request.user.uuid}",
-            "user.unfollowed",
+            user_group(self.request.user.uuid),
+            ServerEvent.USER_UNFOLLOWED,
             from_uuid=str(self.request.user.uuid),
             to_uuid=str(unfollow_user.uuid),
         )
         send_ws_event(
-            f"user_{unfollow_user.uuid}",
-            "user.unfollowed",
+            user_group(unfollow_user.uuid),
+            ServerEvent.USER_UNFOLLOWED,
             from_uuid=str(self.request.user.uuid),
             to_uuid=str(unfollow_user.uuid),
         )

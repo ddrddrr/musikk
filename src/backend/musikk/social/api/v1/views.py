@@ -17,6 +17,7 @@ from social.models.chat import Chat, ChatMember
 from streaming.models import Collection
 from streaming.models.collections import CollectionType
 from users.models import BaseUser
+from social.api.v1.ws_conf import ServerEvent
 from websockets.event_helpers import send_ws_event, user_group
 
 
@@ -45,7 +46,7 @@ class CollectionCommentsListCreateView(PublicationsListCreateMixin, ListCreateAP
     def ws_on_create(self):
         send_ws_event(
             user_group(self.request.user.uuid),
-            "collection.comments.changed",
+            ServerEvent.COLLECTION_COMMENTS_CHANGED,
             collection_uuid=str(self.kwargs["collection_uuid"]),
         )
 
@@ -72,7 +73,7 @@ class FeedPostsListCreateView(PublicationsListCreateMixin, ListCreateAPIView):
     def ws_on_create(self):
         send_ws_event(
             user_group(self.request.user.uuid),
-            "feed.comments.changed",
+            ServerEvent.FEED_COMMENTS_CHANGED,
             user_uuid=str(self.kwargs["user_uuid"]),
         )
 
@@ -96,7 +97,7 @@ class ChatMessagesListCreateView(PublicationsListCreateMixin, ListCreateAPIView)
     def ws_on_create(self):
         send_ws_event(
             user_group(self.request.user.uuid),
-            "chat.messages.changed",
+            ServerEvent.CHAT_MESSAGES_CHANGED,
             chat_uuid=str(self.kwargs["chat_uuid"]),
         )
 
