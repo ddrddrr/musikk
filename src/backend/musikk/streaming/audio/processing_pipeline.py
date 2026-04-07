@@ -1,7 +1,9 @@
-import uuid
+import shutil
+import tempfile
 from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
 import logging
+from pathlib import Path
 
 from utils.storage import delete_django_storage_dir
 from streaming.audio.exceptions import AudioProcessingPipelineError
@@ -50,7 +52,7 @@ class FFmpegStep(Step):
             logger.debug(f"Starting FFmpeg conversion for {ctx.orig_audio_file_path}")
 
             converted = self.wrapper.convert_audio(
-                file_path=ctx.orig_audio_file_path, storage_dir=ctx.intermediate_dir
+                file_path=ctx.orig_audio_file_path, output_dir=ctx.intermediate_dir
             )
             if not converted:
                 raise AudioProcessingPipelineError("FFmpeg step produced no outputs")
@@ -63,7 +65,7 @@ class FFmpegStep(Step):
 
     def rollback(self, ctx: ProcessingContext) -> None:
         if ctx.intermediate_dir:
-            delete_django_storage_dir(storage_dir=ctx.intermediate_dir)
+            shutil.rmtree(ctx.intermediate_dir, ignore_errors=True)
 
 
 class ShakaPackagerStep(Step):
@@ -82,7 +84,8 @@ class ShakaPackagerStep(Step):
             )
 
             song_repr = self.wrapper.package_audio_files(
-                input_storage_paths=ctx.converted_paths, storage_dir=ctx.final_dir
+                local_input_paths=[Path(p) for p in ctx.converted_paths],
+                storage_dir=ctx.final_dir,
             )
             ctx.song_repr = song_repr
 
@@ -112,11 +115,11 @@ class ProcessingPipeline:
         self.do_cleanup = do_cleanup
 
     def run(self, source: str, final_storage_dir: str) -> ProcessingResult:
-        intermediate_prefix = f"{final_storage_dir}/tmp_{uuid.uuid4().hex}"
+        intermediate_dir = tempfile.mkdtemp()
         ctx = ProcessingContext(
             orig_audio_file_path=source,
             final_dir=str(final_storage_dir),
-            intermediate_dir=intermediate_prefix,
+            intermediate_dir=intermediate_dir,
         )
 
         executed: list[Step] = []
@@ -143,7 +146,7 @@ class ProcessingPipeline:
 
         finally:
             if self.do_cleanup:
-                delete_django_storage_dir(storage_dir=ctx.intermediate_dir)
+                shutil.rmtree(ctx.intermediate_dir, ignore_errors=True)
 
 
 AudioProcessingPipeline = ProcessingPipeline(

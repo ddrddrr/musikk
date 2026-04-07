@@ -1,11 +1,8 @@
 import logging
+from concurrent.futures import ThreadPoolExecutor
 from enum import StrEnum
 from pathlib import Path
-import tempfile
 
-from django.conf import settings
-
-from utils.storage import local_dir_to_django_storage, delete_django_storage_dir
 from streaming.audio.ffmpeg_conf.converters import (
     FFMPEGAudioConverter,
     FLAC_CONVERTER,
@@ -24,61 +21,51 @@ class StreamingProtocol(StrEnum):
 
 
 # TODO: add handling for lossy formats(e.g. mp3)
+# An alternative would be to fan out each converter as a separate Celery task
+# (celery group/chord).
+# That would allow distributed processing and per-converter retries,
+# but we would need to store intermediate files in a shared storage
+# so that the next pipeline step (Shaka Packager) could access them.
+# We have a small amount of converters processing a single audio file,
+# so this is fine for now.
 class FFMPEGWrapper:
-    def __init__(
-        self,
-        audio_converters: list[FFMPEGAudioConverter],
-        audio_content_path: str | Path = settings.AUDIO_CONTENT_PATH,
-        do_cleanup: bool = True,
-    ):
-        assert audio_content_path is not None, "`audio_content_path` must be provided"
-        assert audio_converters, "`audio_converters` must be set"
+    """
+    Runs FFmpeg converters in parallel via ThreadPoolExecutor and writes output
+    to a local directory. Converters run as threads, each spawning an FFmpeg subprocess.
+    """
 
+    def __init__(self, audio_converters: list[FFMPEGAudioConverter]):
+        assert audio_converters, "`audio_converters` must be set"
         self.audio_converters: list[FFMPEGAudioConverter] = audio_converters
-        self.audio_content_path = Path(audio_content_path)
-        self.do_cleanup = do_cleanup
 
     def convert_audio(
-        self, file_path: str | Path, storage_dir: str | Path
+        self, file_path: str | Path, output_dir: str | Path
     ) -> list[str]:
         """
-        Transmuxes audio from one format to other formats defined by `converter_map` attribute.
+        Transcodes audio into formats defined by the configured converters.
+
+        Converters run in parallel. All output files are written to output_dir.
 
         Args:
-            file_path (str|Path): Path to the directory containing the chunks/manifests of a song.
-            storage_dir (str|Path):
-                Relative Path to the media directory.
-                In case of local FS storage should be a subdir of MEDIA_ROOT directory.
+            file_path: Path to the source audio file.
+            output_dir: Local directory where converted files are written.
 
         Returns:
-            List of paths for created files.
+            List of local file paths for each converted output.
         """
         assert file_path, "No song path provided."
 
-        with tempfile.TemporaryDirectory() as tmpdir:
-            for converter in self.audio_converters:
-                try:
-                    converter.convert_song(
-                        file_path=file_path, storage_dir=Path(tmpdir)
-                    )
-                except Exception:
-                    logger.exception(
-                        f"FFmpeg converter {converter.__class__.__name__} failed"
-                    )
-                    if self.do_cleanup:
-                        delete_django_storage_dir(storage_dir=storage_dir)
-                    raise
-
-            try:
-                orig_to_transferred_path_map = local_dir_to_django_storage(
-                    local_dir=tmpdir, storage_prefix=storage_dir
+        output_dir = Path(output_dir)
+        with ThreadPoolExecutor(max_workers=len(self.audio_converters)) as executor:
+            futures = [
+                executor.submit(
+                    converter.convert_song,
+                    file_path=file_path,
+                    storage_dir=output_dir,
                 )
-                return list(orig_to_transferred_path_map.values())
-            except Exception:
-                logger.exception(f"Failed to upload converted files to storage")
-                if self.do_cleanup:
-                    delete_django_storage_dir(storage_dir=storage_dir)
-                raise
+                for converter in self.audio_converters
+            ]
+            return [f.result() for f in futures]
 
 
 FFMPEGFlacOnly = FFMPEGWrapper(audio_converters=[FLAC_CONVERTER])

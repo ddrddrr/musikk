@@ -6,7 +6,6 @@ from uuid import UUID
 from celery import shared_task
 from django.conf import settings
 from django.db import transaction
-from django.core.files.storage import default_storage
 
 from utils.storage import delete_django_storage_dir
 from streaming.audio.processing_pipeline import AudioProcessingPipeline
@@ -45,18 +44,6 @@ def convert_audio(
             final_storage_dir=os.path.join(settings.AUDIO_CONTENT_PATH, str_uuid),
         )
         song_repr = result.song_repr
-
-        # keep only chunks and manifests
-        if result.context.converted_paths:
-            for converted_path in result.context.converted_paths:
-                try:
-                    if default_storage.exists(converted_path):
-                        default_storage.delete(converted_path)
-                        logger.debug(f"Deleted full encoded file: {converted_path}")
-                except Exception:
-                    logger.exception(
-                        f"Failed to delete encoded file {converted_path} for song {song_uuid}"
-                    )
 
     except Exception:
         logger.exception(f"Audio processing failed for song {song_uuid}")

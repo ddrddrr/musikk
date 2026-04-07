@@ -63,22 +63,22 @@ class TestProcessingPipelineSteps(TestCase):
         with self.assertRaises(AudioProcessingPipelineError):
             step.process(ctx)
 
-    def test_ffmpeg_step_rollback_calls_delete(self):
+    def test_ffmpeg_step_rollback_removes_intermediate_dir(self):
         mock_ffmpeg = Mock()
         mock_ffmpeg.convert_audio.return_value = ["a.mp4"]
 
         step = FFmpegStep(ffmpeg_wrapper=mock_ffmpeg)
         ctx = ProcessingContext(
             orig_audio_file_path=str(self.input_file),
-            intermediate_dir="int_dir_123",
+            intermediate_dir="/tmp/int_dir_123",
             final_dir="final_dir_123",
         )
 
         with patch(
-            "streaming.audio.processing_pipeline.delete_django_storage_dir"
-        ) as mock_del:
+            "streaming.audio.processing_pipeline.shutil.rmtree"
+        ) as mock_rmtree:
             step.rollback(ctx)
-            mock_del.assert_called_once_with(storage_dir="int_dir_123")
+            mock_rmtree.assert_called_once_with("/tmp/int_dir_123", ignore_errors=True)
 
     def test_shaka_step_requires_converted_paths(self):
         mock_shaka = Mock()
@@ -146,14 +146,13 @@ class TestProcessingPipelineSteps(TestCase):
         pipeline = ProcessingPipeline(steps=[step1, step2], do_cleanup=True)
         final_dir = "final_dir_for_pipeline"
         with patch(
-            "streaming.audio.processing_pipeline.delete_django_storage_dir"
-        ) as mock_del:
+            "streaming.audio.processing_pipeline.shutil.rmtree"
+        ) as mock_rmtree:
             res = pipeline.run(source=str(self.input_file), final_storage_dir=final_dir)
             self.assertEqual(res.song_repr, {"mpd": "x"})
-            self.assertTrue(
-                res.context.intermediate_dir.startswith(final_dir + "/tmp_")
+            mock_rmtree.assert_called_once_with(
+                res.context.intermediate_dir, ignore_errors=True
             )
-            mock_del.assert_called_once_with(storage_dir=res.context.intermediate_dir)
 
     def test_pipeline_rolls_back_executed_steps_on_error_and_cleans_up(self):
         step1 = Mock()
@@ -173,13 +172,13 @@ class TestProcessingPipelineSteps(TestCase):
         pipeline = ProcessingPipeline(steps=[step1, step2], do_cleanup=True)
         final_dir = "final_dir_for_pipeline2"
         with patch(
-            "streaming.audio.processing_pipeline.delete_django_storage_dir"
-        ) as mock_del:
+            "streaming.audio.processing_pipeline.shutil.rmtree"
+        ) as mock_rmtree:
             with self.assertRaises(RuntimeError):
                 pipeline.run(source=str(self.input_file), final_storage_dir=final_dir)
 
             step1.rollback.assert_called_once()
-            self.assertTrue(mock_del.called)
+            self.assertTrue(mock_rmtree.called)
 
     def test_pipeline_conversion_success(self):
         storage_subdir = uuid.uuid4().hex
@@ -206,7 +205,10 @@ class TestProcessingPipelineSteps(TestCase):
             f"HLS master playlist not found in storage: {m3u8_path}",
         )
 
-        self.assertFalse(default_storage.exists(result.context.intermediate_dir))
+        self.assertFalse(
+            Path(result.context.intermediate_dir).exists(),
+            "Intermediate local directory should have been cleaned up",
+        )
 
         delete_django_storage_dir(storage_subdir)
 

@@ -10,7 +10,6 @@ from utils.cmd import run_shell_command
 from utils.storage import (
     local_dir_to_django_storage,
     delete_django_storage_dir,
-    get_django_storage_files,
 )
 
 logger = logging.getLogger(__name__)
@@ -99,27 +98,25 @@ class ShakaPackagerWrapper:
         self.do_cleanup = do_cleanup
 
     def package_audio_files(
-        self, input_storage_paths: list[str], storage_dir: str | Path
+        self, local_input_paths: list[Path], storage_dir: str | Path
     ) -> SongRepresentation:
         """
         Packages multiple audio files into DASH (MPD) and HLS (M3U8) manifests using shaka-packager.
 
         Args:
-            input_storage_paths: list of paths in Django storage (relative to storage root) to audio files
+            local_input_paths: list of local filesystem paths to converted audio files.
             storage_dir: storage prefix/directory where output files will be uploaded (e.g. 'audio/song123')
 
         Returns:
             SongRepresentation with content_path set to storage_dir and manifests mapping.
         """
-        assert input_storage_paths, "No input files provided."
+        assert local_input_paths, "No input files provided."
 
         storage_dir = str(storage_dir)
         with tempfile.TemporaryDirectory() as tmpdir:
             try:
-                local_paths = get_django_storage_files(input_storage_paths, tmpdir)
-
                 cmd, mpd_out, hls_master_out = ShakaPackagerCommand(
-                    local_paths=local_paths, tmpdir=tmpdir
+                    local_paths=local_input_paths, tmpdir=tmpdir
                 ).build()
 
                 run_shell_command(cmd)

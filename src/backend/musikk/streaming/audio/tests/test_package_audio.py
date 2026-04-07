@@ -5,9 +5,8 @@ from pathlib import Path
 
 from django.test import TestCase, override_settings
 from django.core.files.storage import default_storage
-from django.core.files.base import ContentFile
-from utils.storage import delete_django_storage_dir
 
+from utils.storage import delete_django_storage_dir
 from streaming.audio.shaka_packager_conf.shaka_packager_wrapper import (
     ShakaPackagerMPDAndM3U8,
     ManifestType,
@@ -39,17 +38,12 @@ class TestShakaPackagerWrapper(TestCase):
         assert cls.aac_320_mp4.exists(), f"Test input file not found: {cls.aac_320_mp4}"
 
     def test_package_flac_success(self):
-        # prepare storage dir and save single input file into django storage
         storage_subdir = uuid.uuid4().hex
-        storage_path = f"{storage_subdir}/{self.flac_mp4.name}"
-        with open(self.flac_mp4, "rb") as fh:
-            default_storage.save(storage_path, ContentFile(fh.read()))
 
         result = ShakaPackagerMPDAndM3U8.package_audio_files(
-            input_storage_paths=[storage_path], storage_dir=storage_subdir
+            local_input_paths=[self.flac_mp4], storage_dir=storage_subdir
         )
 
-        # verify manifests are present in returned representation and exist in storage
         self.assertIn(ManifestType.MPD, result.manifests)
         self.assertIn(ManifestType.M3U8, result.manifests)
         self.assertTrue(
@@ -65,15 +59,10 @@ class TestShakaPackagerWrapper(TestCase):
 
     def test_package_multiple_success(self):
         storage_subdir = uuid.uuid4().hex
-        paths = []
-        for src in (self.flac_mp4, self.aac_320_mp4):
-            storage_path = f"{storage_subdir}/{src.name}"
-            with open(src, "rb") as fh:
-                default_storage.save(storage_path, ContentFile(fh.read()))
-            paths.append(storage_path)
 
         result = ShakaPackagerMPDAndM3U8.package_audio_files(
-            input_storage_paths=paths, storage_dir=storage_subdir
+            local_input_paths=[self.flac_mp4, self.aac_320_mp4],
+            storage_dir=storage_subdir,
         )
 
         self.assertIn(ManifestType.MPD, result.manifests)
