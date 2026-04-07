@@ -1,8 +1,8 @@
 import factory
 
 from base.tests.factories import BaseModelFactory
-from streaming.models import BaseSong, Collection
-
+from streaming.models import BaseSong, Collection, SongQueue
+from streaming.models.song_queue import PlaybackContext, PlayerState
 from streaming.models.songs import CollectionSong, SongCredit
 from users.tests.factories import ArtistFactory
 
@@ -59,3 +59,21 @@ class CollectionSongFactory(BaseModelFactory):
 
     song = factory.SubFactory(BaseSongFactory)
     collection = factory.SubFactory(CollectionFactory)
+
+
+class PlaybackContextFactory(BaseModelFactory):
+    class Meta:
+        model = PlaybackContext
+
+
+class SongQueueFactory(BaseModelFactory):
+    class Meta:
+        model = SongQueue
+
+
+class PlayerStateFactory(BaseModelFactory):
+    class Meta:
+        model = PlayerState
+
+    queue = factory.SubFactory(SongQueueFactory)
+    context = factory.SubFactory(PlaybackContextFactory)

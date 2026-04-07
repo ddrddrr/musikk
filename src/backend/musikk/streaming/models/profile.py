@@ -4,12 +4,15 @@ from django.conf import settings
 from base.models import BaseModel
 from streaming.models import Collection, CollectionCredit, SongQueue
 from streaming.models.collections import CollectionType
+from streaming.models.song_queue import PlaybackContext, PlayerState
 
 
 class StreamingProfileManager(models.Manager):
     @transaction.atomic
     def create_for_user(self, user):
+        context = PlaybackContext.objects.create()
         song_queue = SongQueue.objects.create()
+        player = PlayerState.objects.create(queue=song_queue, context=context)
 
         history = Collection.objects.create(
             type=CollectionType.HISTORY,
@@ -26,7 +29,7 @@ class StreamingProfileManager(models.Manager):
         CollectionCredit.objects.create(collection=history, author=user)
         CollectionCredit.objects.create(collection=liked_songs, author=user)
 
-        return self.create(user=user, song_queue=song_queue)
+        return self.create(user=user, player=player)
 
 
 class StreamingProfile(BaseModel):
@@ -34,8 +37,8 @@ class StreamingProfile(BaseModel):
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
     )
-    song_queue = models.OneToOneField(
-        "streaming.SongQueue",
+    player = models.OneToOneField(
+        "streaming.PlayerState",
         on_delete=models.PROTECT,
     )
     followed_collections = models.ManyToManyField(

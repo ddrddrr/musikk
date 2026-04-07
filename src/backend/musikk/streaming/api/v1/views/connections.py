@@ -18,7 +18,8 @@ class FriendsLatestListenedView(APIView):
                             f, context={"request": request}
                         ).data,
                         "song": CollectionSongRetrieveSerializer(
-                            f.song_queue.head.song, context={"request": request}
+                            f.streamingprofile.player.current_collection_song,
+                            context={"request": request},
                         ).data,
                     }
                 )

@@ -133,7 +133,7 @@ class SongQueueNextView(SongQueueMixin):
 
         if node_uuid := kwargs.get("uuid"):
             item = get_object_or_404(QueueItem, uuid=node_uuid)
-            song_queue.choose(item)
+            song_queue.choose_queue_song(item)
         else:
             song_queue.advance()
 
