@@ -62,6 +62,7 @@ def convert_audio(
             song.content_path = song_repr.content_path
             song.mpd = song_repr.manifests[ManifestType.MPD]
             song.m3u8 = song_repr.manifests[ManifestType.M3U8]
+            song.draft = False
             song.save()
 
         def notify():

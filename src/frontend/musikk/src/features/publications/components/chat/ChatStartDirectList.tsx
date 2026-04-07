@@ -63,7 +63,7 @@ export function ChatStartDirectList() {
         return (
             <div className="rounded-sm border-2 border-black bg-gray-50 p-6 text-center">
                 <p className="text-sm text-gray-600">
-                    You have direct chats with all your friends!
+                    You have chats with all of your friends!
                 </p>
             </div>
         );

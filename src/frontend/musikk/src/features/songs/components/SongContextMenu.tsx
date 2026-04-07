@@ -20,12 +20,14 @@ interface SongContextMenuProps {
     children: JSX.Element | JSX.Element[];
     song: CollectionSong;
     renderRemoveFromPlaylist?: boolean;
+    onRemoveFromQueue?: () => void;
 }
 
 export function SongContextMenu({
     children,
     song,
     renderRemoveFromPlaylist = false,
+    onRemoveFromQueue,
 }: SongContextMenuProps) {
     const queryClient = useQueryClient();
     const collectionRemoveSongMutation = useMutation({
@@ -51,13 +53,19 @@ export function SongContextMenu({
                         <ContextMenuItem
                             onSelect={() =>
                                 collectionRemoveSongMutation.mutate({
-                                    collectionUUID: song.song_collection,
+                                    collectionUUID: song.collection,
                                     songCollectionSongUUID: song.uuid,
                                 })
                             }
                         >
                             <Trash2 className="mr-2 h-4 w-4" />
                             Remove from playlist
+                        </ContextMenuItem>
+                    )}
+                    {onRemoveFromQueue && (
+                        <ContextMenuItem onSelect={onRemoveFromQueue}>
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Remove from queue
                         </ContextMenuItem>
                     )}
                     <ContextMenuItem

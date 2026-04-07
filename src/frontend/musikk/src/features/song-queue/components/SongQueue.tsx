@@ -1,12 +1,16 @@
+import { getErrorDetail } from "@/api/errorUtils.ts";
 import { Spinner } from "@/components/ui/spinner";
 import { CollectionSong } from "@/features/collections/types.ts";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { QueueItem } from "@/features/song-queue/api/types.ts";
 import { SongQueuePlayButton } from "@/features/song-queue/components/SongQueueContainerPlayButton.tsx";
 import { useQueue, useQueueClear } from "@/features/song-queue/hooks/useQueueAPI.ts";
+import { removeItem } from "@/features/song-queue/mutations.ts";
+import { queueKeys } from "@/features/song-queue/queryKeys.ts";
 import { SongAddToLikedButton } from "@/features/songs/components/SongAddToLikedButton.tsx";
 import { SongAddToQueueButton } from "@/features/songs/components/SongAddToQueueButton.tsx";
 import { songButtonProps } from "@/features/songs/components/DefaultSongActions.tsx";
+import { SongPlayButton } from "@/features/songs/components/SongPlayButton.tsx";
 import { SongContextMenu } from "@/features/songs/components/SongContextMenu.tsx";
 import { SongMenuButton } from "@/features/songs/components/SongMenuButton.tsx";
 import { SongContainer } from "@/features/songs/components/SongContainer.tsx";
@@ -14,14 +18,18 @@ import { SongDisplay } from "@/features/songs/components/SongDisplay.tsx";
 import { Button } from "@/features/ui/button.tsx";
 import { ScrollArea } from "@/features/ui/scroll-area.tsx";
 import { cn } from "@/lib/utils.ts";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
 function QueueItemActions({
     item,
     collectionSong,
+    onRemoveFromQueue,
 }: {
     item: QueueItem;
     collectionSong: CollectionSong;
+    onRemoveFromQueue: () => void;
 }) {
     const btn = songButtonProps.normal;
     return (
@@ -42,6 +50,7 @@ function QueueItemActions({
                 size={btn.size}
                 className={btn.padding}
                 iconSize={btn.iconSize}
+                onRemoveFromQueue={onRemoveFromQueue}
             />
         </div>
     );
@@ -51,6 +60,11 @@ function ContextSongActions({ collectionSong }: { collectionSong: CollectionSong
     const btn = songButtonProps.normal;
     return (
         <div className={cn("flex items-center", btn.gap)}>
+            <SongPlayButton
+                collectionSong={collectionSong}
+                size={btn.size}
+                className={btn.padding}
+            />
             <SongAddToLikedButton
                 collectionSong={collectionSong}
                 size={btn.size}
@@ -72,7 +86,17 @@ function ContextSongActions({ collectionSong }: { collectionSong: CollectionSong
 }
 
 export function SongQueue() {
+    const queryClient = useQueryClient();
     const clearMutation = useQueueClear();
+    const removeItemMutation = useMutation({
+        mutationFn: removeItem,
+        onSuccess: () => {
+            void queryClient.invalidateQueries({ queryKey: queueKeys.base });
+        },
+        onError: (error: Error) => {
+            toast.error(getErrorDetail(error, "Failed to remove song from queue"));
+        },
+    });
     const { data: queue, error, isPending, refetch } = useQueue();
 
     if (error) {
@@ -100,30 +124,41 @@ export function SongQueue() {
             <div className="relative flex min-h-0 w-1/2 flex-col">
                 <h2 className="p-8 pb-0 text-2xl font-bold">Queue</h2>
                 <ScrollArea className="min-h-0 flex-1">
-                    <ul className="space-y-3 p-8">
-                        {items.map((item) => (
-                            <li key={item.uuid}>
-                                <SongContextMenu song={item.collection_song}>
-                                    <SongContainer
-                                        collectionSong={item.collection_song}
-                                        actions={
-                                            <QueueItemActions
-                                                item={item}
-                                                collectionSong={item.collection_song}
-                                            />
-                                        }
-                                    />
-                                </SongContextMenu>
-                            </li>
-                        ))}
-                    </ul>
+                    {items.length === 0 && (
+                        <div className="flex flex-col items-center justify-center p-8 text-gray-500">
+                            <p className="text-lg">Your queue is empty</p>
+                        </div>
+                    )}
+                    {items.length > 0 && (
+                        <ul className="space-y-3 p-8">
+                            {items.map((item) => (
+                                <li key={item.uuid}>
+                                    <SongContextMenu
+                                        song={item.collection_song}
+                                        onRemoveFromQueue={() => removeItemMutation.mutate(item.uuid)}
+                                    >
+                                        <SongContainer
+                                            collectionSong={item.collection_song}
+                                            actions={
+                                                <QueueItemActions
+                                                    item={item}
+                                                    collectionSong={item.collection_song}
+                                                    onRemoveFromQueue={() => removeItemMutation.mutate(item.uuid)}
+                                                />
+                                            }
+                                        />
+                                    </SongContextMenu>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
 
                     {contextItems.length > 0 && (
                         <>
-                            <h3 className="px-8 pt-4 text-lg font-semibold text-muted-foreground">
+                            <h3 className="p-8 pb-0 text-2xl font-bold">
                                 Up Next
                             </h3>
-                            <ul className="space-y-3 p-8 pt-2">
+                            <ul className="space-y-3 p-8">
                                 {contextItems.map((cs) => (
                                     <li key={cs.uuid}>
                                         <SongContextMenu song={cs}>
@@ -139,7 +174,7 @@ export function SongQueue() {
                     )}
                 </ScrollArea>
 
-                <div className="border-t border-black bg-white p-4">
+                <div className="border-t border-black bg-gray-200 p-4">
                     <Button
                         onClick={() => clearMutation.mutate()}
                         variant="destructive"

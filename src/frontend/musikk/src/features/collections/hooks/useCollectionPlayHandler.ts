@@ -7,7 +7,7 @@ export function useCollectionPlayHandler(collection: Collection) {
     const { isPlaybackActive, playingCollectionSong } = useContext(PlaybackContext);
     const handlePlay = useHandlePlay();
 
-    const isThisCollectionChosen = collection.uuid === playingCollectionSong?.song_collection;
+    const isThisCollectionChosen = collection.uuid === playingCollectionSong?.collection;
 
     const onClick = useCallback(() => {
         if (isThisCollectionChosen) {

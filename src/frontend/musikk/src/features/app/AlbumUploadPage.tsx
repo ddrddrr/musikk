@@ -49,7 +49,7 @@ export function AlbumUploadPage() {
                                 <AlbumSongUploadSection
                                     albumUUID={albumUUID}
                                     onComplete={() => {
-                                        navigate(`/collections/${albumUUID}`);
+                                        navigate(`/collection/${albumUUID}/`);
                                     }}
                                 />
                             </>

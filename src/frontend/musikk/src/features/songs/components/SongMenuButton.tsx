@@ -22,12 +22,14 @@ interface SongMenuButtonProps {
     className?: string;
     iconSize: string;
     showRemoveFromPlaylist?: boolean;
+    onRemoveFromQueue?: () => void;
 }
 
 export function SongMenuButton({
     collectionSong,
     iconSize,
     showRemoveFromPlaylist = false,
+    onRemoveFromQueue,
 }: SongMenuButtonProps) {
     const queryClient = useQueryClient();
     const collectionRemoveSongMutation = useMutation({
@@ -59,13 +61,22 @@ export function SongMenuButton({
                             variant="destructive"
                             onSelect={() =>
                                 collectionRemoveSongMutation.mutate({
-                                    collectionUUID: collectionSong.song_collection,
+                                    collectionUUID: collectionSong.collection,
                                     songCollectionSongUUID: collectionSong.uuid,
                                 })
                             }
                         >
                             <Trash2 className="mr-2 h-4 w-4" />
                             Remove from playlist
+                        </DropdownMenuItem>
+                    )}
+                    {onRemoveFromQueue && (
+                        <DropdownMenuItem
+                            variant="destructive"
+                            onSelect={onRemoveFromQueue}
+                        >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Remove from queue
                         </DropdownMenuItem>
                     )}
                     <SongAddToPlaylistSubmenu collectionSong={collectionSong} />

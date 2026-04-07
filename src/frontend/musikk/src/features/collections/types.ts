@@ -19,7 +19,7 @@ export interface Collection extends BaseModel {
 export interface CollectionSong extends BaseModel {
     kind?: "collectionSong";
     song: Song;
-    song_collection: UUID;
+    collection: UUID;
 }
 
 export interface CollectionDetailed extends Collection {
