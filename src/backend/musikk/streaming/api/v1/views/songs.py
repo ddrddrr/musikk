@@ -10,7 +10,7 @@ from streaming.models.profile import StreamingProfile
 from streaming.permissions import IsPublicOrCollectionAuthor
 from users.models import BaseUser
 from users.permissions import IsArtist
-from websockets.event_helpers import send_ws_event
+from websockets.event_helpers import send_ws_event, user_group
 from streaming.api.v1.serializers.songs import CollectionSongRetrieveSerializer
 from streaming.models.songs import CollectionSong
 
@@ -37,20 +37,13 @@ class SongAddLikedView(APIView):
 
         # doing a refetch for the queue is easier than traversing nodes and checking,
         # whether the song is in the queue
+        group = user_group(self.request.user.uuid)
+        send_ws_event(group, "queue.changed")
+        send_ws_event(group, "collection.changed")
         send_ws_event(
-            f"user_{self.request.user.uuid}",
-            event_name="invalidate.query",
-            query_key=["queue"],
-        )
-        send_ws_event(
-            f"user_{self.request.user.uuid}",
-            event_name="invalidate.query",
-            query_key=["openCollection"],
-        )
-        send_ws_event(
-            f"user_{self.request.user.uuid}",
-            event_name="invalidate.query",
-            query_key=["friend-activity", "listening", self.request.user.uuid],
+            group,
+            "friend-activity.listening.changed",
+            user_uuid=str(self.request.user.uuid),
         )
         return Response(status=status.HTTP_204_NO_CONTENT)
 

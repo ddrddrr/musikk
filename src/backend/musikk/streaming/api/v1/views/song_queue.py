@@ -20,11 +20,9 @@ class SongQueueMixin(APIView):
         return request.user.streamingprofile.song_queue
 
     def _broadcast_queue_invalidation(self, request: Request) -> None:
-        # TODO: redo
         send_ws_event(
             user_group(request.user.uuid),
-            "invalidate.query",
-            query_key=["queue"],
+            "queue.changed",
         )
 
     # TODO: will be used in the playback views
@@ -127,10 +125,7 @@ class SongQueueClearView(SongQueueMixin):
         self._broadcast_queue_invalidation(request)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-# TODO: shouldn't be song queue related views
-# there should be three playback-related views: play+pause/prev/next corresponding to the buttons
-# we should also track the playback state be-side
-# and the curr seconds and broadcast that pos to other clients
+
 class SongQueueNextView(SongQueueMixin):
     def post(self, request, *args, **kwargs):
         song_queue = self.get_song_queue(request)
@@ -141,7 +136,7 @@ class SongQueueNextView(SongQueueMixin):
             item = get_object_or_404(QueueItem, uuid=node_uuid)
             song_queue.choose(item.uuid)
         else:
-            song_queue.next()
+            song_queue.advance()
 
         self._broadcast_queue_invalidation(request)
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -186,8 +181,8 @@ class SongQueueReorderView(SongQueueMixin):
 
         song_queue.reorder(
             item_uuid=PyUUID(item_uuid),
-            before_uuid=PyUUID(before_uuid) if before_uuid else None,
-            after_uuid=PyUUID(after_uuid) if after_uuid else None,
+            left_uuid=PyUUID(before_uuid) if before_uuid else None,
+            right_uuid=PyUUID(after_uuid) if after_uuid else None,
         )
         self._broadcast_queue_invalidation(request)
         return Response(status=status.HTTP_204_NO_CONTENT)

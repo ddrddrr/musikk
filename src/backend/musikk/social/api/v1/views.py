@@ -17,7 +17,7 @@ from social.models.chat import Chat, ChatMember
 from streaming.models import Collection
 from streaming.models.collections import CollectionType
 from users.models import BaseUser
-from websockets.event_helpers import send_ws_event
+from websockets.event_helpers import send_ws_event, user_group
 
 
 class PublicationChildrenView(RetrieveAPIView):
@@ -44,13 +44,9 @@ class CollectionCommentsListCreateView(PublicationsListCreateMixin, ListCreateAP
 
     def ws_on_create(self):
         send_ws_event(
-            f"user_{self.request.user.uuid}",
-            event_name="invalidate.query",
-            query_key=[
-                "collection",
-                str(self.kwargs["collection_uuid"]),
-                "comments",
-            ],
+            user_group(self.request.user.uuid),
+            "collection.comments.changed",
+            collection_uuid=str(self.kwargs["collection_uuid"]),
         )
 
 
@@ -75,13 +71,9 @@ class FeedPostsListCreateView(PublicationsListCreateMixin, ListCreateAPIView):
 
     def ws_on_create(self):
         send_ws_event(
-            f"user_{self.request.user.uuid}",
-            event_name="invalidate.query",
-            query_key=[
-                "feed",
-                str(self.kwargs["user_uuid"]),
-                "comments",
-            ],
+            user_group(self.request.user.uuid),
+            "feed.comments.changed",
+            user_uuid=str(self.kwargs["user_uuid"]),
         )
 
 
@@ -103,13 +95,9 @@ class ChatMessagesListCreateView(PublicationsListCreateMixin, ListCreateAPIView)
 
     def ws_on_create(self):
         send_ws_event(
-            f"user_{self.request.user.uuid}",
-            event_name="invalidate.query",
-            query_key=[
-                "chat",
-                str(self.kwargs["chat_uuid"]),
-                "messages",
-            ],
+            user_group(self.request.user.uuid),
+            "chat.messages.changed",
+            chat_uuid=str(self.kwargs["chat_uuid"]),
         )
 
 

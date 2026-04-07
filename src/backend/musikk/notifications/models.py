@@ -1,7 +1,7 @@
 from django.db import models
 
 from base.models import BaseModel
-from websockets.event_helpers import send_ws_event
+from websockets.event_helpers import send_ws_event, user_group
 
 
 class Notification(BaseModel):
@@ -13,9 +13,8 @@ class ReplyNotificationManager(models.Manager):
     def create(self, **kwargs):
         obj = super().create(**kwargs)
         send_ws_event(
-            f"user_{obj.orig_publication.author.uuid}",
-            event_name="invalidate.query",
-            query_key=["notifications"],
+            user_group(obj.orig_publication.author.uuid),
+            "notifications.changed",
         )
         return obj
 
@@ -38,9 +37,8 @@ class FollowerNotificationManager(models.Manager):
     def create(self, **kwargs):
         obj = super().create(**kwargs)
         send_ws_event(
-            f"user_{obj.receiver.uuid}",
-            event_name="invalidate.query",
-            query_key=["notifications"],
+            user_group(obj.receiver.uuid),
+            "notifications.changed",
         )
         return obj
 

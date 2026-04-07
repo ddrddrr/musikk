@@ -12,7 +12,6 @@ class QueueItemSerializer(BaseModelSerializer):
         model = QueueItem
         fields = BaseModelSerializer.Meta.fields + [
             "collection_song",
-            "origin",
             "position",
         ]
 

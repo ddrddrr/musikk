@@ -17,7 +17,7 @@ from streaming.api.v1.serializers import BaseSongCreateSerializer
 from streaming.audio.validators import validate_audio
 from streaming.managers.upload_manager import UploadManager
 from users.permissions import IsArtist
-from websockets.event_helpers import send_ws_event
+from websockets.event_helpers import send_ws_event, user_group
 from streaming.api.v1.filters import CollectionFilter
 from streaming.api.v1.serializers.collections import (
     CollectionSerializerBasic,
@@ -51,9 +51,8 @@ class CollectionListCreateView(ListCreateAPIView):
 
     def post(self, request, *args, **kwargs):
         send_ws_event(
-            f"user_{self.request.user.uuid}",
-            event_name="invalidate.query",
-            query_key=["collectionsPersonal"],
+            user_group(self.request.user.uuid),
+            "collections.personal.changed",
         )
         return super().post(request, *args, **kwargs)
 
@@ -120,17 +119,10 @@ class CollectionAddLikedView(APIView):
             self.check_object_permissions(request, collection)
             self.request.user.streamingprofile.followed_collections.add(collection)
 
-        # TODO: move?
-        send_ws_event(
-            f"user_{self.request.user.uuid}",
-            event_name="invalidate.query",
-            query_key=["openCollection"],
-        )
-        send_ws_event(
-            f"user_{self.request.user.uuid}",
-            event_name="invalidate.query",
-            query_key=["collectionsPersonal"],
-        )
+        group = user_group(self.request.user.uuid)
+        # TODO: rename to open collection changed
+        send_ws_event(group, "collection.changed")
+        send_ws_event(group, "collections.personal.changed")
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -147,9 +139,8 @@ class CollectionRemoveSong(APIView):
 
         collection_song.delete()
         send_ws_event(
-            f"user_{self.request.user.uuid}",
-            event_name="invalidate.query",
-            query_key=["openCollection"],
+            user_group(self.request.user.uuid),
+            "collection.changed",
         )
         return Response(
             status=status.HTTP_200_OK,
@@ -175,9 +166,8 @@ class CollectionSongCreateView(APIView):
             collection=collection, song=base_song_inst
         )
         send_ws_event(
-            f"user_{request.user.uuid}",
-            event_name="invalidate.query",
-            query_key=["openCollection"],
+            user_group(request.user.uuid),
+            "collection.changed",
         )
         return Response(
             data={
