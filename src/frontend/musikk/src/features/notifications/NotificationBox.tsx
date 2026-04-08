@@ -17,11 +17,12 @@ export const NotificationBox = memo(function NotificationBox() {
 
     const unreadUUIDs = useMemo(() => {
         if (!data) return [];
-        const { replies = [], followers = [] } = data;
+        const { replies = [], followers = [], chat_messages = [] } = data;
 
         return [
             ...replies.filter((n) => !n.is_read).map((n) => n.uuid),
             ...followers.filter((n) => !n.is_read).map((n) => n.uuid),
+            ...chat_messages.filter((n) => !n.is_read).map((n) => n.uuid),
         ];
     }, [data]);
 

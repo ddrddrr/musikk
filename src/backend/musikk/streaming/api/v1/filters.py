@@ -10,10 +10,14 @@ class CollectionFilter(filters.FilterSet):
         choices=CollectionType.choices,
     )
     connection = filters.CharFilter(method="filter_connection")
+    author = filters.UUIDFilter(method="filter_author")
 
     class Meta:
         model = Collection
-        fields = ["type", "connection"]
+        fields = ["type", "connection", "author"]
+
+    def filter_author(self, queryset, name, value):
+        return queryset.filter(collection_credits__author__uuid=value).distinct()
 
     def filter_connection(self, queryset, name, value):
         collection_ids = []

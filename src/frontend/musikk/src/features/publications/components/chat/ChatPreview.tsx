@@ -15,39 +15,45 @@ export function ChatPreview({ chat }: ChatPreviewProps) {
     const navigate = useNavigate();
     const { chatImg, chatImgAlt } = useChatImage(chat);
 
+    const lastMessageTime = chat.last_message
+        ? formatDateTime(chat.last_message.date_added)
+        : null;
+
     return (
         <button
             onClick={() => void navigate(`/users/${userUUID}/chats/${chat.uuid}`)}
             className={cn(
-                "w-full rounded-sm border-2 border-black bg-white p-3 text-left transition-colors hover:bg-gray-50",
-                !chat.is_read && "font-bold",
+                "w-full rounded-sm border-2 border-black p-3 text-left transition-colors",
+                chat.is_read ? "bg-white hover:bg-gray-50" : "bg-white font-bold hover:bg-gray-50",
             )}
         >
             <div className="flex items-start gap-3">
                 <UserAvatar src={chatImg} alt={chatImgAlt} size="sm" />
-                <div className="min-w-0 flex-1 space-y-1">
-                    <h3 className="truncate text-base font-bold">{chat.title}</h3>
+                <div className="min-w-0 flex-1">
+                    <div className="flex items-baseline justify-between gap-2">
+                        <h3 className="truncate text-sm font-bold">{chat.title}</h3>
+                        {lastMessageTime && (
+                            <span className="shrink-0 text-xs text-gray-500">
+                                {lastMessageTime}
+                            </span>
+                        )}
+                    </div>
                     {chat.last_message && (
-                        <>
-                            <p className="truncate text-xs text-gray-600">
-                                {chat.last_message.is_deleted ? (
-                                    <span className="italic">Message deleted</span>
-                                ) : (
-                                    <>
-                                        <span className="font-medium">
-                                            {chat.last_message.author.uuid === userUUID
-                                                ? "You"
-                                                : chat.last_message.author.display_name}
-                                            :
-                                        </span>{" "}
-                                        {chat.last_message.content}
-                                    </>
-                                )}
-                            </p>
-                            <p className="text-[10px] text-gray-600">
-                                {formatDateTime(chat.last_message.date_added)}
-                            </p>
-                        </>
+                        <p className="mt-1 truncate text-sm text-gray-600">
+                            {chat.last_message.is_deleted ? (
+                                <span className="italic">Message deleted</span>
+                            ) : (
+                                <>
+                                    <span className="font-medium">
+                                        {chat.last_message.author.uuid === userUUID
+                                            ? "You"
+                                            : chat.last_message.author.display_name}
+                                        :
+                                    </span>{" "}
+                                    {chat.last_message.content}
+                                </>
+                            )}
+                        </p>
                     )}
                 </div>
             </div>

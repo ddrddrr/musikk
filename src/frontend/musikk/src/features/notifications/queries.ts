@@ -1,12 +1,17 @@
 import { api_client } from "@/api/axiosConf.ts";
 import { NotificationURLs } from "@/api/endpoints.ts";
 import { notificationKeys } from "@/features/notifications/queryKeys.ts";
-import { IFollowerNotification, IReplyNotification } from "@/features/notifications/types.ts";
+import {
+    IChatMessageNotification,
+    IFollowerNotification,
+    IReplyNotification,
+} from "@/features/notifications/types.ts";
 import { useQuery } from "@tanstack/react-query";
 
 export interface NotificationListParams {
     replies: IReplyNotification[];
     followers: IFollowerNotification[];
+    chat_messages: IChatMessageNotification[];
 }
 
 export async function fetchNotificationList(): Promise<NotificationListParams> {

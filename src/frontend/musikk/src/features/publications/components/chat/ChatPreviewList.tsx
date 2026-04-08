@@ -43,11 +43,13 @@ export function ChatPreviewList() {
                 </Button>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-1">
                 {chats && chats.map((chat) => <ChatPreview key={chat.uuid} chat={chat} />)}
             </div>
 
-            <ChatStartDirectList />
+            <div className="mt-2 border-t-2 border-black pt-4">
+                <ChatStartDirectList />
+            </div>
         </div>
     );
 }

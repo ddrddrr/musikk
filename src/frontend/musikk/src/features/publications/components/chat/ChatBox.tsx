@@ -7,7 +7,9 @@ import { LoadOlderButton } from "@/features/publications/components/LoadOlderBut
 import { ChatHeader } from "@/features/publications/components/chat/ChatHeader.tsx";
 import { ChatMessageForm } from "@/features/publications/components/chat/ChatMessageForm.tsx";
 import { ChatMessageList } from "@/features/publications/components/chat/ChatMessageList.tsx";
+import { NewMessagesIndicator } from "@/features/publications/components/NewMessagesIndicator.tsx";
 import { useAutoScrollToBottom } from "@/features/publications/hooks/useAutoScrollToBottom.ts";
+import { useNewMessagesIndicator } from "@/features/publications/hooks/useNewMessagesIndicator.ts";
 import { useChatMessagesFlat } from "@/features/publications/hooks/usePublicationsInfiniteFlat.ts";
 import { useRef } from "react";
 
@@ -37,7 +39,13 @@ export function ChatBox({ chatUUID }: ChatBoxProps) {
     } = useChatMessagesFlat(userUUID, chatUUID);
 
     const messagesContainerRef = useRef<HTMLDivElement>(null);
-    const scrollToBottom = useAutoScrollToBottom(messagesContainerRef, isMessagesPending, messages);
+    const messagesEndRef = useRef<HTMLDivElement>(null);
+    useAutoScrollToBottom(messagesEndRef, isMessagesPending, messages);
+    const { hasNewMessages, scrollToBottom } = useNewMessagesIndicator(
+        messagesContainerRef,
+        messagesEndRef,
+        messages,
+    );
 
     if (isChatPending || isMessagesPending) {
         return (
@@ -67,20 +75,23 @@ export function ChatBox({ chatUUID }: ChatBoxProps) {
         <div className="flex h-full max-h-[600px] flex-col overflow-hidden rounded-sm border-2 border-black bg-white">
             <ChatHeader chat={chat} />
 
-            <div className="min-h-0 flex-1 overflow-y-auto p-4" ref={messagesContainerRef}>
-                <div className="mb-4 flex justify-center">
-                    <LoadOlderButton
-                        hasNextPage={hasNextPage}
-                        isFetchingNextPage={isFetchingNextPage}
-                        fetchNextPage={fetchNextPage}
-                    />
+            <div className="relative min-h-0 flex-1">
+                <div className="h-full overflow-y-auto p-4" ref={messagesContainerRef}>
+                    <div className="mb-4 flex justify-center">
+                        <LoadOlderButton
+                            hasNextPage={hasNextPage}
+                            isFetchingNextPage={isFetchingNextPage}
+                            fetchNextPage={fetchNextPage}
+                        />
+                    </div>
+                    <ChatMessageList messages={publicationsFlat} />
+                    <div ref={messagesEndRef} />
                 </div>
-                {/*TODO: add ws to load messages on new pub*/}
-                <ChatMessageList messages={publicationsFlat} />
+                <NewMessagesIndicator visible={hasNewMessages} onClick={scrollToBottom} />
             </div>
 
             <div className="border-t-2 border-black bg-gray-100 p-4">
-                <ChatMessageForm chat={chat} onMessagePosted={scrollToBottom} />
+                <ChatMessageForm chat={chat} />
             </div>
         </div>
     );

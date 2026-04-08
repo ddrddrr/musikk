@@ -8,10 +8,12 @@ from rest_framework import status
 from notifications.api.v1.serializers import (
     ReplyNotificationSerializer,
     FollowerNotificationSerializer,
+    ChatMessageNotificationSerializer,
 )
 from notifications.models import (
     ReplyNotification,
     FollowerNotification,
+    ChatMessageNotification,
     Notification,
 )
 from users.models import BaseUser
@@ -29,7 +31,14 @@ class NotificationsPersonalListUpdateView(GenericAPIView):
         followers = FollowerNotificationSerializer(
             FollowerNotification.objects.filter(receiver=request.user), many=True
         ).data
-        return Response({"replies": replies, "followers": followers})
+        chat_messages = ChatMessageNotificationSerializer(
+            ChatMessageNotification.objects.filter(receiver=request.user),
+            many=True,
+            context={"request": request},
+        ).data
+        return Response(
+            {"replies": replies, "followers": followers, "chat_messages": chat_messages}
+        )
 
     def patch(self, request, *args, **kwargs):
         notif_uuids = self.request.data["uuids"]

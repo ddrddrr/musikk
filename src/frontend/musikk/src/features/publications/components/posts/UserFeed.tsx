@@ -25,7 +25,7 @@ export function UserFeed({ userUUID }: { userUUID: UUID }) {
 
     return (
         <div className="mx-auto w-full max-w-2xl space-y-6">
-            {currUserUUID == userUUID && (
+            {currUserUUID === userUUID && (
                 <Card className="border-2 border-black shadow-md">
                     <CardContent className="space-y-3 p-4">
                         <h2 className="text-lg font-semibold">Add a Post :)</h2>

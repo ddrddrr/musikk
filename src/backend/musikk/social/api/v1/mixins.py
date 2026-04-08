@@ -33,6 +33,7 @@ class PublicationsListCreateMixin(ListModelMixin, CreateModelMixin):
 
     def perform_create(self, serializer):
         serializer.save(created_for_object=self.get_created_for())
+        self._created_publication = serializer.instance
 
     def ws_on_create(self):
         raise NotImplementedError

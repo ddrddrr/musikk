@@ -12,6 +12,7 @@ from social.api.v1.serializers import (
     UserChatCreateSerializer,
     ChatMembersCreateSerializer,
 )
+from notifications.models import ReplyNotification, ChatMessageNotification
 from social.models import Publication
 from social.models.chat import Chat, ChatMember
 from streaming.models import Collection
@@ -49,6 +50,11 @@ class CollectionCommentsListCreateView(PublicationsListCreateMixin, ListCreateAP
             ServerEvent.COLLECTION_COMMENTS_CHANGED,
             collection_uuid=str(self.kwargs["collection_uuid"]),
         )
+        if self._created_publication.parent:
+            ReplyNotification.objects.create(
+                orig_publication=self._created_publication.parent,
+                reply_publication=self._created_publication,
+            )
 
 
 class FeedPostsListCreateView(PublicationsListCreateMixin, ListCreateAPIView):
@@ -76,6 +82,11 @@ class FeedPostsListCreateView(PublicationsListCreateMixin, ListCreateAPIView):
             ServerEvent.FEED_COMMENTS_CHANGED,
             user_uuid=str(self.kwargs["user_uuid"]),
         )
+        if self._created_publication.parent:
+            ReplyNotification.objects.create(
+                orig_publication=self._created_publication.parent,
+                reply_publication=self._created_publication,
+            )
 
 
 class ChatMessagesListCreateView(PublicationsListCreateMixin, ListCreateAPIView):
@@ -100,6 +111,16 @@ class ChatMessagesListCreateView(PublicationsListCreateMixin, ListCreateAPIView)
             ServerEvent.CHAT_MESSAGES_CHANGED,
             chat_uuid=str(self.kwargs["chat_uuid"]),
         )
+        chat = self.get_created_for()
+        other_members = ChatMember.objects.filter(chat=chat).exclude(
+            member=self.request.user
+        )
+        for cm in other_members:
+            ChatMessageNotification.objects.create(
+                message=self._created_publication,
+                chat=chat,
+                receiver=cm.member,
+            )
 
 
 class UserChatsListCreateView(ListCreateAPIView):

@@ -11,6 +11,7 @@ import { MediaThumbnail } from "@/features/common/MediaThumbnail.tsx";
 import { SongContextMenu } from "@/features/songs/components/SongContextMenu.tsx";
 import { albumBySongRetrieve } from "@/features/songs/queries.ts";
 import { Card, CardContent } from "@/features/ui/card.tsx";
+import { AuthorLinks } from "@/features/user/components/AuthorLinks.tsx";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -46,8 +47,6 @@ export function SongCard({ collectionSong, size = "medium", onClick = undefined 
     const navigate = useNavigate();
     const { uuid, title, authors, image } = collectionSong.song;
 
-    const authorNames = authors.map((a) => a.display_name).join(", ");
-
     async function handleClick(s: CollectionSong) {
         if (onClick) {
             onClick(s);
@@ -76,7 +75,7 @@ export function SongCard({ collectionSong, size = "medium", onClick = undefined 
                         className={songCardImageVariants({ size })}
                     />
                     <div className={cardPaddingVariants({ size })}>
-                        <p className={cardSubtitleVariants({ size })}>{authorNames}</p>
+                        <AuthorLinks authors={authors} className={cardSubtitleVariants({ size })} />
                         <p className={cardTitleVariants({ size })}>{title}</p>
                     </div>
                 </CardContent>

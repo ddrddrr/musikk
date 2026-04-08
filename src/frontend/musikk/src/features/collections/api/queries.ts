@@ -9,6 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 export interface CollectionListParams {
     type?: CollectionType;
     connection?: ConnectionType;
+    author?: string;
     limit?: number;
     offset?: number;
 }

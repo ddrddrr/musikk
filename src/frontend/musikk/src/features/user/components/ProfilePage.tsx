@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { Spinner } from "@/components/ui/spinner";
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
+import { UserCollectionsGrid } from "@/features/collections/components/UserCollectionsGrid.tsx";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { UserFeed } from "@/features/publications/components/posts/UserFeed.tsx";
 import { Button } from "@/features/ui/button.tsx";
@@ -11,6 +13,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/features/ui/dialog.tsx";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/features/ui/tabs.tsx";
 import { fetchUser } from "@/features/user/api/queries.ts";
 import { userKeys } from "@/features/user/api/queryKeys.ts";
 import { ProfileForm } from "@/features/user/components/ProfileForm.tsx";
@@ -22,6 +25,7 @@ import { useParams } from "react-router-dom";
 export function ProfilePage() {
     const { uuid } = useParams<{ uuid: string }>();
     const currUserUUID = useUserUUID();
+    const [tab, setTab] = useState("posts");
     const { isFollowing, toggleFollow, isLoading: isFollowLoading } = useFollowUser(uuid);
 
     const {
@@ -97,7 +101,29 @@ export function ProfilePage() {
                 </div>
             </div>
             <div className="mt-8 w-full">
-                <UserFeed userUUID={uuid} />
+                <Tabs value={tab} onValueChange={setTab} className="w-full">
+                    <TabsList className="mx-auto mb-6 rounded-sm">
+                        <TabsTrigger value="posts">Posts</TabsTrigger>
+                        <TabsTrigger value="playlists">Playlists</TabsTrigger>
+                        {user.is_artist && (
+                            <TabsTrigger value="albums">Albums</TabsTrigger>
+                        )}
+                    </TabsList>
+
+                    <TabsContent value="posts">
+                        <UserFeed userUUID={uuid} />
+                    </TabsContent>
+
+                    <TabsContent value="playlists">
+                        <UserCollectionsGrid userUUID={uuid} type="playlist" />
+                    </TabsContent>
+
+                    {user.is_artist && (
+                        <TabsContent value="albums">
+                            <UserCollectionsGrid userUUID={uuid} type="album" />
+                        </TabsContent>
+                    )}
+                </Tabs>
             </div>
         </div>
     );

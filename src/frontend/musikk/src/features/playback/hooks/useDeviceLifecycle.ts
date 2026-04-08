@@ -21,8 +21,8 @@ export function useDeviceLifecycle() {
     useEffect(() => {
         if (
             activeDevice?.id !== device.id &&
-            deviceList.length == 1 &&
-            deviceList[0].id == device.id // just extra precausions
+            deviceList.length === 1 &&
+            deviceList[0].id === device.id
         ) {
             setDeviceActiveAction(device);
         }

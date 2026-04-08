@@ -70,6 +70,10 @@ class BaseUser(BaseModel, AbstractBaseUser, PermissionsMixin):
             .distinct()
         )
 
+    @property
+    def following(self) -> models.QuerySet["BaseUser"]:
+        return BaseUser.objects.filter(followers__from_user=self)
+
     def __str__(self):
         return self.display_name
 

@@ -2,6 +2,7 @@ import { cva } from "class-variance-authority";
 import { CollectionSong } from "@/features/collections/types.ts";
 import { MediaThumbnail } from "@/features/common/MediaThumbnail.tsx";
 import { DefaultSongActions } from "@/features/songs/components/DefaultSongActions.tsx";
+import { AuthorLinks } from "@/features/user/components/AuthorLinks.tsx";
 import { cn } from "@/lib/utils.ts";
 import { type ReactNode, memo } from "react";
 
@@ -83,7 +84,6 @@ export const SongContainer = memo(function SongContainer({
     actions,
 }: SongContainerProps) {
     const song = collectionSong.song;
-    const authors = song.authors.map((a) => a.display_name).join(", ");
 
     const renderedActions = actions ?? (
         <DefaultSongActions collectionSong={collectionSong} size={size} />
@@ -97,7 +97,7 @@ export const SongContainer = memo(function SongContainer({
             <div className="flex min-w-0 flex-col">
                 <p className={titleVariants({ size })}>{song.title}</p>
                 {variant === "inline" && (
-                    <p className={authorsVariants({ size })}>{authors}</p>
+                    <AuthorLinks authors={song.authors} className={authorsVariants({ size })} />
                 )}
             </div>
         </div>

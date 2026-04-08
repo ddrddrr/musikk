@@ -18,12 +18,11 @@ interface ChatMessageFormProps {
     chat: Chat;
     replyTo?: Publication;
     setReplyTo?: (message?: Publication) => void;
-    onMessagePosted?: () => void;
 }
 // TODO: message style as in comments + attachment picker + avatar for the user who sent
 // move chats to header as button instead of a context menu for profile
 // same for connections
-export function ChatMessageForm({ chat, onMessagePosted }: ChatMessageFormProps) {
+export function ChatMessageForm({ chat }: ChatMessageFormProps) {
     const userUUID = useUserUUID();
     const {
         register,
@@ -34,21 +33,26 @@ export function ChatMessageForm({ chat, onMessagePosted }: ChatMessageFormProps)
         resolver: zodResolver(chatMessageSchema),
     });
 
+    const { attachedObj, setAttachedObj, getAttachmentData, clearAttachment } = useAttachment();
     const createChatMessageMutation = useCreateChatMessage();
 
     const submitHandler = (data: ChatMessageFormData) => {
         if (!userUUID) return;
+
+        const { attachmentType, attachmentUUID } = getAttachmentData();
 
         createChatMessageMutation.mutate(
             {
                 userUUID,
                 chatUUID: chat.uuid,
                 content: data.content,
+                attachmentType,
+                attachmentUUID,
             },
             {
                 onSuccess: () => {
                     reset();
-                    onMessagePosted?.();
+                    clearAttachment();
                 },
                 onError: (error) => {
                     toast.error(getErrorDetail(error, "Failed to send message"));
@@ -67,15 +71,16 @@ export function ChatMessageForm({ chat, onMessagePosted }: ChatMessageFormProps)
             />
             {errors.content && <p className="text-xs text-red-500">{errors.content.message}</p>}
 
-            <Button
-                type="submit"
-                variant="brand"
-                size="lg"
-                disabled={createChatMessageMutation.isPending}
-                className={"w-1/3"}
-            >
-                {createChatMessageMutation.isPending ? "Sending..." : "Send"}
-            </Button>
+            <div className="flex items-start gap-2">
+                <Button
+                    type="submit"
+                    variant="brand"
+                    disabled={createChatMessageMutation.isPending}
+                >
+                    {createChatMessageMutation.isPending ? "Sending..." : "Send"}
+                </Button>
+                <AttachmentPicker attachedObj={attachedObj} onAttach={setAttachedObj} />
+            </div>
         </form>
     );
 }

@@ -18,6 +18,6 @@ class PublicationConnectionFilter(filters.FilterSet):
             case "friends":
                 return base_qs.filter(author__in=self.request.user.friends.all())
             case "followed":
-                return base_qs.filter(author__in=self.request.user.followed_users.all())
+                return base_qs.filter(author__in=self.request.user.following)
             case _:
                 return base_qs

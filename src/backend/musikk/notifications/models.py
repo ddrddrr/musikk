@@ -56,3 +56,30 @@ class FollowerNotification(Notification):
         ordering = ["-date_added"]
 
     objects = FollowerNotificationManager()
+
+
+class ChatMessageNotificationManager(models.Manager):
+    def create(self, **kwargs):
+        obj = super().create(**kwargs)
+        send_ws_event(
+            user_group(obj.receiver.uuid),
+            ServerEvent.NOTIFICATIONS_CHANGED,
+        )
+        return obj
+
+
+class ChatMessageNotification(Notification):
+    message = models.ForeignKey(
+        "social.Publication", on_delete=models.CASCADE, related_name="+"
+    )
+    chat = models.ForeignKey(
+        "social.Chat", on_delete=models.CASCADE, related_name="+"
+    )
+    receiver = models.ForeignKey(
+        "users.BaseUser", on_delete=models.CASCADE, related_name="+"
+    )
+
+    class Meta:
+        ordering = ["-date_added"]
+
+    objects = ChatMessageNotificationManager()

@@ -3,6 +3,7 @@ import { ChangeActiveDeviceDropdown } from "@/features/player/ChangeActiveDevice
 import { PlayerPlayButton } from "@/features/player/PlayerPlayButton.tsx";
 import { useQueueNext, useQueuePrev } from "@/features/song-queue/hooks/useQueueAPI.ts";
 import { Button } from "@/features/ui/button";
+import { AuthorLinks } from "@/features/user/components/AuthorLinks.tsx";
 import { Slider } from "@/features/ui/slider";
 import { ListMusic, SkipBack, SkipForward, Volume2 } from "lucide-react";
 import React, { useContext, useEffect, useState } from "react";
@@ -68,7 +69,6 @@ export function PlayerBar({
 
     const playingSong = playingCollectionSong?.song;
     const displayTime = seeking ? seekTime : time;
-    const authorNames = playingCollectionSong?.song.authors.map((a) => a.display_name).join(", ");
 
     return (
         <div className="border-t border-black bg-white px-4 py-2">
@@ -90,7 +90,7 @@ export function PlayerBar({
                         </div>
                         <div className="flex min-w-0 flex-col">
                             <p className="truncate text-sm font-bold">{playingSong.title}</p>
-                            <p className="truncate text-xs text-gray-600">{authorNames}</p>
+                            <AuthorLinks authors={playingCollectionSong.song.authors} className="text-xs text-gray-600" />
                         </div>
                     </div>
                 )}

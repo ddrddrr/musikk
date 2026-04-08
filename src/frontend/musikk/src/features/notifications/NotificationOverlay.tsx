@@ -1,5 +1,6 @@
+import { useAuth } from "@/hooks/useAuth.ts";
 import { NotificationListParams } from "@/features/notifications/queries.ts";
-import { IFollowerNotification, IReplyNotification } from "@/features/notifications/types.ts";
+import { IChatMessageNotification, IFollowerNotification, IReplyNotification } from "@/features/notifications/types.ts";
 import { Button } from "@/features/ui/button.tsx";
 import { formatDateTime } from "@/utils/formatDate.ts";
 import { memo } from "react";
@@ -13,24 +14,39 @@ export const NotificationOverlay = memo(function NotificationOverlay({
     notifications,
 }: NotificationOverlayProps) {
     const navigate = useNavigate();
-    // TODO: fix, can be reply for comments/posts (but not chats)
+    const { user } = useAuth();
+
     function handleNavigateReplyClick(notification: IReplyNotification) {
-        // if (notification.reply_publication.created_for.type == "feed") {
-        //     navigate(`/users/${notification.reply_publication.root_author_uuid}`);
-        // } else {
-        //     navigate(`/collection/${notification.reply_publication.created_for.uuid}/comments`);
-        // }
+        if (notification.reply_publication.created_for.type === "feed") {
+            void navigate(`/users/${notification.reply_publication.root_author_uuid}`);
+        } else {
+            void navigate(
+                `/collection/${notification.reply_publication.created_for.uuid}/comments`,
+            );
+        }
     }
 
     function handleNavigateFollowerClick(notification: IFollowerNotification) {
         void navigate(`/users/${notification.sender.uuid}`);
     }
 
-    const { replies = [], followers = [] } = notifications;
+    function handleNavigateChatClick(notification: IChatMessageNotification) {
+        if (!user) return;
+        void navigate(`/users/${user.uuid}/chats/${notification.chat_uuid}`);
+    }
+
+    const { replies = [], followers = [], chat_messages = [] } = notifications;
     const allNotifications = [
         ...replies.map((n) => ({ ...n, _type: "reply" as const })),
         ...followers.map((n) => ({ ...n, _type: "follower" as const })),
+        ...chat_messages.map((n) => ({ ...n, _type: "chat_message" as const })),
     ].sort((a, b) => new Date(b.date_added).getTime() - new Date(a.date_added).getTime());
+    if (allNotifications.length === 0) {
+        return (
+            <div className="p-6 text-center text-sm text-gray-500">No notifications</div>
+        );
+    }
+
     return (
         <div className="max-h-96 overflow-y-auto p-4 transition-opacity duration-200 ease-in-out">
             {allNotifications.map((notification) => (
@@ -44,10 +60,10 @@ export const NotificationOverlay = memo(function NotificationOverlay({
                                 Reply:{" "}
                                 {notification.reply_publication.author.display_name ?? "Anonymous"}
                             </div>
-                            <div className="mt-1 text-xs text-gray-600">
+                            <div className="mt-1 break-words text-xs text-gray-600">
                                 {notification.orig_publication.content}
                             </div>
-                            <div className="mt-2 text-sm text-gray-800">
+                            <div className="mt-2 break-words text-sm text-gray-800">
                                 {notification.reply_publication.content}
                             </div>
                             <div className="mt-2 flex justify-between">
@@ -82,6 +98,28 @@ export const NotificationOverlay = memo(function NotificationOverlay({
                                     onClick={() => handleNavigateFollowerClick(notification)}
                                 >
                                     View Profile
+                                </Button>
+                            </div>
+                        </>
+                    )}
+                    {notification._type === "chat_message" && (
+                        <>
+                            <div className="text-sm font-semibold">
+                                New message: {notification.message.author.display_name ?? "Anonymous"}
+                            </div>
+                            <div className="mt-1 break-words text-sm text-gray-800">
+                                {notification.message.content}
+                            </div>
+                            <div className="mt-2 flex justify-between">
+                                <span className="text-xs text-gray-600">
+                                    {formatDateTime(notification.date_added)}
+                                </span>
+                                <Button
+                                    variant="brand"
+                                    className="rounded-sm px-3 py-1 text-xs"
+                                    onClick={() => handleNavigateChatClick(notification)}
+                                >
+                                    Open chat
                                 </Button>
                             </div>
                         </>

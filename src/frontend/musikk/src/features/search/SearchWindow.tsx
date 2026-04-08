@@ -99,7 +99,7 @@ export function SearchWindow({ onItemSelect, songMode = "card" }: SearchWindowPr
                 <h3 className="mb-2 text-sm font-semibold">{label}</h3>
                 <div className="grid grid-cols-2 gap-2">
                     {items.map((user) => (
-                        <UserCard key={user.uuid} user={user} onClick={onItemSelect} />
+                        <UserCard key={user.uuid} user={user} size="small" onClick={onItemSelect} />
                     ))}
                 </div>
             </div>

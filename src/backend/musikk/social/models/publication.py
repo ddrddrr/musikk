@@ -3,7 +3,6 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
 from social.models.user_content import UserContent
-from notifications.models import ReplyNotification
 
 
 class Publication(UserContent):
@@ -33,15 +32,6 @@ class Publication(UserContent):
     )
     attachment_id = models.PositiveIntegerField(null=True, blank=True)
     attachment_object = GenericForeignKey("attachment_type", "attachment_id")
-
-    def save(self, *args, **kwargs):
-        is_new = self.pk is None
-        super().save(*args, **kwargs)
-        if is_new and self.parent:
-            ReplyNotification.objects.create(
-                orig_publication=self.parent,
-                reply_publication=self,
-            )
 
     def get_root(self):
         node = self

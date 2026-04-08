@@ -15,3 +15,10 @@ export interface IFollowerNotification extends INotification {
     sender: BaseUser;
     receiver: BaseUser;
 }
+
+export interface IChatMessageNotification extends INotification {
+    message: Publication;
+    chat_uuid: string;
+    chat_title: string;
+    receiver: BaseUser;
+}

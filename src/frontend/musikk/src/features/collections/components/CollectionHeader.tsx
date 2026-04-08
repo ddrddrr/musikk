@@ -3,6 +3,7 @@ import { CollectionAddToQueueButton } from "@/features/collections/components/Co
 import { CollectionPlayButton } from "@/features/collections/components/CollectionPlayButton.tsx";
 import { CollectionDetailed } from "@/features/collections/types.ts";
 import { Button } from "@/features/ui/button.tsx";
+import { AuthorLinks } from "@/features/user/components/AuthorLinks.tsx";
 import { memo } from "react";
 
 interface SongCollectionHeaderProps {
@@ -23,8 +24,6 @@ export const CollectionHeader = memo(function SongCollectionHeader({
     renderAddToLikedButton,
     renderCommentsButton,
 }: SongCollectionHeaderProps) {
-    // TODO: make author clickable, probably factor out to a sep component
-    const authors = collection.authors.map((author) => author.display_name).join(", ");
 
     return (
         <>
@@ -68,7 +67,7 @@ export const CollectionHeader = memo(function SongCollectionHeader({
                         <div className="flex items-center justify-between">
                             <div className="min-w-0">
                                 <p className="text-xl font-bold">{collection.title}</p>
-                                <p className="truncate text-sm text-gray-500">{authors}</p>
+                                <AuthorLinks authors={collection.authors} className="text-sm text-gray-500" />
                                 {collection.description && (
                                     <p className="mt-2 line-clamp-2 text-base text-gray-600">
                                         {collection.description}

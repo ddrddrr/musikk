@@ -1,6 +1,5 @@
+import { PostHeader } from "@/features/publications/components/posts/PostHeader.tsx";
 import { Publication } from "@/features/publications/types.ts";
-import { UserIdentifier } from "@/features/user/components/UserIdentifier.tsx";
-import { formatDateTime } from "@/utils/formatDate.ts";
 
 interface CommentProps {
     comment: Publication;
@@ -18,13 +17,10 @@ export function Comment({ comment, setReplyTo }: CommentProps) {
                     <div className="truncate italic">{comment.parent_repr}</div>
                 </div>
             )}
-            <div className="mb-1 flex items-center justify-between">
-                <UserIdentifier user={comment.author} />
-                <span className="max-w-[50%] truncate text-right text-[10px] text-gray-600">
-                    {formatDateTime(comment.date_added)}
-                </span>
+            <div className="mb-1">
+                <PostHeader author={comment.author} dateAdded={comment.date_added} />
             </div>
-            <p className="text-sm text-gray-800">
+            <p className="break-words text-sm text-gray-800">
                 {comment.is_deleted ? (
                     <span className="text-gray-400 italic">Deleted</span>
                 ) : (

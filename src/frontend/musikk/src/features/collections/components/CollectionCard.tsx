@@ -9,6 +9,7 @@ import {
 } from "@/features/common/card-variants.ts";
 import { MediaThumbnail } from "@/features/common/MediaThumbnail.tsx";
 import { Card, CardContent } from "@/features/ui/card.tsx";
+import { AuthorLinks } from "@/features/user/components/AuthorLinks.tsx";
 import { useNavigate } from "react-router-dom";
 
 type CollectionCardProps = {
@@ -53,8 +54,6 @@ export function CollectionCard({
     const navigate = useNavigate();
     const { uuid, title, image, authors } = collection;
 
-    const authorNames = authors.map((a) => a.display_name).join(", ");
-
     function handleOnClick(collection: Collection) {
         if (onClick) {
             onClick(collection);
@@ -79,7 +78,7 @@ export function CollectionCard({
                         className={collectionCardImageVariants({ size })}
                     />
                     <div className={cardPaddingVariants({ size })}>
-                        <p className={cardSubtitleVariants({ size })}>{authorNames}</p>
+                        <AuthorLinks authors={authors} className={cardSubtitleVariants({ size })} />
                         <p className={cardTitleVariants({ size })}>{title}</p>
                     </div>
                 </CardContent>

@@ -9,7 +9,7 @@ type MediaThumbnailProps = {
 };
 
 const baseClass =
-    "flex items-center justify-center bg-gray-200 rounded-sm border border-black overflow-hidden";
+    "flex items-center justify-center bg-gray-200 overflow-hidden";
 
 export function MediaThumbnail({ src, alt = "", fallback, className }: MediaThumbnailProps) {
     if (src) {

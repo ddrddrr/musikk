@@ -51,6 +51,11 @@ export function useCreatePost() {
             void queryClient.invalidateQueries({
                 queryKey: publicationKeys.feed(variables.userUUID),
             });
+            if (variables.parentUUID) {
+                void queryClient.invalidateQueries({
+                    queryKey: publicationKeys.children(variables.parentUUID),
+                });
+            }
         },
         onError: (error) => {
             toast.error(getErrorDetail(error, "Failed to create post"));

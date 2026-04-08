@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from base.serializers import BaseModelSerializer
-from notifications.models import ReplyNotification, FollowerNotification
+from notifications.models import ReplyNotification, FollowerNotification, ChatMessageNotification
 from social.api.v1.serializers import PublicationRetrieveSerializer
 from users.api.v1.serializers import BaseUserSerializer
 
@@ -37,5 +37,22 @@ class FollowerNotificationSerializer(BaseNotificationSerializer):
         fields = BaseNotificationSerializer.Meta.fields + [
             "sender",
             "receiver",
+            "is_read",
+        ]
+
+
+class ChatMessageNotificationSerializer(BaseNotificationSerializer):
+    message = PublicationRetrieveSerializer(read_only=True)
+    receiver = BaseUserSerializer(read_only=True)
+    chat_uuid = serializers.UUIDField(source="chat.uuid", read_only=True)
+    chat_title = serializers.CharField(source="chat.title", read_only=True)
+
+    class Meta(BaseNotificationSerializer.Meta):
+        model = ChatMessageNotification
+        fields = BaseNotificationSerializer.Meta.fields + [
+            "message",
+            "receiver",
+            "chat_uuid",
+            "chat_title",
             "is_read",
         ]
