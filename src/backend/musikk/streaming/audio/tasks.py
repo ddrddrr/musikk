@@ -18,7 +18,12 @@ from websockets.event_helpers import send_ws_event, user_group
 logger = logging.getLogger(__name__)
 
 
-@shared_task(bind=True)
+@shared_task(
+    bind=True,
+    autoretry_for=(OSError, IOError),
+    max_retries=3,
+    retry_backoff=60,
+)
 def convert_audio(
     self,
     file_path: str | Path,

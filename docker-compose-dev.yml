@@ -43,6 +43,8 @@ services:
         condition: service_healthy
       database:
         condition: service_healthy
+    volumes:
+      - django_media:/app/media
     networks:
       - main
 
@@ -52,6 +54,8 @@ services:
       - 5672
     env_file:
       - .env
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
     networks:
       - main
 
@@ -90,6 +94,7 @@ volumes:
   caddy_config:
   django_static:
   django_media:
+  rabbitmq_data:
 
 networks:
   main:

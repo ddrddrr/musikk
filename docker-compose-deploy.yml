@@ -26,6 +26,41 @@ services:
     networks:
       - main
 
+  celery_worker:
+    image: ddrddrr2/musikk-server:latest
+    command: docker/start-celery-worker.sh
+    env_file:
+      - .env
+    depends_on:
+      - database
+      - broker
+      - redis
+    volumes:
+      - django_media:/app/media
+    networks:
+      - main
+
+  broker:
+    image: rabbitmq:4.1.1
+    expose:
+      - 5672
+    env_file:
+      - .env
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - main
+
+  redis:
+    image: redis:8.0-alpine
+    command: [ "redis-server","--requirepass","${REDIS_PASSWORD}" ]
+    expose:
+      - 6379
+    env_file:
+      - .env
+    networks:
+      - main
+
   proxy:
     image: ddrddrr2/musikk-caddy:latest
     env_file:
@@ -49,6 +84,7 @@ volumes:
   caddy_config:
   django_static:
   django_media:
+  rabbitmq_data:
 
 networks:
   main:

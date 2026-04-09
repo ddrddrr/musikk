@@ -304,12 +304,13 @@ CELERY_BROKER_URL = config(
 )
 CELERY_BROKER_TRANSPORT_OPTIONS = {"confirm_publish": True, "confirm_timeout": 5.0}
 # CELERY_RESULT_BACKEND = config("CELERY_RESULT_BACKEND", default="")
+# this is setup, so the task is always finished (even if fails)
 CELERY_TASK_ACKS_LATE = config("CELERY_TASK_ACKS_LATE", cast=bool, default=True)
 CELERY_TASK_ACKS_ON_FAILURE_OR_TIMEOUT = config(
-    "CELERY_TASK_ACKS_ON_FAILURE_OR_TIMEOUT", cast=bool, default=True
+    "CELERY_TASK_ACKS_ON_FAILURE_OR_TIMEOUT", cast=bool, default=False
 )
 CELERY_TASK_REJECT_ON_WORKER_LOST = config(
-    "CELERY_TASK_REJECT_ON_WORKER_LOST", cast=bool, default=False
+    "CELERY_TASK_REJECT_ON_WORKER_LOST", cast=bool, default=True
 )
 CELERY_WORKER_PREFETCH_MULTIPLIER = config(
     "CELERY_WORKER_PREFETCH_MULTIPLIER", cast=int, default=1
@@ -320,3 +321,7 @@ CELERY_WORKER_CONCURRENCY = config(
 CELERY_WORKER_MAX_TASKS_PER_CHILD = config(
     "CELERY_WORKER_MAX_TASKS_PER_CHILD", cast=int, default=1000
 )
+CELERY_TASK_SOFT_TIME_LIMIT = config(
+    "CELERY_TASK_SOFT_TIME_LIMIT", cast=int, default=540
+)
+CELERY_TASK_TIME_LIMIT = config("CELERY_TASK_TIME_LIMIT", cast=int, default=600)
