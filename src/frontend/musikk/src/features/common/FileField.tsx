@@ -1,5 +1,6 @@
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/features/ui/form";
 import { Input } from "@/features/ui/input";
+import { cn } from "@/lib/utils.ts";
 import { useFormContext } from "react-hook-form";
 
 export interface FileFieldProps {
@@ -28,13 +29,13 @@ export function FileField({
                 const file = value as File | undefined;
 
                 return (
-                    <FormItem className={`min-w-0 ${className ?? ""}`}>
+                    <FormItem className={cn("min-w-0", className)}>
                         <FormLabel>{label}</FormLabel>
 
                         <FormControl>
-                            <div className="rounded-sm border-2 border-black bg-gray-200 p-4">
+                            <div className="rounded-sm border-2 border-foreground bg-muted p-4">
                                 <label className="flex w-full min-w-0 cursor-pointer items-center gap-3 overflow-hidden">
-                                    <span className="shrink-0 rounded border-2 border-black bg-red-600 px-2 py-1 text-sm font-medium text-white">
+                                    <span className="shrink-0 rounded border-2 border-foreground bg-brand px-2 py-1 text-sm font-medium text-brand-foreground">
                                         {buttonText}
                                     </span>
 
@@ -55,7 +56,7 @@ export function FileField({
                             </div>
                         </FormControl>
 
-                        <FormMessage className="text-red-600" />
+                        <FormMessage className="text-destructive" />
                     </FormItem>
                 );
             }}

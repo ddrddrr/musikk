@@ -21,7 +21,7 @@ export const CollectionAddToQueueButton = memo(function CollectionAddToQueueButt
             size="icon"
             onClick={() => addCollectionMutation.mutate(collection.uuid)}
             disabled={addCollectionMutation.isPending}
-            className={showComments ? "h-8 w-8" : "h-12 w-12"}
+            className={showComments ? "size-8" : "size-12"}
         >
             <BetweenHorizonalStart size={20} />
         </Button>

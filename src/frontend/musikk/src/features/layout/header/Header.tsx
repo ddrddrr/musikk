@@ -14,12 +14,12 @@ export const Header = memo(function Header() {
 
     // using grid here is easier than flexbox due to buttons aligment and spacing issues
     return (
-        <header className="grid grid-cols-5 items-center bg-red-600 p-4 text-white">
+        <header className="grid grid-cols-5 items-center bg-brand p-4 text-brand-foreground">
             <div className="col-span-1 flex justify-start gap-4">
                 <Button
                     variant="ghost"
                     size="icon"
-                    className="text-white"
+                    className="text-brand-foreground"
                     onClick={() => void navigate("/")}
                 >
                     <Disc3 />
@@ -28,7 +28,7 @@ export const Header = memo(function Header() {
                 <Button
                     variant="ghost"
                     size="icon"
-                    className="text-white"
+                    className="text-brand-foreground"
                     onClick={() => void navigate(`/users/${user?.uuid}/connections`)}
                 >
                     <Users />
@@ -44,7 +44,7 @@ export const Header = memo(function Header() {
                 <Button
                     variant="ghost"
                     size="icon"
-                    className="hover:bg-red-700"
+                    className="hover:bg-brand-hover"
                     onClick={() => void navigate(`/users/${user?.uuid}`)}
                 >
                     <UserAvatar src={user?.avatar} alt={user?.display_name} size="sm" />
@@ -53,7 +53,7 @@ export const Header = memo(function Header() {
                 <Button
                     variant="ghost"
                     size="icon"
-                    className="text-white"
+                    className="text-brand-foreground"
                     onClick={() => void navigate("/settings")}
                 >
                     <Cog />
@@ -63,10 +63,10 @@ export const Header = memo(function Header() {
                     <Button
                         variant="outline"
                         size="sm"
-                        className="border-white bg-transparent text-white hover:bg-red-700"
+                        className="border-brand-foreground bg-transparent text-brand-foreground hover:bg-brand-hover"
                         onClick={() => void navigate("/upload")}
                     >
-                        <Upload className="mr-1 h-4 w-4" />
+                        <Upload className="mr-1 size-4" />
                         Upload
                     </Button>
                 )}

@@ -7,7 +7,7 @@ const cardVariants = cva("flex flex-col rounded-sm", {
     variants: {
         variant: {
             default: "bg-card text-card-foreground border shadow-sm",
-            panel: "bg-gray-50 border-2 border-black overflow-hidden",
+            panel: "bg-muted border-2 border-foreground overflow-hidden",
             flat: "bg-card text-card-foreground border-none shadow-none",
             elevated: "bg-card text-card-foreground border shadow-lg",
         },

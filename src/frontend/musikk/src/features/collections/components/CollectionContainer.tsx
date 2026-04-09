@@ -1,5 +1,5 @@
 import { UUID } from "@/api/types.ts";
-import { Spinner } from "@/components/ui/spinner";
+import { Spinner } from "@/features/ui/spinner";
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
 import { useCollectionDetailQuery } from "@/features/collections/api/queries.ts";
 import { CollectionHeader } from "@/features/collections/components/CollectionHeader.tsx";
@@ -70,9 +70,9 @@ export function CollectionContainer({ collectionUUID }: CollectionContainerProps
 
     return (
         <div className="mx-auto max-w-7xl p-4">
-            <div className={`flex gap-6 ${showComments ? "flex-row" : "flex-col"}`}>
+            <div className={cn("flex gap-6", showComments ? "flex-row" : "flex-col")}>
                 <div className={showComments ? "min-w-0 flex-1" : "w-full"}>
-                    <div className="space-y-4">
+                    <div className="flex flex-col gap-4">
                         <CollectionHeader
                             collection={collection}
                             toggleComments={toggleComments}
@@ -85,7 +85,7 @@ export function CollectionContainer({ collectionUUID }: CollectionContainerProps
                         />
 
                         {songs.length > 0 ? (
-                            <ul className="space-y-2">
+                            <ul className="flex flex-col gap-2">
                                 {songs.map((collectionSong, index) => {
                                     const songActions = showComments ? (
                                         <div className={cn("flex items-center", btn.gap)}>
@@ -117,7 +117,7 @@ export function CollectionContainer({ collectionUUID }: CollectionContainerProps
                                 })}
                             </ul>
                         ) : (
-                            <div className="rounded-sm border-2 border-black bg-white py-12 text-center text-gray-700">
+                            <div className="rounded-sm border-2 border-foreground bg-card py-12 text-center text-foreground">
                                 <p className="font-medium">No songs in this collection</p>
                             </div>
                         )}

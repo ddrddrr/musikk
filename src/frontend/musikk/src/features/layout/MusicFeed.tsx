@@ -1,5 +1,5 @@
 import { PaginatedRes } from "@/api/types";
-import { Spinner } from "@/components/ui/spinner";
+import { Spinner } from "@/features/ui/spinner";
 import { collectionKeys } from "@/features/collections/api/queryKeys.ts";
 import { fetchCollections } from "@/features/collections/api/queries";
 import { CollectionCarousel } from "@/features/collections/components/CollectionCarousel.tsx";

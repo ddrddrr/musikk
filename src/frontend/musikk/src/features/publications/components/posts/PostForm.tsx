@@ -38,6 +38,7 @@ export function PostForm({ replyTo, setReplyTo, onSuccess, feedUserUUID }: PostF
         const { attachmentType, attachmentUUID } = getAttachmentData();
 
         createPostMutation.mutate(
+            // TODO: just use the useUserUUID?
             {
                 userUUID: feedUserUUID!,
                 content: formData.content,
@@ -61,9 +62,9 @@ export function PostForm({ replyTo, setReplyTo, onSuccess, feedUserUUID }: PostF
     };
 
     return (
-        <form onSubmit={handleSubmit(submitHandler)} className="space-y-3">
+        <form onSubmit={handleSubmit(submitHandler)} className="flex flex-col gap-3">
             <Textarea {...register("content")} />
-            {errors.content && <p className="text-xs text-red-500">{errors.content.message}</p>}
+            {errors.content && <p className="text-xs text-destructive">{errors.content.message}</p>}
 
             <AttachmentPicker attachedObj={attachedObj} onAttach={setAttachedObj} />
 

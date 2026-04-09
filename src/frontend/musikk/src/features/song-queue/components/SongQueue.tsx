@@ -1,5 +1,5 @@
 import { getErrorDetail } from "@/api/errorUtils.ts";
-import { Spinner } from "@/components/ui/spinner";
+import { Spinner } from "@/features/ui/spinner";
 import { CollectionSong } from "@/features/collections/types.ts";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { QueueItem } from "@/features/song-queue/api/types.ts";
@@ -117,7 +117,7 @@ export function SongQueue() {
 
     return (
         <div className="flex h-full w-full">
-            <div className="flex w-1/2 flex-col items-start justify-start border-r border-black p-8">
+            <div className="flex w-1/2 flex-col items-start justify-start border-r border-foreground p-8">
                 <SongDisplay song={currentSong} />
             </div>
 
@@ -125,12 +125,12 @@ export function SongQueue() {
                 <h2 className="p-8 pb-0 text-2xl font-bold">Queue</h2>
                 <ScrollArea className="min-h-0 flex-1">
                     {items.length === 0 && (
-                        <div className="flex flex-col items-center justify-center p-8 text-gray-500">
+                        <div className="flex flex-col items-center justify-center p-8 text-muted-foreground">
                             <p className="text-lg">Your queue is empty</p>
                         </div>
                     )}
                     {items.length > 0 && (
-                        <ul className="space-y-3 p-8">
+                        <ul className="flex flex-col gap-3 p-8">
                             {items.map((item) => (
                                 <li key={item.uuid}>
                                     <SongContextMenu
@@ -158,7 +158,7 @@ export function SongQueue() {
                             <h3 className="p-8 pb-0 text-2xl font-bold">
                                 Up Next
                             </h3>
-                            <ul className="space-y-3 p-8">
+                            <ul className="flex flex-col gap-3 p-8">
                                 {contextItems.map((cs) => (
                                     <li key={cs.uuid}>
                                         <SongContextMenu song={cs}>
@@ -174,13 +174,13 @@ export function SongQueue() {
                     )}
                 </ScrollArea>
 
-                <div className="border-t border-black bg-gray-200 p-4">
+                <div className="border-t border-foreground bg-muted p-4">
                     <Button
                         onClick={() => clearMutation.mutate()}
                         variant="destructive"
                         className="w-full"
                     >
-                        <Trash2 className="mr-2 h-4 w-4" />
+                        <Trash2 className="mr-2 size-4" />
                         Clear Queue
                     </Button>
                 </div>

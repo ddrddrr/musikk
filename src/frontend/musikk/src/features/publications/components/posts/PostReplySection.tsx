@@ -7,19 +7,24 @@ import { useState } from "react";
 type PostReplySectionProps = {
     publication: Publication;
     feedUserUUID: UUID;
+    onReplyCreated?: () => void;
 };
 
-export function PostReplySection({ publication, feedUserUUID }: PostReplySectionProps) {
+export function PostReplySection({
+    publication,
+    feedUserUUID,
+    onReplyCreated,
+}: PostReplySectionProps) {
     const [isReplying, setIsReplying] = useState(false);
 
     return (
         <>
-            <div className="flex items-center gap-2 text-[11px]">
+            <div className="flex items-center gap-2 text-xs">
                 <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => setIsReplying((prev) => !prev)}
-                    className="h-auto px-0 text-xs text-blue-600 hover:underline"
+                    className="h-auto px-0 text-xs text-info hover:underline"
                 >
                     {isReplying ? "Cancel" : "Reply"}
                 </Button>
@@ -27,11 +32,14 @@ export function PostReplySection({ publication, feedUserUUID }: PostReplySection
 
             {isReplying && (
                 <div className="mt-2 pl-2">
-                    <div className="rounded-sm border border-black bg-gray-50 p-3">
+                    <div className="rounded-sm border border-foreground bg-muted p-3">
                         <PostForm
                             replyTo={publication}
                             setReplyTo={() => setIsReplying(false)}
-                            onSuccess={() => setIsReplying(false)}
+                            onSuccess={() => {
+                                setIsReplying(false);
+                                onReplyCreated?.();
+                            }}
                             feedUserUUID={feedUserUUID}
                         />
                     </div>

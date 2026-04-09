@@ -66,7 +66,7 @@ export function SongMenuButton({
                                 })
                             }
                         >
-                            <Trash2 className="mr-2 h-4 w-4" />
+                            <Trash2 className="mr-2 size-4" />
                             Remove from playlist
                         </DropdownMenuItem>
                     )}
@@ -75,7 +75,7 @@ export function SongMenuButton({
                             variant="destructive"
                             onSelect={onRemoveFromQueue}
                         >
-                            <Trash2 className="mr-2 h-4 w-4" />
+                            <Trash2 className="mr-2 size-4" />
                             Remove from queue
                         </DropdownMenuItem>
                     )}
@@ -83,11 +83,11 @@ export function SongMenuButton({
                     <DropdownMenuItem
                         onSelect={() => addSongMutation.mutate(collectionSong.uuid)}
                     >
-                        <BetweenHorizonalStart className="mr-2 h-4 w-4" />
+                        <BetweenHorizonalStart className="mr-2 size-4" />
                         Add to queue
                     </DropdownMenuItem>
                     <DropdownMenuItem onSelect={onSongPlayClick}>
-                        <Play className="mr-2 h-4 w-4" />
+                        <Play className="mr-2 size-4" />
                         Play
                     </DropdownMenuItem>
                 </DropdownMenuContent>

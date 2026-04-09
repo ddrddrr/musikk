@@ -24,7 +24,7 @@ export function CollectionAddToLikedButton({
             toast.error(getErrorDetail(error, "Failed to add collection to liked"));
         },
     });
-    const sizeClass = showComments ? "h-8 w-8" : "h-12 w-12";
+    const sizeClass = showComments ? "size-8" : "size-12";
 
     const renderAddIcon = () => {
         return collection.is_liked ? <Check size={20} /> : <Plus size={20} />;

@@ -13,8 +13,10 @@ interface PublicationPayload {
     parent_uuid?: UUID;
 }
 
+// TODO: add type
 async function createPublication(url: string, payload: PublicationPayload) {
-    await api_client.post(url, payload);
+    const response = await api_client.post(url, payload);
+    return response.data;
 }
 
 interface CreatePostParams {

@@ -58,24 +58,24 @@ export function SongContextMenu({
                                 })
                             }
                         >
-                            <Trash2 className="mr-2 h-4 w-4" />
+                            <Trash2 className="mr-2 size-4" />
                             Remove from playlist
                         </ContextMenuItem>
                     )}
                     {onRemoveFromQueue && (
                         <ContextMenuItem onSelect={onRemoveFromQueue}>
-                            <Trash2 className="mr-2 h-4 w-4" />
+                            <Trash2 className="mr-2 size-4" />
                             Remove from queue
                         </ContextMenuItem>
                     )}
                     <ContextMenuItem
                         onSelect={() => addSongMutation.mutate(song.uuid)}
                     >
-                        <BetweenHorizonalStart className="mr-2 h-4 w-4" />
+                        <BetweenHorizonalStart className="mr-2 size-4" />
                         Add to queue
                     </ContextMenuItem>
                     <ContextMenuItem onSelect={onSongPlayClick}>
-                        <Play className="mr-2 h-4 w-4" />
+                        <Play className="mr-2 size-4" />
                         Play
                     </ContextMenuItem>
                 </ContextMenuContent>

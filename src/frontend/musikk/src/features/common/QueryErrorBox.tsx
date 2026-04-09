@@ -10,7 +10,7 @@ export function QueryErrorBox({
     onRetry,
 }: QueryErrorBoxProps) {
     return (
-        <div className="rounded-sm border-2 border-black bg-red-600 p-4 text-white">
+        <div className="rounded-sm border-2 border-foreground bg-destructive p-4 text-destructive-foreground">
             <div className="text-sm font-medium">{message}</div>
             {onRetry && (
                 <Button variant="brand" size="lg" onClick={onRetry}>

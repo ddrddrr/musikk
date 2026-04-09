@@ -23,10 +23,10 @@ export function PasswordField({
             control={control}
             name={name}
             render={({ field }) => (
-                <FormItem className="space-y-2">
-                    <FormLabel className="text-lg font-bold text-gray-900">{label}</FormLabel>
+                <FormItem>
+                    <FormLabel className="text-lg font-bold text-foreground">{label}</FormLabel>
                     <FormControl>
-                        <div className="flex items-center gap-2 rounded-sm border-2 border-black p-3 transition-colors">
+                        <div className="flex items-center gap-2 rounded-sm border-2 border-foreground p-3 transition-colors">
                             <Input
                                 type={showPassword ? "text" : "password"}
                                 placeholder={placeholder}
@@ -38,12 +38,12 @@ export function PasswordField({
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => setShowPassword(!showPassword)}
-                                className="h-8 w-8 shrink-0"
+                                className="size-8 shrink-0"
                             >
                                 {showPassword ? (
-                                    <EyeOff className="h-5 w-5" />
+                                    <EyeOff className="size-5" />
                                 ) : (
-                                    <Eye className="h-5 w-5" />
+                                    <Eye className="size-5" />
                                 )}
                             </Button>
                         </div>

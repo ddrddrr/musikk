@@ -29,12 +29,12 @@ export function SearchBar({
             <Popover open={open} onOpenChange={setOpen}>
                 <PopoverTrigger asChild>
                     <Button variant={"outline"}>
-                        <Search className="mr-2 h-4 w-4" />
+                        <Search className="mr-2 size-4" />
                         {placeholder}
                     </Button>
                 </PopoverTrigger>
                 <PopoverContent
-                    className="max-h-[500px] w-[350px] overflow-y-auto rounded-sm border bg-white p-0 shadow-lg"
+                    className="max-h-[500px] w-[350px] overflow-y-auto rounded-sm border bg-card p-0 shadow-lg"
                     align="center"
                 >
                     <div className="p-4">

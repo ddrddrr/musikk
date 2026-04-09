@@ -1,4 +1,4 @@
-import { Spinner } from "@/components/ui/spinner";
+import { Spinner } from "@/features/ui/spinner";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
@@ -43,7 +43,7 @@ export function SearchWindow({ onItemSelect, songMode = "card" }: SearchWindowPr
     const renderSongs = () => {
         if (!data?.songs?.length) return null;
 
-        const containerClass = songMode === "card" ? "grid grid-cols-2 gap-2" : "space-y-2";
+        const containerClass = songMode === "card" ? "grid grid-cols-2 gap-2" : "flex flex-col gap-2";
 
         return (
             <div>
@@ -55,7 +55,7 @@ export function SearchWindow({ onItemSelect, songMode = "card" }: SearchWindowPr
                                 key={song.uuid}
                                 collectionSong={song}
                                 size="compact"
-                                extraStyle={onItemSelect ? "cursor-pointer" : ""}
+                                className={onItemSelect ? "cursor-pointer" : undefined}
                             />
                         ) : (
                             <SongCard
@@ -131,7 +131,7 @@ export function SearchWindow({ onItemSelect, songMode = "card" }: SearchWindowPr
                 )}
 
                 {shouldShowResults && data && (
-                    <div className="space-y-4">
+                    <div className="flex flex-col gap-4">
                         {renderSongs()}
                         {renderCollections("Albums", data.albums)}
                         {renderCollections("Playlists", data.playlists)}
@@ -143,7 +143,7 @@ export function SearchWindow({ onItemSelect, songMode = "card" }: SearchWindowPr
                             !data.albums?.length &&
                             !data.artists?.length &&
                             !data.users?.length && (
-                                <div className="py-2 text-center text-sm text-gray-500">
+                                <div className="py-2 text-center text-sm text-muted-foreground">
                                     No results found
                                 </div>
                             )}

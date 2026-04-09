@@ -16,7 +16,7 @@ interface SongCarouselProps {
 export function SongCarousel({ songs, title }: SongCarouselProps) {
     return (
         <div className="mx-auto w-9/10">
-            <h2 className="mb-4 text-xl font-bold text-black">{title}</h2>
+            <h2 className="mb-4 text-xl font-bold text-foreground">{title}</h2>
             <div className="relative">
                 <Carousel
                     opts={{
@@ -36,7 +36,7 @@ export function SongCarousel({ songs, title }: SongCarouselProps) {
                                 </CarouselItem>
                             ))
                         ) : (
-                            <div className="w-full text-center text-gray-500">
+                            <div className="w-full text-center text-muted-foreground">
                                 No songs available
                             </div>
                         )}

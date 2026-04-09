@@ -58,7 +58,7 @@ export function SongAddToPlaylistSubmenu({ collectionSong }: SongAddToPlaylistSu
         <DropdownMenuSub>
             <DropdownMenuSubTrigger>
                 {/*diff mr from other songmenubutton stuff due to listplus rendering shenanigans*/}
-                <ListPlus className="mr-4 h-4 w-4" />
+                <ListPlus className="mr-4 size-4" />
                 Add to Playlist
             </DropdownMenuSubTrigger>
             <DropdownMenuSubContent className="max-h-64 w-64 overflow-y-auto">
@@ -70,11 +70,11 @@ export function SongAddToPlaylistSubmenu({ collectionSong }: SongAddToPlaylistSu
                             onSelect={() => handleCollectionClick(collection.uuid)}
                             disabled={isInCollection}
                         >
-                            <div className="flex h-5 w-5 items-center justify-center">
+                            <div className="flex size-5 items-center justify-center">
                                 {isInCollection ? (
-                                    <Check className="text-brand h-4 w-4" />
+                                    <Check className="text-brand size-4" />
                                 ) : (
-                                    <Plus className="h-4 w-4" />
+                                    <Plus className="size-4" />
                                 )}
                             </div>
                             <span className="flex-1 truncate">{collection.title}</span>

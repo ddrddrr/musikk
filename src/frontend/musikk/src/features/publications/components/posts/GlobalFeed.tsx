@@ -28,7 +28,7 @@ export function GlobalFeed() {
     ) {
         return (
             <TabsContent value={label}>
-                <div className="space-y-6">
+                <div className="flex flex-col gap-6">
                     {error && (
                         <QueryErrorBox
                             message="Failed to load posts"
@@ -37,10 +37,10 @@ export function GlobalFeed() {
                     )}
                     {!error &&
                         posts?.map((post) => (
-                            <PostTree key={post.uuid} publication={post} />
+                            <PostTree key={post.uuid} publication={post} feedUserUUID={userUUID} />
                         ))}
                     {!error && !posts?.length && (
-                        <Card className={"border border-black"}>
+                        <Card className={"border border-foreground"}>
                             <CardContent className="py-6 text-center text-muted-foreground">
                                 No posts yet.
                             </CardContent>

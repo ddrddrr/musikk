@@ -9,10 +9,10 @@ export function EmailField() {
             control={control}
             name="email"
             render={({ field }) => (
-                <FormItem className="space-y-2">
-                    <FormLabel className="text-lg font-bold text-gray-900">Email</FormLabel>
+                <FormItem>
+                    <FormLabel className="text-lg font-bold text-foreground">Email</FormLabel>
                     <FormControl>
-                        <div className="rounded-sm border-2 border-black p-3 transition-colors">
+                        <div className="rounded-sm border-2 border-foreground p-3 transition-colors">
                             <Input
                                 placeholder="Enter Email"
                                 {...field}

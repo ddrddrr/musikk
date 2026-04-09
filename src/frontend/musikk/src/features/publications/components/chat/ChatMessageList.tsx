@@ -11,7 +11,7 @@ function DateSeparator({ date }: { date: string }) {
     return (
         <div className="flex items-center gap-3 py-3">
             <div className="h-[2px] flex-1 bg-black" />
-            <span className="shrink-0 text-xs font-bold text-gray-600">
+            <span className="shrink-0 text-xs font-bold text-muted-foreground">
                 {formatDate(date)}
             </span>
             <div className="h-[2px] flex-1 bg-black" />
@@ -22,8 +22,8 @@ function DateSeparator({ date }: { date: string }) {
 export function ChatMessageList({ messages }: ChatMessageListProps) {
     if (messages.length === 0) {
         return (
-            <div className="rounded-sm border-2 border-black bg-gray-50 p-6 text-center">
-                <p className="text-sm text-gray-600">No messages yet :(</p>
+            <div className="rounded-sm border-2 border-foreground bg-muted p-6 text-center">
+                <p className="text-sm text-muted-foreground">No messages yet :(</p>
             </div>
         );
     }

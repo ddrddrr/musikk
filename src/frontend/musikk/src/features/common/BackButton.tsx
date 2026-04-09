@@ -8,7 +8,7 @@ export function BackButton({ to = "/", label = "Back" }: { to?: string; label?: 
         <Button
             variant="ghost"
             onClick={() => void navigate(to)}
-            className="mb-6 flex items-center text-white hover:underline"
+            className="mb-6 flex items-center text-brand-foreground hover:underline"
         >
             <ChevronLeft className="mr-1" /> {label}
         </Button>

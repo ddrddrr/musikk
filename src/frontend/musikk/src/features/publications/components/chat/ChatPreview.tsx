@@ -23,8 +23,8 @@ export function ChatPreview({ chat }: ChatPreviewProps) {
         <button
             onClick={() => void navigate(`/users/${userUUID}/chats/${chat.uuid}`)}
             className={cn(
-                "w-full rounded-sm border-2 border-black p-3 text-left transition-colors",
-                chat.is_read ? "bg-white hover:bg-gray-50" : "bg-white font-bold hover:bg-gray-50",
+                "w-full rounded-sm border-2 border-foreground p-3 text-left transition-colors",
+                chat.is_read ? "bg-card hover:bg-muted" : "bg-card font-bold hover:bg-muted",
             )}
         >
             <div className="flex items-start gap-3">
@@ -33,13 +33,13 @@ export function ChatPreview({ chat }: ChatPreviewProps) {
                     <div className="flex items-baseline justify-between gap-2">
                         <h3 className="truncate text-sm font-bold">{chat.title}</h3>
                         {lastMessageTime && (
-                            <span className="shrink-0 text-xs text-gray-500">
+                            <span className="shrink-0 text-xs text-muted-foreground">
                                 {lastMessageTime}
                             </span>
                         )}
                     </div>
                     {chat.last_message && (
-                        <p className="mt-1 truncate text-sm text-gray-600">
+                        <p className="mt-1 truncate text-sm text-muted-foreground">
                             {chat.last_message.is_deleted ? (
                                 <span className="italic">Message deleted</span>
                             ) : (

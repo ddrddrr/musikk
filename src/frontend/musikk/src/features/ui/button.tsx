@@ -12,19 +12,19 @@ const buttonVariants = cva(
         variants: {
             variant: {
                 default: "bg-primary text-primary-foreground",
-                brand: "bg-red-600 hover:bg-red-700 text-white border-2 border-black",
-                muted: "bg-gray-200 hover:bg-gray-300 text-black border-2 border-black",
-                accent: "bg-blue-500 hover:bg-blue-600 text-white border-2 border-black",
+                brand: "bg-brand hover:bg-brand-hover text-brand-foreground border-2 border-foreground",
+                muted: "bg-muted hover:bg-muted/80 text-foreground border-2 border-foreground",
+                accent: "bg-info hover:bg-info-hover text-info-foreground border-2 border-foreground",
                 ghost: "bg-transparent text-primary hover:bg-accent/60",
-                destructive: "bg-destructive text-white",
+                destructive: "bg-destructive text-destructive-foreground",
                 outline:
-                    "bg-background text-black hover:bg-gray-100 hover:border-gray-300 border-2",
+                    "bg-background text-foreground hover:bg-muted hover:border-border border-2",
             },
             size: {
                 default: "h-9 px-4",
                 sm: "h-8 px-3 text-sm",
                 lg: "h-10 px-6 text-base",
-                icon: "h-9 w-9 p-0",
+                icon: "size-9 p-0",
                 fit: "h-auto px-2 py-1",
             },
         },

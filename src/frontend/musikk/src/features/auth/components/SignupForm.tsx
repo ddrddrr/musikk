@@ -7,7 +7,7 @@ import { getErrorDetail } from "@/api/errorUtils.ts";
 import { register } from "@/features/auth/api.ts";
 import { EmailField } from "@/features/auth/components/EmailField.tsx";
 import { PasswordField } from "@/features/auth/components/PasswordField.tsx";
-import { Spinner } from "@/components/ui/spinner";
+import { Spinner } from "@/features/ui/spinner";
 import { Button } from "@/features/ui/button.tsx";
 import { CardContent } from "@/features/ui/card.tsx";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/features/ui/form.tsx";
@@ -68,7 +68,7 @@ export function SignUpForm() {
                         control={form.control}
                         name="userRole"
                         render={({ field }) => (
-                            <FormItem className="flex items-center space-x-2">
+                            <FormItem className="flex items-center gap-2">
                                 <FormControl>
                                     <Switch
                                         checked={field.value === "Artist"}
@@ -95,9 +95,9 @@ export function SignUpForm() {
                             className={[
                                 "rounded-sm border-2 p-4 font-medium",
                                 isError
-                                    ? "border-red-900 bg-red-700 text-white"
+                                    ? "border-destructive bg-destructive text-destructive-foreground"
                                     : isSuccess
-                                      ? "border-green-900 bg-green-700 text-white"
+                                      ? "border-success bg-success text-success-foreground"
                                       : "",
                             ].join(" ")}
                         >

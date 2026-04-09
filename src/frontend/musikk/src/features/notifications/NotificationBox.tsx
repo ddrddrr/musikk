@@ -1,4 +1,4 @@
-import { Spinner } from "@/components/ui/spinner";
+import { Spinner } from "@/features/ui/spinner";
 import { setNotificationRead } from "@/features/notifications/mutations.ts";
 import { NotificationOverlay } from "@/features/notifications/NotificationOverlay.tsx";
 import { useNotificationsQuery } from "@/features/notifications/queries.ts";
@@ -40,17 +40,17 @@ export const NotificationBox = memo(function NotificationBox() {
             </div>
         );
     if (error)
-        return <div className="p-4 text-center text-sm text-red-500">Error: {error.message}</div>;
+        return <div className="p-4 text-center text-sm text-destructive">Error: {error.message}</div>;
 
     return (
         <Popover onOpenChange={handleOpenChange}>
             <PopoverTrigger asChild>
                 <div className="relative">
-                    <Button variant="ghost" size="icon" className="text-white">
-                        <Sparkle className="h-5 w-5" />
+                    <Button variant="ghost" size="icon" className="text-brand-foreground">
+                        <Sparkle className="size-5" />
                     </Button>
                     {unreadUUIDs.length > 0 && (
-                        <span className="absolute -top-1 -right-1 rounded-full bg-amber-200 px-1.5 py-0.5 text-xs font-bold text-black">
+                        <span className="absolute -top-1 -right-1 rounded-full bg-amber-200 px-1.5 py-0.5 text-xs font-bold text-foreground">
                             {unreadUUIDs.length}
                         </span>
                     )}

@@ -52,10 +52,10 @@ export function CommentForm({
     };
 
     return (
-        <form onSubmit={handleSubmit(submitHandler)} className="space-y-2">
+        <form onSubmit={handleSubmit(submitHandler)} className="flex flex-col gap-2">
             {replyTo && (
-                <div className="mb-2 flex justify-between rounded-sm border border-black bg-amber-100 p-2 text-xs text-gray-600">
-                    <div className="max-w-xs truncate">
+                <div className="mb-2 flex justify-between rounded-sm border border-foreground bg-amber-100 p-2 text-xs text-muted-foreground">
+                    <div className="min-w-0 max-w-xs truncate">
                         <div className="truncate font-medium">
                             {replyTo.author.display_name || "Anonymous"}
                         </div>
@@ -74,10 +74,10 @@ export function CommentForm({
             )}
             <textarea
                 {...register("content")}
-                className="w-full rounded-sm border border-black bg-white p-2 text-sm"
+                className="w-full rounded-sm border border-foreground bg-card p-2 text-sm"
                 placeholder="Write a comment..."
             />
-            {errors.content && <p className="text-xs text-red-500">{errors.content.message}</p>}
+            {errors.content && <p className="text-xs text-destructive">{errors.content.message}</p>}
             <Button type="submit" variant="brand" className="rounded-sm px-4 py-2">
                 Post Comment
             </Button>

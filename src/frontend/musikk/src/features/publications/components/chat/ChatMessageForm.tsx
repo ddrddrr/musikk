@@ -62,14 +62,14 @@ export function ChatMessageForm({ chat }: ChatMessageFormProps) {
     };
 
     return (
-        <form onSubmit={handleSubmit(submitHandler)} className="space-y-2">
+        <form onSubmit={handleSubmit(submitHandler)} className="flex flex-col gap-2">
             <Textarea
                 {...register("content")}
                 placeholder="Type a message..."
                 rows={2}
-                className={"border border-black bg-white"}
+                className={"border border-foreground bg-card"}
             />
-            {errors.content && <p className="text-xs text-red-500">{errors.content.message}</p>}
+            {errors.content && <p className="text-xs text-destructive">{errors.content.message}</p>}
 
             <div className="flex items-start gap-2">
                 <Button

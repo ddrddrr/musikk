@@ -71,11 +71,11 @@ export function PlayerBar({
     const displayTime = seeking ? seekTime : time;
 
     return (
-        <div className="border-t border-black bg-white px-4 py-2">
+        <div className="border-t border-foreground bg-card px-4 py-2">
             <div className="flex w-full items-center justify-between gap-4">
                 {playingSong && (
                     <div className="flex min-w-0 items-center gap-3">
-                        <div className="h-14 w-14 flex-shrink-0 border-2 border-black">
+                        <div className="size-14 shrink-0 border-2 border-foreground">
                             {playingSong.image ? (
                                 <img
                                     src={playingSong.image}
@@ -83,14 +83,14 @@ export function PlayerBar({
                                     className="h-full w-full object-cover"
                                 />
                             ) : (
-                                <div className="flex h-full w-full items-center justify-center bg-gray-200">
-                                    <span className="text-2xl text-gray-400">♪</span>
+                                <div className="flex h-full w-full items-center justify-center bg-muted">
+                                    <span className="text-2xl text-muted-foreground">♪</span>
                                 </div>
                             )}
                         </div>
                         <div className="flex min-w-0 flex-col">
                             <p className="truncate text-sm font-bold">{playingSong.title}</p>
-                            <AuthorLinks authors={playingCollectionSong.song.authors} className="text-xs text-gray-600" />
+                            <AuthorLinks authors={playingCollectionSong.song.authors} className="text-xs text-muted-foreground" />
                         </div>
                     </div>
                 )}

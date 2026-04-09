@@ -88,9 +88,9 @@ export function AlbumSongUploadSection({ albumUUID, onComplete }: AlbumSongUploa
         .every((s) => s.operationID && uploadState[s.operationID]?.status === "ready");
 
     return (
-        <div className="space-y-4">
+        <div className="flex flex-col gap-4">
             <Form {...form}>
-                <div className="space-y-4">
+                <div className="flex flex-col gap-4">
                     {fields.map((field, i) => (
                         <SongUploadCard
                             key={field.id}

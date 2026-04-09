@@ -13,7 +13,7 @@ export const cardTitleVariants = cva("truncate font-bold", {
     defaultVariants: { size: "medium" },
 });
 
-export const cardSubtitleVariants = cva("truncate text-gray-600", {
+export const cardSubtitleVariants = cva("truncate text-muted-foreground", {
     variants: {
         size: {
             small: "text-xs",
@@ -24,7 +24,7 @@ export const cardSubtitleVariants = cva("truncate text-gray-600", {
     defaultVariants: { size: "medium" },
 });
 
-export const cardPaddingVariants = cva("border-t-2 border-black bg-gray-200", {
+export const cardPaddingVariants = cva("border-t-2 border-foreground bg-muted", {
     variants: {
         size: {
             small: "p-1",

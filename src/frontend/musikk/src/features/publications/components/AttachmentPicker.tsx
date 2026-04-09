@@ -8,7 +8,7 @@ interface AttachmentPickerProps {
 
 export function AttachmentPicker({ attachedObj, onAttach }: AttachmentPickerProps) {
     return (
-        <div className="space-y-2">
+        <div className="flex flex-col gap-2">
             <SearchBar onItemSelect={onAttach} placeholder="Attach" songMode="card" />
 
             {attachedObj && (

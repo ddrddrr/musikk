@@ -1,6 +1,6 @@
 import { EmailField } from "@/features/auth/components/EmailField.tsx";
 import { PasswordField } from "@/features/auth/components/PasswordField.tsx";
-import { Spinner } from "@/components/ui/spinner";
+import { Spinner } from "@/features/ui/spinner";
 import { Button } from "@/features/ui/button.tsx";
 import { CardContent } from "@/features/ui/card.tsx";
 import { Form } from "@/features/ui/form.tsx";
@@ -61,20 +61,20 @@ export function LoginForm() {
                     </Button>
 
                     {message && (
-                        <div className="rounded-sm border-2 border-red-900 bg-red-700 p-4 text-white">
+                        <div className="rounded-sm border-2 border-destructive bg-destructive p-4 text-destructive-foreground">
                             <p className="font-medium">{message}</p>
                         </div>
                     )}
 
                     <div className="text-center">
-                        <p className="text-gray-700">
+                        <p className="text-foreground">
                             Don&#39;t have an account?
                             <Button
                                 type="button"
                                 onClick={() => void navigate("/signup")}
                                 variant="link"
                                 size="sm"
-                                className="ml-1 text-red-600 hover:text-red-700"
+                                className="ml-1 text-brand hover:text-brand-hover"
                             >
                                 Sign up
                             </Button>

@@ -1,4 +1,4 @@
-import { Spinner } from "@/components/ui/spinner";
+import { Spinner } from "@/features/ui/spinner";
 import { Button } from "@/features/ui/button.tsx";
 
 type LoadOlderButtonProps = {

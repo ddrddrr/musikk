@@ -16,7 +16,7 @@ export function SocialDropdown() {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="text-white">
+                <Button variant="ghost" size="icon" className="text-brand-foreground">
                     <MessageSquareText />
                 </Button>
             </DropdownMenuTrigger>

@@ -1,6 +1,7 @@
 import { verifyEmail } from "@/features/auth/api.ts";
 import { Button } from "@/features/ui/button.tsx";
 import { Card, CardContent, CardHeader, CardTitle } from "@/features/ui/card.tsx";
+import { cn } from "@/lib/utils.ts";
 import { AlertCircle, CheckCircle2, Loader2, XCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -42,13 +43,13 @@ export function EmailVerificationPage() {
     const getIcon = () => {
         switch (status) {
             case "loading":
-                return <Loader2 className="h-16 w-16 animate-spin text-red-600" />;
+                return <Loader2 className="size-16 animate-spin text-red-600" />;
             case "success":
-                return <CheckCircle2 className="h-16 w-16 text-green-600" />;
+                return <CheckCircle2 className="size-16 text-green-600" />;
             case "error":
-                return <XCircle className="h-16 w-16 text-red-600" />;
+                return <XCircle className="size-16 text-red-600" />;
             case "invalid":
-                return <AlertCircle className="h-16 w-16 text-red-600" />;
+                return <AlertCircle className="size-16 text-red-600" />;
         }
     };
 
@@ -61,17 +62,17 @@ export function EmailVerificationPage() {
     };
 
     return (
-        <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
-            <Card className="w-full max-w-md border-2 border-black shadow-lg">
-                <CardHeader className="border-b-2 border-black">
-                    <CardTitle className="text-center text-2xl font-bold text-gray-900">
+        <div className="flex min-h-screen items-center justify-center bg-background p-4">
+            <Card className="w-full max-w-md border-2 border-foreground shadow-lg">
+                <CardHeader className="border-b-2 border-foreground">
+                    <CardTitle className="text-center text-2xl font-bold text-foreground">
                         Email Verification
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-8 pb-6">
                     <div className="flex flex-col items-center gap-6 text-center">
                         {getIcon()}
-                        <p className={`text-lg  ${getStatusColor()}`}>{message}</p>
+                        <p className={cn("text-lg", getStatusColor())}>{message}</p>
                         {status === "success" && (
                             <Button
                                 variant="brand"

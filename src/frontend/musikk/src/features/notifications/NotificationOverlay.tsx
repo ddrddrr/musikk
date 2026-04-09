@@ -2,6 +2,7 @@ import { useAuth } from "@/hooks/useAuth.ts";
 import { NotificationListParams } from "@/features/notifications/queries.ts";
 import { IChatMessageNotification, IFollowerNotification, IReplyNotification } from "@/features/notifications/types.ts";
 import { Button } from "@/features/ui/button.tsx";
+import { cn } from "@/lib/utils.ts";
 import { formatDateTime } from "@/utils/formatDate.ts";
 import { memo } from "react";
 import { useNavigate } from "react-router-dom";
@@ -43,7 +44,7 @@ export const NotificationOverlay = memo(function NotificationOverlay({
     ].sort((a, b) => new Date(b.date_added).getTime() - new Date(a.date_added).getTime());
     if (allNotifications.length === 0) {
         return (
-            <div className="p-6 text-center text-sm text-gray-500">No notifications</div>
+            <div className="p-6 text-center text-sm text-muted-foreground">No notifications</div>
         );
     }
 
@@ -52,7 +53,7 @@ export const NotificationOverlay = memo(function NotificationOverlay({
             {allNotifications.map((notification) => (
                 <div
                     key={notification.uuid}
-                    className={`mb-2 rounded-sm border border-black p-3 ${notification.is_read ? "bg-gray-50" : "bg-yellow-100"}`}
+                    className={cn("mb-2 rounded-sm border border-foreground p-3", notification.is_read ? "bg-muted" : "bg-highlight")}
                 >
                     {notification._type === "reply" && (
                         <>
@@ -60,14 +61,14 @@ export const NotificationOverlay = memo(function NotificationOverlay({
                                 Reply:{" "}
                                 {notification.reply_publication.author.display_name ?? "Anonymous"}
                             </div>
-                            <div className="mt-1 break-words text-xs text-gray-600">
+                            <div className="mt-1 break-words text-xs text-muted-foreground">
                                 {notification.orig_publication.content}
                             </div>
-                            <div className="mt-2 break-words text-sm text-gray-800">
+                            <div className="mt-2 break-words text-sm text-foreground">
                                 {notification.reply_publication.content}
                             </div>
                             <div className="mt-2 flex justify-between">
-                                <span className="text-xs text-gray-600">
+                                <span className="text-xs text-muted-foreground">
                                     {formatDateTime(notification.date_added)}
                                 </span>
                                 <Button
@@ -85,11 +86,11 @@ export const NotificationOverlay = memo(function NotificationOverlay({
                             <div className="text-sm font-semibold">
                                 New Follower: {notification.sender.display_name ?? "Anonymous"}
                             </div>
-                            <div className="mt-2 text-sm text-gray-800">
+                            <div className="mt-2 text-sm text-foreground">
                                 @{notification.sender.display_name} started following you
                             </div>
                             <div className="mt-2 flex justify-between">
-                                <span className="text-xs text-gray-600">
+                                <span className="text-xs text-muted-foreground">
                                     {formatDateTime(notification.date_added)}
                                 </span>
                                 <Button
@@ -107,11 +108,11 @@ export const NotificationOverlay = memo(function NotificationOverlay({
                             <div className="text-sm font-semibold">
                                 New message: {notification.message.author.display_name ?? "Anonymous"}
                             </div>
-                            <div className="mt-1 break-words text-sm text-gray-800">
+                            <div className="mt-1 break-words text-sm text-foreground">
                                 {notification.message.content}
                             </div>
                             <div className="mt-2 flex justify-between">
-                                <span className="text-xs text-gray-600">
+                                <span className="text-xs text-muted-foreground">
                                     {formatDateTime(notification.date_added)}
                                 </span>
                                 <Button

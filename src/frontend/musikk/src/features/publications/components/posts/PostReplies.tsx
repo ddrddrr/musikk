@@ -1,21 +1,20 @@
-import { Spinner } from "@/components/ui/spinner";
+import { Spinner } from "@/features/ui/spinner";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { usePublicationChildren } from "@/features/publications/api/queries.ts";
 import { Publication } from "@/features/publications/types.ts";
 import { Button } from "@/features/ui/button.tsx";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/features/ui/collapsible.tsx";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { ReactNode, useState } from "react";
+import { ReactNode } from "react";
 
 type PostRepliesProps = {
     publication: Publication;
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
     renderChild: (child: Publication) => ReactNode;
 };
 
-export function PostReplies({ publication, renderChild }: PostRepliesProps) {
-    // TODO: add proper ws invalidate event
-    const [areChildrenOpen, setAreChildrenOpen] = useState(false);
-
+export function PostReplies({ publication, open, onOpenChange, renderChild }: PostRepliesProps) {
     const {
         data: replies,
         isPending,
@@ -25,13 +24,13 @@ export function PostReplies({ publication, renderChild }: PostRepliesProps) {
 
     if (!publication.has_children || !replies) return null;
     return (
-        <Collapsible open={areChildrenOpen} onOpenChange={() => setAreChildrenOpen((o) => !o)}>
+        <Collapsible open={open} onOpenChange={() => onOpenChange(!open)}>
             <CollapsibleTrigger asChild>
                 <Button variant="ghost" size="sm" className="text-xs">
                     <span className="flex items-center gap-1">
-                        {isPending && areChildrenOpen ? (
+                        {isPending && open ? (
                             <Spinner className="size-3" />
-                        ) : areChildrenOpen ? (
+                        ) : open ? (
                             <ChevronUp size={12} />
                         ) : (
                             <ChevronDown size={12} />
@@ -44,9 +43,8 @@ export function PostReplies({ publication, renderChild }: PostRepliesProps) {
                     </span>
                 </Button>
             </CollapsibleTrigger>
-            {areChildrenOpen && (
+            {open && (
                 <CollapsibleContent>
-                    {/*TODO: move to a sep component?*/}
                     <div className="relative pl-2">
                         {error && (
                             <QueryErrorBox

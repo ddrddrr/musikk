@@ -1,4 +1,5 @@
 import { Avatar, AvatarImage } from "@/features/ui/avatar.tsx";
+import { cn } from "@/lib/utils.ts";
 import { Smile } from "lucide-react";
 
 type UserAvatarProps = {
@@ -9,9 +10,9 @@ type UserAvatarProps = {
 
 export function UserAvatar({ src, alt, size = "md" }: UserAvatarProps) {
     const sizeClass = {
-        sm: "w-8 h-8",
-        md: "w-16 h-16",
-        lg: "w-24 h-24",
+        sm: "size-8",
+        md: "size-16",
+        lg: "size-24",
     }[size];
 
     if (src) {
@@ -23,7 +24,7 @@ export function UserAvatar({ src, alt, size = "md" }: UserAvatarProps) {
     }
 
     return (
-        <div className={`flex items-center justify-center ${sizeClass} rounded-full bg-muted`}>
+        <div className={cn("flex items-center justify-center rounded-full bg-muted", sizeClass)}>
             <Smile className="h-2/3 w-2/3 text-muted-foreground" />
         </div>
     );

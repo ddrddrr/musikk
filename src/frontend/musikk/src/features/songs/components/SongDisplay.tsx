@@ -9,8 +9,8 @@ type SongDisplayProps = {
 export function SongDisplay({ song }: SongDisplayProps) {
     if (!song) {
         return (
-            <div className="mb-4 rounded-sm border border-gray-300 bg-gray-100 p-4 text-center">
-                <p className="text-gray-500">No song playing</p>
+            <div className="mb-4 rounded-sm border border-border bg-muted p-4 text-center">
+                <p className="text-muted-foreground">No song playing</p>
             </div>
         );
     }

@@ -28,12 +28,12 @@ export function CollectionContextMenu({ children, collection }: SongContextMenuP
                     <ContextMenuItem
                         onSelect={() => addCollectionMutation.mutate(collection.uuid)}
                     >
-                        <BetweenHorizonalStart className="mr-2 h-4 w-4" />
+                        <BetweenHorizonalStart className="mr-2 size-4" />
                         Add to queue
                     </ContextMenuItem>
 
                     <ContextMenuItem onSelect={onCollectionPlayClick}>
-                        <Play className="mr-2 h-4 w-4" />
+                        <Play className="mr-2 size-4" />
                         Play
                     </ContextMenuItem>
                 </ContextMenuContent>

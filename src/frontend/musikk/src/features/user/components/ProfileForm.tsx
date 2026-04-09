@@ -15,6 +15,7 @@ import { Textarea } from "@/features/ui/textarea.tsx";
 import { useMeUpdateMutation } from "@/features/user/api/mutations.ts";
 import { ProfileFormSchema, ProfileFormValues } from "@/features/user/types.ts";
 import { useAuth } from "@/hooks/useAuth.ts";
+import { cn } from "@/lib/utils.ts";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -41,16 +42,16 @@ export function ProfileForm() {
     // TODO: rewrite so that this is consistent across forms...
     const borderClass =
         submitStatus === "success"
-            ? "border-green-500"
+            ? "border-success"
             : submitStatus === "error"
-              ? "border-red-500"
+              ? "border-destructive"
               : "border-border";
 
     const messageClass =
         submitStatus === "success"
-            ? "text-black"
+            ? "text-foreground"
             : submitStatus === "error"
-              ? "text-red-700"
+              ? "text-destructive"
               : "text-muted-foreground";
 
     const onSubmit = (values: ProfileFormValues) => {
@@ -76,11 +77,11 @@ export function ProfileForm() {
 
     return (
         <div className="p-4">
-            <div className={`mx-auto max-w-xl rounded-sm border-2 ${borderClass} bg-white p-6`}>
-                {message && <div className={`mb-4 text-sm ${messageClass}`}>{message}</div>}
+            <div className={cn("mx-auto max-w-xl rounded-sm border-2 bg-card p-6", borderClass)}>
+                {message && <div className={cn("mb-4 text-sm", messageClass)}>{message}</div>}
 
-                <div className="mb-6 flex items-center space-x-4">
-                    <Avatar className="h-12 w-12 rounded-sm">
+                <div className="mb-6 flex items-center gap-4">
+                    <Avatar className="size-12 rounded-sm">
                         <AvatarImage
                             src={user.avatar}
                             alt={user.display_name}
@@ -91,7 +92,7 @@ export function ProfileForm() {
                 </div>
 
                 <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-5">
                         <FormField
                             control={form.control}
                             name="display_name"

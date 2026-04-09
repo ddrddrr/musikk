@@ -19,7 +19,7 @@ export function ChatHeader({ chat }: ChatHeaderProps) {
     const { chatImg, chatImgAlt } = useChatImage(chat);
 
     return (
-        <div className="flex gap-x-4 border-b-2 border-black bg-gray-100 p-4">
+        <div className="flex gap-x-4 border-b-2 border-foreground bg-muted p-4">
             <Popover>
                 <PopoverTrigger asChild>
                     <div className="flex cursor-pointer items-center gap-3">
@@ -52,7 +52,7 @@ export function ChatHeader({ chat }: ChatHeaderProps) {
                                         </span>
                                         {/*TODO: mb render differently*/}
                                         {otherMember.is_artist && (
-                                            <span className="rounded-sm bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700">
+                                            <span className="rounded-sm bg-brand/20 px-2 py-0.5 text-xs font-medium text-brand">
                                                 Artist
                                             </span>
                                         )}
@@ -70,7 +70,7 @@ export function ChatHeader({ chat }: ChatHeaderProps) {
                             <TabsContent value="members">
                                 {/*TODO: should scroll area be used more in general? eg in search/songs for collection etc
                                 should this border variant be moved there?*/}
-                                <div className={"rounded-sm border border-black"}>
+                                <div className={"rounded-sm border border-foreground"}>
                                     <ScrollArea className="max-h-48">
                                         <div className="flex flex-col gap-2 py-2">
                                             {chat.members.map((member) => (

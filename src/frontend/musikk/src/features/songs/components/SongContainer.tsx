@@ -13,13 +13,13 @@ type SongContainerProps = {
     collectionSong: CollectionSong;
     size?: SongContainerSize;
     variant?: SongContainerVariant;
-    extraStyle?: string;
+    className?: string;
     showImage?: boolean;
     actions?: ReactNode;
 };
 
 const containerVariants = cva(
-    "w-full overflow-hidden rounded-sm border-2 border-black bg-white transition-colors hover:bg-gray-100",
+    "w-full overflow-hidden rounded-sm border-2 border-foreground bg-card transition-colors hover:bg-muted",
     {
         variants: {
             size: {
@@ -38,14 +38,14 @@ const containerVariants = cva(
 const imageVariants = cva("", {
     variants: {
         size: {
-            compact: "w-8 h-8",
-            normal: "w-10 h-10",
+            compact: "size-8",
+            normal: "size-10",
         },
     },
     defaultVariants: { size: "normal" },
 });
 
-const titleVariants = cva("truncate font-bold text-black", {
+const titleVariants = cva("truncate font-bold text-foreground", {
     variants: {
         size: {
             compact: "text-xs",
@@ -55,7 +55,7 @@ const titleVariants = cva("truncate font-bold text-black", {
     defaultVariants: { size: "normal" },
 });
 
-const authorsVariants = cva("truncate text-gray-600", {
+const authorsVariants = cva("truncate text-muted-foreground", {
     variants: {
         size: {
             compact: "text-[10px]",
@@ -79,7 +79,7 @@ export const SongContainer = memo(function SongContainer({
     collectionSong,
     size = "normal",
     variant = "inline",
-    extraStyle,
+    className,
     showImage = true,
     actions,
 }: SongContainerProps) {
@@ -105,7 +105,7 @@ export const SongContainer = memo(function SongContainer({
 
     if (variant === "stacked") {
         return (
-            <div className={containerVariants({ size, variant, className: extraStyle })}>
+            <div className={cn(containerVariants({ size, variant }), className)}>
                 {mediaAndTitle}
                 <div className="flex">
                     <div className={cn("shrink-0", imageVariants({ size }))} />
@@ -116,7 +116,7 @@ export const SongContainer = memo(function SongContainer({
     }
 
     return (
-        <div className={containerVariants({ size, variant, className: extraStyle })}>
+        <div className={cn(containerVariants({ size, variant }), className)}>
             {mediaAndTitle}
             <div className="shrink-0">{renderedActions}</div>
         </div>

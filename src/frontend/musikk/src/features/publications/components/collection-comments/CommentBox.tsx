@@ -1,5 +1,5 @@
 import { UUID } from "@/api/types.ts";
-import { Spinner } from "@/components/ui/spinner";
+import { Spinner } from "@/features/ui/spinner";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { CommentForm } from "@/features/publications/components/collection-comments/CommentForm.tsx";
 import { CommentList } from "@/features/publications/components/collection-comments/CommentList.tsx";
@@ -51,7 +51,7 @@ export const CommentBox = memo(function CommentBox({ collectionUUID }: CommentBo
     }
 
     return (
-        <div className="flex h-full max-h-[600px] flex-col overflow-hidden rounded-sm border-2 border-black bg-white">
+        <div className="flex h-full max-h-[600px] flex-col overflow-hidden rounded-sm border-2 border-foreground bg-card">
             <div className="relative min-h-0 flex-1">
                 <div className="h-full overflow-y-auto p-4" ref={commentsContainerRef}>
                     <div className="mb-4 flex justify-center">
@@ -67,7 +67,7 @@ export const CommentBox = memo(function CommentBox({ collectionUUID }: CommentBo
                 <NewMessagesIndicator visible={hasNewMessages} onClick={scrollToBottom} />
             </div>
 
-            <div className="border-t-2 border-black bg-gray-100 p-4">
+            <div className="border-t-2 border-foreground bg-muted p-4">
                 <CommentForm
                     collectionUUID={collectionUUID}
                     replyTo={replyTo}

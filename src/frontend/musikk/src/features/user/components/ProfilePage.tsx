@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Spinner } from "@/components/ui/spinner";
+import { Spinner } from "@/features/ui/spinner";
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
 import { UserCollectionsGrid } from "@/features/collections/components/UserCollectionsGrid.tsx";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
@@ -28,6 +28,7 @@ export function ProfilePage() {
     const [tab, setTab] = useState("posts");
     const { isFollowing, toggleFollow, isLoading: isFollowLoading } = useFollowUser(uuid);
 
+    // TODO: dont fetch if current?
     const {
         isLoading,
         isError,
@@ -59,7 +60,7 @@ export function ProfilePage() {
 
     return (
         <div className="flex flex-col items-center pt-8">
-            <div className="flex items-start space-x-6">
+            <div className="flex items-start gap-6">
                 <UserAvatar src={user.avatar} alt={user.display_name} size="lg" />
                 <div>
                     <h1 className="text-2xl font-semibold">{user.display_name}</h1>

@@ -1,5 +1,5 @@
 import { UUID } from "@/api/types.ts";
-import { Spinner } from "@/components/ui/spinner";
+import { Spinner } from "@/features/ui/spinner";
 import { collectionKeys } from "@/features/collections/api/queryKeys.ts";
 import { fetchCollections } from "@/features/collections/api/queries.ts";
 import { CollectionCard } from "@/features/collections/components/CollectionCard.tsx";
@@ -35,7 +35,7 @@ export function UserCollectionsGrid({ userUUID, type }: UserCollectionsGridProps
 
     if (collections.length === 0) {
         return (
-            <Card className="border border-black">
+            <Card className="border border-foreground">
                 <CardContent className="py-6 text-center text-muted-foreground">
                     No {type}s yet.
                 </CardContent>

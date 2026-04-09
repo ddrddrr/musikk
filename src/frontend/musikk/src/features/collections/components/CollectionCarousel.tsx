@@ -18,7 +18,7 @@ export function CollectionCarousel({ collections, title }: CollectionsCarouselPr
 
     return (
         <div className="mx-auto w-9/10">
-            <h2 className="mb-4 text-xl font-bold text-black">{title}</h2>
+            <h2 className="mb-4 text-xl font-bold text-foreground">{title}</h2>
 
             <Carousel
                 opts={{
@@ -37,7 +37,7 @@ export function CollectionCarousel({ collections, title }: CollectionsCarouselPr
                             ))
                         ) : (
                             <CarouselItem className="basis-full pl-0">
-                                <div className="w-full text-center text-gray-500">
+                                <div className="w-full text-center text-muted-foreground">
                                     No collections available
                                 </div>
                             </CarouselItem>

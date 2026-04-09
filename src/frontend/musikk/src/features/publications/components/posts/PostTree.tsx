@@ -1,3 +1,4 @@
+import { UUID } from "@/api/types.ts";
 import { PostAttachment } from "@/features/publications/components/posts/PostAttachment.tsx";
 import { PostHeader } from "@/features/publications/components/posts/PostHeader.tsx";
 import { PostReplies } from "@/features/publications/components/posts/PostReplies.tsx";
@@ -5,13 +6,17 @@ import { PostReplySection } from "@/features/publications/components/posts/PostR
 import { Publication } from "@/features/publications/types.ts";
 import { Card, CardContent } from "@/features/ui/card.tsx";
 import { cn } from "@/lib/utils.ts";
+import { useState } from "react";
 
 interface PostTreeProps {
     publication: Publication;
+    feedUserUUID: UUID;
     depth?: number;
 }
 
-export function PostTree({ publication, depth = 0 }: PostTreeProps) {
+export function PostTree({ publication, feedUserUUID, depth = 0 }: PostTreeProps) {
+    const [repliesOpen, setRepliesOpen] = useState(false);
+
     const getBgColor = () => {
         if (!publication.parent_uuid) return "bg-white";
 
@@ -32,11 +37,20 @@ export function PostTree({ publication, depth = 0 }: PostTreeProps) {
 
                     <PostReplySection
                         publication={publication}
-                        feedUserUUID={publication.author.uuid}
+                        feedUserUUID={feedUserUUID}
+                        onReplyCreated={() => setRepliesOpen(true)}
                     />
                     <PostReplies
                         publication={publication}
-                        renderChild={(reply) => <PostTree publication={reply} depth={depth + 1} />}
+                        open={repliesOpen}
+                        onOpenChange={setRepliesOpen}
+                        renderChild={(reply) => (
+                            <PostTree
+                                publication={reply}
+                                feedUserUUID={feedUserUUID}
+                                depth={depth + 1}
+                            />
+                        )}
                     />
                 </CardContent>
             </Card>

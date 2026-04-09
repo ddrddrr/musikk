@@ -32,7 +32,7 @@ const userCardWidthVariants = cva("", {
 });
 
 const userCardPaddingVariants = cva(
-    "flex items-center justify-center border-t-2 border-black bg-gray-200 text-center",
+    "flex items-center justify-center border-t-2 border-foreground bg-muted text-center",
     {
         variants: {
             size: {
@@ -86,7 +86,7 @@ export function UserCard({ user, size = "medium", onClick }: UserCardProps) {
             {!!myUuid && user.uuid !== myUuid && (
                 <ContextMenuContent panel="card" className="w-48">
                     <ContextMenuItem onSelect={toggleFollow}>
-                        <MoreHorizontal className="mr-2 h-4 w-4" />
+                        <MoreHorizontal className="mr-2 size-4" />
                         {isFollowing ? "Unfollow" : "Follow"}
                     </ContextMenuItem>
                 </ContextMenuContent>

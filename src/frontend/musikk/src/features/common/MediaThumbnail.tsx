@@ -9,7 +9,7 @@ type MediaThumbnailProps = {
 };
 
 const baseClass =
-    "flex items-center justify-center bg-gray-200 overflow-hidden";
+    "flex items-center justify-center bg-muted overflow-hidden";
 
 export function MediaThumbnail({ src, alt = "", fallback, className }: MediaThumbnailProps) {
     if (src) {
@@ -22,7 +22,7 @@ export function MediaThumbnail({ src, alt = "", fallback, className }: MediaThum
 
     return (
         <div className={cn(baseClass, className)}>
-            {fallback ?? <span className="text-2xl text-gray-400">&#9835;</span>}
+            {fallback ?? <span className="text-2xl text-muted-foreground">&#9835;</span>}
         </div>
     );
 }

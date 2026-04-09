@@ -1,6 +1,6 @@
 import { UUID } from "@/api/types.ts";
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
-import { Spinner } from "@/components/ui/spinner";
+import { Spinner } from "@/features/ui/spinner";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { useChatDetail } from "@/features/publications/api/queries.ts";
 import { LoadOlderButton } from "@/features/publications/components/LoadOlderButton.tsx";
@@ -72,7 +72,7 @@ export function ChatBox({ chatUUID }: ChatBoxProps) {
     }
 
     return (
-        <div className="flex h-full max-h-[600px] flex-col overflow-hidden rounded-sm border-2 border-black bg-white">
+        <div className="flex h-full max-h-[600px] flex-col overflow-hidden rounded-sm border-2 border-foreground bg-card">
             <ChatHeader chat={chat} />
 
             <div className="relative min-h-0 flex-1">
@@ -90,7 +90,7 @@ export function ChatBox({ chatUUID }: ChatBoxProps) {
                 <NewMessagesIndicator visible={hasNewMessages} onClick={scrollToBottom} />
             </div>
 
-            <div className="border-t-2 border-black bg-gray-100 p-4">
+            <div className="border-t-2 border-foreground bg-muted p-4">
                 <ChatMessageForm chat={chat} />
             </div>
         </div>

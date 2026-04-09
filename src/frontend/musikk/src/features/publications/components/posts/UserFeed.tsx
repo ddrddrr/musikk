@@ -18,23 +18,23 @@ export function UserFeed({ userUUID }: { userUUID: UUID }) {
     const currUserUUID = useUserUUID();
 
     if (error) {
-        return <div className="text-center text-red-500">Failed to load posts.</div>;
+        return <div className="text-center text-destructive">Failed to load posts.</div>;
     }
 
     if (isPending) return null;
 
     return (
-        <div className="mx-auto w-full max-w-2xl space-y-6">
+        <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
             {currUserUUID === userUUID && (
-                <Card className="border-2 border-black shadow-md">
-                    <CardContent className="space-y-3 p-4">
+                <Card className="border-2 border-foreground shadow-md">
+                    <CardContent className="flex flex-col gap-3 p-4">
                         <h2 className="text-lg font-semibold">Add a Post :)</h2>
                         <PostForm feedUserUUID={userUUID} />
                     </CardContent>
                 </Card>
             )}
             {publicationsFlat?.map((post) => (
-                <PostTree key={post.uuid} publication={post} />
+                <PostTree key={post.uuid} publication={post} feedUserUUID={userUUID} />
             ))}
             <div className="flex justify-center py-4">
                 <LoadOlderButton

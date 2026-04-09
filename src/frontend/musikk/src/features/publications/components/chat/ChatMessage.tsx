@@ -19,8 +19,8 @@ export function ChatMessage({ message, isFirstInGroup = true }: ChatMessageProps
         <div className={cn("flex", isOwnMessage ? "justify-end" : "justify-start")}>
             <div
                 className={cn(
-                    "max-w-[70%] rounded-sm border border-black p-3",
-                    isOwnMessage ? "bg-blue-100" : "bg-gray-50",
+                    "max-w-[70%] rounded-sm border border-foreground p-3",
+                    isOwnMessage ? "bg-info/20" : "bg-muted",
                 )}
             >
                 {showHeader && (
@@ -28,9 +28,9 @@ export function ChatMessage({ message, isFirstInGroup = true }: ChatMessageProps
                         <PostHeader author={message.author} dateAdded={message.date_added} />
                     </div>
                 )}
-                <p className="break-words text-sm text-gray-800">
+                <p className="break-words text-sm text-foreground">
                     {message.is_deleted ? (
-                        <span className="text-gray-400 italic">Deleted</span>
+                        <span className="text-muted-foreground italic">Deleted</span>
                     ) : (
                         message.content
                     )}

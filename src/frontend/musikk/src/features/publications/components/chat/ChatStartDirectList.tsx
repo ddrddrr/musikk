@@ -51,8 +51,8 @@ export function ChatStartDirectList() {
 
     if (!friends || friends.length === 0) {
         return (
-            <div className="rounded-sm border-2 border-black bg-gray-50 p-6 text-center">
-                <p className="text-sm text-gray-600">
+            <div className="rounded-sm border-2 border-foreground bg-muted p-6 text-center">
+                <p className="text-sm text-muted-foreground">
                     Chats will appear, when you have some friends :)
                 </p>
             </div>
@@ -61,8 +61,8 @@ export function ChatStartDirectList() {
 
     if (!friendsWithoutDirectChat || friendsWithoutDirectChat.length === 0) {
         return (
-            <div className="rounded-sm border-2 border-black bg-gray-50 p-6 text-center">
-                <p className="text-sm text-gray-600">
+            <div className="rounded-sm border-2 border-foreground bg-muted p-6 text-center">
+                <p className="text-sm text-muted-foreground">
                     You have chats with all of your friends!
                 </p>
             </div>
@@ -70,8 +70,8 @@ export function ChatStartDirectList() {
     }
 
     return (
-        <div className="space-y-2">
-            <h3 className="text-sm font-bold text-gray-600">Start Chatting</h3>
+        <div className="flex flex-col gap-2">
+            <h3 className="text-sm font-bold text-muted-foreground">Start Chatting</h3>
             <div className="grid grid-cols-7 gap-1">
                 {friendsWithoutDirectChat.map((friend) => (
                     <UserCard

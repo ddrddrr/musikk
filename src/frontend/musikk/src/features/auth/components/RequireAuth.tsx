@@ -1,4 +1,4 @@
-import { Spinner } from "@/components/ui/spinner";
+import { Spinner } from "@/features/ui/spinner";
 import { useAuth } from "@/hooks/useAuth.ts";
 import { ReactNode } from "react";
 import { Navigate, useLocation } from "react-router-dom";

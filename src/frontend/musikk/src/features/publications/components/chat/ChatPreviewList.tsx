@@ -1,4 +1,4 @@
-import { Spinner } from "@/components/ui/spinner";
+import { Spinner } from "@/features/ui/spinner";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { ChatNewGroupForm } from "@/features/publications/components/chat/ChatNewGroupForm.tsx";
 import { ChatPreview } from "@/features/publications/components/chat/ChatPreview.tsx";
@@ -34,20 +34,20 @@ export function ChatPreviewList() {
     }
 
     return (
-        <div className="space-y-4 p-4">
+        <div className="flex flex-col gap-4 p-4">
             <div className="flex items-center justify-between">
                 <h2 className="text-xl font-bold">Chats</h2>
                 <Button variant="brand" size="sm" onClick={() => setShowNewGroupForm(true)}>
-                    <Plus className="mr-2 h-4 w-4" />
+                    <Plus className="mr-2 size-4" />
                     New Group
                 </Button>
             </div>
 
-            <div className="space-y-1">
+            <div className="flex flex-col gap-1">
                 {chats && chats.map((chat) => <ChatPreview key={chat.uuid} chat={chat} />)}
             </div>
 
-            <div className="mt-2 border-t-2 border-black pt-4">
+            <div className="mt-2 border-t-2 border-foreground pt-4">
                 <ChatStartDirectList />
             </div>
         </div>

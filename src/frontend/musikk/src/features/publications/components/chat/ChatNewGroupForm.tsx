@@ -78,8 +78,8 @@ export function ChatNewGroupForm({ onSuccess, onCancel }: ChatNewGroupFormProps)
 
     if (!friends || friends.length === 0) {
         return (
-            <div className="rounded-sm border-2 border-black bg-gray-50 p-6 text-center">
-                <p className="text-sm text-gray-600">
+            <div className="rounded-sm border-2 border-foreground bg-muted p-6 text-center">
+                <p className="text-sm text-muted-foreground">
                     Group chats can be created only with friends...
                 </p>
                 {onCancel && (
@@ -96,7 +96,7 @@ export function ChatNewGroupForm({ onSuccess, onCancel }: ChatNewGroupFormProps)
             <h2 className="mb-4 text-xl font-bold">Create Group Chat</h2>
 
             <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
                     <FormField
                         name="title"
                         render={({ field }) => (
@@ -118,7 +118,7 @@ export function ChatNewGroupForm({ onSuccess, onCancel }: ChatNewGroupFormProps)
                                     Select Friends ({selectedParticipants.length} selected)
                                 </FormLabel>
                                 <FormControl>
-                                    <div className="max-h-[300px] space-y-2 overflow-y-auto rounded-sm border-2 border-black bg-white p-2">
+                                    <div className="flex max-h-[300px] flex-col gap-2 overflow-y-auto rounded-sm border-2 border-foreground bg-card p-2">
                                         {friends.map((friend) => (
                                             // TODO button
                                             <button
@@ -126,18 +126,18 @@ export function ChatNewGroupForm({ onSuccess, onCancel }: ChatNewGroupFormProps)
                                                 type="button"
                                                 onClick={() => void toggleParticipant(friend.uuid)}
                                                 className={cn(
-                                                    "w-full rounded-sm border-2 border-black bg-white p-2 text-left transition-colors hover:bg-gray-50",
+                                                    "w-full rounded-sm border-2 border-foreground bg-card p-2 text-left transition-colors hover:bg-muted",
                                                 )}
                                             >
                                                 <div className="flex items-center gap-2">
                                                     <div
                                                         className={cn(
-                                                            "h-5 w-5 rounded-sm border-2 border-black",
+                                                            "size-5 rounded-sm border-2 border-foreground",
                                                             selectedParticipants.includes(
                                                                 friend.uuid,
                                                             )
-                                                                ? "bg-black"
-                                                                : "bg-white",
+                                                                ? "bg-foreground"
+                                                                : "bg-card",
                                                         )}
                                                     />
                                                     {/*TODO: use the common avatar component*/}
@@ -145,7 +145,7 @@ export function ChatNewGroupForm({ onSuccess, onCancel }: ChatNewGroupFormProps)
                                                         <img
                                                             src={friend.avatar}
                                                             alt={friend.display_name}
-                                                            className="h-8 w-8 rounded-sm border-2 border-black object-cover"
+                                                            className="size-8 rounded-sm border-2 border-foreground object-cover"
                                                         />
                                                     )}
                                                     <span className="text-sm font-medium">

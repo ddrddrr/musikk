@@ -23,13 +23,13 @@ export function LeftColumn() {
     }, [liked_songs, history, created_collections, followed_collections]);
 
     return (
-        <div className="w-1/5 overflow-y-auto bg-red-600 p-4 pb-40">
+        <div className="w-1/5 overflow-y-auto bg-brand p-4 pb-40">
             <div className="mx-14 mb-4 flex items-center justify-between">
-                <h2 className="text-center text-xl font-bold text-white">Your stuff</h2>
+                <h2 className="text-center text-xl font-bold text-brand-foreground">Your stuff</h2>
                 <ColletionCreateButton />
             </div>
             {collections.length > 0 ? (
-                <ul className="space-y-6" role="list">
+                <ul className="flex flex-col gap-6" role="list">
                     {collections.map((collection) => (
                         <li key={collection.uuid}>
                             <CollectionCard collection={collection} size="big" />
@@ -37,7 +37,7 @@ export function LeftColumn() {
                     ))}
                 </ul>
             ) : (
-                <div className="rounded-sm border-2 border-black bg-red-600 py-8 text-center text-white">
+                <div className="rounded-sm border-2 border-foreground bg-brand py-8 text-center text-brand-foreground">
                     <p>No song collections found</p>
                 </div>
             )}

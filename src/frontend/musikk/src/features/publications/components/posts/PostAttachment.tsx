@@ -24,7 +24,7 @@ export function PostAttachment({ attachment }: PostAttachmentProps) {
                 <div className="mb-4">
                     <SongContainer
                         collectionSong={attachment.obj as CollectionSong}
-                        extraStyle={"border"}
+                        className="border"
                     />
                 </div>
             );

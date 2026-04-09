@@ -26,14 +26,14 @@ export const PlayerBox = memo(function PlayerBox({
     // TODO: fine for now, but probably move
     if (queueError) {
         return (
-            <div className="sticky right-0 bottom-0 left-0 z-10 border-t border-black bg-white p-4">
+            <div className="sticky right-0 bottom-0 left-0 z-10 border-t border-foreground bg-card p-4">
                 <QueryErrorBox message="Failed to load playback queue" onRetry={queueRefetch} />
             </div>
         );
     }
 
     return (
-        <div className="sticky right-0 bottom-0 left-0 z-10 border-t border-black bg-white">
+        <div className="sticky right-0 bottom-0 left-0 z-10 border-t border-foreground bg-card">
             <PlayerBar
                 audioRef={audioRef}
                 totalDuration={totalDuration}

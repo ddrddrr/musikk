@@ -19,7 +19,7 @@ export function CollectionPlayButton({ collection, showComments }: SongCollectio
             variant="brand"
             size="icon"
             onClick={onClick}
-            className={showComments ? "h-8 w-8" : "h-12 w-12"}
+            className={showComments ? "size-8" : "size-12"}
         >
             {renderPlayPauseIcon()}
         </Button>

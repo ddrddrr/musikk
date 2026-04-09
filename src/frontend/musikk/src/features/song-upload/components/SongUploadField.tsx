@@ -9,7 +9,7 @@ interface SongUploadProps {
 
 export function SongUploadField({ songIndex }: SongUploadProps) {
     return (
-        <div className="space-y-4">
+        <div className="flex flex-col gap-4">
             <div className="grid gap-4 md:grid-cols-2">
                 <FormField
                     name={`songs.${songIndex}.title`}
@@ -37,11 +37,11 @@ export function SongUploadField({ songIndex }: SongUploadProps) {
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
+                <div className="flex flex-col gap-2">
                     <ImageField name={`songs.${songIndex}.image`} />
                 </div>
 
-                <div className="space-y-2">
+                <div className="flex flex-col gap-2">
                     <AudioField name={`songs.${songIndex}.audio`} />
                 </div>
             </div>

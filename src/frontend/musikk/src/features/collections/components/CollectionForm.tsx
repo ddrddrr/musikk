@@ -24,7 +24,7 @@ export function CollectionForm({
 }: CollectionFormProps) {
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
                 <FormField
                     name="title"
                     render={({ field }) => (
@@ -51,7 +51,7 @@ export function CollectionForm({
                     )}
                 />
 
-                <div className="space-y-2">
+                <div className="flex flex-col gap-2">
                     <ImageField name="image" />
                 </div>
 
