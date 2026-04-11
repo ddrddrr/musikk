@@ -1,16 +1,16 @@
 import { UUID } from "@/api/types.ts";
 import { useInfiniteFlat } from "@/api/hooks.ts";
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
-import { CollectionCard } from "@/features/collections/components/CollectionCard.tsx";
 import { Collection, CollectionSong } from "@/features/collections/types.ts";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { useChatAttachments } from "@/features/publications/api/queries.ts";
+import { CollectionAttachmentRow } from "@/features/publications/components/chat/CollectionAttachmentRow.tsx";
+import { SongAttachmentRow } from "@/features/publications/components/chat/SongAttachmentRow.tsx";
+import { UserAttachmentRow } from "@/features/publications/components/chat/UserAttachmentRow.tsx";
 import { Attachment } from "@/features/publications/types.ts";
-import { SongContainer } from "@/features/songs/components/SongContainer.tsx";
 import { Button } from "@/features/ui/button.tsx";
 import { ScrollArea } from "@/features/ui/scroll-area.tsx";
 import { Spinner } from "@/features/ui/spinner";
-import { UserIdentifier } from "@/features/user/components/UserIdentifier.tsx";
 import { BaseUser } from "@/features/user/types.ts";
 
 type ChatAttachmentsListProps = {
@@ -49,9 +49,9 @@ export function ChatAttachmentsList({ chatUUID }: ChatAttachmentsListProps) {
     }
 
     return (
-        <div className="rounded-sm border border-black">
+        <div className="rounded-sm border border-foreground">
             <ScrollArea className="max-h-48">
-                <div className="flex flex-col gap-2 py-2">
+                <div className="flex flex-col gap-1 px-2 py-2">
                     {attachments.map((attachment, i) => (
                         <ChatAttachmentItem key={i} attachment={attachment} />
                     ))}
@@ -77,10 +77,10 @@ export function ChatAttachmentsList({ chatUUID }: ChatAttachmentsListProps) {
 function ChatAttachmentItem({ attachment }: { attachment: Attachment }) {
     switch (attachment.type) {
         case "song":
-            return <SongContainer collectionSong={attachment.obj as CollectionSong} size="compact" />;
+            return <SongAttachmentRow song={attachment.obj as CollectionSong} />;
         case "collection":
-            return <CollectionCard collection={attachment.obj as Collection} size="small" />;
+            return <CollectionAttachmentRow collection={attachment.obj as Collection} />;
         case "user":
-            return <UserIdentifier user={attachment.obj as BaseUser} />;
+            return <UserAttachmentRow user={attachment.obj as BaseUser} />;
     }
 }
