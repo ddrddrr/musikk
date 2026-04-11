@@ -1,7 +1,7 @@
 from django.db import models
 
 from base.models import BaseModel
-from notifications.api.v1.ws_conf import ServerEvent
+from notifications.ws import ServerEvent
 from websockets.event_helpers import send_ws_event, user_group
 
 

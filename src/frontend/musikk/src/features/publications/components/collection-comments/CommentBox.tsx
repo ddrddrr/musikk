@@ -6,6 +6,7 @@ import { CommentList } from "@/features/publications/components/collection-comme
 import { LoadOlderButton } from "@/features/publications/components/LoadOlderButton.tsx";
 import { NewMessagesIndicator } from "@/features/publications/components/NewMessagesIndicator.tsx";
 import { useAutoScrollToBottom } from "@/features/publications/hooks/useAutoScrollToBottom.ts";
+import { useCollectionCommentsWsEvents } from "@/features/publications/hooks/useCollectionCommentsWsEvents.ts";
 import { useNewMessagesIndicator } from "@/features/publications/hooks/useNewMessagesIndicator.ts";
 import { useScrollAnchor } from "@/features/publications/hooks/useScrollAnchor.ts";
 import { useCollectionCommentsFlat } from "@/features/publications/hooks/usePublicationsInfiniteFlat.ts";
@@ -18,6 +19,7 @@ interface CommentBoxProps {
 // TODO: add proper infinite scroll, read about https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API
 
 export const CommentBox = memo(function CommentBox({ collectionUUID }: CommentBoxProps) {
+    useCollectionCommentsWsEvents(collectionUUID);
     const [replyTo, setReplyTo] = useState<Publication | undefined>(undefined);
     const {
         error,

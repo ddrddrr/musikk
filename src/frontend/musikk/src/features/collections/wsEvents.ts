@@ -8,15 +8,11 @@ export function useCollectionWsEvents() {
 
     useEffect(() => {
         const unsubCollection = ws.subscribe("collection.changed", () => {
-            void client.invalidateQueries({
-                predicate: (q) => q.queryKey[0] === "openCollection",
-            });
+            void client.invalidateQueries({ queryKey: ["openCollection"] });
         });
 
         const unsubPersonal = ws.subscribe("collections.personal.changed", () => {
-            void client.invalidateQueries({
-                predicate: (q) => q.queryKey[0] === "collectionsPersonal",
-            });
+            void client.invalidateQueries({ queryKey: ["collectionsPersonal"] });
         });
 
         return () => {

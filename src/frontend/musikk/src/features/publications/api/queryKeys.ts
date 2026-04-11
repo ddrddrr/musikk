@@ -6,10 +6,7 @@ export const publicationKeys = {
         ["collection", collectionUUID, "comments"] as const,
     children: (pubUUID: UUID) => ["publication-children", pubUUID] as const,
     userChats: (userUUID: UUID) => ["user-chats", userUUID] as const,
-    chatDetail: (userUUID: UUID, chatUUID: UUID) =>
-        ["chat-detail", userUUID, chatUUID] as const,
-    chatMessages: (userUUID: UUID, chatUUID: UUID) =>
-        ["chat-messages", userUUID, chatUUID] as const,
-    chatAttachments: (userUUID: UUID, chatUUID: UUID) =>
-        ["chat-attachments", userUUID, chatUUID] as const,
+    chatDetail: (chatUUID: UUID) => ["chat-detail", chatUUID] as const,
+    chatMessages: (chatUUID: UUID) => ["chat-messages", chatUUID] as const,
+    chatAttachments: (chatUUID: UUID) => ["chat-attachments", chatUUID] as const,
 };

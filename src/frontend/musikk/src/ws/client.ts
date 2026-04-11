@@ -22,6 +22,7 @@ export class WSClient {
 
     private listeners = new Map<string, Set<MessageHandler>>();
     private pendingMessages: string[] = [];
+    private topicSubscriptions = new Map<string, number>();
 
     constructor(url: string) {
         this.url = url;
@@ -54,6 +55,10 @@ export class WSClient {
                     this.ws?.send(msg);
                 }
                 this.pendingMessages = [];
+            }
+
+            for (const topic of this.topicSubscriptions.keys()) {
+                this.ws?.send(JSON.stringify({ action: "subscribe", payload: { topic } }));
             }
         };
 
@@ -122,6 +127,7 @@ export class WSClient {
     close() {
         console.debug("WS Closing connection manually");
         this.shouldReconnect = false;
+        this.topicSubscriptions.clear();
 
         if (this.reconnectTimeout) {
             clearTimeout(this.reconnectTimeout);
@@ -141,6 +147,25 @@ export class WSClient {
             console.debug(`WS Connection not ready, queueing message ${action}`);
             this.pendingMessages.push(message);
         }
+    }
+
+    subscribeTopic(topic: string): () => void {
+        const count = this.topicSubscriptions.get(topic) ?? 0;
+        this.topicSubscriptions.set(topic, count + 1);
+
+        if (count === 0) {
+            this.send({ action: "subscribe", payload: { topic } });
+        }
+
+        return () => {
+            const current = this.topicSubscriptions.get(topic) ?? 0;
+            if (current <= 1) {
+                this.topicSubscriptions.delete(topic);
+                this.send({ action: "unsubscribe", payload: { topic } });
+            } else {
+                this.topicSubscriptions.set(topic, current - 1);
+            }
+        };
     }
 
     // returns a func that should be called in useEffect, since we need to clear

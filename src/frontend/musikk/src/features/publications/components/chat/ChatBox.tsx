@@ -9,6 +9,7 @@ import { ChatMessageForm } from "@/features/publications/components/chat/ChatMes
 import { ChatMessageList } from "@/features/publications/components/chat/ChatMessageList.tsx";
 import { NewMessagesIndicator } from "@/features/publications/components/NewMessagesIndicator.tsx";
 import { useAutoScrollToBottom } from "@/features/publications/hooks/useAutoScrollToBottom.ts";
+import { useChatWsEvents } from "@/features/publications/hooks/useChatWsEvents.ts";
 import { useNewMessagesIndicator } from "@/features/publications/hooks/useNewMessagesIndicator.ts";
 import { useScrollAnchor } from "@/features/publications/hooks/useScrollAnchor.ts";
 import { useChatMessagesFlat } from "@/features/publications/hooks/usePublicationsInfiniteFlat.ts";
@@ -21,6 +22,7 @@ interface ChatBoxProps {
 export function ChatBox({ chatUUID }: ChatBoxProps) {
     // TODO: add member count in serializer, render in header
     const userUUID = useUserUUID();
+    useChatWsEvents(chatUUID);
     const {
         data: chat,
         error: chatError,

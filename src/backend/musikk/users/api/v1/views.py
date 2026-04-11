@@ -16,7 +16,7 @@ from users.api.v1.serializers import (
 )
 from users.models import BaseUser, UserFollow
 from users.permissions import IsSelfOrFriend
-from users.api.v1.ws_conf import ServerEvent
+from users.ws import ServerEvent
 from websockets.event_helpers import send_ws_event, user_group
 from notifications.models import FollowerNotification
 

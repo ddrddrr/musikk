@@ -117,8 +117,7 @@ CACHES = {
     }
 }
 
-# Channels channel layer (Redis). Required for Django Channels (WebSockets).
-# Make sure channels_redis is installed in your environment.
+# TODO: make in-mem for local?
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",

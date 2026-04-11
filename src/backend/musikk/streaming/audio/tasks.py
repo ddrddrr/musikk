@@ -12,7 +12,7 @@ from streaming.audio.processing_pipeline import AudioProcessingPipeline
 from streaming.audio.shaka_packager_conf.shaka_packager_wrapper import ManifestType
 from streaming.managers.upload_manager import UploadManager
 from streaming.models.songs import BaseSong
-from streaming.api.v1.ws_conf import ServerEvent
+from streaming.ws import ServerEvent
 from websockets.event_helpers import send_ws_event, user_group
 
 logger = logging.getLogger(__name__)

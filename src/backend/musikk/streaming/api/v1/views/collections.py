@@ -17,7 +17,7 @@ from streaming.api.v1.serializers import BaseSongCreateSerializer
 from streaming.audio.validators import validate_audio
 from streaming.managers.upload_manager import UploadManager
 from users.permissions import IsArtist
-from streaming.api.v1.ws_conf import ServerEvent
+from streaming.ws import ServerEvent
 from websockets.event_helpers import send_ws_event, user_group
 from streaming.api.v1.filters import CollectionFilter
 from streaming.api.v1.serializers.collections import (

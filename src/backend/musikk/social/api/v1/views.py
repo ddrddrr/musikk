@@ -24,8 +24,9 @@ from social.models.chat import Chat, ChatMember
 from streaming.models import Collection
 from streaming.models.collections import CollectionType
 from users.models import BaseUser
-from social.api.v1.ws_conf import ServerEvent
-from websockets.event_helpers import send_ws_event, user_group
+from social.ws import ServerEvent
+from websockets.event_helpers import send_ws_event
+from websockets.topics import topic_group
 
 
 class PublicationChildrenView(RetrieveAPIView):
@@ -52,7 +53,7 @@ class CollectionCommentsListCreateView(PublicationsListCreateMixin, ListCreateAP
 
     def ws_on_create(self):
         send_ws_event(
-            user_group(self.request.user.uuid),
+            topic_group("collection_comments", str(self.kwargs["collection_uuid"])),
             ServerEvent.COLLECTION_COMMENTS_CHANGED,
             collection_uuid=str(self.kwargs["collection_uuid"]),
         )
@@ -84,7 +85,7 @@ class FeedPostsListCreateView(PublicationsListCreateMixin, ListCreateAPIView):
 
     def ws_on_create(self):
         send_ws_event(
-            user_group(self.request.user.uuid),
+            topic_group("feed", str(self.kwargs["user_uuid"])),
             ServerEvent.FEED_COMMENTS_CHANGED,
             user_uuid=str(self.kwargs["user_uuid"]),
         )
@@ -112,10 +113,11 @@ class ChatMessagesListCreateView(PublicationsListCreateMixin, ListCreateAPIView)
         ).exists()
 
     def ws_on_create(self):
+        chat_uuid = str(self.kwargs["chat_uuid"])
         send_ws_event(
-            user_group(self.request.user.uuid),
+            topic_group("chat", chat_uuid),
             ServerEvent.CHAT_MESSAGES_CHANGED,
-            chat_uuid=str(self.kwargs["chat_uuid"]),
+            chat_uuid=chat_uuid,
         )
         chat = self.get_created_for()
         other_members = ChatMember.objects.filter(chat=chat).exclude(

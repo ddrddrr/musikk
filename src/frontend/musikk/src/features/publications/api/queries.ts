@@ -77,7 +77,7 @@ export function useUserChats(userUUID: UUID) {
 
 export function useChatMessages(userUUID: UUID, chatUUID: UUID) {
     return usePublicationListInfinite(ChatURLs.chatMessages(userUUID, chatUUID), [
-        ...publicationKeys.chatMessages(userUUID, chatUUID),
+        ...publicationKeys.chatMessages(chatUUID),
     ]);
 }
 
@@ -89,13 +89,13 @@ async function fetchChatDetail(userUUID: UUID, chatUUID: UUID): Promise<Chat> {
 export function useChatDetail(userUUID: UUID, chatUUID: UUID) {
     return useQuery<Chat>({
         queryFn: () => fetchChatDetail(userUUID, chatUUID),
-        queryKey: publicationKeys.chatDetail(userUUID, chatUUID),
+        queryKey: publicationKeys.chatDetail(chatUUID),
     });
 }
 
 export function useChatAttachments(userUUID: UUID, chatUUID: UUID) {
     return useInfiniteQuery({
-        queryKey: [...publicationKeys.chatAttachments(userUUID, chatUUID), "infinite"],
+        queryKey: [...publicationKeys.chatAttachments(chatUUID), "infinite"],
         initialPageParam: 0,
         queryFn: async ({ pageParam }) => {
             const res = await api_client.get<PaginatedRes<Attachment>>(

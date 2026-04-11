@@ -8,9 +8,8 @@ from rest_framework.views import APIView
 from streaming.managers.upload_manager import UploadManager
 from streaming.models.profile import StreamingProfile
 from streaming.permissions import IsPublicOrCollectionAuthor
-from users.models import BaseUser
 from users.permissions import IsArtist
-from streaming.api.v1.ws_conf import ServerEvent
+from streaming.ws import ServerEvent
 from websockets.event_helpers import send_ws_event, user_group
 from streaming.api.v1.serializers.songs import CollectionSongRetrieveSerializer
 from streaming.models.songs import CollectionSong
@@ -54,8 +53,12 @@ class SongUploadStatusView(APIView):
 
     # TODO: rewrite with operation id!
     def get(self, request, song_uuid: str):
-        um = UploadManager(song_uuid)
-        return Response({"uuid": song_uuid, "status": um.get_status() or "unknown"})
+        return Response(
+            {
+                "uuid": song_uuid,
+                "status": UploadManager(song_uuid).get_status() or "unknown",
+            }
+        )
 
 
 class SongUserCollections(APIView):

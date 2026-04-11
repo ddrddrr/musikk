@@ -2,6 +2,7 @@ import { RefObject, useCallback, useEffect, useRef, useState } from "react";
 
 const NEAR_BOTTOM_THRESHOLD = 50; // px
 
+// TODO: fix
 export function useNewMessagesIndicator(
     containerRef: RefObject<HTMLDivElement | null>,
     bottomRef: RefObject<HTMLDivElement | null>,

@@ -172,7 +172,7 @@ export function useCreateChatMessage() {
         },
         onSuccess: (_data, variables) => {
             void queryClient.invalidateQueries({
-                queryKey: publicationKeys.chatMessages(variables.userUUID, variables.chatUUID),
+                queryKey: publicationKeys.chatMessages(variables.chatUUID),
             });
         },
         onError: (error) => {
@@ -197,7 +197,7 @@ export function useAddChatMembers() {
         },
         onSuccess: (_data, variables) => {
             void queryClient.invalidateQueries({
-                queryKey: publicationKeys.chatDetail(variables.userUUID, variables.chatUUID),
+                queryKey: publicationKeys.chatDetail(variables.chatUUID),
             });
         },
         onError: (error) => {

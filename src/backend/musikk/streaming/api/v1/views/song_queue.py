@@ -1,4 +1,3 @@
-from django.db import transaction
 from rest_framework import status
 from rest_framework.generics import RetrieveAPIView, get_object_or_404
 from rest_framework.request import Request
@@ -8,7 +7,7 @@ from rest_framework.response import Response
 from streaming.api.v1.serializers.song_queue import PlayerStateSerializer
 from streaming.models import SongQueue, QueueItem, Collection, PlayerState
 from streaming.models.songs import CollectionSong
-from streaming.api.v1.ws_conf import ServerEvent
+from streaming.ws import ServerEvent
 from streaming.permissions import IsPublicOrCollectionAuthor
 from streaming.managers.playback_manager import PlaybackManager
 from websockets.event_helpers import send_ws_event, user_group
