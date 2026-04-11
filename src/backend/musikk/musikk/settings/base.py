@@ -260,6 +260,7 @@ MEDIA_URL = config("MEDIA_URL", default="media/")
 
 ### FFMPEG, Shaka-packager
 FFMPEG_BIN = config("FFMPEG_BIN", default="/usr/bin/ffmpeg")
+FFPROBE_BIN = config("FFPROBE_BIN", default="/usr/bin/ffprobe")
 SHAKA_PACKAGER_BIN = config("SHAKA_PACKAGER_BIN", default="/usr/bin/packager")
 
 ### LOGS

@@ -13,6 +13,7 @@ ENV LD_LIBRARY_PATH="/opt/ffmpeg_build/lib:$LD_LIBRARY_PATH"
 ENV UV_LINK_MODE=copy
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
+    curl \
     libpq-dev \
     libmagic1 \
     && rm -rf /var/lib/apt/lists/*
@@ -25,6 +26,8 @@ ARG SHAKA_VERSION=v3.4.2
 RUN curl -fsSL "https://github.com/shaka-project/shaka-packager/releases/download/${SHAKA_VERSION}/packager-linux-x64" -o /opt/bin/packager \
     && chmod +x /opt/bin/packager \
     && ln -sf /opt/bin/packager /opt/bin/shaka-packager
+
+RUN ffmpeg -version && ffprobe -version && packager --version
 
 WORKDIR /app
 COPY ./docker/entrypoint.sh ./

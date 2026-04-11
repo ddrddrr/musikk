@@ -6,4 +6,5 @@ class StreamingConfig(AppConfig):
     name = "streaming"
 
     def ready(self):
+        from streaming import checks  # noqa: F401
         from streaming.models import signals
