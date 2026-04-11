@@ -2,45 +2,46 @@ import { RefObject, useCallback, useEffect, useRef, useState } from "react";
 
 const NEAR_BOTTOM_THRESHOLD = 50; // px
 
-// TODO: fix
+function distanceFromBottom(container: HTMLElement): number {
+    return container.scrollHeight - container.scrollTop - container.clientHeight;
+}
+
 export function useNewMessagesIndicator(
     containerRef: RefObject<HTMLDivElement | null>,
     bottomRef: RefObject<HTMLDivElement | null>,
-    data: unknown,
+    messages: { uuid: string }[],
 ) {
-    const didInitialLoadRef = useRef(false);
-    const isNearBottomRef = useRef(true);
     const [hasNewMessages, setHasNewMessages] = useState(false);
+    const lastUUIDRef = useRef<string | undefined>(undefined);
 
     useEffect(() => {
         const container = containerRef.current;
         if (!container) return;
 
         const handleScroll = () => {
-            const distanceFromBottom =
-                container.scrollHeight - container.scrollTop - container.clientHeight;
-            isNearBottomRef.current = distanceFromBottom < NEAR_BOTTOM_THRESHOLD;
-            if (isNearBottomRef.current) {
+            if (distanceFromBottom(container) < NEAR_BOTTOM_THRESHOLD) {
                 setHasNewMessages(false);
             }
         };
 
         container.addEventListener("scroll", handleScroll);
         return () => container.removeEventListener("scroll", handleScroll);
-    }, [containerRef]);
+    });
 
     useEffect(() => {
-        if (!data) return;
+        const newest = messages.at(-1)?.uuid;
+        const prev = lastUUIDRef.current;
+        lastUUIDRef.current = newest;
 
-        if (!didInitialLoadRef.current) {
-            didInitialLoadRef.current = true;
-            return;
-        }
+        if (!prev || newest === prev) return;
 
-        if (!isNearBottomRef.current) {
+        const container = containerRef.current;
+        if (!container) return;
+
+        if (distanceFromBottom(container) >= NEAR_BOTTOM_THRESHOLD) {
             setHasNewMessages(true);
         }
-    }, [data]);
+    }, [messages, containerRef]);
 
     const scrollToBottom = useCallback(() => {
         bottomRef.current?.scrollIntoView({ behavior: "smooth" });

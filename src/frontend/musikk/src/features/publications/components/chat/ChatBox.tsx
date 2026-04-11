@@ -48,7 +48,7 @@ export function ChatBox({ chatUUID }: ChatBoxProps) {
     const { hasNewMessages, scrollToBottom } = useNewMessagesIndicator(
         messagesContainerRef,
         messagesEndRef,
-        messages,
+        publicationsFlat,
     );
 
     if (isChatPending || isMessagesPending) {
