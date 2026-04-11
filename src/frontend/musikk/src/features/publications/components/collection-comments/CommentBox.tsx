@@ -7,6 +7,7 @@ import { LoadOlderButton } from "@/features/publications/components/LoadOlderBut
 import { NewMessagesIndicator } from "@/features/publications/components/NewMessagesIndicator.tsx";
 import { useAutoScrollToBottom } from "@/features/publications/hooks/useAutoScrollToBottom.ts";
 import { useNewMessagesIndicator } from "@/features/publications/hooks/useNewMessagesIndicator.ts";
+import { useScrollAnchor } from "@/features/publications/hooks/useScrollAnchor.ts";
 import { useCollectionCommentsFlat } from "@/features/publications/hooks/usePublicationsInfiniteFlat.ts";
 import { Publication } from "@/features/publications/types.ts";
 import { memo, useRef, useState } from "react";
@@ -30,6 +31,7 @@ export const CommentBox = memo(function CommentBox({ collectionUUID }: CommentBo
     const commentsContainerRef = useRef<HTMLDivElement | null>(null);
     const commentsEndRef = useRef<HTMLDivElement | null>(null);
     useAutoScrollToBottom(commentsEndRef, isPending, publicationsFlat);
+    useScrollAnchor(commentsContainerRef, isFetchingNextPage);
     const { hasNewMessages, scrollToBottom } = useNewMessagesIndicator(
         commentsContainerRef,
         commentsEndRef,

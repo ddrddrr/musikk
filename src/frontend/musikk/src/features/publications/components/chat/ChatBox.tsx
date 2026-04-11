@@ -10,6 +10,7 @@ import { ChatMessageList } from "@/features/publications/components/chat/ChatMes
 import { NewMessagesIndicator } from "@/features/publications/components/NewMessagesIndicator.tsx";
 import { useAutoScrollToBottom } from "@/features/publications/hooks/useAutoScrollToBottom.ts";
 import { useNewMessagesIndicator } from "@/features/publications/hooks/useNewMessagesIndicator.ts";
+import { useScrollAnchor } from "@/features/publications/hooks/useScrollAnchor.ts";
 import { useChatMessagesFlat } from "@/features/publications/hooks/usePublicationsInfiniteFlat.ts";
 import { useRef } from "react";
 
@@ -41,6 +42,7 @@ export function ChatBox({ chatUUID }: ChatBoxProps) {
     const messagesContainerRef = useRef<HTMLDivElement>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     useAutoScrollToBottom(messagesEndRef, isMessagesPending, messages);
+    useScrollAnchor(messagesContainerRef, isFetchingNextPage);
     const { hasNewMessages, scrollToBottom } = useNewMessagesIndicator(
         messagesContainerRef,
         messagesEndRef,
