@@ -4,6 +4,7 @@ import { PaginatedRes, UUID } from "@/api/types.ts";
 import { publicationKeys } from "@/features/publications/api/queryKeys.ts";
 import { ChatURLs, PublicationURLs } from "@/features/publications/api/urls.ts";
 import { Chat, Publication } from "@/features/publications/types.ts";
+import { Attachment } from "@/features/publications/types.ts";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 
 async function fetchPublicationPage(
@@ -89,5 +90,20 @@ export function useChatDetail(userUUID: UUID, chatUUID: UUID) {
     return useQuery<Chat>({
         queryFn: () => fetchChatDetail(userUUID, chatUUID),
         queryKey: publicationKeys.chatDetail(userUUID, chatUUID),
+    });
+}
+
+export function useChatAttachments(userUUID: UUID, chatUUID: UUID) {
+    return useInfiniteQuery({
+        queryKey: [...publicationKeys.chatAttachments(userUUID, chatUUID), "infinite"],
+        initialPageParam: 0,
+        queryFn: async ({ pageParam }) => {
+            const res = await api_client.get<PaginatedRes<Attachment>>(
+                ChatURLs.chatAttachments(userUUID, chatUUID),
+                { params: { limit: 10, offset: pageParam } },
+            );
+            return res.data;
+        },
+        getNextPageParam: getOffsetFromNextUrl,
     });
 }

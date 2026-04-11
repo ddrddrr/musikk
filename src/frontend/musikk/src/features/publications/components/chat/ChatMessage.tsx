@@ -19,14 +19,12 @@ export function ChatMessage({ message, isFirstInGroup = true }: ChatMessageProps
         <div className={cn("flex", isOwnMessage ? "justify-end" : "justify-start")}>
             <div
                 className={cn(
-                    "max-w-[70%] rounded-sm border border-foreground p-3",
+                    "flex max-w-[70%] flex-col gap-2 overflow-hidden rounded-sm border border-foreground p-3",
                     isOwnMessage ? "bg-info/20" : "bg-muted",
                 )}
             >
                 {showHeader && (
-                    <div className="mb-1">
-                        <PostHeader author={message.author} dateAdded={message.date_added} />
-                    </div>
+                    <PostHeader author={message.author} dateAdded={message.date_added} />
                 )}
                 <p className="break-words text-sm text-foreground">
                     {message.is_deleted ? (
@@ -37,7 +35,7 @@ export function ChatMessage({ message, isFirstInGroup = true }: ChatMessageProps
                 </p>
                 {message.attachment && <PostAttachment attachment={message.attachment} />}
                 {!showHeader && (
-                    <span className="mt-1 block text-right text-xs text-muted-foreground">
+                    <span className="block text-right text-xs text-muted-foreground">
                         {formatDateTime(message.date_added)}
                     </span>
                 )}

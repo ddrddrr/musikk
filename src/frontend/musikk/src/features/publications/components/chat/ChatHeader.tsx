@@ -1,4 +1,5 @@
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
+import { ChatAttachmentsList } from "@/features/publications/components/chat/ChatAttachmentsList.tsx";
 import { useChatImage } from "@/features/publications/hooks/useChatImage.ts";
 import { Chat } from "@/features/publications/types.ts";
 import { Popover, PopoverContent, PopoverTrigger } from "@/features/ui/popover.tsx";
@@ -82,11 +83,8 @@ export function ChatHeader({ chat }: ChatHeaderProps) {
                             </TabsContent>
                         )}
 
-                        {/*TODO: remove that placeholder when proper logic is added*/}
                         <TabsContent value="attachments">
-                            <p className="py-4 text-center text-sm text-muted-foreground">
-                                No attachments yet
-                            </p>
+                            <ChatAttachmentsList chatUUID={chat.uuid} />
                         </TabsContent>
                     </Tabs>
                 </PopoverContent>

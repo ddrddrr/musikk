@@ -229,6 +229,13 @@ class UserChatCreateSerializer(BaseModelSerializer):
             return chat
 
 
+class ChatAttachmentSerializer(serializers.Serializer):
+    def to_representation(self, publication):
+        return ATTACHMENT_RESOLVER.serialize_model_instance(
+            publication.attachment_object, context=self.context
+        )
+
+
 class ChatMembersCreateSerializer(BaseModelSerializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
 

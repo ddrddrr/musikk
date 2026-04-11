@@ -1,12 +1,18 @@
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.generics import (
+    ListAPIView,
     RetrieveAPIView,
     ListCreateAPIView,
     CreateAPIView,
 )
 
+from django.contrib.contenttypes.models import ContentType
+
+from musikk.pagination import BaseLimitOffsetPagination
 from social.api.v1.filters import PublicationConnectionFilter
 from social.api.v1.mixins import PublicationsListCreateMixin
 from social.api.v1.serializers import (
+    ChatAttachmentSerializer,
     PublicationChildrenSerializer,
     UserChatRetrieveSerializer,
     UserChatCreateSerializer,
@@ -152,3 +158,25 @@ class ChatRetrieveView(RetrieveAPIView):
                 "chat_id", flat=True
             )
         ).prefetch_related("chatmember_set__member")
+
+
+class ChatAttachmentsListView(ListAPIView):
+    serializer_class = ChatAttachmentSerializer
+    pagination_class = BaseLimitOffsetPagination
+
+    def get_queryset(self):
+        chat = Chat.objects.get(uuid=self.kwargs["chat_uuid"])
+        if not ChatMember.objects.filter(
+            chat=chat, member=self.request.user
+        ).exists():
+            raise PermissionDenied()
+        ct = ContentType.objects.get_for_model(chat)
+        return (
+            Publication.objects.filter(
+                created_for_type=ct,
+                created_for_id=chat.pk,
+                attachment_type__isnull=False,
+            )
+            .select_related("attachment_type")
+            .order_by("-date_added")
+        )

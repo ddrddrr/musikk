@@ -11,4 +11,6 @@ export const ChatURLs = {
         `/users/${userUUID}/chats/${chatUUID}/messages`,
     chatMembers: (userUUID: UUID, chatUUID: UUID) => `/users/${userUUID}/chats/${chatUUID}/members`,
     chatDetail: (userUUID: UUID, chatUUID: UUID) => `/users/${userUUID}/chats/${chatUUID}`,
+    chatAttachments: (userUUID: UUID, chatUUID: UUID) =>
+        `/users/${userUUID}/chats/${chatUUID}/attachments`,
 };

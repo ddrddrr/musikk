@@ -5,6 +5,7 @@ from social.api.v1.views import (
     CollectionCommentsListCreateView,
     FeedPostsListCreateView,
     ChatMessagesListCreateView,
+    ChatAttachmentsListView,
     UserChatsListCreateView,
     ChatMembersCreateView,
     ChatRetrieveView,
@@ -25,6 +26,11 @@ chat_urlpatterns = [
         "users/<uuid:user_uuid>/chats/<uuid:chat_uuid>/messages",
         ChatMessagesListCreateView.as_view(),
         name="chat-messages-list-create",
+    ),
+    path(
+        "users/<uuid:user_uuid>/chats/<uuid:chat_uuid>/attachments",
+        ChatAttachmentsListView.as_view(),
+        name="chat-attachments-list",
     ),
     path(
         "users/<uuid:user_uuid>/chats/<uuid:chat_uuid>/members",

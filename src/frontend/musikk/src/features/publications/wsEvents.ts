@@ -45,6 +45,11 @@ export function usePublicationWsEvents() {
                     predicate: (q) =>
                         q.queryKey[0] === "chat-messages" && q.queryKey[2] === payload.chat_uuid,
                 });
+                void client.invalidateQueries({
+                    predicate: (q) =>
+                        q.queryKey[0] === "chat-attachments" &&
+                        q.queryKey[2] === payload.chat_uuid,
+                });
             },
         );
 

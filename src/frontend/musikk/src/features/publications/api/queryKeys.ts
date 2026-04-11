@@ -10,4 +10,6 @@ export const publicationKeys = {
         ["chat-detail", userUUID, chatUUID] as const,
     chatMessages: (userUUID: UUID, chatUUID: UUID) =>
         ["chat-messages", userUUID, chatUUID] as const,
+    chatAttachments: (userUUID: UUID, chatUUID: UUID) =>
+        ["chat-attachments", userUUID, chatUUID] as const,
 };
