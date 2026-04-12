@@ -1,12 +1,13 @@
 import { PlaybackContext } from "@/features/playback/providers/playbackContext.ts";
 import { ChangeActiveDeviceDropdown } from "@/features/player/ChangeActiveDeviceDropdown.tsx";
+import { useVolume } from "@/features/player/hooks/useVolume.ts";
 import { PlayerPlayButton } from "@/features/player/PlayerPlayButton.tsx";
 import { useQueueNext, useQueuePrev } from "@/features/song-queue/hooks/useQueueAPI.ts";
 import { Button } from "@/features/ui/button";
 import { AuthorLinks } from "@/features/user/components/AuthorLinks.tsx";
 import { Slider } from "@/features/ui/slider";
-import { ListMusic, SkipBack, SkipForward, Volume2 } from "lucide-react";
-import React, { useContext, useEffect, useState } from "react";
+import { ListMusic, SkipBack, SkipForward, Volume2, VolumeX } from "lucide-react";
+import React, { useContext, useState } from "react";
 
 interface PlayerBarProps {
     audioRef: React.RefObject<HTMLAudioElement>;
@@ -27,16 +28,10 @@ export function PlayerBar({
     onSeekCommit,
 }: PlayerBarProps) {
     const { playingCollectionSong, isThisDeviceActive } = useContext(PlaybackContext);
-    const [volume, setVolume] = useState(100);
+    const { volume, setVolume, handleVolumeCommit, handleMuteToggle } = useVolume(audioRef);
     const [seekTime, setSeekTime] = useState(0);
     const nextMutation = useQueueNext();
     const prevMutation = useQueuePrev();
-
-    useEffect(() => {
-        if (audioRef.current) {
-            audioRef.current.volume = volume / 100;
-        }
-    }, [volume]);
 
     const formatTime = (seconds: number) => {
         const mins = Math.floor(seconds / 60);
@@ -130,19 +125,26 @@ export function PlayerBar({
                         </Button>
                     </div>
 
-                    {isThisDeviceActive && (
-                        <div className="flex items-center gap-2">
-                            <Volume2 size={16} />
-                            <Slider
-                                value={[volume]}
-                                min={0}
-                                max={100}
-                                step={1}
-                                onValueChange={(value) => setVolume(value[0])}
-                                className="w-30 cursor-pointer"
-                            />
-                        </div>
-                    )}
+                    <div className="flex items-center gap-2">
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={handleMuteToggle}
+                            className="shrink-0"
+                        >
+                            {volume === 0 ? <VolumeX size={16} /> : <Volume2 size={16} />}
+                        </Button>
+                        <Slider
+                            value={[volume]}
+                            min={0}
+                            max={100}
+                            step={1}
+                            // slider always passes an array (one entry per slider dot, we have 1)
+                            onValueChange={(value) => setVolume(value[0])}
+                            onValueCommit={handleVolumeCommit}
+                            className="w-30 cursor-pointer"
+                        />
+                    </div>
 
                     <Button
                         variant="ghost"

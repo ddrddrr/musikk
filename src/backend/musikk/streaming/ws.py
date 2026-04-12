@@ -29,6 +29,7 @@ class DeviceHandler(WSActionHandler):
         return {
             "device.register": self.handle_register,
             "device.set_active": self.handle_set_active,
+            "device.set_volume": self.handle_set_volume,
             "device.heartbeat": self.handle_heartbeat,
         }
 
@@ -42,7 +43,7 @@ class DeviceHandler(WSActionHandler):
         device_name = payload.get("name")
         if not device_id or not device_name:
             self.consumer.send_error(
-                "'device_id' and 'name' are required for device.register"
+                "`device_id` and `name` are required for device.register"
             )
             return
 
@@ -53,16 +54,32 @@ class DeviceHandler(WSActionHandler):
     def handle_set_active(self, payload: dict):
         device_id = payload.get("device_id")
         if not device_id:
-            self.consumer.send_error("'device_id' is required for device.set_active")
+            self.consumer.send_error("`device_id` is required for device.set_active")
             return
 
         self.manager.set_active_device(device_id=device_id)
         self._broadcast_devices()
 
+    def handle_set_volume(self, payload: dict):
+        device_id = payload.get("device_id")
+        volume = payload.get("volume")
+        if not device_id or volume is None:
+            self.consumer.send_error(
+                "`device_id` and `volume` are required for device.set_volume"
+            )
+            return
+
+        if not isinstance(volume, int) or not (0 <= volume <= 100):
+            self.consumer.send_error("`volume` must be an integer between 0 and 100")
+            return
+
+        self.manager.set_device_volume(device_id=device_id, volume=volume)
+        self._broadcast_devices()
+
     def handle_heartbeat(self, payload: dict):
         device_id = payload.get("device_id")
         if not device_id:
-            self.consumer.send_error("'device_id' is required for device.heartbeat")
+            self.consumer.send_error("`device_id` is required for device.heartbeat")
             return
 
         self.manager.touch_device(device_id=device_id)

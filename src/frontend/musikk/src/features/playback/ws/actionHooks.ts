@@ -2,6 +2,7 @@ import { ThisDevice } from "@/features/playback/hooks/useCurrentDevice.ts";
 import { useWSClient } from "@/hooks/useWSClient.ts";
 import { useCallback } from "react";
 
+// TODO: one hook or multiple?
 export function useRegisterDeviceAction() {
     const ws = useWSClient();
     const registerDeviceAction = useCallback(
@@ -40,6 +41,19 @@ export function useDeviceHeartbeatAction() {
         [ws],
     );
     return deviceHeartbeatAction;
+}
+
+export function useSetDeviceVolumeAction() {
+    const ws = useWSClient();
+    const setDeviceVolumeAction = useCallback(
+        (deviceId: string, volume: number) =>
+            ws.send({
+                action: "device.set_volume",
+                payload: { device_id: deviceId, volume },
+            }),
+        [ws],
+    );
+    return setDeviceVolumeAction;
 }
 
 export function usePlaybackActions() {

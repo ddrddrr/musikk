@@ -7,42 +7,51 @@ from utils.data import try_decode
 DEVICE_TTL_SECONDS = 5  # heartbeat TTL seconds
 
 
+DEFAULT_VOLUME = 100
+
+
 class Device(TypedDict):
     id: str
     name: str
     is_active: bool
+    volume: int
 
 
 class DeviceManager:
     def __init__(self, user_uuid: str):
         self._device_key_base = f"user:{user_uuid}"
 
-    def device_key(self, device_id: str) -> str:
+    def _device_key(self, device_id: str) -> str:
         return self._device_key_base + f":device:{device_id}"
 
-    def devices_set_key(self) -> str:
+    def _devices_set_key(self) -> str:
         return self._device_key_base + ":devices"
 
-    def active_device_key(self) -> str:
+    def _active_device_key(self) -> str:
         return self._device_key_base + ":active_device"
 
-    def register_device(self, device_id: str, name: str | None = None) -> str:
+    def register_device(
+        self,
+        device_id: str,
+        name: str | None = None,
+        volume: int = DEFAULT_VOLUME,
+    ) -> str:
         r = get_default_redis_conn()
 
-        device_data = {"name": name}
+        device_data = {"name": name, "volume": volume}
         r.set(
-            self.device_key(device_id),
+            self._device_key(device_id),
             json.dumps(device_data),
             ex=DEVICE_TTL_SECONDS,
         )
-        r.sadd(self.devices_set_key(), device_id)
+        r.sadd(self._devices_set_key(), device_id)
         return device_id
 
     def touch_device(self, device_id: str) -> str:
         r = get_default_redis_conn()
 
         device_data = {}
-        existing_device_raw = r.get(self.device_key(device_id))
+        existing_device_raw = r.get(self._device_key(device_id))
         if existing_device_raw:
             try:
                 device_data = json.loads(existing_device_raw)
@@ -51,7 +60,7 @@ class DeviceManager:
                 pass
 
         r.set(
-            self.device_key(device_id),
+            self._device_key(device_id),
             json.dumps(device_data),
             ex=DEVICE_TTL_SECONDS,
         )
@@ -60,16 +69,16 @@ class DeviceManager:
     def get_devices(self) -> list[Device]:
         r = get_default_redis_conn()
 
-        device_ids = r.smembers(self.devices_set_key())
-        active_device_raw = r.get(self.active_device_key())
+        device_ids = r.smembers(self._devices_set_key())
+        active_device_raw = r.get(self._active_device_key())
         active_device_id = try_decode(active_device_raw) if active_device_raw else None
 
         devices: list[Device] = []
         for raw_device_id in device_ids:
             device_id = try_decode(raw_device_id)
-            raw_device = r.get(self.device_key(device_id))
+            raw_device = r.get(self._device_key(device_id))
             if not raw_device:
-                r.srem(self.devices_set_key(), device_id)
+                r.srem(self._devices_set_key(), device_id)
                 continue
 
             try:
@@ -82,6 +91,7 @@ class DeviceManager:
                     id=device_id,
                     name=device.get("name", ""),
                     is_active=device_id == active_device_id,
+                    volume=device.get("volume", DEFAULT_VOLUME),
                 )
             )
 
@@ -90,18 +100,39 @@ class DeviceManager:
     def set_active_device(self, device_id: str) -> None:
         r = get_default_redis_conn()
         # no ttl, should be cleared explicitely
-        r.set(self.active_device_key(), device_id)
+        r.set(self._active_device_key(), device_id)
         return None
+
+    def set_device_volume(self, device_id: str, volume: int) -> None:
+        r = get_default_redis_conn()
+
+        device_data: dict = {}
+        existing_raw = r.get(self._device_key(device_id))
+        if existing_raw:
+            try:
+                device_data = json.loads(existing_raw)
+            except Exception:
+                pass
+
+        device_data["volume"] = volume
+        # set the same ttl as before since device 1 can update the
+        # volume of device 2
+        ttl = r.ttl(self._device_key(device_id))
+        r.set(
+            self._device_key(device_id),
+            json.dumps(device_data),
+            ex=ttl if ttl > 0 else DEVICE_TTL_SECONDS,
+        )
 
     def clear_device(self, device_id: str) -> None:
         r = get_default_redis_conn()
 
-        r.delete(self.device_key(device_id))
-        r.srem(self.devices_set_key(), device_id)
+        r.delete(self._device_key(device_id))
+        r.srem(self._devices_set_key(), device_id)
 
-        prev_active = r.get(self.active_device_key())
+        prev_active = r.get(self._active_device_key())
         prev_active = try_decode(prev_active) if prev_active else None
 
         if prev_active == device_id:
-            r.delete(self.active_device_key())
+            r.delete(self._active_device_key())
         return None
