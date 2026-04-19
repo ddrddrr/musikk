@@ -19,8 +19,7 @@ export function ChatMessage({ message, isFirstInGroup = true }: ChatMessageProps
         <div className={cn("flex", isOwnMessage ? "justify-end" : "justify-start")}>
             <div
                 className={cn(
-                    "flex max-w-[70%] flex-col gap-2 overflow-hidden rounded-sm border border-foreground p-3",
-                    "bg-muted",
+                    "flex max-w-[70%] flex-col gap-2 overflow-hidden rounded-sm border border-foreground bg-muted p-3",
                 )}
             >
                 {showHeader && (

@@ -1,13 +1,8 @@
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
-import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
-import { LoadOlderButton } from "@/features/publications/components/LoadOlderButton.tsx";
-import { LoadNewerButton } from "@/features/publications/components/LoadNewerButton.tsx";
-import { PostTree } from "@/features/publications/components/posts/PostTree.tsx";
+import { PostTabContent } from "@/features/publications/components/posts/PostTabContent.tsx";
 import { useNewFeedPosts } from "@/features/publications/hooks/useNewFeedPosts.ts";
 import { useFeedPostsFlat } from "@/features/publications/hooks/usePublicationsInfiniteFlat.ts";
-import { Publication } from "@/features/publications/types.ts";
-import { Card, CardContent } from "@/features/ui/card.tsx";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/features/ui/tabs.tsx";
+import { Tabs, TabsList, TabsTrigger } from "@/features/ui/tabs.tsx";
 import { useState } from "react";
 
 export function GlobalFeed() {
@@ -23,50 +18,7 @@ export function GlobalFeed() {
         queryAll.publicationsFlat?.[0]?.uuid,
     );
 
-    // TODO: move to a sep component
-    function renderPostTree(
-        label: string,
-        posts: Publication[] | undefined,
-        error: Error | null,
-        refetch: () => void,
-        hasNextPage: boolean,
-        isFetchingNextPage: boolean,
-        fetchNextPage: () => Promise<unknown> | void,
-    ) {
-        return (
-            <TabsContent value={label}>
-                <div className="flex flex-col gap-6">
-                    {error && (
-                        <QueryErrorBox
-                            message="Failed to load posts"
-                            onRetry={() => void refetch()}
-                        />
-                    )}
-                    <div className="flex justify-center py-4">
-                        <LoadNewerButton hasNewerPosts={hasNewPosts} onLoadNewer={refresh} />
-                    </div>
-                    {!error &&
-                        posts?.map((post) => (
-                            <PostTree key={post.uuid} publication={post} feedUserUUID={userUUID} />
-                        ))}
-                    {!error && !posts?.length && (
-                        <Card className={"border border-foreground"}>
-                            <CardContent className="py-6 text-center text-muted-foreground">
-                                No posts yet.
-                            </CardContent>
-                        </Card>
-                    )}
-                    <div className="flex justify-center py-4">
-                        <LoadOlderButton
-                            hasNextPage={hasNextPage}
-                            isFetchingNextPage={isFetchingNextPage}
-                            fetchNextPage={fetchNextPage}
-                        />
-                    </div>
-                </div>
-            </TabsContent>
-        );
-    }
+    const sharedProps = { hasNewPosts, onLoadNewer: refresh, feedUserUUID: userUUID };
 
     return (
         <div className="mx-auto max-w-2xl p-6">
@@ -77,33 +29,36 @@ export function GlobalFeed() {
                     <TabsTrigger value="followed">Followed</TabsTrigger>
                 </TabsList>
 
-                {renderPostTree(
-                    "random",
-                    queryAll.publicationsFlat,
-                    queryAll.error,
-                    queryAll.refetch,
-                    queryAll.hasNextPage,
-                    queryAll.isFetchingNextPage,
-                    queryAll.fetchNextPage,
-                )}
-                {renderPostTree(
-                    "friends",
-                    queryFriends.publicationsFlat,
-                    queryFriends.error,
-                    queryFriends.refetch,
-                    queryFriends.hasNextPage,
-                    queryFriends.isFetchingNextPage,
-                    queryFriends.fetchNextPage,
-                )}
-                {renderPostTree(
-                    "followed",
-                    queryFollowed.publicationsFlat,
-                    queryFollowed.error,
-                    queryFollowed.refetch,
-                    queryFollowed.hasNextPage,
-                    queryFollowed.isFetchingNextPage,
-                    queryFollowed.fetchNextPage,
-                )}
+                <PostTabContent
+                    label="random"
+                    posts={queryAll.publicationsFlat}
+                    error={queryAll.error}
+                    refetch={queryAll.refetch}
+                    hasNextPage={queryAll.hasNextPage}
+                    isFetchingNextPage={queryAll.isFetchingNextPage}
+                    fetchNextPage={queryAll.fetchNextPage}
+                    {...sharedProps}
+                />
+                <PostTabContent
+                    label="friends"
+                    posts={queryFriends.publicationsFlat}
+                    error={queryFriends.error}
+                    refetch={queryFriends.refetch}
+                    hasNextPage={queryFriends.hasNextPage}
+                    isFetchingNextPage={queryFriends.isFetchingNextPage}
+                    fetchNextPage={queryFriends.fetchNextPage}
+                    {...sharedProps}
+                />
+                <PostTabContent
+                    label="followed"
+                    posts={queryFollowed.publicationsFlat}
+                    error={queryFollowed.error}
+                    refetch={queryFollowed.refetch}
+                    hasNextPage={queryFollowed.hasNextPage}
+                    isFetchingNextPage={queryFollowed.isFetchingNextPage}
+                    fetchNextPage={queryFollowed.fetchNextPage}
+                    {...sharedProps}
+                />
             </Tabs>
         </div>
     );

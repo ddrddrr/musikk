@@ -4,7 +4,7 @@ import { useCreateChatMessage } from "@/features/publications/api/mutations.ts";
 import { AttachmentPicker } from "@/features/publications/components/AttachmentPicker.tsx";
 import { useAttachment } from "@/features/publications/hooks/useAttachment.ts";
 import { chatMessageSchema } from "@/features/publications/schemas.ts";
-import { Chat, Publication } from "@/features/publications/types.ts";
+import { Chat } from "@/features/publications/types.ts";
 import { Button } from "@/features/ui/button.tsx";
 import { Textarea } from "@/features/ui/textarea.tsx";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,8 +16,6 @@ type ChatMessageFormData = z.infer<typeof chatMessageSchema>;
 
 interface ChatMessageFormProps {
     chat: Chat;
-    replyTo?: Publication;
-    setReplyTo?: (message?: Publication) => void;
 }
 // TODO: message style as in comments + attachment picker + avatar for the user who sent
 // move chats to header as button instead of a context menu for profile

@@ -10,7 +10,7 @@ import { SongContainer } from "@/features/songs/components/SongContainer.tsx";
 import { SongMenuButton } from "@/features/songs/components/SongMenuButton.tsx";
 import { UserCollectionsContext } from "@/features/user/providers/userCollectionsContext.ts";
 import { cn } from "@/lib/utils.ts";
-import { useContext } from "react";
+import { useCallback, useContext } from "react";
 import { useMatch, useNavigate } from "react-router-dom";
 
 interface CollectionContainerProps {
@@ -30,13 +30,13 @@ export function CollectionContainer({ collectionUUID }: CollectionContainerProps
         refetch,
     } = useCollectionDetailQuery(collectionUUID);
 
-    const toggleComments = () => {
+    const toggleComments = useCallback(() => {
         void navigate(
             showComments
                 ? `/collection/${collectionUUID}`
                 : `/collection/${collectionUUID}/comments`,
         );
-    };
+    }, [navigate, showComments, collectionUUID]);
 
     if (isPending)
         return (

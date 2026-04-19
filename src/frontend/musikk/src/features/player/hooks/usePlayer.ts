@@ -5,6 +5,8 @@ import { toast } from "sonner";
 
 import shaka from "shaka-player";
 
+const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+
 interface UsePlayerOptions {
     audioRef: React.RefObject<HTMLAudioElement>;
     onDurationChange?: (duration: number) => void;
@@ -42,10 +44,6 @@ export function usePlayer({
     isThisDeviceActiveRef.current = isThisDeviceActive;
 
     // TODO: split by OS not browser (ios -> m3u8, otherwise mpd)
-    const isSafari = useMemo(() => {
-        return /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-    }, []);
-
     const url = useMemo(() => {
         if (!playingCollectionSong) return undefined;
         return isSafari ? playingCollectionSong.song.m3u8 : playingCollectionSong.song.mpd;

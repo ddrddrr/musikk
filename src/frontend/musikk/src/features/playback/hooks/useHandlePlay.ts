@@ -7,7 +7,7 @@ import { useContext } from "react";
 
 export function useHandlePlay() {
     const { playingCollectionSong, isPlaybackActive } = useContext(PlaybackContext);
-    const { getDeviceID } = useCurrentDevice();
+    const device = useCurrentDevice();
     const { activatePlaybackAction, stopPlaybackAction } = usePlaybackActions();
     const playSongMutation = usePlaySong();
     const playCollectionMutation = usePlayCollection();
@@ -42,7 +42,7 @@ export function useHandlePlay() {
         newSong?: CollectionSong;
     } = {}) {
         // TODO: probably remove this check
-        if (!getDeviceID()) return;
+        if (!device.id) return;
 
         if (newCollection || newSong) {
             await playItem({ newCollection, newSong });

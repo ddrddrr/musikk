@@ -3,7 +3,7 @@ import { fetchCollectionsPersonal } from "@/features/collections/api/queries.ts"
 import { userKeys } from "@/features/user/api/queryKeys.ts";
 import { UserCollectionsContext } from "@/features/user/providers/userCollectionsContext.ts";
 import { useQuery } from "@tanstack/react-query";
-import { ReactNode } from "react";
+import { ReactNode, useMemo } from "react";
 
 interface UserCollectionsProviderProps {
     children: ReactNode;
@@ -16,14 +16,17 @@ export function UserCollectionsProvider({ children }: UserCollectionsProviderPro
         queryKey: userKeys.collectionsPersonal(userUUID),
         queryFn: () => fetchCollectionsPersonal(userUUID),
     });
-    const contextValue = {
-        history: data?.history ?? null,
-        liked_songs: data?.liked_songs ?? null,
-        created_collections: data?.created_collections ?? null,
-        followed_collections: data?.followed_collections ?? null,
-        error: error ?? null,
-        isLoading: isPending,
-    };
+    const contextValue = useMemo(
+        () => ({
+            history: data?.history ?? null,
+            liked_songs: data?.liked_songs ?? null,
+            created_collections: data?.created_collections ?? null,
+            followed_collections: data?.followed_collections ?? null,
+            error: error ?? null,
+            isLoading: isPending,
+        }),
+        [data, error, isPending],
+    );
     return (
         <UserCollectionsContext.Provider value={contextValue}>
             {children}

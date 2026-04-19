@@ -8,7 +8,7 @@ import {
 import { useCurrentDevice } from "./useCurrentDevice.ts";
 
 export function useDeviceLifecycle() {
-    const { device } = useCurrentDevice();
+    const device = useCurrentDevice();
     const { deviceList, activeDevice } = useDeviceList();
     const registerDevice = useRegisterDeviceAction();
     const sendHeartbeat = useDeviceHeartbeatAction();

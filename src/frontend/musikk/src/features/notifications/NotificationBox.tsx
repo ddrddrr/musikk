@@ -7,9 +7,9 @@ import { Button } from "@/features/ui/button.tsx";
 import { Popover, PopoverContent, PopoverTrigger } from "@/features/ui/popover.tsx";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Sparkle } from "lucide-react";
-import { memo, useMemo } from "react";
+import { useMemo } from "react";
 
-export const NotificationBox = memo(function NotificationBox() {
+export function NotificationBox() {
     const client = useQueryClient();
 
     const { isPending, error, data } = useNotificationsQuery();
@@ -61,4 +61,4 @@ export const NotificationBox = memo(function NotificationBox() {
             </PopoverContent>
         </Popover>
     );
-});
+}

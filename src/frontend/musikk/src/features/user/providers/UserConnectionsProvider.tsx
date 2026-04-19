@@ -5,7 +5,7 @@ import {
     useUserFollowersQuery,
     useUserFriendsQuery,
 } from "@/features/user/api/queries.ts";
-import { ReactNode } from "react";
+import { ReactNode, useMemo } from "react";
 
 interface UserConnectionsProviderProps {
     children: ReactNode;
@@ -32,16 +32,19 @@ export function UserConnectionsProvider({ children }: UserConnectionsProviderPro
     const isLoading = friendsPending || followersPending || followedPending;
     const error = friendsError ?? followersError ?? followedError ?? null;
 
+    const contextValue = useMemo(
+        () => ({
+            friends: friendsPending ? [] : friends,
+            followers: followersPending ? [] : followers,
+            followed: followedPending ? [] : followed,
+            error,
+            isLoading,
+        }),
+        [friends, friendsPending, followers, followersPending, followed, followedPending, error, isLoading],
+    );
+
     return (
-        <UserConnectionsContext.Provider
-            value={{
-                friends: friendsPending ? [] : friends,
-                followers: followersPending ? [] : followers,
-                followed: followedPending ? [] : followed,
-                error,
-                isLoading,
-            }}
-        >
+        <UserConnectionsContext.Provider value={contextValue}>
             {children}
         </UserConnectionsContext.Provider>
     );

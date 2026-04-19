@@ -6,7 +6,7 @@ import { userKeys } from "@/features/user/api/queryKeys.ts";
 import { BaseUser } from "@/features/user/types.ts";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Cookies from "js-cookie";
-import { ReactNode, useCallback, useEffect } from "react";
+import { ReactNode, useCallback, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 
 interface AuthProviderProps {
@@ -31,10 +31,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     const isAuthenticated = !!user && !error;
 
-    const login = async (email: string, password: string) => {
+    const login = useCallback(async (email: string, password: string) => {
         await loginAPI(email, password);
         await refetch();
-    };
+    }, [refetch]);
 
     const logout = useCallback(async () => {
         try {
@@ -55,16 +55,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
         };
     }, [logout]);
 
+    const contextValue = useMemo(
+        () => ({
+            isAuthenticated,
+            user: user ?? null,
+            isLoading,
+            login,
+            logout,
+        }),
+        [isAuthenticated, user, isLoading, login, logout],
+    );
+
     return (
-        <AuthContext.Provider
-            value={{
-                isAuthenticated,
-                user: user ?? null,
-                isLoading,
-                login,
-                logout,
-            }}
-        >
+        <AuthContext.Provider value={contextValue}>
             {children}
         </AuthContext.Provider>
     );

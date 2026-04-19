@@ -26,7 +26,7 @@ export function useNewMessagesIndicator(
 
         container.addEventListener("scroll", handleScroll);
         return () => container.removeEventListener("scroll", handleScroll);
-    });
+    }, [containerRef]);
 
     useEffect(() => {
         const newest = messages.at(-1)?.uuid;

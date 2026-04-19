@@ -1,6 +1,6 @@
 import { getWebPlayerLabel } from "@/utils/getWebPlayerLabel";
 import { randomID } from "@/utils/randomID.ts";
-import { useCallback, useMemo, useState } from "react";
+import { useState } from "react";
 
 export interface ThisDevice {
     id: string;
@@ -27,17 +27,5 @@ export function useCurrentDevice() {
         return newDevice;
     });
 
-    const getDeviceID = useCallback(() => device.id, [device.id]);
-    const getDeviceName = useCallback(() => device.name, [device.name]);
-
-    return useMemo(
-        () => ({
-            device,
-            deviceId: device.id,
-            deviceName: device.name,
-            getDeviceID,
-            getDeviceName,
-        }),
-        [device, getDeviceID, getDeviceName],
-    );
+    return device;
 }

@@ -7,7 +7,13 @@ import { Button } from "@/features/ui/button";
 import { AuthorLinks } from "@/features/user/components/AuthorLinks.tsx";
 import { Slider } from "@/features/ui/slider";
 import { ListMusic, SkipBack, SkipForward, Volume2, VolumeX } from "lucide-react";
-import React, { useContext, useState } from "react";
+import React, { useCallback, useContext, useState } from "react";
+
+function formatTime(seconds: number) {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+}
 
 interface PlayerBarProps {
     audioRef: React.RefObject<HTMLAudioElement>;
@@ -33,22 +39,16 @@ export function PlayerBar({
     const nextMutation = useQueueNext();
     const prevMutation = useQueuePrev();
 
-    const formatTime = (seconds: number) => {
-        const mins = Math.floor(seconds / 60);
-        const secs = Math.floor(seconds % 60);
-        return `${mins}:${secs.toString().padStart(2, "0")}`;
-    };
-
     // if the audio is playing, coming to and end and the person is seeking back
     // the audio will switch
     // this is expected as there is no proper way to prevent the audio from switching
     // and seek at the same time
-    const handleSeek = (value: number[]) => {
+    const handleSeek = useCallback((value: number[]) => {
         setSeeking(true);
         setSeekTime(value[0]);
-    };
+    }, [setSeeking]);
 
-    const handleSeekCommit = (value: number[]) => {
+    const handleSeekCommit = useCallback((value: number[]) => {
         const t = value[0];
 
         setSeekTime(t);
@@ -60,7 +60,7 @@ export function PlayerBar({
         }
 
         setSeeking(false);
-    };
+    }, [onSeekCommit, audioRef, setSeeking]);
 
     const playingSong = playingCollectionSong?.song;
     const displayTime = seeking ? seekTime : time;
