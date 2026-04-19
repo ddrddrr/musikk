@@ -31,18 +31,16 @@ export function PostReplySection({
             </div>
 
             {isReplying && (
-                <div className="mt-2 pl-2">
-                    <div className="rounded-sm border border-foreground bg-muted p-3">
-                        <PostForm
-                            replyTo={publication}
-                            setReplyTo={() => setIsReplying(false)}
-                            onSuccess={() => {
-                                setIsReplying(false);
-                                onReplyCreated?.();
-                            }}
-                            feedUserUUID={feedUserUUID}
-                        />
-                    </div>
+                <div className="mt-2 border-l-2 border-foreground pl-3">
+                    <PostForm
+                        replyTo={publication}
+                        setReplyTo={() => setIsReplying(false)}
+                        onSuccess={() => {
+                            setIsReplying(false);
+                            onReplyCreated?.();
+                        }}
+                        feedUserUUID={feedUserUUID}
+                    />
                 </div>
             )}
         </>

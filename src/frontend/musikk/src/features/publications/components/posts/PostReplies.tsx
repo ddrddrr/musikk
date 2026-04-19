@@ -2,7 +2,6 @@ import { Spinner } from "@/features/ui/spinner";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { usePublicationChildren } from "@/features/publications/api/queries.ts";
 import { Publication } from "@/features/publications/types.ts";
-import { Button } from "@/features/ui/button.tsx";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/features/ui/collapsible.tsx";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { ReactNode } from "react";
@@ -26,22 +25,20 @@ export function PostReplies({ publication, open, onOpenChange, renderChild }: Po
     return (
         <Collapsible open={open} onOpenChange={() => onOpenChange(!open)}>
             <CollapsibleTrigger asChild>
-                <Button variant="ghost" size="sm" className="text-xs">
-                    <span className="flex items-center gap-1">
-                        {isPending && open ? (
-                            <Spinner className="size-3" />
-                        ) : open ? (
-                            <ChevronUp size={12} />
-                        ) : (
-                            <ChevronDown size={12} />
-                        )}
-                        <span>
-                            {replies && replies.length > 0
-                                ? `${replies.length} ${replies.length === 1 ? "reply" : "replies"}`
-                                : "Load replies"}
-                        </span>
+                <button className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground hover:underline">
+                    {isPending && open ? (
+                        <Spinner className="size-3" />
+                    ) : open ? (
+                        <ChevronUp size={12} />
+                    ) : (
+                        <ChevronDown size={12} />
+                    )}
+                    <span>
+                        {replies && replies.length > 0
+                            ? `${replies.length} ${replies.length === 1 ? "reply" : "replies"}`
+                            : "Load replies"}
                     </span>
-                </Button>
+                </button>
             </CollapsibleTrigger>
             {open && (
                 <CollapsibleContent>

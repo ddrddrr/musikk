@@ -4,6 +4,7 @@ import { useCreateCollectionComment } from "@/features/publications/api/mutation
 import { commentSchema } from "@/features/publications/schemas.ts";
 import { Publication } from "@/features/publications/types.ts";
 import { Button } from "@/features/ui/button.tsx";
+import { Textarea } from "@/features/ui/textarea.tsx";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -54,7 +55,7 @@ export function CommentForm({
     return (
         <form onSubmit={handleSubmit(submitHandler)} className="flex flex-col gap-2">
             {replyTo && (
-                <div className="mb-2 flex justify-between rounded-sm border border-foreground bg-amber-100 p-2 text-xs text-muted-foreground">
+                <div className="mb-2 flex items-start justify-between border-l-2 border-foreground pl-2 text-xs text-muted-foreground">
                     <div className="min-w-0 max-w-xs truncate">
                         <div className="truncate font-medium">
                             {replyTo.author.display_name || "Anonymous"}
@@ -72,9 +73,9 @@ export function CommentForm({
                     </Button>
                 </div>
             )}
-            <textarea
+            <Textarea
                 {...register("content")}
-                className="w-full rounded-sm border border-foreground bg-card p-2 text-sm"
+                className="border border-foreground bg-card"
                 placeholder="Write a comment..."
             />
             {errors.content && <p className="text-xs text-destructive">{errors.content.message}</p>}

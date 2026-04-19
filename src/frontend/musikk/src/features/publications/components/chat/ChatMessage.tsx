@@ -20,7 +20,7 @@ export function ChatMessage({ message, isFirstInGroup = true }: ChatMessageProps
             <div
                 className={cn(
                     "flex max-w-[70%] flex-col gap-2 overflow-hidden rounded-sm border border-foreground p-3",
-                    isOwnMessage ? "bg-info/20" : "bg-muted",
+                    "bg-muted",
                 )}
             >
                 {showHeader && (

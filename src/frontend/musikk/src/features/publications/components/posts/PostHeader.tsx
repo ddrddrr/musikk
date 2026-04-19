@@ -9,7 +9,7 @@ type PostHeaderProps = {
 
 export function PostHeader({ author, dateAdded }: PostHeaderProps) {
     return (
-        <div className="flex items-center gap-2">
+        <div className="-ml-2 flex items-center gap-2">
             <UserIdentifier user={author} />
             <div className="text-xs text-muted-foreground">
                 {formatDateTime(dateAdded)}

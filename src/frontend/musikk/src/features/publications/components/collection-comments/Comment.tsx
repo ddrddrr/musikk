@@ -10,7 +10,7 @@ export function Comment({ comment, setReplyTo }: CommentProps) {
     return (
         <div className="rounded-sm border border-foreground bg-muted p-3">
             {comment.parent_uuid && comment.parent_author && comment.parent_repr && (
-                <div className="mb-2 rounded border border-border bg-amber-100 p-2 text-xs text-muted-foreground">
+                <div className="mb-2 border-l-2 border-foreground pl-2 text-xs text-muted-foreground">
                     <div className="truncate font-medium">
                         {comment.parent_author.display_name || "Anonymous"}
                     </div>

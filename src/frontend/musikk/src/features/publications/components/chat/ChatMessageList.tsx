@@ -10,11 +10,11 @@ interface ChatMessageListProps {
 function DateSeparator({ date }: { date: string }) {
     return (
         <div className="flex items-center gap-3 py-3">
-            <div className="h-[2px] flex-1 bg-black" />
+            <div className="h-[2px] flex-1 bg-foreground" />
             <span className="shrink-0 text-xs font-bold text-muted-foreground">
                 {formatDate(date)}
             </span>
-            <div className="h-[2px] flex-1 bg-black" />
+            <div className="h-[2px] flex-1 bg-foreground" />
         </div>
     );
 }
