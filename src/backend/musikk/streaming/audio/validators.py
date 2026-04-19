@@ -5,13 +5,24 @@ from typing import Protocol, runtime_checkable, TypeAlias
 import magic
 from rest_framework.exceptions import ValidationError
 
-from streaming.audio.config import MAX_FILE_SIZE, ALLOWED_FILE_TYPES
+from streaming.audio.config import (
+    ALLOWED_CODECS,
+    ALLOWED_FILE_TYPES,
+    MAX_CHANNELS,
+    MAX_DURATION_SECONDS,
+    MAX_FILE_SIZE,
+    MAX_SAMPLE_RATE,
+)
+from streaming.audio.probe import AudioStreamInfo, probe_audio
 
 
+# admin/testing
 BytesLike: TypeAlias = bytes | bytearray | memoryview
 Pathish: TypeAlias = str | os.PathLike[str]
 
 
+# django's UploadedFile exposes those but doesn't declare
+# a base type that could be used for type checking...
 @runtime_checkable
 class SeekableReader(Protocol):
     def read(self, n: int = ...) -> bytes: ...
@@ -21,10 +32,8 @@ class SeekableReader(Protocol):
 
 AudioInput: TypeAlias = BytesLike | Pathish | SeekableReader
 
-# TODO: run ffprobe and reject extreme sample rates, huge channel counts, etc.
 
-
-def validate_audio(song: AudioInput) -> None:
+def _validate_audio_file(song: AudioInput) -> None:
     header: bytes
     size: int
 
@@ -71,3 +80,33 @@ def validate_audio(song: AudioInput) -> None:
     subtype = mime.split("/", 1)[1].lower()
     if subtype not in ALLOWED_FILE_TYPES:
         raise ValidationError(f"Unsupported audio format: {subtype}.")
+
+
+def _validate_audio_properties(info: AudioStreamInfo) -> None:
+    if info.duration_seconds > MAX_DURATION_SECONDS:
+        raise ValidationError(
+            f"Audio is too long ({info.duration_seconds:.0f}s), "
+            f"maximum allowed is {MAX_DURATION_SECONDS}s."
+        )
+
+    if info.sample_rate < 1 or info.sample_rate > MAX_SAMPLE_RATE:
+        raise ValidationError(
+            f"Unsupported sample rate: {info.sample_rate} Hz. "
+            f"Must be between 1 and {MAX_SAMPLE_RATE} Hz."
+        )
+
+    if info.channels < 1 or info.channels > MAX_CHANNELS:
+        raise ValidationError(
+            f"Unsupported channel count: {info.channels}. "
+            f"Must be between 1 and {MAX_CHANNELS}."
+        )
+
+    if info.codec_name not in ALLOWED_CODECS:
+        raise ValidationError(f"Unsupported audio codec: {info.codec_name}.")
+
+
+def validate_audio(path: Pathish) -> AudioStreamInfo:
+    _validate_audio_file(path)
+    info = probe_audio(path)
+    _validate_audio_properties(info)
+    return info

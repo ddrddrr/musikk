@@ -45,6 +45,7 @@ class BaseSong(BaseModel):
         max_length=settings.MAX_PATH_LENGTH,
         help_text="Path to the m3u8 file representing the song.",
     )
+    duration_ms = models.IntegerField(null=True, blank=True)
 
     objects = BaseSongManager()
 

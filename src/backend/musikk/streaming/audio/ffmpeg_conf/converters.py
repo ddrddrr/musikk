@@ -7,6 +7,8 @@ from django.conf import settings
 from utils.cmd import run_shell_command
 
 
+# TODO: normalize sample rate/bit depth/channel count (to stereo)
+# do not reconvert lossy stuff
 class FFMPEGCommand:
     def __init__(
         self,
@@ -61,7 +63,6 @@ class FFMPEGCommand:
         return [str(self.output_path)]
 
 
-# TODO: probably change so bitrate is set at runtime(to be more extensible)
 class FFMPEGAudioConverter:
     def __init__(
         self,

@@ -1,7 +1,8 @@
+import dataclasses
 import tempfile
+from pathlib import Path
 
 from django.db import transaction
-from django.db.models import Q
 from rest_framework import status
 from rest_framework.generics import (
     RetrieveAPIView,
@@ -185,7 +186,17 @@ class CollectionSongCreateView(APIView):
             )
 
         audio = request.data.get("audio")
-        validate_audio(audio)
+
+        with tempfile.NamedTemporaryFile(delete=False) as tmp:
+            for chunk in audio.chunks():
+                tmp.write(chunk)
+            temp_path = tmp.name
+
+        try:
+            audio_info = validate_audio(temp_path)
+        except Exception:
+            Path(temp_path).unlink(missing_ok=True)
+            raise
 
         serializer = BaseSongCreateSerializer(
             data=request.data, context={"request": request}
@@ -196,10 +207,6 @@ class CollectionSongCreateView(APIView):
         collection_song_inst = CollectionSong.objects.create(
             collection=collection, song=base_song_inst
         )
-        with tempfile.NamedTemporaryFile(delete=False) as tmp:
-            for chunk in audio.chunks():
-                tmp.write(chunk)
-            temp_path = tmp.name
 
         UploadManager(song_uuid=base_song_inst.uuid).set_status("queued")
         convert_audio.apply_async(
@@ -208,6 +215,7 @@ class CollectionSongCreateView(APIView):
                 "song_uuid": str(base_song_inst.uuid),
                 "initiator_uuid": str(request.user.uuid),
                 "operation_id": request.data["operation_id"],
+                "audio_info": dataclasses.asdict(audio_info),
             }
         )
         return Response(

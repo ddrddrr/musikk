@@ -8,6 +8,7 @@ from django.conf import settings
 from django.db import transaction
 
 from utils.storage import delete_django_storage_dir
+from streaming.audio.probe import AudioStreamInfo
 from streaming.audio.processing_pipeline import AudioProcessingPipeline
 from streaming.audio.shaka_packager_conf.shaka_packager_wrapper import ManifestType
 from streaming.managers.upload_manager import UploadManager
@@ -30,6 +31,7 @@ def convert_audio(
     song_uuid: str | UUID,
     initiator_uuid: str | UUID = None,
     operation_id: str | UUID = None,
+    audio_info: dict | None = None,
     delete_orig_file: bool = True,
 ):
     str_uuid = str(song_uuid)
@@ -67,6 +69,9 @@ def convert_audio(
             song.content_path = song_repr.content_path
             song.mpd = song_repr.manifests[ManifestType.MPD]
             song.m3u8 = song_repr.manifests[ManifestType.M3U8]
+            if audio_info:
+                info = AudioStreamInfo(**audio_info)
+                song.duration_ms = int(info.duration_seconds * 1000)
             song.draft = False
             song.save()
 
