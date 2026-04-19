@@ -55,7 +55,7 @@ export function useCreatePost() {
             });
             if (variables.parentUUID) {
                 void queryClient.invalidateQueries({
-                    queryKey: publicationKeys.children(variables.parentUUID),
+                    queryKey: publicationKeys.childrenRoot(),
                 });
             }
         },

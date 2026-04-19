@@ -20,9 +20,9 @@ export function PostReplies({ publication, open, onOpenChange, renderChild }: Po
         isPending,
         error,
         refetch,
-    } = usePublicationChildren(publication.uuid, publication.has_children);
+    } = usePublicationChildren(publication.uuid, open);
 
-    if (!publication.has_children || !replies) return null;
+    if (!publication.has_children && !open) return null;
     return (
         <Collapsible open={open} onOpenChange={() => onOpenChange(!open)}>
             <CollapsibleTrigger asChild>
@@ -36,7 +36,7 @@ export function PostReplies({ publication, open, onOpenChange, renderChild }: Po
                             <ChevronDown size={12} />
                         )}
                         <span>
-                            {replies.length > 0
+                            {replies && replies.length > 0
                                 ? `${replies.length} ${replies.length === 1 ? "reply" : "replies"}`
                                 : "Load replies"}
                         </span>

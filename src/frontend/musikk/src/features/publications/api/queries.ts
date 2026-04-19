@@ -7,7 +7,7 @@ import { Chat, Publication } from "@/features/publications/types.ts";
 import { Attachment } from "@/features/publications/types.ts";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 
-async function fetchPublicationPage(
+export async function fetchPublicationPage(
     url: string,
     limit = 10,
     offset = 0,
@@ -55,11 +55,12 @@ export async function fetchPublicationChildren(pubUUID: UUID): Promise<Publicati
     return res.data.children;
 }
 
-export function usePublicationChildren(pubUUID: UUID, enabled = true) {
+export function usePublicationChildren(pubUUID: UUID, active = true) {
     return useQuery<Publication[]>({
         queryFn: () => fetchPublicationChildren(pubUUID),
         queryKey: publicationKeys.children(pubUUID),
-        enabled,
+        enabled: active,
+        refetchInterval: active ? 30_000 : false,
     });
 }
 
