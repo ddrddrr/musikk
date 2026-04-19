@@ -1,8 +1,5 @@
-import { getErrorDetail } from "@/api/errorUtils.ts";
-import { collectionRemoveSong } from "@/features/collections/api/mutations.ts";
 import { CollectionSong } from "@/features/collections/types.ts";
-import { useAddSong } from "@/features/song-queue/hooks/useQueueAPI.ts";
-import { useSongPlayHandler } from "@/features/songs/hooks/useSongPlayHandler.ts";
+import { useSongActions } from "@/features/songs/hooks/useSongActions.ts";
 import { Button } from "@/features/ui/button";
 import {
     DropdownMenu,
@@ -10,10 +7,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/features/ui/dropdown-menu.tsx";
-import { collectionKeys } from "@/features/collections/api/queryKeys.ts";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { BetweenHorizonalStart, EllipsisVertical, Play, Trash2 } from "lucide-react";
-import { toast } from "sonner";
 import { SongAddToPlaylistSubmenu } from "./SongAddToPlaylistSubmenu.tsx";
 
 interface SongMenuButtonProps {
@@ -31,20 +25,7 @@ export function SongMenuButton({
     showRemoveFromPlaylist = false,
     onRemoveFromQueue,
 }: SongMenuButtonProps) {
-    const queryClient = useQueryClient();
-    const collectionRemoveSongMutation = useMutation({
-        mutationFn: collectionRemoveSong,
-        onSuccess: (_data, variables) => {
-            void queryClient.invalidateQueries({
-                queryKey: collectionKeys.detail(variables.collectionUUID),
-            });
-        },
-        onError: (error) => {
-            toast.error(getErrorDetail(error, "Failed to remove song"));
-        },
-    });
-    const { onClick: onSongPlayClick } = useSongPlayHandler(collectionSong);
-    const addSongMutation = useAddSong();
+    const { removeSongMutation, onPlay, addSongMutation } = useSongActions(collectionSong);
 
     // TODO: improve styling
     return (
@@ -60,7 +41,7 @@ export function SongMenuButton({
                         <DropdownMenuItem
                             variant="destructive"
                             onSelect={() =>
-                                collectionRemoveSongMutation.mutate({
+                                removeSongMutation.mutate({
                                     collectionUUID: collectionSong.collection,
                                     songCollectionSongUUID: collectionSong.uuid,
                                 })
@@ -86,7 +67,7 @@ export function SongMenuButton({
                         <BetweenHorizonalStart className="mr-2 size-4" />
                         Add to queue
                     </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={onSongPlayClick}>
+                    <DropdownMenuItem onSelect={onPlay}>
                         <Play className="mr-2 size-4" />
                         Play
                     </DropdownMenuItem>

@@ -12,10 +12,7 @@ interface SongPlayButtonProps {
 export function SongPlayButton({ collectionSong, className = "", size = 20 }: SongPlayButtonProps) {
     const { isThisPlaying, onClick } = useSongPlayHandler(collectionSong);
 
-    const renderPlayPauseIcon = () => {
-        const iconSize = Math.floor(size * 0.6);
-        return isThisPlaying ? <Pause size={iconSize} /> : <Play size={iconSize} />;
-    };
+    const iconSize = Math.floor(size * 0.6);
 
     return (
         <Button
@@ -25,7 +22,7 @@ export function SongPlayButton({ collectionSong, className = "", size = 20 }: So
             onClick={onClick}
             className={className}
         >
-            {renderPlayPauseIcon()}
+            {isThisPlaying ? <Pause size={iconSize} /> : <Play size={iconSize} />}
         </Button>
     );
 }

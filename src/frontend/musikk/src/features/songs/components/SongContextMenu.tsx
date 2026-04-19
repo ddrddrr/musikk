@@ -1,8 +1,5 @@
-import { getErrorDetail } from "@/api/errorUtils.ts";
-import { collectionRemoveSong } from "@/features/collections/api/mutations.ts";
 import { CollectionSong } from "@/features/collections/types.ts";
-import { useAddSong } from "@/features/song-queue/hooks/useQueueAPI.ts";
-import { useSongPlayHandler } from "@/features/songs/hooks/useSongPlayHandler.ts";
+import { useSongActions } from "@/features/songs/hooks/useSongActions.ts";
 import {
     ContextMenu,
     ContextMenuContent,
@@ -10,11 +7,8 @@ import {
     ContextMenuPortal,
     ContextMenuTrigger,
 } from "@/features/ui/context-menu.tsx";
-import { collectionKeys } from "@/features/collections/api/queryKeys.ts";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { BetweenHorizonalStart, Play, Trash2 } from "lucide-react";
 import { JSX } from "react";
-import { toast } from "sonner";
 
 interface SongContextMenuProps {
     children: JSX.Element | JSX.Element[];
@@ -29,20 +23,7 @@ export function SongContextMenu({
     renderRemoveFromPlaylist = false,
     onRemoveFromQueue,
 }: SongContextMenuProps) {
-    const queryClient = useQueryClient();
-    const collectionRemoveSongMutation = useMutation({
-        mutationFn: collectionRemoveSong,
-        onSuccess: (_data, variables) => {
-            void queryClient.invalidateQueries({
-                queryKey: collectionKeys.detail(variables.collectionUUID),
-            });
-        },
-        onError: (error) => {
-            toast.error(getErrorDetail(error, "Failed to remove song"));
-        },
-    });
-    const { onClick: onSongPlayClick } = useSongPlayHandler(song);
-    const addSongMutation = useAddSong();
+    const { removeSongMutation, onPlay, addSongMutation } = useSongActions(song);
 
     return (
         <ContextMenu>
@@ -52,7 +33,7 @@ export function SongContextMenu({
                     {renderRemoveFromPlaylist && (
                         <ContextMenuItem
                             onSelect={() =>
-                                collectionRemoveSongMutation.mutate({
+                                removeSongMutation.mutate({
                                     collectionUUID: song.collection,
                                     songCollectionSongUUID: song.uuid,
                                 })
@@ -74,7 +55,7 @@ export function SongContextMenu({
                         <BetweenHorizonalStart className="mr-2 size-4" />
                         Add to queue
                     </ContextMenuItem>
-                    <ContextMenuItem onSelect={onSongPlayClick}>
+                    <ContextMenuItem onSelect={onPlay}>
                         <Play className="mr-2 size-4" />
                         Play
                     </ContextMenuItem>

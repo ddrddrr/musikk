@@ -31,10 +31,6 @@ export function SongAddToLikedButton({ collectionSong, className = "", size = 40
 
     const iconSize = Math.floor(size * 0.6);
 
-    const renderAddIcon = () => {
-        return collectionSong.song.is_liked ? <Check size={iconSize} /> : <Plus size={iconSize} />;
-    };
-
     function handleClick(collectionSong: CollectionSong) {
         if (collectionSong.song.is_liked) {
             return; // TODO: remove from liked
@@ -50,7 +46,7 @@ export function SongAddToLikedButton({ collectionSong, className = "", size = 40
             style={{ width: size, height: size }}
             className={className}
         >
-            {renderAddIcon()}
+            {collectionSong.song.is_liked ? <Check size={iconSize} /> : <Plus size={iconSize} />}
         </Button>
     );
 }

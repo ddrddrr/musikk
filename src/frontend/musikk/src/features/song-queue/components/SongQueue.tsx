@@ -22,19 +22,23 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
-function QueueItemActions({
-    item,
+function SongQueueActions({
     collectionSong,
+    item,
     onRemoveFromQueue,
 }: {
-    item: QueueItem;
     collectionSong: CollectionSong;
-    onRemoveFromQueue: () => void;
+    item?: QueueItem;
+    onRemoveFromQueue?: () => void;
 }) {
     const btn = songButtonProps.normal;
     return (
         <div className={cn("flex items-center", btn.gap)}>
-            <SongQueuePlayButton item={item} size={btn.size} className={btn.padding} />
+            {item ? (
+                <SongQueuePlayButton item={item} size={btn.size} className={btn.padding} />
+            ) : (
+                <SongPlayButton collectionSong={collectionSong} size={btn.size} className={btn.padding} />
+            )}
             <SongAddToLikedButton
                 collectionSong={collectionSong}
                 size={btn.size}
@@ -51,35 +55,6 @@ function QueueItemActions({
                 className={btn.padding}
                 iconSize={btn.iconSize}
                 onRemoveFromQueue={onRemoveFromQueue}
-            />
-        </div>
-    );
-}
-
-function ContextSongActions({ collectionSong }: { collectionSong: CollectionSong }) {
-    const btn = songButtonProps.normal;
-    return (
-        <div className={cn("flex items-center", btn.gap)}>
-            <SongPlayButton
-                collectionSong={collectionSong}
-                size={btn.size}
-                className={btn.padding}
-            />
-            <SongAddToLikedButton
-                collectionSong={collectionSong}
-                size={btn.size}
-                className={btn.padding}
-            />
-            <SongAddToQueueButton
-                collectionSong={collectionSong}
-                size={btn.size}
-                className={btn.padding}
-            />
-            <SongMenuButton
-                collectionSong={collectionSong}
-                size={btn.size}
-                className={btn.padding}
-                iconSize={btn.iconSize}
             />
         </div>
     );
@@ -140,9 +115,9 @@ export function SongQueue() {
                                         <SongContainer
                                             collectionSong={item.collection_song}
                                             actions={
-                                                <QueueItemActions
-                                                    item={item}
+                                                <SongQueueActions
                                                     collectionSong={item.collection_song}
+                                                    item={item}
                                                     onRemoveFromQueue={() => removeItemMutation.mutate(item.uuid)}
                                                 />
                                             }
@@ -164,7 +139,7 @@ export function SongQueue() {
                                         <SongContextMenu song={cs}>
                                             <SongContainer
                                                 collectionSong={cs}
-                                                actions={<ContextSongActions collectionSong={cs} />}
+                                                actions={<SongQueueActions collectionSong={cs} />}
                                             />
                                         </SongContextMenu>
                                     </li>

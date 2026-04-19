@@ -4,7 +4,7 @@ import { MediaThumbnail } from "@/features/common/MediaThumbnail.tsx";
 import { DefaultSongActions } from "@/features/songs/components/DefaultSongActions.tsx";
 import { AuthorLinks } from "@/features/user/components/AuthorLinks.tsx";
 import { cn } from "@/lib/utils.ts";
-import { type ReactNode, memo } from "react";
+import { type ReactNode } from "react";
 
 type SongContainerSize = "compact" | "normal";
 type SongContainerVariant = "inline" | "stacked";
@@ -65,17 +65,9 @@ const authorsVariants = cva("truncate text-muted-foreground", {
     defaultVariants: { size: "normal" },
 });
 
-const gapVariants = cva("", {
-    variants: {
-        size: {
-            compact: "gap-2",
-            normal: "gap-4",
-        },
-    },
-    defaultVariants: { size: "normal" },
-});
+const gapClass = { compact: "gap-2", normal: "gap-4" } as const;
 
-export const SongContainer = memo(function SongContainer({
+export function SongContainer({
     collectionSong,
     size = "normal",
     variant = "inline",
@@ -89,10 +81,8 @@ export const SongContainer = memo(function SongContainer({
         <DefaultSongActions collectionSong={collectionSong} size={size} />
     );
 
-    const gapClass = gapVariants({ size });
-
     const mediaAndTitle = (
-        <div className={cn("flex min-w-0 items-center", gapClass)}>
+        <div className={cn("flex min-w-0 items-center", gapClass[size])}>
             {showImage && <MediaThumbnail src={song.image} className={imageVariants({ size })} />}
             <div className="flex min-w-0 flex-col">
                 <p className={titleVariants({ size })}>{song.title}</p>
@@ -109,7 +99,7 @@ export const SongContainer = memo(function SongContainer({
                 {mediaAndTitle}
                 <div className="flex">
                     <div className={cn("shrink-0", imageVariants({ size }))} />
-                    <div className={cn("flex flex-1", gapClass)}>{renderedActions}</div>
+                    <div className={cn("flex flex-1", gapClass[size])}>{renderedActions}</div>
                 </div>
             </div>
         );
@@ -121,4 +111,4 @@ export const SongContainer = memo(function SongContainer({
             <div className="shrink-0">{renderedActions}</div>
         </div>
     );
-});
+}
