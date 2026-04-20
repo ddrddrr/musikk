@@ -8,6 +8,11 @@ from pathlib import Path
 from utils.storage import delete_django_storage_dir
 from streaming.audio.exceptions import AudioProcessingPipelineError
 from streaming.audio.ffmpeg_conf.ffmpeg_wrapper import FFMPEGWrapper, FFMPEGFull
+from streaming.audio.normalization import build_normalization_filters
+from streaming.audio.probes import (
+    AudioStreamInfo,
+    get_audio_loudness,
+)
 from streaming.audio.shaka_packager_conf.shaka_packager_wrapper import (
     ShakaPackagerWrapper,
     ShakaPackagerMPDAndM3U8,
@@ -26,8 +31,11 @@ class ProcessingContext:
     orig_audio_file_path: str
     intermediate_dir: str
     final_dir: str
+    audio_info: AudioStreamInfo
     converted_paths: list[str] = field(default_factory=list)
     song_repr: SongRepresentation | None = None
+    loudness_lufs: float | None = None
+    true_peak_dbtp: float | None = None
 
 
 class Step(ABC):
@@ -43,6 +51,17 @@ class Step(ABC):
         return None
 
 
+class LoudnessMeasurementStep(Step):
+    def process(self, ctx: ProcessingContext) -> None:
+        try:
+            lufs, peak = get_audio_loudness(ctx.orig_audio_file_path)
+            ctx.loudness_lufs = lufs
+            ctx.true_peak_dbtp = peak
+        except Exception:
+            logger.exception("Loudness measurement failed")
+            raise
+
+
 class FFmpegStep(Step):
     def __init__(self, ffmpeg_wrapper: FFMPEGWrapper = FFMPEGFull):
         self.wrapper = ffmpeg_wrapper
@@ -51,8 +70,12 @@ class FFmpegStep(Step):
         try:
             logger.debug(f"Starting FFmpeg conversion for {ctx.orig_audio_file_path}")
 
+            filters = build_normalization_filters(ctx.audio_info)
             converted = self.wrapper.convert_audio(
-                file_path=ctx.orig_audio_file_path, output_dir=ctx.intermediate_dir
+                file_path=ctx.orig_audio_file_path,
+                output_dir=ctx.intermediate_dir,
+                audio_info=ctx.audio_info,
+                filters=filters,
             )
             if not converted:
                 raise AudioProcessingPipelineError("FFmpeg step produced no outputs")
@@ -107,6 +130,8 @@ class ProcessingResult:
     def __init__(self, song_repr: SongRepresentation, context: ProcessingContext):
         self.song_repr = song_repr
         self.context = context
+        self.loudness_lufs = context.loudness_lufs
+        self.true_peak_dbtp = context.true_peak_dbtp
 
 
 class ProcessingPipeline:
@@ -114,12 +139,18 @@ class ProcessingPipeline:
         self.steps = steps
         self.do_cleanup = do_cleanup
 
-    def run(self, source: str, final_storage_dir: str) -> ProcessingResult:
+    def run(
+        self,
+        source: str,
+        final_storage_dir: str,
+        audio_info: AudioStreamInfo,
+    ) -> ProcessingResult:
         intermediate_dir = tempfile.mkdtemp()
         ctx = ProcessingContext(
             orig_audio_file_path=source,
             final_dir=str(final_storage_dir),
             intermediate_dir=intermediate_dir,
+            audio_info=audio_info,
         )
 
         executed: list[Step] = []
@@ -134,7 +165,7 @@ class ProcessingPipeline:
                     "Pipeline finished without a SongRepresentation"
                 )
 
-            logger.debug(f"Audio processing pipeline completed successfully")
+            logger.debug("Audio processing pipeline done")
             return ProcessingResult(song_repr=ctx.song_repr, context=ctx)
         except Exception:
             logger.exception(
@@ -150,6 +181,10 @@ class ProcessingPipeline:
 
 
 AudioProcessingPipeline = ProcessingPipeline(
-    steps=[FFmpegStep(FFMPEGFull), ShakaPackagerStep(ShakaPackagerMPDAndM3U8)],
+    steps=[
+        LoudnessMeasurementStep(),
+        FFmpegStep(FFMPEGFull),
+        ShakaPackagerStep(ShakaPackagerMPDAndM3U8),
+    ],
     do_cleanup=True,
 )

@@ -1,5 +1,6 @@
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { PlaybackContext } from "@/features/playback/providers/playbackContext.ts";
+import { useLoudnessNormalization } from "@/features/player/hooks/useLoudnessNormalization.ts";
 import { usePlayer } from "@/features/player/hooks/usePlayer.ts";
 import { PlayerBar } from "@/features/player/PlayerBar.tsx";
 import React, { memo, useContext, useRef, useState } from "react";
@@ -13,7 +14,7 @@ export const PlayerBox = memo(function PlayerBox({
     const [totalDuration, setTotalDuration] = useState(0);
     const [time, setTime] = useState(0);
     const [seeking, setSeeking] = useState(false);
-    const { queueError, queueRefetch } = useContext(PlaybackContext);
+    const { queueError, queueRefetch, playingCollectionSong } = useContext(PlaybackContext);
 
     const { handleLoadedMetadata, handleTimeUpdate, handleOnEnded } = usePlayer({
         audioRef,
@@ -21,6 +22,11 @@ export const PlayerBox = memo(function PlayerBox({
         onTimeUpdate: (currentTime) => {
             if (!seeking) setTime(currentTime);
         },
+    });
+
+    useLoudnessNormalization({
+        audioRef,
+        song: playingCollectionSong?.song,
     });
 
     // TODO: fine for now, but probably move

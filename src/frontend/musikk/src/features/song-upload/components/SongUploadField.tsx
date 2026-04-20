@@ -36,15 +36,8 @@ export function SongUploadField({ songIndex }: SongUploadProps) {
                 />
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2">
-                <div className="flex flex-col gap-2">
-                    <ImageField name={`songs.${songIndex}.image`} />
-                </div>
-
-                <div className="flex flex-col gap-2">
-                    <AudioField name={`songs.${songIndex}.audio`} />
-                </div>
-            </div>
+            <ImageField name={`songs.${songIndex}.image`} />
+            <AudioField name={`songs.${songIndex}.audio`} />
 
             <FormField
                 name={`songs.${songIndex}.operationID`}

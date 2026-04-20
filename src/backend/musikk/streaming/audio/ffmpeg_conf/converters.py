@@ -7,60 +7,48 @@ from django.conf import settings
 from utils.cmd import run_shell_command
 
 
-# TODO: normalize sample rate/bit depth/channel count (to stereo)
-# do not reconvert lossy stuff
-class FFMPEGCommand:
-    def __init__(
-        self,
-        input_path: Path,
-        output_path: Path,
-        encoder: str,
-        bitrate: int | None = None,
-        extras: list[str] | None = None,
-        strip_non_audio: bool = True,
-        movflags_faststart: bool = True,
-    ):
-        self.input_path = input_path
-        self.output_path = output_path
-        self.encoder = encoder
-        self.bitrate = bitrate
-        self.extras = extras or []
-        self.strip_non_audio = strip_non_audio
-        self.movflags_faststart = movflags_faststart
+def build_ffmpeg_command(
+    input_path: Path,
+    output_path: Path,
+    encoder: str,
+    bitrate: int | None = None,
+    extras: list[str] | None = None,
+    filters: list[str] | None = None,
+) -> list[str]:
+    """
+    Build an ffmpeg transcoding command.
 
-    def build(self) -> list[str]:
-        parts: list[str] = []
-        parts += self._input_args()
-        parts += self._strip_non_audio_args()
-        parts += self._encoder_args()
-        parts += self._extras_args()
-        parts += self._bitrate_args()
-        parts += self._save_options_args()
-        parts += self._output_arg()
-        return parts
+    ffmpeg flags:
+        - `-vn -sn -dn`
+            remove video, subtitle, and data streams (keep audio only)
+        - `-af <filters>`
+            audio filter graph (e.g. loudnorm, volume)
+        - `-c:a <encoder>`
+            audio codec (e.g. flac, libfdk_aac)
+        - `-b:a <bitrate>k`
+            target bitrate (kbps)
+        - `-movflags +faststart`
+            move the moov atom to the beginning of the file for faster streaming start
+    """
+    parts: list[str] = [settings.FFMPEG_BIN, "-i", str(input_path)]
 
-    def _input_args(self) -> list[str]:
-        return [settings.FFMPEG_BIN, "-i", str(self.input_path)]
+    parts += ["-vn", "-sn", "-dn"]
+    if filters:
+        parts += ["-af", ",".join(filters)]
 
-    def _strip_non_audio_args(self) -> list[str]:
-        return ["-vn", "-sn", "-dn"] if self.strip_non_audio else []
+    parts += ["-c:a", encoder]
 
-    def _encoder_args(self) -> list[str]:
-        return ["-c:a", self.encoder]
+    if extras:
+        parts += list(extras)
 
-    def _bitrate_args(self) -> list[str]:
-        if self.bitrate:
-            return ["-b:a", f"{self.bitrate}k"]
-        return []
+    if bitrate:
+        parts += ["-b:a", f"{bitrate}k"]
 
-    def _extras_args(self) -> list[str]:
-        return list(self.extras) if self.extras else []
+    parts += ["-movflags", "+faststart"]
 
-    def _save_options_args(self) -> list[str]:
-        return ["-movflags", "+faststart"] if self.movflags_faststart else []
+    parts.append(str(output_path))
 
-    def _output_arg(self) -> list[str]:
-        return [str(self.output_path)]
+    return parts
 
 
 class FFMPEGAudioConverter:
@@ -70,26 +58,34 @@ class FFMPEGAudioConverter:
         bitrate: int | None = None,
         extras: list[str] | None = None,
         timeout: int | None = 60,
+        lossless: bool = False,
     ):
         self.encoder = encoder
         self.bitrate = bitrate
         self.extras = extras or []
         self.timeout = timeout
+        self.lossless = lossless
 
-    def convert_song(self, file_path: Path, storage_dir: Path) -> str:
+    def convert_song(
+        self,
+        file_path: Path,
+        storage_dir: Path,
+        filters: list[str] | None = None,
+    ) -> str:
         """
         Transcodes a single audio file and returns the local output path (string).
         """
         output_path = self._output_file_path_arg(storage_dir=storage_dir)
 
         run_shell_command(
-            FFMPEGCommand(
+            build_ffmpeg_command(
                 input_path=file_path,
                 output_path=Path(output_path),
                 encoder=self.encoder,
                 bitrate=self.bitrate,
                 extras=self.extras,
-            ).build()
+                filters=filters,
+            )
         )
 
         return output_path
@@ -101,7 +97,7 @@ class FFMPEGAudioConverter:
         )
 
 
-FLAC_CONVERTER = FFMPEGAudioConverter("flac")
+FLAC_CONVERTER = FFMPEGAudioConverter("flac", lossless=True)
 
 AACHEv2_CONVERTER = FFMPEGAudioConverter(
     encoder="libfdk_aac",

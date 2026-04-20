@@ -32,55 +32,61 @@ class SongRepresentation:
     manifests: dict[ManifestType, str]
 
 
-class ShakaPackagerCommand:
+def build_shaka_packager_command(
+    file_paths: list[Path],
+    tmpdir: str,
+    bin_path: str = settings.SHAKA_PACKAGER_BIN,
+    segment_duration: int = 3,  # s
+) -> tuple[list[str], Path, Path]:
     """
-    Command builder for `shaka-packager`.
-    Responsible for building the command and returning the manifest output paths.
+    Build a shaka-packager command that creates DASH (MPD) and HLS (M3U8) manifests.
+
+    Returns:
+        cmd, mpd_output_path, hls_master_output_path
+
+    shaka-packager flags:
+        - `input=<path>,stream=audio,init_segment=...,segment_template=...,playlist_name=...`
+            added per every file;
+            pick audio stream, define where to write the init segment,
+            the naming pattern for media segments, and the per-representation HLS playlist filename
+        - `--segment_duration <seconds>`
+            target segment duration (default==3s)
+        - `--generate_static_live_mpd`
+            produce a DASH manifest with type="static", so seeking works properly
+            (default is "dynamic")
+        - `--mpd_output=<path>`
+            DASH manifest path
+        - `--hls_master_playlist_output=<path>`
+            HLS master playlist path
     """
+    tmpdir_path = Path(tmpdir)
 
-    def __init__(
-        self,
-        local_paths: list[Path],
-        tmpdir: str,
-        bin_path: str = settings.SHAKA_PACKAGER_BIN,
-        segment_duration=3,  # seconds
-    ):
-        self.local_paths = local_paths
-        self.tmpdir = Path(tmpdir)
-        self.bin_path = bin_path
-        self.segment_duration = segment_duration
+    inputs: list[str] = []
+    for i, fpath in enumerate(file_paths):
+        base = f"audio_{i}"
+        init_seg = tmpdir_path / f"{base}_init.mp4"
+        segment_tmpl = tmpdir_path / f"{base}_$Number$.m4s"
+        playlist_name = f"{base}.m3u8"
 
-    def build(self) -> tuple[list[str], Path, Path]:
-        """
-        Returns:
-            tuple (cmd, mpd_out, hls_master_out)
-        """
-        inputs_args: list[str] = []
-        for i, local in enumerate(self.local_paths):
-            base = f"audio_{i}"
-            init_seg = self.tmpdir / f"{base}_init.mp4"
-            segment_tmpl = self.tmpdir / f"{base}_$Number$.m4s"
-            playlist_name = f"{base}.m3u8"  # per-representation HLS playlist
+        arg = (
+            f"input={fpath.as_posix()},stream=audio,"
+            f"init_segment={init_seg.as_posix()},"
+            f"segment_template={segment_tmpl.as_posix()},"
+            f"playlist_name={playlist_name}"
+        )
+        inputs.append(arg)
 
-            arg = (
-                f"input={local.as_posix()},stream=audio,"
-                f"init_segment={init_seg.as_posix()},"
-                f"segment_template={segment_tmpl.as_posix()},"
-                f"playlist_name={playlist_name}"
-            )
-            inputs_args.append(arg)
+    mpd_out = tmpdir_path / "manifest.mpd"
+    hls_master_out = tmpdir_path / "master.m3u8"
 
-        mpd_out = self.tmpdir / "manifest.mpd"
-        hls_master_out = self.tmpdir / "master.m3u8"
+    cmd = [bin_path]
+    cmd.extend(inputs)
+    cmd.extend(["--segment_duration", str(segment_duration)])
+    cmd.append("--generate_static_live_mpd")
+    cmd.append(f"--mpd_output={mpd_out.as_posix()}")
+    cmd.append(f"--hls_master_playlist_output={hls_master_out.as_posix()}")
 
-        cmd: list[str] = [self.bin_path]
-        cmd.extend(inputs_args)
-        cmd.extend(["--segment_duration", str(self.segment_duration)])
-        cmd.append("--generate_static_live_mpd")
-        cmd.append(f"--mpd_output={mpd_out.as_posix()}")
-        cmd.append(f"--hls_master_playlist_output={hls_master_out.as_posix()}")
-
-        return cmd, mpd_out, hls_master_out
+    return cmd, mpd_out, hls_master_out
 
 
 class ShakaPackagerWrapper:
@@ -115,9 +121,9 @@ class ShakaPackagerWrapper:
         storage_dir = str(storage_dir)
         with tempfile.TemporaryDirectory() as tmpdir:
             try:
-                cmd, mpd_out, hls_master_out = ShakaPackagerCommand(
-                    local_paths=local_input_paths, tmpdir=tmpdir
-                ).build()
+                cmd, mpd_out, hls_master_out = build_shaka_packager_command(
+                    file_paths=local_input_paths, tmpdir=tmpdir
+                )
 
                 run_shell_command(cmd)
                 orig_to_transferred_path_map = local_dir_to_django_storage(

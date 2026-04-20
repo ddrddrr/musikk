@@ -17,7 +17,7 @@ def _mock_song_repr():
         ManifestType.MPD: "path/to/manifest.mpd",
         ManifestType.M3U8: "path/to/playlist.m3u8",
     }
-    return Mock(song_repr=song_repr)
+    return Mock(song_repr=song_repr, loudness_lufs=-14.0, true_peak_dbtp=-1.5)
 
 
 @patch("streaming.audio.tasks.send_ws_event")

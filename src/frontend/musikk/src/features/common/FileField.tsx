@@ -33,7 +33,7 @@ export function FileField({
                         <FormLabel>{label}</FormLabel>
 
                         <FormControl>
-                            <div className="rounded-sm border-2 border-foreground bg-muted p-4">
+                            <div className="overflow-hidden rounded-sm border-2 border-foreground bg-muted p-4">
                                 <label className="flex w-full min-w-0 cursor-pointer items-center gap-3 overflow-hidden">
                                     <span className="shrink-0 rounded border-2 border-foreground bg-brand px-2 py-1 text-sm font-medium text-brand-foreground">
                                         {buttonText}

@@ -8,7 +8,7 @@ from django.conf import settings
 from django.db import transaction
 
 from utils.storage import delete_django_storage_dir
-from streaming.audio.probe import AudioStreamInfo
+from streaming.audio.probes import AudioStreamInfo
 from streaming.audio.processing_pipeline import AudioProcessingPipeline
 from streaming.audio.shaka_packager_conf.shaka_packager_wrapper import ManifestType
 from streaming.managers.upload_manager import UploadManager
@@ -29,9 +29,9 @@ def convert_audio(
     self,
     file_path: str | Path,
     song_uuid: str | UUID,
+    audio_info: dict,
     initiator_uuid: str | UUID = None,
     operation_id: str | UUID = None,
-    audio_info: dict | None = None,
     delete_orig_file: bool = True,
 ):
     str_uuid = str(song_uuid)
@@ -45,10 +45,13 @@ def convert_audio(
         operation_id=operation_id,
     )
 
+    info = AudioStreamInfo(**audio_info)
+
     try:
         result = AudioProcessingPipeline.run(
             source=file_path,
             final_storage_dir=os.path.join(settings.AUDIO_CONTENT_PATH, str_uuid),
+            audio_info=info,
         )
         song_repr = result.song_repr
 
@@ -69,9 +72,11 @@ def convert_audio(
             song.content_path = song_repr.content_path
             song.mpd = song_repr.manifests[ManifestType.MPD]
             song.m3u8 = song_repr.manifests[ManifestType.M3U8]
-            if audio_info:
-                info = AudioStreamInfo(**audio_info)
-                song.duration_ms = int(info.duration_seconds * 1000)
+            song.duration_ms = int(info.duration_seconds * 1000)
+            song.source_codec = info.codec_name
+            song.source_bitrate = info.bit_rate
+            song.loudness_lufs = result.loudness_lufs
+            song.true_peak_dbtp = result.true_peak_dbtp
             song.draft = False
             song.save()
 

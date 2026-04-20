@@ -9,4 +9,6 @@ export interface Song extends BaseModel {
     m3u8: string;
     image?: string;
     is_liked?: boolean;
+    loudness_lufs?: number | null;
+    true_peak_dbtp?: number | null;
 }

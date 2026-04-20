@@ -10,7 +10,7 @@ from streaming.audio.config import (
     MAX_DURATION_SECONDS,
     MAX_SAMPLE_RATE,
 )
-from streaming.audio.probe import AudioStreamInfo, probe_audio
+from streaming.audio.probes import AudioStreamInfo, get_audio_metadata
 from streaming.audio.validators import _validate_audio_properties
 
 
@@ -50,11 +50,11 @@ def _mock_result(stdout: str) -> MagicMock:
 
 
 class ProbeAudioTests(TestCase):
-    @patch("streaming.audio.probe.run_shell_command")
+    @patch("streaming.audio.probes.run_shell_command")
     def test_valid_output(self, mock_cmd):
         mock_cmd.return_value = _mock_result(_ffprobe_output())
 
-        info = probe_audio("/fake/path.wav")
+        info = get_audio_metadata("/fake/path.wav")
 
         self.assertEqual(info.duration_seconds, 180.0)
         self.assertEqual(info.sample_rate, 44100)
@@ -62,58 +62,58 @@ class ProbeAudioTests(TestCase):
         self.assertEqual(info.codec_name, "pcm_s16le")
         self.assertEqual(info.bit_depth, 16)
 
-    @patch("streaming.audio.probe.run_shell_command")
+    @patch("streaming.audio.probes.run_shell_command")
     def test_malformed_file_raises(self, mock_cmd):
         mock_cmd.side_effect = subprocess.CalledProcessError(1, "ffprobe")
 
         with self.assertRaises(ValidationError) as ctx:
-            probe_audio("/fake/path.wav")
+            get_audio_metadata("/fake/path.wav")
         self.assertIn("malformed", str(ctx.exception.detail))
 
-    @patch("streaming.audio.probe.run_shell_command")
+    @patch("streaming.audio.probes.run_shell_command")
     def test_timeout_raises(self, mock_cmd):
         mock_cmd.side_effect = subprocess.TimeoutExpired("ffprobe", 30)
 
         with self.assertRaises(ValidationError) as ctx:
-            probe_audio("/fake/path.wav")
+            get_audio_metadata("/fake/path.wav")
         self.assertIn("malformed", str(ctx.exception.detail))
 
-    @patch("streaming.audio.probe.run_shell_command")
+    @patch("streaming.audio.probes.run_shell_command")
     def test_no_audio_stream_raises(self, mock_cmd):
         mock_cmd.return_value = _mock_result(
             _ffprobe_output(include_stream=False)
         )
 
         with self.assertRaises(ValidationError) as ctx:
-            probe_audio("/fake/path.wav")
+            get_audio_metadata("/fake/path.wav")
         self.assertIn("No audio stream", str(ctx.exception.detail))
 
-    @patch("streaming.audio.probe.run_shell_command")
+    @patch("streaming.audio.probes.run_shell_command")
     def test_multiple_audio_streams_raises(self, mock_cmd):
         two_streams = json.loads(_ffprobe_output())
         two_streams["streams"].append(two_streams["streams"][0])
         mock_cmd.return_value = _mock_result(json.dumps(two_streams))
 
         with self.assertRaises(ValidationError) as ctx:
-            probe_audio("/fake/path.wav")
+            get_audio_metadata("/fake/path.wav")
         self.assertIn("2 audio streams", str(ctx.exception.detail))
 
-    @patch("streaming.audio.probe.run_shell_command")
+    @patch("streaming.audio.probes.run_shell_command")
     def test_fallback_to_format_duration(self, mock_cmd):
         mock_cmd.return_value = _mock_result(
             _ffprobe_output(stream_duration=None, format_duration="240.5")
         )
 
-        info = probe_audio("/fake/path.wav")
+        info = get_audio_metadata("/fake/path.wav")
         self.assertAlmostEqual(info.duration_seconds, 240.5)
 
-    @patch("streaming.audio.probe.run_shell_command")
+    @patch("streaming.audio.probes.run_shell_command")
     def test_no_bit_depth(self, mock_cmd):
         mock_cmd.return_value = _mock_result(
             _ffprobe_output(bit_depth=None)
         )
 
-        info = probe_audio("/fake/path.wav")
+        info = get_audio_metadata("/fake/path.wav")
         self.assertIsNone(info.bit_depth)
 
 
@@ -125,6 +125,7 @@ class ValidateAudioPropertiesTests(TestCase):
             "channels": 2,
             "codec_name": "pcm_s16le",
             "bit_depth": 16,
+            "bit_rate": None,
         }
         defaults.update(overrides)
         return AudioStreamInfo(**defaults)
@@ -171,7 +172,7 @@ class ValidateAudioPropertiesTests(TestCase):
         _validate_audio_properties(self._make_info(channels=MAX_CHANNELS))
 
     def test_unknown_codec(self):
-        info = self._make_info(codec_name="mp3")
+        info = self._make_info(codec_name="wma")
         with self.assertRaises(ValidationError) as ctx:
             _validate_audio_properties(info)
         self.assertIn("codec", str(ctx.exception.detail).lower())
@@ -180,4 +181,8 @@ class ValidateAudioPropertiesTests(TestCase):
         from streaming.audio.config import ALLOWED_CODECS
 
         for codec in ALLOWED_CODECS:
+            _validate_audio_properties(self._make_info(codec_name=codec))
+
+    def test_pcm_codecs_pass(self):
+        for codec in ("pcm_s16le", "pcm_s24be", "pcm_f32le"):
             _validate_audio_properties(self._make_info(codec_name=codec))

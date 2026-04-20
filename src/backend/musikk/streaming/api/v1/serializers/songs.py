@@ -25,6 +25,8 @@ class BaseSongRetrieveSerializer(BaseModelSerializer):
             "is_liked",
             "authors",
             "duration_ms",
+            "loudness_lufs",
+            "true_peak_dbtp",
         ]
 
     def get_mpd(self, obj):

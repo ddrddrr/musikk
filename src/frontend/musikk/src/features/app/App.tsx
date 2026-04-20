@@ -9,6 +9,7 @@ import { EmailVerificationPage } from "@/features/auth/components/EmailVerificat
 import { RequireAuth } from "@/features/auth/components/RequireAuth.tsx";
 import { AuthProvider } from "@/features/auth/providers/AuthProvider.tsx";
 import { WebSocketProvider } from "@/providers/WebSocketProvider";
+import { LoudnessPresetProvider } from "@/features/player/providers/LoudnessPresetProvider.tsx";
 import { DeviceListProvider } from "../playback/providers/DeviceListProvider";
 import { PlaybackProvider } from "../playback/providers/PlaybackProvider";
 import { AlbumUploadPage } from "./AlbumUploadPage.tsx";
@@ -42,7 +43,9 @@ export function App() {
                                 <WebSocketProvider>
                                     <DeviceListProvider>
                                         <PlaybackProvider>
-                                            <AuthenticatedApp />
+                                            <LoudnessPresetProvider>
+                                                <AuthenticatedApp />
+                                            </LoudnessPresetProvider>
                                         </PlaybackProvider>
                                     </DeviceListProvider>
                                 </WebSocketProvider>

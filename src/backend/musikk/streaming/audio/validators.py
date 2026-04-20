@@ -6,14 +6,14 @@ import magic
 from rest_framework.exceptions import ValidationError
 
 from streaming.audio.config import (
-    ALLOWED_CODECS,
     ALLOWED_FILE_TYPES,
     MAX_CHANNELS,
     MAX_DURATION_SECONDS,
     MAX_FILE_SIZE,
     MAX_SAMPLE_RATE,
+    is_codec_allowed,
 )
-from streaming.audio.probe import AudioStreamInfo, probe_audio
+from streaming.audio.probes import AudioStreamInfo, get_audio_metadata
 
 
 # admin/testing
@@ -33,7 +33,10 @@ class SeekableReader(Protocol):
 AudioInput: TypeAlias = BytesLike | Pathish | SeekableReader
 
 
-def _validate_audio_file(song: AudioInput) -> None:
+def _validate_size_type(song: AudioInput) -> None:
+    """
+    Validate size and type
+    """
     header: bytes
     size: int
 
@@ -83,6 +86,9 @@ def _validate_audio_file(song: AudioInput) -> None:
 
 
 def _validate_audio_properties(info: AudioStreamInfo) -> None:
+    """
+    Validate duration, sample rate, channels, codec
+    """
     if info.duration_seconds > MAX_DURATION_SECONDS:
         raise ValidationError(
             f"Audio is too long ({info.duration_seconds:.0f}s), "
@@ -101,12 +107,12 @@ def _validate_audio_properties(info: AudioStreamInfo) -> None:
             f"Must be between 1 and {MAX_CHANNELS}."
         )
 
-    if info.codec_name not in ALLOWED_CODECS:
+    if not is_codec_allowed(info.codec_name):
         raise ValidationError(f"Unsupported audio codec: {info.codec_name}.")
 
 
 def validate_audio(path: Pathish) -> AudioStreamInfo:
-    _validate_audio_file(path)
-    info = probe_audio(path)
+    _validate_size_type(path)
+    info = get_audio_metadata(path)
     _validate_audio_properties(info)
     return info

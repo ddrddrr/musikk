@@ -42,7 +42,7 @@ export function PlayerBar({
     // if the audio is playing, coming to and end and the person is seeking back
     // the audio will switch
     // this is expected as there is no proper way to prevent the audio from switching
-    // and seek at the same time
+    // and seek at the same time (same, e.g., in Spotify)
     const handleSeek = useCallback((value: number[]) => {
         setSeeking(true);
         setSeekTime(value[0]);

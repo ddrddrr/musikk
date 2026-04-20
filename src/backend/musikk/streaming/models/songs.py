@@ -47,6 +47,11 @@ class BaseSong(BaseModel):
     )
     duration_ms = models.IntegerField(null=True, blank=True)
 
+    source_codec = models.CharField(max_length=32, blank=True, default="")
+    source_bitrate = models.IntegerField(null=True, blank=True)
+    loudness_lufs = models.FloatField(null=True, blank=True)
+    true_peak_dbtp = models.FloatField(null=True, blank=True)
+
     objects = BaseSongManager()
 
     def delete(self, using=None, keep_parents=False):

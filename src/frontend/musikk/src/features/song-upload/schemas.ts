@@ -1,7 +1,7 @@
 import z from "zod";
 
 const MAX_FILE_SIZE = 2 * 1024 * 1024 * 1024;
-const ALLOWED_EXTENSIONS = [".wav", ".flac", ".aiff", ".aif", ".m4a"];
+const ALLOWED_EXTENSIONS = [".wav", ".flac", ".aiff", ".aif", ".m4a", ".mp3", ".ogg", ".opus", ".aac"];
 
 export const SongSchema = z.object({
     operationID: z.uuid().optional(),
@@ -11,7 +11,7 @@ export const SongSchema = z.object({
         .refine((f) => f.size <= MAX_FILE_SIZE, "File is too large (max 2GB)")
         .refine(
             (f) => ALLOWED_EXTENSIONS.some((ext) => f.name.toLowerCase().endsWith(ext)),
-            "Unsupported format. Accepted: WAV, FLAC, AIFF, ALAC",
+            "Unsupported format. Accepted: WAV, FLAC, AIFF, ALAC, MP3, OGG, Opus, AAC",
         ),
     image: z.instanceof(File).optional(),
     uuid: z.uuid().optional(),
