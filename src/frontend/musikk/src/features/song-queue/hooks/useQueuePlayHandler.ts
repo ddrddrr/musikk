@@ -3,8 +3,8 @@ import { QueueItem } from "@/features/song-queue/api/types.ts";
 import { skipTo } from "@/features/song-queue/mutations.ts";
 import { queueKeys } from "@/features/song-queue/queryKeys.ts";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
 import { useCallback } from "react";
+import { toast } from "sonner";
 
 export function useQueuePlayHandler(item: QueueItem) {
     const queryClient = useQueryClient();

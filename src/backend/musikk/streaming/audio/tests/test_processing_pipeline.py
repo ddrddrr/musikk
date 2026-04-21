@@ -2,21 +2,21 @@ import shutil
 import tempfile
 import uuid
 from pathlib import Path
-from unittest.mock import patch, Mock
+from unittest.mock import Mock, patch
 
-from django.test import TestCase, override_settings
 from django.core.files.storage import default_storage
-
+from django.test import TestCase, override_settings
 from utils.storage import delete_django_storage_dir
+
+from streaming.audio.exceptions import AudioProcessingPipelineError
 from streaming.audio.processing_pipeline import (
-    ProcessingContext,
-    FFmpegStep,
-    ShakaPackagerStep,
-    ProcessingPipeline,
     AudioProcessingPipeline,
+    FFmpegStep,
+    ProcessingContext,
+    ProcessingPipeline,
+    ShakaPackagerStep,
 )
 from streaming.audio.shaka_packager_conf.shaka_packager_wrapper import ManifestType
-from streaming.audio.exceptions import AudioProcessingPipelineError
 
 
 class TestProcessingPipelineSteps(TestCase):
@@ -74,9 +74,7 @@ class TestProcessingPipelineSteps(TestCase):
             final_dir="final_dir_123",
         )
 
-        with patch(
-            "streaming.audio.processing_pipeline.shutil.rmtree"
-        ) as mock_rmtree:
+        with patch("streaming.audio.processing_pipeline.shutil.rmtree") as mock_rmtree:
             step.rollback(ctx)
             mock_rmtree.assert_called_once_with("/tmp/int_dir_123", ignore_errors=True)
 
@@ -145,9 +143,7 @@ class TestProcessingPipelineSteps(TestCase):
 
         pipeline = ProcessingPipeline(steps=[step1, step2], do_cleanup=True)
         final_dir = "final_dir_for_pipeline"
-        with patch(
-            "streaming.audio.processing_pipeline.shutil.rmtree"
-        ) as mock_rmtree:
+        with patch("streaming.audio.processing_pipeline.shutil.rmtree") as mock_rmtree:
             res = pipeline.run(source=str(self.input_file), final_storage_dir=final_dir)
             self.assertEqual(res.song_repr, {"mpd": "x"})
             mock_rmtree.assert_called_once_with(
@@ -171,9 +167,7 @@ class TestProcessingPipelineSteps(TestCase):
 
         pipeline = ProcessingPipeline(steps=[step1, step2], do_cleanup=True)
         final_dir = "final_dir_for_pipeline2"
-        with patch(
-            "streaming.audio.processing_pipeline.shutil.rmtree"
-        ) as mock_rmtree:
+        with patch("streaming.audio.processing_pipeline.shutil.rmtree") as mock_rmtree:
             with self.assertRaises(RuntimeError):
                 pipeline.run(source=str(self.input_file), final_storage_dir=final_dir)
 

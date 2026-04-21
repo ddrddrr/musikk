@@ -1,6 +1,8 @@
 import { getErrorDetail } from "@/api/errorUtils.ts";
 import { createCollectionSong } from "@/features/collections/api/mutations.ts";
 import { Collection, CollectionSong } from "@/features/collections/types.ts";
+import { useSongUserCollectionsQuery } from "@/features/songs/queries.ts";
+import { songKeys } from "@/features/songs/queryKeys.ts";
 import {
     DropdownMenuItem,
     DropdownMenuSub,
@@ -8,8 +10,6 @@ import {
     DropdownMenuSubTrigger,
 } from "@/features/ui/dropdown-menu.tsx";
 import { UserCollectionsContext } from "@/features/user/providers/userCollectionsContext.ts";
-import { useSongUserCollectionsQuery } from "@/features/songs/queries.ts";
-import { songKeys } from "@/features/songs/queryKeys.ts";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Check, ListPlus, Plus } from "lucide-react";
 import { useContext } from "react";
@@ -72,7 +72,7 @@ export function SongAddToPlaylistSubmenu({ collectionSong }: SongAddToPlaylistSu
                         >
                             <div className="flex size-5 items-center justify-center">
                                 {isInCollection ? (
-                                    <Check className="text-brand size-4" />
+                                    <Check className="size-4 text-brand" />
                                 ) : (
                                     <Plus className="size-4" />
                                 )}

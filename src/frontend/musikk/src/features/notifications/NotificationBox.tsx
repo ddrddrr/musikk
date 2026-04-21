@@ -1,10 +1,10 @@
-import { Spinner } from "@/features/ui/spinner";
 import { setNotificationRead } from "@/features/notifications/mutations.ts";
 import { NotificationOverlay } from "@/features/notifications/NotificationOverlay.tsx";
 import { useNotificationsQuery } from "@/features/notifications/queries.ts";
 import { notificationKeys } from "@/features/notifications/queryKeys.ts";
 import { Button } from "@/features/ui/button.tsx";
 import { Popover, PopoverContent, PopoverTrigger } from "@/features/ui/popover.tsx";
+import { Spinner } from "@/features/ui/spinner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Sparkle } from "lucide-react";
 import { useMemo } from "react";
@@ -40,7 +40,9 @@ export function NotificationBox() {
             </div>
         );
     if (error)
-        return <div className="p-4 text-center text-sm text-destructive">Error: {error.message}</div>;
+        return (
+            <div className="p-4 text-center text-sm text-destructive">Error: {error.message}</div>
+        );
 
     return (
         <Popover onOpenChange={handleOpenChange}>

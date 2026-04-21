@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('streaming', '0011_remove_queueitem_origin'),
+        ("streaming", "0011_remove_queueitem_origin"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='basesong',
-            name='duration_ms',
+            model_name="basesong",
+            name="duration_ms",
             field=models.IntegerField(blank=True, null=True),
         ),
     ]

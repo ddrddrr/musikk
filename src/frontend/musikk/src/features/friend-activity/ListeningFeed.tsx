@@ -7,7 +7,9 @@ export function ListeningFeed() {
 
     return (
         <>
-            <h2 className="mb-4 text-center text-xl font-bold text-brand-foreground">Friend activity</h2>
+            <h2 className="mb-4 text-center text-xl font-bold text-brand-foreground">
+                Friend activity
+            </h2>
             {userSongs && !!userSongs.length && (
                 <div className="flex flex-col gap-4">
                     {userSongs.map(({ user, song }) => (

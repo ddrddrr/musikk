@@ -6,7 +6,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("streaming", "0003_remove_streamingprofile_playback_state_and_more"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),

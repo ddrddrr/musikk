@@ -1,12 +1,12 @@
-from unittest.mock import Mock, patch, MagicMock, AsyncMock
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 from django.test import TestCase
-
-from streaming.ws import ServerEvent, DeviceHandler, PlaybackHandler
+from streaming.ws import DeviceHandler, PlaybackHandler, ServerEvent
 from users.tests.factories import BaseUserFactory
+
 from websockets.action_handler import WSActionHandler
 from websockets.base_consumer import BaseConsumer
-from websockets.topics import TopicHandler, TOPIC_VALIDATORS
+from websockets.topics import TOPIC_VALIDATORS, TopicHandler
 
 
 def _make_consumer(user):
@@ -428,9 +428,7 @@ class TestTopicHandler(TestCase):
         handler = TopicHandler(self.consumer)
         handler.handle_subscribe({"topic": "unknown.abc-123"})
 
-        self.consumer.send_error.assert_called_once_with(
-            "Unknown topic type: unknown"
-        )
+        self.consumer.send_error.assert_called_once_with("Unknown topic type: unknown")
 
     def test_subscribe_validator_denies(self):
         self._register_validator("chat", return_value=False)
@@ -486,6 +484,4 @@ class TestTopicHandler(TestCase):
 
         discard_calls = self.consumer.channel_layer.group_discard.call_args_list
         discarded_groups = {call[0][0] for call in discard_calls}
-        self.assertEqual(
-            discarded_groups, {"topic.chat.abc-123", "topic.feed.xyz-456"}
-        )
+        self.assertEqual(discarded_groups, {"topic.chat.abc-123", "topic.feed.xyz-456"})

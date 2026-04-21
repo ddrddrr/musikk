@@ -32,8 +32,10 @@ export function ChatMessageList({ messages }: ChatMessageListProps) {
         <div>
             {messages.map((message, index) => {
                 const prevMessage = index > 0 ? messages[index - 1] : null;
-                const sameSender = prevMessage !== null && prevMessage.author.uuid === message.author.uuid;
-                const sameDay = prevMessage !== null && isSameDay(prevMessage.date_added, message.date_added);
+                const sameSender =
+                    prevMessage !== null && prevMessage.author.uuid === message.author.uuid;
+                const sameDay =
+                    prevMessage !== null && isSameDay(prevMessage.date_added, message.date_added);
                 const isFirstInGroup = !sameSender || !sameDay;
                 const showDateSeparator = prevMessage !== null && !sameDay;
 

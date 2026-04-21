@@ -23,6 +23,9 @@ dependencies = [
     "python-magic>=0.4.27",
 ]
 
+[tool.ruff.lint.per-file-ignores]
+"musikk/musikk/settings/*.py" = ["F403", "F405"]
+
 [dependency-groups]
 dev = [
     "django-debug-toolbar>=6.2.0",

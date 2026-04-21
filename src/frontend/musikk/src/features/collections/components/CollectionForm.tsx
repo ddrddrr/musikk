@@ -1,6 +1,13 @@
 import { ImageField } from "@/features/common/ImageField.tsx";
 import { Button } from "@/features/ui/button.tsx";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/features/ui/form.tsx";
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from "@/features/ui/form.tsx";
 import { Input } from "@/features/ui/input.tsx";
 import { UseFormReturn } from "react-hook-form";
 import { CollectionCreationFormValues } from "../hooks/useCollectionCreation.ts";

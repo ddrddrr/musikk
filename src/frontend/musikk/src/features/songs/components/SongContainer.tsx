@@ -1,9 +1,9 @@
-import { cva } from "class-variance-authority";
 import { CollectionSong } from "@/features/collections/types.ts";
 import { MediaThumbnail } from "@/features/common/MediaThumbnail.tsx";
 import { DefaultSongActions } from "@/features/songs/components/DefaultSongActions.tsx";
 import { AuthorLinks } from "@/features/user/components/AuthorLinks.tsx";
 import { cn } from "@/lib/utils.ts";
+import { cva } from "class-variance-authority";
 import { type ReactNode } from "react";
 
 type SongContainerSize = "compact" | "normal";

@@ -32,7 +32,11 @@ export function SongMenuButton({
         <div className="flex items-center gap-1">
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                    <Button variant={"ghost"} size="icon" className={"hover:text-accent-foreground"}>
+                    <Button
+                        variant={"ghost"}
+                        size="icon"
+                        className={"hover:text-accent-foreground"}
+                    >
                         <EllipsisVertical className={iconSize} />
                     </Button>
                 </DropdownMenuTrigger>
@@ -52,18 +56,13 @@ export function SongMenuButton({
                         </DropdownMenuItem>
                     )}
                     {onRemoveFromQueue && (
-                        <DropdownMenuItem
-                            variant="destructive"
-                            onSelect={onRemoveFromQueue}
-                        >
+                        <DropdownMenuItem variant="destructive" onSelect={onRemoveFromQueue}>
                             <Trash2 className="mr-2 size-4" />
                             Remove from queue
                         </DropdownMenuItem>
                     )}
                     <SongAddToPlaylistSubmenu collectionSong={collectionSong} />
-                    <DropdownMenuItem
-                        onSelect={() => addSongMutation.mutate(collectionSong.uuid)}
-                    >
+                    <DropdownMenuItem onSelect={() => addSongMutation.mutate(collectionSong.uuid)}>
                         <BetweenHorizonalStart className="mr-2 size-4" />
                         Add to queue
                     </DropdownMenuItem>

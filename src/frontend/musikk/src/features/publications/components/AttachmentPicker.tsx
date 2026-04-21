@@ -12,7 +12,7 @@ export function AttachmentPicker({ attachedObj, onAttach }: AttachmentPickerProp
             <SearchBar onItemSelect={onAttach} placeholder="Attach" songMode="card" />
 
             {attachedObj && (
-                <div className="text-xs italic text-muted-foreground">
+                <div className="text-xs text-muted-foreground italic">
                     Attached: {attachedObj.repr}
                 </div>
             )}

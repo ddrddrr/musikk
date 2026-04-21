@@ -15,9 +15,7 @@ export function ChatPreview({ chat }: ChatPreviewProps) {
     const navigate = useNavigate();
     const { chatImg, chatImgAlt } = useChatImage(chat);
 
-    const lastMessageTime = chat.last_message
-        ? formatDateTime(chat.last_message.date_added)
-        : null;
+    const lastMessageTime = chat.last_message ? formatDateTime(chat.last_message.date_added) : null;
 
     return (
         <button

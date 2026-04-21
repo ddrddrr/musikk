@@ -25,9 +25,7 @@ export function CollectionContextMenu({ children, collection }: SongContextMenuP
             <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
             <ContextMenuPortal>
                 <ContextMenuContent panel="card" className="w-48">
-                    <ContextMenuItem
-                        onSelect={() => addCollectionMutation.mutate(collection.uuid)}
-                    >
+                    <ContextMenuItem onSelect={() => addCollectionMutation.mutate(collection.uuid)}>
                         <BetweenHorizonalStart className="mr-2 size-4" />
                         Add to queue
                     </ContextMenuItem>

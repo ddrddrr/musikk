@@ -1,10 +1,10 @@
 import { PaginatedRes } from "@/api/types";
-import { Spinner } from "@/features/ui/spinner";
-import { collectionKeys } from "@/features/collections/api/queryKeys.ts";
 import { fetchCollections } from "@/features/collections/api/queries";
+import { collectionKeys } from "@/features/collections/api/queryKeys.ts";
 import { CollectionCarousel } from "@/features/collections/components/CollectionCarousel.tsx";
 import { Collection } from "@/features/collections/types";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
+import { Spinner } from "@/features/ui/spinner";
 import { useQueries, useQueryClient } from "@tanstack/react-query";
 
 export function MusicFeed() {
@@ -58,7 +58,9 @@ export function MusicFeed() {
         return (
             <QueryErrorBox
                 message="Failed to load music feed"
-                onRetry={() => void queryClient.invalidateQueries({ queryKey: collectionKeys.base })}
+                onRetry={() =>
+                    void queryClient.invalidateQueries({ queryKey: collectionKeys.base })
+                }
             />
         );
 

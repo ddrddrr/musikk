@@ -80,9 +80,7 @@ class ProbeAudioTests(TestCase):
 
     @patch("streaming.audio.probes.run_shell_command")
     def test_no_audio_stream_raises(self, mock_cmd):
-        mock_cmd.return_value = _mock_result(
-            _ffprobe_output(include_stream=False)
-        )
+        mock_cmd.return_value = _mock_result(_ffprobe_output(include_stream=False))
 
         with self.assertRaises(ValidationError) as ctx:
             get_audio_metadata("/fake/path.wav")
@@ -109,9 +107,7 @@ class ProbeAudioTests(TestCase):
 
     @patch("streaming.audio.probes.run_shell_command")
     def test_no_bit_depth(self, mock_cmd):
-        mock_cmd.return_value = _mock_result(
-            _ffprobe_output(bit_depth=None)
-        )
+        mock_cmd.return_value = _mock_result(_ffprobe_output(bit_depth=None))
 
         info = get_audio_metadata("/fake/path.wav")
         self.assertIsNone(info.bit_depth)

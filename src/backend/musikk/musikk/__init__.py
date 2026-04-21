@@ -1,1 +1,1 @@
-from musikk.celery import app
+from musikk.celery import app as app

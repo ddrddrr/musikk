@@ -27,7 +27,6 @@ def forward(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("streaming", "0008_playbackcontext_playerstate"),
     ]

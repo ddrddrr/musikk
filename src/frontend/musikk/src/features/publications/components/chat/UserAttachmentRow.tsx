@@ -11,7 +11,9 @@ export function UserAttachmentRow({ user }: { user: BaseUser }) {
             onClick={() => void navigate(`/users/${user.uuid}`)}
         >
             <UserAvatar src={user.avatar} alt={user.display_name} size="sm" />
-            <p className="min-w-0 truncate text-xs font-bold text-foreground">{user.display_name}</p>
+            <p className="min-w-0 truncate text-xs font-bold text-foreground">
+                {user.display_name}
+            </p>
         </div>
     );
 }

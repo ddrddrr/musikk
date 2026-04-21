@@ -1,7 +1,17 @@
 import z from "zod";
 
 const MAX_FILE_SIZE = 2 * 1024 * 1024 * 1024;
-const ALLOWED_EXTENSIONS = [".wav", ".flac", ".aiff", ".aif", ".m4a", ".mp3", ".ogg", ".opus", ".aac"];
+const ALLOWED_EXTENSIONS = [
+    ".wav",
+    ".flac",
+    ".aiff",
+    ".aif",
+    ".m4a",
+    ".mp3",
+    ".ogg",
+    ".opus",
+    ".aac",
+];
 
 export const SongSchema = z.object({
     operationID: z.uuid().optional(),

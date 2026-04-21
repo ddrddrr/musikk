@@ -1,7 +1,7 @@
 import { UUID } from "@/api/types.ts";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
-import { LoadOlderButton } from "@/features/publications/components/LoadOlderButton.tsx";
 import { LoadNewerButton } from "@/features/publications/components/LoadNewerButton.tsx";
+import { LoadOlderButton } from "@/features/publications/components/LoadOlderButton.tsx";
 import { PostTree } from "@/features/publications/components/posts/PostTree.tsx";
 import { Publication } from "@/features/publications/types.ts";
 import { Card, CardContent } from "@/features/ui/card.tsx";
@@ -36,10 +36,7 @@ export function PostTabContent({
         <TabsContent value={label}>
             <div className="flex flex-col gap-6">
                 {error && (
-                    <QueryErrorBox
-                        message="Failed to load posts"
-                        onRetry={() => void refetch()}
-                    />
+                    <QueryErrorBox message="Failed to load posts" onRetry={() => void refetch()} />
                 )}
                 <div className="flex justify-center py-4">
                     <LoadNewerButton hasNewerPosts={hasNewPosts} onLoadNewer={onLoadNewer} />

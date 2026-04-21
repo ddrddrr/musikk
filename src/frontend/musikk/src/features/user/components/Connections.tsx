@@ -1,5 +1,5 @@
-import { Spinner } from "@/features/ui/spinner";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
+import { Spinner } from "@/features/ui/spinner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/features/ui/tabs.tsx";
 import { UserCard } from "@/features/user/components/UserCard.tsx";
 import { UserConnectionsContext } from "@/features/user/providers/userConnectionsContext.tsx";

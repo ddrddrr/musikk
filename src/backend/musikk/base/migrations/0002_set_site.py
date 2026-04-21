@@ -13,7 +13,6 @@ def set_site(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("base", "0001_enable_trgm"),
         ("sites", "0001_initial"),

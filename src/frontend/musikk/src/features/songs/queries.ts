@@ -21,7 +21,7 @@ interface SongUserCollectionsResponse {
 
 export async function songUserCollections(collectionSongUUID: UUID): Promise<UUID[]> {
     const res = await api_client.get<SongUserCollectionsResponse>(
-        SongURLs.songUserCollections(collectionSongUUID)
+        SongURLs.songUserCollections(collectionSongUUID),
     );
     return res.data.collection_uuids;
 }

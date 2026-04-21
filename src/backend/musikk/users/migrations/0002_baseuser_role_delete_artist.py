@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("streaming", "0004_alter_basesong_authors_alter_songcredit_author"),
         ("users", "0001_initial"),

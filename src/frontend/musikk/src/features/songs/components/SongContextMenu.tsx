@@ -49,9 +49,7 @@ export function SongContextMenu({
                             Remove from queue
                         </ContextMenuItem>
                     )}
-                    <ContextMenuItem
-                        onSelect={() => addSongMutation.mutate(song.uuid)}
-                    >
+                    <ContextMenuItem onSelect={() => addSongMutation.mutate(song.uuid)}>
                         <BetweenHorizonalStart className="mr-2 size-4" />
                         Add to queue
                     </ContextMenuItem>

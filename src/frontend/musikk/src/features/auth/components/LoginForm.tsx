@@ -1,10 +1,10 @@
+import { getErrorDetail } from "@/api/errorUtils.ts";
 import { EmailField } from "@/features/auth/components/EmailField.tsx";
 import { PasswordField } from "@/features/auth/components/PasswordField.tsx";
-import { Spinner } from "@/features/ui/spinner";
 import { Button } from "@/features/ui/button.tsx";
 import { CardContent } from "@/features/ui/card.tsx";
 import { Form } from "@/features/ui/form.tsx";
-import { getErrorDetail } from "@/api/errorUtils.ts";
+import { Spinner } from "@/features/ui/spinner";
 import { useAuth } from "@/hooks/useAuth.ts";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
@@ -36,7 +36,10 @@ export function LoginForm() {
             void navigate("/");
         } catch (error) {
             setmessage(
-                getErrorDetail(error, "Could not perform login, please check your credentials and try again."),
+                getErrorDetail(
+                    error,
+                    "Could not perform login, please check your credentials and try again.",
+                ),
             );
         } finally {
             setLoading(false);

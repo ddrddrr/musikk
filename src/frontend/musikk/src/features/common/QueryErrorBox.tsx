@@ -5,10 +5,7 @@ type QueryErrorBoxProps = {
     onRetry?: () => void;
 };
 
-export function QueryErrorBox({
-    message = "Something went wrong",
-    onRetry,
-}: QueryErrorBoxProps) {
+export function QueryErrorBox({ message = "Something went wrong", onRetry }: QueryErrorBoxProps) {
     return (
         <div className="rounded-sm border-2 border-foreground bg-destructive p-4 text-destructive-foreground">
             <div className="text-sm font-medium">{message}</div>

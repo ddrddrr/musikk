@@ -13,12 +13,7 @@ export function PlayerPlayButton() {
     };
 
     return (
-        <Button
-            variant="brand"
-            size="icon"
-            onClick={() => handlePlay()}
-            className="rounded-sm"
-        >
+        <Button variant="brand" size="icon" onClick={() => handlePlay()} className="rounded-sm">
             {renderPlayPauseIcon()}
         </Button>
     );

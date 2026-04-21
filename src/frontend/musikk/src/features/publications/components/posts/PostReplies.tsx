@@ -1,8 +1,8 @@
-import { Spinner } from "@/features/ui/spinner";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { usePublicationChildren } from "@/features/publications/api/queries.ts";
 import { Publication } from "@/features/publications/types.ts";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/features/ui/collapsible.tsx";
+import { Spinner } from "@/features/ui/spinner";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { ReactNode } from "react";
 

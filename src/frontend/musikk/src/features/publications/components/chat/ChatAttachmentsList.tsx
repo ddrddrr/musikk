@@ -1,5 +1,5 @@
-import { UUID } from "@/api/types.ts";
 import { useInfiniteFlat } from "@/api/hooks.ts";
+import { UUID } from "@/api/types.ts";
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
 import { Collection, CollectionSong } from "@/features/collections/types.ts";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
@@ -20,8 +20,12 @@ type ChatAttachmentsListProps = {
 export function ChatAttachmentsList({ chatUUID }: ChatAttachmentsListProps) {
     const userUUID = useUserUUID();
     const query = useChatAttachments(userUUID, chatUUID);
-    const { itemsFlat: attachments, hasNextPage, isFetchingNextPage, fetchNextPage } =
-        useInfiniteFlat(query, false);
+    const {
+        itemsFlat: attachments,
+        hasNextPage,
+        isFetchingNextPage,
+        fetchNextPage,
+    } = useInfiniteFlat(query, false);
 
     if (query.isPending) {
         return (
@@ -41,11 +45,7 @@ export function ChatAttachmentsList({ chatUUID }: ChatAttachmentsListProps) {
     }
 
     if (attachments.length === 0) {
-        return (
-            <p className="py-4 text-center text-sm text-muted-foreground">
-                No attachments yet
-            </p>
-        );
+        return <p className="py-4 text-center text-sm text-muted-foreground">No attachments yet</p>;
     }
 
     return (

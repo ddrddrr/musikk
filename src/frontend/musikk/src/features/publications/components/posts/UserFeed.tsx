@@ -1,7 +1,7 @@
 import { UUID } from "@/api/types.ts";
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
-import { LoadOlderButton } from "@/features/publications/components/LoadOlderButton.tsx";
 import { LoadNewerButton } from "@/features/publications/components/LoadNewerButton.tsx";
+import { LoadOlderButton } from "@/features/publications/components/LoadOlderButton.tsx";
 import { PostForm } from "@/features/publications/components/posts/PostForm.tsx";
 import { PostTree } from "@/features/publications/components/posts/PostTree.tsx";
 import { useFeedWsEvents } from "@/features/publications/hooks/useFeedWsEvents.ts";
@@ -11,14 +11,8 @@ import { Card, CardContent } from "@/features/ui/card.tsx";
 
 export function UserFeed({ userUUID }: { userUUID: UUID }) {
     useFeedWsEvents(userUUID);
-    const {
-        error,
-        isPending,
-        publicationsFlat,
-        hasNextPage,
-        isFetchingNextPage,
-        fetchNextPage,
-    } = useFeedPostsFlat(userUUID, false);
+    const { error, isPending, publicationsFlat, hasNextPage, isFetchingNextPage, fetchNextPage } =
+        useFeedPostsFlat(userUUID, false);
     const currUserUUID = useUserUUID();
     const { hasNewPosts, refresh } = useNewFeedPosts(userUUID, publicationsFlat?.[0]?.uuid);
 

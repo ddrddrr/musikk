@@ -4,30 +4,29 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('streaming', '0012_add_duration_ms_to_basesong'),
+        ("streaming", "0012_add_duration_ms_to_basesong"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='basesong',
-            name='loudness_lufs',
+            model_name="basesong",
+            name="loudness_lufs",
             field=models.FloatField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='basesong',
-            name='source_bitrate',
+            model_name="basesong",
+            name="source_bitrate",
             field=models.IntegerField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='basesong',
-            name='source_codec',
-            field=models.CharField(blank=True, default='', max_length=32),
+            model_name="basesong",
+            name="source_codec",
+            field=models.CharField(blank=True, default="", max_length=32),
         ),
         migrations.AddField(
-            model_name='basesong',
-            name='true_peak_dbtp',
+            model_name="basesong",
+            name="true_peak_dbtp",
             field=models.FloatField(blank=True, null=True),
         ),
     ]

@@ -1,8 +1,8 @@
-from django.db import models
-
 from base.models import BaseModel
-from notifications.ws import ServerEvent
+from django.db import models
 from websockets.event_helpers import send_ws_event, user_group
+
+from notifications.ws import ServerEvent
 
 
 class Notification(BaseModel):
@@ -72,9 +72,7 @@ class ChatMessageNotification(Notification):
     message = models.ForeignKey(
         "social.Publication", on_delete=models.CASCADE, related_name="+"
     )
-    chat = models.ForeignKey(
-        "social.Chat", on_delete=models.CASCADE, related_name="+"
-    )
+    chat = models.ForeignKey("social.Chat", on_delete=models.CASCADE, related_name="+")
     receiver = models.ForeignKey(
         "users.BaseUser", on_delete=models.CASCADE, related_name="+"
     )

@@ -4,8 +4,8 @@ import { useVolume } from "@/features/player/hooks/useVolume.ts";
 import { PlayerPlayButton } from "@/features/player/PlayerPlayButton.tsx";
 import { useQueueNext, useQueuePrev } from "@/features/song-queue/hooks/useQueueAPI.ts";
 import { Button } from "@/features/ui/button";
-import { AuthorLinks } from "@/features/user/components/AuthorLinks.tsx";
 import { Slider } from "@/features/ui/slider";
+import { AuthorLinks } from "@/features/user/components/AuthorLinks.tsx";
 import { ListMusic, SkipBack, SkipForward, Volume2, VolumeX } from "lucide-react";
 import React, { useCallback, useContext, useState } from "react";
 
@@ -43,24 +43,30 @@ export function PlayerBar({
     // the audio will switch
     // this is expected as there is no proper way to prevent the audio from switching
     // and seek at the same time (same, e.g., in Spotify)
-    const handleSeek = useCallback((value: number[]) => {
-        setSeeking(true);
-        setSeekTime(value[0]);
-    }, [setSeeking]);
+    const handleSeek = useCallback(
+        (value: number[]) => {
+            setSeeking(true);
+            setSeekTime(value[0]);
+        },
+        [setSeeking],
+    );
 
-    const handleSeekCommit = useCallback((value: number[]) => {
-        const t = value[0];
+    const handleSeekCommit = useCallback(
+        (value: number[]) => {
+            const t = value[0];
 
-        setSeekTime(t);
-        onSeekCommit?.(t);
+            setSeekTime(t);
+            onSeekCommit?.(t);
 
-        const audio = audioRef.current;
-        if (audio) {
-            audio.currentTime = t;
-        }
+            const audio = audioRef.current;
+            if (audio) {
+                audio.currentTime = t;
+            }
 
-        setSeeking(false);
-    }, [onSeekCommit, audioRef, setSeeking]);
+            setSeeking(false);
+        },
+        [onSeekCommit, audioRef, setSeeking],
+    );
 
     const playingSong = playingCollectionSong?.song;
     const displayTime = seeking ? seekTime : time;
@@ -85,7 +91,10 @@ export function PlayerBar({
                         </div>
                         <div className="flex min-w-0 flex-col">
                             <p className="truncate text-sm font-bold">{playingSong.title}</p>
-                            <AuthorLinks authors={playingCollectionSong.song.authors} className="text-xs text-muted-foreground" />
+                            <AuthorLinks
+                                authors={playingCollectionSong.song.authors}
+                                className="text-xs text-muted-foreground"
+                            />
                         </div>
                     </div>
                 )}
@@ -108,19 +117,11 @@ export function PlayerBar({
                     )}
 
                     <div className="flex items-center gap-1">
-                        <Button
-                            onClick={() => prevMutation.mutate()}
-                            variant="ghost"
-                            size="icon"
-                        >
+                        <Button onClick={() => prevMutation.mutate()} variant="ghost" size="icon">
                             <SkipBack className="size-5" strokeWidth="2" />
                         </Button>
                         <PlayerPlayButton />
-                        <Button
-                            onClick={() => nextMutation.mutate()}
-                            variant="ghost"
-                            size="icon"
-                        >
+                        <Button onClick={() => nextMutation.mutate()} variant="ghost" size="icon">
                             <SkipForward className="size-5" strokeWidth="2" />
                         </Button>
                     </div>

@@ -1,6 +1,7 @@
 import logging
 import os
 from pathlib import Path
+
 from django.core.files.base import File
 from django.core.files.storage import default_storage
 
@@ -40,12 +41,12 @@ def local_dir_to_django_storage(
 
                     with open(abs_path, "rb") as f:
                         paths[str(abs_path)] = default_storage.save(key, File(f))
-                except Exception as ex:
+                except Exception:
                     logger.exception(
                         f"Failed to upload file {abs_path} to storage at {key}"
                     )
                     raise
-    except Exception as ex:
+    except Exception:
         logger.exception(f"Failed to upload directory {local_dir} to storage")
         raise
 

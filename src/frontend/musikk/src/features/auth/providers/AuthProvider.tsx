@@ -31,10 +31,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     const isAuthenticated = !!user && !error;
 
-    const login = useCallback(async (email: string, password: string) => {
-        await loginAPI(email, password);
-        await refetch();
-    }, [refetch]);
+    const login = useCallback(
+        async (email: string, password: string) => {
+            await loginAPI(email, password);
+            await refetch();
+        },
+        [refetch],
+    );
 
     const logout = useCallback(async () => {
         try {
@@ -66,9 +69,5 @@ export function AuthProvider({ children }: AuthProviderProps) {
         [isAuthenticated, user, isLoading, login, logout],
     );
 
-    return (
-        <AuthContext.Provider value={contextValue}>
-            {children}
-        </AuthContext.Provider>
-    );
+    return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;
 }

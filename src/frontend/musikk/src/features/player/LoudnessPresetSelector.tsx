@@ -2,6 +2,7 @@ import { type LoudnessPreset } from "@/features/player/providers/loudnessPresetC
 import { Button } from "@/features/ui/button";
 import { cn } from "@/lib/utils";
 
+// TODO: move? kinda a player concern but from now on used only in settings
 interface LoudnessPresetSelectorProps {
     value: LoudnessPreset;
     onChange: (preset: LoudnessPreset) => void;
@@ -14,7 +15,11 @@ const PRESETS: { value: LoudnessPreset; label: string }[] = [
     { value: "loud", label: "L" },
 ];
 
-export function LoudnessPresetSelector({ value, onChange, className }: LoudnessPresetSelectorProps) {
+export function LoudnessPresetSelector({
+    value,
+    onChange,
+    className,
+}: LoudnessPresetSelectorProps) {
     return (
         <div className={cn("flex items-center gap-0.5", className)}>
             {PRESETS.map((p) => (

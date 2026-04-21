@@ -1,4 +1,3 @@
-import { cva } from "class-variance-authority";
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
 import { type CardSize, cardTitleVariants } from "@/features/common/card-variants.ts";
 import { MediaThumbnail } from "@/features/common/MediaThumbnail.tsx";
@@ -11,6 +10,7 @@ import {
 } from "@/features/ui/context-menu.tsx";
 import { useFollowUser } from "@/features/user/hooks/useFollowUser.ts";
 import { BaseUser } from "@/features/user/types.ts";
+import { cva } from "class-variance-authority";
 import { MoreHorizontal, Smile } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 

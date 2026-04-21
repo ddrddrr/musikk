@@ -1,5 +1,4 @@
 import { getErrorDetail } from "@/api/errorUtils.ts";
-import { cva } from "class-variance-authority";
 import { CollectionSong } from "@/features/collections/types.ts";
 import {
     type CardSize,
@@ -12,6 +11,7 @@ import { SongContextMenu } from "@/features/songs/components/SongContextMenu.tsx
 import { albumBySongRetrieve } from "@/features/songs/queries.ts";
 import { Card, CardContent } from "@/features/ui/card.tsx";
 import { AuthorLinks } from "@/features/user/components/AuthorLinks.tsx";
+import { cva } from "class-variance-authority";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -66,7 +66,10 @@ export function SongCard({ collectionSong, size = "medium", onClick = undefined 
                 onClick={() => void handleClick(collectionSong)}
                 key={uuid}
                 variant="panel"
-                className={songCardWidthVariants({ size, className: "cursor-pointer py-0 transition-all duration-200" })}
+                className={songCardWidthVariants({
+                    size,
+                    className: "cursor-pointer py-0 transition-all duration-200",
+                })}
             >
                 <CardContent className="p-0">
                     <MediaThumbnail

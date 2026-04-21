@@ -1,14 +1,24 @@
 from streaming.api.v1.serializers.collections import (
-    CollectionSerializerBasic,
-    CollectionSerializerDetailed,
-    CollectionCreateSerializer,
+    CollectionCreateSerializer as CollectionCreateSerializer,
+)
+from streaming.api.v1.serializers.collections import (
+    CollectionSerializerBasic as CollectionSerializerBasic,
+)
+from streaming.api.v1.serializers.collections import (
+    CollectionSerializerDetailed as CollectionSerializerDetailed,
 )
 from streaming.api.v1.serializers.song_queue import (
-    QueueItemSerializer,
-    PlayerStateSerializer,
+    PlayerStateSerializer as PlayerStateSerializer,
+)
+from streaming.api.v1.serializers.song_queue import (
+    QueueItemSerializer as QueueItemSerializer,
 )
 from streaming.api.v1.serializers.songs import (
-    BaseSongRetrieveSerializer,
-    BaseSongCreateSerializer,
-    CollectionSongRetrieveSerializer,
+    BaseSongCreateSerializer as BaseSongCreateSerializer,
+)
+from streaming.api.v1.serializers.songs import (
+    BaseSongRetrieveSerializer as BaseSongRetrieveSerializer,
+)
+from streaming.api.v1.serializers.songs import (
+    CollectionSongRetrieveSerializer as CollectionSongRetrieveSerializer,
 )

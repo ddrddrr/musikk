@@ -1,11 +1,11 @@
 from decimal import Decimal
 from typing import overload
 
+from base.models import BaseModel
 from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models, transaction
 
-from base.models import BaseModel
 from streaming.models.collections import Collection
 from streaming.models.songs import CollectionSong
 
@@ -173,7 +173,9 @@ class SongQueue(BaseModel):
     @overload
     def insert_song(self, song: CollectionSong, position: Decimal) -> QueueItem: ...
     @overload
-    def insert_song(self, song: CollectionSong, position: None = None) -> QueueSource: ...
+    def insert_song(
+        self, song: CollectionSong, position: None = None
+    ) -> QueueSource: ...
 
     def insert_song(
         self, song: CollectionSong, position: Decimal | None = None
@@ -255,7 +257,6 @@ class SongQueue(BaseModel):
         after: QueueItem | None = None,
     ) -> None:
         with transaction.atomic():
-
             if before and after:
                 item.position = (before.position + after.position) / 2
             elif before:

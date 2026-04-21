@@ -3,8 +3,8 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
-import { searchKeys } from "@/features/search/queryKeys.ts";
 import { performSearch } from "@/features/search/queries";
+import { searchKeys } from "@/features/search/queryKeys.ts";
 import { Input } from "@/features/ui/input";
 
 import { CollectionCard } from "@/features/collections/components/CollectionCard.tsx";
@@ -43,7 +43,8 @@ export function SearchWindow({ onItemSelect, songMode = "card" }: SearchWindowPr
     const renderSongs = () => {
         if (!data?.songs?.length) return null;
 
-        const containerClass = songMode === "card" ? "grid grid-cols-2 gap-2" : "flex flex-col gap-2";
+        const containerClass =
+            songMode === "card" ? "grid grid-cols-2 gap-2" : "flex flex-col gap-2";
 
         return (
             <div>
@@ -117,12 +118,7 @@ export function SearchWindow({ onItemSelect, songMode = "card" }: SearchWindowPr
             </div>
 
             <div className="results-container min-h-[200px] flex-1 overflow-y-auto pt-4">
-                {error && (
-                    <QueryErrorBox
-                        message="Search failed"
-                        onRetry={() => void refetch()}
-                    />
-                )}
+                {error && <QueryErrorBox message="Search failed" onRetry={() => void refetch()} />}
 
                 {isPlaceholderData && (
                     <div className="flex items-center justify-center py-2">

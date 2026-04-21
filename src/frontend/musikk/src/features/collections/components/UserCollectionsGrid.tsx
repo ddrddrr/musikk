@@ -1,11 +1,11 @@
 import { UUID } from "@/api/types.ts";
-import { Spinner } from "@/features/ui/spinner";
-import { collectionKeys } from "@/features/collections/api/queryKeys.ts";
 import { fetchCollections } from "@/features/collections/api/queries.ts";
+import { collectionKeys } from "@/features/collections/api/queryKeys.ts";
 import { CollectionCard } from "@/features/collections/components/CollectionCard.tsx";
 import type { CollectionType } from "@/features/collections/types.ts";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { Card, CardContent } from "@/features/ui/card.tsx";
+import { Spinner } from "@/features/ui/spinner";
 import { useQuery } from "@tanstack/react-query";
 
 type UserCollectionsGridProps = {

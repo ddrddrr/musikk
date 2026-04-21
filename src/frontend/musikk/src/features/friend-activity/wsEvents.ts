@@ -12,10 +12,13 @@ export function useFriendActivityWsEvents() {
     const client = useQueryClient();
 
     useEffect(() => {
-        return ws.subscribe("friend-activity.listening.changed", (payload: ListeningChangedPayload) => {
-            void client.invalidateQueries({
-                queryKey: friendActivityKeys.listening(payload.user_uuid),
-            });
-        });
+        return ws.subscribe(
+            "friend-activity.listening.changed",
+            (payload: ListeningChangedPayload) => {
+                void client.invalidateQueries({
+                    queryKey: friendActivityKeys.listening(payload.user_uuid),
+                });
+            },
+        );
     }, [ws, client]);
 }

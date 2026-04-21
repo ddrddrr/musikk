@@ -16,7 +16,7 @@ class TypeModelRefField(serializers.Field):
             raise serializers.ValidationError()
         try:
             return self.resolver.resolve_model_instance(data)
-        except Exception as e:
+        except Exception:
             # TODO:
             raise serializers.ValidationError()
 

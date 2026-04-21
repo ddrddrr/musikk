@@ -20,7 +20,7 @@ export function Comment({ comment, setReplyTo }: CommentProps) {
             <div className="mb-1">
                 <PostHeader author={comment.author} dateAdded={comment.date_added} />
             </div>
-            <p className="break-words text-sm text-foreground">
+            <p className="text-sm break-words text-foreground">
                 {comment.is_deleted ? (
                     <span className="text-muted-foreground italic">Deleted</span>
                 ) : (

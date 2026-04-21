@@ -1,10 +1,10 @@
-import { Spinner } from "@/features/ui/spinner";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { ChatNewGroupForm } from "@/features/publications/components/chat/ChatNewGroupForm.tsx";
 import { ChatPreview } from "@/features/publications/components/chat/ChatPreview.tsx";
 import { ChatStartDirectList } from "@/features/publications/components/chat/ChatStartDirectList.tsx";
 import { useUserChatsContext } from "@/features/publications/hooks/useUserChats.ts";
 import { Button } from "@/features/ui/button.tsx";
+import { Spinner } from "@/features/ui/spinner";
 import { Plus } from "lucide-react";
 import { useState } from "react";
 

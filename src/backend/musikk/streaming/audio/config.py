@@ -39,6 +39,7 @@ def is_codec_allowed(codec_name: str) -> bool:
 def is_lossy_codec(codec_name: str) -> bool:
     return any(codec_name.startswith(c) for c in ALLOWED_LOSSY_CODECS)
 
+
 TARGET_SAMPLE_RATE_44_1 = 44100
 SAMPLE_RATE_44_FAMILY = {
     TARGET_SAMPLE_RATE_44_1,

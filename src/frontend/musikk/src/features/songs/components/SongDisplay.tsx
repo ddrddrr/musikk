@@ -18,11 +18,7 @@ export function SongDisplay({ song }: SongDisplayProps) {
     return (
         <div className="mb-4 flex flex-col items-start gap-3">
             <div className="aspect-square w-full max-w-2/5">
-                <MediaThumbnail
-                    src={song.image}
-                    alt={song.title}
-                    className="h-full w-full"
-                />
+                <MediaThumbnail src={song.image} alt={song.title} className="h-full w-full" />
             </div>
             <div className="w-full text-start">
                 <div className="mb-1 flex flex-wrap items-center gap-2">

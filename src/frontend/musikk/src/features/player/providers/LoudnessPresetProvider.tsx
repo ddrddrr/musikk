@@ -22,8 +22,6 @@ export function LoudnessPresetProvider({ children }: LoudnessPresetProviderProps
     const value = useMemo(() => ({ preset, setPreset }), [preset, setPreset]);
 
     return (
-        <LoudnessPresetContext.Provider value={value}>
-            {children}
-        </LoudnessPresetContext.Provider>
+        <LoudnessPresetContext.Provider value={value}>{children}</LoudnessPresetContext.Provider>
     );
 }

@@ -1,14 +1,14 @@
-from rest_framework import serializers
-from django.db import transaction
-from django.contrib.contenttypes.models import ContentType
-
 from base.serializers import BaseModelSerializer, UUIDListField
-from social.api.v1.type_model_maps import ATTACHMENT_RESOLVER
+from django.contrib.contenttypes.models import ContentType
+from django.db import transaction
+from rest_framework import serializers
+from users.api.v1.serializers import BaseUserSerializer
+
 from social.api.v1.fields import TypeModelRefField
+from social.api.v1.type_model_maps import ATTACHMENT_RESOLVER
+from social.api.v1.validators import validate_participants_are_friends
 from social.models import Publication
 from social.models.chat import Chat, ChatMember
-from social.api.v1.validators import validate_participants_are_friends
-from users.api.v1.serializers import BaseUserSerializer
 
 
 class PublicationCreateSerializer(BaseModelSerializer):
@@ -42,9 +42,9 @@ class PublicationCreateSerializer(BaseModelSerializer):
                         "parent_uuid": f"Parent publication does not exist: {parent_uuid}."
                     }
                 )
-            if not (
+            if (
                 validated_data["created_for_object"].__class__
-                is parent.get_root().created_for_object.__class__
+                is not parent.get_root().created_for_object.__class__
             ):
                 raise serializers.ValidationError(
                     {

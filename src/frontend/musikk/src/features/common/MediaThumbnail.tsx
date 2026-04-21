@@ -8,8 +8,7 @@ type MediaThumbnailProps = {
     className?: string;
 };
 
-const baseClass =
-    "flex items-center justify-center bg-muted overflow-hidden";
+const baseClass = "flex items-center justify-center bg-muted overflow-hidden";
 
 export function MediaThumbnail({ src, alt = "", fallback, className }: MediaThumbnailProps) {
     if (src) {

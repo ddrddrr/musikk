@@ -1,9 +1,8 @@
+from base.models import BaseModel
 from django.conf import settings
 from django.db import models
-
-from base.models import BaseModel
-from utils.paths import deafult_image_path, delete_dir_for_file
 from users.models import UserRole
+from utils.paths import deafult_image_path, delete_dir_for_file
 
 
 class BaseSongQuerySet(models.QuerySet):
@@ -81,6 +80,7 @@ class SongCredit(BaseModel):
 
     class Meta:
         ordering = ("author_priority",)
+
 
 # TODO: if song is in draft state, dont show this somehow
 class CollectionSong(BaseModel):

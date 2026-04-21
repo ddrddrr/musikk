@@ -1,32 +1,31 @@
+from django.contrib.contenttypes.models import ContentType
+from musikk.pagination import BaseLimitOffsetPagination
+from notifications.models import ChatMessageNotification, ReplyNotification
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.generics import (
-    ListAPIView,
-    RetrieveAPIView,
-    ListCreateAPIView,
     CreateAPIView,
+    ListAPIView,
+    ListCreateAPIView,
+    RetrieveAPIView,
 )
+from streaming.models import Collection
+from streaming.models.collections import CollectionType
+from users.models import BaseUser
+from websockets.event_helpers import send_ws_event
+from websockets.topics import topic_group
 
-from django.contrib.contenttypes.models import ContentType
-
-from musikk.pagination import BaseLimitOffsetPagination
 from social.api.v1.filters import PublicationConnectionFilter
 from social.api.v1.mixins import PublicationsListCreateMixin
 from social.api.v1.serializers import (
     ChatAttachmentSerializer,
-    PublicationChildrenSerializer,
-    UserChatRetrieveSerializer,
-    UserChatCreateSerializer,
     ChatMembersCreateSerializer,
+    PublicationChildrenSerializer,
+    UserChatCreateSerializer,
+    UserChatRetrieveSerializer,
 )
-from notifications.models import ReplyNotification, ChatMessageNotification
 from social.models import Publication
 from social.models.chat import Chat, ChatMember
-from streaming.models import Collection
-from streaming.models.collections import CollectionType
-from users.models import BaseUser
 from social.ws import ServerEvent
-from websockets.event_helpers import send_ws_event
-from websockets.topics import topic_group
 
 
 class PublicationChildrenView(RetrieveAPIView):
@@ -43,10 +42,10 @@ class CollectionCommentsListCreateView(PublicationsListCreateMixin, ListCreateAP
         return Collection.objects.get(uuid=self.kwargs["collection_uuid"])
 
     def check_list_permission(self, created_for: Collection):
-        return created_for.private == False
+        return not created_for.private
 
     def check_create_permission(self, created_for: Collection):
-        return created_for.private == False and created_for.type in (
+        return not created_for.private and created_for.type in (
             CollectionType.ALBUM,
             CollectionType.PLAYLIST,
         )
@@ -148,6 +147,7 @@ class UserChatsListCreateView(ListCreateAPIView):
 class ChatMembersCreateView(CreateAPIView):
     serializer_class = ChatMembersCreateSerializer
 
+
 # TODO: remove, the chats are pre-retrieved I guess
 class ChatRetrieveView(RetrieveAPIView):
     serializer_class = UserChatRetrieveSerializer
@@ -168,9 +168,7 @@ class ChatAttachmentsListView(ListAPIView):
 
     def get_queryset(self):
         chat = Chat.objects.get(uuid=self.kwargs["chat_uuid"])
-        if not ChatMember.objects.filter(
-            chat=chat, member=self.request.user
-        ).exists():
+        if not ChatMember.objects.filter(chat=chat, member=self.request.user).exists():
             raise PermissionDenied()
         ct = ContentType.objects.get_for_model(chat)
         return (

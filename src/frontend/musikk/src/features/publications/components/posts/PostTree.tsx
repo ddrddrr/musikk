@@ -24,7 +24,9 @@ export function PostTree({ publication, feedUserUUID, depth = 0 }: PostTreeProps
 
     return (
         <div className="relative">
-            <Card className={cn("mb-2 rounded-sm border border-foreground shadow-sm", getBgColor())}>
+            <Card
+                className={cn("mb-2 rounded-sm border border-foreground shadow-sm", getBgColor())}
+            >
                 <CardContent className="flex flex-col gap-2 px-3 py-0">
                     <PostAttachment attachment={publication.attachment} />
                     <PostHeader author={publication.author} dateAdded={publication.date_added} />

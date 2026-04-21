@@ -3,8 +3,7 @@ import { getOffsetFromNextUrl } from "@/api/hooks.ts";
 import { PaginatedRes, UUID } from "@/api/types.ts";
 import { publicationKeys } from "@/features/publications/api/queryKeys.ts";
 import { ChatURLs, PublicationURLs } from "@/features/publications/api/urls.ts";
-import { Chat, Publication } from "@/features/publications/types.ts";
-import { Attachment } from "@/features/publications/types.ts";
+import { Attachment, Chat, Publication } from "@/features/publications/types.ts";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 
 export async function fetchPublicationPage(

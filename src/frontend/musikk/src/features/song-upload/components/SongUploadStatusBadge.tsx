@@ -1,5 +1,5 @@
-import { Spinner } from "@/features/ui/spinner";
 import { SongUploadStatus } from "@/features/song-upload/types.ts";
+import { Spinner } from "@/features/ui/spinner";
 import { cn } from "@/lib/utils.ts";
 
 function statusTone(status: SongUploadStatus) {
@@ -31,7 +31,10 @@ export function SongUploadStatusBadge({
     return (
         <div className="flex items-center gap-2">
             <div
-                className={cn("inline-flex items-center rounded-sm border px-2.5 py-1 text-xs font-medium", statusTone(status))}
+                className={cn(
+                    "inline-flex items-center rounded-sm border px-2.5 py-1 text-xs font-medium",
+                    statusTone(status),
+                )}
             >
                 {status}
             </div>

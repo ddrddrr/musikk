@@ -1,4 +1,3 @@
-import { cva } from "class-variance-authority";
 import { CollectionContextMenu } from "@/features/collections/components/CollectionContextMenu.tsx";
 import type { Collection } from "@/features/collections/types.ts";
 import {
@@ -10,6 +9,7 @@ import {
 import { MediaThumbnail } from "@/features/common/MediaThumbnail.tsx";
 import { Card, CardContent } from "@/features/ui/card.tsx";
 import { AuthorLinks } from "@/features/user/components/AuthorLinks.tsx";
+import { cva } from "class-variance-authority";
 import { useNavigate } from "react-router-dom";
 
 type CollectionCardProps = {
@@ -69,7 +69,10 @@ export function CollectionCard({
                 key={uuid}
                 variant="panel"
                 spacing={spacingBySize[size]}
-                className={collectionCardWidthVariants({ size, className: "cursor-pointer py-0 transition-all duration-200" })}
+                className={collectionCardWidthVariants({
+                    size,
+                    className: "cursor-pointer py-0 transition-all duration-200",
+                })}
             >
                 <CardContent className="p-0">
                     <MediaThumbnail

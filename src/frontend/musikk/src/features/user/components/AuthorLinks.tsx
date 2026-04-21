@@ -1,5 +1,5 @@
-import { cn } from "@/lib/utils.ts";
 import { BaseUser } from "@/features/user/types.ts";
+import { cn } from "@/lib/utils.ts";
 import { useNavigate } from "react-router-dom";
 
 type AuthorLinksProps = {

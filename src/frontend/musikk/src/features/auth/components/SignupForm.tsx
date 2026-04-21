@@ -7,10 +7,10 @@ import { getErrorDetail } from "@/api/errorUtils.ts";
 import { register } from "@/features/auth/api.ts";
 import { EmailField } from "@/features/auth/components/EmailField.tsx";
 import { PasswordField } from "@/features/auth/components/PasswordField.tsx";
-import { Spinner } from "@/features/ui/spinner";
 import { Button } from "@/features/ui/button.tsx";
 import { CardContent } from "@/features/ui/card.tsx";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/features/ui/form.tsx";
+import { Spinner } from "@/features/ui/spinner";
 import { Switch } from "@/features/ui/switch.tsx";
 import * as z from "zod";
 
@@ -38,7 +38,9 @@ export function SignUpForm() {
     const { mutate, isPending, isError, isSuccess } = useMutation({
         mutationFn: register,
         onError(error) {
-            setFormMessage(getErrorDetail(error, "Could not perform registration, please try again."));
+            setFormMessage(
+                getErrorDetail(error, "Could not perform registration, please try again."),
+            );
         },
         onSuccess() {
             setFormMessage(

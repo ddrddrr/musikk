@@ -1,12 +1,10 @@
 from django.test import TestCase
 from django.urls.base import reverse
-from rest_framework.test import APIRequestFactory
-
-from streaming.tests.factories import BaseSongFactory, CollectionFactory
-from recommendations.api.v1.views import SearchView
-from rest_framework.test import force_authenticate
-
+from rest_framework.test import APIRequestFactory, force_authenticate
+from streaming.tests.factories import CollectionFactory
 from users.tests.factories import BaseUserFactory
+
+from recommendations.api.v1.views import SearchView
 
 
 # TODO: rewrite with client instead of factory

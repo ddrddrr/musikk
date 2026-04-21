@@ -1,15 +1,14 @@
+from base.serializers import BaseModelSerializer, UUIDListField
 from django.db import transaction
 from rest_framework import serializers
+from users.api.v1.serializers import BaseUserSerializer
 
-from base.serializers import BaseModelSerializer, UUIDListField
 from streaming.api.v1.serializers.songs import (
     CollectionSongRetrieveSerializer,
 )
 from streaming.api.v1.serializers.validators import validate_authors
-from streaming.models import BaseSong
 from streaming.models.collections import Collection, CollectionCredit
 from streaming.models.songs import CollectionSong
-from users.api.v1.serializers import BaseUserSerializer
 
 
 class CollectionSerializerBasic(BaseModelSerializer):

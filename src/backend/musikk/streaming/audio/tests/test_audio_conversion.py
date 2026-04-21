@@ -1,4 +1,3 @@
-import shutil
 import tempfile
 from pathlib import Path
 
@@ -21,7 +20,9 @@ class TestFFMPEGConversion(TestCase):
                 file_path=self.input_file, output_dir=output_dir
             )
             self.assertIsInstance(results, list)
-            self.assertTrue(len(results) > 0, "No files were returned from convert_audio")
+            self.assertTrue(
+                len(results) > 0, "No files were returned from convert_audio"
+            )
             for path in results:
                 self.assertTrue(
                     Path(path).exists(),
@@ -34,7 +35,9 @@ class TestFFMPEGConversion(TestCase):
                 file_path=self.input_file, output_dir=output_dir
             )
             self.assertIsInstance(results, list)
-            self.assertEqual(len(results), 5, "Expected 5 converted files from FFMPEGFull")
+            self.assertEqual(
+                len(results), 5, "Expected 5 converted files from FFMPEGFull"
+            )
             for path in results:
                 self.assertTrue(
                     Path(path).exists(),

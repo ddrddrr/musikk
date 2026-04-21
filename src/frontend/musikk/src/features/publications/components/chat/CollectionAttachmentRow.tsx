@@ -16,7 +16,10 @@ export function CollectionAttachmentRow({ collection }: { collection: Collection
                 <MediaThumbnail src={collection.image} className="size-8 shrink-0 rounded-sm" />
                 <div className="flex min-w-0 flex-col">
                     <p className="truncate text-xs font-bold text-foreground">{collection.title}</p>
-                    <AuthorLinks authors={collection.authors} className="text-[10px] text-muted-foreground" />
+                    <AuthorLinks
+                        authors={collection.authors}
+                        className="text-[10px] text-muted-foreground"
+                    />
                 </div>
             </div>
         </CollectionContextMenu>

@@ -1,5 +1,4 @@
 import { UUID } from "@/api/types.ts";
-import { Spinner } from "@/features/ui/spinner";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { CommentForm } from "@/features/publications/components/collection-comments/CommentForm.tsx";
 import { CommentList } from "@/features/publications/components/collection-comments/CommentList.tsx";
@@ -8,9 +7,10 @@ import { NewMessagesIndicator } from "@/features/publications/components/NewMess
 import { useAutoScrollToBottom } from "@/features/publications/hooks/useAutoScrollToBottom.ts";
 import { useCollectionCommentsWsEvents } from "@/features/publications/hooks/useCollectionCommentsWsEvents.ts";
 import { useNewMessagesIndicator } from "@/features/publications/hooks/useNewMessagesIndicator.ts";
-import { useScrollAnchor } from "@/features/publications/hooks/useScrollAnchor.ts";
 import { useCollectionCommentsFlat } from "@/features/publications/hooks/usePublicationsInfiniteFlat.ts";
+import { useScrollAnchor } from "@/features/publications/hooks/useScrollAnchor.ts";
 import { Publication } from "@/features/publications/types.ts";
+import { Spinner } from "@/features/ui/spinner";
 import { memo, useRef, useState } from "react";
 
 interface CommentBoxProps {
@@ -49,9 +49,7 @@ export const CommentBox = memo(function CommentBox({ collectionUUID }: CommentBo
     }
 
     if (error) {
-        return (
-            <QueryErrorBox message="Failed to load comments" onRetry={() => void refetch()} />
-        );
+        return <QueryErrorBox message="Failed to load comments" onRetry={() => void refetch()} />;
     }
 
     return (

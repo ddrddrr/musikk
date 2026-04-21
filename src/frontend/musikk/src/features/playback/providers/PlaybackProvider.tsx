@@ -27,12 +27,15 @@ export function PlaybackProvider({ children }: PlaybackProviderProps) {
             queueError: queueError ?? null,
             queueRefetch: () => void queueRefetch(),
         }),
-        [device, isThisDeviceActive, isPlaybackActive, playingCollectionSong, queueError, queueRefetch],
+        [
+            device,
+            isThisDeviceActive,
+            isPlaybackActive,
+            playingCollectionSong,
+            queueError,
+            queueRefetch,
+        ],
     );
 
-    return (
-        <PlaybackContext.Provider value={value}>
-            {children}
-        </PlaybackContext.Provider>
-    );
+    return <PlaybackContext.Provider value={value}>{children}</PlaybackContext.Provider>;
 }

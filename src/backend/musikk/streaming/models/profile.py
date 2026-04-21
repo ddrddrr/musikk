@@ -1,7 +1,7 @@
-from django.db import models, transaction
-from django.conf import settings
-
 from base.models import BaseModel
+from django.conf import settings
+from django.db import models, transaction
+
 from streaming.models import Collection, CollectionCredit, SongQueue
 from streaming.models.collections import CollectionType
 from streaming.models.song_queue import PlaybackContext, PlayerState
@@ -57,8 +57,8 @@ class StreamingProfile(BaseModel):
 
     @property
     def created_collections(self):
-        return Collection.objects.filter(
-            collection_credits__author=self.user
-        ).exclude(type__in=[CollectionType.HISTORY, CollectionType.LIKED])
+        return Collection.objects.filter(collection_credits__author=self.user).exclude(
+            type__in=[CollectionType.HISTORY, CollectionType.LIKED]
+        )
 
     objects = StreamingProfileManager()

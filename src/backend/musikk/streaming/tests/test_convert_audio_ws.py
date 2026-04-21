@@ -1,13 +1,12 @@
 import tempfile
-from unittest.mock import patch, Mock
+from unittest.mock import Mock, patch
 
 from django.test import TestCase
-
-from streaming.audio.tasks import convert_audio
-from streaming.audio.shaka_packager_conf.shaka_packager_wrapper import ManifestType
-from streaming.models.songs import BaseSong
-from streaming.tests.factories import BaseSongFactory
 from users.tests.factories import ArtistFactory
+
+from streaming.audio.shaka_packager_conf.shaka_packager_wrapper import ManifestType
+from streaming.audio.tasks import convert_audio
+from streaming.tests.factories import BaseSongFactory
 
 
 def _mock_song_repr():
@@ -29,7 +28,9 @@ class ConvertAudioTest(TestCase):
         super().setUpClass()
         cls.user = ArtistFactory.create()
 
-    def test_sets_draft_false_after_success(self, mock_pipeline, mock_upload_mgr, mock_ws):
+    def test_sets_draft_false_after_success(
+        self, mock_pipeline, mock_upload_mgr, mock_ws
+    ):
         song = BaseSongFactory.create(draft=True)
         mock_pipeline.return_value = _mock_song_repr()
 
@@ -49,7 +50,9 @@ class ConvertAudioTest(TestCase):
         self.assertEqual(song.m3u8, "path/to/playlist.m3u8")
         self.assertEqual(song.content_path, "audio/content/path")
 
-    def test_draft_stays_true_on_processing_failure(self, mock_pipeline, mock_upload_mgr, mock_ws):
+    def test_draft_stays_true_on_processing_failure(
+        self, mock_pipeline, mock_upload_mgr, mock_ws
+    ):
         song = BaseSongFactory.create(draft=True)
         mock_pipeline.side_effect = RuntimeError("processing failed")
 

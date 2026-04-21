@@ -68,7 +68,11 @@ export function usePlayCollection() {
 
 export function useMoveToQueue() {
     return useQueueMutation(
-        ({ collectionSongUUID, beforeUUID, afterUUID }: {
+        ({
+            collectionSongUUID,
+            beforeUUID,
+            afterUUID,
+        }: {
             collectionSongUUID: string;
             beforeUUID: string | null;
             afterUUID: string | null;

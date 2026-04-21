@@ -1,7 +1,11 @@
-import { useAuth } from "@/hooks/useAuth.ts";
 import { NotificationListParams } from "@/features/notifications/queries.ts";
-import { IChatMessageNotification, IFollowerNotification, IReplyNotification } from "@/features/notifications/types.ts";
+import {
+    IChatMessageNotification,
+    IFollowerNotification,
+    IReplyNotification,
+} from "@/features/notifications/types.ts";
 import { Button } from "@/features/ui/button.tsx";
+import { useAuth } from "@/hooks/useAuth.ts";
 import { cn } from "@/lib/utils.ts";
 import { formatDateTime } from "@/utils/formatDate.ts";
 import { memo } from "react";
@@ -53,7 +57,10 @@ export const NotificationOverlay = memo(function NotificationOverlay({
             {allNotifications.map((notification) => (
                 <div
                     key={notification.uuid}
-                    className={cn("mb-2 rounded-sm border border-foreground p-3", notification.is_read ? "bg-muted" : "bg-highlight")}
+                    className={cn(
+                        "mb-2 rounded-sm border border-foreground p-3",
+                        notification.is_read ? "bg-muted" : "bg-highlight",
+                    )}
                 >
                     {notification._type === "reply" && (
                         <>
@@ -61,10 +68,10 @@ export const NotificationOverlay = memo(function NotificationOverlay({
                                 Reply:{" "}
                                 {notification.reply_publication.author.display_name ?? "Anonymous"}
                             </div>
-                            <div className="mt-1 break-words text-xs text-muted-foreground">
+                            <div className="mt-1 text-xs break-words text-muted-foreground">
                                 {notification.orig_publication.content}
                             </div>
-                            <div className="mt-2 break-words text-sm text-foreground">
+                            <div className="mt-2 text-sm break-words text-foreground">
                                 {notification.reply_publication.content}
                             </div>
                             <div className="mt-2 flex justify-between">
@@ -106,9 +113,10 @@ export const NotificationOverlay = memo(function NotificationOverlay({
                     {notification._type === "chat_message" && (
                         <>
                             <div className="text-sm font-semibold">
-                                New message: {notification.message.author.display_name ?? "Anonymous"}
+                                New message:{" "}
+                                {notification.message.author.display_name ?? "Anonymous"}
                             </div>
-                            <div className="mt-1 break-words text-sm text-foreground">
+                            <div className="mt-1 text-sm break-words text-foreground">
                                 {notification.message.content}
                             </div>
                             <div className="mt-2 flex justify-between">

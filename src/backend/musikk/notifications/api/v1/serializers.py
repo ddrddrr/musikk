@@ -1,9 +1,13 @@
-from rest_framework import serializers
-
 from base.serializers import BaseModelSerializer
-from notifications.models import ReplyNotification, FollowerNotification, ChatMessageNotification
+from rest_framework import serializers
 from social.api.v1.serializers import PublicationRetrieveSerializer
 from users.api.v1.serializers import BaseUserSerializer
+
+from notifications.models import (
+    ChatMessageNotification,
+    FollowerNotification,
+    ReplyNotification,
+)
 
 
 class BaseNotificationSerializer(BaseModelSerializer):

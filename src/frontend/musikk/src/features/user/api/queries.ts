@@ -1,9 +1,9 @@
 import { api_client } from "@/api/axiosConf.ts";
 import { UUID } from "@/api/types.ts";
+import { UserURLs } from "@/features/user/api/endpoints.ts";
 import { userKeys } from "@/features/user/api/queryKeys.ts";
 import { BaseUser } from "@/features/user/types.ts";
 import { skipToken, useQuery } from "@tanstack/react-query";
-import { UserURLs } from "@/features/user/api/endpoints.ts";
 
 export async function fetchMe(): Promise<BaseUser | null> {
     const res = await api_client.get(UserURLs.me);

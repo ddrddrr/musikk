@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from typing import Protocol, runtime_checkable, TypeAlias
+from typing import Protocol, TypeAlias, runtime_checkable
 
 import magic
 from rest_framework.exceptions import ValidationError
@@ -14,7 +14,6 @@ from streaming.audio.config import (
     is_codec_allowed,
 )
 from streaming.audio.probes import AudioStreamInfo, get_audio_metadata
-
 
 # admin/testing
 BytesLike: TypeAlias = bytes | bytearray | memoryview
@@ -63,7 +62,7 @@ def _validate_size_type(song: AudioInput) -> None:
         assert False, f"Unsupported type of audio file - {type(song)}."
 
     if not size:
-        raise ValidationError(f"Could not determine the size of the audio file.")
+        raise ValidationError("Could not determine the size of the audio file.")
 
     if size > MAX_FILE_SIZE:
         raise ValidationError(

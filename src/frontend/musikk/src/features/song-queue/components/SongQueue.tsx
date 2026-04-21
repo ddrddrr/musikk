@@ -1,5 +1,4 @@
 import { getErrorDetail } from "@/api/errorUtils.ts";
-import { Spinner } from "@/features/ui/spinner";
 import { CollectionSong } from "@/features/collections/types.ts";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { QueueItem } from "@/features/song-queue/api/types.ts";
@@ -7,16 +6,17 @@ import { SongQueuePlayButton } from "@/features/song-queue/components/SongQueueC
 import { useQueue, useQueueClear } from "@/features/song-queue/hooks/useQueueAPI.ts";
 import { removeItem } from "@/features/song-queue/mutations.ts";
 import { queueKeys } from "@/features/song-queue/queryKeys.ts";
+import { songButtonProps } from "@/features/songs/components/DefaultSongActions.tsx";
 import { SongAddToLikedButton } from "@/features/songs/components/SongAddToLikedButton.tsx";
 import { SongAddToQueueButton } from "@/features/songs/components/SongAddToQueueButton.tsx";
-import { songButtonProps } from "@/features/songs/components/DefaultSongActions.tsx";
-import { SongPlayButton } from "@/features/songs/components/SongPlayButton.tsx";
-import { SongContextMenu } from "@/features/songs/components/SongContextMenu.tsx";
-import { SongMenuButton } from "@/features/songs/components/SongMenuButton.tsx";
 import { SongContainer } from "@/features/songs/components/SongContainer.tsx";
+import { SongContextMenu } from "@/features/songs/components/SongContextMenu.tsx";
 import { SongDisplay } from "@/features/songs/components/SongDisplay.tsx";
+import { SongMenuButton } from "@/features/songs/components/SongMenuButton.tsx";
+import { SongPlayButton } from "@/features/songs/components/SongPlayButton.tsx";
 import { Button } from "@/features/ui/button.tsx";
 import { ScrollArea } from "@/features/ui/scroll-area.tsx";
+import { Spinner } from "@/features/ui/spinner";
 import { cn } from "@/lib/utils.ts";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Trash2 } from "lucide-react";
@@ -37,7 +37,11 @@ function SongQueueActions({
             {item ? (
                 <SongQueuePlayButton item={item} size={btn.size} className={btn.padding} />
             ) : (
-                <SongPlayButton collectionSong={collectionSong} size={btn.size} className={btn.padding} />
+                <SongPlayButton
+                    collectionSong={collectionSong}
+                    size={btn.size}
+                    className={btn.padding}
+                />
             )}
             <SongAddToLikedButton
                 collectionSong={collectionSong}
@@ -110,7 +114,9 @@ export function SongQueue() {
                                 <li key={item.uuid}>
                                     <SongContextMenu
                                         song={item.collection_song}
-                                        onRemoveFromQueue={() => removeItemMutation.mutate(item.uuid)}
+                                        onRemoveFromQueue={() =>
+                                            removeItemMutation.mutate(item.uuid)
+                                        }
                                     >
                                         <SongContainer
                                             collectionSong={item.collection_song}
@@ -118,7 +124,9 @@ export function SongQueue() {
                                                 <SongQueueActions
                                                     collectionSong={item.collection_song}
                                                     item={item}
-                                                    onRemoveFromQueue={() => removeItemMutation.mutate(item.uuid)}
+                                                    onRemoveFromQueue={() =>
+                                                        removeItemMutation.mutate(item.uuid)
+                                                    }
                                                 />
                                             }
                                         />
@@ -130,9 +138,7 @@ export function SongQueue() {
 
                     {contextItems.length > 0 && (
                         <>
-                            <h3 className="p-8 pb-0 text-2xl font-bold">
-                                Up Next
-                            </h3>
+                            <h3 className="p-8 pb-0 text-2xl font-bold">Up Next</h3>
                             <ul className="flex flex-col gap-3 p-8">
                                 {contextItems.map((cs) => (
                                     <li key={cs.uuid}>

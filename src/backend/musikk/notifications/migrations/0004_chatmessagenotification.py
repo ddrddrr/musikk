@@ -6,25 +6,55 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('notifications', '0003_alter_notification_uuid'),
-        ('social', '0004_alter_chat_title_alter_chat_uuid_and_more'),
+        ("notifications", "0003_alter_notification_uuid"),
+        ("social", "0004_alter_chat_title_alter_chat_uuid_and_more"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='ChatMessageNotification',
+            name="ChatMessageNotification",
             fields=[
-                ('notification_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='notifications.notification')),
-                ('chat', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='+', to='social.chat')),
-                ('message', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='+', to='social.publication')),
-                ('receiver', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='+', to=settings.AUTH_USER_MODEL)),
+                (
+                    "notification_ptr",
+                    models.OneToOneField(
+                        auto_created=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        parent_link=True,
+                        primary_key=True,
+                        serialize=False,
+                        to="notifications.notification",
+                    ),
+                ),
+                (
+                    "chat",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="+",
+                        to="social.chat",
+                    ),
+                ),
+                (
+                    "message",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="+",
+                        to="social.publication",
+                    ),
+                ),
+                (
+                    "receiver",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="+",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-date_added'],
+                "ordering": ["-date_added"],
             },
-            bases=('notifications.notification',),
+            bases=("notifications.notification",),
         ),
     ]

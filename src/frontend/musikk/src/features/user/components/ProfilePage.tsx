@@ -1,5 +1,3 @@
-import { useState } from "react";
-import { Spinner } from "@/features/ui/spinner";
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
 import { UserCollectionsGrid } from "@/features/collections/components/UserCollectionsGrid.tsx";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
@@ -13,6 +11,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/features/ui/dialog.tsx";
+import { Spinner } from "@/features/ui/spinner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/features/ui/tabs.tsx";
 import { fetchUser } from "@/features/user/api/queries.ts";
 import { userKeys } from "@/features/user/api/queryKeys.ts";
@@ -20,6 +19,7 @@ import { ProfileForm } from "@/features/user/components/ProfileForm.tsx";
 import { UserAvatar } from "@/features/user/components/UserAvatar.tsx";
 import { useFollowUser } from "@/features/user/hooks/useFollowUser.ts";
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { useParams } from "react-router-dom";
 
 export function ProfilePage() {
@@ -106,9 +106,7 @@ export function ProfilePage() {
                     <TabsList className="mx-auto mb-6 rounded-sm">
                         <TabsTrigger value="posts">Posts</TabsTrigger>
                         <TabsTrigger value="playlists">Playlists</TabsTrigger>
-                        {user.is_artist && (
-                            <TabsTrigger value="albums">Albums</TabsTrigger>
-                        )}
+                        {user.is_artist && <TabsTrigger value="albums">Albums</TabsTrigger>}
                     </TabsList>
 
                     <TabsContent value="posts">

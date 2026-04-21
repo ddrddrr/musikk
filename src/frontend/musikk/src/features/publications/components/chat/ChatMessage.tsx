@@ -25,7 +25,7 @@ export function ChatMessage({ message, isFirstInGroup = true }: ChatMessageProps
                 {showHeader && (
                     <PostHeader author={message.author} dateAdded={message.date_added} />
                 )}
-                <p className="break-words text-sm text-foreground">
+                <p className="text-sm break-words text-foreground">
                     {message.is_deleted ? (
                         <span className="text-muted-foreground italic">Deleted</span>
                     ) : (

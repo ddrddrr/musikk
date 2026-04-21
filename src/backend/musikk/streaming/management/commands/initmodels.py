@@ -1,30 +1,28 @@
-import os
-import uuid
-import tempfile
 import io
+import os
 import random
+import tempfile
+import uuid
 from pathlib import Path
 
 import requests
-
 from django.conf import settings
 from django.core.files import File
 from django.core.management.base import BaseCommand
 from django.db import transaction
-
 from faker import Faker
-
-from streaming.audio.shaka_packager_conf.shaka_packager_wrapper import ManifestType
-from streaming.audio.processing_pipeline import AudioProcessingPipeline
-from streaming.models.collections import CollectionType
 from users.management.helpers import create_user_with_password
+
+from streaming.audio.processing_pipeline import AudioProcessingPipeline
+from streaming.audio.shaka_packager_conf.shaka_packager_wrapper import ManifestType
 from streaming.models import (
     BaseSong,
     Collection,
+    CollectionCredit,
     CollectionSong,
     SongCredit,
-    CollectionCredit,
 )
+from streaming.models.collections import CollectionType
 
 fake = Faker()
 
@@ -42,7 +40,9 @@ class Command(BaseCommand):
         parser.add_argument("--users", type=int, default=2)
         parser.add_argument("--artists", type=int, default=3)
         parser.add_argument("--songs", type=int, default=7)
-        parser.add_argument("--collections", type=int, default=2) # TODO: rename to playlists
+        parser.add_argument(
+            "--collections", type=int, default=2
+        )  # TODO: rename to playlists
         parser.add_argument("--albums", type=int, default=2)
 
     def handle(self, *args, **options):

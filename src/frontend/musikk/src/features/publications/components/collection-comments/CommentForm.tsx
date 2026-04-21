@@ -18,11 +18,7 @@ interface CommentFormDataProps {
     setReplyTo?: (comment?: Publication) => void;
 }
 
-export function CommentForm({
-    collectionUUID,
-    replyTo,
-    setReplyTo,
-}: CommentFormDataProps) {
+export function CommentForm({ collectionUUID, replyTo, setReplyTo }: CommentFormDataProps) {
     const {
         register,
         handleSubmit,
@@ -56,7 +52,7 @@ export function CommentForm({
         <form onSubmit={handleSubmit(submitHandler)} className="flex flex-col gap-2">
             {replyTo && (
                 <div className="mb-2 flex items-start justify-between border-l-2 border-foreground pl-2 text-xs text-muted-foreground">
-                    <div className="min-w-0 max-w-xs truncate">
+                    <div className="max-w-xs min-w-0 truncate">
                         <div className="truncate font-medium">
                             {replyTo.author.display_name || "Anonymous"}
                         </div>

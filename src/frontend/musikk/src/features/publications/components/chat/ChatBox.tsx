@@ -1,18 +1,18 @@
 import { UUID } from "@/api/types.ts";
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
-import { Spinner } from "@/features/ui/spinner";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { useChatDetail } from "@/features/publications/api/queries.ts";
-import { LoadOlderButton } from "@/features/publications/components/LoadOlderButton.tsx";
 import { ChatHeader } from "@/features/publications/components/chat/ChatHeader.tsx";
 import { ChatMessageForm } from "@/features/publications/components/chat/ChatMessageForm.tsx";
 import { ChatMessageList } from "@/features/publications/components/chat/ChatMessageList.tsx";
+import { LoadOlderButton } from "@/features/publications/components/LoadOlderButton.tsx";
 import { NewMessagesIndicator } from "@/features/publications/components/NewMessagesIndicator.tsx";
 import { useAutoScrollToBottom } from "@/features/publications/hooks/useAutoScrollToBottom.ts";
 import { useChatWsEvents } from "@/features/publications/hooks/useChatWsEvents.ts";
 import { useNewMessagesIndicator } from "@/features/publications/hooks/useNewMessagesIndicator.ts";
-import { useScrollAnchor } from "@/features/publications/hooks/useScrollAnchor.ts";
 import { useChatMessagesFlat } from "@/features/publications/hooks/usePublicationsInfiniteFlat.ts";
+import { useScrollAnchor } from "@/features/publications/hooks/useScrollAnchor.ts";
+import { Spinner } from "@/features/ui/spinner";
 import { useRef } from "react";
 
 interface ChatBoxProps {

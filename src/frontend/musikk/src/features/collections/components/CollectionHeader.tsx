@@ -25,7 +25,6 @@ export const CollectionHeader = memo(function SongCollectionHeader({
     renderAddToLikedButton,
     renderCommentsButton,
 }: SongCollectionHeaderProps) {
-
     return (
         <>
             <div className="flex gap-4 rounded-sm border-2 border-foreground bg-card p-6">
@@ -33,7 +32,10 @@ export const CollectionHeader = memo(function SongCollectionHeader({
                     <img
                         src={collection.image}
                         alt="♫"
-                        className={cn("rounded-sm border-2 border-foreground object-cover", showComments ? "size-20" : "size-32")}
+                        className={cn(
+                            "rounded-sm border-2 border-foreground object-cover",
+                            showComments ? "size-20" : "size-32",
+                        )}
                     />
                 ) : (
                     <div>♫</div>
@@ -66,7 +68,10 @@ export const CollectionHeader = memo(function SongCollectionHeader({
                         <div className="flex items-center justify-between">
                             <div className="min-w-0">
                                 <p className="text-xl font-bold">{collection.title}</p>
-                                <AuthorLinks authors={collection.authors} className="text-sm text-muted-foreground" />
+                                <AuthorLinks
+                                    authors={collection.authors}
+                                    className="text-sm text-muted-foreground"
+                                />
                                 {collection.description && (
                                     <p className="mt-2 line-clamp-2 text-base text-muted-foreground">
                                         {collection.description}
@@ -97,7 +102,12 @@ export const CollectionHeader = memo(function SongCollectionHeader({
             </div>
 
             <div className="flex items-center justify-between">
-                <h3 className={cn("p-1 font-bold text-foreground", showComments ? "text-sm" : "text-lg")}>
+                <h3
+                    className={cn(
+                        "p-1 font-bold text-foreground",
+                        showComments ? "text-sm" : "text-lg",
+                    )}
+                >
                     Songs • {songsCount}
                 </h3>
                 {renderCommentsButton && (

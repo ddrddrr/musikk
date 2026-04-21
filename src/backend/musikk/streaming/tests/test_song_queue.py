@@ -1,14 +1,15 @@
 from decimal import Decimal
 
 from django.test import TestCase
+from users.tests.factories import BaseUserFactory
 
-from streaming.models import SongQueue, QueueSource, QueueItem, Collection
+from streaming.models import Collection, QueueItem, QueueSource, SongQueue
 from streaming.models.song_queue import (
+    FILL_BATCH,
     POSITION_GAP,
     REFILL_THRESHOLD,
-    FILL_BATCH,
-    SourceType,
     PlaybackContext,
+    SourceType,
 )
 from streaming.models.songs import CollectionSong
 from streaming.tests.factories import (
@@ -17,7 +18,6 @@ from streaming.tests.factories import (
     CollectionSongFactory,
     PlayerStateFactory,
 )
-from users.tests.factories import BaseUserFactory
 
 
 def _make_collection(n_songs=5):
@@ -313,9 +313,7 @@ class TestReorder(TestCase):
         i1.refresh_from_db()
 
         queue.insert_song(s3)
-        items = list(
-            QueueItem.objects.filter(queue=queue).order_by("position")
-        )
+        items = list(QueueItem.objects.filter(queue=queue).order_by("position"))
 
         assert items[-1].collection_song == s3
         assert items[-1].position > i1.position

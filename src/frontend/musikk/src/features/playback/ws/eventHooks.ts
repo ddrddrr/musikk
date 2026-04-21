@@ -12,7 +12,9 @@ export function useDeviceListEvent() {
     const { setDeviceList } = useDeviceList();
 
     useEffect(() => {
-        return ws.subscribe("device.list", (payload: DeviceListPayload) => setDeviceList(payload.devices));
+        return ws.subscribe("device.list", (payload: DeviceListPayload) =>
+            setDeviceList(payload.devices),
+        );
     }, [ws, setDeviceList]);
 }
 

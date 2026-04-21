@@ -1,10 +1,10 @@
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
-import { UserConnectionsContext } from "@/features/user/providers/userConnectionsContext.tsx";
 import {
     useUserFollowedQuery,
     useUserFollowersQuery,
     useUserFriendsQuery,
 } from "@/features/user/api/queries.ts";
+import { UserConnectionsContext } from "@/features/user/providers/userConnectionsContext.tsx";
 import { ReactNode, useMemo } from "react";
 
 interface UserConnectionsProviderProps {
@@ -40,7 +40,16 @@ export function UserConnectionsProvider({ children }: UserConnectionsProviderPro
             error,
             isLoading,
         }),
-        [friends, friendsPending, followers, followersPending, followed, followedPending, error, isLoading],
+        [
+            friends,
+            friendsPending,
+            followers,
+            followersPending,
+            followed,
+            followedPending,
+            error,
+            isLoading,
+        ],
     );
 
     return (
