@@ -6,9 +6,9 @@ from pathlib import Path
 
 from django.conf import settings
 from rest_framework.exceptions import ValidationError
+from utils.cmd import run_shell_command
 
 from streaming.audio.exceptions import AudioProcessingPipelineError
-from utils.cmd import run_shell_command
 
 # TODO: check if enough
 FFPROBE_TIMEOUT = 30  # sec
@@ -110,7 +110,7 @@ def get_audio_metadata(path: str | Path) -> AudioStreamInfo:
     )
 
 
-def get_audio_loudness(path: str | Path) -> tuple[float, float]:
+def get_audio_loudness(path: str | Path) -> tuple[float | None, float | None]:
     """
     Measure audio loudness (LUFS, ITU-R BS.1770) and true peak (dBTP)
     using FFmpeg's ebur128 filter.
@@ -125,31 +125,21 @@ def get_audio_loudness(path: str | Path) -> tuple[float, float]:
           don't write output to a file (write to stderr instead)
 
     Returns:
-         lufs, true_peak_dbtp
+        lufs, true_peak_dbtp (or None if something is not defined, e.g. if loudness is -inf)
 
     Example FFmpeg output::
 
         [Parsed_ebur128_0 @ 0xb9ac08b40]
 
-        t: 0.0999773 TARGET:-23 LUFS M:-120.7 S:-120.7 I: -70.0 LUFS LRA: 0.0 LU FTPK: -27.2 -27.2 dBFS TPK: -27.2 -27.2 dBFS Output #0, null, to 'pipe:': Metadata: encoder : Lavf62.6.101 Stream #0:0: Audio: pcm_s16le, 44100 Hz, stereo, s16, 1411 kb/s Metadata: encoder : Lavc62.19.100 pcm_s16le Side data: Replay Gain: track gain - -3.400000, track peak - 0.000021, album gain - -5.800000, album peak - unknown,
-
-        [Parsed_ebur128_0 @ 0xb9ac08b40]
-
-        t: 0.199977 TARGET:-23 LUFS M:-120.7 S:-120.7 I: -70.0 LUFS LRA: 0.0 LU FTPK: -5.9 -5.9 dBFS TPK: -5.9 -5.9 dBFS
+        t: 0.0999773 TARGET:-23 LUFS M:-120.7 S:-120.7 I: -70.0 LUFS LRA: 0.0 LU FTPK: -27.2 -27.2 dBFS TPK: -27.2 -27.2 dBFS
         ...
-        (a lof of the same)
+                (a lof of the same)
         ...
-        [Parsed_ebur128_0 @ 0xb9ac08b40]
-
         t: 170.199977 TARGET:-23 LUFS M: -20.5 S: -20.4 I: -14.7 LUFS LRA: 6.4 LU FTPK: -4.2 -4.2 dBFS TPK: -1.1 -1.1 dBFS
 
         [Parsed_ebur128_0 @ 0xb9ac08b40]
 
         Summary: Integrated loudness: I: -14.7 LUFS Threshold: -24.8 LUFS Loudness range: LRA: 6.4 LU Threshold: -34.8 LUFS LRA low: -19.2 LUFS LRA high: -12.8 LUFS True peak: Peak: -1.1 dBFS
-
-        [out#0/null @ 0xb9ac086c0]
-
-        video:0KiB audio:29326KiB subtitle:0KiB other streams:0KiB global headers:0KiB muxing overhead: unknown size=N/A time=00:02:50.24 bitrate=N/A speed= 172x elapsed=0:00:00.99
     """
     cmd = [
         settings.FFMPEG_BIN,
@@ -169,30 +159,45 @@ def get_audio_loudness(path: str | Path) -> tuple[float, float]:
         ) from exc
     stderr = result.stderr
 
-    return (
-        _parse_ebur128_value(stderr, r"I:\s+([-\d.]+)\s+LUFS"),
-        _parse_ebur128_value(stderr, r"Peak:\s+([-\d.]+)\s+dBFS"),
-    )
+    return _parse_ebur128_lufs(stderr), _parse_ebur128_peak(stderr)
 
 
-def _parse_ebur128_value(stderr: str, pattern: str) -> float:
+def _parse_ebur128_lufs(stderr: str) -> float | None:
     """
-    Extract a value from ebur128 stderr output using a regex.
+    Extract LUFS loudness from ebur128 summary.
 
-    The raw ouput contains a lot of redundant per-frame lines in the format of:
-        ... I: -14.7 LUFS ... FTPK: -3.8 -3.8 dBFS  TPK: -1.1 -1.1 dBFS
-
-    We need the summary block instead (at the end), which looks like:
-        Integrated loudness:
-          I:         -14.7 LUFS
-        True peak:
-          Peak:       -1.1 dBFS
-
-    For `I` we take the last match (the summary value), peak appears only in the summary.
+    The raw output contains per-frame lines that also have ``I:`` values;
+    we take the last match which is the summary value.
+    Returns None for audio with LUFS==-inf.
     """
-    matches = re.findall(pattern, stderr)
+    matches = re.findall(r"I:\s+([-\d.]+|-inf)\s+LUFS", stderr)
     if not matches:
         raise AudioProcessingPipelineError(
-            f"Failed to parse ebur128 output for pattern: {pattern}"
+            "Failed to parse integrated loudness from ebur128 output"
         )
-    return float(matches[-1])
+    raw = matches[-1]
+    if raw == "-inf":
+        return None
+    return float(raw)
+
+
+def _parse_ebur128_peak(stderr: str) -> float | None:
+    """
+    Extract true peak from ebur128 summary.
+
+    The summary ``Peak:`` line has one value per channel
+    (e.g., ``Peak: -1.1 -2.3 dBFS`` for stereo).
+    Returns the loudest (max) channel peak.
+    Returns None when all channels are -inf.
+    """
+    match = re.search(r"Peak:\s+(.+?)\s*dBFS", stderr)
+    if not match:
+        raise AudioProcessingPipelineError(
+            "Failed to parse true peak from ebur128 output"
+        )
+    tokens = match.group(1).split()
+    values = [float(t) for t in tokens]
+    peak = max(values)
+    if peak == float("-inf"):
+        return None
+    return peak

@@ -1,21 +1,22 @@
+import logging
 import shutil
 import tempfile
-from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
-import logging
+from dataclasses import dataclass, field
 from pathlib import Path
 
 from utils.storage import delete_django_storage_dir
+
 from streaming.audio.exceptions import AudioProcessingPipelineError
-from streaming.audio.ffmpeg_conf.ffmpeg_wrapper import FFMPEGWrapper, FFMPEGFull
+from streaming.audio.ffmpeg_conf.ffmpeg_wrapper import FFMPEGFull, FFMPEGWrapper
 from streaming.audio.normalization import build_normalization_filters
 from streaming.audio.probes import (
     AudioStreamInfo,
     get_audio_loudness,
 )
 from streaming.audio.shaka_packager_conf.shaka_packager_wrapper import (
-    ShakaPackagerWrapper,
     ShakaPackagerMPDAndM3U8,
+    ShakaPackagerWrapper,
     SongRepresentation,
 )
 
@@ -51,17 +52,6 @@ class Step(ABC):
         return None
 
 
-class LoudnessMeasurementStep(Step):
-    def process(self, ctx: ProcessingContext) -> None:
-        try:
-            lufs, peak = get_audio_loudness(ctx.orig_audio_file_path)
-            ctx.loudness_lufs = lufs
-            ctx.true_peak_dbtp = peak
-        except Exception:
-            logger.exception("Loudness measurement failed")
-            raise
-
-
 class FFmpegStep(Step):
     def __init__(self, ffmpeg_wrapper: FFMPEGWrapper = FFMPEGFull):
         self.wrapper = ffmpeg_wrapper
@@ -89,6 +79,33 @@ class FFmpegStep(Step):
     def rollback(self, ctx: ProcessingContext) -> None:
         if ctx.intermediate_dir:
             shutil.rmtree(ctx.intermediate_dir, ignore_errors=True)
+
+
+class LoudnessMeasurementStep(Step):
+    """
+    Measures track's loudness in LUFS and dBTP.
+
+    Supports only mono or stereo tracks.
+    As a consequence should be ran after the conversion of the user
+    input to internal representation (since user input can have multiple channels).
+    Can be ran only on one representation of the file (preferrably lossless), since
+    after FFmpeg conversion LUFS/dBTP do not vary much from codec to codec.
+    """
+
+    def process(self, ctx: ProcessingContext) -> None:
+        try:
+            target = next(
+                # TODO: flac is hardcoded here now and requires the knowledge of codecs used
+                # by the ffmpeg step, the fallback to first defined is not ideal; improve
+                (p for p in ctx.converted_paths if Path(p).name.startswith("flac-")),
+                ctx.converted_paths[0],
+            )
+            lufs, peak = get_audio_loudness(target)
+            ctx.loudness_lufs = lufs
+            ctx.true_peak_dbtp = peak
+        except Exception:
+            logger.exception("Loudness measurement failed")
+            raise
 
 
 class ShakaPackagerStep(Step):
@@ -182,8 +199,8 @@ class ProcessingPipeline:
 
 AudioProcessingPipeline = ProcessingPipeline(
     steps=[
-        LoudnessMeasurementStep(),
         FFmpegStep(FFMPEGFull),
+        LoudnessMeasurementStep(),
         ShakaPackagerStep(ShakaPackagerMPDAndM3U8),
     ],
     do_cleanup=True,

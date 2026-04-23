@@ -9,14 +9,25 @@ from django.test import TestCase, override_settings
 from utils.storage import delete_django_storage_dir
 
 from streaming.audio.exceptions import AudioProcessingPipelineError
+from streaming.audio.probes import AudioStreamInfo, get_audio_metadata
 from streaming.audio.processing_pipeline import (
     AudioProcessingPipeline,
     FFmpegStep,
+    LoudnessMeasurementStep,
     ProcessingContext,
     ProcessingPipeline,
     ShakaPackagerStep,
 )
 from streaming.audio.shaka_packager_conf.shaka_packager_wrapper import ManifestType
+
+MOCK_AUDIO_INFO = AudioStreamInfo(
+    duration_seconds=6.0,
+    sample_rate=44100,
+    channels=2,
+    codec_name="pcm_s16le",
+    bit_depth=16,
+    bit_rate=None,
+)
 
 
 class TestProcessingPipelineSteps(TestCase):
@@ -44,6 +55,7 @@ class TestProcessingPipelineSteps(TestCase):
             orig_audio_file_path=str(self.input_file),
             intermediate_dir="some/intermediate",
             final_dir="some/final",
+            audio_info=MOCK_AUDIO_INFO,
         )
 
         step.process(ctx)
@@ -58,6 +70,7 @@ class TestProcessingPipelineSteps(TestCase):
             orig_audio_file_path=str(self.input_file),
             intermediate_dir="some/intermediate",
             final_dir="some/final",
+            audio_info=MOCK_AUDIO_INFO,
         )
 
         with self.assertRaises(AudioProcessingPipelineError):
@@ -72,6 +85,7 @@ class TestProcessingPipelineSteps(TestCase):
             orig_audio_file_path=str(self.input_file),
             intermediate_dir="/tmp/int_dir_123",
             final_dir="final_dir_123",
+            audio_info=MOCK_AUDIO_INFO,
         )
 
         with patch("streaming.audio.processing_pipeline.shutil.rmtree") as mock_rmtree:
@@ -87,6 +101,7 @@ class TestProcessingPipelineSteps(TestCase):
             orig_audio_file_path=str(self.input_file),
             intermediate_dir="i",
             final_dir="f",
+            audio_info=MOCK_AUDIO_INFO,
             converted_paths=[],
         )
 
@@ -102,6 +117,7 @@ class TestProcessingPipelineSteps(TestCase):
             orig_audio_file_path=str(self.input_file),
             intermediate_dir="i",
             final_dir="f",
+            audio_info=MOCK_AUDIO_INFO,
             converted_paths=["a.mp4"],
         )
 
@@ -117,6 +133,7 @@ class TestProcessingPipelineSteps(TestCase):
             orig_audio_file_path=str(self.input_file),
             intermediate_dir="i",
             final_dir="final_dir_xyz",
+            audio_info=MOCK_AUDIO_INFO,
             converted_paths=["a.mp4"],
         )
 
@@ -144,7 +161,11 @@ class TestProcessingPipelineSteps(TestCase):
         pipeline = ProcessingPipeline(steps=[step1, step2], do_cleanup=True)
         final_dir = "final_dir_for_pipeline"
         with patch("streaming.audio.processing_pipeline.shutil.rmtree") as mock_rmtree:
-            res = pipeline.run(source=str(self.input_file), final_storage_dir=final_dir)
+            res = pipeline.run(
+                source=str(self.input_file),
+                final_storage_dir=final_dir,
+                audio_info=MOCK_AUDIO_INFO,
+            )
             self.assertEqual(res.song_repr, {"mpd": "x"})
             mock_rmtree.assert_called_once_with(
                 res.context.intermediate_dir, ignore_errors=True
@@ -169,17 +190,24 @@ class TestProcessingPipelineSteps(TestCase):
         final_dir = "final_dir_for_pipeline2"
         with patch("streaming.audio.processing_pipeline.shutil.rmtree") as mock_rmtree:
             with self.assertRaises(RuntimeError):
-                pipeline.run(source=str(self.input_file), final_storage_dir=final_dir)
+                pipeline.run(
+                    source=str(self.input_file),
+                    final_storage_dir=final_dir,
+                    audio_info=MOCK_AUDIO_INFO,
+                )
 
             step1.rollback.assert_called_once()
             self.assertTrue(mock_rmtree.called)
 
     def test_pipeline_conversion_success(self):
         storage_subdir = uuid.uuid4().hex
+        audio_info = get_audio_metadata(self.input_file)
 
         pipeline = AudioProcessingPipeline
         result = pipeline.run(
-            source=str(self.input_file), final_storage_dir=storage_subdir
+            source=str(self.input_file),
+            final_storage_dir=storage_subdir,
+            audio_info=audio_info,
         )
 
         self.assertIsNotNone(result.song_repr)
@@ -199,6 +227,9 @@ class TestProcessingPipelineSteps(TestCase):
             f"HLS master playlist not found in storage: {m3u8_path}",
         )
 
+        self.assertIsNotNone(result.loudness_lufs)
+        self.assertIsNotNone(result.true_peak_dbtp)
+
         self.assertFalse(
             Path(result.context.intermediate_dir).exists(),
             "Intermediate local directory should have been cleaned up",
@@ -211,3 +242,57 @@ class TestProcessingPipelineSteps(TestCase):
         cls.override.disable()
         shutil.rmtree(cls._tmp_media)
         super().tearDownClass()
+
+
+class TestLoudnessMeasurementStepTargetSelection(TestCase):
+    @patch("streaming.audio.processing_pipeline.get_audio_loudness")
+    def test_prefers_flac_output(self, mock_loudness):
+        mock_loudness.return_value = (-14.0, -1.0)
+        step = LoudnessMeasurementStep()
+        ctx = ProcessingContext(
+            orig_audio_file_path="/fake/source.wav",
+            intermediate_dir="/tmp/inter",
+            final_dir="/tmp/final",
+            audio_info=MOCK_AUDIO_INFO,
+            converted_paths=[
+                "/tmp/inter/libfdk_aac-96-abc.mp4",
+                "/tmp/inter/flac-None-def.mp4",
+                "/tmp/inter/libfdk_aac-320-ghi.mp4",
+            ],
+        )
+        step.process(ctx)
+        mock_loudness.assert_called_once_with("/tmp/inter/flac-None-def.mp4")
+        self.assertAlmostEqual(ctx.loudness_lufs, -14.0)
+        self.assertAlmostEqual(ctx.true_peak_dbtp, -1.0)
+
+    @patch("streaming.audio.processing_pipeline.get_audio_loudness")
+    def test_falls_back_to_first_when_no_flac(self, mock_loudness):
+        mock_loudness.return_value = (-16.0, -2.0)
+        step = LoudnessMeasurementStep()
+        ctx = ProcessingContext(
+            orig_audio_file_path="/fake/source.wav",
+            intermediate_dir="/tmp/inter",
+            final_dir="/tmp/final",
+            audio_info=MOCK_AUDIO_INFO,
+            converted_paths=[
+                "/tmp/inter/libfdk_aac-96-abc.mp4",
+                "/tmp/inter/libfdk_aac-320-ghi.mp4",
+            ],
+        )
+        step.process(ctx)
+        mock_loudness.assert_called_once_with("/tmp/inter/libfdk_aac-96-abc.mp4")
+
+    @patch("streaming.audio.processing_pipeline.get_audio_loudness")
+    def test_silent_audio_sets_none(self, mock_loudness):
+        mock_loudness.return_value = (None, None)
+        step = LoudnessMeasurementStep()
+        ctx = ProcessingContext(
+            orig_audio_file_path="/fake/source.wav",
+            intermediate_dir="/tmp/inter",
+            final_dir="/tmp/final",
+            audio_info=MOCK_AUDIO_INFO,
+            converted_paths=["/tmp/inter/flac-None-abc.mp4"],
+        )
+        step.process(ctx)
+        self.assertIsNone(ctx.loudness_lufs)
+        self.assertIsNone(ctx.true_peak_dbtp)
