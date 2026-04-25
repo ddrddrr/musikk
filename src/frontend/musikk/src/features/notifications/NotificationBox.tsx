@@ -1,4 +1,4 @@
-import { setNotificationRead } from "@/features/notifications/mutations.ts";
+import { setNotificationsRead } from "@/features/notifications/mutations.ts";
 import { NotificationOverlay } from "@/features/notifications/NotificationOverlay.tsx";
 import { useNotificationsQuery } from "@/features/notifications/queries.ts";
 import { notificationKeys } from "@/features/notifications/queryKeys.ts";
@@ -13,23 +13,23 @@ export function NotificationBox() {
     const client = useQueryClient();
 
     const { isPending, error, data } = useNotificationsQuery();
-    const setNotificationsReadMutation = useMutation({ mutationFn: setNotificationRead });
+    const setNotificationsReadMutation = useMutation({ mutationFn: setNotificationsRead });
 
-    const unreadUUIDs = useMemo(() => {
-        if (!data) return [];
+    const unreadCount = useMemo(() => {
+        if (!data) return 0;
         const { replies = [], followers = [], chat_messages = [] } = data;
 
-        return [
-            ...replies.filter((n) => !n.is_read).map((n) => n.uuid),
-            ...followers.filter((n) => !n.is_read).map((n) => n.uuid),
-            ...chat_messages.filter((n) => !n.is_read).map((n) => n.uuid),
-        ];
+        return (
+            replies.filter((n) => !n.is_read).length +
+            followers.filter((n) => !n.is_read).length +
+            chat_messages.filter((n) => !n.is_read).length
+        );
     }, [data]);
 
     async function handleOpenChange(open: boolean) {
-        if (!open && unreadUUIDs.length > 0) {
-            await setNotificationsReadMutation.mutateAsync({ notificationUUIDs: unreadUUIDs });
-            client.invalidateQueries({ queryKey: notificationKeys.base });
+        if (!open && unreadCount > 0) {
+            await setNotificationsReadMutation.mutateAsync();
+            void client.invalidateQueries({ queryKey: notificationKeys.base });
         }
     }
 
@@ -51,9 +51,9 @@ export function NotificationBox() {
                     <Button variant="ghost" size="icon" className="text-brand-foreground">
                         <Sparkle className="size-5" />
                     </Button>
-                    {unreadUUIDs.length > 0 && (
+                    {unreadCount > 0 && (
                         <span className="absolute -top-1 -right-1 rounded-full bg-amber-200 px-1.5 py-0.5 text-xs font-bold text-foreground">
-                            {unreadUUIDs.length}
+                            {unreadCount}
                         </span>
                     )}
                 </div>

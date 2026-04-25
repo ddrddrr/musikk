@@ -1,3 +1,4 @@
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.generics import (
     GenericAPIView,
@@ -13,7 +14,6 @@ from notifications.api.v1.serializers import (
 from notifications.models import (
     ChatMessageNotification,
     FollowerNotification,
-    Notification,
     ReplyNotification,
 )
 
@@ -28,7 +28,9 @@ class NotificationsPersonalListUpdateView(GenericAPIView):
             context={"request": request},
         ).data
         followers = FollowerNotificationSerializer(
-            FollowerNotification.objects.filter(receiver=request.user), many=True
+            FollowerNotification.objects.filter(receiver=request.user),
+            many=True,
+            context={"request": request},
         ).data
         chat_messages = ChatMessageNotificationSerializer(
             ChatMessageNotification.objects.filter(receiver=request.user),
@@ -40,9 +42,9 @@ class NotificationsPersonalListUpdateView(GenericAPIView):
         )
 
     def patch(self, request, *args, **kwargs):
-        notif_uuids = self.request.data["uuids"]
-        Notification.objects.filter(uuid__in=notif_uuids).update(is_read=True)
-
+        profile = request.user.notificationprofile
+        profile.read_at = timezone.now()
+        profile.save(update_fields=["read_at"])
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -50,8 +52,6 @@ class NotificationDeleteView(GenericAPIView):
     def delete(self, request, *args, **kwargs):
         user = self.request.user
         notif_uuid = kwargs["uuid"]
-        # filtering by receiver, so any random user couldn't delete notifications
-        # which don't belong to him
         notification = get_object_or_404(
             FollowerNotification, receiver=user, uuid=notif_uuid
         )

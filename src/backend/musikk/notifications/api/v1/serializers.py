@@ -11,7 +11,13 @@ from notifications.models import (
 
 
 class BaseNotificationSerializer(BaseModelSerializer):
-    is_read = serializers.BooleanField(default=False)
+    is_read = serializers.SerializerMethodField()
+
+    def get_is_read(self, obj):
+        read_at = self.context["request"].user.notificationprofile.read_at
+        if read_at is None:
+            return False
+        return obj.date_added <= read_at
 
     class Meta(BaseModelSerializer.Meta):
         fields = BaseModelSerializer.Meta.fields + [
@@ -28,7 +34,6 @@ class ReplyNotificationSerializer(BaseNotificationSerializer):
         fields = BaseNotificationSerializer.Meta.fields + [
             "orig_publication",
             "reply_publication",
-            "is_read",
         ]
 
 
@@ -41,7 +46,6 @@ class FollowerNotificationSerializer(BaseNotificationSerializer):
         fields = BaseNotificationSerializer.Meta.fields + [
             "sender",
             "receiver",
-            "is_read",
         ]
 
 
@@ -58,5 +62,4 @@ class ChatMessageNotificationSerializer(BaseNotificationSerializer):
             "receiver",
             "chat_uuid",
             "chat_title",
-            "is_read",
         ]
