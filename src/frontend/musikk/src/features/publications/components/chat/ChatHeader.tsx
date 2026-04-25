@@ -59,9 +59,9 @@ export function ChatHeader({ chat }: ChatHeaderProps) {
                                         )}
                                     </div>
                                     {otherMember.bio && (
-                                        <p className="text-center text-sm text-muted-foreground">
-                                            {otherMember.bio}
-                                        </p>
+                                        <div className="max-h-20 overflow-y-auto text-sm text-muted-foreground">
+                                            <p className="whitespace-pre-wrap">{otherMember.bio}</p>
+                                        </div>
                                     )}
                                 </div>
                             </TabsContent>

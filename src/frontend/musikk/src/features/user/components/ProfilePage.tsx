@@ -60,46 +60,38 @@ export function ProfilePage() {
 
     return (
         <div className="flex flex-col items-center pt-8">
-            <div className="flex items-start gap-6">
-                <UserAvatar src={user.avatar} alt={user.display_name} size="lg" />
-                <div>
-                    <h1 className="text-2xl font-semibold">{user.display_name}</h1>
-                    <div className="mt-1 max-h-40 overflow-y-auto text-sm text-muted-foreground">
-                        {user.bio}
-                    </div>
-                    <div className="mt-4 flex gap-2">
-                        {isOwnProfile && (
-                            <Dialog>
-                                <DialogTrigger asChild>
-                                    <Button variant="outline">Edit Profile</Button>
-                                </DialogTrigger>
-                                <DialogContent>
-                                    <DialogHeader>
-                                        <DialogTitle>Edit Profile</DialogTitle>
-                                        <DialogClose />
-                                    </DialogHeader>
-
-                                    <ProfileForm />
-                                </DialogContent>
-                            </Dialog>
-                        )}
-                        {!isOwnProfile && (
-                            <Button
-                                variant={isFollowing ? "outline" : "brand"}
-                                onClick={toggleFollow}
-                                disabled={isFollowLoading}
-                            >
-                                {isFollowLoading ? (
-                                    <Spinner />
-                                ) : isFollowing ? (
-                                    "Following"
-                                ) : (
-                                    "Follow"
-                                )}
-                            </Button>
-                        )}
-                    </div>
+            <UserAvatar src={user.avatar} alt={user.display_name} size="lg" />
+            <h1 className="mt-2 text-2xl font-semibold">{user.display_name}</h1>
+            {user.bio && (
+                <div className="mt-2 max-h-40 w-120 overflow-y-auto text-sm text-muted-foreground">
+                    <p className="whitespace-pre-wrap">{user.bio}</p>
                 </div>
+            )}
+            <div className="mt-4 flex gap-2">
+                {isOwnProfile && (
+                    <Dialog>
+                        <DialogTrigger asChild>
+                            <Button variant="outline">Edit Profile</Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>Edit Profile</DialogTitle>
+                                <DialogClose />
+                            </DialogHeader>
+
+                            <ProfileForm />
+                        </DialogContent>
+                    </Dialog>
+                )}
+                {!isOwnProfile && (
+                    <Button
+                        variant={isFollowing ? "outline" : "brand"}
+                        onClick={toggleFollow}
+                        disabled={isFollowLoading}
+                    >
+                        {isFollowLoading ? <Spinner /> : isFollowing ? "Following" : "Follow"}
+                    </Button>
+                )}
             </div>
             <div className="mt-8 w-full">
                 <Tabs value={tab} onValueChange={setTab} className="w-full">
