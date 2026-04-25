@@ -1,7 +1,7 @@
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
 import { PostTabContent } from "@/features/publications/components/posts/PostTabContent.tsx";
-import { useNewFeedPosts } from "@/features/publications/hooks/useNewFeedPosts.ts";
-import { useFeedPostsFlat } from "@/features/publications/hooks/usePublicationsInfiniteFlat.ts";
+import { useNewGlobalFeedPosts } from "@/features/publications/hooks/useNewFeedPosts.ts";
+import { useGlobalFeedPostsFlat } from "@/features/publications/hooks/usePublicationsInfiniteFlat.ts";
 import { Tabs, TabsList, TabsTrigger } from "@/features/ui/tabs.tsx";
 import { useState } from "react";
 
@@ -9,14 +9,11 @@ export function GlobalFeed() {
     const [tab, setTab] = useState("friends");
     const userUUID = useUserUUID();
 
-    const queryFriends = useFeedPostsFlat(userUUID, false, "friends");
-    const queryFollowed = useFeedPostsFlat(userUUID, false, "followed");
-    const queryAll = useFeedPostsFlat(userUUID, false);
+    const queryFriends = useGlobalFeedPostsFlat(false, "friends");
+    const queryFollowed = useGlobalFeedPostsFlat(false, "followed");
+    const queryAll = useGlobalFeedPostsFlat(false);
 
-    const { hasNewPosts, refresh } = useNewFeedPosts(
-        userUUID,
-        queryAll.publicationsFlat?.[0]?.uuid,
-    );
+    const { hasNewPosts, refresh } = useNewGlobalFeedPosts(queryAll.publicationsFlat?.[0]?.uuid);
 
     const sharedProps = { hasNewPosts, onLoadNewer: refresh, feedUserUUID: userUUID };
 

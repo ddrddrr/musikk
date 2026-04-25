@@ -4,7 +4,14 @@ import {
     useChatMessages,
     useCollectionComments,
     useFeedPosts,
+    useGlobalFeedPosts,
 } from "@/features/publications/api/queries.ts";
+
+export function useGlobalFeedPostsFlat(reverse = true, connection?: "friends" | "followed") {
+    const query = useGlobalFeedPosts(connection);
+    const result = useInfiniteFlat(query, reverse);
+    return { ...result, publicationsFlat: result.itemsFlat };
+}
 
 export function useFeedPostsFlat(
     userUUID: UUID,

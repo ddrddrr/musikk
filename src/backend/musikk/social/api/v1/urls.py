@@ -1,14 +1,14 @@
 from django.urls import path
 
 from social.api.v1.views import (
-    PublicationChildrenView,
+    ChatAttachmentsListView,
+    ChatMembersCreateView,
+    ChatMessagesListCreateView,
+    ChatRetrieveView,
     CollectionCommentsListCreateView,
     FeedPostsListCreateView,
-    ChatMessagesListCreateView,
-    ChatAttachmentsListView,
+    PublicationChildrenView,
     UserChatsListCreateView,
-    ChatMembersCreateView,
-    ChatRetrieveView,
 )
 
 chat_urlpatterns = [
@@ -45,7 +45,12 @@ urlpatterns = [
         name="publication-children",
     ),
     path(
-        "feed/<uuid:user_uuid>/posts",  # future proofing with /posts
+        "feed/posts",
+        FeedPostsListCreateView.as_view(),
+        name="global-feed-list",
+    ),
+    path(
+        "feed/<uuid:user_uuid>/posts",
         FeedPostsListCreateView.as_view(),
         name="feed-list-retrieve",
     ),

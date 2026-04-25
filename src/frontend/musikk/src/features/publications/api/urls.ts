@@ -2,6 +2,7 @@ import { UUID } from "@/api/types.ts";
 
 export const PublicationURLs = {
     publicationChildren: (pubUUID: UUID) => `/publications/${pubUUID}/children`,
+    globalFeedPosts: () => "/feed/posts",
     feedPosts: (userUUID: UUID) => `/feed/${userUUID}/posts`,
     collectionComments: (collectionUUID: UUID) => `/collections/${collectionUUID}/comments`,
 };

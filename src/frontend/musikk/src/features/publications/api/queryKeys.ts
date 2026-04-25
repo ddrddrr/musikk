@@ -1,6 +1,7 @@
 import { UUID } from "@/api/types.ts";
 
 export const publicationKeys = {
+    globalFeed: () => ["global-feed"] as const,
     feed: (userUUID: UUID) => ["feed", userUUID, "comments"] as const,
     collectionComments: (collectionUUID: UUID) =>
         ["collection", collectionUUID, "comments"] as const,

@@ -32,6 +32,15 @@ function usePublicationListInfinite(
     });
 }
 
+export function useGlobalFeedPosts(connection?: "friends" | "followed") {
+    const params = connection ? { connection } : undefined;
+    return usePublicationListInfinite(
+        PublicationURLs.globalFeedPosts(),
+        [...publicationKeys.globalFeed()],
+        params,
+    );
+}
+
 export function useFeedPosts(userUUID: UUID, connection?: "friends" | "followed") {
     const params = connection ? { connection } : undefined;
     return usePublicationListInfinite(

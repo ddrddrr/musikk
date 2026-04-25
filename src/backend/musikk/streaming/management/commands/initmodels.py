@@ -1,257 +1,155 @@
-import io
 import os
-import random
-import tempfile
-import uuid
-from pathlib import Path
 
-import requests
-from django.conf import settings
-from django.core.files import File
 from django.core.management.base import BaseCommand
 from django.db import transaction
-from faker import Faker
-from users.management.helpers import create_user_with_password
 
-from streaming.audio.processing_pipeline import AudioProcessingPipeline
-from streaming.audio.shaka_packager_conf.shaka_packager_wrapper import ManifestType
-from streaming.models import (
-    BaseSong,
-    Collection,
-    CollectionCredit,
-    CollectionSong,
-    SongCredit,
+from streaming.management.constants import DEFAULT_GENERATED_AUDIO_DIR
+from streaming.management.seeders.audio import seed_songs
+from streaming.management.seeders.audio_gen import generate_audio_files
+from streaming.management.seeders.collections import (
+    seed_collections,
+    seed_followed_collections,
 )
-from streaming.models.collections import CollectionType
-
-fake = Faker()
-
-
-AUDIO_FILES_DIR = Path(settings.BASE_DIR) / "samples"
-
-IMAGE_URL_1 = "https://picsum.photos/500"
-IMAGE_URL_2 = "https://picsum.photos/200"
+from streaming.management.seeders.images import ImageProvider
+from streaming.management.seeders.notifications import seed_notifications
+from streaming.management.seeders.social import (
+    seed_chat_messages,
+    seed_chats,
+    seed_publications,
+)
+from streaming.management.seeders.users import seed_follows, seed_users
 
 
 class Command(BaseCommand):
-    help = "Create sample users, artists, songs, collections, and albums"
+    help = "Generate comprehensive sample data for all system entities"
 
     def add_arguments(self, parser):
-        parser.add_argument("--users", type=int, default=2)
-        parser.add_argument("--artists", type=int, default=3)
-        parser.add_argument("--songs", type=int, default=7)
+        parser.add_argument("--users", type=int, default=20)
+        parser.add_argument("--artists", type=int, default=30)
+        parser.add_argument("--songs", type=int, default=40)
+        parser.add_argument("--playlists", type=int, default=50)
+        parser.add_argument("--albums", type=int, default=70)
+        parser.add_argument("--follows", type=int, default=15)
+        parser.add_argument("--publications", type=int, default=100)
+        parser.add_argument("--feed-posts", type=int, default=100)
+        parser.add_argument("--direct-chats", type=int, default=3)
+        parser.add_argument("--group-chats", type=int, default=1)
+        parser.add_argument("--messages-per-chat", type=int, default=50)
+        parser.add_argument("--skip-audio", action="store_true")
         parser.add_argument(
-            "--collections", type=int, default=2
-        )  # TODO: rename to playlists
-        parser.add_argument("--albums", type=int, default=2)
+            "--generate-audio",
+            action="store_true",
+            help="Generate audio files with FFmpeg (to samples/generated/)",
+        )
+        parser.add_argument(
+            "--audio-duration-range",
+            type=str,
+            default="1,60",
+            help="Min,max duration in seconds for generated audio",
+        )
+        parser.add_argument(
+            "--workers",
+            type=int,
+            default=min(4, os.cpu_count() or 4),
+            help="Number of parallel workers for audio generation/processing",
+        )
 
     def handle(self, *args, **options):
-        users_count = options["users"]
-        artists_count = options["artists"]
-        songs_count = options["songs"]
-        collections_count = options["collections"]
-        albums_count = options["albums"]
+        image_provider = ImageProvider()
 
-        image_urls = [IMAGE_URL_1, IMAGE_URL_2]
+        if options["generate_audio"] and not options["skip_audio"]:
+            dur_min, dur_max = (
+                int(x) for x in options["audio_duration_range"].split(",")
+            )
+
+            self.stdout.write(f"\nGenerating {options['songs']} audio files")
+            generate_audio_files(
+                count=options["songs"],
+                output_dir=DEFAULT_GENERATED_AUDIO_DIR,
+                duration_range=(dur_min, dur_max),
+                workers=options["workers"],
+            )
 
         with transaction.atomic():
-            users = self._create_users(users_count)
-            artists = self._create_artists(artists_count)
-
             self.stdout.write(
-                f"\nCreated {len(users)} users and {len(artists)} artists.\n"
+                f"\nGenerating {options['users']} users and {options['artists']} artists"
+            )
+            users, artists, credentials = seed_users(
+                user_count=options["users"],
+                artist_count=options["artists"],
+                image_provider=image_provider,
+            )
+            all_users = users + artists
+
+            self.stdout.write(f"\nGenerating {options['follows']} follows")
+            follows = seed_follows(
+                users=all_users,
+                count=options["follows"],
             )
 
-            songs = []
-            for _ in range(songs_count):
-                image_url = random.choice(image_urls)
-                audio_path = self._pick_random_audio_path()
-
-                song = self._create_song(
-                    audio_path=str(audio_path),
-                    image_url=image_url,
-                    artists=artists,
-                )
-                songs.append(song)
-
-            self._create_playlists(
-                songs=songs,
-                image_urls=image_urls,
-                collections_count=collections_count,
-                users=users,
-            )
-
-            self._create_albums(
-                songs=songs,
-                image_urls=image_urls,
-                albums_count=albums_count,
+            self.stdout.write(f"\nGenerating {options['songs']} songs")
+            songs = seed_songs(
                 artists=artists,
+                song_count=options["songs"],
+                image_provider=image_provider,
+                skip_audio=options["skip_audio"],
+                workers=options["workers"],
             )
-
-    def _pick_random_audio_path(self) -> Path:
-        if not AUDIO_FILES_DIR.exists() or not AUDIO_FILES_DIR.is_dir():
-            raise FileNotFoundError(f"Audio files dir not found: {AUDIO_FILES_DIR}")
-
-        files = [p for p in AUDIO_FILES_DIR.iterdir() if p.is_file()]
-        if not files:
-            raise FileNotFoundError(f"No files found in audio dir: {AUDIO_FILES_DIR}")
-
-        return random.choice(files)
-
-    def _create_users(self, count):
-        created = []
-        for _ in range(count):
-            user, pwd = create_user_with_password("streaming")
-            created.append(user)
-            self.stdout.write(f"- user: {user.email} / {pwd}")
-        return created
-
-    def _create_artists(self, count):
-        created = []
-        for _ in range(count):
-            artist, pwd = create_user_with_password("artist")
-            created.append(artist)
-            self.stdout.write(f"- artist email:{artist.email}, password:{pwd}")
-        return created
-
-    def _create_song(self, audio_path: str, image_url: str, artists: list):
-        image_file = self._fetch_image_file(image_url)
-        song = BaseSong.objects.create(
-            title=fake.catch_phrase(),
-            description=fake.text(max_nb_chars=512),
-            image=image_file,
-        )
-
-        tmp_audio_path = self._get_local_temp_audio(audio_path)
-        audio_uuid = str(uuid.uuid4())
-        storage_dir = os.path.join(settings.AUDIO_CONTENT_PATH, audio_uuid)
-
-        try:
-            self.stdout.write(f"Converting audio for '{song.title}'…")
-            self._process_audio_for_song(song, tmp_audio_path, audio_uuid, storage_dir)
-        except Exception as exc:
-            self.stderr.write(f"Failed processing audio for '{song.title}': {exc}")
-        finally:
-            self._safe_remove(tmp_audio_path)
-
-        self._create_song_credits(song, artists)
-
-        self.stdout.write(
-            f"Created '{song.title}' ({len(song.credits.all())} author(s))"
-        )
-        return song
-
-    def _fetch_image_file(self, url: str) -> File:
-        resp = requests.get(url)
-        return File(io.BytesIO(resp.content), name=os.path.basename(url))
-
-    def _get_local_temp_audio(self, path: str) -> str:
-        """
-        Copy a local audio file to a temporary file and return its path.
-        Expects `path` to be an existing filesystem path.
-        """
-        if not os.path.exists(path):
-            raise FileNotFoundError(f"Local audio file not found: {path}")
-        suffix = os.path.splitext(path)[1] or ".wav"
-        with open(path, "rb") as rf:
-            with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tf:
-                tf.write(rf.read())
-                return tf.name
-
-    def _process_audio_for_song(
-        self, song: BaseSong, tmp_audio_path: str, audio_uuid: str, storage_dir: str
-    ) -> bool:
-        result = AudioProcessingPipeline.run(
-            source=tmp_audio_path, final_storage_dir=storage_dir
-        )
-
-        song.content_path = storage_dir
-        song.mpd = result.song_repr.manifests.get(ManifestType.MPD)
-        song.m3u8 = result.song_repr.manifests.get(ManifestType.M3U8)
-        song.save()
-        return True
-
-    def _create_song_credits(self, song: BaseSong, artists: list):
-        if not artists:
-            return
-        num_authors = random.randint(1, min(3, len(artists)))
-        for priority, author in enumerate(random.sample(artists, num_authors)):
-            SongCredit.objects.create(
-                song=song, author=author, author_priority=priority
-            )
-
-    def _create_playlists(
-        self, songs: list, image_urls: list, collections_count: int, users: list
-    ):
-        for _ in range(collections_count):
-            if not songs:
-                break
-
-            image_file = self._fetch_image_file(random.choice(image_urls))
-            collection = Collection.objects.create(
-                title=fake.bs().title(),
-                description=fake.text(max_nb_chars=512),
-                image=image_file,
-            )
-
-            chosen = random.sample(songs, k=random.randint(1, len(songs)))
-            for idx, song in enumerate(chosen):
-                CollectionSong.objects.create(
-                    collection=collection, song=song, position=idx
-                )
-
-            num_creds = random.randint(1, len(users)) if users else 0
-            for priority, author in enumerate(
-                random.sample(users, num_creds) if num_creds else []
-            ):
-                CollectionCredit.objects.create(
-                    collection=collection,
-                    author=author,
-                    author_priority=priority,
-                )
 
             self.stdout.write(
-                f"Created collection '{collection.title}' "
-                f"with {len(chosen)} song(s) and {collection.collection_credits.count()} author(s)"
+                f"\nGenerating {options['playlists']} playlists and {options['albums']} albums"
+            )
+            playlists, albums = seed_collections(
+                songs=songs,
+                users=users,
+                artists=artists,
+                playlist_count=options["playlists"],
+                album_count=options["albums"],
+                image_provider=image_provider,
             )
 
-    def _create_albums(
-        self, songs: list, image_urls: list, albums_count: int, artists: list
-    ):
-        for _ in range(albums_count):
-            if not songs:
-                break
-
-            image_file = self._fetch_image_file(random.choice(image_urls))
-            album = Collection.objects.create(
-                title=fake.bs().title(),
-                description=fake.text(max_nb_chars=512),
-                image=image_file,
-                type=CollectionType.ALBUM,
+            self.stdout.write("\nGenerating followed collections")
+            seed_followed_collections(
+                users=all_users,
+                collections=playlists + albums,
             )
-
-            chosen = random.sample(songs, k=random.randint(1, len(songs)))
-            for idx, song in enumerate(chosen):
-                CollectionSong.objects.create(collection=album, song=song, position=idx)
-
-            num_creds = random.randint(1, len(artists)) if artists else 0
-            for priority, author in enumerate(
-                random.sample(artists, num_creds) if num_creds else []
-            ):
-                CollectionCredit.objects.create(
-                    collection=album,
-                    author=author,
-                    author_priority=priority,
-                )
 
             self.stdout.write(
-                f"Created album '{album.title}' "
-                f"with {len(chosen)} song(s) and {album.collection_credits.count()} author(s)"
+                f"\nGenerating {options['publications']} publications and {options['feed_posts']} feed posts"
+            )
+            publications = seed_publications(
+                users=all_users,
+                collections=playlists + albums,
+                songs=songs,
+                pub_count=options["publications"],
+                feed_post_count=options["feed_posts"],
             )
 
-    def _safe_remove(self, path: str):
-        try:
-            if path and os.path.exists(path):
-                os.remove(path)
-        except Exception:
-            self.stderr.write("Failed to remove temporary file %s", path)
+            self.stdout.write(
+                f"\nGenerating {options['direct_chats']} direct chats and {options['group_chats']} group chats"
+            )
+            chats, members_map = seed_chats(
+                users=all_users,
+                direct_count=options["direct_chats"],
+                group_count=options["group_chats"],
+                image_provider=image_provider,
+            )
+
+            self.stdout.write(
+                f"\nGenerating {options['messages_per_chat']} messages per chat"
+            )
+            chat_messages = seed_chat_messages(
+                chats=chats,
+                members_map=members_map,
+                messages_per_chat=options["messages_per_chat"],
+            )
+
+            self.stdout.write("\nGenerating notifications")
+            seed_notifications(
+                follows=follows,
+                publications=publications,
+                chat_messages=chat_messages,
+                chat_members_map=members_map,
+            )
+
+        self.stdout.write("")

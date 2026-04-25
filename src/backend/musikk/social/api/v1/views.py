@@ -69,6 +69,16 @@ class FeedPostsListCreateView(PublicationsListCreateMixin, ListCreateAPIView):
     def get_created_for(self):
         return BaseUser.objects.get(uuid=self.kwargs["user_uuid"])
 
+    def get_queryset(self):
+        if "user_uuid" not in self.kwargs:
+            ct = ContentType.objects.get_for_model(BaseUser)
+            return (
+                Publication.objects.filter(created_for_type=ct, parent__isnull=True)
+                .select_related("author")
+                .order_by("-date_added")
+            )
+        return super().get_queryset()
+
     def check_list_permission(self, created_for):
         return True
 
