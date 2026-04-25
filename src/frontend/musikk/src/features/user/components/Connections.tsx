@@ -32,7 +32,7 @@ export function Connections() {
 
                 <TabsContent value="friends">
                     {friends.length === 0 ? (
-                        <p className="text-muted-foreground">No friends yet.</p>
+                        <p className="py-12 text-center text-muted-foreground">No friends yet.</p>
                     ) : (
                         <div className="grid grid-cols-1 gap-1 sm:grid-cols-2 md:grid-cols-3">
                             {friends.map((friend) => (
@@ -44,7 +44,9 @@ export function Connections() {
 
                 <TabsContent value="followed">
                     {followed.length === 0 ? (
-                        <p className="text-muted-foreground">Not following anyone yet.</p>
+                        <p className="py-12 text-center text-muted-foreground">
+                            Not following anyone yet.
+                        </p>
                     ) : (
                         <div className="grid grid-cols-1 gap-1 sm:grid-cols-2 md:grid-cols-3">
                             {followed.map((user) => (
@@ -56,7 +58,7 @@ export function Connections() {
 
                 <TabsContent value="followers">
                     {followers.length === 0 ? (
-                        <p className="text-muted-foreground">No followers.</p>
+                        <p className="py-12 text-center text-muted-foreground">No followers.</p>
                     ) : (
                         <div className="grid grid-cols-1 gap-1 sm:grid-cols-2 md:grid-cols-3">
                             {followers.map((user) => (

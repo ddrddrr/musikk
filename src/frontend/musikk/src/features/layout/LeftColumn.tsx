@@ -23,7 +23,7 @@ export function LeftColumn() {
     }, [liked_songs, history, created_collections, followed_collections]);
 
     return (
-        <div className="w-1/5 overflow-y-auto bg-brand p-4 pb-40">
+        <div className="flex w-1/5 flex-col overflow-y-auto bg-brand p-4 pb-40">
             <div className="mx-14 mb-4 flex items-center justify-between">
                 <h2 className="text-center text-xl font-bold text-brand-foreground">Your stuff</h2>
                 <ColletionCreateButton />
@@ -37,8 +37,10 @@ export function LeftColumn() {
                     ))}
                 </ul>
             ) : (
-                <div className="rounded-sm border-2 border-foreground bg-brand py-8 text-center text-brand-foreground">
-                    <p>No song collections found</p>
+                <div className="flex flex-1 items-center justify-center">
+                    <div className="rounded-sm border-2 border-foreground bg-brand py-8 text-center text-brand-foreground">
+                        <p>No song collections found</p>
+                    </div>
                 </div>
             )}
         </div>

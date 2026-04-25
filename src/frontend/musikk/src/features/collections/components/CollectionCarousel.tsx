@@ -27,7 +27,7 @@ export function CollectionCarousel({ collections, title }: CollectionsCarouselPr
                 }}
                 className="w-full"
             >
-                <div className="min-h-[120px]">
+                <div className="flex min-h-[120px] items-center">
                     <CarouselContent>
                         {collections.length > 0 ? (
                             collections.map((collection) => (
