@@ -2,6 +2,8 @@ import { UUID } from "@/api/types.ts";
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
 import { useCollectionDetailQuery } from "@/features/collections/api/queries.ts";
 import { CollectionHeader } from "@/features/collections/components/CollectionHeader.tsx";
+import { DeletePlaylistDialog } from "@/features/collections/components/DeletePlaylistDialog.tsx";
+import { useDeletePlaylist } from "@/features/collections/hooks/useDeletePlaylist.ts";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { CommentBox } from "@/features/publications/components/collection-comments/CommentBox.tsx";
 import {
@@ -13,7 +15,7 @@ import { SongMenuButton } from "@/features/songs/components/SongMenuButton.tsx";
 import { Spinner } from "@/features/ui/spinner";
 import { UserCollectionsContext } from "@/features/user/providers/userCollectionsContext.ts";
 import { cn } from "@/lib/utils.ts";
-import { useCallback, useContext } from "react";
+import { useCallback, useContext, useState } from "react";
 import { useMatch, useNavigate } from "react-router-dom";
 
 interface CollectionContainerProps {
@@ -41,6 +43,9 @@ export function CollectionContainer({ collectionUUID }: CollectionContainerProps
         );
     }, [navigate, showComments, collectionUUID]);
 
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const deleteMutation = useDeletePlaylist();
+
     if (isPending)
         return (
             <div className="flex min-h-[400px] items-center justify-center">
@@ -62,6 +67,7 @@ export function CollectionContainer({ collectionUUID }: CollectionContainerProps
     showComments = showComments && notPersonalCollection && !collection?.private;
     const removeFromPlaylistCtxBtn =
         !!currUserUUID && collection?.authors.map((a) => a.uuid).includes(currUserUUID);
+    const isAuthorPlaylist = removeFromPlaylistCtxBtn && collection.type === "playlist";
 
     const songSize = showComments ? "compact" : "normal";
     const btn = songButtonProps[songSize];
@@ -80,6 +86,8 @@ export function CollectionContainer({ collectionUUID }: CollectionContainerProps
                             }
                             renderCommentsButton={notPersonalCollection && !collection?.private}
                             showComments={showComments}
+                            isAuthorPlaylist={isAuthorPlaylist}
+                            onDeleteClick={() => setDeleteDialogOpen(true)}
                         />
 
                         {songs.length > 0 ? (
@@ -128,6 +136,16 @@ export function CollectionContainer({ collectionUUID }: CollectionContainerProps
                     </div>
                 )}
             </div>
+
+            {isAuthorPlaylist && (
+                <DeletePlaylistDialog
+                    open={deleteDialogOpen}
+                    onOpenChange={setDeleteDialogOpen}
+                    playlistTitle={collection.title}
+                    onConfirm={() => deleteMutation.mutate({ collectionUUID: collection.uuid })}
+                    isDeleting={deleteMutation.isPending}
+                />
+            )}
         </div>
     );
 }
