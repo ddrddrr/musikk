@@ -20,7 +20,7 @@ export function SongDisplay({ song }: SongDisplayProps) {
             <div className="aspect-square w-full max-w-2/5">
                 <MediaThumbnail src={song.image} alt={song.title} className="h-full w-full" />
             </div>
-            <div className="w-full text-start">
+            <div className="w-full min-w-0 text-start">
                 <div className="mb-1 flex flex-wrap items-center gap-2">
                     {song.authors.map((author) => (
                         <UserIdentifier key={author.uuid} user={author} />

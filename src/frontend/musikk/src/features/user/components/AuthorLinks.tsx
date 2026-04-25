@@ -11,7 +11,7 @@ export function AuthorLinks({ authors, className }: AuthorLinksProps) {
     const navigate = useNavigate();
 
     return (
-        <span className={cn("truncate", className)}>
+        <span className={cn("block truncate", className)}>
             {authors.map((author, index) => (
                 <span key={author.uuid}>
                     <span

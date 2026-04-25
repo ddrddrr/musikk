@@ -3,8 +3,15 @@ import { CollectionAddToQueueButton } from "@/features/collections/components/Co
 import { CollectionPlayButton } from "@/features/collections/components/CollectionPlayButton.tsx";
 import { CollectionDetailed } from "@/features/collections/types.ts";
 import { Button } from "@/features/ui/button.tsx";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/features/ui/dropdown-menu.tsx";
 import { AuthorLinks } from "@/features/user/components/AuthorLinks.tsx";
 import { cn } from "@/lib/utils.ts";
+import { EllipsisVertical, Trash2 } from "lucide-react";
 import { memo } from "react";
 
 interface SongCollectionHeaderProps {
@@ -14,9 +21,34 @@ interface SongCollectionHeaderProps {
     songsCount: number;
     renderAddToLikedButton: boolean;
     renderCommentsButton: boolean;
+    isAuthorPlaylist?: boolean;
+    onDeleteClick?: () => void;
 }
 
-// TODO: make user-created playlists deletable
+function PlaylistMenuDropdown({
+    size,
+    onDeleteClick,
+}: {
+    size?: "sm" | "icon";
+    onDeleteClick?: () => void;
+}) {
+    return (
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size={size ?? "icon"}>
+                    <EllipsisVertical size={size === "sm" ? 16 : 20} />
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+                <DropdownMenuItem variant="destructive" onSelect={onDeleteClick}>
+                    <Trash2 />
+                    Delete playlist
+                </DropdownMenuItem>
+            </DropdownMenuContent>
+        </DropdownMenu>
+    );
+}
+
 export const CollectionHeader = memo(function SongCollectionHeader({
     collection,
     showComments,
@@ -24,6 +56,8 @@ export const CollectionHeader = memo(function SongCollectionHeader({
     songsCount,
     renderAddToLikedButton,
     renderCommentsButton,
+    isAuthorPlaylist,
+    onDeleteClick,
 }: SongCollectionHeaderProps) {
     return (
         <>
@@ -41,7 +75,7 @@ export const CollectionHeader = memo(function SongCollectionHeader({
                     <div>♫</div>
                 )}
 
-                <div className="flex-1">
+                <div className="min-w-0 flex-1">
                     {showComments ? (
                         <div className="mb-2">
                             <p className="truncate text-sm font-bold">{collection.title}</p>
@@ -62,6 +96,9 @@ export const CollectionHeader = memo(function SongCollectionHeader({
                                     collection={collection}
                                     showComments={showComments}
                                 />
+                                {isAuthorPlaylist && (
+                                    <PlaylistMenuDropdown size="sm" onDeleteClick={onDeleteClick} />
+                                )}
                             </div>
                         </div>
                     ) : (
@@ -95,6 +132,9 @@ export const CollectionHeader = memo(function SongCollectionHeader({
                                     collection={collection}
                                     showComments={showComments}
                                 />
+                                {isAuthorPlaylist && (
+                                    <PlaylistMenuDropdown onDeleteClick={onDeleteClick} />
+                                )}
                             </div>
                         </div>
                     )}
