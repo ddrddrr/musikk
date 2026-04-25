@@ -2,7 +2,7 @@ import { getErrorDetail } from "@/api/errorUtils.ts";
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
 import { createCollection } from "@/features/collections/api/mutations.ts";
 import { CollectionCreationSchema } from "@/features/collections/schemas.ts";
-import { Collection, CollectionType } from "@/features/collections/types.ts";
+import { Collection } from "@/features/collections/types.ts";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -19,7 +19,7 @@ const DEFAULT_VALUES: CollectionCreationFormValues = {
 };
 
 type UseCollectionCreationOptions = {
-    type: CollectionType;
+    type: "playlist" | "album";
     onSuccess?: (collection: Collection) => void;
 };
 
@@ -38,13 +38,12 @@ export function useCollectionCreation({ type, onSuccess }: UseCollectionCreation
 
             try {
                 const collection = await createCollection({
-                    // TODO: tighten the allowed type
                     type,
                     private: data.private,
                     title: data.title,
                     description: data.description,
                     image: data.image,
-                    authors: [userUUID],
+                    authors: type === "album" ? [userUUID] : undefined,
                 });
 
                 form.reset(DEFAULT_VALUES);

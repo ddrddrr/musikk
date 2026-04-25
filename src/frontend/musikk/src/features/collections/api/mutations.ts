@@ -13,6 +13,14 @@ export async function collectionAddToLiked({
     await api_client.post(CollectionURLs.collectionAddToLiked(collectionUUID));
 }
 
+interface ICollectionDeleteParams {
+    collectionUUID: UUID;
+}
+
+export async function deleteCollection({ collectionUUID }: ICollectionDeleteParams): Promise<void> {
+    await api_client.delete(CollectionURLs.collectionDelete(collectionUUID));
+}
+
 interface ICollectionRemoveSongParams {
     collectionUUID: UUID;
     songCollectionSongUUID: UUID;
@@ -41,7 +49,7 @@ interface CreateCollectionInput {
     image?: File;
     private: boolean;
     type: "album" | "playlist";
-    authors: UUID[];
+    authors?: UUID[];
 }
 
 export async function createCollection(input: CreateCollectionInput): Promise<Collection> {
@@ -54,7 +62,7 @@ export async function createCollection(input: CreateCollectionInput): Promise<Co
     if (input.description) formData.append("description", input.description);
     if (input.image) formData.append("image", input.image);
 
-    input.authors.forEach((u) => formData.append("authors", String(u)));
+    input.authors?.forEach((u) => formData.append("authors", String(u)));
 
     const res = await api_client.post<Collection>(CollectionURLs.collectionCreate, formData);
     return res.data;

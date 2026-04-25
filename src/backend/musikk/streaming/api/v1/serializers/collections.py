@@ -7,7 +7,7 @@ from streaming.api.v1.serializers.songs import (
     CollectionSongRetrieveSerializer,
 )
 from streaming.api.v1.serializers.validators import validate_authors
-from streaming.models.collections import Collection, CollectionCredit
+from streaming.models.collections import Collection, CollectionCredit, CollectionType
 from streaming.models.songs import CollectionSong
 
 
@@ -92,17 +92,22 @@ class CollectionCreateSerializer(BaseModelSerializer):
 
     def create(self, validated_data):
         author_uuids = validated_data.pop("authors", None)
-        authors = validate_authors(author_uuids or [self.context["request"].user.uuid])
+        user = self.context["request"].user
 
         with transaction.atomic():
             collection = Collection.objects.create(**validated_data)
-            CollectionCredit.objects.bulk_create(
-                [
-                    CollectionCredit(
-                        collection=collection, author=author, author_priority=i
-                    )
-                    for i, author in enumerate(authors)
-                ]
-            )
+
+            if collection.type == CollectionType.PLAYLIST:
+                CollectionCredit.objects.create(collection=collection, author=user)
+            else:
+                authors = validate_authors(author_uuids or [user.uuid])
+                CollectionCredit.objects.bulk_create(
+                    [
+                        CollectionCredit(
+                            collection=collection, author=author, author_priority=i
+                        )
+                        for i, author in enumerate(authors)
+                    ]
+                )
 
         return collection

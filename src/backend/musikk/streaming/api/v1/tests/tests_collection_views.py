@@ -1,22 +1,22 @@
 from django.test import TestCase
 from django.urls import reverse
+from faker import Faker
 from rest_framework import status
 from rest_framework.test import APIRequestFactory, force_authenticate
-from faker import Faker
+from users.tests.factories import ArtistFactory, BaseUserFactory
 
-from streaming.tests.factories import BaseSongFactory, CollectionFactory
 from streaming.api.v1.views.collections import (
-    CollectionListCreateView,
-    CollectionRetrieveView,
-    CollectionDetailView,
     CollectionAddLikedView,
-    CollectionRemoveSong,
     CollectionAddSong,
+    CollectionDetailView,
+    CollectionListCreateView,
+    CollectionRemoveSong,
+    CollectionRetrieveView,
 )
 from streaming.models import Collection
 from streaming.models.collections import CollectionCredit, CollectionType
 from streaming.models.songs import CollectionSong
-from users.tests.factories import BaseUserFactory, ArtistFactory
+from streaming.tests.factories import BaseSongFactory, CollectionFactory
 
 fake = Faker()
 
@@ -30,13 +30,12 @@ class TestCollectionCreateView(TestCase):
         cls.artist = ArtistFactory()
         cls.songs = BaseSongFactory.create_batch(2, authors=[cls.artist])
 
-    def test_create_with_valid_songs(self):
+    def test_create_playlist_as_artist(self):
         url = reverse("api:collection-list-create")
         payload = {
             "title": fake.word(),
             "type": "playlist",
             "description": fake.text(max_nb_chars=100),
-            "songs": [str(song.uuid) for song in self.songs],
         }
         request = self.factory.post(url, payload, format="multipart")
         force_authenticate(request, user=self.artist)
@@ -54,16 +53,33 @@ class TestCollectionCreateView(TestCase):
         self.assertEqual(authors.count(), 1)
         self.assertEqual(authors.first().author.uuid, self.artist.uuid)
 
-        collection_songs = CollectionSong.objects.filter(collection=collection)
-        self.assertEqual(collection_songs.count(), len(self.songs))
+    def test_create_playlist_as_default_user(self):
+        url = reverse("api:collection-list-create")
+        payload = {
+            "title": fake.word(),
+            "type": "playlist",
+            "description": fake.text(max_nb_chars=100),
+        }
+        request = self.factory.post(url, payload, format="multipart")
+        force_authenticate(request, user=self.user)
+        response = CollectionListCreateView.as_view()(request)
 
-    def test_create_album(self):
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        collection = Collection.objects.filter(title=payload["title"]).first()
+        self.assertIsNotNone(collection)
+        self.assertEqual(collection.type, CollectionType.PLAYLIST)
+
+        authors = CollectionCredit.objects.filter(collection=collection)
+        self.assertEqual(authors.count(), 1)
+        self.assertEqual(authors.first().author.uuid, self.user.uuid)
+
+    def test_create_album_as_artist(self):
         url = reverse("api:collection-list-create")
         payload = {
             "title": fake.word(),
             "type": "album",
             "description": fake.text(max_nb_chars=100),
-            "songs": [str(song.uuid) for song in self.songs],
         }
         request = self.factory.post(url, payload, format="multipart")
         force_authenticate(request, user=self.artist)
@@ -79,43 +95,12 @@ class TestCollectionCreateView(TestCase):
             "title": fake.word(),
             "type": "album",
             "description": fake.text(max_nb_chars=100),
-            "songs": [str(song.uuid) for song in self.songs],
         }
         request = self.factory.post(url, payload, format="multipart")
         force_authenticate(request, user=self.user)
         response = CollectionListCreateView.as_view()(request)
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
-    def test_invalid_song_uuid_returns_400(self):
-        url = reverse("api:collection-list-create")
-        payload = {
-            "title": fake.word(),
-            "type": "playlist",
-            "songs": [fake.word(), fake.word()],
-        }
-        request = self.factory.post(url, payload, format="multipart")
-        force_authenticate(request, user=self.artist)
-        response = CollectionListCreateView.as_view()(request)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
-    def test_no_songs(self):
-        url = reverse("api:collection-list-create")
-        payload = {
-            "title": fake.word(),
-            "type": "playlist",
-            "songs": [],
-        }
-        request = self.factory.post(url, payload, format="multipart")
-        force_authenticate(request, user=self.artist)
-        response = CollectionListCreateView.as_view()(request)
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-
-        collection = Collection.objects.filter(title=payload["title"]).first()
-        self.assertIsNotNone(collection)
-        self.assertEqual(
-            CollectionSong.objects.filter(collection=collection).count(), 0
-        )
 
 
 class TestCollectionRetrieveView(TestCase):
@@ -255,6 +240,63 @@ class TestCollectionRemoveSong(TestCase):
         )
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+
+class TestCollectionDeleteView(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.factory = APIRequestFactory()
+        cls.author = BaseUserFactory()
+        cls.other_user = BaseUserFactory()
+
+    def test_delete_playlist_as_author(self):
+        collection = CollectionFactory(type="playlist", songs=[])
+        CollectionCredit.objects.create(collection=collection, author=self.author)
+
+        url = reverse("api:collection-retrieve", kwargs={"uuid": collection.uuid})
+        request = self.factory.delete(url)
+        force_authenticate(request, user=self.author)
+        response = CollectionRetrieveView.as_view()(request, uuid=collection.uuid)
+
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(Collection.objects.filter(uuid=collection.uuid).exists())
+
+    def test_delete_playlist_as_non_author_returns_403(self):
+        collection = CollectionFactory(type="playlist", songs=[])
+        CollectionCredit.objects.create(collection=collection, author=self.other_user)
+
+        url = reverse("api:collection-retrieve", kwargs={"uuid": collection.uuid})
+        request = self.factory.delete(url)
+        force_authenticate(request, user=self.author)
+        response = CollectionRetrieveView.as_view()(request, uuid=collection.uuid)
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertTrue(Collection.objects.filter(uuid=collection.uuid).exists())
+
+    def test_delete_album_returns_400(self):
+        collection = CollectionFactory(type="album", songs=[])
+        CollectionCredit.objects.create(collection=collection, author=self.author)
+
+        url = reverse("api:collection-retrieve", kwargs={"uuid": collection.uuid})
+        request = self.factory.delete(url)
+        force_authenticate(request, user=self.author)
+        response = CollectionRetrieveView.as_view()(request, uuid=collection.uuid)
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data["detail"], "Only playlists can be deleted.")
+        self.assertTrue(Collection.objects.filter(uuid=collection.uuid).exists())
+
+    def test_delete_nonexistent_collection_returns_404(self):
+        import uuid as uuid_mod
+
+        random_uuid = uuid_mod.uuid4()
+        url = reverse("api:collection-retrieve", kwargs={"uuid": random_uuid})
+        request = self.factory.delete(url)
+        force_authenticate(request, user=self.author)
+        response = CollectionRetrieveView.as_view()(request, uuid=random_uuid)
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
 class TestCollectionAddSong(TestCase):

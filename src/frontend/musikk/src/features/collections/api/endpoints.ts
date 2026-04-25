@@ -8,6 +8,7 @@ export const CollectionURLs = {
     collectionDetail: (collectionUUID: UUID) => `/collections/detail/${collectionUUID}`,
     collectionAddToLiked: (collectionUUID: UUID) => `/collections/${collectionUUID}/like`,
     collectionSongCreate: (collectionUUID: UUID) => `/collections/${collectionUUID}/songs`,
+    collectionDelete: (collectionUUID: UUID) => `/collections/${collectionUUID}`,
     collectionRemoveSong: (collectionUUID: UUID, songCollectionSongUUID: UUID) =>
         `/collections/${collectionUUID}/songs/${songCollectionSongUUID}/remove`,
     // TODO: not needed, generic collectionSongCreate is enough

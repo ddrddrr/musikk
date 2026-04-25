@@ -26,17 +26,17 @@ interface SongCollectionHeaderProps {
 }
 
 function PlaylistMenuDropdown({
-    size,
+    showComments,
     onDeleteClick,
 }: {
-    size?: "sm" | "icon";
+    showComments: boolean;
     onDeleteClick?: () => void;
 }) {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size={size ?? "icon"}>
-                    <EllipsisVertical size={size === "sm" ? 16 : 20} />
+                <Button variant="muted" size="icon" className={showComments ? "size-8" : "size-12"}>
+                    <EllipsisVertical size={20} />
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
@@ -97,7 +97,10 @@ export const CollectionHeader = memo(function SongCollectionHeader({
                                     showComments={showComments}
                                 />
                                 {isAuthorPlaylist && (
-                                    <PlaylistMenuDropdown size="sm" onDeleteClick={onDeleteClick} />
+                                    <PlaylistMenuDropdown
+                                        showComments={showComments}
+                                        onDeleteClick={onDeleteClick}
+                                    />
                                 )}
                             </div>
                         </div>
@@ -133,7 +136,10 @@ export const CollectionHeader = memo(function SongCollectionHeader({
                                     showComments={showComments}
                                 />
                                 {isAuthorPlaylist && (
-                                    <PlaylistMenuDropdown onDeleteClick={onDeleteClick} />
+                                    <PlaylistMenuDropdown
+                                        showComments={showComments}
+                                        onDeleteClick={onDeleteClick}
+                                    />
                                 )}
                             </div>
                         </div>

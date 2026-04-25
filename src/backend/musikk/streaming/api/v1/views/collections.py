@@ -3,33 +3,36 @@ import tempfile
 from pathlib import Path
 
 from django.db import transaction
+from musikk.pagination import BaseLimitOffsetPagination
 from rest_framework import status
 from rest_framework.generics import (
+    ListCreateAPIView,
     RetrieveAPIView,
     get_object_or_404,
-    ListCreateAPIView,
 )
-from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
+from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
-from musikk.pagination import BaseLimitOffsetPagination
-from streaming.api.v1.serializers import BaseSongCreateSerializer
-from streaming.audio.validators import validate_audio
-from streaming.managers.upload_manager import UploadManager
-from users.permissions import IsArtist
-from streaming.ws import ServerEvent
 from websockets.event_helpers import send_ws_event, user_group
+
 from streaming.api.v1.filters import CollectionFilter
+from streaming.api.v1.serializers import BaseSongCreateSerializer
 from streaming.api.v1.serializers.collections import (
+    CollectionCreateSerializer,
     CollectionSerializerBasic,
     CollectionSerializerDetailed,
-    CollectionCreateSerializer,
 )
-from streaming.models.collections import Collection, CollectionType
-from streaming.models.songs import CollectionSong, BaseSong
-from streaming.permissions import IsPublicOrCollectionAuthor, IsCollecitonAuthor
 from streaming.audio.tasks import convert_audio
+from streaming.audio.validators import validate_audio
+from streaming.managers.upload_manager import UploadManager
+from streaming.models.collections import Collection, CollectionType
+from streaming.models.songs import BaseSong, CollectionSong
+from streaming.permissions import (
+    IsArtistForAlbumCreation,
+    IsCollecitonAuthor,
+    IsPublicOrCollectionAuthor,
+)
+from streaming.ws import ServerEvent
 
 
 class CollectionListCreateView(ListCreateAPIView):
@@ -48,7 +51,7 @@ class CollectionListCreateView(ListCreateAPIView):
     def get_permissions(self):
         permissions = super().get_permissions()
         if self.request.method == "POST":
-            return permissions + [IsArtist()]
+            return permissions + [IsArtistForAlbumCreation()]
         return permissions
 
     def post(self, request, *args, **kwargs):
@@ -97,11 +100,35 @@ class CollectionPersonalView(APIView):
         )
 
 
-class CollectionRetrieveView(RetrieveAPIView):
-    lookup_field = "uuid"
-    permission_classes = [IsPublicOrCollectionAuthor]
-    queryset = Collection.objects.all()
-    serializer_class = CollectionSerializerBasic
+class CollectionRetrieveView(APIView):
+    def get_permissions(self):
+        if self.request.method == "DELETE":
+            return [IsCollecitonAuthor()]
+        return [IsPublicOrCollectionAuthor()]
+
+    def get(self, request, *args, **kwargs):
+        collection = get_object_or_404(Collection, uuid=kwargs["uuid"])
+        self.check_object_permissions(request, collection)
+        data = CollectionSerializerBasic(collection, context={"request": request}).data
+        return Response(status=status.HTTP_200_OK, data=data)
+
+    def delete(self, request, *args, **kwargs):
+        collection = get_object_or_404(Collection, uuid=kwargs["uuid"])
+        self.check_object_permissions(request, collection)
+
+        # TODO: albums should be as well, but we need song handling
+        if collection.type != CollectionType.PLAYLIST:
+            return Response(
+                data={"detail": "Only playlists can be deleted."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        collection.delete()
+        send_ws_event(
+            user_group(request.user.uuid),
+            ServerEvent.COLLECTIONS_PERSONAL_CHANGED,
+        )
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class CollectionDetailView(RetrieveAPIView):
@@ -148,7 +175,6 @@ class CollectionRemoveSong(APIView):
         )
 
 
-# TODO: ws events should be not per-user, but per-object
 class CollectionSongCreateView(APIView):
     permission_classes = [IsCollecitonAuthor]
     parser_classes = [MultiPartParser, FormParser, JSONParser]
