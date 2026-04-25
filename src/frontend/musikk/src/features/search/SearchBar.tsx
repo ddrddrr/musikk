@@ -2,7 +2,8 @@ import { AttachmentObj } from "@/features/publications/types";
 import { SearchWindow } from "@/features/search/SearchWindow";
 import { Popover, PopoverContent, PopoverTrigger } from "@/features/ui/popover";
 import { Search } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { Button } from "../ui/button";
 
 interface SearchBarProps {
@@ -17,6 +18,13 @@ export function SearchBar({
     songMode = "container",
 }: SearchBarProps) {
     const [open, setOpen] = useState(false);
+    const location = useLocation();
+
+    // we could do an onClick event instead, but this is better I think, since
+    // cards own their navigation internally
+    useEffect(() => {
+        setOpen(false);
+    }, [location]);
 
     const handleSelect = (item: AttachmentObj) => {
         if (!onItemSelect) return;
