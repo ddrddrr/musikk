@@ -34,7 +34,9 @@ def build_normalization_filters(info: AudioStreamInfo) -> list[str]:
 
     target_channels = _compute_target_channels(info.channels)
     if target_channels is not None:
-        filters.append("aresample=ocl=stereo")
+        # using this instead of the proposed ffmpeg wiki way (https://trac.ffmpeg.org/wiki/AudioChannelManipulation)
+        # in order to change sample rate and ch count in one conversion
+        filters.append("aresample=out_chlayout=stereo")
 
     target_rate = _compute_target_sample_rate(info.sample_rate)
     if target_rate is not None:

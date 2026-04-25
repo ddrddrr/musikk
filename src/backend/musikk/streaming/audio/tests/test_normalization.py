@@ -83,17 +83,17 @@ class TestBuildNormalizationFilters(TestCase):
 
     def test_multichannel_adds_downmix(self):
         filters = build_normalization_filters(_make_info(channels=6))
-        self.assertIn("aresample=ocl=stereo", filters)
+        self.assertIn("aresample=out_chlayout=stereo", filters)
 
     def test_multichannel_and_high_rate(self):
         filters = build_normalization_filters(_make_info(channels=6, sample_rate=96000))
-        self.assertIn("aresample=ocl=stereo", filters)
+        self.assertIn("aresample=out_chlayout=stereo", filters)
         self.assertIn("aresample=48000", filters)
         self.assertIn("aformat=sample_fmts=s16", filters)
 
     def test_downmix_before_resample(self):
         filters = build_normalization_filters(_make_info(channels=6, sample_rate=96000))
-        downmix_idx = filters.index("aresample=ocl=stereo")
+        downmix_idx = filters.index("aresample=out_chlayout=stereo")
         resample_idx = filters.index("aresample=48000")
         self.assertLess(downmix_idx, resample_idx)
 

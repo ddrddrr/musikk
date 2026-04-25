@@ -2,9 +2,8 @@ from base.models import BaseModel
 from django.conf import settings
 from django.db import models, transaction
 
-from streaming.models import Collection, CollectionCredit, SongQueue
-from streaming.models.collections import CollectionType
-from streaming.models.song_queue import PlaybackContext, PlayerState
+from streaming.models.collections import Collection, CollectionCredit, CollectionType
+from streaming.models.song_queue import PlaybackContext, PlayerState, SongQueue
 
 
 class StreamingProfileManager(models.Manager):
