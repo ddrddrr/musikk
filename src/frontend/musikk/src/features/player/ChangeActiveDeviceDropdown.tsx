@@ -1,3 +1,4 @@
+import { EmptyState } from "@/features/common/EmptyState.tsx";
 import { useDeviceList } from "@/features/playback/hooks/useDeviceList.ts";
 import { useHandleSwitchDevice } from "@/features/playback/hooks/useHandleSwitchDevice.ts";
 import { Button } from "@/features/ui/button.tsx";
@@ -20,6 +21,13 @@ export function ChangeActiveDeviceDropdown() {
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+                {deviceList.length === 0 && (
+                    <EmptyState
+                        variant="inline"
+                        message="No devices available"
+                        className="px-4 py-2"
+                    />
+                )}
                 {deviceList.map((device) => (
                     <DropdownMenuItem
                         key={device.id}

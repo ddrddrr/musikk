@@ -1,5 +1,6 @@
 import { getErrorDetail } from "@/api/errorUtils.ts";
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
+import { EmptyState } from "@/features/common/EmptyState.tsx";
 import { useCreateChat } from "@/features/publications/api/mutations.ts";
 import { Button } from "@/features/ui/button.tsx";
 import {
@@ -78,12 +79,10 @@ export function ChatNewGroupForm({ onSuccess, onCancel }: ChatNewGroupFormProps)
 
     if (!friends || friends.length === 0) {
         return (
-            <div className="rounded-sm border-2 border-foreground bg-muted p-6 text-center">
-                <p className="text-sm text-muted-foreground">
-                    Group chats can be created only with friends...
-                </p>
+            <div className="flex flex-col items-center gap-4">
+                <EmptyState message="No friends to create a group with yet" />
                 {onCancel && (
-                    <Button variant="brand" size="lg" onClick={onCancel} className="mt-4">
+                    <Button variant="brand" size="lg" onClick={onCancel}>
                         Back
                     </Button>
                 )}

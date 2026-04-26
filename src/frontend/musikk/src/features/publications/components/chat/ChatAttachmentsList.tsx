@@ -2,6 +2,7 @@ import { useInfiniteFlat } from "@/api/hooks.ts";
 import { UUID } from "@/api/types.ts";
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
 import { Collection, CollectionSong } from "@/features/collections/types.ts";
+import { EmptyState } from "@/features/common/EmptyState.tsx";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { useChatAttachments } from "@/features/publications/api/queries.ts";
 import { CollectionAttachmentRow } from "@/features/publications/components/chat/CollectionAttachmentRow.tsx";
@@ -45,7 +46,7 @@ export function ChatAttachmentsList({ chatUUID }: ChatAttachmentsListProps) {
     }
 
     if (attachments.length === 0) {
-        return <p className="py-4 text-center text-sm text-muted-foreground">No attachments yet</p>;
+        return <EmptyState variant="inline" message="No attachments yet" />;
     }
 
     return (

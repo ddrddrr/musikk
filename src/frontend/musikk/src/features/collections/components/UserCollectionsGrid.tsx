@@ -3,8 +3,8 @@ import { fetchCollections } from "@/features/collections/api/queries.ts";
 import { collectionKeys } from "@/features/collections/api/queryKeys.ts";
 import { CollectionCard } from "@/features/collections/components/CollectionCard.tsx";
 import type { CollectionType } from "@/features/collections/types.ts";
+import { EmptyState } from "@/features/common/EmptyState.tsx";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
-import { Card, CardContent } from "@/features/ui/card.tsx";
 import { Spinner } from "@/features/ui/spinner";
 import { useQuery } from "@tanstack/react-query";
 
@@ -34,13 +34,7 @@ export function UserCollectionsGrid({ userUUID, type }: UserCollectionsGridProps
     const collections = data?.results ?? [];
 
     if (collections.length === 0) {
-        return (
-            <Card className="border border-foreground">
-                <CardContent className="py-6 text-center text-muted-foreground">
-                    No {type}s yet.
-                </CardContent>
-            </Card>
-        );
+        return <EmptyState message={`No ${type}s yet`} />;
     }
 
     return (

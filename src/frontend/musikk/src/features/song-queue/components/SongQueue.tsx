@@ -1,5 +1,6 @@
 import { getErrorDetail } from "@/api/errorUtils.ts";
 import { CollectionSong } from "@/features/collections/types.ts";
+import { EmptyState } from "@/features/common/EmptyState.tsx";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { QueueItem } from "@/features/song-queue/api/types.ts";
 import { SongQueuePlayButton } from "@/features/song-queue/components/SongQueueContainerPlayButton.tsx";
@@ -104,9 +105,7 @@ export function SongQueue() {
                 <h2 className="p-8 pb-0 text-2xl font-bold">Queue</h2>
                 <ScrollArea className="min-h-0 flex-1">
                     {items.length === 0 && (
-                        <div className="flex flex-col items-center justify-center p-8 text-muted-foreground">
-                            <p className="text-lg">Your queue is empty</p>
-                        </div>
+                        <EmptyState variant="inline" message="Queue is empty" className="p-8" />
                     )}
                     {items.length > 0 && (
                         <ul className="flex flex-col gap-3 p-8">

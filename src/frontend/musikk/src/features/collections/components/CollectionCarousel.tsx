@@ -1,5 +1,6 @@
 import { CollectionCard } from "@/features/collections/components/CollectionCard.tsx";
 import { Collection } from "@/features/collections/types.ts";
+import { EmptyState } from "@/features/common/EmptyState.tsx";
 import {
     Carousel,
     CarouselContent,
@@ -27,22 +28,23 @@ export function CollectionCarousel({ collections, title }: CollectionsCarouselPr
                 }}
                 className="w-full"
             >
-                <div className="flex min-h-[120px] items-center">
-                    <CarouselContent>
-                        {collections.length > 0 ? (
-                            collections.map((collection) => (
-                                <CarouselItem key={collection.uuid} className="basis-1/5 pl-2 pl-4">
-                                    <CollectionCard collection={collection} size="medium" />
+                <div className="grid min-h-[120px] items-center">
+                    {collections.length === 0 && (
+                        <EmptyState variant="inline" message="No collections available" />
+                    )}
+                    {collections.length > 0 && (
+                        <CarouselContent>
+                            {collections.map((collection) => (
+                                <CarouselItem key={collection.uuid} className="basis-1/5">
+                                    <CollectionCard
+                                        collection={collection}
+                                        size="medium"
+                                        className="w-full"
+                                    />
                                 </CarouselItem>
-                            ))
-                        ) : (
-                            <CarouselItem className="basis-full pl-0">
-                                <div className="w-full text-center text-muted-foreground">
-                                    No collections available
-                                </div>
-                            </CarouselItem>
-                        )}
-                    </CarouselContent>
+                            ))}
+                        </CarouselContent>
+                    )}
                 </div>
 
                 {collections.length > 0 && (

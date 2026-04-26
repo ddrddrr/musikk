@@ -4,6 +4,7 @@ import { useCollectionDetailQuery } from "@/features/collections/api/queries.ts"
 import { CollectionHeader } from "@/features/collections/components/CollectionHeader.tsx";
 import { DeletePlaylistDialog } from "@/features/collections/components/DeletePlaylistDialog.tsx";
 import { useDeletePlaylist } from "@/features/collections/hooks/useDeletePlaylist.ts";
+import { EmptyState } from "@/features/common/EmptyState.tsx";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { CommentBox } from "@/features/publications/components/collection-comments/CommentBox.tsx";
 import {
@@ -90,7 +91,10 @@ export function CollectionContainer({ collectionUUID }: CollectionContainerProps
                             onDeleteClick={() => setDeleteDialogOpen(true)}
                         />
 
-                        {songs.length > 0 ? (
+                        {songs.length === 0 && (
+                            <EmptyState message="No songs in this collection" className="py-12" />
+                        )}
+                        {songs.length > 0 && (
                             <ul className="flex flex-col gap-2">
                                 {songs.map((collectionSong, index) => {
                                     const songActions = showComments ? (
@@ -122,10 +126,6 @@ export function CollectionContainer({ collectionUUID }: CollectionContainerProps
                                     );
                                 })}
                             </ul>
-                        ) : (
-                            <div className="rounded-sm border-2 border-foreground bg-card py-12 text-center text-foreground">
-                                <p className="font-medium">No songs in this collection</p>
-                            </div>
                         )}
                     </div>
                 </div>

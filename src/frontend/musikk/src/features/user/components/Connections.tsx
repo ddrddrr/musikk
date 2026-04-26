@@ -1,3 +1,4 @@
+import { EmptyState } from "@/features/common/EmptyState.tsx";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { Spinner } from "@/features/ui/spinner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/features/ui/tabs.tsx";
@@ -31,9 +32,10 @@ export function Connections() {
                 </TabsList>
 
                 <TabsContent value="friends">
-                    {friends.length === 0 ? (
-                        <p className="py-12 text-center text-muted-foreground">No friends yet.</p>
-                    ) : (
+                    {friends.length === 0 && (
+                        <EmptyState variant="inline" message="No friends yet" className="py-12" />
+                    )}
+                    {friends.length > 0 && (
                         <div className="grid grid-cols-1 gap-1 sm:grid-cols-2 md:grid-cols-3">
                             {friends.map((friend) => (
                                 <UserCard key={friend.uuid} user={friend} />
@@ -43,11 +45,14 @@ export function Connections() {
                 </TabsContent>
 
                 <TabsContent value="followed">
-                    {followed.length === 0 ? (
-                        <p className="py-12 text-center text-muted-foreground">
-                            Not following anyone yet.
-                        </p>
-                    ) : (
+                    {followed.length === 0 && (
+                        <EmptyState
+                            variant="inline"
+                            message="Not following anyone yet"
+                            className="py-12"
+                        />
+                    )}
+                    {followed.length > 0 && (
                         <div className="grid grid-cols-1 gap-1 sm:grid-cols-2 md:grid-cols-3">
                             {followed.map((user) => (
                                 <UserCard key={user.uuid} user={user} />
@@ -57,9 +62,10 @@ export function Connections() {
                 </TabsContent>
 
                 <TabsContent value="followers">
-                    {followers.length === 0 ? (
-                        <p className="py-12 text-center text-muted-foreground">No followers.</p>
-                    ) : (
+                    {followers.length === 0 && (
+                        <EmptyState variant="inline" message="No followers yet" className="py-12" />
+                    )}
+                    {followers.length > 0 && (
                         <div className="grid grid-cols-1 gap-1 sm:grid-cols-2 md:grid-cols-3">
                             {followers.map((user) => (
                                 <UserCard key={user.uuid} user={user} />

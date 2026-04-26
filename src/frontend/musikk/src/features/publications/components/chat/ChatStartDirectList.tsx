@@ -1,5 +1,6 @@
 import { getErrorDetail } from "@/api/errorUtils.ts";
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
+import { EmptyState } from "@/features/common/EmptyState.tsx";
 import { useCreateChat } from "@/features/publications/api/mutations.ts";
 import { useUserChatsContext } from "@/features/publications/hooks/useUserChats.ts";
 import { UserCard } from "@/features/user/components/UserCard.tsx";
@@ -50,23 +51,11 @@ export function ChatStartDirectList() {
     };
 
     if (!friends || friends.length === 0) {
-        return (
-            <div className="rounded-sm border-2 border-foreground bg-muted p-6 text-center">
-                <p className="text-sm text-muted-foreground">
-                    Chats will appear, when you have some friends :)
-                </p>
-            </div>
-        );
+        return <EmptyState message="No friends to chat with yet" />;
     }
 
     if (!friendsWithoutDirectChat || friendsWithoutDirectChat.length === 0) {
-        return (
-            <div className="rounded-sm border-2 border-foreground bg-muted p-6 text-center">
-                <p className="text-sm text-muted-foreground">
-                    You have chats with all of your friends!
-                </p>
-            </div>
-        );
+        return <EmptyState message="You have chats with all your friends" />;
     }
 
     return (

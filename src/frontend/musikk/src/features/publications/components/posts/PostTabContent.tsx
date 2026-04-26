@@ -1,10 +1,11 @@
 import { UUID } from "@/api/types.ts";
+import { EmptyState } from "@/features/common/EmptyState.tsx";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { LoadNewerButton } from "@/features/publications/components/LoadNewerButton.tsx";
 import { LoadOlderButton } from "@/features/publications/components/LoadOlderButton.tsx";
 import { PostTree } from "@/features/publications/components/posts/PostTree.tsx";
 import { Publication } from "@/features/publications/types.ts";
-import { Card, CardContent } from "@/features/ui/card.tsx";
+
 import { TabsContent } from "@/features/ui/tabs.tsx";
 
 export type PostTabContentProps = {
@@ -45,13 +46,7 @@ export function PostTabContent({
                     posts?.map((post) => (
                         <PostTree key={post.uuid} publication={post} feedUserUUID={feedUserUUID} />
                     ))}
-                {!error && !posts?.length && (
-                    <Card className="border border-foreground">
-                        <CardContent className="py-6 text-center text-muted-foreground">
-                            No posts yet.
-                        </CardContent>
-                    </Card>
-                )}
+                {!error && !posts?.length && <EmptyState message="No posts yet" />}
                 <div className="flex justify-center py-4">
                     <LoadOlderButton
                         hasNextPage={hasNextPage}

@@ -1,4 +1,5 @@
 import { CollectionSong } from "@/features/collections/types.ts";
+import { EmptyState } from "@/features/common/EmptyState.tsx";
 import { SongCard } from "@/features/songs/components/SongCard.tsx";
 import {
     Carousel,
@@ -25,22 +26,25 @@ export function SongCarousel({ songs, title }: SongCarouselProps) {
                     }}
                     className="w-full"
                 >
-                    <CarouselContent className="-ml-0 flex min-h-[120px] items-center justify-center">
-                        {songs.length > 0 ? (
-                            songs.map((song) => (
+                    {songs.length === 0 && (
+                        <EmptyState
+                            variant="inline"
+                            message="No songs available"
+                            className="min-h-[120px] content-center"
+                        />
+                    )}
+                    {songs.length > 0 && (
+                        <CarouselContent className="-ml-0 flex min-h-[120px] items-center justify-center">
+                            {songs.map((song) => (
                                 <CarouselItem
                                     key={song.uuid}
                                     className="basis-1/2 pl-2 md:basis-1/3 md:pl-4 lg:basis-1/4"
                                 >
                                     <SongCard collectionSong={song} size={"medium"} />
                                 </CarouselItem>
-                            ))
-                        ) : (
-                            <div className="w-full text-center text-muted-foreground">
-                                No songs available
-                            </div>
-                        )}
-                    </CarouselContent>
+                            ))}
+                        </CarouselContent>
+                    )}
                     {songs.length > 0 && (
                         <>
                             <CarouselPrevious />

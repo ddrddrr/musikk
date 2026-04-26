@@ -1,3 +1,4 @@
+import { EmptyState } from "@/features/common/EmptyState.tsx";
 import { NotificationListParams } from "@/features/notifications/queries.ts";
 import {
     IChatMessageNotification,
@@ -47,9 +48,7 @@ export const NotificationOverlay = memo(function NotificationOverlay({
         ...chat_messages.map((n) => ({ ...n, _type: "chat_message" as const })),
     ].sort((a, b) => new Date(b.date_added).getTime() - new Date(a.date_added).getTime());
     if (allNotifications.length === 0) {
-        return (
-            <div className="p-6 text-center text-sm text-muted-foreground">No notifications</div>
-        );
+        return <EmptyState variant="inline" message="No notifications yet" className="p-6" />;
     }
 
     return (

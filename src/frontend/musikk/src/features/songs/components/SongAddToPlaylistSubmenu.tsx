@@ -1,6 +1,7 @@
 import { getErrorDetail } from "@/api/errorUtils.ts";
 import { createCollectionSong } from "@/features/collections/api/mutations.ts";
 import { Collection, CollectionSong } from "@/features/collections/types.ts";
+import { EmptyState } from "@/features/common/EmptyState.tsx";
 import { useSongUserCollectionsQuery } from "@/features/songs/queries.ts";
 import { songKeys } from "@/features/songs/queryKeys.ts";
 import {
@@ -62,6 +63,9 @@ export function SongAddToPlaylistSubmenu({ collectionSong }: SongAddToPlaylistSu
                 Add to Playlist
             </DropdownMenuSubTrigger>
             <DropdownMenuSubContent className="max-h-64 w-64 overflow-y-auto">
+                {userCollections.length === 0 && (
+                    <EmptyState variant="inline" message="No playlists yet" className="px-4 py-2" />
+                )}
                 {userCollections.map((collection) => {
                     const isInCollection = collectionUUIDs.includes(collection.uuid);
                     return (

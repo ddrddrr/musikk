@@ -1,3 +1,4 @@
+import { EmptyState } from "@/features/common/EmptyState.tsx";
 import { Spinner } from "@/features/ui/spinner";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
@@ -139,9 +140,11 @@ export function SearchWindow({ onItemSelect, songMode = "card" }: SearchWindowPr
                             !data.albums?.length &&
                             !data.artists?.length &&
                             !data.users?.length && (
-                                <div className="py-2 text-center text-sm text-muted-foreground">
-                                    No results found
-                                </div>
+                                <EmptyState
+                                    variant="inline"
+                                    message="No results found"
+                                    className="py-2"
+                                />
                             )}
                     </div>
                 )}

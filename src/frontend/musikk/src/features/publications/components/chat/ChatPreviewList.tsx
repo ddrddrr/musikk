@@ -1,3 +1,4 @@
+import { EmptyState } from "@/features/common/EmptyState.tsx";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { ChatNewGroupForm } from "@/features/publications/components/chat/ChatNewGroupForm.tsx";
 import { ChatPreview } from "@/features/publications/components/chat/ChatPreview.tsx";
@@ -44,7 +45,10 @@ export function ChatPreviewList() {
             </div>
 
             <div className="flex flex-col gap-1">
-                {chats && chats.map((chat) => <ChatPreview key={chat.uuid} chat={chat} />)}
+                {chats?.length === 0 && <EmptyState message="No chats yet" />}
+                {chats?.map((chat) => (
+                    <ChatPreview key={chat.uuid} chat={chat} />
+                ))}
             </div>
 
             <div className="mt-2 border-t-2 border-foreground pt-4">

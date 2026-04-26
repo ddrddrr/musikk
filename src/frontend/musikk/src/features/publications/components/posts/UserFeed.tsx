@@ -1,5 +1,6 @@
 import { UUID } from "@/api/types.ts";
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
+import { EmptyState } from "@/features/common/EmptyState.tsx";
 import { LoadNewerButton } from "@/features/publications/components/LoadNewerButton.tsx";
 import { LoadOlderButton } from "@/features/publications/components/LoadOlderButton.tsx";
 import { PostForm } from "@/features/publications/components/posts/PostForm.tsx";
@@ -35,6 +36,7 @@ export function UserFeed({ userUUID }: { userUUID: UUID }) {
             <div className="flex justify-center py-4">
                 <LoadNewerButton hasNewerPosts={hasNewPosts} onLoadNewer={refresh} />
             </div>
+            {!publicationsFlat?.length && <EmptyState message="No posts yet" />}
             {publicationsFlat?.map((post) => (
                 <PostTree key={post.uuid} publication={post} feedUserUUID={userUUID} />
             ))}

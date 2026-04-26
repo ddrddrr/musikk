@@ -1,5 +1,6 @@
 import { CollectionCard } from "@/features/collections/components/CollectionCard.tsx";
 import { ColletionCreateButton } from "@/features/collections/components/ColletionCreateButton.tsx";
+import { EmptyState } from "@/features/common/EmptyState.tsx";
 import { UserCollectionsContext } from "@/features/user/providers/userCollectionsContext.ts";
 import { useContext, useMemo } from "react";
 
@@ -28,7 +29,15 @@ export function LeftColumn() {
                 <h2 className="text-center text-xl font-bold text-brand-foreground">Your stuff</h2>
                 <ColletionCreateButton />
             </div>
-            {collections.length > 0 ? (
+            {collections.length === 0 && (
+                <div className="flex flex-1 items-center justify-center">
+                    <EmptyState
+                        message="No collections yet"
+                        className="bg-brand text-brand-foreground"
+                    />
+                </div>
+            )}
+            {collections.length > 0 && (
                 <ul className="flex flex-col gap-6" role="list">
                     {collections.map((collection) => (
                         <li key={collection.uuid}>
@@ -36,12 +45,6 @@ export function LeftColumn() {
                         </li>
                     ))}
                 </ul>
-            ) : (
-                <div className="flex flex-1 items-center justify-center">
-                    <div className="rounded-sm border-2 border-foreground bg-brand py-8 text-center text-brand-foreground">
-                        <p>No song collections found</p>
-                    </div>
-                </div>
             )}
         </div>
     );

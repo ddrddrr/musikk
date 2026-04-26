@@ -1,3 +1,4 @@
+import { EmptyState } from "@/features/common/EmptyState.tsx";
 import { ChatMessage } from "@/features/publications/components/chat/ChatMessage.tsx";
 import { Publication } from "@/features/publications/types.ts";
 import { formatDate, isSameDay } from "@/utils/formatDate.ts";
@@ -21,11 +22,7 @@ function DateSeparator({ date }: { date: string }) {
 
 export function ChatMessageList({ messages }: ChatMessageListProps) {
     if (messages.length === 0) {
-        return (
-            <div className="rounded-sm border-2 border-foreground bg-muted p-6 text-center">
-                <p className="text-sm text-muted-foreground">No messages yet :(</p>
-            </div>
-        );
+        return <EmptyState message="No messages yet" />;
     }
 
     return (

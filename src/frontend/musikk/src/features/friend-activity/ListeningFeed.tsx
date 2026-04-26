@@ -1,3 +1,4 @@
+import { EmptyState } from "@/features/common/EmptyState.tsx";
 import { useFriendsListeningQuery } from "@/features/friend-activity/queries.ts";
 import { SongContainer } from "@/features/songs/components/SongContainer.tsx";
 import { UserIdentifier } from "@/features/user/components/UserIdentifier.tsx";
@@ -10,6 +11,13 @@ export function ListeningFeed() {
             <h2 className="mb-4 text-center text-xl font-bold text-brand-foreground">
                 Friend activity
             </h2>
+            {(!userSongs || userSongs.length === 0) && (
+                <EmptyState
+                    variant="inline"
+                    message="No friend activity yet"
+                    className="text-brand-foreground"
+                />
+            )}
             {userSongs && !!userSongs.length && (
                 <div className="flex flex-col gap-4">
                     {userSongs.map(({ user, song }) => (
