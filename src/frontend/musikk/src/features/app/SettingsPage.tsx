@@ -9,7 +9,7 @@ export function SettingsPage() {
     const { preset, setPreset } = useContext(LoudnessPresetContext);
 
     return (
-        <div className="flex min-h-screen flex-col items-center gap-8 bg-brand p-8">
+        <div className="flex flex-1 flex-col items-center gap-8 bg-brand p-8">
             <h1 className="text-2xl font-bold">Settings</h1>
 
             <div className="flex w-full max-w-md flex-col gap-6">

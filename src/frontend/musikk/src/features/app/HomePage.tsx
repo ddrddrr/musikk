@@ -1,4 +1,3 @@
-import { Header } from "@/features/layout/header/Header.tsx";
 import { MainContent } from "@/features/layout/MainContent.tsx";
 import { PlayerBox } from "@/features/player/PlayerBox.tsx";
 import { SongQueue } from "@/features/song-queue/components/SongQueue.tsx";
@@ -9,27 +8,26 @@ import { memo, useState } from "react";
 import { UserChatsProvider } from "../publications/providers/UserChatsProvider";
 
 export const HomePage = memo(function HomePage() {
+    // TODO: this and other queue-related stuff should probably be moved from the Player* components
+    // but kinda hard to deduplicate now, left for later
     const [isQueueOpen, setIsQueueOpen] = useState(false);
 
     return (
         <UserCollectionsProvider>
             <UserConnectionsProvider>
                 <UserChatsProvider>
-                    <div className="flex h-screen flex-col bg-muted">
-                        <Header />
-                        <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
-                            <div className="min-h-0 flex-1 overflow-hidden">
-                                <MainContent />
-                            </div>
-                            {isQueueOpen && (
-                                <div className="absolute inset-0 border-t border-foreground bg-card">
-                                    <SongQueue />
-                                </div>
-                            )}
+                    <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
+                        <div className="min-h-0 flex-1 overflow-hidden">
+                            <MainContent />
                         </div>
-                        <Toaster />
-                        <PlayerBox setIsQueueOpen={setIsQueueOpen} />
+                        {isQueueOpen && (
+                            <div className="absolute inset-0 border-t border-foreground bg-card">
+                                <SongQueue />
+                            </div>
+                        )}
                     </div>
+                    <Toaster />
+                    <PlayerBox setIsQueueOpen={setIsQueueOpen} />
                 </UserChatsProvider>
             </UserConnectionsProvider>
         </UserCollectionsProvider>

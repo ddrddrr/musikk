@@ -1,4 +1,4 @@
-import { SongUploadStatus } from "@/features/song-upload/types.ts";
+import { SongUploadStatus } from "../types.ts";
 import { Spinner } from "@/features/ui/spinner";
 import { cn } from "@/lib/utils.ts";
 

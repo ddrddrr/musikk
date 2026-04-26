@@ -1,5 +1,5 @@
 import { UUID } from "@/api/types.ts";
-import { SongUploadStatus } from "@/features/song-upload/types.ts";
+import { SongUploadStatus } from "./types.ts";
 import { useWSClient } from "@/hooks/useWSClient.ts";
 import { useEffect } from "react";
 

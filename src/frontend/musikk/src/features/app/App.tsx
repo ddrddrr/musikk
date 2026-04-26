@@ -8,6 +8,7 @@ import { useWebSocketListeners } from "@/features/app/useWebSocketListeners.ts";
 import { EmailVerificationPage } from "@/features/auth/components/EmailVerificationPage.tsx";
 import { RequireAuth } from "@/features/auth/components/RequireAuth.tsx";
 import { AuthProvider } from "@/features/auth/providers/AuthProvider.tsx";
+import { AuthenticatedLayout } from "@/features/layout/AuthenticatedLayout.tsx";
 import { LoudnessPresetProvider } from "@/features/player/providers/LoudnessPresetProvider.tsx";
 import { WebSocketProvider } from "@/providers/WebSocketProvider";
 import { DeviceListProvider } from "../playback/providers/DeviceListProvider";
@@ -18,9 +19,11 @@ function AuthenticatedApp() {
     useWebSocketListeners();
     return (
         <Routes>
-            <Route path="/*" element={<HomePage />} />
-            <Route path="/upload" element={<AlbumUploadPage />} />
-            <Route path="/settings" element={<SettingsPage />} />
+            <Route element={<AuthenticatedLayout />}>
+                <Route path="/*" element={<HomePage />} />
+                <Route path="/upload" element={<AlbumUploadPage />} />
+                <Route path="/settings" element={<SettingsPage />} />
+            </Route>
         </Routes>
     );
 }

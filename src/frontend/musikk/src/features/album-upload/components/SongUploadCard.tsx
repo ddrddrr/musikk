@@ -1,6 +1,6 @@
 import type { UUID } from "@/api/types.ts";
-import { SongUploadField } from "@/features/song-upload/components/SongUploadField.tsx";
-import type { SongUploadState, SongUploadStatus } from "@/features/song-upload/types.ts";
+import { SongUploadField } from "./SongUploadField.tsx";
+import type { SongUploadState, SongUploadStatus } from "../types.ts";
 import { Button } from "@/features/ui/button.tsx";
 import { SongUploadStatusBadge } from "./SongUploadStatusBadge.tsx";
 
