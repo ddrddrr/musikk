@@ -84,5 +84,8 @@ src/backend/musikk/samples
 media
 media/*
 
+### Project-local tools (ffmpeg, shaka-packager)
+.tools/
+
 ### Macos
 .DS_Store

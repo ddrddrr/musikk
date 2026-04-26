@@ -28,7 +28,7 @@ services:
 
   celery_worker:
     image: ddrddrr2/musikk-server:latest
-    command: docker/start-celery-worker.sh
+    command: start-celery-worker.sh
     env_file:
       - .env
     depends_on:
