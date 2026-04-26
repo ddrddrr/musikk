@@ -52,8 +52,18 @@ class NotificationDeleteView(GenericAPIView):
     def delete(self, request, *args, **kwargs):
         user = self.request.user
         notif_uuid = kwargs["uuid"]
-        notification = get_object_or_404(
-            FollowerNotification, receiver=user, uuid=notif_uuid
+
+        notification = (
+            FollowerNotification.objects.filter(receiver=user, uuid=notif_uuid).first()
+            or ChatMessageNotification.objects.filter(
+                receiver=user, uuid=notif_uuid
+            ).first()
+            or ReplyNotification.objects.filter(
+                orig_publication__author=user, uuid=notif_uuid
+            ).first()
         )
+        if not notification:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
         notification.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)

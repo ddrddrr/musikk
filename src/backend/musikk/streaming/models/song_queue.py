@@ -364,11 +364,11 @@ class PlayerState(BaseModel):
     history_cursor = models.PositiveIntegerField(default=0)
     queue = models.OneToOneField(
         "streaming.SongQueue",
-        on_delete=models.PROTECT,
+        on_delete=models.CASCADE,
     )
     context = models.OneToOneField(
         "streaming.PlaybackContext",
-        on_delete=models.PROTECT,
+        on_delete=models.CASCADE,
     )
 
     def play_song(self, collection_song: CollectionSong) -> None:

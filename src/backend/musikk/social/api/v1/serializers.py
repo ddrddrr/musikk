@@ -209,6 +209,19 @@ class UserChatCreateSerializer(BaseModelSerializer):
                 {"participants": "Cannot create a chat with yourself."}
             )
 
+        if is_direct:
+            other_uuid = next(iter(participants))
+            already_exists = (
+                Chat.objects.filter(is_direct=True)
+                .filter(chatmember__member=user)
+                .filter(chatmember__member__uuid=other_uuid)
+                .exists()
+            )
+            if already_exists:
+                raise serializers.ValidationError(
+                    "A direct chat with this user already exists."
+                )
+
         return attrs
 
     def create(self, validated_data):

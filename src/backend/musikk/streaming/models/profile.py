@@ -38,7 +38,7 @@ class StreamingProfile(BaseModel):
     )
     player = models.OneToOneField(
         "streaming.PlayerState",
-        on_delete=models.PROTECT,
+        on_delete=models.CASCADE,
     )
     followed_collections = models.ManyToManyField(
         "streaming.Collection",

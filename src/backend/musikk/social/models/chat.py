@@ -1,10 +1,8 @@
-from django.db import models
-
 from base.models import BaseModel
+from django.db import models
 from utils.paths import deafult_image_path
 
 
-# TODO: guard against multiple chats for the same pair of people when is_direct=True
 class Chat(BaseModel):
     title = models.CharField(max_length=200, blank=True, default="")
     image = models.ImageField(upload_to=deafult_image_path, null=True, blank=True)
@@ -17,9 +15,8 @@ class Chat(BaseModel):
 class ChatMember(BaseModel):
     chat = models.ForeignKey(Chat, on_delete=models.CASCADE)
     member = models.ForeignKey("users.BaseUser", on_delete=models.CASCADE)
-    # TODO: this is probably fine, but check...
     last_read_message = models.ForeignKey(
-        "social.Publication", null=True, blank=True, on_delete=models.DO_NOTHING
+        "social.Publication", null=True, blank=True, on_delete=models.SET_NULL
     )
 
     class Meta:
