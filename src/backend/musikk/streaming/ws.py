@@ -2,10 +2,10 @@ from collections.abc import Callable
 from enum import StrEnum
 
 from asgiref.sync import async_to_sync as atos
+from websockets.action_handler import WSActionHandler
 
 from streaming.managers.device_manager import DeviceManager
 from streaming.managers.playback_manager import PlaybackManager
-from websockets.action_handler import WSActionHandler
 
 
 class ServerEvent(StrEnum):
@@ -16,7 +16,6 @@ class ServerEvent(StrEnum):
     COLLECTION_CHANGED = "collection.changed"
     COLLECTIONS_PERSONAL_CHANGED = "collections.personal.changed"
     SONG_UPLOAD = "song.upload"
-    FRIEND_ACTIVITY_LISTENING_CHANGED = "friend-activity.listening.changed"
 
 
 class DeviceHandler(WSActionHandler):
@@ -24,6 +23,7 @@ class DeviceHandler(WSActionHandler):
         super().__init__(consumer)
         self.device_id: str | None = None
         self.manager = DeviceManager(user_uuid=consumer.user_uuid)
+        self.playback_manager = PlaybackManager(user_uuid=consumer.user_uuid)
 
     def get_actions(self) -> dict[str, Callable]:
         return {
@@ -35,7 +35,11 @@ class DeviceHandler(WSActionHandler):
 
     def on_disconnect(self):
         if self.device_id:
-            self.manager.clear_device(self.device_id)
+            was_active = self.manager.clear_device(self.device_id)
+            # broadcast playback stop before the device list so clients see
+            # isPlaybackActive=false by the time isThisDeviceActive flips
+            if was_active:
+                self._stop_playback_and_broadcast()
             self._broadcast_devices()
 
     def handle_register(self, payload: dict):
@@ -57,7 +61,9 @@ class DeviceHandler(WSActionHandler):
             self.consumer.send_error("`device_id` is required for device.set_active")
             return
 
-        self.manager.set_active_device(device_id=device_id)
+        changed = self.manager.set_active_device(device_id=device_id)
+        if changed:
+            self._stop_playback_and_broadcast()
         self._broadcast_devices()
 
     def handle_set_volume(self, payload: dict):
@@ -93,6 +99,17 @@ class DeviceHandler(WSActionHandler):
                 "type": "ws_event",
                 "event": ServerEvent.DEVICE_LIST,
                 "payload": {"devices": devices},
+            },
+        )
+
+    def _stop_playback_and_broadcast(self):
+        self.playback_manager.stop()
+        atos(self.consumer.channel_layer.group_send)(
+            self.consumer.group_name,
+            {
+                "type": "ws_event",
+                "event": ServerEvent.PLAYBACK_CHANGE,
+                "payload": {"playback": self.playback_manager.is_playback_active()},
             },
         )
 

@@ -1,5 +1,4 @@
 import { useCollectionWsEvents } from "@/features/collections/wsEvents.ts";
-import { useFriendActivityWsEvents } from "@/features/friend-activity/wsEvents.ts";
 import { useNotificationWsEvents } from "@/features/notifications/wsEvents.ts";
 import { useDeviceLifecycle } from "@/features/playback/hooks/useDeviceLifecycle.ts";
 import { useDeviceListEvent, usePlaybackChangeEvent } from "@/features/playback/ws/eventHooks.ts";
@@ -15,6 +14,5 @@ export function useWebSocketListeners() {
     useUserWsEvents();
     useQueueWsEvents();
     useCollectionWsEvents();
-    useFriendActivityWsEvents();
     useNotificationWsEvents();
 }

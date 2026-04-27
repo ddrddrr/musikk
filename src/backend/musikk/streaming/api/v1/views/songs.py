@@ -1,18 +1,18 @@
 import logging
 
 from rest_framework import status
-from rest_framework.generics import get_object_or_404, RetrieveAPIView
+from rest_framework.generics import RetrieveAPIView, get_object_or_404
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from users.permissions import IsArtist
+from websockets.event_helpers import send_ws_event, user_group
 
+from streaming.api.v1.serializers.songs import CollectionSongRetrieveSerializer
 from streaming.managers.upload_manager import UploadManager
 from streaming.models.profile import StreamingProfile
-from streaming.permissions import IsPublicOrCollectionAuthor
-from users.permissions import IsArtist
-from streaming.ws import ServerEvent
-from websockets.event_helpers import send_ws_event, user_group
-from streaming.api.v1.serializers.songs import CollectionSongRetrieveSerializer
 from streaming.models.songs import CollectionSong
+from streaming.permissions import IsPublicOrCollectionAuthor
+from streaming.ws import ServerEvent
 
 logger = logging.getLogger(__name__)
 
@@ -40,11 +40,6 @@ class SongAddLikedView(APIView):
         group = user_group(self.request.user.uuid)
         send_ws_event(group, ServerEvent.QUEUE_CHANGED)
         send_ws_event(group, ServerEvent.COLLECTION_CHANGED)
-        send_ws_event(
-            group,
-            ServerEvent.FRIEND_ACTIVITY_LISTENING_CHANGED,
-            user_uuid=str(self.request.user.uuid),
-        )
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
