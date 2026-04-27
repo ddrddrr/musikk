@@ -2,6 +2,7 @@ import { CollectionAddToLikedButton } from "@/features/collections/components/Co
 import { CollectionAddToQueueButton } from "@/features/collections/components/CollectionAddToQueueButton.tsx";
 import { CollectionPlayButton } from "@/features/collections/components/CollectionPlayButton.tsx";
 import { CollectionDetailed } from "@/features/collections/types.ts";
+import { MediaThumbnail } from "@/features/common/MediaThumbnail.tsx";
 import { Button } from "@/features/ui/button.tsx";
 import {
     DropdownMenu,
@@ -62,18 +63,14 @@ export const CollectionHeader = memo(function SongCollectionHeader({
     return (
         <>
             <div className="flex gap-4 rounded-sm border-2 border-foreground bg-card p-6">
-                {collection.image ? (
-                    <img
-                        src={collection.image}
-                        alt="♫"
-                        className={cn(
-                            "rounded-sm border-2 border-foreground object-cover",
-                            showComments ? "size-20" : "size-32",
-                        )}
-                    />
-                ) : (
-                    <div>♫</div>
-                )}
+                <MediaThumbnail
+                    src={collection.image}
+                    alt={collection.title}
+                    className={cn(
+                        "rounded-sm border-2 border-foreground",
+                        showComments ? "size-20" : "size-32",
+                    )}
+                />
 
                 <div className="min-w-0 flex-1">
                     {showComments ? (

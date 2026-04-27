@@ -1,5 +1,5 @@
-# 2GB, which approx. corresponds to a 32bit, 48khz, stereo, 90min wav file
-MAX_FILE_SIZE = (((2**3) ** 10) ** 2) ** 3
+# ~2GB, approx. a 32bit 48kHz stereo 90min WAV
+MAX_FILE_SIZE = 2 * (1024**3)
 
 MAX_DURATION_SECONDS = 7200  # 2h
 # 48khz * 8, realistically we don't want to handle anything more

@@ -57,6 +57,7 @@ class TestBaseConsumer(TestCase):
             {
                 "device.register",
                 "device.set_active",
+                "device.set_volume",
                 "device.heartbeat",
                 "playback.activate",
                 "playback.stop",
@@ -195,8 +196,11 @@ class TestDeviceHandler(TestCase):
         self.consumer.channel_layer = MagicMock()
         self.consumer.channel_layer.group_send = AsyncMock()
 
+    @patch("streaming.ws.PlaybackManager")
     @patch("streaming.ws.DeviceManager")
-    def test_register_calls_manager_and_broadcasts(self, mock_manager_cls):
+    def test_register_calls_manager_and_broadcasts(
+        self, mock_manager_cls, _mock_playback_cls
+    ):
         mock_manager = mock_manager_cls.return_value
         devices = [{"id": "device1", "name": "My Device", "is_active": False}]
         mock_manager.get_devices.return_value = devices
@@ -218,28 +222,33 @@ class TestDeviceHandler(TestCase):
             },
         )
 
+    @patch("streaming.ws.PlaybackManager")
     @patch("streaming.ws.DeviceManager")
-    def test_register_missing_device_id(self, mock_manager_cls):
+    def test_register_missing_device_id(self, mock_manager_cls, _mock_playback_cls):
         handler = DeviceHandler(self.consumer)
         handler.handle_register({"name": "My Device"})
 
         self.consumer.send_error.assert_called_once_with(
-            "'device_id' and 'name' are required for device.register"
+            "`device_id` and `name` are required for device.register"
         )
         mock_manager_cls.return_value.register_device.assert_not_called()
 
+    @patch("streaming.ws.PlaybackManager")
     @patch("streaming.ws.DeviceManager")
-    def test_register_missing_name(self, mock_manager_cls):
+    def test_register_missing_name(self, mock_manager_cls, _mock_playback_cls):
         handler = DeviceHandler(self.consumer)
         handler.handle_register({"device_id": "device1"})
 
         self.consumer.send_error.assert_called_once_with(
-            "'device_id' and 'name' are required for device.register"
+            "`device_id` and `name` are required for device.register"
         )
         mock_manager_cls.return_value.register_device.assert_not_called()
 
+    @patch("streaming.ws.PlaybackManager")
     @patch("streaming.ws.DeviceManager")
-    def test_heartbeat_calls_manager_and_broadcasts(self, mock_manager_cls):
+    def test_heartbeat_calls_manager_and_broadcasts(
+        self, mock_manager_cls, _mock_playback_cls
+    ):
         mock_manager = mock_manager_cls.return_value
         devices = [{"id": "device1", "name": "Device 1", "is_active": True}]
         mock_manager.get_devices.return_value = devices
@@ -250,63 +259,124 @@ class TestDeviceHandler(TestCase):
         mock_manager.touch_device.assert_called_once_with(device_id="device1")
         self.consumer.channel_layer.group_send.assert_called_once()
 
+    @patch("streaming.ws.PlaybackManager")
     @patch("streaming.ws.DeviceManager")
-    def test_heartbeat_missing_device_id(self, mock_manager_cls):
+    def test_heartbeat_missing_device_id(self, mock_manager_cls, _mock_playback_cls):
         handler = DeviceHandler(self.consumer)
         handler.handle_heartbeat({})
 
         self.consumer.send_error.assert_called_once_with(
-            "'device_id' is required for device.heartbeat"
+            "`device_id` is required for device.heartbeat"
         )
         mock_manager_cls.return_value.touch_device.assert_not_called()
 
+    @patch("streaming.ws.PlaybackManager")
     @patch("streaming.ws.DeviceManager")
-    def test_set_active_calls_manager_and_broadcasts(self, mock_manager_cls):
+    def test_set_active_changed_broadcasts_devices_and_stops_playback(
+        self, mock_manager_cls, mock_playback_cls
+    ):
         mock_manager = mock_manager_cls.return_value
+        mock_manager.set_active_device.return_value = True
         mock_manager.get_devices.return_value = [
             {"id": "device1", "name": "Device 1", "is_active": True},
             {"id": "device2", "name": "Device 2", "is_active": False},
         ]
+        mock_playback = mock_playback_cls.return_value
+        mock_playback.is_playback_active.return_value = False
 
         handler = DeviceHandler(self.consumer)
         handler.handle_set_active({"device_id": "device1"})
 
         mock_manager.set_active_device.assert_called_once_with(device_id="device1")
+        mock_playback.stop.assert_called_once()
 
+        self.assertEqual(self.consumer.channel_layer.group_send.call_count, 2)
+        first_call, second_call = self.consumer.channel_layer.group_send.call_args_list
+        self.assertEqual(first_call[0][1]["event"], ServerEvent.PLAYBACK_CHANGE)
+        self.assertEqual(first_call[0][1]["payload"], {"playback": False})
+        self.assertEqual(second_call[0][1]["event"], ServerEvent.DEVICE_LIST)
+
+    @patch("streaming.ws.PlaybackManager")
+    @patch("streaming.ws.DeviceManager")
+    def test_set_active_no_change_does_not_stop_playback(
+        self, mock_manager_cls, mock_playback_cls
+    ):
+        mock_manager = mock_manager_cls.return_value
+        mock_manager.set_active_device.return_value = False
+        mock_manager.get_devices.return_value = [
+            {"id": "device1", "name": "Device 1", "is_active": True},
+        ]
+
+        handler = DeviceHandler(self.consumer)
+        handler.handle_set_active({"device_id": "device1"})
+
+        mock_playback_cls.return_value.stop.assert_not_called()
         self.consumer.channel_layer.group_send.assert_called_once()
         call_args = self.consumer.channel_layer.group_send.call_args
-        self.assertEqual(call_args[0][0], f"user_{self.user.uuid}")
         self.assertEqual(call_args[0][1]["event"], ServerEvent.DEVICE_LIST)
 
+    @patch("streaming.ws.PlaybackManager")
     @patch("streaming.ws.DeviceManager")
-    def test_set_active_missing_device_id(self, mock_manager_cls):
+    def test_set_active_missing_device_id(self, mock_manager_cls, _mock_playback_cls):
         handler = DeviceHandler(self.consumer)
         handler.handle_set_active({})
 
         self.consumer.send_error.assert_called_once_with(
-            "'device_id' is required for device.set_active"
+            "`device_id` is required for device.set_active"
         )
         mock_manager_cls.return_value.set_active_device.assert_not_called()
 
+    @patch("streaming.ws.PlaybackManager")
     @patch("streaming.ws.DeviceManager")
-    def test_disconnect_clears_device_and_broadcasts(self, mock_manager_cls):
+    def test_disconnect_clears_active_device_and_stops_playback(
+        self, mock_manager_cls, mock_playback_cls
+    ):
         mock_manager = mock_manager_cls.return_value
+        mock_manager.clear_device.return_value = True
         mock_manager.get_devices.return_value = [
             {"id": "device2", "name": "Device 2", "is_active": False}
         ]
+        mock_playback = mock_playback_cls.return_value
+        mock_playback.is_playback_active.return_value = False
 
         handler = DeviceHandler(self.consumer)
         handler.device_id = "device1"
         handler.on_disconnect()
 
         mock_manager.clear_device.assert_called_once_with("device1")
+        mock_playback.stop.assert_called_once()
+
+        self.assertEqual(self.consumer.channel_layer.group_send.call_count, 2)
+        first_call, second_call = self.consumer.channel_layer.group_send.call_args_list
+        self.assertEqual(first_call[0][1]["event"], ServerEvent.PLAYBACK_CHANGE)
+        self.assertEqual(first_call[0][1]["payload"], {"playback": False})
+        self.assertEqual(second_call[0][1]["event"], ServerEvent.DEVICE_LIST)
+
+    @patch("streaming.ws.PlaybackManager")
+    @patch("streaming.ws.DeviceManager")
+    def test_disconnect_clears_non_active_device_does_not_stop_playback(
+        self, mock_manager_cls, mock_playback_cls
+    ):
+        mock_manager = mock_manager_cls.return_value
+        mock_manager.clear_device.return_value = False
+        mock_manager.get_devices.return_value = [
+            {"id": "device2", "name": "Device 2", "is_active": True}
+        ]
+
+        handler = DeviceHandler(self.consumer)
+        handler.device_id = "device1"
+        handler.on_disconnect()
+
+        mock_playback_cls.return_value.stop.assert_not_called()
         self.consumer.channel_layer.group_send.assert_called_once()
         call_args = self.consumer.channel_layer.group_send.call_args
-        self.assertEqual(call_args[0][0], f"user_{self.user.uuid}")
         self.assertEqual(call_args[0][1]["event"], ServerEvent.DEVICE_LIST)
 
+    @patch("streaming.ws.PlaybackManager")
     @patch("streaming.ws.DeviceManager")
-    def test_disconnect_without_device_id_is_noop(self, mock_manager_cls):
+    def test_disconnect_without_device_id_is_noop(
+        self, mock_manager_cls, _mock_playback_cls
+    ):
         handler = DeviceHandler(self.consumer)
         handler.on_disconnect()
 

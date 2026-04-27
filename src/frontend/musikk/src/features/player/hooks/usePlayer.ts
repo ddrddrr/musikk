@@ -1,6 +1,6 @@
 import { PlaybackContext } from "@/features/playback/providers/playbackContext.ts";
 import { useQueueNext } from "@/features/song-queue/hooks/useQueueAPI.ts";
-import { useContext, useEffect, useMemo, useRef } from "react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import shaka from "shaka-player";
@@ -9,6 +9,7 @@ const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 
 interface UsePlayerOptions {
     audioRef: React.RefObject<HTMLAudioElement>;
+    ensureAudioPipeline: () => void;
     onDurationChange?: (duration: number) => void;
     onTimeUpdate?: (currentTime: number) => void;
 }
@@ -17,17 +18,13 @@ interface UsePlayerReturn {
     handleLoadedMetadata: () => void;
     handleTimeUpdate: () => void;
     handleOnEnded: () => void;
-}
-
-function tryPlay(audio: HTMLAudioElement) {
-    audio.play().catch((err: unknown) => {
-        if (err instanceof DOMException && err.name === "AbortError") return;
-        toast.error("Playback failed. Please try again.");
-    });
+    isMutedFallback: boolean;
+    unmute: () => void;
 }
 
 export function usePlayer({
     audioRef,
+    ensureAudioPipeline,
     onDurationChange,
     onTimeUpdate,
 }: UsePlayerOptions): UsePlayerReturn {
@@ -35,7 +32,9 @@ export function usePlayer({
         useContext(PlaybackContext);
     const nextMutation = useQueueNext();
     const playerRef = useRef<shaka.Player | null>(null);
+    // whether the audio is loaded and can be manipulated with
     const isAudioReadyRef = useRef(false);
+    const [isMutedFallback, setIsMutedFallback] = useState(false);
 
     // kinda wacky, but didn't figure out a better way to always have a fresh value for those
     const isPlaybackActiveRef = useRef(isPlaybackActive);
@@ -48,6 +47,45 @@ export function usePlayer({
         if (!playingCollectionSong) return undefined;
         return isSafari ? playingCollectionSong.song.m3u8 : playingCollectionSong.song.mpd;
     }, [playingCollectionSong, isSafari]);
+
+    async function tryPlay(audio: HTMLAudioElement) {
+        try {
+            await audio.play();
+            if (isMutedFallback) setIsMutedFallback(false);
+        } catch (err) {
+            if (err instanceof DOMException && err.name === "AbortError") return;
+            // if the user opens the app on a completely new device (non-active yet)
+            // the new device becomes active and closes the active page
+            // then, if the user re-opens the old window (which was active, but not anymore)
+            // and resumes the playback, it should start on the new device
+            // but if the user haven't interacted with the page on the new device,
+            // autoplay will be blocked
+            // muted playback is always allowed, so we fall back to it
+            if (err instanceof DOMException && err.name === "NotAllowedError") {
+                audio.muted = true;
+                try {
+                    await audio.play();
+                    setIsMutedFallback(true);
+                    return;
+                } catch {
+                    audio.muted = false;
+                    toast.error("Playback failed. Please try again.");
+                    return;
+                }
+            }
+            toast.error("Playback failed. Please try again.");
+        }
+    }
+
+    function unmute() {
+        const audio = audioRef.current;
+        if (!audio) return;
+        // unmute click is the user gesture that lets us go over the autoplay policy
+        // and build the AudioContext
+        ensureAudioPipeline();
+        audio.muted = false;
+        setIsMutedFallback(false);
+    }
 
     function initShakaPlayer() {
         shaka.polyfill.installAll();
@@ -68,22 +106,25 @@ export function usePlayer({
             playerRef.current = null;
         };
     }
-
     useEffect(initShakaPlayer, []);
 
     function loadOrUnloadSong() {
-        // guards against e.g. the user shifting to the next song inbetween the attach and load
-        // since the control yields to the event loop and the flag value can flip
+        // guards against e.g. the user shifting to the next song inbetween the attach and load calls
+        // on await player.attach() the control yields to the event loop and a func
+        // that shifts a song can run in the meantime
+        // that would change the url, i.e., run a new loadOrUnloadSong
+        // there is always a single instace of a player so it is possible that it would run
+        // player.load(url) on an (already) old url and then try to play it
         let cancelled = false;
 
         const initPlayback = async () => {
             isAudioReadyRef.current = false;
+
             const player = playerRef.current;
             const audio = audioRef.current;
-
             if (!player || !audio) return;
 
-            if (url && playingCollectionSong) {
+            if (url && isThisDeviceActiveRef.current) {
                 try {
                     await player.attach(audio);
                     if (cancelled) return;
@@ -91,8 +132,10 @@ export function usePlayer({
                     if (cancelled) return;
                     isAudioReadyRef.current = true;
 
+                    // BE always sets playback=false on any active-device transition,
+                    // so isPlaybackActive=true here means the user explicitly hit play
                     if (isPlaybackActiveRef.current && isThisDeviceActiveRef.current) {
-                        tryPlay(audio);
+                        void tryPlay(audio);
                     }
                 } catch {
                     if (cancelled) return;
@@ -102,7 +145,8 @@ export function usePlayer({
                 try {
                     await player.unload();
                 } catch {
-                    // unload can fail when the player is already being destroyed during cleanup
+                    // unload can fail when the player is already being destroyed by initShakaPlayer's cleanup
+                    // so we just swallow the err and go along our day
                 }
                 if (!cancelled && audio) {
                     audio.pause();
@@ -111,27 +155,24 @@ export function usePlayer({
             }
         };
 
-        initPlayback();
+        void initPlayback();
         return () => {
             cancelled = true;
         };
     }
+    useEffect(loadOrUnloadSong, [playingCollectionSong?.uuid, url, isThisDeviceActive]);
 
-    useEffect(loadOrUnloadSong, [playingCollectionSong?.uuid, url]);
-
-    function syncPlayPauseWithState() {
+    function syncLocalPlaybackStateWithRemote() {
         const audio = audioRef.current;
         if (!audio || !isAudioReadyRef.current || !playingCollectionSong) return;
-        if (!isThisDeviceActive) return;
 
-        if (isPlaybackActive) {
-            tryPlay(audio);
+        if (isThisDeviceActive && isPlaybackActive) {
+            void tryPlay(audio);
         } else {
             audio.pause();
         }
     }
-
-    useEffect(syncPlayPauseWithState, [isPlaybackActive, isThisDeviceActive]);
+    useEffect(syncLocalPlaybackStateWithRemote, [isPlaybackActive, isThisDeviceActive]);
 
     function handleOnEnded() {
         isAudioReadyRef.current = false;
@@ -151,6 +192,7 @@ export function usePlayer({
 
         onTimeUpdate?.(audio.currentTime);
 
+        // TODO: probably remove since with introduction of shakapackager short tracks behave correctly
         if (
             isThisDeviceActive &&
             playingCollectionSong &&
@@ -163,5 +205,5 @@ export function usePlayer({
         }
     }
 
-    return { handleLoadedMetadata, handleTimeUpdate, handleOnEnded };
+    return { handleLoadedMetadata, handleTimeUpdate, handleOnEnded, isMutedFallback, unmute };
 }

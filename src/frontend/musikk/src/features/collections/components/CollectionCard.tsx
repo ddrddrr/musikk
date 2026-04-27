@@ -9,12 +9,14 @@ import {
 import { MediaThumbnail } from "@/features/common/MediaThumbnail.tsx";
 import { Card, CardContent } from "@/features/ui/card.tsx";
 import { AuthorLinks } from "@/features/user/components/AuthorLinks.tsx";
+import { cn } from "@/lib/utils";
 import { cva } from "class-variance-authority";
 import { useNavigate } from "react-router-dom";
 
 type CollectionCardProps = {
     collection: Collection;
     size?: CardSize;
+    className?: string;
     onClick?: (c: Collection) => void;
 };
 
@@ -49,6 +51,7 @@ const spacingBySize: Record<CardSize, "sm" | "md" | "lg"> = {
 export function CollectionCard({
     collection,
     size = "medium",
+    className,
     onClick = undefined,
 }: CollectionCardProps) {
     const navigate = useNavigate();
@@ -69,10 +72,11 @@ export function CollectionCard({
                 key={uuid}
                 variant="panel"
                 spacing={spacingBySize[size]}
-                className={collectionCardWidthVariants({
-                    size,
-                    className: "cursor-pointer py-0 transition-all duration-200",
-                })}
+                className={cn(
+                    collectionCardWidthVariants({ size }),
+                    "cursor-pointer py-0 transition-all duration-200",
+                    className,
+                )}
             >
                 <CardContent className="p-0">
                     <MediaThumbnail

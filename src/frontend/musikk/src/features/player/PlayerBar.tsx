@@ -1,3 +1,4 @@
+import { MediaThumbnail } from "@/features/common/MediaThumbnail.tsx";
 import { PlaybackContext } from "@/features/playback/providers/playbackContext.ts";
 import { ChangeActiveDeviceDropdown } from "@/features/player/ChangeActiveDeviceDropdown.tsx";
 import { useVolume } from "@/features/player/hooks/useVolume.ts";
@@ -23,6 +24,8 @@ interface PlayerBarProps {
     setSeeking: (s: boolean) => void;
     setIsQueueOpen: React.Dispatch<React.SetStateAction<boolean>>;
     onSeekCommit?: (t: number) => void;
+    isMutedFallback: boolean;
+    onUnmute: () => void;
 }
 export function PlayerBar({
     audioRef,
@@ -32,6 +35,8 @@ export function PlayerBar({
     setSeeking,
     setIsQueueOpen,
     onSeekCommit,
+    isMutedFallback,
+    onUnmute,
 }: PlayerBarProps) {
     const { playingCollectionSong, isThisDeviceActive } = useContext(PlaybackContext);
     const { volume, setVolume, handleVolumeCommit, handleMuteToggle } = useVolume(audioRef);
@@ -76,19 +81,11 @@ export function PlayerBar({
             <div className="flex w-full items-center justify-between gap-4">
                 {playingSong && (
                     <div className="flex min-w-0 items-center gap-3">
-                        <div className="size-14 shrink-0 border-2 border-foreground">
-                            {playingSong.image ? (
-                                <img
-                                    src={playingSong.image}
-                                    alt={playingSong.title}
-                                    className="h-full w-full object-cover"
-                                />
-                            ) : (
-                                <div className="flex h-full w-full items-center justify-center bg-muted">
-                                    <span className="text-2xl text-muted-foreground">♪</span>
-                                </div>
-                            )}
-                        </div>
+                        <MediaThumbnail
+                            src={playingSong.image}
+                            alt={playingSong.title}
+                            className="size-14 shrink-0 border-2 border-foreground"
+                        />
                         <div className="flex min-w-0 flex-col">
                             <p className="truncate text-sm font-bold">{playingSong.title}</p>
                             <AuthorLinks
@@ -124,6 +121,20 @@ export function PlayerBar({
                         <Button onClick={() => nextMutation.mutate()} variant="ghost" size="icon">
                             <SkipForward className="size-5" strokeWidth="2" />
                         </Button>
+                        {isMutedFallback && (
+                            // shown when audio is forced muted because no user gesture was
+                            // available when playback started
+                            // the unmute click is the fallback builds the AudioContext
+                            <Button
+                                onClick={onUnmute}
+                                variant="ghost"
+                                size="icon"
+                                title="Tap to unmute on this device"
+                                className="bg-highlight"
+                            >
+                                <VolumeX className="size-5" strokeWidth="2" />
+                            </Button>
+                        )}
                     </div>
 
                     <div className="flex items-center gap-2">

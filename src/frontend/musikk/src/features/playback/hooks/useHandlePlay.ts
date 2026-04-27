@@ -1,13 +1,19 @@
 import { Collection, CollectionSong } from "@/features/collections/types.ts";
 import { useCurrentDevice } from "@/features/playback/hooks/useCurrentDevice.ts";
+import { useDeviceList } from "@/features/playback/hooks/useDeviceList.ts";
 import { PlaybackContext } from "@/features/playback/providers/playbackContext.ts";
-import { usePlaybackActions } from "@/features/playback/ws/actionHooks.ts";
+import {
+    usePlaybackActions,
+    useSetDeviceActiveAction,
+} from "@/features/playback/ws/actionHooks.ts";
 import { usePlayCollection, usePlaySong } from "@/features/song-queue/hooks/useQueueAPI.ts";
 import { useContext } from "react";
 
 export function useHandlePlay() {
     const { playingCollectionSong, isPlaybackActive } = useContext(PlaybackContext);
     const device = useCurrentDevice();
+    const { activeDevice } = useDeviceList();
+    const setDeviceActiveAction = useSetDeviceActiveAction();
     const { activatePlaybackAction, stopPlaybackAction } = usePlaybackActions();
     const playSongMutation = usePlaySong();
     const playCollectionMutation = usePlayCollection();
@@ -43,6 +49,10 @@ export function useHandlePlay() {
     } = {}) {
         // TODO: probably remove this check
         if (!device.id) return;
+
+        if (!activeDevice) {
+            setDeviceActiveAction(device);
+        }
 
         if (newCollection || newSong) {
             await playItem({ newCollection, newSong });

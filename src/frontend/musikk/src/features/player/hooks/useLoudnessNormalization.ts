@@ -1,9 +1,10 @@
+import { PlaybackContext } from "@/features/playback/providers/playbackContext.ts";
 import {
     LoudnessPresetContext,
     type LoudnessPreset,
 } from "@/features/player/providers/loudnessPresetContext.ts";
 import { Song } from "@/features/songs/types.ts";
-import { useCallback, useContext, useEffect, useRef } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 
 const LOUDNESS_TARGETS: Record<LoudnessPreset, number> = {
     quiet: -19, // LUFS
@@ -16,6 +17,10 @@ const TRUE_PEAK_CEILING = -1; // dBTP
 interface UseLoudnessNormalizationOptions {
     audioRef: React.RefObject<HTMLAudioElement>;
     song: Song | undefined;
+}
+
+interface UseLoudnessNormalizationReturn {
+    ensureAudioPipeline: () => void;
 }
 
 // boosting a quiet track can push its peaks above 0 dBFS (clipping),
@@ -43,16 +48,23 @@ function applyCompressor(compressorNode: DynamicsCompressorNode, preset: Loudnes
     }
 }
 
-// see https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API
+// see https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API/Using_Web_Audio_API
 // on how to use the audio API (very cool!)
-export function useLoudnessNormalization({ audioRef, song }: UseLoudnessNormalizationOptions) {
+export function useLoudnessNormalization({
+    audioRef,
+    song,
+}: UseLoudnessNormalizationOptions): UseLoudnessNormalizationReturn {
+    const { isThisDeviceActive } = useContext(PlaybackContext);
     const { preset } = useContext(LoudnessPresetContext);
     const audioContextRef = useRef<AudioContext | null>(null);
     const sourceNodeRef = useRef<MediaElementAudioSourceNode | null>(null);
     const gainNodeRef = useRef<GainNode | null>(null);
     const compressorNodeRef = useRef<DynamicsCompressorNode | null>(null);
+    // drives a re-render after the gesture-bound build, so the settings effect re-fires
+    // and replaces the browser-default DynamicsCompressor with the configured values
+    const [hasPipeline, setHasPipeline] = useState(false);
 
-    const createAudioPipeline = useCallback(() => {
+    const ensureAudioPipeline = useCallback(() => {
         const audio = audioRef.current;
         if (!audio || sourceNodeRef.current) return;
 
@@ -73,19 +85,37 @@ export function useLoudnessNormalization({ audioRef, song }: UseLoudnessNormaliz
         sourceNode.connect(gainNode);
         gainNode.connect(compressorNode);
         compressorNode.connect(ctx.destination);
+
+        setHasPipeline(true);
     }, [audioRef]);
 
+    // browsers gate AudioContext creation/resume on a user gesture; we capture the user's first
+    // interaction anywhere on the page and build the pipeline synchronously inside it
     useEffect(() => {
-        createAudioPipeline();
+        const initOnFirstGesture = () => {
+            ensureAudioPipeline();
+            document.removeEventListener("pointerdown", initOnFirstGesture, true);
+            document.removeEventListener("keydown", initOnFirstGesture, true);
+        };
+        // capture phase so this runs before app handlers, while transient activation is fresh
+        document.addEventListener("pointerdown", initOnFirstGesture, true);
+        document.addEventListener("keydown", initOnFirstGesture, true);
+        return () => {
+            document.removeEventListener("pointerdown", initOnFirstGesture, true);
+            document.removeEventListener("keydown", initOnFirstGesture, true);
+        };
+    }, [ensureAudioPipeline]);
 
-        // retry resume, since the pipeline may have been created before user interaction
-        if (audioContextRef.current?.state === "suspended") {
-            void audioContextRef.current.resume();
-        }
+    useEffect(() => {
+        if (!isThisDeviceActive) return;
 
         const gainNode = gainNodeRef.current;
         const compressorNode = compressorNodeRef.current;
         if (!gainNode || !compressorNode) return;
+
+        if (audioContextRef.current?.state === "suspended") {
+            void audioContextRef.current.resume();
+        }
 
         if (song?.loudness_lufs == null) {
             gainNode.gain.value = 1;
@@ -98,16 +128,25 @@ export function useLoudnessNormalization({ audioRef, song }: UseLoudnessNormaliz
         // audio api's gain is linear, so we convert from dB
         gainNode.gain.value = Math.pow(10, gainDb / 20);
         applyCompressor(compressorNode, preset);
-    }, [song?.uuid, song?.loudness_lufs, song?.true_peak_dbtp, preset, createAudioPipeline]);
+    }, [
+        song?.uuid,
+        song?.loudness_lufs,
+        song?.true_peak_dbtp,
+        preset,
+        isThisDeviceActive,
+        hasPipeline,
+    ]);
 
     useEffect(() => {
         return () => {
-            audioContextRef.current?.close();
-            // clear refs so the pipeline can be recreated on remount (mostly dev issue)
+            // close the orphaned context to avoid leaks across StrictMode/HMR remounts
+            void audioContextRef.current?.close();
             audioContextRef.current = null;
             sourceNodeRef.current = null;
             gainNodeRef.current = null;
             compressorNodeRef.current = null;
         };
     }, []);
+
+    return { ensureAudioPipeline };
 }

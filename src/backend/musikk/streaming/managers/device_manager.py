@@ -97,11 +97,14 @@ class DeviceManager:
 
         return devices
 
-    def set_active_device(self, device_id: str) -> None:
+    def set_active_device(self, device_id: str) -> bool:
         r = get_default_redis_conn()
+        prev_active = try_decode(r.get(self._active_device_key()))
+        if prev_active == device_id:
+            return False
         # no ttl, should be cleared explicitely
         r.set(self._active_device_key(), device_id)
-        return None
+        return True
 
     def set_device_volume(self, device_id: str, volume: int) -> None:
         r = get_default_redis_conn()
@@ -124,7 +127,7 @@ class DeviceManager:
             ex=ttl if ttl > 0 else DEVICE_TTL_SECONDS,
         )
 
-    def clear_device(self, device_id: str) -> None:
+    def clear_device(self, device_id: str) -> bool:
         r = get_default_redis_conn()
 
         r.delete(self._device_key(device_id))
@@ -135,4 +138,5 @@ class DeviceManager:
 
         if prev_active == device_id:
             r.delete(self._active_device_key())
-        return None
+            return True
+        return False

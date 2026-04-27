@@ -9,21 +9,16 @@ export interface ThisDevice {
 
 export function useCurrentDevice() {
     const [device] = useState<ThisDevice>(() => {
-        const savedId = localStorage.getItem("deviceID");
-        const savedName = localStorage.getItem("deviceName");
-
-        if (savedId && savedName) {
-            return { id: savedId, name: savedName };
+        const savedId = sessionStorage.getItem("deviceID");
+        if (savedId) {
+            return { id: savedId, name: getWebPlayerLabel() };
         }
 
         const newDevice: ThisDevice = {
             id: randomID(),
             name: getWebPlayerLabel(),
         };
-
-        localStorage.setItem("deviceID", newDevice.id);
-        localStorage.setItem("deviceName", newDevice.name);
-
+        sessionStorage.setItem("deviceID", newDevice.id);
         return newDevice;
     });
 

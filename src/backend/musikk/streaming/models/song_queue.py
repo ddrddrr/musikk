@@ -6,6 +6,7 @@ from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models, transaction
 
+from streaming.managers.playback_manager import PlaybackManager
 from streaming.models.collections import Collection
 from streaming.models.songs import CollectionSong
 
@@ -494,6 +495,9 @@ class PlayerState(BaseModel):
         self._add_to_history()
         self.current_collection_song = song
         self.history_cursor = 0
+        # keep the Redis playback flag in sync with the DB: "no current song" implies "not playing"
+        if song is None:
+            PlaybackManager(user_uuid=self.streamingprofile.user.uuid).stop()
 
     def _add_to_history(self) -> None:
         if not self.current_collection_song:

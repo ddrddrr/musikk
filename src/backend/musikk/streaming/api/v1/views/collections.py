@@ -201,7 +201,7 @@ class CollectionSongCreateView(APIView):
                 "song_uuid": str(base_song_inst.uuid),
                 "collection_song_uuid": str(collection_song_inst.uuid),
             },
-            status=status.HTTP_204_NO_CONTENT,
+            status=status.HTTP_201_CREATED,
         )
 
     def _create_album_song(self, request, collection):
@@ -212,6 +212,11 @@ class CollectionSongCreateView(APIView):
             )
 
         audio = request.data.get("audio")
+        if not audio:
+            return Response(
+                data={"detail": "An audio file is required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         with tempfile.NamedTemporaryFile(delete=False) as tmp:
             for chunk in audio.chunks():

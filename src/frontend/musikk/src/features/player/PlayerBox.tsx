@@ -16,20 +16,21 @@ export const PlayerBox = memo(function PlayerBox({
     const [seeking, setSeeking] = useState(false);
     const { queueError, queueRefetch, playingCollectionSong } = useContext(PlaybackContext);
 
-    const { handleLoadedMetadata, handleTimeUpdate, handleOnEnded } = usePlayer({
-        audioRef,
-        onDurationChange: setTotalDuration,
-        onTimeUpdate: (currentTime) => {
-            if (!seeking) setTime(currentTime);
-        },
-    });
-
-    useLoudnessNormalization({
+    const { ensureAudioPipeline } = useLoudnessNormalization({
         audioRef,
         song: playingCollectionSong?.song,
     });
 
-    // TODO: fine for now, but probably move
+    const { handleLoadedMetadata, handleTimeUpdate, handleOnEnded, isMutedFallback, unmute } =
+        usePlayer({
+            audioRef,
+            ensureAudioPipeline,
+            onDurationChange: setTotalDuration,
+            onTimeUpdate: (currentTime) => {
+                if (!seeking) setTime(currentTime);
+            },
+        });
+
     if (queueError) {
         return (
             <div className="sticky right-0 bottom-0 left-0 z-10 border-t border-foreground bg-card p-4">
@@ -48,6 +49,8 @@ export const PlayerBox = memo(function PlayerBox({
                 setSeeking={setSeeking}
                 setIsQueueOpen={setIsQueueOpen}
                 onSeekCommit={(t) => setTime(t)}
+                isMutedFallback={isMutedFallback}
+                onUnmute={unmute}
             />
 
             <audio
