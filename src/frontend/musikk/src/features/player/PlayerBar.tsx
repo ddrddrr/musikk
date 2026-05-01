@@ -4,6 +4,7 @@ import { ChangeActiveDeviceDropdown } from "@/features/player/ChangeActiveDevice
 import { useVolume } from "@/features/player/hooks/useVolume.ts";
 import { PlayerPlayButton } from "@/features/player/PlayerPlayButton.tsx";
 import { useQueueNext, useQueuePrev } from "@/features/song-queue/hooks/useQueueAPI.ts";
+import { useNavigateToSongAlbum } from "@/features/songs/hooks/useNavigateToSongAlbum.ts";
 import { Button } from "@/features/ui/button";
 import { Slider } from "@/features/ui/slider";
 import { AuthorLinks } from "@/features/user/components/AuthorLinks.tsx";
@@ -43,6 +44,7 @@ export function PlayerBar({
     const [seekTime, setSeekTime] = useState(0);
     const nextMutation = useQueueNext();
     const prevMutation = useQueuePrev();
+    const navigateToAlbum = useNavigateToSongAlbum();
 
     // if the audio is playing, coming to and end and the person is seeking back
     // the audio will switch
@@ -87,7 +89,13 @@ export function PlayerBar({
                             className="size-14 shrink-0 border-2 border-foreground"
                         />
                         <div className="flex min-w-0 flex-col">
-                            <p className="truncate text-sm font-bold">{playingSong.title}</p>
+                            <button
+                                type="button"
+                                onClick={() => void navigateToAlbum(playingCollectionSong.uuid)}
+                                className="cursor-pointer truncate bg-transparent p-0 text-left text-sm font-bold hover:underline"
+                            >
+                                {playingSong.title}
+                            </button>
                             <AuthorLinks
                                 authors={playingCollectionSong.song.authors}
                                 className="text-xs text-muted-foreground"

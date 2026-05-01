@@ -258,14 +258,13 @@ class CollectionSongCreateView(APIView):
         )
 
 
-# todo pass collection song uuid not base song uuid
 class AlbumBySongView(APIView):
     permission_classes = [IsPublicOrCollectionAuthor]
 
     def get(self, request, *args, **kwargs):
         collection_song = get_object_or_404(
             CollectionSong.objects.select_related("song"),
-            uuid=kwargs["song_uuid"],
+            uuid=kwargs["uuid"],
         )
 
         album = get_object_or_404(

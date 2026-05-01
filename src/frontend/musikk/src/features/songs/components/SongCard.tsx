@@ -1,4 +1,3 @@
-import { getErrorDetail } from "@/api/errorUtils.ts";
 import { CollectionSong } from "@/features/collections/types.ts";
 import {
     type CardSize,
@@ -8,12 +7,10 @@ import {
 } from "@/features/common/card-variants.ts";
 import { MediaThumbnail } from "@/features/common/MediaThumbnail.tsx";
 import { SongContextMenu } from "@/features/songs/components/SongContextMenu.tsx";
-import { albumBySongRetrieve } from "@/features/songs/queries.ts";
+import { useNavigateToSongAlbum } from "@/features/songs/hooks/useNavigateToSongAlbum.ts";
 import { Card, CardContent } from "@/features/ui/card.tsx";
 import { AuthorLinks } from "@/features/user/components/AuthorLinks.tsx";
 import { cva } from "class-variance-authority";
-import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
 
 type SongCardProps = {
     collectionSong: CollectionSong;
@@ -44,20 +41,15 @@ const songCardImageVariants = cva("w-full", {
 });
 
 export function SongCard({ collectionSong, size = "medium", onClick = undefined }: SongCardProps) {
-    const navigate = useNavigate();
+    const navigateToAlbum = useNavigateToSongAlbum();
     const { uuid, title, authors, image } = collectionSong.song;
 
-    async function handleClick(s: CollectionSong) {
+    function handleClick(s: CollectionSong) {
         if (onClick) {
             onClick(s);
             return;
         }
-        try {
-            const albumUUID = await albumBySongRetrieve(s.uuid);
-            void navigate(`/collection/${albumUUID.uuid}/`);
-        } catch (error) {
-            toast.error(getErrorDetail(error, "Failed to load album"));
-        }
+        void navigateToAlbum(s.uuid);
     }
 
     return (

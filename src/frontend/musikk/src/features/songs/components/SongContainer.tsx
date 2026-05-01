@@ -1,10 +1,11 @@
 import { CollectionSong } from "@/features/collections/types.ts";
 import { MediaThumbnail } from "@/features/common/MediaThumbnail.tsx";
 import { DefaultSongActions } from "@/features/songs/components/DefaultSongActions.tsx";
+import { useNavigateToSongAlbum } from "@/features/songs/hooks/useNavigateToSongAlbum.ts";
 import { AuthorLinks } from "@/features/user/components/AuthorLinks.tsx";
 import { cn } from "@/lib/utils.ts";
 import { cva } from "class-variance-authority";
-import { type ReactNode } from "react";
+import { type MouseEvent, type ReactNode } from "react";
 
 type SongContainerSize = "compact" | "normal";
 type SongContainerVariant = "inline" | "stacked";
@@ -76,6 +77,7 @@ export function SongContainer({
     actions,
 }: SongContainerProps) {
     const song = collectionSong.song;
+    const navigateToAlbum = useNavigateToSongAlbum();
 
     const renderedActions = actions ?? (
         <DefaultSongActions collectionSong={collectionSong} size={size} />
@@ -85,7 +87,16 @@ export function SongContainer({
         <div className={cn("flex min-w-0 items-center", gapClass[size])}>
             {showImage && <MediaThumbnail src={song.image} className={imageVariants({ size })} />}
             <div className="flex min-w-0 flex-col">
-                <p className={titleVariants({ size })}>{song.title}</p>
+                <button
+                    type="button"
+                    onClick={() => void navigateToAlbum(collectionSong.uuid)}
+                    className={cn(
+                        titleVariants({ size }),
+                        "cursor-pointer bg-transparent p-0 text-left hover:underline",
+                    )}
+                >
+                    {song.title}
+                </button>
                 {variant === "inline" && (
                     <AuthorLinks authors={song.authors} className={authorsVariants({ size })} />
                 )}

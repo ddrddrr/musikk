@@ -24,18 +24,20 @@ def seed_collections(
     album_count: int,
     image_provider: ImageProvider,
 ) -> tuple[list[Collection], list[Collection]]:
+    playlist_song_groups = [
+        random.sample(songs, k=random.randint(1, len(songs))) if songs else []
+        for _ in range(playlist_count)
+    ]
     playlists = _create_collections(
-        songs=songs,
+        song_groups=playlist_song_groups,
         authors=users,
-        count=playlist_count,
         collection_type=CollectionType.PLAYLIST,
         image_provider=image_provider,
         label="playlist",
     )
     albums = _create_collections(
-        songs=songs,
+        song_groups=_partition_songs(songs, album_count),
         authors=artists,
-        count=album_count,
         collection_type=CollectionType.ALBUM,
         image_provider=image_provider,
         label="album",
@@ -43,18 +45,34 @@ def seed_collections(
     return playlists, albums
 
 
+def _partition_songs(songs: list[BaseSong], album_count: int) -> list[list[BaseSong]]:
+    if not songs or album_count <= 0:
+        return []
+
+    effective_count = min(album_count, len(songs))
+    shuffled = random.sample(songs, len(songs))
+    cut_points = sorted(random.sample(range(1, len(shuffled)), effective_count - 1))
+
+    groups: list[list[BaseSong]] = []
+    prev = 0
+    for cut in cut_points:
+        groups.append(shuffled[prev:cut])
+        prev = cut
+    groups.append(shuffled[prev:])
+    return groups
+
+
 def _create_collections(
-    songs: list[BaseSong],
+    song_groups: list[list[BaseSong]],
     authors: list[BaseUser],
-    count: int,
     collection_type: str,
     image_provider: ImageProvider,
     label: str,
 ) -> list[Collection]:
     collections: list[Collection] = []
-    for _ in range(count):
-        if not songs:
-            break
+    for chosen in song_groups:
+        if not chosen:
+            continue
 
         collection = Collection.objects.create(
             title=fake.bs().title(),
@@ -63,7 +81,6 @@ def _create_collections(
             type=collection_type,
         )
 
-        chosen = random.sample(songs, k=random.randint(1, len(songs)))
         for idx, song in enumerate(chosen):
             CollectionSong.objects.create(
                 collection=collection, song=song, position=idx
