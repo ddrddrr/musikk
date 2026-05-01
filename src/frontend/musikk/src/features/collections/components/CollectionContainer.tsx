@@ -4,6 +4,7 @@ import { useCollectionDetailQuery } from "@/features/collections/api/queries.ts"
 import { CollectionHeader } from "@/features/collections/components/CollectionHeader.tsx";
 import { DeletePlaylistDialog } from "@/features/collections/components/DeletePlaylistDialog.tsx";
 import { useDeletePlaylist } from "@/features/collections/hooks/useDeletePlaylist.ts";
+import { BackButton } from "@/features/common/BackButton.tsx";
 import { EmptyState } from "@/features/common/EmptyState.tsx";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { CommentBox } from "@/features/publications/components/collection-comments/CommentBox.tsx";
@@ -75,6 +76,7 @@ export function CollectionContainer({ collectionUUID }: CollectionContainerProps
 
     return (
         <div className="mx-auto max-w-7xl p-4">
+            <BackButton />
             <div className={cn("flex gap-6", showComments ? "flex-row" : "flex-col")}>
                 <div className={showComments ? "min-w-0 flex-1" : "w-full"}>
                     <div className="flex flex-col gap-4">

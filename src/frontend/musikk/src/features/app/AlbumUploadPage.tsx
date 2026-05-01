@@ -21,7 +21,7 @@ export function AlbumUploadPage() {
     return (
         <div className="flex-1 overflow-y-auto bg-brand p-4">
             <div className="mx-auto max-w-2xl">
-                <BackButton to="/" label="Back to Music" />
+                <BackButton to="/" label="Back to Music" className="text-brand-foreground" />
 
                 <div className="rounded-sm border-2 border-foreground bg-card p-6">
                     {!albumUUID ? (

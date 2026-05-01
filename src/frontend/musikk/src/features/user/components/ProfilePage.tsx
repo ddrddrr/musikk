@@ -1,6 +1,5 @@
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
 import { UserCollectionsGrid } from "@/features/collections/components/UserCollectionsGrid.tsx";
-import { BackButton } from "@/features/common/BackButton.tsx";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { UserFeed } from "@/features/publications/components/posts/UserFeed.tsx";
 import { Button } from "@/features/ui/button.tsx";
@@ -61,7 +60,6 @@ export function ProfilePage() {
 
     return (
         <div className="flex flex-col items-center pt-8">
-            <BackButton />
             <UserAvatar src={user.avatar} alt={user.display_name} size="lg" />
             <h1 className="mt-2 text-2xl font-semibold">{user.display_name}</h1>
             {user.bio && (
