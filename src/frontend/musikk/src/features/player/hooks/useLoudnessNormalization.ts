@@ -6,7 +6,7 @@ import {
 import { Song } from "@/features/songs/types.ts";
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
 
-const LOUDNESS_TARGETS: Record<LoudnessPreset, number> = {
+const LOUDNESS_TARGETS: Record<Exclude<LoudnessPreset, "off">, number> = {
     quiet: -19, // LUFS
     normal: -14,
     loud: -11,
@@ -117,7 +117,7 @@ export function useLoudnessNormalization({
             void audioContextRef.current.resume();
         }
 
-        if (song?.loudness_lufs == null) {
+        if (preset === "off" || song?.loudness_lufs == null) {
             gainNode.gain.value = 1;
             compressorNode.threshold.value = 0;
             compressorNode.ratio.value = 1;

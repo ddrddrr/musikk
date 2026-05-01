@@ -10,9 +10,10 @@ interface LoudnessPresetSelectorProps {
 }
 
 const PRESETS: { value: LoudnessPreset; label: string }[] = [
-    { value: "quiet", label: "Q" },
-    { value: "normal", label: "N" },
-    { value: "loud", label: "L" },
+    { value: "off", label: "Off" },
+    { value: "quiet", label: "Quiet" },
+    { value: "normal", label: "Normal" },
+    { value: "loud", label: "Loud" },
 ];
 
 export function LoudnessPresetSelector({
@@ -26,8 +27,8 @@ export function LoudnessPresetSelector({
                 <Button
                     key={p.value}
                     variant={value === p.value ? "default" : "ghost"}
-                    size="icon"
-                    className="size-7 text-xs"
+                    size="sm"
+                    className="h-7 px-3 text-xs"
                     onClick={() => onChange(p.value)}
                 >
                     {p.label}

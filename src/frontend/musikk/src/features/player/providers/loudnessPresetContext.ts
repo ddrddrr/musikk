@@ -1,6 +1,6 @@
 import { createContext } from "react";
 
-export type LoudnessPreset = "quiet" | "normal" | "loud";
+export type LoudnessPreset = "off" | "quiet" | "normal" | "loud";
 
 export interface LoudnessPresetContextProps {
     preset: LoudnessPreset;
