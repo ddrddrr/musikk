@@ -18,14 +18,15 @@ export function GlobalFeed() {
     const sharedProps = { hasNewPosts, onLoadNewer: refresh, feedUserUUID: userUUID };
 
     return (
-        <div className="mx-auto max-w-2xl p-6">
-            <Tabs value={tab} onValueChange={setTab} className="w-full">
-                <TabsList className="mb-6 rounded-sm">
+        <Tabs value={tab} onValueChange={setTab} className="flex flex-col">
+            <div className="border-b border-border px-6 py-4">
+                <TabsList className="rounded-sm">
                     <TabsTrigger value="random">Random</TabsTrigger>
                     <TabsTrigger value="friends">Friends</TabsTrigger>
                     <TabsTrigger value="followed">Followed</TabsTrigger>
                 </TabsList>
-
+            </div>
+            <div className="mx-auto w-full max-w-2xl p-6">
                 <PostTabContent
                     label="random"
                     posts={queryAll.publicationsFlat}
@@ -56,7 +57,7 @@ export function GlobalFeed() {
                     fetchNextPage={queryFollowed.fetchNextPage}
                     {...sharedProps}
                 />
-            </Tabs>
-        </div>
+            </div>
+        </Tabs>
     );
 }

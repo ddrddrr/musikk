@@ -1,5 +1,6 @@
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
 import { UserCollectionsGrid } from "@/features/collections/components/UserCollectionsGrid.tsx";
+import { BackButton } from "@/features/common/BackButton.tsx";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { UserFeed } from "@/features/publications/components/posts/UserFeed.tsx";
 import { Button } from "@/features/ui/button.tsx";
@@ -60,6 +61,7 @@ export function ProfilePage() {
 
     return (
         <div className="flex flex-col items-center pt-8">
+            <BackButton />
             <UserAvatar src={user.avatar} alt={user.display_name} size="lg" />
             <h1 className="mt-2 text-2xl font-semibold">{user.display_name}</h1>
             {user.bio && (
@@ -93,14 +95,15 @@ export function ProfilePage() {
                     </Button>
                 )}
             </div>
-            <div className="mt-8 w-full">
-                <Tabs value={tab} onValueChange={setTab} className="w-full">
-                    <TabsList className="mx-auto mb-6 rounded-sm">
+            <Tabs value={tab} onValueChange={setTab} className="mt-8 flex w-full flex-col">
+                <div className="border-b border-border px-6 py-4">
+                    <TabsList className="rounded-sm">
                         <TabsTrigger value="posts">Posts</TabsTrigger>
                         <TabsTrigger value="playlists">Playlists</TabsTrigger>
                         {user.is_artist && <TabsTrigger value="albums">Albums</TabsTrigger>}
                     </TabsList>
-
+                </div>
+                <div className="mx-auto w-full max-w-4xl p-6">
                     <TabsContent value="posts">
                         <UserFeed userUUID={uuid} />
                     </TabsContent>
@@ -114,8 +117,8 @@ export function ProfilePage() {
                             <UserCollectionsGrid userUUID={uuid} type="album" />
                         </TabsContent>
                     )}
-                </Tabs>
-            </div>
+                </div>
+            </Tabs>
         </div>
     );
 }

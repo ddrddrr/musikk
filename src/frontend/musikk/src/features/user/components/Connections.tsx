@@ -23,14 +23,15 @@ export function Connections() {
     }
 
     return (
-        <div className="mx-auto max-w-4xl p-6">
-            <Tabs value={tab} onValueChange={setTab} className="w-full">
-                <TabsList className="mb-6">
+        <Tabs value={tab} onValueChange={setTab} className="flex flex-col">
+            <div className="border-b border-border px-6 py-4">
+                <TabsList className="rounded-sm">
                     <TabsTrigger value="friends">Friends</TabsTrigger>
                     <TabsTrigger value="followed">Followed</TabsTrigger>
                     <TabsTrigger value="followers">Followers</TabsTrigger>
                 </TabsList>
-
+            </div>
+            <div className="mx-auto w-full max-w-4xl p-6">
                 <TabsContent value="friends">
                     {friends.length === 0 && (
                         <EmptyState variant="inline" message="No friends yet" className="py-12" />
@@ -73,7 +74,7 @@ export function Connections() {
                         </div>
                     )}
                 </TabsContent>
-            </Tabs>
-        </div>
+            </div>
+        </Tabs>
     );
 }
