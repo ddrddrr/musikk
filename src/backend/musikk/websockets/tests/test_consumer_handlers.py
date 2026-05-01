@@ -545,19 +545,21 @@ class TestTopicHandler(TestCase):
 
     def test_on_disconnect_discards_all_subscribed_groups(self):
         self._register_validator("chat")
-        self._register_validator("feed")
-        TOPIC_VALIDATORS["feed"] = Mock(return_value=True)
+        self._register_validator("collection_comments")
 
         handler = TopicHandler(self.consumer)
         handler.handle_subscribe({"topic": "chat.abc-123"})
-        handler.handle_subscribe({"topic": "feed.xyz-456"})
+        handler.handle_subscribe({"topic": "collection_comments.xyz-456"})
         self.consumer.channel_layer.group_discard.reset_mock()
 
         handler.on_disconnect()
 
         discard_calls = self.consumer.channel_layer.group_discard.call_args_list
         discarded_groups = {call[0][0] for call in discard_calls}
-        self.assertEqual(discarded_groups, {"topic.chat.abc-123", "topic.feed.xyz-456"})
+        self.assertEqual(
+            discarded_groups,
+            {"topic.chat.abc-123", "topic.collection_comments.xyz-456"},
+        )
         self.assertEqual(self.consumer.subscribed_topics, set())
 
 
@@ -601,10 +603,10 @@ class TestTypingHandler(TestCase):
         self.consumer.channel_layer.group_send.assert_not_called()
 
     def test_typing_dropped_for_prefix_without_registered_event(self):
-        self.consumer.subscribed_topics = {"topic.feed.xyz-456"}
+        self.consumer.subscribed_topics = {"topic.unknown.xyz-456"}
         handler = TypingHandler(self.consumer)
 
-        handler.handle_typing({"topic": "feed.xyz-456"})
+        handler.handle_typing({"topic": "unknown.xyz-456"})
 
         self.consumer.channel_layer.group_send.assert_not_called()
 

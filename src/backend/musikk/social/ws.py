@@ -13,7 +13,6 @@ from social.models.chat import ChatMember
 
 class ServerEvent(StrEnum):
     COLLECTION_COMMENTS_CHANGED = "collection.comments.changed"
-    FEED_COMMENTS_CHANGED = "feed.comments.changed"
     CHAT_MESSAGES_CHANGED = "chat.messages.changed"
     CHAT_TYPING = "chat.typing"
     COLLECTION_COMMENTS_TYPING = "collection_comments.typing"
@@ -27,11 +26,6 @@ def validate_chat(user: BaseUser, topic_id: str) -> bool:
 @topic_validator("collection_comments")
 def validate_collection_comments(user: BaseUser, topic_id: str) -> bool:
     return Collection.objects.filter(uuid=topic_id, private=False).exists()
-
-
-@topic_validator("feed")
-def validate_feed(user: BaseUser, topic_id: str) -> bool:
-    return BaseUser.objects.filter(uuid=topic_id).exists()
 
 
 class TypingHandler(WSActionHandler):

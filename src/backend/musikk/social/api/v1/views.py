@@ -93,11 +93,6 @@ class FeedPostsListCreateView(PublicationsListCreateMixin, ListCreateAPIView):
         )
 
     def ws_on_create(self):
-        send_ws_event(
-            topic_group("feed", str(self.kwargs["user_uuid"])),
-            ServerEvent.FEED_COMMENTS_CHANGED,
-            user_uuid=str(self.kwargs["user_uuid"]),
-        )
         if self._created_publication.parent:
             ReplyNotification.objects.create(
                 orig_publication=self._created_publication.parent,

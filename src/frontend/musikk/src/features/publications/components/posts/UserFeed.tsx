@@ -5,13 +5,11 @@ import { LoadNewerButton } from "@/features/publications/components/LoadNewerBut
 import { LoadOlderButton } from "@/features/publications/components/LoadOlderButton.tsx";
 import { PostForm } from "@/features/publications/components/posts/PostForm.tsx";
 import { PostTree } from "@/features/publications/components/posts/PostTree.tsx";
-import { useFeedWsEvents } from "@/features/publications/hooks/useFeedWsEvents.ts";
 import { useNewFeedPosts } from "@/features/publications/hooks/useNewFeedPosts.ts";
 import { useFeedPostsFlat } from "@/features/publications/hooks/usePublicationsInfiniteFlat.ts";
 import { Card, CardContent } from "@/features/ui/card.tsx";
 
 export function UserFeed({ userUUID }: { userUUID: UUID }) {
-    useFeedWsEvents(userUUID);
     const { error, isPending, publicationsFlat, hasNextPage, isFetchingNextPage, fetchNextPage } =
         useFeedPostsFlat(userUUID, false);
     const currUserUUID = useUserUUID();
