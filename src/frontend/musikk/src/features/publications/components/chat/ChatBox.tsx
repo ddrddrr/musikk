@@ -7,11 +7,13 @@ import { ChatMessageForm } from "@/features/publications/components/chat/ChatMes
 import { ChatMessageList } from "@/features/publications/components/chat/ChatMessageList.tsx";
 import { LoadOlderButton } from "@/features/publications/components/LoadOlderButton.tsx";
 import { NewMessagesIndicator } from "@/features/publications/components/NewMessagesIndicator.tsx";
+import { TypingIndicator } from "@/features/publications/components/TypingIndicator.tsx";
 import { useAutoScrollToBottom } from "@/features/publications/hooks/useAutoScrollToBottom.ts";
 import { useChatWsEvents } from "@/features/publications/hooks/useChatWsEvents.ts";
 import { useNewMessagesIndicator } from "@/features/publications/hooks/useNewMessagesIndicator.ts";
 import { useChatMessagesFlat } from "@/features/publications/hooks/usePublicationsInfiniteFlat.ts";
 import { useScrollAnchor } from "@/features/publications/hooks/useScrollAnchor.ts";
+import { useTypingIndicator } from "@/features/publications/hooks/useTypingIndicator.ts";
 import { Spinner } from "@/features/ui/spinner";
 import { useRef } from "react";
 
@@ -40,6 +42,8 @@ export function ChatBox({ chatUUID }: ChatBoxProps) {
         publicationsFlat,
         refetch: refetchMessages,
     } = useChatMessagesFlat(userUUID, chatUUID);
+
+    const { typers, notifyTyping } = useTypingIndicator(`chat.${chatUUID}`, "chat.typing");
 
     const messagesContainerRef = useRef<HTMLDivElement>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -94,8 +98,10 @@ export function ChatBox({ chatUUID }: ChatBoxProps) {
                 <NewMessagesIndicator visible={hasNewMessages} onClick={scrollToBottom} />
             </div>
 
+            <TypingIndicator typers={typers} />
+
             <div className="border-t-2 border-foreground bg-muted p-4">
-                <ChatMessageForm chat={chat} />
+                <ChatMessageForm chat={chat} onTyping={notifyTyping} />
             </div>
         </div>
     );

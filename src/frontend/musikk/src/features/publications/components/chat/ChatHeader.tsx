@@ -51,12 +51,6 @@ export function ChatHeader({ chat }: ChatHeaderProps) {
                                         <span className="text-sm font-semibold">
                                             {otherMember.display_name}
                                         </span>
-                                        {/*TODO: mb render differently*/}
-                                        {otherMember.is_artist && (
-                                            <span className="rounded-sm bg-brand/20 px-2 py-0.5 text-xs font-medium text-brand">
-                                                Artist
-                                            </span>
-                                        )}
                                     </div>
                                     {otherMember.bio && (
                                         <div className="max-h-20 overflow-y-auto text-sm text-muted-foreground">

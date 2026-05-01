@@ -3,8 +3,9 @@ from logging import getLogger
 
 from asgiref.sync import async_to_sync as atos
 from channels.generic.websocket import JsonWebsocketConsumer
-
+from social.ws import TypingHandler
 from streaming.ws import DeviceHandler, PlaybackHandler
+
 from websockets.action_handler import WSActionHandler
 from websockets.event_helpers import user_group
 from websockets.topics import TopicHandler
@@ -35,6 +36,7 @@ class BaseConsumer(JsonWebsocketConsumer):
         DeviceHandler,
         PlaybackHandler,
         TopicHandler,
+        TypingHandler,
     ]
 
     def __init__(self, *args, **kwargs):
@@ -42,6 +44,11 @@ class BaseConsumer(JsonWebsocketConsumer):
         self.user = None
         self.user_uuid = None
         self.group_name = None
+        # this was defined in TopicHandler, but lifted here because TypingHandler (and mb others in the future)
+        # use it as an auth cache instead of re-hitting the DB (in case of typing stuff would be expensive)
+        # this is not very good since it mixes subscription state with implicit auth state
+        # probably rewrite in the future, but fine for now
+        self.subscribed_topics: set[str] = set()
         self._handlers: list[WSActionHandler] = []
         self._action_map: dict[str, Callable] = {}
 

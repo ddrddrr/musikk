@@ -1,6 +1,7 @@
 from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 from django.test import TestCase
+from social.ws import TypingHandler
 from streaming.ws import DeviceHandler, PlaybackHandler, ServerEvent
 from users.tests.factories import BaseUserFactory
 
@@ -63,6 +64,7 @@ class TestBaseConsumer(TestCase):
                 "playback.stop",
                 "subscribe",
                 "unsubscribe",
+                "typing",
             },
         )
 
@@ -448,6 +450,7 @@ class TestTopicHandler(TestCase):
         self.consumer.channel_layer = MagicMock()
         self.consumer.channel_layer.group_add = AsyncMock()
         self.consumer.channel_layer.group_discard = AsyncMock()
+        self.consumer.subscribed_topics = set()
         self._original_validators = TOPIC_VALIDATORS.copy()
 
     def tearDown(self):
@@ -467,7 +470,7 @@ class TestTopicHandler(TestCase):
         self.consumer.channel_layer.group_add.assert_called_once_with(
             "topic.chat.abc-123", "test_channel"
         )
-        self.assertIn("topic.chat.abc-123", handler._subscribed)
+        self.assertIn("topic.chat.abc-123", self.consumer.subscribed_topics)
 
     def test_subscribe_invalid_topic_format(self):
         handler = TopicHandler(self.consumer)
@@ -510,7 +513,7 @@ class TestTopicHandler(TestCase):
             "Not authorized for chat.abc-123"
         )
         self.consumer.channel_layer.group_add.assert_not_called()
-        self.assertEqual(handler._subscribed, set())
+        self.assertEqual(self.consumer.subscribed_topics, set())
 
     def test_unsubscribe_subscribed_group(self):
         self._register_validator("chat")
@@ -524,7 +527,7 @@ class TestTopicHandler(TestCase):
         self.consumer.channel_layer.group_discard.assert_called_once_with(
             "topic.chat.abc-123", "test_channel"
         )
-        self.assertNotIn("topic.chat.abc-123", handler._subscribed)
+        self.assertNotIn("topic.chat.abc-123", self.consumer.subscribed_topics)
 
     def test_unsubscribe_non_subscribed_group_is_noop(self):
         self._register_validator("chat")
@@ -555,3 +558,82 @@ class TestTopicHandler(TestCase):
         discard_calls = self.consumer.channel_layer.group_discard.call_args_list
         discarded_groups = {call[0][0] for call in discard_calls}
         self.assertEqual(discarded_groups, {"topic.chat.abc-123", "topic.feed.xyz-456"})
+        self.assertEqual(self.consumer.subscribed_topics, set())
+
+
+class TestTypingHandler(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.user = BaseUserFactory.create()
+
+    def setUp(self):
+        self.consumer = Mock()
+        self.consumer.user = self.user
+        self.consumer.channel_name = "test_channel"
+        self.consumer.channel_layer = MagicMock()
+        self.consumer.channel_layer.group_send = AsyncMock()
+        self.consumer.subscribed_topics = {"topic.chat.abc-123"}
+
+    def test_typing_broadcasts_when_subscribed(self):
+        handler = TypingHandler(self.consumer)
+
+        handler.handle_typing({"topic": "chat.abc-123"})
+
+        self.consumer.channel_layer.group_send.assert_called_once_with(
+            "topic.chat.abc-123",
+            {
+                "type": "ws_event",
+                "event": "chat.typing",
+                "payload": {
+                    "user_uuid": str(self.user.uuid),
+                    "display_name": self.user.display_name,
+                },
+            },
+        )
+
+    def test_typing_dropped_when_not_subscribed(self):
+        self.consumer.subscribed_topics = set()
+        handler = TypingHandler(self.consumer)
+
+        handler.handle_typing({"topic": "chat.abc-123"})
+
+        self.consumer.channel_layer.group_send.assert_not_called()
+
+    def test_typing_dropped_for_prefix_without_registered_event(self):
+        self.consumer.subscribed_topics = {"topic.feed.xyz-456"}
+        handler = TypingHandler(self.consumer)
+
+        handler.handle_typing({"topic": "feed.xyz-456"})
+
+        self.consumer.channel_layer.group_send.assert_not_called()
+
+    def test_typing_dropped_for_invalid_topic(self):
+        handler = TypingHandler(self.consumer)
+
+        handler.handle_typing({"topic": "invalid"})
+        handler.handle_typing({})
+
+        self.consumer.channel_layer.group_send.assert_not_called()
+
+    @patch("social.ws.time.monotonic")
+    def test_typing_throttled_within_min_interval(self, mock_monotonic):
+        mock_monotonic.return_value = 100.0
+        handler = TypingHandler(self.consumer)
+
+        handler.handle_typing({"topic": "chat.abc-123"})
+        mock_monotonic.return_value = 100.0 + TypingHandler.MIN_INTERVAL - 0.5
+        handler.handle_typing({"topic": "chat.abc-123"})
+
+        self.consumer.channel_layer.group_send.assert_called_once()
+
+    @patch("social.ws.time.monotonic")
+    def test_typing_accepted_after_min_interval(self, mock_monotonic):
+        mock_monotonic.return_value = 100.0
+        handler = TypingHandler(self.consumer)
+
+        handler.handle_typing({"topic": "chat.abc-123"})
+        mock_monotonic.return_value = 100.0 + TypingHandler.MIN_INTERVAL + 0.1
+        handler.handle_typing({"topic": "chat.abc-123"})
+
+        self.assertEqual(self.consumer.channel_layer.group_send.call_count, 2)

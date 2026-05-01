@@ -1,8 +1,8 @@
 from collections.abc import Callable
 
 from asgiref.sync import async_to_sync as atos
-
 from users.models import BaseUser
+
 from websockets.action_handler import WSActionHandler
 
 type TopicValidator = Callable[[BaseUser, str], bool]
@@ -22,10 +22,26 @@ def topic_group(prefix: str, topic_id: str) -> str:
     return f"topic.{prefix}.{topic_id}"
 
 
+def parse_topic(topic: str) -> tuple[str, str] | None:
+    prefix, _, topic_id = topic.partition(".")
+    if not prefix or not topic_id:
+        return None
+    return prefix, topic_id
+
+
 class TopicHandler(WSActionHandler):
-    def __init__(self, consumer):
-        super().__init__(consumer)
-        self._subscribed: set[str] = set()
+    """Generic pub/sub over Channels groups.
+
+    Flow:
+      1. A feature registers an auth rule with `@topic_validator("<prefix>")`.
+      2. Client sends `{action: "subscribe", topic: "<prefix>.<id>"}`.
+        The validator decides if the user may join, and on success the channel
+        is added to the Channels group `topic.<prefix>.<id>` and tracked on
+        `consumer.subscribed_topics`.
+      3. Producers broadcast to the same group via `topic_group(prefix, id)`,
+        so subscribers and publishers stay in sync on the group name.
+      4. On disconnect every joined group is dropped to avoid leaks.
+    """
 
     def get_actions(self) -> dict[str, Callable]:
         return {
@@ -34,13 +50,14 @@ class TopicHandler(WSActionHandler):
         }
 
     def on_disconnect(self):
-        for group in self._subscribed:
+        for group in self.consumer.subscribed_topics:
             atos(self.consumer.channel_layer.group_discard)(
                 group, self.consumer.channel_name
             )
+        self.consumer.subscribed_topics.clear()
 
     def handle_subscribe(self, payload: dict):
-        parsed = self._parse_topic(payload.get("topic", ""))
+        parsed = parse_topic(payload.get("topic", ""))
         if not parsed:
             self.consumer.send_error("Invalid topic format, expected 'type.id'")
             return
@@ -57,23 +74,16 @@ class TopicHandler(WSActionHandler):
 
         group = topic_group(prefix, topic_id)
         atos(self.consumer.channel_layer.group_add)(group, self.consumer.channel_name)
-        self._subscribed.add(group)
+        self.consumer.subscribed_topics.add(group)
 
     def handle_unsubscribe(self, payload: dict):
-        parsed = self._parse_topic(payload.get("topic", ""))
+        parsed = parse_topic(payload.get("topic", ""))
         if not parsed:
             return
 
         group = topic_group(*parsed)
-        if group in self._subscribed:
+        if group in self.consumer.subscribed_topics:
             atos(self.consumer.channel_layer.group_discard)(
                 group, self.consumer.channel_name
             )
-            self._subscribed.discard(group)
-
-    @staticmethod
-    def _parse_topic(topic: str) -> tuple[str, str] | None:
-        prefix, _, topic_id = topic.partition(".")
-        if not prefix or not topic_id:
-            return None
-        return prefix, topic_id
+            self.consumer.subscribed_topics.discard(group)

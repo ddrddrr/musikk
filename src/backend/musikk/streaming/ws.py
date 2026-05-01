@@ -18,6 +18,9 @@ class ServerEvent(StrEnum):
     SONG_UPLOAD = "song.upload"
 
 
+# TODO: add enums for user actions
+
+
 class DeviceHandler(WSActionHandler):
     def __init__(self, consumer):
         super().__init__(consumer)

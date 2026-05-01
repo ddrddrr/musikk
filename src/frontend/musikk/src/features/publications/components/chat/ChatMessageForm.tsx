@@ -16,11 +16,12 @@ type ChatMessageFormData = z.infer<typeof chatMessageSchema>;
 
 interface ChatMessageFormProps {
     chat: Chat;
+    onTyping?: () => void;
 }
 // TODO: message style as in comments + attachment picker + avatar for the user who sent
 // move chats to header as button instead of a context menu for profile
 // same for connections
-export function ChatMessageForm({ chat }: ChatMessageFormProps) {
+export function ChatMessageForm({ chat, onTyping }: ChatMessageFormProps) {
     const userUUID = useUserUUID();
     const {
         register,
@@ -30,6 +31,7 @@ export function ChatMessageForm({ chat }: ChatMessageFormProps) {
     } = useForm<ChatMessageFormData>({
         resolver: zodResolver(chatMessageSchema),
     });
+    const contentField = register("content");
 
     const { attachedObj, setAttachedObj, getAttachmentData, clearAttachment } = useAttachment();
     const createChatMessageMutation = useCreateChatMessage();
@@ -62,7 +64,11 @@ export function ChatMessageForm({ chat }: ChatMessageFormProps) {
     return (
         <form onSubmit={handleSubmit(submitHandler)} className="flex flex-col gap-2">
             <Textarea
-                {...register("content")}
+                {...contentField}
+                onChange={(e) => {
+                    void contentField.onChange(e);
+                    if (onTyping && e.target.value.length > 0) onTyping();
+                }}
                 placeholder="Type a message..."
                 rows={2}
                 className={"border border-foreground bg-card"}

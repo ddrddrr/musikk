@@ -4,11 +4,13 @@ import { CommentForm } from "@/features/publications/components/collection-comme
 import { CommentList } from "@/features/publications/components/collection-comments/CommentList.tsx";
 import { LoadOlderButton } from "@/features/publications/components/LoadOlderButton.tsx";
 import { NewMessagesIndicator } from "@/features/publications/components/NewMessagesIndicator.tsx";
+import { TypingIndicator } from "@/features/publications/components/TypingIndicator.tsx";
 import { useAutoScrollToBottom } from "@/features/publications/hooks/useAutoScrollToBottom.ts";
 import { useCollectionCommentsWsEvents } from "@/features/publications/hooks/useCollectionCommentsWsEvents.ts";
 import { useNewMessagesIndicator } from "@/features/publications/hooks/useNewMessagesIndicator.ts";
 import { useCollectionCommentsFlat } from "@/features/publications/hooks/usePublicationsInfiniteFlat.ts";
 import { useScrollAnchor } from "@/features/publications/hooks/useScrollAnchor.ts";
+import { useTypingIndicator } from "@/features/publications/hooks/useTypingIndicator.ts";
 import { Publication } from "@/features/publications/types.ts";
 import { Spinner } from "@/features/ui/spinner";
 import { memo, useRef, useState } from "react";
@@ -20,6 +22,10 @@ interface CommentBoxProps {
 
 export const CommentBox = memo(function CommentBox({ collectionUUID }: CommentBoxProps) {
     useCollectionCommentsWsEvents(collectionUUID);
+    const { typers, notifyTyping } = useTypingIndicator(
+        `collection_comments.${collectionUUID}`,
+        "collection_comments.typing",
+    );
     const [replyTo, setReplyTo] = useState<Publication | undefined>(undefined);
     const {
         error,
@@ -69,11 +75,14 @@ export const CommentBox = memo(function CommentBox({ collectionUUID }: CommentBo
                 <NewMessagesIndicator visible={hasNewMessages} onClick={scrollToBottom} />
             </div>
 
+            <TypingIndicator typers={typers} />
+
             <div className="border-t-2 border-foreground bg-muted p-4">
                 <CommentForm
                     collectionUUID={collectionUUID}
                     replyTo={replyTo}
                     setReplyTo={setReplyTo}
+                    onTyping={notifyTyping}
                 />
             </div>
         </div>

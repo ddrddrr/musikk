@@ -16,9 +16,15 @@ interface CommentFormDataProps {
     collectionUUID: UUID;
     replyTo?: Publication;
     setReplyTo?: (comment?: Publication) => void;
+    onTyping?: () => void;
 }
 
-export function CommentForm({ collectionUUID, replyTo, setReplyTo }: CommentFormDataProps) {
+export function CommentForm({
+    collectionUUID,
+    replyTo,
+    setReplyTo,
+    onTyping,
+}: CommentFormDataProps) {
     const {
         register,
         handleSubmit,
@@ -27,6 +33,7 @@ export function CommentForm({ collectionUUID, replyTo, setReplyTo }: CommentForm
     } = useForm<CommentFormData>({
         resolver: zodResolver(commentSchema),
     });
+    const contentField = register("content");
 
     const createCollectionCommentMutation = useCreateCollectionComment();
     const submitHandler = (data: CommentFormData) => {
@@ -70,7 +77,11 @@ export function CommentForm({ collectionUUID, replyTo, setReplyTo }: CommentForm
                 </div>
             )}
             <Textarea
-                {...register("content")}
+                {...contentField}
+                onChange={(e) => {
+                    void contentField.onChange(e);
+                    if (onTyping && e.target.value.length > 0) onTyping();
+                }}
                 className="border border-foreground bg-card"
                 placeholder="Write a comment..."
             />
