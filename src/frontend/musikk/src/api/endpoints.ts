@@ -18,7 +18,7 @@ export const SongURLs = {
     songList: `/songs`,
     songRetrieve: (songUUID: UUID) => `/songs/${songUUID}`,
     albumBySong: (songUUID: UUID) => `/songs/${songUUID}/album`,
-    songUserCollections: (collectionSongUUID: UUID) => `/songs/${collectionSongUUID}/collections`,
+    collectionMemberships: (collectionSongUUID: UUID) => `/songs/${collectionSongUUID}/collections`,
 };
 export const QueueURLs = {
     queue: `/song-queue`,

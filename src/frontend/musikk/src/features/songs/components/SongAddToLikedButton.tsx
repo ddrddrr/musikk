@@ -1,6 +1,6 @@
 import { getErrorDetail } from "@/api/errorUtils.ts";
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
-import { addToLikedSongs } from "@/features/collections/api/mutations.ts";
+import { addToLikedSongs, removeFromLikedSongs } from "@/features/collections/api/mutations.ts";
 import { CollectionSong } from "@/features/collections/types.ts";
 import { Button } from "@/features/ui/button.tsx";
 import { userKeys } from "@/features/user/api/queryKeys.ts";
@@ -17,12 +17,16 @@ interface SongCardProps {
 export function SongAddToLikedButton({ collectionSong, className = "", size = 40 }: SongCardProps) {
     const queryClient = useQueryClient();
     const userUUID = useUserUUID();
+
+    const invalidatePersonal = () =>
+        queryClient.invalidateQueries({
+            queryKey: userKeys.collectionsPersonal(userUUID),
+        });
+
     const addToLikedSongsMutation = useMutation({
         mutationFn: addToLikedSongs,
         onSuccess: () => {
-            void queryClient.invalidateQueries({
-                queryKey: userKeys.collectionsPersonal(userUUID),
-            });
+            void invalidatePersonal();
             toast.success("Added to liked songs");
         },
         onError: (error) => {
@@ -30,11 +34,23 @@ export function SongAddToLikedButton({ collectionSong, className = "", size = 40
         },
     });
 
+    const removeFromLikedSongsMutation = useMutation({
+        mutationFn: removeFromLikedSongs,
+        onSuccess: () => {
+            void invalidatePersonal();
+            toast.success("Removed from liked songs");
+        },
+        onError: (error) => {
+            toast.error(getErrorDetail(error, "Failed to remove from liked songs"));
+        },
+    });
+
     const iconSize = Math.floor(size * 0.6);
 
     function handleClick(collectionSong: CollectionSong) {
         if (collectionSong.song.is_liked) {
-            return; // TODO: remove from liked
+            removeFromLikedSongsMutation.mutate({ collectionSongUUID: collectionSong.uuid });
+            return;
         }
         addToLikedSongsMutation.mutate({ collectionSongUUID: collectionSong.uuid });
     }

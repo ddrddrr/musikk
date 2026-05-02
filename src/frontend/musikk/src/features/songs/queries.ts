@@ -15,20 +15,27 @@ export async function albumBySongRetrieve(songUUID: UUID): Promise<Collection> {
     return res.data;
 }
 
-interface SongUserCollectionsResponse {
-    collection_uuids: UUID[];
+export interface CollectionMembership {
+    collection_uuid: UUID;
+    collection_song_uuid: UUID;
 }
 
-export async function songUserCollections(collectionSongUUID: UUID): Promise<UUID[]> {
-    const res = await api_client.get<SongUserCollectionsResponse>(
-        SongURLs.songUserCollections(collectionSongUUID),
+interface CollectionMembershipResponse {
+    collections: CollectionMembership[];
+}
+
+export async function collectionMemberships(
+    collectionSongUUID: UUID,
+): Promise<CollectionMembership[]> {
+    const res = await api_client.get<CollectionMembershipResponse>(
+        SongURLs.collectionMemberships(collectionSongUUID),
     );
-    return res.data.collection_uuids;
+    return res.data.collections;
 }
 
-export function useSongUserCollectionsQuery(collectionSongUUID: UUID) {
+export function useCollectionMemberships(collectionSongUUID: UUID) {
     return useQuery({
         queryKey: songKeys.userCollections(collectionSongUUID),
-        queryFn: () => songUserCollections(collectionSongUUID),
+        queryFn: () => collectionMemberships(collectionSongUUID),
     });
 }

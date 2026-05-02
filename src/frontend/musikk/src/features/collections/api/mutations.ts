@@ -13,6 +13,12 @@ export async function collectionAddToLiked({
     await api_client.post(CollectionURLs.collectionAddToLiked(collectionUUID));
 }
 
+export async function collectionRemoveFromLiked({
+    collectionUUID,
+}: ICollectionAddToLikedParams): Promise<void> {
+    await api_client.delete(CollectionURLs.collectionAddToLiked(collectionUUID));
+}
+
 interface ICollectionDeleteParams {
     collectionUUID: UUID;
 }
@@ -41,6 +47,10 @@ export interface IAddToLikedSongsParams {
 
 export async function addToLikedSongs({ collectionSongUUID }: IAddToLikedSongsParams) {
     await api_client.post(CollectionURLs.likedSongsAddSong(collectionSongUUID));
+}
+
+export async function removeFromLikedSongs({ collectionSongUUID }: IAddToLikedSongsParams) {
+    await api_client.delete(CollectionURLs.likedSongsAddSong(collectionSongUUID));
 }
 
 interface CreateCollectionInput {

@@ -3,7 +3,7 @@ import { Button } from "@/features/ui/button.tsx";
 import { useMutation } from "@tanstack/react-query";
 import { Check, Plus } from "lucide-react";
 import { toast } from "sonner";
-import { collectionAddToLiked } from "../api/mutations.ts";
+import { collectionAddToLiked, collectionRemoveFromLiked } from "../api/mutations.ts";
 import { Collection } from "../types.ts";
 
 interface CollectionAddToLikedButtonProps {
@@ -24,6 +24,15 @@ export function CollectionAddToLikedButton({
             toast.error(getErrorDetail(error, "Failed to add collection to liked"));
         },
     });
+    const collectionRemoveFromLikedMutation = useMutation({
+        mutationFn: collectionRemoveFromLiked,
+        onSuccess: () => {
+            toast.success("Removed from liked collections");
+        },
+        onError: (error) => {
+            toast.error(getErrorDetail(error, "Failed to remove collection from liked"));
+        },
+    });
     const sizeClass = showComments ? "size-8" : "size-12";
 
     const renderAddIcon = () => {
@@ -32,7 +41,8 @@ export function CollectionAddToLikedButton({
 
     function handleClick(collection: Collection) {
         if (collection.is_liked) {
-            return; // remove from liked
+            collectionRemoveFromLikedMutation.mutate({ collectionUUID: collection.uuid });
+            return;
         }
         collectionAddToLikedMutation.mutate({ collectionUUID: collection.uuid });
     }

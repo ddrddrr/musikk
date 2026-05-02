@@ -24,6 +24,7 @@ from streaming.api.v1.serializers.collections import (
 )
 from streaming.audio.tasks import convert_audio
 from streaming.audio.validators import validate_audio
+from streaming.events import ServerEvent
 from streaming.managers.upload_manager import UploadManager
 from streaming.models.collections import Collection, CollectionType
 from streaming.models.songs import BaseSong, CollectionSong
@@ -32,7 +33,6 @@ from streaming.permissions import (
     IsCollecitonAuthor,
     IsPublicOrCollectionAuthor,
 )
-from streaming.ws import ServerEvent
 
 
 class CollectionListCreateView(ListCreateAPIView):
@@ -147,6 +147,18 @@ class CollectionAddLikedView(APIView):
             collection = get_object_or_404(Collection, uuid=collection_uuid)
             self.check_object_permissions(request, collection)
             self.request.user.streamingprofile.followed_collections.add(collection)
+
+        group = user_group(self.request.user.uuid)
+        send_ws_event(group, ServerEvent.COLLECTION_CHANGED)
+        send_ws_event(group, ServerEvent.COLLECTIONS_PERSONAL_CHANGED)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def delete(self, request, *args, **kwargs):
+        collection_uuid = kwargs["uuid"]
+        with transaction.atomic():
+            collection = get_object_or_404(Collection, uuid=collection_uuid)
+            self.check_object_permissions(request, collection)
+            self.request.user.streamingprofile.followed_collections.remove(collection)
 
         group = user_group(self.request.user.uuid)
         send_ws_event(group, ServerEvent.COLLECTION_CHANGED)
