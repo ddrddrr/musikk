@@ -13,12 +13,12 @@ const buttonVariants = cva(
             variant: {
                 default: "bg-primary text-primary-foreground",
                 brand: "bg-brand hover:bg-brand-hover text-brand-foreground border-2 border-foreground",
-                muted: "bg-muted hover:bg-muted/80 text-foreground border-2 border-foreground",
+                muted: "bg-muted hover:bg-muted-hover text-foreground border-2 border-foreground",
                 accent: "bg-info hover:bg-info-hover text-info-foreground border-2 border-foreground",
-                ghost: "bg-transparent text-primary hover:bg-accent/60",
+                ghost: "bg-transparent text-primary hover:bg-muted-hover",
                 destructive: "bg-destructive text-destructive-foreground",
                 outline:
-                    "bg-background text-foreground hover:bg-muted hover:border-border border-2",
+                    "bg-background text-foreground hover:bg-muted-hover hover:border-border border-2",
             },
             size: {
                 default: "h-9 px-4",

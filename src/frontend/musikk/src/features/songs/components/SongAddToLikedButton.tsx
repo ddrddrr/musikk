@@ -23,6 +23,7 @@ export function SongAddToLikedButton({ collectionSong, className = "", size = 40
             void queryClient.invalidateQueries({
                 queryKey: userKeys.collectionsPersonal(userUUID),
             });
+            toast.success("Added to liked songs");
         },
         onError: (error) => {
             toast.error(getErrorDetail(error, "Failed to like song"));

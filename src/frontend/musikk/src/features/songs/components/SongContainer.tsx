@@ -22,7 +22,7 @@ type SongContainerProps = {
 };
 
 const containerVariants = cva(
-    "w-full overflow-hidden rounded-sm border-2 border-foreground bg-card transition-colors hover:bg-muted",
+    "w-full overflow-hidden rounded-sm border-2 border-foreground bg-card transition-colors hover:bg-muted-hover",
     {
         variants: {
             size: {

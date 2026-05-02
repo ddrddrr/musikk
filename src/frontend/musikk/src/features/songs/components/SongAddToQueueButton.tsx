@@ -2,6 +2,7 @@ import { CollectionSong } from "@/features/collections/types.ts";
 import { useAddSong } from "@/features/song-queue/hooks/useQueueAPI.ts";
 import { Button } from "@/features/ui/button.tsx";
 import { BetweenHorizonalStart } from "lucide-react";
+import { toast } from "sonner";
 
 interface SongAddToQueueButtonProps {
     collectionSong: CollectionSong;
@@ -21,7 +22,11 @@ export function SongAddToQueueButton({
         <Button
             variant="muted"
             size="icon"
-            onClick={() => addSongMutation.mutate(collectionSong.uuid)}
+            onClick={() =>
+                addSongMutation.mutate(collectionSong.uuid, {
+                    onSuccess: () => toast.success("Added to queue"),
+                })
+            }
             disabled={addSongMutation.isPending}
             style={{ width: size, height: size }}
             className={className}
