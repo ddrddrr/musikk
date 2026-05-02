@@ -61,9 +61,16 @@ export function ProfilePage() {
     return (
         <div className="flex flex-col items-center pt-8">
             <UserAvatar src={user.avatar} alt={user.display_name} size="lg" />
-            <h1 className="mt-2 text-2xl font-semibold">{user.display_name}</h1>
+            <div className="mt-2 flex items-center gap-2">
+                <h1 className="text-2xl font-semibold">{user.display_name}</h1>
+                {user.is_artist && (
+                    <span className="rounded-sm bg-brand px-2 py-0.5 text-xs font-medium text-brand-foreground">
+                        Artist
+                    </span>
+                )}
+            </div>
             {user.bio && (
-                <div className="mt-2 max-h-40 w-120 overflow-y-auto text-sm text-muted-foreground">
+                <div className="mt-2 max-h-40 w-120 overflow-y-auto text-center text-sm text-muted-foreground">
                     <p className="whitespace-pre-wrap">{user.bio}</p>
                 </div>
             )}
