@@ -25,8 +25,8 @@ export function LeftColumn() {
 
     return (
         <div className="flex w-1/5 flex-col overflow-y-auto bg-brand p-4 pb-40">
-            <div className="mx-14 mb-4 flex items-center justify-between">
-                <h2 className="text-center text-xl font-bold text-brand-foreground">Your stuff</h2>
+            <div className="mb-4 flex items-center justify-center gap-3">
+                <h2 className="text-xl font-bold text-brand-foreground">Your stuff</h2>
                 <ColletionCreateButton />
             </div>
             {collections.length === 0 && (
@@ -38,7 +38,7 @@ export function LeftColumn() {
                 </div>
             )}
             {collections.length > 0 && (
-                <ul className="flex flex-col gap-6" role="list">
+                <ul className="flex flex-col items-center gap-6" role="list">
                     {collections.map((collection) => (
                         <li key={collection.uuid}>
                             <CollectionCard collection={collection} size="big" />
