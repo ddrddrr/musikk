@@ -4,6 +4,7 @@ import { DefaultSongActions } from "@/features/songs/components/DefaultSongActio
 import { useNavigateToSongAlbum } from "@/features/songs/hooks/useNavigateToSongAlbum.ts";
 import { AuthorLinks } from "@/features/user/components/AuthorLinks.tsx";
 import { cn } from "@/lib/utils.ts";
+import { formatDuration } from "@/utils/formatDuration.ts";
 import { cva } from "class-variance-authority";
 import { type MouseEvent, type ReactNode } from "react";
 
@@ -16,6 +17,7 @@ type SongContainerProps = {
     variant?: SongContainerVariant;
     className?: string;
     showImage?: boolean;
+    showDuration?: boolean;
     actions?: ReactNode;
 };
 
@@ -66,6 +68,16 @@ const authorsVariants = cva("truncate text-muted-foreground", {
     defaultVariants: { size: "normal" },
 });
 
+const durationVariants = cva("tabular-nums text-muted-foreground", {
+    variants: {
+        size: {
+            compact: "text-[10px]",
+            normal: "text-xs",
+        },
+    },
+    defaultVariants: { size: "normal" },
+});
+
 const gapClass = { compact: "gap-2", normal: "gap-4" } as const;
 
 export function SongContainer({
@@ -74,6 +86,7 @@ export function SongContainer({
     variant = "inline",
     className,
     showImage = true,
+    showDuration = false,
     actions,
 }: SongContainerProps) {
     const song = collectionSong.song;
@@ -119,7 +132,14 @@ export function SongContainer({
     return (
         <div className={cn(containerVariants({ size, variant }), className)}>
             {mediaAndTitle}
-            <div className="shrink-0">{renderedActions}</div>
+            <div className={cn("flex shrink-0 items-center", gapClass[size])}>
+                {showDuration && song.duration_ms != null && (
+                    <span className={durationVariants({ size })}>
+                        {formatDuration(song.duration_ms)}
+                    </span>
+                )}
+                <div>{renderedActions}</div>
+            </div>
         </div>
     );
 }

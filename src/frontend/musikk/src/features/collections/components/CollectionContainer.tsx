@@ -122,6 +122,7 @@ export function CollectionContainer({ collectionUUID }: CollectionContainerProps
                                             <SongContainer
                                                 collectionSong={collectionSong}
                                                 size={songSize}
+                                                showDuration
                                                 actions={songActions}
                                             />
                                         </li>
