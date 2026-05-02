@@ -31,17 +31,6 @@ const collectionCardWidthVariants = cva("", {
     defaultVariants: { size: "medium" },
 });
 
-const collectionCardImageVariants = cva("w-full", {
-    variants: {
-        size: {
-            small: "h-20",
-            medium: "h-30",
-            big: "h-55",
-        },
-    },
-    defaultVariants: { size: "medium" },
-});
-
 const spacingBySize: Record<CardSize, "sm" | "md" | "lg"> = {
     small: "sm",
     medium: "md",
@@ -79,11 +68,7 @@ export function CollectionCard({
                 )}
             >
                 <CardContent className="p-0">
-                    <MediaThumbnail
-                        src={image}
-                        alt={title}
-                        className={collectionCardImageVariants({ size })}
-                    />
+                    <MediaThumbnail src={image} alt={title} className="aspect-square w-full" />
                     <div className={cardPaddingVariants({ size })}>
                         <AuthorLinks authors={authors} className={cardSubtitleVariants({ size })} />
                         <p className={cardTitleVariants({ size })}>{title}</p>

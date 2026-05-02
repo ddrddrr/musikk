@@ -15,7 +15,7 @@ interface CollectionsCarouselProps {
 }
 
 export function CollectionCarousel({ collections, title }: CollectionsCarouselProps) {
-    const shouldLoop = collections.length > 4; // lg shows 4 at once
+    const shouldLoop = collections.length > 5;
 
     return (
         <div className="mx-auto w-9/10">
@@ -35,7 +35,10 @@ export function CollectionCarousel({ collections, title }: CollectionsCarouselPr
                     {collections.length > 0 && (
                         <CarouselContent>
                             {collections.map((collection) => (
-                                <CarouselItem key={collection.uuid} className="basis-1/5">
+                                <CarouselItem
+                                    key={collection.uuid}
+                                    className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5"
+                                >
                                     <CollectionCard
                                         collection={collection}
                                         size="medium"
