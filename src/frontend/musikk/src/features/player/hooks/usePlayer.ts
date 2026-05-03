@@ -1,5 +1,7 @@
 import { PlaybackContext } from "@/features/playback/providers/playbackContext.ts";
+import { useTickAction } from "@/features/playback/ws/actionHooks.ts";
 import { useQueueNext } from "@/features/song-queue/hooks/useQueueAPI.ts";
+import { useWSClient } from "@/hooks/useWSClient.ts";
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -22,25 +24,32 @@ interface UsePlayerReturn {
     unmute: () => void;
 }
 
+interface PlaybackSeekPayload {
+    position: number;
+    collection_song_uuid: string | null;
+}
+
 export function usePlayer({
     audioRef,
     ensureAudioPipeline,
     onDurationChange,
     onTimeUpdate,
 }: UsePlayerOptions): UsePlayerReturn {
-    const { isThisDeviceActive, isPlaybackActive, playingCollectionSong } =
+    const { isThisDeviceActive, isPlaybackActive, playingCollectionSong, getCurrentTime } =
         useContext(PlaybackContext);
+    const ws = useWSClient();
+    const sendTick = useTickAction();
     const nextMutation = useQueueNext();
     const playerRef = useRef<shaka.Player | null>(null);
-    // whether the audio is loaded and can be manipulated with
     const isAudioReadyRef = useRef(false);
     const [isMutedFallback, setIsMutedFallback] = useState(false);
 
-    // kinda wacky, but didn't figure out a better way to always have a fresh value for those
     const isPlaybackActiveRef = useRef(isPlaybackActive);
     isPlaybackActiveRef.current = isPlaybackActive;
     const isThisDeviceActiveRef = useRef(isThisDeviceActive);
     isThisDeviceActiveRef.current = isThisDeviceActive;
+    const playingUUIDRef = useRef<string | undefined>(playingCollectionSong?.uuid);
+    playingUUIDRef.current = playingCollectionSong?.uuid;
 
     // TODO: split by OS not browser (ios -> m3u8, otherwise mpd)
     const url = useMemo(() => {
@@ -124,6 +133,11 @@ export function usePlayer({
             const audio = audioRef.current;
             if (!player || !audio) return;
 
+            // pause synchronously so any stale-active-with-stale-isPlaybackActive
+            // window (e.g. set_active_device flip arriving before the snapshot
+            // that clears playback) cannot bleed audio from the previous track
+            audio.pause();
+
             if (url && isThisDeviceActiveRef.current) {
                 try {
                     await player.attach(audio);
@@ -131,6 +145,13 @@ export function usePlayer({
                     await player.load(url);
                     if (cancelled) return;
                     isAudioReadyRef.current = true;
+
+                    // resume from the broadcasted position when becoming active mid-playback
+                    // skip if 0 (load already sets to 0) or > max duration
+                    const resumeAt = getCurrentTime();
+                    if (resumeAt > 0 && (!audio.duration || resumeAt < audio.duration)) {
+                        audio.currentTime = resumeAt;
+                    }
 
                     // BE always sets playback=false on any active-device transition,
                     // so isPlaybackActive=true here means the user explicitly hit play
@@ -174,6 +195,21 @@ export function usePlayer({
     }
     useEffect(syncLocalPlaybackStateWithRemote, [isPlaybackActive, isThisDeviceActive]);
 
+    function subToSeekWSEvent() {
+        // needed only for active devices to update the curr audio time
+        // (playback provider's seek/tick events update the non-active devices)
+        return ws.subscribe("playback.seek", (payload: PlaybackSeekPayload) => {
+            if (!isThisDeviceActiveRef.current || !isAudioReadyRef.current) return;
+            if (payload.collection_song_uuid !== playingUUIDRef.current) {
+                return;
+            }
+            const audio = audioRef.current;
+            if (!audio) return;
+            audio.currentTime = payload.position;
+        });
+    }
+    useEffect(subToSeekWSEvent, [ws]);
+
     function handleOnEnded() {
         isAudioReadyRef.current = false;
         nextMutation.mutate();
@@ -191,6 +227,10 @@ export function usePlayer({
         if (!audio) return;
 
         onTimeUpdate?.(audio.currentTime);
+
+        if (isThisDeviceActiveRef.current && isPlaybackActiveRef.current) {
+            sendTick(audio.currentTime, playingUUIDRef.current ?? null);
+        }
 
         // TODO: probably remove since with introduction of shakapackager short tracks behave correctly
         if (

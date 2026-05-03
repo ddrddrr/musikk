@@ -3,12 +3,12 @@ from logging import getLogger
 
 from asgiref.sync import async_to_sync as atos
 from channels.generic.websocket import JsonWebsocketConsumer
-from social.ws import TypingHandler
-from streaming.ws import DeviceHandler, PlaybackHandler
+from social.ws import TypingWSActionHandler
+from streaming.ws import DeviceWSActionHandler, PlaybackWSActionHandler
 
 from websockets.action_handler import WSActionHandler
 from websockets.event_helpers import user_group
-from websockets.topics import TopicHandler
+from websockets.topics import TopicWSActionHandler
 
 logger = getLogger(__name__)
 
@@ -28,15 +28,15 @@ class BaseConsumer(JsonWebsocketConsumer):
           - { "action": "subscribe", "payload": { "topic": "chat.<uuid>" } }
 
         server -> client:
-          - { "event": "device.list", "payload": { "devices": [...] } }
+          - { "event": "device.list", "payload": { "current_song": {...}, "devices": [...], ... } }
           - { "event": "chat.message", "payload": { "messages": [...] } }
     """
 
     action_handler_classes: list[type[WSActionHandler]] = [
-        DeviceHandler,
-        PlaybackHandler,
-        TopicHandler,
-        TypingHandler,
+        DeviceWSActionHandler,
+        PlaybackWSActionHandler,
+        TopicWSActionHandler,
+        TypingWSActionHandler,
     ]
 
     def __init__(self, *args, **kwargs):
@@ -44,7 +44,8 @@ class BaseConsumer(JsonWebsocketConsumer):
         self.user = None
         self.user_uuid = None
         self.group_name = None
-        # this was defined in TopicHandler, but lifted here because TypingHandler (and mb others in the future)
+        self.device_id: str | None = None
+        # this was defined in TopicWSActionHandler, but lifted here because TypingWSActionHandler (and mb others in the future)
         # use it as an auth cache instead of re-hitting the DB (in case of typing stuff would be expensive)
         # this is not very good since it mixes subscription state with implicit auth state
         # probably rewrite in the future, but fine for now
@@ -106,6 +107,23 @@ class BaseConsumer(JsonWebsocketConsumer):
         handler(payload)
 
     def ws_event(self, event):
+        """
+        A method that should be used for all outbound ws events
+
+        Django Channels resolves the `type` key of a group_send message to a
+        method on the consumer (dots -> underscores, I know...),
+        so group_send should be called as:
+
+            channel_layer.group_send(group, {
+                "type": "ws_event",
+                "event": "<server-event-name>",
+                "payload": {...},
+                "exclude_device_id": "<device-uuid>",  # optional
+            })
+        """
+        exclude_device_id = event.get("exclude_device_id")
+        if exclude_device_id is not None and exclude_device_id == self.device_id:
+            return
         logger.debug(
             f"Sending WS event event={event['event']} payload={event.get('payload')}",
         )

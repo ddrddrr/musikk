@@ -1,11 +1,11 @@
-from django.db import transaction
-from django.core.files.storage import default_storage
-from rest_framework import serializers
-
 from base.serializers import BaseModelSerializer
+from django.core.files.storage import default_storage
+from django.db import transaction
+from rest_framework import serializers
+from users.api.v1.serializers import BaseUserSerializer
+
 from streaming.api.v1.serializers.validators import validate_authors
 from streaming.models import BaseSong, CollectionSong, SongCredit
-from users.api.v1.serializers import BaseUserSerializer
 
 
 class BaseSongRetrieveSerializer(BaseModelSerializer):
@@ -36,7 +36,11 @@ class BaseSongRetrieveSerializer(BaseModelSerializer):
         return default_storage.url(obj.m3u8)
 
     def get_is_liked(self, obj):
-        user = self.context["request"].user
+        user = self.context.get("user")
+        if user is None and (req := self.context.get("request")) is not None:
+            user = req.user
+        if user is None or user.is_anonymous:
+            return None
         return CollectionSong.objects.filter(
             song=obj, collection=user.streamingprofile.liked_songs
         ).exists()

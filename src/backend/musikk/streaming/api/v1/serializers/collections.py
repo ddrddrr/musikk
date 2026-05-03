@@ -31,12 +31,13 @@ class CollectionSerializerBasic(BaseModelSerializer):
             "private": {"read_only": True},
         }
 
-    def get_is_liked(self, obj) -> bool:
-        return (
-            self.context["request"]
-            .user.streamingprofile.followed_collections.filter(pk=obj.pk)
-            .exists()
-        )
+    def get_is_liked(self, obj) -> bool | None:
+        user = self.context.get("user")
+        if user is None and (req := self.context.get("request")) is not None:
+            user = req.user
+        if user is None or user.is_anonymous:
+            return None
+        return user.streamingprofile.followed_collections.filter(pk=obj.pk).exists()
 
     def get_authors(self, obj) -> dict:
         collection_credits = CollectionCredit.objects.filter(

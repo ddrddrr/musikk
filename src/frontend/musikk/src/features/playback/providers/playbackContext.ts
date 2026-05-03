@@ -10,6 +10,11 @@ export interface PlaybackContextProps {
     playingCollectionSong: CollectionSong | undefined;
     queueError: Error | null;
     queueRefetch: () => void;
+    getCurrentTime: () => number;
+    setCurrentTime: Dispatch<SetStateAction<number>>;
+    totalDuration: number;
+    setTotalDuration: Dispatch<SetStateAction<number>>;
+    seek: (position: number) => void;
 }
 
 export const PlaybackContext = createContext<PlaybackContextProps>({
@@ -20,4 +25,17 @@ export const PlaybackContext = createContext<PlaybackContextProps>({
     playingCollectionSong: undefined,
     queueError: null,
     queueRefetch: () => {},
+    getCurrentTime: () => 0,
+    setCurrentTime: () => {},
+    totalDuration: 0,
+    setTotalDuration: () => {},
+    seek: () => {},
+});
+
+export interface PlaybackTimeContextProps {
+    currentTime: number;
+}
+
+export const PlaybackTimeContext = createContext<PlaybackTimeContextProps>({
+    currentTime: 0,
 });

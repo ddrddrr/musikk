@@ -6,7 +6,7 @@ import { AuthorLinks } from "@/features/user/components/AuthorLinks.tsx";
 import { cn } from "@/lib/utils.ts";
 import { formatDuration } from "@/utils/formatDuration.ts";
 import { cva } from "class-variance-authority";
-import { type MouseEvent, type ReactNode } from "react";
+import { type ReactNode } from "react";
 
 type SongContainerSize = "compact" | "normal";
 type SongContainerVariant = "inline" | "stacked";
@@ -100,6 +100,7 @@ export function SongContainer({
         <div className={cn("flex min-w-0 items-center", gapClass[size])}>
             {showImage && <MediaThumbnail src={song.image} className={imageVariants({ size })} />}
             <div className="flex min-w-0 flex-col">
+                {/*TODO: unify with other clickable names which are links?*/}
                 <button
                     type="button"
                     onClick={() => void navigateToAlbum(collectionSong.uuid)}

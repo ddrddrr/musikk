@@ -29,7 +29,7 @@ def parse_topic(topic: str) -> tuple[str, str] | None:
     return prefix, topic_id
 
 
-class TopicHandler(WSActionHandler):
+class TopicWSActionHandler(WSActionHandler):
     """Generic pub/sub over Channels groups.
 
     Flow:

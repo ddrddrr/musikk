@@ -11,6 +11,7 @@ export function useSongPlayHandler(collectionSong: CollectionSong) {
 
     const onClick = () => {
         if (isThisChosen) {
+            // TODO: unify to proper calls with () => void or smth ...
             handlePlay();
         } else {
             handlePlay({ newSong: collectionSong });

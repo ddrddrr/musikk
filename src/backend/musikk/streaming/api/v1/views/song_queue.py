@@ -1,16 +1,18 @@
 from rest_framework import status
 from rest_framework.generics import RetrieveAPIView, get_object_or_404
 from rest_framework.request import Request
-from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.views import APIView
+from websockets.event_helpers import send_ws_event, user_group
 
 from streaming.api.v1.serializers.song_queue import PlayerStateSerializer
-from streaming.models import SongQueue, QueueItem, Collection, PlayerState
-from streaming.models.songs import CollectionSong
-from streaming.ws import ServerEvent
-from streaming.permissions import IsPublicOrCollectionAuthor
+from streaming.events import ServerEvent
 from streaming.managers.playback_manager import PlaybackManager
-from websockets.event_helpers import send_ws_event, user_group
+from streaming.models import Collection, PlayerState, QueueItem, SongQueue
+from streaming.models.songs import CollectionSong
+from streaming.permissions import IsPublicOrCollectionAuthor
+from streaming.state_broadcasters.playback import PlaybackStateBroadcaster
+from streaming.state_broadcasters.player import PlayerStateBroadcaster
 
 
 class PlayerMixin(APIView):
@@ -26,19 +28,14 @@ class PlayerMixin(APIView):
             ServerEvent.QUEUE_CHANGED,
         )
 
-    # TODO: will be used in the playback views
-    # def _stop_playback_and_broadcast(self, request: Request) -> None:
-    #     playback_manager = PlaybackManager(user_uuid=str(request.user.uuid))
-    #     playback_manager.stop()
-    #     self._broadcast_playback_state(request)
+    def _clear_playback_position(self, request: Request) -> None:
+        PlaybackManager(user_uuid=str(request.user.uuid)).clear_position()
 
-    def _broadcast_playback_state(self, request: Request) -> None:
-        playback_manager = PlaybackManager(user_uuid=str(request.user.uuid))
-        send_ws_event(
-            user_group(request.user.uuid),
-            ServerEvent.PLAYBACK_CHANGE,
-            playback=playback_manager.is_playback_active(),
-        )
+    def _stop_playback(self, request: Request) -> None:
+        PlaybackStateBroadcaster(user_uuid=str(request.user.uuid)).stop()
+
+    def _broadcast_player_state(self, request: Request) -> None:
+        PlayerStateBroadcaster(user_uuid=str(request.user.uuid)).broadcast_state()
 
 
 class PlayerStateRetrieveView(PlayerMixin, RetrieveAPIView):
@@ -80,7 +77,9 @@ class PlayerPlaySongView(PlayerMixin):
         self.check_object_permissions(request, song)
 
         self.get_player(request).play_song(song)
+        self._clear_playback_position(request)
         self._broadcast_queue_invalidation(request)
+        self._broadcast_player_state(request)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -92,7 +91,9 @@ class PlayerPlayCollectionView(PlayerMixin):
         self.check_object_permissions(request, collection)
 
         self.get_player(request).play_collection(collection)
+        self._clear_playback_position(request)
         self._broadcast_queue_invalidation(request)
+        self._broadcast_player_state(request)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -121,7 +122,9 @@ class QueueRemoveItemView(PlayerMixin):
 class PlayerClearView(PlayerMixin):
     def post(self, request, *args, **kwargs):
         self.get_player(request).clear()
+        self._clear_playback_position(request)
         self._broadcast_queue_invalidation(request)
+        self._broadcast_player_state(request)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -140,9 +143,16 @@ class PlayerNextView(PlayerMixin):
                 )
             player.choose_queue_song(item)
         else:
-            player.advance()
+            # nothing left --> stop playback
+            if player.advance() is None:
+                self._stop_playback(request)
+                self._clear_playback_position(request)
+                self._broadcast_queue_invalidation(request)
+                return Response(status=status.HTTP_204_NO_CONTENT)
 
+        self._clear_playback_position(request)
         self._broadcast_queue_invalidation(request)
+        self._broadcast_player_state(request)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -153,7 +163,9 @@ class PlayerPrevView(PlayerMixin):
             return Response(status=status.HTTP_204_NO_CONTENT)
 
         player.prev()
+        self._clear_playback_position(request)
         self._broadcast_queue_invalidation(request)
+        self._broadcast_player_state(request)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 

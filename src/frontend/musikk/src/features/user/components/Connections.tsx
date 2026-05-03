@@ -24,7 +24,7 @@ export function Connections() {
 
     return (
         <Tabs value={tab} onValueChange={setTab} className="flex flex-col">
-            <div className="border-b border-border px-6 py-4">
+            <div className="flex items-center gap-2 border-b border-border px-6 py-4">
                 <TabsList className="rounded-sm">
                     <TabsTrigger value="friends">Friends</TabsTrigger>
                     <TabsTrigger value="followed">Followed</TabsTrigger>

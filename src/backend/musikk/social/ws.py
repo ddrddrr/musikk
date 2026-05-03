@@ -28,7 +28,7 @@ def validate_collection_comments(user: BaseUser, topic_id: str) -> bool:
     return Collection.objects.filter(uuid=topic_id, private=False).exists()
 
 
-class TypingHandler(WSActionHandler):
+class TypingWSActionHandler(WSActionHandler):
     # minimum gap between typing sends
     MIN_INTERVAL = 2  # sec
     PREFIX_TO_EVENT: dict[str, str] = {

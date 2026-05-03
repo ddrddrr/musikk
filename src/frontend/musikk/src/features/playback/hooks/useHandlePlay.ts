@@ -6,7 +6,12 @@ import {
     usePlaybackActions,
     useSetDeviceActiveAction,
 } from "@/features/playback/ws/actionHooks.ts";
-import { usePlayCollection, usePlaySong } from "@/features/song-queue/hooks/useQueueAPI.ts";
+import {
+    usePlayCollection,
+    usePlaySong,
+    useQueue,
+    useQueueNext,
+} from "@/features/song-queue/hooks/useQueueAPI.ts";
 import { useContext } from "react";
 
 export function useHandlePlay() {
@@ -17,6 +22,8 @@ export function useHandlePlay() {
     const { activatePlaybackAction, stopPlaybackAction } = usePlaybackActions();
     const playSongMutation = usePlaySong();
     const playCollectionMutation = usePlayCollection();
+    const { data: queue } = useQueue();
+    const nextMutation = useQueueNext();
 
     async function playItem({
         newCollection,
@@ -67,7 +74,19 @@ export function useHandlePlay() {
             }
             return;
         }
-        // no item in the queue -> should be stopped
+
+        const hasQueuedItems =
+            (queue?.items.length ?? 0) > 0 || (queue?.context_items.length ?? 0) > 0;
+        if (hasQueuedItems) {
+            try {
+                await nextMutation.mutateAsync();
+            } catch {
+                return;
+            }
+            activatePlaybackAction();
+            return;
+        }
+
         stopPlaybackAction();
     }
 

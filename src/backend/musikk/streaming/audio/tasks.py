@@ -6,15 +6,15 @@ from uuid import UUID
 from celery import shared_task
 from django.conf import settings
 from django.db import transaction
-
 from utils.storage import delete_django_storage_dir
+from websockets.event_helpers import send_ws_event, user_group
+
 from streaming.audio.probes import AudioStreamInfo
 from streaming.audio.processing_pipeline import AudioProcessingPipeline
 from streaming.audio.shaka_packager_conf.shaka_packager_wrapper import ManifestType
+from streaming.events import ServerEvent
 from streaming.managers.upload_manager import UploadManager
 from streaming.models.songs import BaseSong
-from streaming.ws import ServerEvent
-from websockets.event_helpers import send_ws_event, user_group
 
 logger = logging.getLogger(__name__)
 

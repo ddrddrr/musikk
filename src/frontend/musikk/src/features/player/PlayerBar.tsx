@@ -1,5 +1,8 @@
 import { MediaThumbnail } from "@/features/common/MediaThumbnail.tsx";
-import { PlaybackContext } from "@/features/playback/providers/playbackContext.ts";
+import {
+    PlaybackContext,
+    PlaybackTimeContext,
+} from "@/features/playback/providers/playbackContext.ts";
 import { ChangeActiveDeviceDropdown } from "@/features/player/ChangeActiveDeviceDropdown.tsx";
 import { useVolume } from "@/features/player/hooks/useVolume.ts";
 import { PlayerPlayButton } from "@/features/player/PlayerPlayButton.tsx";
@@ -19,27 +22,23 @@ function formatTime(seconds: number) {
 
 interface PlayerBarProps {
     audioRef: React.RefObject<HTMLAudioElement>;
-    totalDuration: number;
-    time: number;
     seeking: boolean;
     setSeeking: (s: boolean) => void;
     setIsQueueOpen: React.Dispatch<React.SetStateAction<boolean>>;
-    onSeekCommit?: (t: number) => void;
     isMutedFallback: boolean;
     onUnmute: () => void;
 }
 export function PlayerBar({
     audioRef,
-    totalDuration,
-    time,
     seeking,
     setSeeking,
     setIsQueueOpen,
-    onSeekCommit,
     isMutedFallback,
     onUnmute,
 }: PlayerBarProps) {
-    const { playingCollectionSong, isThisDeviceActive } = useContext(PlaybackContext);
+    const { playingCollectionSong, isThisDeviceActive, totalDuration, seek } =
+        useContext(PlaybackContext);
+    const { currentTime } = useContext(PlaybackTimeContext);
     const { volume, setVolume, handleVolumeCommit, handleMuteToggle } = useVolume(audioRef);
     const [seekTime, setSeekTime] = useState(0);
     const nextMutation = useQueueNext();
@@ -61,22 +60,21 @@ export function PlayerBar({
     const handleSeekCommit = useCallback(
         (value: number[]) => {
             const t = value[0];
-
             setSeekTime(t);
-            onSeekCommit?.(t);
+            seek(t);
 
-            const audio = audioRef.current;
-            if (audio) {
-                audio.currentTime = t;
+            if (isThisDeviceActive) {
+                const audio = audioRef.current;
+                if (audio) audio.currentTime = t;
             }
 
             setSeeking(false);
         },
-        [onSeekCommit, audioRef, setSeeking],
+        [seek, audioRef, setSeeking, isThisDeviceActive],
     );
 
     const playingSong = playingCollectionSong?.song;
-    const displayTime = seeking ? seekTime : time;
+    const displayTime = seeking ? seekTime : currentTime;
 
     return (
         <div className="border-t border-foreground bg-card px-4 py-2">
@@ -105,7 +103,7 @@ export function PlayerBar({
                 )}
 
                 <div className="flex min-w-0 flex-1 items-center justify-end gap-4">
-                    {isThisDeviceActive && playingCollectionSong && (
+                    {playingCollectionSong && (
                         <div className="flex max-w-[350px] min-w-0 basis-1/2 items-center gap-1">
                             <span className="text-right text-xs">{formatTime(displayTime)}</span>
                             <Slider

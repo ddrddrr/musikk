@@ -22,8 +22,8 @@ export function useQueue() {
     });
 }
 
-function useQueueMutation<TVariables = void>(
-    mutationFn: (variables: TVariables) => Promise<void>,
+function useQueueMutation<T = void>(
+    mutationFn: (variables: T) => Promise<void>,
     errorMessage: string,
 ) {
     const queryClient = useQueryClient();

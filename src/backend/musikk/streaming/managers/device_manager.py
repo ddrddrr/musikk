@@ -66,12 +66,16 @@ class DeviceManager:
         )
         return device_id
 
+    def get_active_device_id(self) -> str | None:
+        r = get_default_redis_conn()
+        raw = r.get(self._active_device_key())
+        return try_decode(raw) if raw else None
+
     def get_devices(self) -> list[Device]:
         r = get_default_redis_conn()
 
         device_ids = r.smembers(self._devices_set_key())
-        active_device_raw = r.get(self._active_device_key())
-        active_device_id = try_decode(active_device_raw) if active_device_raw else None
+        active_device_id = self.get_active_device_id()
 
         devices: list[Device] = []
         for raw_device_id in device_ids:

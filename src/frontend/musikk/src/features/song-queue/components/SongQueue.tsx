@@ -2,6 +2,7 @@ import { getErrorDetail } from "@/api/errorUtils.ts";
 import { CollectionSong } from "@/features/collections/types.ts";
 import { EmptyState } from "@/features/common/EmptyState.tsx";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
+import { PlaybackContext } from "@/features/playback/providers/playbackContext.ts";
 import { QueueItem } from "@/features/song-queue/api/types.ts";
 import { SongQueuePlayButton } from "@/features/song-queue/components/SongQueueContainerPlayButton.tsx";
 import { useQueue, useQueueClear } from "@/features/song-queue/hooks/useQueueAPI.ts";
@@ -21,6 +22,7 @@ import { Spinner } from "@/features/ui/spinner";
 import { cn } from "@/lib/utils.ts";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Trash2 } from "lucide-react";
+import { useContext } from "react";
 import { toast } from "sonner";
 
 function SongQueueActions({
@@ -78,6 +80,7 @@ export function SongQueue() {
         },
     });
     const { data: queue, error, isPending, refetch } = useQueue();
+    const { playingCollectionSong } = useContext(PlaybackContext);
 
     if (error) {
         return <QueryErrorBox message="Failed to load queue" onRetry={() => void refetch()} />;
@@ -93,7 +96,7 @@ export function SongQueue() {
 
     const items = queue?.items ?? [];
     const contextItems = queue?.context_items ?? [];
-    const currentSong = queue?.current_song?.song;
+    const currentSong = playingCollectionSong?.song;
 
     return (
         <div className="flex h-full w-full">

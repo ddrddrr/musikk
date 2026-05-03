@@ -1,8 +1,8 @@
+from base.serializers import BaseModelSerializer
 from rest_framework import serializers
 
-from base.serializers import BaseModelSerializer
 from streaming.api.v1.serializers.songs import CollectionSongRetrieveSerializer
-from streaming.models.song_queue import QueueItem, PlayerState
+from streaming.models.song_queue import PlayerState, QueueItem
 
 
 class QueueItemSerializer(BaseModelSerializer):
@@ -17,24 +17,15 @@ class QueueItemSerializer(BaseModelSerializer):
 
 
 class PlayerStateSerializer(BaseModelSerializer):
-    current_song = serializers.SerializerMethodField()
     items = serializers.SerializerMethodField()
     context_items = serializers.SerializerMethodField()
 
     class Meta:
         model = PlayerState
         fields = BaseModelSerializer.Meta.fields + [
-            "current_song",
             "items",
             "context_items",
         ]
-
-    def get_current_song(self, obj: PlayerState):
-        if not obj.current_collection_song:
-            return None
-        return CollectionSongRetrieveSerializer(
-            obj.current_collection_song, context=self.context
-        ).data
 
     def get_items(self, obj: PlayerState):
         items = obj.queue.window()

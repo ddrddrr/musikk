@@ -7,7 +7,6 @@ export interface QueueItem extends BaseModel {
 }
 
 export interface SongQueue extends BaseModel {
-    current_song: CollectionSong | null;
     items: QueueItem[];
     context_items: CollectionSong[];
 }

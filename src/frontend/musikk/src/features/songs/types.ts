@@ -11,4 +11,5 @@ export interface Song extends BaseModel {
     is_liked?: boolean;
     loudness_lufs?: number | null;
     true_peak_dbtp?: number | null;
+    duration_ms?: number | null;
 }

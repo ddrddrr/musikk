@@ -11,10 +11,9 @@ export const PlayerBox = memo(function PlayerBox({
     setIsQueueOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
     const audioRef = useRef<HTMLAudioElement>(null);
-    const [totalDuration, setTotalDuration] = useState(0);
-    const [time, setTime] = useState(0);
     const [seeking, setSeeking] = useState(false);
-    const { queueError, queueRefetch, playingCollectionSong } = useContext(PlaybackContext);
+    const { queueError, queueRefetch, playingCollectionSong, setCurrentTime, setTotalDuration } =
+        useContext(PlaybackContext);
 
     const { ensureAudioPipeline } = useLoudnessNormalization({
         audioRef,
@@ -27,7 +26,7 @@ export const PlayerBox = memo(function PlayerBox({
             ensureAudioPipeline,
             onDurationChange: setTotalDuration,
             onTimeUpdate: (currentTime) => {
-                if (!seeking) setTime(currentTime);
+                if (!seeking) setCurrentTime(currentTime);
             },
         });
 
@@ -43,12 +42,9 @@ export const PlayerBox = memo(function PlayerBox({
         <div className="sticky right-0 bottom-0 left-0 z-10 border-t border-foreground bg-card">
             <PlayerBar
                 audioRef={audioRef}
-                totalDuration={totalDuration}
-                time={time}
                 seeking={seeking}
                 setSeeking={setSeeking}
                 setIsQueueOpen={setIsQueueOpen}
-                onSeekCommit={(t) => setTime(t)}
                 isMutedFallback={isMutedFallback}
                 onUnmute={unmute}
             />
