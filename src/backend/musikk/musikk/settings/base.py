@@ -18,7 +18,7 @@ config = AutoConfig(search_path=ROOT_DIR)
 
 DJANGO_BASE_URL = config("DJANGO_BASE_URL", default="http://localhost:8000")
 
-SECRET_KEY = config("SECRET_KEY", default="<SECRET_KEY>")
+SECRET_KEY = config("SECRET_KEY")
 
 DEBUG = config("DEBUG", default=True, cast=bool)
 
@@ -105,10 +105,10 @@ WSGI_APPLICATION = "musikk.wsgi.application"
 ASGI_APPLICATION = "musikk.asgi.application"
 
 
-REDIS_PASSWORD = os.getenv("REDIS_PASSWORD", "password")
-REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
-REDIS_PORT = os.getenv("REDIS_PORT", "6375")
-REDIS_DB = os.getenv("REDIS_DB", "1")
+REDIS_PASSWORD = config("REDIS_PASSWORD")
+REDIS_HOST = config("REDIS_HOST", default="localhost")
+REDIS_PORT = config("REDIS_PORT", default="6375")
+REDIS_DB = config("REDIS_DB", default="1")
 
 CACHES = {
     "default": {
@@ -220,7 +220,7 @@ DATABASES = {
     "default": {
         "ENGINE": config("SQL_ENGINE", default="django.db.backends.postgresql"),
         "USER": config("POSTGRES_USER", default="user"),
-        "PASSWORD": config("POSTGRES_PASSWORD", default="password"),
+        "PASSWORD": config("POSTGRES_PASSWORD"),
         "NAME": config("POSTGRES_DB", default="db"),
         "HOST": config("POSTGRES_HOST", default="localhost"),
         "PORT": config("POSTGRES_PORT", default="5435"),
@@ -300,9 +300,10 @@ MAX_PATH_LENGTH = os.pathconf("/", "PC_PATH_MAX")
 
 CELERY_TASK_ALWAYS_EAGER = config("CELERY_TASK_ALWAYS_EAGER", cast=bool, default=True)
 CELERY_BROKER_URL = config(
-    "CELERY_BROKER_URL", default="amqp://user:password@localhost:5672//"
+    "CELERY_BROKER_URL",
+    default=f"redis://:{REDIS_PASSWORD}@{REDIS_HOST}:{REDIS_PORT}/2",
 )
-CELERY_BROKER_TRANSPORT_OPTIONS = {"confirm_publish": True, "confirm_timeout": 5.0}
+CELERY_BROKER_TRANSPORT_OPTIONS = {"visibility_timeout": 700}
 # CELERY_RESULT_BACKEND = config("CELERY_RESULT_BACKEND", default="")
 # this is setup, so the task is always finished (even if fails)
 CELERY_TASK_ACKS_LATE = config("CELERY_TASK_ACKS_LATE", cast=bool, default=True)

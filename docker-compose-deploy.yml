@@ -5,13 +5,25 @@ services:
     image: ddrddrr2/musikk-server:latest
     env_file:
       - .env
+    environment:
+      DJANGO_SETTINGS_MODULE: musikk.settings.prod
+    restart: unless-stopped
     depends_on:
-      - database
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     expose:
       - ${DJANGO_PORT}
     volumes:
       - django_static:/app/staticfiles
       - django_media:/app/media
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:${DJANGO_PORT}/health/"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 30s
     networks:
       - main
 
@@ -19,35 +31,34 @@ services:
     image: postgres:17
     env_file:
       - .env
+    restart: unless-stopped
     volumes:
       - postgres_data:/var/lib/postgresql/data
     expose:
       - ${POSTGRES_PORT}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
     networks:
       - main
 
   celery_worker:
     image: ddrddrr2/musikk-server:latest
-    command: start-celery-worker.sh
+    entrypoint: ["./start-celery-worker.sh"]
     env_file:
       - .env
+    environment:
+      DJANGO_SETTINGS_MODULE: musikk.settings.prod
+    restart: unless-stopped
     depends_on:
-      - database
-      - broker
-      - redis
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     volumes:
       - django_media:/app/media
-    networks:
-      - main
-
-  broker:
-    image: rabbitmq:4.1.1
-    expose:
-      - 5672
-    env_file:
-      - .env
-    volumes:
-      - rabbitmq_data:/var/lib/rabbitmq
     networks:
       - main
 
@@ -58,6 +69,12 @@ services:
       - 6379
     env_file:
       - .env
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
     networks:
       - main
 
@@ -84,7 +101,6 @@ volumes:
   caddy_config:
   django_static:
   django_media:
-  rabbitmq_data:
 
 networks:
   main:

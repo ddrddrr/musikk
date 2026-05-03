@@ -7,9 +7,13 @@ services:
       dockerfile: Dockerfile
     env_file:
       - .env
+    environment:
+      DJANGO_SETTINGS_MODULE: musikk.settings.prod
     depends_on:
-      - database
-      - redis
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     expose:
       - ${DJANGO_PORT}
     volumes:
@@ -38,34 +42,18 @@ services:
     build:
       context: ./src/backend/
       dockerfile: Dockerfile
-    command: start-celery-worker.sh
+    entrypoint: ["./start-celery-worker.sh"]
     env_file:
       - .env
+    environment:
+      DJANGO_SETTINGS_MODULE: musikk.settings.prod
     depends_on:
       redis:
-        condition: service_healthy
-      broker:
         condition: service_healthy
       database:
         condition: service_healthy
     volumes:
       - django_media:/app/media
-    networks:
-      - main
-
-  broker:
-    image: rabbitmq:4.1.1
-    expose:
-      - 5672
-    env_file:
-      - .env
-    volumes:
-      - rabbitmq_data:/var/lib/rabbitmq
-    healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
     networks:
       - main
 
@@ -109,7 +97,6 @@ volumes:
   caddy_config:
   django_static:
   django_media:
-  rabbitmq_data:
 
 networks:
   main:

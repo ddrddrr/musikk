@@ -9,7 +9,6 @@ musikk.stream {
         root /app/media
         file_server
     }
-    # TODO: no django port var anymore
     handle /api/* {
         reverse_proxy server:{env.DJANGO_PORT} {
             header_up X-Forwarded-Proto {scheme}
