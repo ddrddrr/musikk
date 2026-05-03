@@ -26,7 +26,10 @@ interface PlayerBarProps {
     setSeeking: (s: boolean) => void;
     setIsQueueOpen: React.Dispatch<React.SetStateAction<boolean>>;
     isMutedFallback: boolean;
-    onUnmute: () => void;
+    onUnmute: () => Promise<void>;
+    setUserVolume: (value: number) => void;
+    fadeIn: (durationMs?: number) => void;
+    fadeOut: (durationMs?: number) => Promise<void>;
 }
 export function PlayerBar({
     audioRef,
@@ -35,11 +38,16 @@ export function PlayerBar({
     setIsQueueOpen,
     isMutedFallback,
     onUnmute,
+    setUserVolume,
+    fadeIn,
+    fadeOut,
 }: PlayerBarProps) {
     const { playingCollectionSong, isThisDeviceActive, totalDuration, seek } =
         useContext(PlaybackContext);
     const { currentTime } = useContext(PlaybackTimeContext);
-    const { volume, setVolume, handleVolumeCommit, handleMuteToggle } = useVolume(audioRef);
+    const { volume, setVolume, handleVolumeCommit, handleMuteToggle } = useVolume({
+        setUserVolume,
+    });
     const [seekTime, setSeekTime] = useState(0);
     const nextMutation = useQueueNext();
     const prevMutation = useQueuePrev();
@@ -65,12 +73,19 @@ export function PlayerBar({
 
             if (isThisDeviceActive) {
                 const audio = audioRef.current;
-                if (audio) audio.currentTime = t;
+                if (audio) {
+                    // changing currentTime "clicks" without a fade
+                    void (async () => {
+                        await fadeOut();
+                        audio.currentTime = t;
+                        fadeIn();
+                    })();
+                }
             }
 
             setSeeking(false);
         },
-        [seek, audioRef, setSeeking, isThisDeviceActive],
+        [seek, audioRef, setSeeking, isThisDeviceActive, fadeIn, fadeOut],
     );
 
     const playingSong = playingCollectionSong?.song;
@@ -132,7 +147,7 @@ export function PlayerBar({
                             // available when playback started
                             // the unmute click is the fallback builds the AudioContext
                             <Button
-                                onClick={onUnmute}
+                                onClick={() => void onUnmute()}
                                 variant="ghost"
                                 size="icon"
                                 title="Tap to unmute on this device"

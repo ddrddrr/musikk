@@ -12,6 +12,8 @@ const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 interface UsePlayerOptions {
     audioRef: React.RefObject<HTMLAudioElement>;
     ensureAudioPipeline: () => void;
+    fadeIn: (durationMs?: number) => void;
+    fadeOut: (durationMs?: number) => Promise<void>;
     onDurationChange?: (duration: number) => void;
     onTimeUpdate?: (currentTime: number) => void;
 }
@@ -21,7 +23,7 @@ interface UsePlayerReturn {
     handleTimeUpdate: () => void;
     handleOnEnded: () => void;
     isMutedFallback: boolean;
-    unmute: () => void;
+    unmute: () => Promise<void>;
 }
 
 interface PlaybackSeekPayload {
@@ -32,6 +34,8 @@ interface PlaybackSeekPayload {
 export function usePlayer({
     audioRef,
     ensureAudioPipeline,
+    fadeIn,
+    fadeOut,
     onDurationChange,
     onTimeUpdate,
 }: UsePlayerOptions): UsePlayerReturn {
@@ -59,8 +63,10 @@ export function usePlayer({
 
     async function tryPlay(audio: HTMLAudioElement) {
         try {
+            await fadeOut(0);
             await audio.play();
             if (isMutedFallback) setIsMutedFallback(false);
+            fadeIn();
         } catch (err) {
             if (err instanceof DOMException && err.name === "AbortError") return;
             // if the user opens the app on a completely new device (non-active yet)
@@ -75,6 +81,8 @@ export function usePlayer({
                 try {
                     await audio.play();
                     setIsMutedFallback(true);
+                    // dont fadeIn here since audio is muted, and unmute() does the
+                    // anti-pop fade for audio.muted=false
                     return;
                 } catch {
                     audio.muted = false;
@@ -86,13 +94,15 @@ export function usePlayer({
         }
     }
 
-    function unmute() {
+    async function unmute() {
         const audio = audioRef.current;
         if (!audio) return;
         // unmute click is the user gesture that lets us go over the autoplay policy
         // and build the AudioContext
         ensureAudioPipeline();
+        await fadeOut(0);
         audio.muted = false;
+        fadeIn();
         setIsMutedFallback(false);
     }
 
@@ -133,9 +143,8 @@ export function usePlayer({
             const audio = audioRef.current;
             if (!player || !audio) return;
 
-            // pause synchronously so any stale-active-with-stale-isPlaybackActive
-            // window (e.g. set_active_device flip arriving before the snapshot
-            // that clears playback) cannot bleed audio from the previous track
+            await fadeOut();
+            if (cancelled) return;
             audio.pause();
 
             if (url && isThisDeviceActiveRef.current) {
@@ -187,11 +196,20 @@ export function usePlayer({
         const audio = audioRef.current;
         if (!audio || !isAudioReadyRef.current || !playingCollectionSong) return;
 
-        if (isThisDeviceActive && isPlaybackActive) {
-            void tryPlay(audio);
-        } else {
-            audio.pause();
-        }
+        let cancelled = false;
+        const apply = async () => {
+            if (isThisDeviceActive && isPlaybackActive) {
+                void tryPlay(audio);
+            } else {
+                await fadeOut();
+                if (cancelled) return;
+                audio.pause();
+            }
+        };
+        void apply();
+        return () => {
+            cancelled = true;
+        };
     }
     useEffect(syncLocalPlaybackStateWithRemote, [isPlaybackActive, isThisDeviceActive]);
 
@@ -205,7 +223,11 @@ export function usePlayer({
             }
             const audio = audioRef.current;
             if (!audio) return;
-            audio.currentTime = payload.position;
+            void (async () => {
+                await fadeOut();
+                audio.currentTime = payload.position;
+                fadeIn();
+            })();
         });
     }
     useEffect(subToSeekWSEvent, [ws]);

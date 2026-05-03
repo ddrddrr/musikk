@@ -1,6 +1,6 @@
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { PlaybackContext } from "@/features/playback/providers/playbackContext.ts";
-import { useLoudnessNormalization } from "@/features/player/hooks/useLoudnessNormalization.ts";
+import { useAudioPipeline } from "@/features/player/hooks/useAudioPipeline.ts";
 import { usePlayer } from "@/features/player/hooks/usePlayer.ts";
 import { PlayerBar } from "@/features/player/PlayerBar.tsx";
 import React, { memo, useContext, useRef, useState } from "react";
@@ -15,7 +15,7 @@ export const PlayerBox = memo(function PlayerBox({
     const { queueError, queueRefetch, playingCollectionSong, setCurrentTime, setTotalDuration } =
         useContext(PlaybackContext);
 
-    const { ensureAudioPipeline } = useLoudnessNormalization({
+    const { ensureAudioPipeline, setUserVolume, fadeIn, fadeOut } = useAudioPipeline({
         audioRef,
         song: playingCollectionSong?.song,
     });
@@ -24,6 +24,8 @@ export const PlayerBox = memo(function PlayerBox({
         usePlayer({
             audioRef,
             ensureAudioPipeline,
+            fadeIn,
+            fadeOut,
             onDurationChange: setTotalDuration,
             onTimeUpdate: (currentTime) => {
                 if (!seeking) setCurrentTime(currentTime);
@@ -47,6 +49,9 @@ export const PlayerBox = memo(function PlayerBox({
                 setIsQueueOpen={setIsQueueOpen}
                 isMutedFallback={isMutedFallback}
                 onUnmute={unmute}
+                setUserVolume={setUserVolume}
+                fadeIn={fadeIn}
+                fadeOut={fadeOut}
             />
 
             <audio

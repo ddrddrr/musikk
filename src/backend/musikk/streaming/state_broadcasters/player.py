@@ -48,9 +48,14 @@ class PlayerStateBroadcaster:
         # position omitted on group broadcasts triggered by device.register
         # so already-connected clients don't rewind
         position_snapshot = self._playback_manager.get_position() or {}
+        current_song = self._serialize_current_song()
+        # the redis flag can outlive the song it referred to, so check, if there is an active song still
+        is_playback_active = (
+            current_song is not None and self._playback_manager.is_playback_active()
+        )
         return {
-            "current_song": self._serialize_current_song(),
-            "is_playback_active": self._playback_manager.is_playback_active(),
+            "current_song": current_song,
+            "is_playback_active": is_playback_active,
             "position": position_snapshot.get("position") if include_position else None,
         }
 

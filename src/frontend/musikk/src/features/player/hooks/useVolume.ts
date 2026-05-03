@@ -1,10 +1,14 @@
 import { useDeviceList } from "@/features/playback/hooks/useDeviceList.ts";
 import { useSetDeviceVolumeAction } from "@/features/playback/ws/actionHooks.ts";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 type SliderValue = number[];
 
-export function useVolume(audioRef: React.RefObject<HTMLAudioElement>) {
+interface UseVolumeOptions {
+    setUserVolume: (value: number) => void;
+}
+
+export function useVolume({ setUserVolume }: UseVolumeOptions) {
     const { activeDevice } = useDeviceList();
     const setDeviceVolume = useSetDeviceVolumeAction();
     const [volume, setVolume] = useState(() => {
@@ -15,11 +19,9 @@ export function useVolume(audioRef: React.RefObject<HTMLAudioElement>) {
 
     // local changes
     useEffect(() => {
-        if (audioRef.current) {
-            audioRef.current.volume = volume / 100;
-        }
+        setUserVolume(volume / 100);
         localStorage.setItem("deviceVolume", String(volume));
-    }, [volume]);
+    }, [volume, setUserVolume]);
 
     // when we get vol from ws
     useEffect(() => {

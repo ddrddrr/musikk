@@ -79,6 +79,18 @@ class TestPlayerStateBroadcaster(TestCase):
         self.assertIsNone(payload["current_song"])
         self.assertFalse(payload["is_playback_active"])
 
+    def test_broadcast_state_forces_inactive_when_current_song_is_null(self):
+        # the redis flag can outlive the song; snapshot must reconcile to
+        # is_playback_active=False so the FE play button doesn't get stuck in Pause
+        self.mock_redis.get.return_value = b"true"
+
+        PlayerStateBroadcaster(user_uuid=str(self.user.uuid)).broadcast_state()
+
+        args, _ = self.mock_channel_layer.group_send.call_args
+        payload = args[1]["payload"]
+        self.assertIsNone(payload["current_song"])
+        self.assertFalse(payload["is_playback_active"])
+
     def test_build_snapshot_omits_position_when_disabled(self):
         self.mock_redis.get.return_value = None
         broadcaster = PlayerStateBroadcaster(user_uuid=str(self.user.uuid))
