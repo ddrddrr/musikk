@@ -46,11 +46,17 @@ class BaseSongRetrieveSerializer(BaseModelSerializer):
         ).exists()
 
     def get_authors(self, obj):
-        # TODO: optimize
-        sauthors = SongCredit.objects.filter(song=obj).select_related("author")
-        users = [sauthor.author for sauthor in sauthors]
+        cache = getattr(obj, "_prefetched_objects_cache", None) or {}
+        if "credits" in cache:
+            sauthors = cache["credits"]
+        else:
+            sauthors = SongCredit.objects.filter(song=obj).select_related("author")
 
-        return BaseUserSerializer(users, many=True, context=self.context).data
+        return BaseUserSerializer(
+            [sauthor.author for sauthor in sauthors],
+            many=True,
+            context=self.context,
+        ).data
 
 
 class BaseSongCreateSerializer(serializers.ModelSerializer):

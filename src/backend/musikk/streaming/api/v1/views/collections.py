@@ -22,7 +22,7 @@ from streaming.api.v1.serializers.collections import (
     CollectionCreateSerializer,
     CollectionSerializerBasic,
     CollectionSerializerDetailed,
-    with_collection_list_optimizations,
+    collection_optimizations,
 )
 from streaming.audio.tasks import convert_audio
 from streaming.audio.validators import validate_audio
@@ -46,7 +46,7 @@ class CollectionListCreateView(ListCreateAPIView):
     def get_queryset(self):
         qs = super().get_queryset()
         if self.request.method == "GET":
-            qs = with_collection_list_optimizations(qs, self.request.user)
+            qs = collection_optimizations(qs, self.request.user)
         return qs
 
     def get_serializer_class(self):
@@ -77,12 +77,10 @@ class CollectionPersonalView(APIView):
         profile = request.user.streamingprofile
         ctx = {"request": request}
 
-        created_qs = with_collection_list_optimizations(
-            profile.created_collections, request.user
-        )
+        created_qs = collection_optimizations(profile.created_collections, request.user)
         created_ids = list(created_qs.values_list("id", flat=True))
 
-        followed_qs = with_collection_list_optimizations(
+        followed_qs = collection_optimizations(
             profile.followed_collections.exclude(id__in=created_ids), request.user
         )
 

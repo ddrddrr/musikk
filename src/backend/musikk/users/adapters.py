@@ -1,6 +1,7 @@
 import secrets
 
 from allauth.account.adapter import DefaultAccountAdapter
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 
@@ -20,6 +21,5 @@ class BaseAccountAdapter(DefaultAccountAdapter):
             )
         return email
 
-    # TODO: set frontend url
     def get_email_confirmation_url(self, request, emailconfirmation):
-        return f"http://localhost:5175/email-confirmation/{emailconfirmation.key}"
+        return f"{settings.FRONTEND_URL}/email-confirmation/{emailconfirmation.key}"

@@ -1,5 +1,6 @@
 from base.serializers import BaseModelSerializer, UUIDListField
 from django.db import transaction
+from django.db.models import Exists, OuterRef, Prefetch, QuerySet
 from rest_framework import serializers
 from users.api.v1.serializers import BaseUserSerializer
 
@@ -9,6 +10,29 @@ from streaming.api.v1.serializers.songs import (
 from streaming.api.v1.serializers.validators import validate_authors
 from streaming.models.collections import Collection, CollectionCredit, CollectionType
 from streaming.models.songs import CollectionSong
+
+
+def collection_optimizations(qs: QuerySet, user) -> QuerySet:
+    """Optimize collection queries (e.g. by prefetching related objects)
+
+    Without this, `get_authors` and `get_is_liked` each fall back
+    to per-object queries.
+    """
+    qs = qs.prefetch_related(
+        Prefetch(
+            "collection_credits",
+            queryset=CollectionCredit.objects.select_related("author"),
+        )
+    )
+    if user is not None and not user.is_anonymous:
+        qs = qs.annotate(
+            is_liked_annotated=Exists(
+                Collection.objects.filter(
+                    pk=OuterRef("pk"), followers=user.streamingprofile
+                )
+            )
+        )
+    return qs
 
 
 class CollectionSerializerBasic(BaseModelSerializer):
@@ -32,6 +56,8 @@ class CollectionSerializerBasic(BaseModelSerializer):
         }
 
     def get_is_liked(self, obj) -> bool | None:
+        if (annotated := getattr(obj, "is_liked_annotated", None)) is not None:
+            return annotated
         user = self.context.get("user")
         if user is None and (req := self.context.get("request")) is not None:
             user = req.user
@@ -40,12 +66,16 @@ class CollectionSerializerBasic(BaseModelSerializer):
         return user.streamingprofile.followed_collections.filter(pk=obj.pk).exists()
 
     def get_authors(self, obj) -> dict:
-        collection_credits = CollectionCredit.objects.filter(
-            collection=obj
-        ).select_related("author")
+        cache = getattr(obj, "_prefetched_objects_cache", None) or {}
+        if "collection_credits" in cache:
+            credits = cache["collection_credits"]
+        else:
+            credits = CollectionCredit.objects.filter(collection=obj).select_related(
+                "author"
+            )
 
         return BaseUserSerializer(
-            [cc.author for cc in collection_credits], many=True, context=self.context
+            [cc.author for cc in credits], many=True, context=self.context
         ).data
 
 

@@ -1,24 +1,24 @@
+from django.http import HttpResponse
+from django.views.decorators.csrf import ensure_csrf_cookie
+from notifications.models import FollowerNotification
+from rest_framework import status
 from rest_framework.generics import (
-    get_object_or_404,
     RetrieveAPIView,
     RetrieveUpdateAPIView,
+    get_object_or_404,
 )
-from rest_framework.views import APIView
-from rest_framework import status
 from rest_framework.response import Response
-from django.views.decorators.csrf import ensure_csrf_cookie
-from django.http import HttpResponse
+from rest_framework.views import APIView
+from websockets.event_helpers import send_ws_event, user_group
 
 from users.api.v1.serializers import (
-    BaseUserSerializer,
     BaseMeSerializer,
+    BaseUserSerializer,
     MeUpdateSerializer,
 )
 from users.models import BaseUser, UserFollow
 from users.permissions import IsSelfOrFriend
 from users.ws import ServerEvent
-from websockets.event_helpers import send_ws_event, user_group
-from notifications.models import FollowerNotification
 
 
 # not strictly needed, but already implemented so...
@@ -121,19 +121,18 @@ class FollowedView(APIView):
                 sender=self.request.user,
                 receiver=follow_user,
             )
-
-        send_ws_event(
-            user_group(self.request.user.uuid),
-            ServerEvent.USER_FOLLOWED,
-            from_uuid=str(self.request.user.uuid),
-            to_uuid=str(follow_user.uuid),
-        )
-        send_ws_event(
-            user_group(follow_user.uuid),
-            ServerEvent.USER_FOLLOWED,
-            from_uuid=str(self.request.user.uuid),
-            to_uuid=str(follow_user.uuid),
-        )
+            send_ws_event(
+                user_group(self.request.user.uuid),
+                ServerEvent.USER_FOLLOWED,
+                from_uuid=str(self.request.user.uuid),
+                to_uuid=str(follow_user.uuid),
+            )
+            send_ws_event(
+                user_group(follow_user.uuid),
+                ServerEvent.USER_FOLLOWED,
+                from_uuid=str(self.request.user.uuid),
+                to_uuid=str(follow_user.uuid),
+            )
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def delete(self, *args, **kwargs):
