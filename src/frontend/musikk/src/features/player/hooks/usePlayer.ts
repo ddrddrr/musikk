@@ -10,7 +10,7 @@ import shaka from "shaka-player";
 const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 
 interface UsePlayerOptions {
-    audioRef: React.RefObject<HTMLAudioElement>;
+    audioRef: React.RefObject<HTMLAudioElement | null>;
     ensureAudioPipeline: () => void;
     fadeIn: (durationMs?: number) => void;
     fadeOut: (durationMs?: number) => Promise<void>;

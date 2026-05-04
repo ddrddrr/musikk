@@ -12,23 +12,17 @@ export function useAttachment() {
             return { attachmentType: undefined, attachmentUUID: undefined };
         }
 
-        let attachmentType: AttachmentType;
+        const attachmentUUID = attachedObj.uuid;
         switch (attachedObj.kind) {
             case "collection":
-                attachmentType = "collection";
-                break;
+                return { attachmentType: "collection", attachmentUUID };
             case "collectionSong":
-                attachmentType = "song";
-                break;
+                return { attachmentType: "song", attachmentUUID };
             case "user":
-                attachmentType = "user";
-                break;
+                return { attachmentType: "user", attachmentUUID };
+            default:
+                throw new Error(`Unsupported attachment: ${String(attachedObj.kind)}`);
         }
-
-        return {
-            attachmentType,
-            attachmentUUID: attachedObj.uuid,
-        };
     };
 
     const clearAttachment = () => setAttachedObj(undefined);

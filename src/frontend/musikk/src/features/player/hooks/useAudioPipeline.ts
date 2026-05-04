@@ -20,7 +20,7 @@ const DEFAULT_FADE_MS = 125;
 const VOLUME_STORAGE_KEY = "deviceVolume";
 
 interface UseAudioPipelineOptions {
-    audioRef: React.RefObject<HTMLAudioElement>;
+    audioRef: React.RefObject<HTMLAudioElement | null>;
     song: Song | undefined;
 }
 
@@ -43,6 +43,7 @@ interface AudioPipeline {
 // boosting a quiet track can push its peaks above 0 dBFS (clipping),
 // so we cap gainDb at the headroom we have left before TRUE_PEAK_CEILING
 function computeGainDb(song: Song, targetLufs: number): number {
+    if (song.loudness_lufs == null) return 0;
     let gainDb = targetLufs - song.loudness_lufs;
     if (song.true_peak_dbtp != null) {
         const maxGain = TRUE_PEAK_CEILING - song.true_peak_dbtp;

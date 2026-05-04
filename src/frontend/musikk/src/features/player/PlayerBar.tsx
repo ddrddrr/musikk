@@ -21,7 +21,7 @@ function formatTime(seconds: number) {
 }
 
 interface PlayerBarProps {
-    audioRef: React.RefObject<HTMLAudioElement>;
+    audioRef: React.RefObject<HTMLAudioElement | null>;
     seeking: boolean;
     setSeeking: (s: boolean) => void;
     setIsQueueOpen: React.Dispatch<React.SetStateAction<boolean>>;
