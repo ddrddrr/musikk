@@ -80,7 +80,7 @@ export function ChatBox({ chatUUID }: ChatBoxProps) {
     }
 
     return (
-        <div className="flex h-full max-h-[600px] flex-col overflow-hidden rounded-sm border-2 border-foreground bg-card">
+        <div className="flex h-[600px] flex-col overflow-hidden rounded-sm border-2 border-foreground bg-card">
             <ChatHeader chat={chat} />
 
             <div className="relative min-h-0 flex-1">

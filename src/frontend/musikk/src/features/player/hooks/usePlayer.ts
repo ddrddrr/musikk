@@ -246,7 +246,7 @@ export function usePlayer({
 
     function handleTimeUpdate() {
         const audio = audioRef.current;
-        if (!audio) return;
+        if (!audio || !isAudioReadyRef.current) return;
 
         onTimeUpdate?.(audio.currentTime);
 

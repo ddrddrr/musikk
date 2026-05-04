@@ -62,7 +62,7 @@ export const CollectionHeader = memo(function SongCollectionHeader({
 }: SongCollectionHeaderProps) {
     return (
         <>
-            <div className="flex gap-4 rounded-sm border-2 border-foreground bg-card p-6">
+            <div className="flex items-center gap-4 rounded-sm border-2 border-foreground bg-card p-6">
                 <MediaThumbnail
                     src={collection.image}
                     alt={collection.title}

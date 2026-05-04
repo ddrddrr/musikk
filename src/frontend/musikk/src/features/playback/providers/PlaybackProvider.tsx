@@ -45,6 +45,8 @@ export function PlaybackProvider({ children }: PlaybackProviderProps) {
 
     const playingUUIDRef = useRef<string | undefined>(playingCollectionSong?.uuid);
     playingUUIDRef.current = playingCollectionSong?.uuid;
+    const isThisDeviceActiveRef = useRef(isThisDeviceActive);
+    isThisDeviceActiveRef.current = isThisDeviceActive;
     const audioTimePosRef = useRef<CurrAudioTimePos | null>(null);
     const currentTimeRef = useRef(currentTime);
     currentTimeRef.current = currentTime;
@@ -59,6 +61,8 @@ export function PlaybackProvider({ children }: PlaybackProviderProps) {
         () =>
             subToPlaybackSnapshotWSEvent(
                 ws,
+                isThisDeviceActiveRef,
+                playingUUIDRef,
                 setIsPlaybackActive,
                 setCurrentSong,
                 audioTimePosRef,
@@ -145,6 +149,8 @@ function resetPositionForNewSong(
 
 function subToPlaybackSnapshotWSEvent(
     ws: WSClient,
+    isThisDeviceActiveRef: RefObject<boolean>,
+    playingUUIDRef: RefObject<string | undefined>,
     setIsPlaybackActive: (b: boolean) => void,
     setCurrentSong: (s: CollectionSong | null) => void,
     audioTimePosRef: RefObject<CurrAudioTimePos | null>,
@@ -153,13 +159,20 @@ function subToPlaybackSnapshotWSEvent(
     return ws.subscribe("playback.snapshot", (payload: PlaybackSnapshotPayload) => {
         setIsPlaybackActive(payload.is_playback_active);
         setCurrentSong(payload.current_song);
-        if (payload.position !== null) {
-            audioTimePosRef.current = {
-                currTimePos: payload.position,
-                lastUpdateAt: performance.now(),
-            };
-            setCurrentTime(payload.position);
-        }
+        if (payload.position === null) return;
+
+        // if no song change and the device is active we let the native audio element
+        // control the timepos, hence skip the update in that case
+        const sameSong =
+            playingUUIDRef.current !== undefined &&
+            payload.current_song?.uuid === playingUUIDRef.current;
+        if (isThisDeviceActiveRef.current && sameSong) return;
+
+        audioTimePosRef.current = {
+            currTimePos: payload.position,
+            lastUpdateAt: performance.now(),
+        };
+        setCurrentTime(payload.position);
     });
 }
 

@@ -57,6 +57,9 @@ export function useCreatePost() {
                 void queryClient.invalidateQueries({
                     queryKey: publicationKeys.childrenRoot(),
                 });
+                void queryClient.invalidateQueries({
+                    queryKey: publicationKeys.globalFeed(),
+                });
             }
         },
         onError: (error) => {
