@@ -1,9 +1,9 @@
-.PHONY: setup setup-ffmpeg setup-shaka check check-ffmpeg check-shaka clean
+.PHONY: setup setup-ffmpeg setup-shaka check check-ffmpeg check-shaka clean run-local-full run-local-full-down
 
 UNAME := $(shell uname -s)
 ARCH := $(shell uname -m)
 
-PREFIX := .tools
+LOCAL_BINARY_DIR_PREFIX := .tools
 SHAKA_VERSION := v3.4.2
 
 ifeq ($(UNAME),Darwin)
@@ -19,8 +19,8 @@ SHAKA_URL := https://github.com/shaka-project/shaka-packager/releases/download/$
 setup: setup-ffmpeg setup-shaka
 
 setup-ffmpeg:
-	@if [ -x "$(PREFIX)/bin/ffmpeg" ]; then \
-		echo "ffmpeg already installed at $(PREFIX)/bin/ffmpeg, run 'make clean' to rebuild"; \
+	@if [ -x "$(LOCAL_BINARY_DIR_PREFIX)/bin/ffmpeg" ]; then \
+		echo "ffmpeg already installed at $(LOCAL_BINARY_DIR_PREFIX)/bin/ffmpeg, run 'make clean' to rebuild"; \
 		exit 0; \
 	fi; \
 	if command -v ffmpeg >/dev/null 2>&1; then \
@@ -30,27 +30,33 @@ setup-ffmpeg:
 	bash $(FFMPEG_SCRIPT)
 
 setup-shaka:
-	@if [ -x "$(PREFIX)/bin/packager" ]; then \
-		echo "shaka-packager already installed at $(PREFIX)/bin/packager, run 'make clean' to rebuild"; \
+	@if [ -x "$(LOCAL_BINARY_DIR_PREFIX)/bin/packager" ]; then \
+		echo "shaka-packager already installed at $(LOCAL_BINARY_DIR_PREFIX)/bin/packager, run 'make clean' to rebuild"; \
 		exit 0; \
 	fi; \
 	if command -v packager >/dev/null 2>&1; then \
 		echo "note: system packager found at $$(command -v packager); "; \
 		echo "to use the system one instead, point SHAKA_PACKAGER_BIN at it in .env."; \
 	fi; \
-	mkdir -p $(PREFIX)/bin; \
-	curl -fsSL "$(SHAKA_URL)" -o $(PREFIX)/bin/packager; \
-	chmod +x $(PREFIX)/bin/packager; \
-	echo "shaka-packager $(SHAKA_VERSION) installed to $(PREFIX)/bin/packager"
+	mkdir -p $(LOCAL_BINARY_DIR_PREFIX)/bin; \
+	curl -fsSL "$(SHAKA_URL)" -o $(LOCAL_BINARY_DIR_PREFIX)/bin/packager; \
+	chmod +x $(LOCAL_BINARY_DIR_PREFIX)/bin/packager; \
+	echo "shaka-packager $(SHAKA_VERSION) installed to $(LOCAL_BINARY_DIR_PREFIX)/bin/packager"
 
 check: check-ffmpeg check-shaka
 
 check-ffmpeg:
-	@$(PREFIX)/bin/ffmpeg -version | head -1
-	@$(PREFIX)/bin/ffprobe -version | head -1
+	@$(LOCAL_BINARY_DIR_PREFIX)/bin/ffmpeg -version | head -1
+	@$(LOCAL_BINARY_DIR_PREFIX)/bin/ffprobe -version | head -1
 
 check-shaka:
-	@$(PREFIX)/bin/packager --version
+	@$(LOCAL_BINARY_DIR_PREFIX)/bin/packager --version
 
 clean:
-	rm -rf $(PREFIX)
+	rm -rf $(LOCAL_BINARY_DIR_PREFIX)
+
+run-local-full:
+	docker compose -f docker-compose-prod.yml up --build
+
+run-local-full-down:
+	docker compose -f docker-compose-prod.yml down

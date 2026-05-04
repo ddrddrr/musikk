@@ -1,6 +1,4 @@
-musikk.stream {
-    tls internal
-
+:80 {
     handle_path /static/* {
         root /app/staticfiles
         file_server
@@ -10,7 +8,7 @@ musikk.stream {
         file_server
     }
     handle /api/* {
-        reverse_proxy server:{env.DJANGO_PORT} {
+        reverse_proxy server:8000 {
             header_up X-Forwarded-Proto {scheme}
         }
     }

@@ -16,8 +16,6 @@ ROOT_DIR = BASE_DIR.parent.parent.parent  # root dir(where /src lives)
 
 config = AutoConfig(search_path=ROOT_DIR)
 
-DJANGO_BASE_URL = config("DJANGO_BASE_URL", default="http://localhost:8000")
-
 SECRET_KEY = config("SECRET_KEY")
 
 DEBUG = config("DEBUG", default=True, cast=bool)
