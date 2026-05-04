@@ -1,9 +1,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
+import * as z from "zod";
 
-import { getErrorDetail } from "@/api/errorUtils.ts";
+import { setFormServerErrors } from "@/api/errorUtils.ts";
 import { register } from "@/features/auth/api.ts";
 import { EmailField } from "@/features/auth/components/EmailField.tsx";
 import { PasswordField } from "@/features/auth/components/PasswordField.tsx";
@@ -12,7 +12,7 @@ import { CardContent } from "@/features/ui/card.tsx";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/features/ui/form.tsx";
 import { Spinner } from "@/features/ui/spinner";
 import { Switch } from "@/features/ui/switch.tsx";
-import * as z from "zod";
+import { cn } from "@/lib/utils.ts";
 
 const signupSchema = z
     .object({
@@ -28,32 +28,29 @@ const signupSchema = z
 
 type SignUpFormValues = z.infer<typeof signupSchema>;
 
+const SUCCESS_MESSAGE =
+    "Confirmation email has been sent. " +
+    "Please follow the link in the email and validate your account.";
+
 export function SignUpForm() {
-    const [formMessage, setFormMessage] = useState("");
     const form = useForm<SignUpFormValues>({
         resolver: zodResolver(signupSchema),
         defaultValues: { userRole: "StreamingUser" },
     });
 
-    const { mutate, isPending, isError, isSuccess } = useMutation({
+    const { mutate, isPending, isSuccess } = useMutation({
         mutationFn: register,
         onError(error) {
-            setFormMessage(
-                getErrorDetail(error, "Could not perform registration, please try again."),
-            );
-        },
-        onSuccess() {
-            setFormMessage(
-                "Confirmation email has been sent. " +
-                    "Please follow the link in the email and validate your account.",
-            );
+            setFormServerErrors(form, error);
         },
     });
 
     const onSubmit = (values: SignUpFormValues) => {
-        setFormMessage("");
+        form.clearErrors("root");
         mutate(values);
     };
+
+    const serverErrorMessage = form.formState.errors.root?.serverError?.message;
 
     return (
         <CardContent>
@@ -92,18 +89,24 @@ export function SignUpForm() {
                     >
                         {isPending ? <Spinner /> : "Sign Up"}
                     </Button>
-                    {formMessage && (
+                    {serverErrorMessage && (
                         <div
-                            className={[
+                            className={cn(
                                 "rounded-sm border-2 p-4 font-medium",
-                                isError
-                                    ? "border-destructive bg-destructive text-destructive-foreground"
-                                    : isSuccess
-                                      ? "border-success bg-success text-success-foreground"
-                                      : "",
-                            ].join(" ")}
+                                "border-destructive bg-destructive text-destructive-foreground",
+                            )}
                         >
-                            {formMessage}
+                            {serverErrorMessage}
+                        </div>
+                    )}
+                    {isSuccess && (
+                        <div
+                            className={cn(
+                                "rounded-sm border-2 p-4 font-medium",
+                                "border-success bg-success text-success-foreground",
+                            )}
+                        >
+                            {SUCCESS_MESSAGE}
                         </div>
                     )}
                 </form>

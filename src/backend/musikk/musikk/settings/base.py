@@ -143,6 +143,7 @@ REST_FRAMEWORK = {
     ],
     # "DEFAULT_PAGINATION_CLASS": "musikk.pagination.BaseLimitOffsetPagination",
     "PAGE_SIZE": 10,
+    "EXCEPTION_HANDLER": "base.exception_handler.musikk_exception_handler",
 }
 
 ### AUTH
@@ -198,6 +199,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+
+### Frontend
+FRONTEND_URL = config("FRONTEND_URL", default="http://localhost:5175")
 
 ### MAIL
 EMAIL_BACKEND = config(

@@ -5,6 +5,7 @@ from pathlib import Path
 from django.db import transaction
 from musikk.pagination import BaseLimitOffsetPagination
 from rest_framework import status
+from rest_framework.exceptions import ValidationError
 from rest_framework.generics import (
     ListCreateAPIView,
     RetrieveAPIView,
@@ -21,6 +22,7 @@ from streaming.api.v1.serializers.collections import (
     CollectionCreateSerializer,
     CollectionSerializerBasic,
     CollectionSerializerDetailed,
+    with_collection_list_optimizations,
 )
 from streaming.audio.tasks import convert_audio
 from streaming.audio.validators import validate_audio
@@ -40,6 +42,12 @@ class CollectionListCreateView(ListCreateAPIView):
     filterset_class = CollectionFilter
     pagination_class = BaseLimitOffsetPagination
     parser_classes = [MultiPartParser, FormParser, JSONParser]
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        if self.request.method == "GET":
+            qs = with_collection_list_optimizations(qs, self.request.user)
+        return qs
 
     def get_serializer_class(self):
         return (
@@ -67,26 +75,24 @@ class CollectionPersonalView(APIView):
 
     def get(self, request, *args, **kwargs):
         profile = request.user.streamingprofile
+        ctx = {"request": request}
 
-        history = CollectionSerializerBasic(
-            profile.history, context={"request": request}
-        ).data
-        liked_songs = CollectionSerializerBasic(
-            profile.liked_songs, context={"request": request}
-        ).data
+        created_qs = with_collection_list_optimizations(
+            profile.created_collections, request.user
+        )
+        created_ids = list(created_qs.values_list("id", flat=True))
 
+        followed_qs = with_collection_list_optimizations(
+            profile.followed_collections.exclude(id__in=created_ids), request.user
+        )
+
+        history = CollectionSerializerBasic(profile.history, context=ctx).data
+        liked_songs = CollectionSerializerBasic(profile.liked_songs, context=ctx).data
         created_collections = CollectionSerializerBasic(
-            profile.created_collections,
-            context={"request": request},
-            many=True,
+            created_qs, context=ctx, many=True
         ).data
-
         followed_collections = CollectionSerializerBasic(
-            profile.followed_collections.exclude(
-                id__in=profile.created_collections.values_list("id", flat=True)
-            ),
-            context={"request": request},
-            many=True,
+            followed_qs, context=ctx, many=True
         ).data
 
         return Response(
@@ -118,10 +124,7 @@ class CollectionRetrieveView(APIView):
 
         # TODO: albums should be as well, but we need song handling
         if collection.type != CollectionType.PLAYLIST:
-            return Response(
-                data={"detail": "Only playlists can be deleted."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            raise ValidationError("Only playlists can be deleted.")
 
         collection.delete()
         send_ws_event(

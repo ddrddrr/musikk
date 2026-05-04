@@ -1,4 +1,10 @@
-import { getErrorDetail } from "@/api/errorUtils.ts";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
+import * as z from "zod";
+
+import { setFormServerErrors } from "@/api/errorUtils.ts";
 import { EmailField } from "@/features/auth/components/EmailField.tsx";
 import { PasswordField } from "@/features/auth/components/PasswordField.tsx";
 import { Button } from "@/features/ui/button.tsx";
@@ -6,11 +12,6 @@ import { CardContent } from "@/features/ui/card.tsx";
 import { Form } from "@/features/ui/form.tsx";
 import { Spinner } from "@/features/ui/spinner";
 import { useAuth } from "@/hooks/useAuth.ts";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
-import * as z from "zod";
 
 const loginSchema = z.object({
     email: z.string().min(5, "Email is required."),
@@ -22,25 +23,19 @@ export function LoginForm() {
     const { login } = useAuth();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
-    const [message, setmessage] = useState("");
 
     const form = useForm<LoginFormValues>({
         resolver: zodResolver(loginSchema),
     });
+    const serverErrorMessage = form.formState.errors.root?.serverError?.message;
 
     const onSubmit = async (values: LoginFormValues) => {
-        setmessage("");
         setLoading(true);
         try {
             await login(values.email, values.password);
             void navigate("/");
         } catch (error) {
-            setmessage(
-                getErrorDetail(
-                    error,
-                    "Could not perform login, please check your credentials and try again.",
-                ),
-            );
+            setFormServerErrors(form, error);
         } finally {
             setLoading(false);
         }
@@ -63,9 +58,9 @@ export function LoginForm() {
                         {loading ? <Spinner /> : "Login"}
                     </Button>
 
-                    {message && (
+                    {serverErrorMessage && (
                         <div className="rounded-sm border-2 border-destructive bg-destructive p-4 text-destructive-foreground">
-                            <p className="font-medium">{message}</p>
+                            <p className="font-medium">{serverErrorMessage}</p>
                         </div>
                     )}
 
