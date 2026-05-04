@@ -7,6 +7,23 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
     const [client] = useState(() => WebSocketManager.connect(WebsocketURLs.userChannel));
 
     useEffect(() => {
+        const onOnline = () => client.reconnect();
+        const onVisibilityChange = () => {
+            if (document.visibilityState === "visible") {
+                client.reconnect();
+            }
+        };
+
+        window.addEventListener("online", onOnline);
+        document.addEventListener("visibilitychange", onVisibilityChange);
+
+        return () => {
+            window.removeEventListener("online", onOnline);
+            document.removeEventListener("visibilitychange", onVisibilityChange);
+        };
+    }, [client]);
+
+    useEffect(() => {
         return () => {
             WebSocketManager.disconnect();
         };

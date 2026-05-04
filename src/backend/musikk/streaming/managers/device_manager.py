@@ -4,7 +4,9 @@ from typing import TypedDict
 from redis_helpers import get_default_redis_conn
 from utils.data import try_decode
 
-DEVICE_TTL_SECONDS = 5  # heartbeat TTL seconds
+# heartbeat TTL seconds
+# 2x the 3s FE heartbeat + 1s so a single missed beat doesn't remove active device
+DEVICE_TTL_SECONDS = 7
 
 
 DEFAULT_VOLUME = 100

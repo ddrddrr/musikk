@@ -10,8 +10,8 @@ interface UserAction {
 
 type MessageHandler = (payload: any) => void;
 
-const MAX_RECONNECTS = 10;
-const RECONNECT_DELAY = 1000; // ms
+const RECONNECT_BASE_DELAY_MS = 500;
+const RECONNECT_MAX_DELAY_MS = 30000;
 
 export class WSClient {
     private ws: WebSocket | null = null;
@@ -49,17 +49,14 @@ export class WSClient {
             console.debug("WS conn established");
             this.currReconnects = 0;
 
-            if (this.pendingMessages.length > 0) {
-                console.debug(`WS Flushing ${this.pendingMessages.length} pending messages`);
-                for (const msg of this.pendingMessages) {
-                    this.ws?.send(msg);
-                }
-                this.pendingMessages = [];
-            }
-
             for (const topic of this.topicSubscriptions.keys()) {
                 this.ws?.send(JSON.stringify({ action: "subscribe", payload: { topic } }));
             }
+
+            if (this.pendingMessages.length > 0) {
+                console.debug(`WS Flushing ${this.pendingMessages.length} pending messages`);
+            }
+            this.flush();
         };
 
         this.ws.onmessage = (e) => {
@@ -71,15 +68,15 @@ export class WSClient {
                 return;
             }
 
-            const type = data?.event;
-            if (!type) {
+            const eventType = data?.event;
+            if (!eventType) {
                 console.debug("WS Received message without event type:", data);
                 return;
             }
 
-            const listeners = this.listeners.get(type);
+            const listeners = this.listeners.get(eventType);
             if (!listeners || listeners.size === 0) {
-                console.debug(`WS No listeners for event '${type}'`);
+                console.debug(`WS No listeners for event '${eventType}'`);
                 return;
             }
 
@@ -88,7 +85,7 @@ export class WSClient {
                 try {
                     handler(payload);
                 } catch (error) {
-                    console.error(`WS Error in event handler for '${type}':`, error);
+                    console.error(`WS Error in event handler for '${eventType}':`, error);
                 }
             }
         };
@@ -102,26 +99,50 @@ export class WSClient {
             console.debug(`WS Connection closed (code: ${event.code}, reason: ${reason})`);
             this.ws = null;
 
-            // TODO: add exp backoff
-            // reconnect on non-standard close
-            if (
-                this.shouldReconnect &&
-                event.code !== 1000 &&
-                this.currReconnects < MAX_RECONNECTS
-            ) {
-                this.currReconnects++;
-                const delay = RECONNECT_DELAY * this.currReconnects;
-                console.debug(
-                    `WS Attempting reconnect ${this.currReconnects}/${MAX_RECONNECTS} in ${delay}ms`,
-                );
-
-                this.reconnectTimeout = setTimeout(() => {
-                    this.connect();
-                }, delay);
-            } else if (this.currReconnects >= MAX_RECONNECTS) {
-                console.error("WS Max reconnection attempts reached");
+            if (!this.shouldReconnect || event.code === 1000) {
+                return;
             }
+
+            this.scheduleReconnect();
         };
+    }
+
+    private scheduleReconnect() {
+        if (this.reconnectTimeout) {
+            return;
+        }
+
+        const exp = Math.min(
+            RECONNECT_MAX_DELAY_MS,
+            RECONNECT_BASE_DELAY_MS * 2 ** this.currReconnects,
+        );
+        // jitter, see https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/
+        // helps, e.g, with possible simulatenous reconnects of multiple clients
+        const delay = Math.floor(Math.random() * exp);
+        this.currReconnects++;
+
+        console.debug(`WS Reconnect attempt ${this.currReconnects} in ${delay}ms`);
+        this.reconnectTimeout = setTimeout(() => {
+            this.reconnectTimeout = null;
+            this.connect();
+        }, delay);
+    }
+
+    private isOpen(): boolean {
+        return this.ws?.readyState === WebSocket.OPEN;
+    }
+
+    // used on `visibilitychange` -> visible or `online`
+    reconnect() {
+        if (this.isOpen()) {
+            return;
+        }
+        if (this.reconnectTimeout) {
+            clearTimeout(this.reconnectTimeout);
+            this.reconnectTimeout = null;
+        }
+        this.currReconnects = 0;
+        this.connect();
     }
 
     close() {
@@ -139,14 +160,29 @@ export class WSClient {
     }
 
     send({ action, payload }: UserAction) {
-        const message = JSON.stringify({ action: action, payload: payload });
+        this.pendingMessages.push(JSON.stringify({ action, payload }));
+        this.flush();
+    }
 
-        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-            this.ws.send(message);
-        } else {
-            console.debug(`WS Connection not ready, queueing message ${action}`);
-            this.pendingMessages.push(message);
+    // the invariant is that the pendingMessages arr is empty before we call send()
+    // and after onopen (in connect)
+    private flush() {
+        const ws = this.ws;
+        if (ws?.readyState !== WebSocket.OPEN) return;
+        while (this.pendingMessages.length > 0) {
+            ws.send(this.pendingMessages.shift()!);
         }
+    }
+
+    // used e.g. by subscribeTopic
+    // because we need create the sub immediatelly and increment the sub count
+    // otherwise we can re-subscribe if there are a lot of pending messages
+    // and another sub request comes in
+    // (checks that there are no subs since the sub req is queued -> queues again)
+    private sendNow(action: UserAction) {
+        const ws = this.ws;
+        if (ws?.readyState !== WebSocket.OPEN) return;
+        ws.send(JSON.stringify(action));
     }
 
     subscribeTopic(topic: string): () => void {
@@ -154,14 +190,14 @@ export class WSClient {
         this.topicSubscriptions.set(topic, count + 1);
 
         if (count === 0) {
-            this.send({ action: "subscribe", payload: { topic } });
+            this.sendNow({ action: "subscribe", payload: { topic } });
         }
 
         return () => {
             const current = this.topicSubscriptions.get(topic) ?? 0;
             if (current <= 1) {
                 this.topicSubscriptions.delete(topic);
-                this.send({ action: "unsubscribe", payload: { topic } });
+                this.sendNow({ action: "unsubscribe", payload: { topic } });
             } else {
                 this.topicSubscriptions.set(topic, current - 1);
             }
