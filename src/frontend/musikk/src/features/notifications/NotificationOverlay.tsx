@@ -6,6 +6,7 @@ import {
     IReplyNotification,
 } from "@/features/notifications/types.ts";
 import { Button } from "@/features/ui/button.tsx";
+import { PopoverClose } from "@/features/ui/popover.tsx";
 import { useAuth } from "@/hooks/useAuth.ts";
 import { cn } from "@/lib/utils.ts";
 import { formatDateTime } from "@/utils/formatDate.ts";
@@ -77,13 +78,16 @@ export const NotificationOverlay = memo(function NotificationOverlay({
                                 <span className="text-xs text-muted-foreground">
                                     {formatDateTime(notification.date_added)}
                                 </span>
-                                <Button
-                                    variant="brand"
-                                    className="rounded-sm px-3 py-1 text-xs"
-                                    onClick={() => handleNavigateReplyClick(notification)}
-                                >
-                                    Go to reply
-                                </Button>
+                                {/*asChild makes PopoverClose "become" the button (merges with it) */}
+                                <PopoverClose asChild>
+                                    <Button
+                                        variant="brand"
+                                        className="rounded-sm px-3 py-1 text-xs"
+                                        onClick={() => handleNavigateReplyClick(notification)}
+                                    >
+                                        Open
+                                    </Button>
+                                </PopoverClose>
                             </div>
                         </>
                     )}
@@ -99,13 +103,15 @@ export const NotificationOverlay = memo(function NotificationOverlay({
                                 <span className="text-xs text-muted-foreground">
                                     {formatDateTime(notification.date_added)}
                                 </span>
-                                <Button
-                                    variant="brand"
-                                    className="px-3 py-1 text-xs"
-                                    onClick={() => handleNavigateFollowerClick(notification)}
-                                >
-                                    View Profile
-                                </Button>
+                                <PopoverClose asChild>
+                                    <Button
+                                        variant="brand"
+                                        className="px-3 py-1 text-xs"
+                                        onClick={() => handleNavigateFollowerClick(notification)}
+                                    >
+                                        View Profile
+                                    </Button>
+                                </PopoverClose>
                             </div>
                         </>
                     )}
@@ -122,13 +128,15 @@ export const NotificationOverlay = memo(function NotificationOverlay({
                                 <span className="text-xs text-muted-foreground">
                                     {formatDateTime(notification.date_added)}
                                 </span>
-                                <Button
-                                    variant="brand"
-                                    className="rounded-sm px-3 py-1 text-xs"
-                                    onClick={() => handleNavigateChatClick(notification)}
-                                >
-                                    Open chat
-                                </Button>
+                                <PopoverClose asChild>
+                                    <Button
+                                        variant="brand"
+                                        className="rounded-sm px-3 py-1 text-xs"
+                                        onClick={() => handleNavigateChatClick(notification)}
+                                    >
+                                        Open chat
+                                    </Button>
+                                </PopoverClose>
                             </div>
                         </>
                     )}
