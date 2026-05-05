@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { Music } from "lucide-react";
 import { type ReactNode } from "react";
 
 type MediaThumbnailProps = {
@@ -21,7 +22,7 @@ export function MediaThumbnail({ src, alt = "", fallback, className }: MediaThum
 
     return (
         <div className={cn(baseClass, className)}>
-            {fallback ?? <span className="text-2xl text-muted-foreground">&#9835;</span>}
+            {fallback ?? <Music className="h-1/4 w-1/4 text-muted-foreground" />}
         </div>
     );
 }

@@ -3,7 +3,7 @@ import { getErrorDetail } from "@/api/errorUtils.ts";
 import { UUID } from "@/api/types.ts";
 import { publicationKeys } from "@/features/publications/api/queryKeys.ts";
 import { ChatURLs, PublicationURLs } from "@/features/publications/api/urls.ts";
-import { AttachmentType, Chat } from "@/features/publications/types.ts";
+import { AttachmentType, Chat, Publication } from "@/features/publications/types.ts";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
@@ -13,9 +13,8 @@ interface PublicationPayload {
     parent_uuid?: UUID;
 }
 
-// TODO: add type
-async function createPublication(url: string, payload: PublicationPayload) {
-    const response = await api_client.post(url, payload);
+async function createPublication(url: string, payload: PublicationPayload): Promise<Publication> {
+    const response = await api_client.post<Publication>(url, payload);
     return response.data;
 }
 
@@ -53,17 +52,14 @@ export function useCreatePost() {
             void queryClient.invalidateQueries({
                 queryKey: publicationKeys.feed(variables.userUUID),
             });
+            void queryClient.invalidateQueries({
+                queryKey: publicationKeys.globalFeed(),
+            });
             if (variables.parentUUID) {
                 void queryClient.invalidateQueries({
                     queryKey: publicationKeys.childrenRoot(),
                 });
-                void queryClient.invalidateQueries({
-                    queryKey: publicationKeys.globalFeed(),
-                });
             }
-        },
-        onError: (error) => {
-            toast.error(getErrorDetail(error, "Failed to create post"));
         },
     });
 }
@@ -72,6 +68,8 @@ interface CreateCollectionCommentParams {
     collectionUUID: UUID;
     content: string;
     parentUUID?: UUID;
+    attachmentType?: AttachmentType;
+    attachmentUUID?: UUID;
 }
 
 export function useCreateCollectionComment() {
@@ -81,8 +79,14 @@ export function useCreateCollectionComment() {
             collectionUUID,
             content,
             parentUUID,
+            attachmentType,
+            attachmentUUID,
         }: CreateCollectionCommentParams) => {
             const payload: PublicationPayload = { content };
+
+            if (attachmentType && attachmentUUID) {
+                payload.attachment = { type: attachmentType, uuid: attachmentUUID };
+            }
 
             if (parentUUID) {
                 payload.parent_uuid = parentUUID;
@@ -94,9 +98,6 @@ export function useCreateCollectionComment() {
             void queryClient.invalidateQueries({
                 queryKey: publicationKeys.collectionComments(variables.collectionUUID),
             });
-        },
-        onError: (error) => {
-            toast.error(getErrorDetail(error, "Failed to add comment"));
         },
     });
 }
@@ -141,9 +142,6 @@ export function useCreateChat() {
                 queryKey: publicationKeys.userChats(variables.userUUID),
             });
         },
-        onError: (error) => {
-            toast.error(getErrorDetail(error, "Failed to create chat"));
-        },
     });
 }
 
@@ -177,9 +175,6 @@ export function useCreateChatMessage() {
             void queryClient.invalidateQueries({
                 queryKey: publicationKeys.chatMessages(variables.chatUUID),
             });
-        },
-        onError: (error) => {
-            toast.error(getErrorDetail(error, "Failed to send message"));
         },
     });
 }

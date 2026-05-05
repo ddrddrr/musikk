@@ -1,4 +1,4 @@
-import { getErrorDetail } from "@/api/errorUtils.ts";
+import { setFormServerErrors } from "@/api/errorUtils.ts";
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
 import { useCreateChatMessage } from "@/features/publications/api/mutations.ts";
 import { AttachmentPicker } from "@/features/publications/components/AttachmentPicker.tsx";
@@ -9,7 +9,6 @@ import { Button } from "@/features/ui/button.tsx";
 import { Textarea } from "@/features/ui/textarea.tsx";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 import { z } from "zod";
 
 type ChatMessageFormData = z.infer<typeof chatMessageSchema>;
@@ -18,20 +17,20 @@ interface ChatMessageFormProps {
     chat: Chat;
     onTyping?: () => void;
 }
-// TODO: message style as in comments + attachment picker + avatar for the user who sent
-// move chats to header as button instead of a context menu for profile
-// same for connections
+
 export function ChatMessageForm({ chat, onTyping }: ChatMessageFormProps) {
     const userUUID = useUserUUID();
+    const form = useForm<ChatMessageFormData>({
+        resolver: zodResolver(chatMessageSchema),
+    });
     const {
         register,
         handleSubmit,
         formState: { errors },
         reset,
-    } = useForm<ChatMessageFormData>({
-        resolver: zodResolver(chatMessageSchema),
-    });
+    } = form;
     const contentField = register("content");
+    const serverErrorMessage = errors.root?.serverError?.message;
 
     const { attachedObj, setAttachedObj, getAttachmentData, clearAttachment } = useAttachment();
     const createChatMessageMutation = useCreateChatMessage();
@@ -55,7 +54,7 @@ export function ChatMessageForm({ chat, onTyping }: ChatMessageFormProps) {
                     clearAttachment();
                 },
                 onError: (error) => {
-                    toast.error(getErrorDetail(error, "Failed to send message"));
+                    setFormServerErrors(form, error);
                 },
             },
         );
@@ -74,6 +73,7 @@ export function ChatMessageForm({ chat, onTyping }: ChatMessageFormProps) {
                 className={"border border-foreground bg-card"}
             />
             {errors.content && <p className="text-xs text-destructive">{errors.content.message}</p>}
+            {serverErrorMessage && <p className="text-xs text-destructive">{serverErrorMessage}</p>}
 
             <div className="flex items-start gap-2">
                 <Button

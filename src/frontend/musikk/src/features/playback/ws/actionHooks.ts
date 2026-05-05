@@ -9,11 +9,23 @@ const TICK_INTERVAL_MS = 1500;
 export function useRegisterDeviceAction() {
     const ws = useWSClient();
     const registerDeviceAction = useCallback(
-        (device: ThisDevice) =>
-            ws.send({
-                action: "device.register",
-                payload: { device_id: device.id, name: device.name },
-            }),
+        (device: ThisDevice) => {
+            // BE forgets device volume across disconnects (TTL + cleared on disconnect),
+            // so we re-assert localStorage as the source of truth on every register
+            const payload: {
+                device_id: string;
+                name: string;
+                volume?: number;
+            } = { device_id: device.id, name: device.name };
+            const saved = localStorage.getItem("deviceVolume");
+            if (saved !== null) {
+                const parsed = Number(saved);
+                if (Number.isInteger(parsed) && parsed >= 0 && parsed <= 100) {
+                    payload.volume = parsed;
+                }
+            }
+            ws.send({ action: "device.register", payload });
+        },
         [ws],
     );
 

@@ -1,21 +1,26 @@
+import io
+from unittest.mock import MagicMock, patch
+
 from django.test import TestCase
 from django.urls import reverse
 from faker import Faker
 from rest_framework import status
+from rest_framework.exceptions import ValidationError
 from rest_framework.test import APIRequestFactory, force_authenticate
 from users.tests.factories import ArtistFactory, BaseUserFactory
 
 from streaming.api.v1.views.collections import (
     CollectionAddLikedView,
-    CollectionAddSong,
     CollectionDetailView,
     CollectionListCreateView,
     CollectionRemoveSong,
     CollectionRetrieveView,
+    CollectionSongCreateView,
 )
+from streaming.audio.probes import AudioStreamInfo
 from streaming.models import Collection
 from streaming.models.collections import CollectionCredit, CollectionType
-from streaming.models.songs import CollectionSong
+from streaming.models.songs import BaseSong, CollectionSong
 from streaming.tests.factories import BaseSongFactory, CollectionFactory
 
 fake = Faker()
@@ -299,41 +304,103 @@ class TestCollectionDeleteView(TestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
-class TestCollectionAddSong(TestCase):
+class TestCollectionSongCreateView(TestCase):
     def setUp(self):
         self.factory = APIRequestFactory()
         self.artist = BaseUserFactory()
 
-    def test_add_song_as_author(self):
+    def test_add_song_to_playlist_as_author(self):
         song = BaseSongFactory()
-        source_collection = CollectionFactory(private=False, songs=[song])
-        target_collection = CollectionFactory(private=False, songs=[])
+        target_collection = CollectionFactory(private=False, type="playlist", songs=[])
         CollectionCredit.objects.create(
             collection=target_collection, author=self.artist
         )
 
-        collection_song = CollectionSong.objects.get(
-            collection=source_collection, song=song
-        )
-
         url = reverse(
-            "api:collection-add-song",
-            kwargs={
-                "collection_uuid": target_collection.uuid,
-                "song_uuid": collection_song.uuid,
-            },
+            "api:collection-song-create",
+            kwargs={"collection_uuid": target_collection.uuid},
         )
-        request = self.factory.post(url)
+        request = self.factory.post(url, {"song_uuid": str(song.uuid)}, format="json")
         force_authenticate(request, user=self.artist)
-        response = CollectionAddSong.as_view()(
-            request,
-            collection_uuid=target_collection.uuid,
-            song_uuid=collection_song.uuid,
+        response = CollectionSongCreateView.as_view()(
+            request, collection_uuid=target_collection.uuid
         )
 
-        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data["song_uuid"], str(song.uuid))
         self.assertTrue(
             CollectionSong.objects.filter(
                 collection=target_collection, song=song
             ).exists()
         )
+
+
+class TestCollectionSongCreateViewAlbumUpload(TestCase):
+    def setUp(self):
+        self.factory = APIRequestFactory()
+        self.artist = ArtistFactory()
+        self.collection = CollectionFactory(private=False, type="album", songs=[])
+        CollectionCredit.objects.create(collection=self.collection, author=self.artist)
+
+    def _upload_payload(self, **overrides):
+        audio_file = io.BytesIO(b"fake audio content")
+        audio_file.name = "test_song.mp3"
+        payload = {
+            "title": fake.word(),
+            "description": fake.text(max_nb_chars=100),
+            "audio": audio_file,
+            "authors": [str(self.artist.uuid)],
+            "operation_id": "op-test-123",
+        }
+        payload.update(overrides)
+        return payload
+
+    @patch("streaming.api.v1.views.collections.validate_audio")
+    @patch("streaming.api.v1.views.collections.convert_audio.apply_async")
+    def test_album_song_create_with_multiple_authors(self, mock_convert, mock_validate):
+        mock_validate.return_value = AudioStreamInfo(
+            duration_seconds=180.0,
+            sample_rate=44100,
+            channels=2,
+            codec_name="mp3",
+            bit_depth=None,
+            bit_rate=320000,
+        )
+        mock_convert.return_value = MagicMock(id="task-id-456")
+
+        other_artist = ArtistFactory()
+        url = reverse(
+            "api:collection-song-create",
+            kwargs={"collection_uuid": self.collection.uuid},
+        )
+        payload = self._upload_payload(
+            authors=[str(self.artist.uuid), str(other_artist.uuid)]
+        )
+
+        request = self.factory.post(url, payload, format="multipart")
+        force_authenticate(request, user=self.artist)
+        response = CollectionSongCreateView.as_view()(
+            request, collection_uuid=self.collection.uuid
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
+
+        song = BaseSong.objects.get(uuid=response.data["song_uuid"])
+        self.assertEqual(song.credits.count(), 2)
+
+    @patch("streaming.api.v1.views.collections.validate_audio")
+    def test_album_song_create_validation_failure(self, mock_validate):
+        mock_validate.side_effect = ValidationError("Invalid audio format")
+
+        url = reverse(
+            "api:collection-song-create",
+            kwargs={"collection_uuid": self.collection.uuid},
+        )
+        request = self.factory.post(url, self._upload_payload(), format="multipart")
+        force_authenticate(request, user=self.artist)
+        response = CollectionSongCreateView.as_view()(
+            request, collection_uuid=self.collection.uuid
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        mock_validate.assert_called_once()

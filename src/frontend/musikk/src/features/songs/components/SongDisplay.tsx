@@ -16,12 +16,12 @@ export function SongDisplay({ song }: SongDisplayProps) {
     }
 
     return (
-        <div className="mb-4 flex flex-col items-start gap-3">
-            <div className="aspect-square w-full max-w-2/5">
+        <div className="mb-4 flex w-full flex-col items-start gap-3">
+            <div className="aspect-square w-1/3">
                 <MediaThumbnail src={song.image} alt={song.title} className="h-full w-full" />
             </div>
             <div className="w-full min-w-0 text-start">
-                <div className="mb-1 flex flex-wrap items-center gap-2">
+                <div className="mb-1 -ml-2 flex flex-wrap items-center gap-2">
                     {song.authors.map((author) => (
                         <UserIdentifier key={author.uuid} user={author} />
                     ))}

@@ -49,9 +49,16 @@ class DeviceWSActionHandler(WSActionHandler):
             )
             return
 
+        # FE owns the durable per-device volume in localStorage; BE state is
+        # volatile (TTL + cleared on disconnect) so the FE re-asserts it here
+        register_kwargs = {"device_id": device_id, "name": device_name}
+        volume = payload.get("volume")
+        if isinstance(volume, int) and 0 <= volume <= 100:
+            register_kwargs["volume"] = volume
+
         self.device_id = device_id
         self.consumer.device_id = device_id
-        self.manager.register_device(device_id=device_id, name=device_name)
+        self.manager.register_device(**register_kwargs)
         self.device_broadcaster.broadcast_devices()
 
         self.player_broadcaster.send_state_to_channel(
@@ -110,7 +117,6 @@ class PlaybackWSActionHandler(WSActionHandler):
         self.playback_broadcaster = PlaybackStateBroadcaster(
             user_uuid=consumer.user_uuid
         )
-        self.device_manager = DeviceManager(user_uuid=self.consumer.user_uuid)
         self.device_broadcaster = DeviceStateBroadcaster(user_uuid=consumer.user_uuid)
         self._last_tick: float = 0.0
 
@@ -149,9 +155,10 @@ class PlaybackWSActionHandler(WSActionHandler):
         device_id = self.consumer.device_id
         if not device_id:
             return
-        if self.device_manager.get_active_device_id() is not None:
+        device_manager = DeviceManager(user_uuid=self.consumer.user_uuid)
+        if device_manager.get_active_device_id() is not None:
             return
-        self.device_manager.set_active_device(device_id)
+        device_manager.set_active_device(device_id)
         self.device_broadcaster.broadcast_devices()
 
     def handle_tick(self, payload: dict):

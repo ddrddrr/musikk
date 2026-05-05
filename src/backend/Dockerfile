@@ -4,7 +4,7 @@ RUN chmod +x build-ffmpeg-linux.sh
 RUN ./build-ffmpeg-linux.sh --prefix=/opt/ffmpeg
 
 
-FROM python:3.13-slim AS backend-builder
+FROM python:3.14-slim AS backend-builder
 
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
@@ -12,6 +12,8 @@ ENV PATH="/opt/ffmpeg/bin:$PATH"
 ENV UV_LINK_MODE=copy
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
+    libc6-dev \
+    libffi-dev \
     curl \
     libpq-dev \
     libmagic1 \

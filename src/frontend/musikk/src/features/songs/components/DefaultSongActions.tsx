@@ -14,12 +14,14 @@ type DefaultSongActionsProps = {
     collectionSong: CollectionSong;
     size?: "compact" | "normal";
     showRemoveFromPlaylist?: boolean;
+    showAddToLiked?: boolean;
 };
 
 export function DefaultSongActions({
     collectionSong,
     size = "normal",
     showRemoveFromPlaylist = false,
+    showAddToLiked = true,
 }: DefaultSongActionsProps) {
     const btn = songButtonProps[size];
     return (
@@ -29,11 +31,13 @@ export function DefaultSongActions({
                 size={btn.size}
                 className={btn.padding}
             />
-            <SongAddToLikedButton
-                collectionSong={collectionSong}
-                size={btn.size}
-                className={btn.padding}
-            />
+            {showAddToLiked && (
+                <SongAddToLikedButton
+                    collectionSong={collectionSong}
+                    size={btn.size}
+                    className={btn.padding}
+                />
+            )}
             <SongAddToQueueButton
                 collectionSong={collectionSong}
                 size={btn.size}

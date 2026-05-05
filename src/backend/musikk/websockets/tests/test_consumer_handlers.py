@@ -305,6 +305,40 @@ class TestDeviceWSActionHandler(TestCase):
 
     @patch("streaming.ws.PlaybackManager")
     @patch("streaming.ws.DeviceManager")
+    def test_register_forwards_valid_volume(self, mock_manager_cls, _mock_playback_cls):
+        # FE owns the durable per-device volume in localStorage; without this
+        # forwarding, register would re-hydrate Redis at DEFAULT_VOLUME and
+        # subsequent device.list broadcasts would clobber the FE state
+        handler = DeviceWSActionHandler(self.consumer)
+        handler.handle_register(
+            {"device_id": "device1", "name": "My Device", "volume": 42}
+        )
+
+        mock_manager_cls.return_value.register_device.assert_called_once_with(
+            device_id="device1", name="My Device", volume=42
+        )
+
+    @patch("streaming.ws.PlaybackManager")
+    @patch("streaming.ws.DeviceManager")
+    def test_register_drops_invalid_volume(self, mock_manager_cls, _mock_playback_cls):
+        # invalid volume must not block registration; manager applies its own default
+        handler = DeviceWSActionHandler(self.consumer)
+        handler.handle_register(
+            {"device_id": "device1", "name": "My Device", "volume": 150}
+        )
+        handler.handle_register(
+            {"device_id": "device1", "name": "My Device", "volume": "loud"}
+        )
+        handler.handle_register(
+            {"device_id": "device1", "name": "My Device", "volume": -1}
+        )
+
+        for call in mock_manager_cls.return_value.register_device.call_args_list:
+            self.assertNotIn("volume", call.kwargs)
+        self.consumer.send_error.assert_not_called()
+
+    @patch("streaming.ws.PlaybackManager")
+    @patch("streaming.ws.DeviceManager")
     def test_register_missing_name(self, mock_manager_cls, _mock_playback_cls):
         handler = DeviceWSActionHandler(self.consumer)
         handler.handle_register({"device_id": "device1"})

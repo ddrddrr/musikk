@@ -1,0 +1,33 @@
+# Python
+**/__pycache__
+**/*.pyc
+**/*.pyo
+**/.ruff_cache
+**/.pytest_cache
+**/.mypy_cache
+.venv
+venv
+ENV/
+
+# Local data not needed in image
+musikk/samples
+musikk/media
+musikk/staticfiles
+**/*.sqlite3
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# VCS / editor / OS
+.git
+.gitignore
+.dockerignore
+.idea
+.vscode
+.DS_Store
+
+# Docker
+Dockerfile
+docker-compose*

@@ -1,13 +1,14 @@
-import { getErrorDetail } from "@/api/errorUtils.ts";
+import { setFormServerErrors } from "@/api/errorUtils.ts";
 import { UUID } from "@/api/types.ts";
 import { useCreateCollectionComment } from "@/features/publications/api/mutations.ts";
+import { AttachmentPicker } from "@/features/publications/components/AttachmentPicker.tsx";
+import { useAttachment } from "@/features/publications/hooks/useAttachment.ts";
 import { commentSchema } from "@/features/publications/schemas.ts";
 import { Publication } from "@/features/publications/types.ts";
 import { Button } from "@/features/ui/button.tsx";
 import { Textarea } from "@/features/ui/textarea.tsx";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 import { z } from "zod";
 
 type CommentFormData = z.infer<typeof commentSchema>;
@@ -25,31 +26,38 @@ export function CommentForm({
     setReplyTo,
     onTyping,
 }: CommentFormDataProps) {
+    const form = useForm<CommentFormData>({
+        resolver: zodResolver(commentSchema),
+    });
     const {
         register,
         handleSubmit,
         formState: { errors },
         reset,
-    } = useForm<CommentFormData>({
-        resolver: zodResolver(commentSchema),
-    });
+    } = form;
     const contentField = register("content");
+    const serverErrorMessage = errors.root?.serverError?.message;
 
+    const { attachedObj, setAttachedObj, getAttachmentData, clearAttachment } = useAttachment();
     const createCollectionCommentMutation = useCreateCollectionComment();
     const submitHandler = (data: CommentFormData) => {
+        const { attachmentType, attachmentUUID } = getAttachmentData();
         createCollectionCommentMutation.mutate(
             {
                 collectionUUID,
                 content: data.content,
                 parentUUID: replyTo?.uuid,
+                attachmentType,
+                attachmentUUID,
             },
             {
                 onSuccess: () => {
                     reset();
                     setReplyTo?.(undefined);
+                    clearAttachment();
                 },
                 onError: (error) => {
-                    toast.error(getErrorDetail(error, "Failed to post comment"));
+                    setFormServerErrors(form, error);
                 },
             },
         );
@@ -86,8 +94,15 @@ export function CommentForm({
                 placeholder="Write a comment..."
             />
             {errors.content && <p className="text-xs text-destructive">{errors.content.message}</p>}
-            <Button type="submit" variant="brand" className="rounded-sm px-4 py-2">
-                Post Comment
+            <AttachmentPicker attachedObj={attachedObj} onAttach={setAttachedObj} />
+            {serverErrorMessage && <p className="text-xs text-destructive">{serverErrorMessage}</p>}
+            <Button
+                type="submit"
+                variant="brand"
+                className="rounded-sm px-4 py-2"
+                disabled={createCollectionCommentMutation.isPending}
+            >
+                {createCollectionCommentMutation.isPending ? "Posting..." : "Post Comment"}
             </Button>
         </form>
     );

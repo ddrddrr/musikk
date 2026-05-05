@@ -4,6 +4,7 @@ from django.test import TestCase
 from users.tests.factories import BaseUserFactory
 
 from streaming.events import ServerEvent
+from streaming.managers.playback_manager import PlaybackManager
 from streaming.state_broadcasters.player import PlayerStateBroadcaster
 from streaming.tests.factories import CollectionSongFactory
 
@@ -25,17 +26,22 @@ class TestPlayerStateBroadcaster(TestCase):
         cls.collection_song = CollectionSongFactory.create()
 
     def setUp(self):
-        self.redis_patcher = patch(
-            "streaming.managers.playback_manager.get_default_redis_conn"
+        self.is_active_patcher = patch.object(
+            PlaybackManager, "is_playback_active", return_value=False
+        )
+        self.get_position_patcher = patch.object(
+            PlaybackManager, "get_position", return_value=None
         )
         self.channel_layer_patcher = patch("websockets.event_helpers.get_channel_layer")
-        self.mock_redis = self.redis_patcher.start().return_value
+        self.mock_is_active = self.is_active_patcher.start()
+        self.mock_get_position = self.get_position_patcher.start()
         self.mock_channel_layer = MagicMock()
         self.mock_channel_layer.group_send = AsyncMock()
         self.mock_channel_layer.send = AsyncMock()
         self.channel_layer_patcher.start().return_value = self.mock_channel_layer
 
-        self.addCleanup(self.redis_patcher.stop)
+        self.addCleanup(self.is_active_patcher.stop)
+        self.addCleanup(self.get_position_patcher.stop)
         self.addCleanup(self.channel_layer_patcher.stop)
 
     def _set_current_song(self):
@@ -45,7 +51,11 @@ class TestPlayerStateBroadcaster(TestCase):
 
     def test_broadcast_state_with_current_song_serializes_full_payload(self):
         self._set_current_song()
-        self.mock_redis.get.return_value = b"true"
+        self.mock_is_active.return_value = True
+        self.mock_get_position.return_value = {
+            "position": 12.5,
+            "collection_song_uuid": str(self.collection_song.uuid),
+        }
 
         PlayerStateBroadcaster(user_uuid=str(self.user.uuid)).broadcast_state()
 
@@ -68,9 +78,12 @@ class TestPlayerStateBroadcaster(TestCase):
         # is_liked must serialize without an HTTP request in context
         self.assertIn("is_liked", payload["current_song"]["song"])
         self.assertEqual(payload["current_song"]["song"]["is_liked"], False)
+        self.assertTrue(payload["is_playback_active"])
+        self.assertEqual(payload["position"], 12.5)
 
     def test_broadcast_state_without_current_song_returns_null(self):
-        self.mock_redis.get.return_value = None
+        self.mock_is_active.return_value = False
+        self.mock_get_position.return_value = None
 
         PlayerStateBroadcaster(user_uuid=str(self.user.uuid)).broadcast_state()
 
@@ -82,7 +95,8 @@ class TestPlayerStateBroadcaster(TestCase):
     def test_broadcast_state_forces_inactive_when_current_song_is_null(self):
         # the redis flag can outlive the song; snapshot must reconcile to
         # is_playback_active=False so the FE play button doesn't get stuck in Pause
-        self.mock_redis.get.return_value = b"true"
+        self.mock_is_active.return_value = True
+        self.mock_get_position.return_value = None
 
         PlayerStateBroadcaster(user_uuid=str(self.user.uuid)).broadcast_state()
 
@@ -92,7 +106,6 @@ class TestPlayerStateBroadcaster(TestCase):
         self.assertFalse(payload["is_playback_active"])
 
     def test_build_snapshot_omits_position_when_disabled(self):
-        self.mock_redis.get.return_value = None
         broadcaster = PlayerStateBroadcaster(user_uuid=str(self.user.uuid))
 
         snapshot = broadcaster.build_snapshot(include_position=False)

@@ -15,7 +15,7 @@ class TestSearchView(TestCase):
         cls.factory = APIRequestFactory()
         cls.user = BaseUserFactory()
 
-        cls.collections = CollectionFactory.create_batch(2)
+        cls.collections = CollectionFactory.create_batch(2, type="album", private=False)
         cls.songs = [song for c in cls.collections for song in c.base_songs.all()]
 
     def test_empty_q_string(self):

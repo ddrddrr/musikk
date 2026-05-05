@@ -1,9 +1,11 @@
+import dataclasses
 import tempfile
 from unittest.mock import Mock, patch
 
 from django.test import TestCase
 from users.tests.factories import ArtistFactory
 
+from streaming.audio.probes import AudioStreamInfo
 from streaming.audio.shaka_packager_conf.shaka_packager_wrapper import ManifestType
 from streaming.audio.tasks import convert_audio
 from streaming.tests.factories import BaseSongFactory
@@ -17,6 +19,19 @@ def _mock_song_repr():
         ManifestType.M3U8: "path/to/playlist.m3u8",
     }
     return Mock(song_repr=song_repr, loudness_lufs=-14.0, true_peak_dbtp=-1.5)
+
+
+def _audio_info_dict():
+    return dataclasses.asdict(
+        AudioStreamInfo(
+            duration_seconds=180.0,
+            sample_rate=44100,
+            channels=2,
+            codec_name="mp3",
+            bit_depth=None,
+            bit_rate=320000,
+        )
+    )
 
 
 @patch("streaming.audio.tasks.send_ws_event")
@@ -40,6 +55,7 @@ class ConvertAudioTest(TestCase):
         convert_audio(
             file_path=temp_path,
             song_uuid=str(song.uuid),
+            audio_info=_audio_info_dict(),
             initiator_uuid=str(self.user.uuid),
             delete_orig_file=False,
         )
@@ -63,6 +79,7 @@ class ConvertAudioTest(TestCase):
             convert_audio(
                 file_path=temp_path,
                 song_uuid=str(song.uuid),
+                audio_info=_audio_info_dict(),
                 initiator_uuid=str(self.user.uuid),
                 delete_orig_file=False,
             )

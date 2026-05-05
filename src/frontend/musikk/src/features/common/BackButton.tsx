@@ -20,7 +20,7 @@ export function BackButton({ to, label = "Back", className }: BackButtonProps) {
         }
         // location.key === "default" means this is the first entry in the
         // session's history stack (e.g. deep link or hard refresh), so there is
-        // no in-app page to go back to.
+        // no in-app page to go back to
         if (location.key === "default") {
             void navigate("/");
         } else {

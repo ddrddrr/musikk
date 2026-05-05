@@ -1,4 +1,4 @@
-import { getErrorDetail } from "@/api/errorUtils.ts";
+import { setFormServerErrors } from "@/api/errorUtils.ts";
 import { UUID } from "@/api/types.ts";
 import { useCreatePost } from "@/features/publications/api/mutations.ts";
 import { AttachmentPicker } from "@/features/publications/components/AttachmentPicker.tsx";
@@ -9,27 +9,28 @@ import { Button } from "@/features/ui/button.tsx";
 import { Textarea } from "@/features/ui/textarea.tsx";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 import z from "zod";
 
 type PostFormData = z.infer<typeof postSchema>;
 
 interface PostFormProps {
+    feedUserUUID: UUID;
     replyTo?: Publication;
     setReplyTo?: (reply?: Publication) => void;
     onSuccess?: () => void;
-    feedUserUUID?: UUID;
 }
 
-export function PostForm({ replyTo, setReplyTo, onSuccess, feedUserUUID }: PostFormProps) {
+export function PostForm({ feedUserUUID, replyTo, setReplyTo, onSuccess }: PostFormProps) {
+    const form = useForm<PostFormData>({
+        resolver: zodResolver(postSchema),
+    });
     const {
         register,
         handleSubmit,
         formState: { errors },
         reset,
-    } = useForm<PostFormData>({
-        resolver: zodResolver(postSchema),
-    });
+    } = form;
+    const serverErrorMessage = errors.root?.serverError?.message;
 
     const { attachedObj, setAttachedObj, getAttachmentData, clearAttachment } = useAttachment();
     const createPostMutation = useCreatePost();
@@ -38,9 +39,8 @@ export function PostForm({ replyTo, setReplyTo, onSuccess, feedUserUUID }: PostF
         const { attachmentType, attachmentUUID } = getAttachmentData();
 
         createPostMutation.mutate(
-            // TODO: just use the useUserUUID?
             {
-                userUUID: feedUserUUID!,
+                userUUID: feedUserUUID,
                 content: formData.content,
                 parentUUID: replyTo?.uuid,
                 attachmentType,
@@ -53,9 +53,8 @@ export function PostForm({ replyTo, setReplyTo, onSuccess, feedUserUUID }: PostF
                     clearAttachment();
                     onSuccess?.();
                 },
-                // TODOL move to def?
                 onError: (error) => {
-                    toast.error(getErrorDetail(error, "Failed to create post"));
+                    setFormServerErrors(form, error);
                 },
             },
         );
@@ -68,8 +67,15 @@ export function PostForm({ replyTo, setReplyTo, onSuccess, feedUserUUID }: PostF
 
             <AttachmentPicker attachedObj={attachedObj} onAttach={setAttachedObj} />
 
-            <Button type="submit" variant="brand" className="rounded-sm px-4 py-2">
-                Submit
+            {serverErrorMessage && <p className="text-xs text-destructive">{serverErrorMessage}</p>}
+
+            <Button
+                type="submit"
+                variant="brand"
+                className="rounded-sm px-4 py-2"
+                disabled={createPostMutation.isPending}
+            >
+                {createPostMutation.isPending ? "Posting..." : "Submit"}
             </Button>
         </form>
     );

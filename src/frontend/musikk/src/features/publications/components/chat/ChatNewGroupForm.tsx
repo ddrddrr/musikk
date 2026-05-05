@@ -1,4 +1,4 @@
-import { getErrorDetail } from "@/api/errorUtils.ts";
+import { setFormServerErrors } from "@/api/errorUtils.ts";
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
 import { EmptyState } from "@/features/common/EmptyState.tsx";
 import { useCreateChat } from "@/features/publications/api/mutations.ts";
@@ -12,12 +12,12 @@ import {
     FormMessage,
 } from "@/features/ui/form.tsx";
 import { Input } from "@/features/ui/input.tsx";
+import { UserAvatar } from "@/features/user/components/UserAvatar.tsx";
 import { UserConnectionsContext } from "@/features/user/providers/userConnectionsContext.tsx";
 import { cn } from "@/lib/utils.ts";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useContext } from "react";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 import { z } from "zod";
 
 const chatNewGroupFormSchema = z.object({
@@ -46,6 +46,7 @@ export function ChatNewGroupForm({ onSuccess, onCancel }: ChatNewGroupFormProps)
     });
 
     const selectedParticipants = form.watch("participants");
+    const serverErrorMessage = form.formState.errors.root?.serverError?.message;
 
     const toggleParticipant = (friendUUID: string) => {
         const current = selectedParticipants;
@@ -54,7 +55,7 @@ export function ChatNewGroupForm({ onSuccess, onCancel }: ChatNewGroupFormProps)
             : [...current, friendUUID];
         form.setValue("participants", next);
     };
-    // TODO: participants not passed correctly?
+
     const onSubmit = (data: ChatNewGroupFormData) => {
         if (!userUUID) return;
 
@@ -71,7 +72,7 @@ export function ChatNewGroupForm({ onSuccess, onCancel }: ChatNewGroupFormProps)
                     onSuccess?.();
                 },
                 onError: (error) => {
-                    toast.error(getErrorDetail(error, "Failed to create group chat"));
+                    setFormServerErrors(form, error);
                 },
             },
         );
@@ -119,14 +120,12 @@ export function ChatNewGroupForm({ onSuccess, onCancel }: ChatNewGroupFormProps)
                                 <FormControl>
                                     <div className="flex max-h-[300px] flex-col gap-2 overflow-y-auto rounded-sm border-2 border-foreground bg-card p-2">
                                         {friends.map((friend) => (
-                                            // TODO button
-                                            <button
+                                            <Button
                                                 key={friend.uuid}
                                                 type="button"
+                                                variant="ghost"
                                                 onClick={() => void toggleParticipant(friend.uuid)}
-                                                className={cn(
-                                                    "w-full rounded-sm border-2 border-foreground bg-card p-2 text-left transition-colors hover:bg-muted",
-                                                )}
+                                                className="h-auto w-full justify-start rounded-sm border-2 border-foreground bg-card p-2 text-left text-foreground hover:bg-muted"
                                             >
                                                 <div className="flex items-center gap-2">
                                                     <div
@@ -139,19 +138,16 @@ export function ChatNewGroupForm({ onSuccess, onCancel }: ChatNewGroupFormProps)
                                                                 : "bg-card",
                                                         )}
                                                     />
-                                                    {/*TODO: use the common avatar component*/}
-                                                    {friend.avatar && (
-                                                        <img
-                                                            src={friend.avatar}
-                                                            alt={friend.display_name}
-                                                            className="size-8 rounded-sm border-2 border-foreground object-cover"
-                                                        />
-                                                    )}
+                                                    <UserAvatar
+                                                        src={friend.avatar}
+                                                        alt={friend.display_name}
+                                                        size="sm"
+                                                    />
                                                     <span className="text-sm font-medium">
                                                         {friend.display_name}
                                                     </span>
                                                 </div>
-                                            </button>
+                                            </Button>
                                         ))}
                                     </div>
                                 </FormControl>
@@ -159,6 +155,10 @@ export function ChatNewGroupForm({ onSuccess, onCancel }: ChatNewGroupFormProps)
                             </FormItem>
                         )}
                     />
+
+                    {serverErrorMessage && (
+                        <p className="text-sm text-destructive">{serverErrorMessage}</p>
+                    )}
 
                     <div className="flex gap-2">
                         {onCancel && (

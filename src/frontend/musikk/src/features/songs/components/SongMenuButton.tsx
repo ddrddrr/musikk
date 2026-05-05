@@ -7,6 +7,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/features/ui/dropdown-menu.tsx";
+import { cn } from "@/lib/utils.ts";
 import { BetweenHorizonalStart, EllipsisVertical, Play, Trash2 } from "lucide-react";
 import { SongAddToPlaylistSubmenu } from "./SongAddToPlaylistSubmenu.tsx";
 
@@ -21,57 +22,57 @@ interface SongMenuButtonProps {
 
 export function SongMenuButton({
     collectionSong,
+    size,
+    className,
     iconSize,
     showRemoveFromPlaylist = false,
     onRemoveFromQueue,
 }: SongMenuButtonProps) {
     const { removeSongMutation, onPlay, addSongMutation } = useSongActions(collectionSong);
 
-    // TODO: improve styling
     return (
-        <div className="flex items-center gap-1">
-            <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <Button
-                        variant={"ghost"}
-                        size="icon"
-                        className={"hover:text-accent-foreground"}
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    style={{ width: size, height: size }}
+                    className={cn("hover:text-accent-foreground", className)}
+                >
+                    <EllipsisVertical className={iconSize} />
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-48">
+                {showRemoveFromPlaylist && (
+                    <DropdownMenuItem
+                        variant="destructive"
+                        onSelect={() =>
+                            removeSongMutation.mutate({
+                                collectionUUID: collectionSong.collection,
+                                songCollectionSongUUID: collectionSong.uuid,
+                            })
+                        }
                     >
-                        <EllipsisVertical className={iconSize} />
-                    </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-48">
-                    {showRemoveFromPlaylist && (
-                        <DropdownMenuItem
-                            variant="destructive"
-                            onSelect={() =>
-                                removeSongMutation.mutate({
-                                    collectionUUID: collectionSong.collection,
-                                    songCollectionSongUUID: collectionSong.uuid,
-                                })
-                            }
-                        >
-                            <Trash2 className="mr-2 size-4" />
-                            Remove from playlist
-                        </DropdownMenuItem>
-                    )}
-                    {onRemoveFromQueue && (
-                        <DropdownMenuItem variant="destructive" onSelect={onRemoveFromQueue}>
-                            <Trash2 className="mr-2 size-4" />
-                            Remove from queue
-                        </DropdownMenuItem>
-                    )}
-                    <SongAddToPlaylistSubmenu collectionSong={collectionSong} />
-                    <DropdownMenuItem onSelect={() => addSongMutation.mutate(collectionSong.uuid)}>
-                        <BetweenHorizonalStart className="mr-2 size-4" />
-                        Add to queue
+                        <Trash2 className="mr-2 size-4" />
+                        Remove from playlist
                     </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={onPlay}>
-                        <Play className="mr-2 size-4" />
-                        Play
+                )}
+                {onRemoveFromQueue && (
+                    <DropdownMenuItem variant="destructive" onSelect={onRemoveFromQueue}>
+                        <Trash2 className="mr-2 size-4" />
+                        Remove from queue
                     </DropdownMenuItem>
-                </DropdownMenuContent>
-            </DropdownMenu>
-        </div>
+                )}
+                <SongAddToPlaylistSubmenu collectionSong={collectionSong} />
+                <DropdownMenuItem onSelect={() => addSongMutation.mutate(collectionSong.uuid)}>
+                    <BetweenHorizonalStart className="mr-2 size-4" />
+                    Add to queue
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={onPlay}>
+                    <Play className="mr-2 size-4" />
+                    Play
+                </DropdownMenuItem>
+            </DropdownMenuContent>
+        </DropdownMenu>
     );
 }

@@ -51,7 +51,8 @@ export function ChatAttachmentsList({ chatUUID }: ChatAttachmentsListProps) {
 
     return (
         <div className="rounded-sm border border-foreground">
-            <ScrollArea className="max-h-48">
+            {/*[&>...>div]:!block overrides Radix's display:table inner wrapper so attachment rows truncate properly*/}
+            <ScrollArea className="max-h-48 [&>[data-slot=scroll-area-viewport]>div]:!block">
                 <div className="flex flex-col gap-1 px-2 py-2">
                     {attachments.map((attachment, i) => (
                         <ChatAttachmentItem key={i} attachment={attachment} />

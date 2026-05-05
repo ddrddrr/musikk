@@ -6,7 +6,7 @@ services:
       context: ./src/backend/
       dockerfile: Dockerfile
     env_file:
-      - .env
+      - .env.prod
     environment:
       DJANGO_SETTINGS_MODULE: musikk.settings.prod
     restart: unless-stopped
@@ -32,7 +32,7 @@ services:
   database:
     image: postgres:17
     env_file:
-      - .env
+      - .env.prod
     restart: unless-stopped
     expose:
       - 5432
@@ -47,13 +47,12 @@ services:
       - main
 
   celery_worker:
-    image: ddrddrr2/musikk-server:latest
     build:
       context: ./src/backend/
       dockerfile: Dockerfile
     entrypoint: [ "./start-celery-worker.sh" ]
     env_file:
-      - .env
+      - .env.prod
     environment:
       DJANGO_SETTINGS_MODULE: musikk.settings.prod
     restart: unless-stopped
@@ -73,7 +72,7 @@ services:
     expose:
       - 6379
     env_file:
-      - .env
+      - .env.prod
     restart: unless-stopped
     healthcheck:
       test: [ "CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping" ]
@@ -84,12 +83,11 @@ services:
       - main
 
   proxy:
-    image: ddrddrr2/musikk-caddy:latest
     build:
       context: ./src/frontend
       dockerfile: Dockerfile
     env_file:
-      - .env
+      - .env.prod
     restart: unless-stopped
     ports:
       - "80:80"

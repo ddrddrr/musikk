@@ -1,6 +1,7 @@
 import { EmptyState } from "@/features/common/EmptyState.tsx";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { useFriendsListeningQuery } from "@/features/friend-activity/queries.ts";
+import { DefaultSongActions } from "@/features/songs/components/DefaultSongActions.tsx";
 import { SongContainer } from "@/features/songs/components/SongContainer.tsx";
 import { ScrollArea } from "@/features/ui/scroll-area.tsx";
 import { UserIdentifier } from "@/features/user/components/UserIdentifier.tsx";
@@ -41,6 +42,13 @@ export function ListeningFeed() {
                                         collectionSong={song}
                                         size="compact"
                                         showImage={false}
+                                        actions={
+                                            <DefaultSongActions
+                                                collectionSong={song}
+                                                size="compact"
+                                                showAddToLiked={false}
+                                            />
+                                        }
                                     />
                                 </div>
                             </div>

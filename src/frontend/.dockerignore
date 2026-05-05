@@ -1,0 +1,26 @@
+# Node
+musikk/node_modules
+musikk/dist
+musikk/build
+musikk/.vite
+**/*.log
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+musikk/.env
+musikk/.env.*
+!musikk/.env.example
+
+# VCS / editor / OS
+.git
+.gitignore
+.dockerignore
+.idea
+.vscode
+.DS_Store
+
+# Docker
+Dockerfile
+docker-compose*

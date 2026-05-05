@@ -1,7 +1,11 @@
+import { ChevronDown } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
 import { ChatAttachmentsList } from "@/features/publications/components/chat/ChatAttachmentsList.tsx";
 import { useChatImage } from "@/features/publications/hooks/useChatImage.ts";
 import { Chat } from "@/features/publications/types.ts";
+import { Button } from "@/features/ui/button.tsx";
 import { Popover, PopoverContent, PopoverTrigger } from "@/features/ui/popover.tsx";
 import { ScrollArea } from "@/features/ui/scroll-area.tsx";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/features/ui/tabs.tsx";
@@ -14,6 +18,7 @@ interface ChatHeaderProps {
 
 export function ChatHeader({ chat }: ChatHeaderProps) {
     const currentUserUUID = useUserUUID();
+    const navigate = useNavigate();
     const otherMember = chat.is_direct
         ? chat.members.find((m) => m.uuid !== currentUserUUID)
         : undefined;
@@ -23,9 +28,16 @@ export function ChatHeader({ chat }: ChatHeaderProps) {
         <div className="flex gap-x-4 border-b-2 border-foreground bg-muted p-4">
             <Popover>
                 <PopoverTrigger asChild>
-                    <div className="flex cursor-pointer items-center gap-3">
+                    <button
+                        type="button"
+                        aria-label="Show chat info and attachments"
+                        className="relative rounded-full transition hover:ring-2 hover:ring-foreground"
+                    >
                         <UserAvatar src={chatImg} alt={chatImgAlt} size="sm" />
-                    </div>
+                        <span className="absolute right-0 bottom-0 flex size-4 items-center justify-center rounded-full border border-foreground bg-muted">
+                            <ChevronDown className="size-3 text-foreground" />
+                        </span>
+                    </button>
                 </PopoverTrigger>
 
                 <PopoverContent align="start" className="w-64">
@@ -47,11 +59,14 @@ export function ChatHeader({ chat }: ChatHeaderProps) {
                                         alt={otherMember.display_name}
                                         size="md"
                                     />
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-sm font-semibold">
-                                            {otherMember.display_name}
-                                        </span>
-                                    </div>
+                                    <Button
+                                        variant="link"
+                                        size="fit"
+                                        className="text-sm font-semibold"
+                                        onClick={() => void navigate(`/users/${otherMember.uuid}`)}
+                                    >
+                                        {otherMember.display_name}
+                                    </Button>
                                     {otherMember.bio && (
                                         <div className="max-h-20 overflow-y-auto text-sm text-muted-foreground">
                                             <p className="whitespace-pre-wrap">{otherMember.bio}</p>

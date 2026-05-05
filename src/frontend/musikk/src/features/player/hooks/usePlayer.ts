@@ -253,18 +253,6 @@ export function usePlayer({
         if (isThisDeviceActiveRef.current && isPlaybackActiveRef.current) {
             sendTick(audio.currentTime, playingUUIDRef.current ?? null);
         }
-
-        // TODO: probably remove since with introduction of shakapackager short tracks behave correctly
-        if (
-            isThisDeviceActive &&
-            playingCollectionSong &&
-            isAudioReadyRef.current &&
-            !audio.ended &&
-            !audio.paused &&
-            audio.duration - audio.currentTime < 0.5
-        ) {
-            handleOnEnded();
-        }
     }
 
     return { handleLoadedMetadata, handleTimeUpdate, handleOnEnded, isMutedFallback, unmute };
