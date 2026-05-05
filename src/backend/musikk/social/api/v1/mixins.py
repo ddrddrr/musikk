@@ -1,13 +1,14 @@
-from rest_framework.mixins import ListModelMixin, CreateModelMixin
-from django.db.models import Model
 from django.contrib.contenttypes.models import ContentType
-
+from django.db.models import Model
 from musikk.pagination import BaseLimitOffsetPagination
-from social.models import Publication
+from rest_framework.exceptions import PermissionDenied
+from rest_framework.mixins import CreateModelMixin, ListModelMixin
+
 from social.api.v1.serializers import (
     PublicationCreateSerializer,
     PublicationRetrieveSerializer,
 )
+from social.models import Publication
 
 
 class PublicationsListCreateMixin(ListModelMixin, CreateModelMixin):
@@ -17,16 +18,17 @@ class PublicationsListCreateMixin(ListModelMixin, CreateModelMixin):
     def get_created_for(self) -> Model:
         raise NotImplementedError
 
-    def check_list_permission(self, created_for: Model):
+    def check_list_permission(self, created_for: Model) -> bool:
         """Check permission for listing publications. Override to customize."""
         raise NotImplementedError
 
-    def check_create_permission(self, created_for: Model):
+    def check_create_permission(self, created_for: Model) -> bool:
         """Check permission for creating publications. Override to customize."""
         raise NotImplementedError
 
     def create(self, request, *args, **kwargs):
-        self.check_create_permission(self.get_created_for())
+        if not self.check_create_permission(self.get_created_for()):
+            raise PermissionDenied()
         resp = super().create(request, *args, **kwargs)
         self.ws_on_create()
         return resp
@@ -40,7 +42,8 @@ class PublicationsListCreateMixin(ListModelMixin, CreateModelMixin):
 
     def get_queryset(self):
         created_for = self.get_created_for()
-        self.check_list_permission(created_for)
+        if not self.check_list_permission(created_for):
+            raise PermissionDenied()
         ct = ContentType.objects.get_for_model(created_for)
         qs = Publication.objects.filter(
             created_for_type=ct, created_for_id=created_for.pk

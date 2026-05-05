@@ -41,10 +41,10 @@ class CollectionCommentsListCreateView(PublicationsListCreateMixin, ListCreateAP
     def get_created_for(self) -> Collection:
         return Collection.objects.get(uuid=self.kwargs["collection_uuid"])
 
-    def check_list_permission(self, created_for: Collection):
+    def check_list_permission(self, created_for: Collection) -> bool:
         return not created_for.private
 
-    def check_create_permission(self, created_for: Collection):
+    def check_create_permission(self, created_for: Collection) -> bool:
         return not created_for.private and created_for.type in (
             CollectionType.ALBUM,
             CollectionType.PLAYLIST,
@@ -79,10 +79,10 @@ class FeedPostsListCreateView(PublicationsListCreateMixin, ListCreateAPIView):
             )
         return super().get_queryset()
 
-    def check_list_permission(self, created_for):
+    def check_list_permission(self, created_for: BaseUser) -> bool:
         return True
 
-    def check_create_permission(self, created_for):
+    def check_create_permission(self, created_for: BaseUser) -> bool:
         # top-level publications on their own feed
         # or replies anywhere
         return (

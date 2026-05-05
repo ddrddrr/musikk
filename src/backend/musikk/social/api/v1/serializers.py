@@ -59,6 +59,9 @@ class PublicationCreateSerializer(BaseModelSerializer):
             **validated_data,
         )
 
+    def to_representation(self, instance):
+        return PublicationRetrieveSerializer(instance, context=self.context).data
+
 
 class PublicationRetrieveSerializer(BaseModelSerializer):
     author = BaseUserSerializer(read_only=True)
