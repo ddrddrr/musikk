@@ -3,7 +3,6 @@ from typing import overload
 
 from base.models import BaseModel
 from django.contrib.postgres.fields import ArrayField
-from django.core.exceptions import ObjectDoesNotExist
 from django.db import models, transaction
 
 from streaming.models.collections import Collection
@@ -114,6 +113,7 @@ class PlaybackContext(BaseModel):
         )
         if next_song:
             self.cursor = next_song.position
+            self.skip_indices = [i for i in self.skip_indices if i > self.cursor]
             self.save()
             return next_song
         return None
@@ -498,11 +498,8 @@ class PlayerState(BaseModel):
     def _add_to_history(self) -> None:
         if not self.current_collection_song:
             return
-        try:
-            history = self.streamingprofile.history
-            CollectionSong.objects.create(
-                collection=history,
-                song=self.current_collection_song.song,
-            )
-        except ObjectDoesNotExist:
-            pass
+        history = self.streamingprofile.history
+        CollectionSong.objects.create(
+            collection=history,
+            song=self.current_collection_song.song,
+        )

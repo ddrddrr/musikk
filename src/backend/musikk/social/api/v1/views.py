@@ -44,7 +44,7 @@ class CollectionCommentsListCreateView(PublicationsListCreateMixin, ListCreateAP
     def check_list_permission(self, created_for: Collection) -> bool:
         return not created_for.private
 
-    def check_create_permission(self, created_for: Collection) -> bool:
+    def check_top_level_create_permission(self, created_for: Collection) -> bool:
         return not created_for.private and created_for.type in (
             CollectionType.ALBUM,
             CollectionType.PLAYLIST,
@@ -82,15 +82,8 @@ class FeedPostsListCreateView(PublicationsListCreateMixin, ListCreateAPIView):
     def check_list_permission(self, created_for: BaseUser) -> bool:
         return True
 
-    def check_create_permission(self, created_for: BaseUser) -> bool:
-        # top-level publications on their own feed
-        # or replies anywhere
-        return (
-            created_for == self.request.user
-            or Publication.objects.filter(
-                uuid=self.request.data.get("parent_uuid")
-            ).exists()
-        )
+    def check_top_level_create_permission(self, created_for: BaseUser) -> bool:
+        return created_for == self.request.user
 
     def ws_on_create(self):
         if self._created_publication.parent:
@@ -111,7 +104,7 @@ class ChatMessagesListCreateView(PublicationsListCreateMixin, ListCreateAPIView)
             chat=created_for, member=self.request.user
         ).exists()
 
-    def check_create_permission(self, created_for: Chat) -> bool:
+    def check_top_level_create_permission(self, created_for: Chat) -> bool:
         return ChatMember.objects.filter(
             chat=created_for, member=self.request.user
         ).exists()
