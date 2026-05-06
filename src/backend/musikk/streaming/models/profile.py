@@ -56,8 +56,8 @@ class StreamingProfile(BaseModel):
 
     @property
     def created_collections(self):
-        return Collection.objects.filter(collection_credits__author=self.user).exclude(
-            type__in=[CollectionType.HISTORY, CollectionType.LIKED]
-        )
+        return Collection.objects.filter(
+            collection_credits__author=self.user, draft=False
+        ).exclude(type__in=[CollectionType.HISTORY, CollectionType.LIKED])
 
     objects = StreamingProfileManager()

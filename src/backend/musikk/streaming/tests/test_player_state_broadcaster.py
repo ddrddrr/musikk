@@ -3,10 +3,10 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from django.test import TestCase
 from users.tests.factories import BaseUserFactory
 
-from streaming.events import ServerEvent
 from streaming.managers.playback_manager import PlaybackManager
-from streaming.state_broadcasters.player import PlayerStateBroadcaster
 from streaming.tests.factories import CollectionSongFactory
+from streaming.ws.events import ServerEvent
+from streaming.ws.state_broadcasters.player import PlayerStateBroadcaster
 
 
 class TestPlayerStateBroadcaster(TestCase):

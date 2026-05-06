@@ -12,9 +12,9 @@ from websockets.event_helpers import send_ws_event, user_group
 from streaming.audio.probes import AudioStreamInfo
 from streaming.audio.processing_pipeline import AudioProcessingPipeline
 from streaming.audio.shaka_packager_conf.shaka_packager_wrapper import ManifestType
-from streaming.events import ServerEvent
 from streaming.managers.upload_manager import UploadManager
 from streaming.models.songs import BaseSong
+from streaming.ws.events import ServerEvent
 
 logger = logging.getLogger(__name__)
 

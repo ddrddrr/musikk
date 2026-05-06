@@ -2,8 +2,8 @@ from unittest.mock import patch
 
 from django.test import TestCase
 
-from streaming.state_broadcasters.playback import PlaybackStateBroadcaster
-from streaming.state_broadcasters.player import PlayerStateBroadcaster
+from streaming.ws.state_broadcasters.playback import PlaybackStateBroadcaster
+from streaming.ws.state_broadcasters.player import PlayerStateBroadcaster
 
 
 class TestPlaybackStateBroadcaster(TestCase):

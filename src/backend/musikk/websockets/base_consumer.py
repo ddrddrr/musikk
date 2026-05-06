@@ -4,7 +4,8 @@ from logging import getLogger
 from asgiref.sync import async_to_sync as atos
 from channels.generic.websocket import JsonWebsocketConsumer
 from social.ws import TypingWSActionHandler
-from streaming.ws import DeviceWSActionHandler, PlaybackWSActionHandler
+from streaming.ws.action_handlers.device import DeviceWSActionHandler
+from streaming.ws.action_handlers.playback import PlaybackWSActionHandler
 
 from websockets.action_handler import WSActionHandler
 from websockets.event_helpers import user_group

@@ -3,16 +3,12 @@ from rest_framework.generics import RetrieveAPIView, get_object_or_404
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from websockets.event_helpers import send_ws_event, user_group
 
 from streaming.api.v1.serializers.song_queue import PlayerStateSerializer
-from streaming.events import ServerEvent
-from streaming.managers.playback_manager import PlaybackManager
 from streaming.models import Collection, PlayerState, QueueItem, SongQueue
 from streaming.models.songs import CollectionSong
 from streaming.permissions import IsPublicOrCollectionAuthor
-from streaming.state_broadcasters.playback import PlaybackStateBroadcaster
-from streaming.state_broadcasters.player import PlayerStateBroadcaster
+from streaming.ws.player_controller import PlayerController
 
 
 class PlayerMixin(APIView):
@@ -22,20 +18,8 @@ class PlayerMixin(APIView):
     def get_song_queue(self, request: Request) -> SongQueue:
         return request.user.streamingprofile.player.queue
 
-    def _broadcast_queue_invalidation(self, request: Request) -> None:
-        send_ws_event(
-            user_group(request.user.uuid),
-            ServerEvent.QUEUE_CHANGED,
-        )
-
-    def _clear_playback_position(self, request: Request) -> None:
-        PlaybackManager(user_uuid=str(request.user.uuid)).clear_position()
-
-    def _stop_playback(self, request: Request) -> None:
-        PlaybackStateBroadcaster(user_uuid=str(request.user.uuid)).stop()
-
-    def _broadcast_player_state(self, request: Request) -> None:
-        PlayerStateBroadcaster(user_uuid=str(request.user.uuid)).broadcast_state()
+    def get_controller(self, request: Request) -> PlayerController:
+        return PlayerController(user_uuid=str(request.user.uuid))
 
 
 class PlayerStateRetrieveView(PlayerMixin, RetrieveAPIView):
@@ -52,8 +36,7 @@ class QueueAddSongView(PlayerMixin):
         song = get_object_or_404(CollectionSong, uuid=kwargs["uuid"])
         self.check_object_permissions(request, song)
 
-        self.get_song_queue(request).insert(song)
-        self._broadcast_queue_invalidation(request)
+        self.get_controller(request).add_song_to_queue(song)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -64,8 +47,7 @@ class QueueAddCollectionView(PlayerMixin):
         collection = get_object_or_404(Collection, uuid=kwargs["uuid"])
         self.check_object_permissions(request, collection)
 
-        self.get_song_queue(request).insert(collection)
-        self._broadcast_queue_invalidation(request)
+        self.get_controller(request).add_collection_to_queue(collection)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -76,10 +58,7 @@ class PlayerPlaySongView(PlayerMixin):
         song = get_object_or_404(CollectionSong, uuid=kwargs["uuid"])
         self.check_object_permissions(request, song)
 
-        self.get_player(request).play_song(song)
-        self._clear_playback_position(request)
-        self._broadcast_queue_invalidation(request)
-        self._broadcast_player_state(request)
+        self.get_controller(request).play_song(song)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -90,10 +69,7 @@ class PlayerPlayCollectionView(PlayerMixin):
         collection = get_object_or_404(Collection, uuid=kwargs["uuid"])
         self.check_object_permissions(request, collection)
 
-        self.get_player(request).play_collection(collection)
-        self._clear_playback_position(request)
-        self._broadcast_queue_invalidation(request)
-        self._broadcast_player_state(request)
+        self.get_controller(request).play_collection(collection)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -105,67 +81,45 @@ class QueueAppendRandomSongsView(PlayerMixin):
 
 class QueueRemoveItemView(PlayerMixin):
     def post(self, request, *args, **kwargs):
-        song_queue = self.get_song_queue(request)
         item = get_object_or_404(QueueItem, uuid=kwargs["uuid"])
 
-        if song_queue != item.queue:
+        if self.get_song_queue(request) != item.queue:
             return Response(
                 status=status.HTTP_403_FORBIDDEN,
                 data={"error": "Item does not belong to this user's queue."},
             )
 
-        song_queue.remove(item)
-        self._broadcast_queue_invalidation(request)
+        self.get_controller(request).remove_queue_item(item)
         return Response(status=status.HTTP_200_OK)
 
 
 class PlayerClearView(PlayerMixin):
     def post(self, request, *args, **kwargs):
-        self.get_player(request).clear()
-        self._clear_playback_position(request)
-        self._broadcast_queue_invalidation(request)
-        self._broadcast_player_state(request)
+        self.get_controller(request).clear()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class PlayerNextView(PlayerMixin):
     def post(self, request, *args, **kwargs):
-        player = self.get_player(request)
-        if player.is_empty():
-            return Response(status=status.HTTP_204_NO_CONTENT)
+        controller = self.get_controller(request)
 
         if node_uuid := kwargs.get("uuid"):
             item = get_object_or_404(QueueItem, uuid=node_uuid)
-            if item.queue != player.queue:
+            if item.queue != self.get_song_queue(request):
                 return Response(
                     status=status.HTTP_403_FORBIDDEN,
                     data={"error": "Item does not belong to this user's queue."},
                 )
-            player.choose_queue_song(item)
+            controller.choose_queue_song(item)
         else:
-            # nothing left --> stop playback
-            if player.advance() is None:
-                self._stop_playback(request)
-                self._clear_playback_position(request)
-                self._broadcast_queue_invalidation(request)
-                return Response(status=status.HTTP_204_NO_CONTENT)
+            controller.advance()
 
-        self._clear_playback_position(request)
-        self._broadcast_queue_invalidation(request)
-        self._broadcast_player_state(request)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class PlayerPrevView(PlayerMixin):
     def post(self, request, *args, **kwargs):
-        player = self.get_player(request)
-        if player.is_empty():
-            return Response(status=status.HTTP_204_NO_CONTENT)
-
-        player.prev()
-        self._clear_playback_position(request)
-        self._broadcast_queue_invalidation(request)
-        self._broadcast_player_state(request)
+        self.get_controller(request).prev()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -198,15 +152,12 @@ class QueueReorderView(PlayerMixin):
         before = get_object_or_404(QueueItem, uuid=before_uuid) if before_uuid else None
         after = get_object_or_404(QueueItem, uuid=after_uuid) if after_uuid else None
 
-        song_queue.reorder(item, before=before, after=after)
-        self._broadcast_queue_invalidation(request)
+        self.get_controller(request).reorder_queue(item, before=before, after=after)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class MoveContextToQueueView(PlayerMixin):
     def post(self, request, *args, **kwargs):
-        player = self.get_player(request)
-
         cs_uuid = request.data.get("collection_song")
         before_uuid = request.data.get("before")
         after_uuid = request.data.get("after")
@@ -218,22 +169,10 @@ class MoveContextToQueueView(PlayerMixin):
             )
 
         collection_song = get_object_or_404(CollectionSong, uuid=cs_uuid)
-
         before = get_object_or_404(QueueItem, uuid=before_uuid) if before_uuid else None
         after = get_object_or_404(QueueItem, uuid=after_uuid) if after_uuid else None
 
-        from streaming.models.song_queue import POSITION_GAP
-
-        if before and after:
-            position = (before.position + after.position) / 2
-        elif before:
-            position = before.position + POSITION_GAP
-        elif after:
-            position = after.position - POSITION_GAP
-        else:
-            position = player.queue._calculate_append_position()
-            player.queue.save()
-
-        player.move_from_context_to_queue(collection_song, position)
-        self._broadcast_queue_invalidation(request)
+        self.get_controller(request).move_context_to_queue(
+            collection_song, before=before, after=after
+        )
         return Response(status=status.HTTP_204_NO_CONTENT)

@@ -8,11 +8,11 @@ from users.permissions import IsArtist
 from websockets.event_helpers import send_ws_event, user_group
 
 from streaming.api.v1.serializers.songs import CollectionSongRetrieveSerializer
-from streaming.events import ServerEvent
 from streaming.managers.upload_manager import UploadManager
 from streaming.models.profile import StreamingProfile
 from streaming.models.songs import CollectionSong
 from streaming.permissions import IsPublicOrCollectionAuthor
+from streaming.ws.events import ServerEvent
 
 logger = logging.getLogger(__name__)
 

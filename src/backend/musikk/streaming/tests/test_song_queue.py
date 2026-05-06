@@ -387,7 +387,7 @@ class TestPlay(TestCase):
         assert player.context.skip_indices == []
 
     def test_play_song_resets_context(self):
-        player = PlayerStateFactory()
+        player, _ = _player_with_profile()
         player.play_collection(self.collection)
 
         other_collection, other_songs = _make_collection(3)
@@ -643,7 +643,7 @@ class TestAdvanceFlow(TestCase):
         cls.collection, cls.songs = _make_collection(3)
 
     def test_advance_drains_queue_then_context_then_stops(self):
-        player = PlayerStateFactory()
+        player, _ = _player_with_profile()
         queued = CollectionSongFactory()
         player.queue.insert_song(queued, position=Decimal("1000"))
         player.context.setup(self.collection, -1)
