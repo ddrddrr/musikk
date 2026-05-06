@@ -51,6 +51,7 @@ export function PlaybackProvider({ children }: PlaybackProviderProps) {
     const currentTimeRef = useRef(currentTime);
     currentTimeRef.current = currentTime;
     const getCurrentTime = useCallback(() => currentTimeRef.current, []);
+    const prevPlayingUUIDRef = useRef<string | undefined>(undefined);
 
     useEffect(
         () => subToAudioTimePosWSEvents(ws, playingUUIDRef, audioTimePosRef, setCurrentTime),
@@ -72,7 +73,14 @@ export function PlaybackProvider({ children }: PlaybackProviderProps) {
     );
 
     useEffect(() => {
-        resetPositionForNewSong(setCurrentTime, audioTimePosRef);
+        const newUUID = playingCollectionSong?.uuid;
+        resetPositionForNewSong(
+            prevPlayingUUIDRef.current,
+            newUUID,
+            setCurrentTime,
+            audioTimePosRef,
+        );
+        prevPlayingUUIDRef.current = newUUID;
     }, [playingCollectionSong?.uuid]);
 
     useEffect(() => {
@@ -140,9 +148,14 @@ export function PlaybackProvider({ children }: PlaybackProviderProps) {
 }
 
 function resetPositionForNewSong(
+    prevUUID: string | undefined,
+    newUUID: string | undefined,
     setCurrentTime: (n: number) => void,
     audioTimePosRef: RefObject<CurrAudioTimePos | null>,
 ): void {
+    // on first load (e.g. page refresh) the ws snapshot sets the song and position together
+    // and even if the song didnt change without this check it is treated as a new one
+    if (prevUUID === undefined || prevUUID === newUUID) return;
     setCurrentTime(0);
     audioTimePosRef.current = null;
 }
