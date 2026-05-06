@@ -25,7 +25,7 @@ def validate_chat(user: BaseUser, topic_id: str) -> bool:
 
 @topic_validator("collection_comments")
 def validate_collection_comments(user: BaseUser, topic_id: str) -> bool:
-    return Collection.objects.filter(uuid=topic_id, private=False).exists()
+    return Collection.objects.filter(uuid=topic_id, private=False, draft=False).exists()
 
 
 class TypingWSActionHandler(WSActionHandler):

@@ -60,6 +60,7 @@ interface CreateCollectionInput {
     private: boolean;
     type: "album" | "playlist";
     authors?: UUID[];
+    draft?: boolean;
 }
 
 export async function createCollection(input: CreateCollectionInput): Promise<Collection> {
@@ -71,10 +72,36 @@ export async function createCollection(input: CreateCollectionInput): Promise<Co
 
     if (input.description) formData.append("description", input.description);
     if (input.image) formData.append("image", input.image);
+    if (input.draft !== undefined) formData.append("draft", String(input.draft));
 
     input.authors?.forEach((u) => formData.append("authors", String(u)));
 
     const res = await api_client.post<Collection>(CollectionURLs.collectionCreate, formData);
+    return res.data;
+}
+
+export interface UpdateCollectionInput {
+    title?: string;
+    description?: string;
+    image?: File;
+    draft?: boolean;
+}
+
+export async function updateCollection(
+    collectionUUID: UUID,
+    input: UpdateCollectionInput,
+): Promise<Collection> {
+    const formData = new FormData();
+
+    if (input.title !== undefined) formData.append("title", input.title);
+    if (input.description !== undefined) formData.append("description", input.description);
+    if (input.image !== undefined) formData.append("image", input.image);
+    if (input.draft !== undefined) formData.append("draft", String(input.draft));
+
+    const res = await api_client.patch<Collection>(
+        CollectionURLs.collectionDetail(collectionUUID),
+        formData,
+    );
     return res.data;
 }
 

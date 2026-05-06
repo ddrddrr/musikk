@@ -44,6 +44,7 @@ export function useCollectionCreation({ type, onSuccess }: UseCollectionCreation
                     description: data.description,
                     image: data.image,
                     authors: type === "album" ? [userUUID] : undefined,
+                    draft: type === "album",
                 });
 
                 form.reset(DEFAULT_VALUES);

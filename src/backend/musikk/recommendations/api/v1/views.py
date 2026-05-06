@@ -1,10 +1,9 @@
 from django.contrib.postgres.search import TrigramSimilarity
-from rest_framework.views import APIView
-from rest_framework.response import Response
 from rest_framework import status
-
-from streaming.api.v1.serializers.songs import CollectionSongRetrieveSerializer
+from rest_framework.response import Response
+from rest_framework.views import APIView
 from streaming.api.v1.serializers.collections import CollectionSerializerBasic
+from streaming.api.v1.serializers.songs import CollectionSongRetrieveSerializer
 from streaming.models import BaseSong, Collection
 from streaming.models.collections import CollectionType
 from streaming.models.songs import CollectionSong
@@ -28,14 +27,14 @@ class SearchView(APIView):
                 query,
                 "title",
                 CollectionSerializerBasic,
-                extra_filters={"type": "album", "private": False},
+                extra_filters={"type": "album", "private": False, "draft": False},
             ),
             "playlists": self.search(
                 Collection,
                 query,
                 "title",
                 CollectionSerializerBasic,
-                extra_filters={"type": "playlist", "private": False},
+                extra_filters={"type": "playlist", "private": False, "draft": False},
             ),
             "users": self.search(
                 BaseUser,
@@ -79,6 +78,7 @@ class SearchView(APIView):
         sc_songs = CollectionSong.objects.filter(
             collection__type=CollectionType.ALBUM,
             collection__private=False,
+            collection__draft=False,
             song__in=matching_songs,
         )
 

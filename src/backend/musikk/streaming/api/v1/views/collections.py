@@ -8,10 +8,11 @@ from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import (
     ListCreateAPIView,
-    RetrieveAPIView,
+    RetrieveUpdateAPIView,
     get_object_or_404,
 )
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
+from rest_framework.permissions import SAFE_METHODS
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from websockets.event_helpers import send_ws_event, user_group
@@ -22,11 +23,11 @@ from streaming.api.v1.serializers.collections import (
     CollectionCreateSerializer,
     CollectionSerializerBasic,
     CollectionSerializerDetailed,
+    CollectionUpdateSerializer,
     collection_optimizations,
 )
 from streaming.audio.tasks import convert_audio
 from streaming.audio.validators import validate_audio
-from streaming.events import ServerEvent
 from streaming.managers.upload_manager import UploadManager
 from streaming.models.collections import Collection, CollectionType
 from streaming.models.songs import BaseSong, CollectionSong
@@ -35,10 +36,13 @@ from streaming.permissions import (
     IsCollecitonAuthor,
     IsPublicOrCollectionAuthor,
 )
+from streaming.ws.events import ServerEvent
 
 
 class CollectionListCreateView(ListCreateAPIView):
-    queryset = Collection.objects.filter(private=False).order_by("-date_added")
+    queryset = Collection.objects.filter(private=False, draft=False).order_by(
+        "-date_added"
+    )
     filterset_class = CollectionFilter
     pagination_class = BaseLimitOffsetPagination
     parser_classes = [MultiPartParser, FormParser, JSONParser]
@@ -111,7 +115,9 @@ class CollectionRetrieveView(APIView):
         return [IsPublicOrCollectionAuthor()]
 
     def get(self, request, *args, **kwargs):
-        collection = get_object_or_404(Collection, uuid=kwargs["uuid"])
+        collection = get_object_or_404(
+            Collection.objects.published(), uuid=kwargs["uuid"]
+        )
         self.check_object_permissions(request, collection)
         data = CollectionSerializerBasic(collection, context={"request": request}).data
         return Response(status=status.HTTP_200_OK, data=data)
@@ -132,11 +138,50 @@ class CollectionRetrieveView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class CollectionDetailView(RetrieveAPIView):
+class CollectionRetrieveUpdateView(RetrieveUpdateAPIView):
     lookup_field = "uuid"
-    permission_classes = [IsPublicOrCollectionAuthor]
     queryset = Collection.objects.all()
-    serializer_class = CollectionSerializerDetailed
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        if self.request.method in SAFE_METHODS:
+            qs = qs.published()
+        return qs
+
+    def get_permissions(self):
+        if self.request.method in SAFE_METHODS:
+            return [IsPublicOrCollectionAuthor()]
+        return [IsCollecitonAuthor()]
+
+    def get_serializer_class(self):
+        if self.request.method in SAFE_METHODS:
+            return CollectionSerializerDetailed
+        return CollectionUpdateSerializer
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        was_draft = instance.draft
+        serializer = CollectionUpdateSerializer(
+            instance,
+            data=request.data,
+            partial=kwargs.pop("partial", False),
+            context=self.get_serializer_context(),
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        if was_draft and not instance.draft:
+            send_ws_event(
+                user_group(request.user.uuid),
+                ServerEvent.COLLECTIONS_PERSONAL_CHANGED,
+            )
+
+        return Response(
+            CollectionSerializerDetailed(
+                instance, context=self.get_serializer_context()
+            ).data
+        )
 
 
 class CollectionAddLikedView(APIView):
@@ -281,7 +326,7 @@ class AlbumBySongView(APIView):
         )
 
         album = get_object_or_404(
-            Collection,
+            Collection.objects.published(),
             type=CollectionType.ALBUM,
             base_songs=collection_song.song,
         )

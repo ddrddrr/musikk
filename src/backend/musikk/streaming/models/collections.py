@@ -1,8 +1,8 @@
-from django.db import models
-
 from base.models import BaseModel
+from django.db import models
 from utils.paths import deafult_image_path
-from streaming.models.songs import CollectionSong, BaseSong
+
+from streaming.models.songs import BaseSong, CollectionSong
 
 
 class CollectionType(models.TextChoices):
@@ -28,6 +28,9 @@ class CollectionQuerySet(models.QuerySet):
     def public(self):
         return self.filter(private=False)
 
+    def published(self):
+        return self.filter(draft=False)
+
 
 CollectionManager = models.Manager.from_queryset(CollectionQuerySet)
 
@@ -47,6 +50,7 @@ class Collection(BaseModel):
     description = models.TextField(max_length=512, blank=True, default="")
     image = models.ImageField(upload_to=deafult_image_path, null=True, blank=True)
     private = models.BooleanField(default=False)
+    draft = models.BooleanField(default=False, db_index=True)
 
     authors = models.ManyToManyField(
         "users.BaseUser",

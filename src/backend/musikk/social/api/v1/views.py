@@ -42,12 +42,17 @@ class CollectionCommentsListCreateView(PublicationsListCreateMixin, ListCreateAP
         return Collection.objects.get(uuid=self.kwargs["collection_uuid"])
 
     def check_list_permission(self, created_for: Collection) -> bool:
-        return not created_for.private
+        return not created_for.private and not created_for.draft
 
     def check_top_level_create_permission(self, created_for: Collection) -> bool:
-        return not created_for.private and created_for.type in (
-            CollectionType.ALBUM,
-            CollectionType.PLAYLIST,
+        return (
+            not created_for.private
+            and not created_for.draft
+            and created_for.type
+            in (
+                CollectionType.ALBUM,
+                CollectionType.PLAYLIST,
+            )
         )
 
     def ws_on_create(self):

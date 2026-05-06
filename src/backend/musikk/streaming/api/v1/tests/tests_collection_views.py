@@ -10,10 +10,12 @@ from rest_framework.test import APIRequestFactory, force_authenticate
 from users.tests.factories import ArtistFactory, BaseUserFactory
 
 from streaming.api.v1.views.collections import (
+    AlbumBySongView,
     CollectionAddLikedView,
-    CollectionDetailView,
     CollectionListCreateView,
+    CollectionPersonalView,
     CollectionRemoveSong,
+    CollectionRetrieveUpdateView,
     CollectionRetrieveView,
     CollectionSongCreateView,
 )
@@ -151,7 +153,7 @@ class TestCollectionRetrieveView(TestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 
-class TestCollectionDetailView(TestCase):
+class TestCollectionRetrieveUpdateView(TestCase):
     def setUp(self):
         self.factory = APIRequestFactory()
         self.artist = BaseUserFactory()
@@ -164,7 +166,7 @@ class TestCollectionDetailView(TestCase):
         url = reverse("api:collection-detail", kwargs={"uuid": collection.uuid})
         request = self.factory.get(url)
         force_authenticate(request, user=self.artist)
-        response = CollectionDetailView.as_view()(request, uuid=collection.uuid)
+        response = CollectionRetrieveUpdateView.as_view()(request, uuid=collection.uuid)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["uuid"], str(collection.uuid))
@@ -404,3 +406,216 @@ class TestCollectionSongCreateViewAlbumUpload(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         mock_validate.assert_called_once()
+
+
+class TestCollectionDraftOnCreate(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.factory = APIRequestFactory()
+        cls.artist = ArtistFactory()
+
+    def _create(self, payload):
+        request = self.factory.post(
+            reverse("api:collection-list-create"), payload, format="multipart"
+        )
+        force_authenticate(request, user=self.artist)
+        return CollectionListCreateView.as_view()(request)
+
+    def test_create_passes_through_draft_true(self):
+        response = self._create(
+            {"title": fake.word(), "type": "album", "description": "x", "draft": "true"}
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(Collection.objects.get(uuid=response.data["uuid"]).draft)
+
+    def test_create_defaults_draft_to_false_when_omitted(self):
+        response = self._create(
+            {"title": fake.word(), "type": "playlist", "description": "x"}
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertFalse(Collection.objects.get(uuid=response.data["uuid"]).draft)
+
+
+class TestCollectionPublishViaPatch(TestCase):
+    def setUp(self):
+        self.factory = APIRequestFactory()
+        self.author = ArtistFactory()
+        self.outsider = BaseUserFactory()
+
+    def _draft_album(self, songs):
+        album = CollectionFactory(type="album", draft=True, songs=songs)
+        CollectionCredit.objects.create(collection=album, author=self.author)
+        return album
+
+    def _patch(self, album, user, payload):
+        url = reverse("api:collection-detail", kwargs={"uuid": album.uuid})
+        request = self.factory.patch(url, payload, format="multipart")
+        force_authenticate(request, user=user)
+        return CollectionRetrieveUpdateView.as_view()(request, uuid=album.uuid)
+
+    def test_publish_succeeds_when_all_songs_processed(self):
+        songs = BaseSongFactory.create_batch(2, draft=False)
+        album = self._draft_album(songs)
+
+        with patch("streaming.api.v1.views.collections.send_ws_event") as mock_ws:
+            response = self._patch(album, self.author, {"draft": "false"})
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        album.refresh_from_db()
+        self.assertFalse(album.draft)
+        mock_ws.assert_called_once()
+
+    def test_publish_rejected_when_song_still_processing(self):
+        songs = [
+            BaseSongFactory(draft=False),
+            BaseSongFactory(draft=True),
+        ]
+        album = self._draft_album(songs)
+
+        response = self._patch(album, self.author, {"draft": "false"})
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("songs", response.data["errors"])
+        self.assertEqual(len(response.data["errors"]["songs"]), 1)
+        album.refresh_from_db()
+        self.assertTrue(album.draft)
+
+    def test_non_author_cannot_patch(self):
+        songs = BaseSongFactory.create_batch(1, draft=False)
+        album = self._draft_album(songs)
+
+        response = self._patch(album, self.outsider, {"draft": "false"})
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        album.refresh_from_db()
+        self.assertTrue(album.draft)
+
+    def test_patch_other_fields_does_not_trigger_publish_check(self):
+        songs = [BaseSongFactory(draft=True)]
+        album = self._draft_album(songs)
+
+        response = self._patch(album, self.author, {"title": "renamed while draft"})
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        album.refresh_from_db()
+        self.assertEqual(album.title, "renamed while draft")
+        self.assertTrue(album.draft)
+
+
+class TestDraftVisibility(TestCase):
+    def setUp(self):
+        self.factory = APIRequestFactory()
+        self.author = ArtistFactory()
+        self.outsider = BaseUserFactory()
+
+    def _make_draft_album(self):
+        album = CollectionFactory(type="album", draft=True, private=False, songs=[])
+        CollectionCredit.objects.create(collection=album, author=self.author)
+        return album
+
+    def test_list_excludes_drafts(self):
+        draft = self._make_draft_album()
+        published = CollectionFactory(
+            type="album", draft=False, private=False, songs=[]
+        )
+
+        url = reverse("api:collection-list-create")
+        request = self.factory.get(url)
+        force_authenticate(request, user=self.outsider)
+        response = CollectionListCreateView.as_view()(request)
+
+        uuids = {item["uuid"] for item in response.data["results"]}
+        self.assertIn(str(published.uuid), uuids)
+        self.assertNotIn(str(draft.uuid), uuids)
+
+    def test_detail_blocks_non_author_on_draft(self):
+        album = self._make_draft_album()
+
+        url = reverse("api:collection-detail", kwargs={"uuid": album.uuid})
+        request = self.factory.get(url)
+        force_authenticate(request, user=self.outsider)
+        response = CollectionRetrieveUpdateView.as_view()(request, uuid=album.uuid)
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_detail_blocks_author_on_draft(self):
+        album = self._make_draft_album()
+
+        url = reverse("api:collection-detail", kwargs={"uuid": album.uuid})
+        request = self.factory.get(url)
+        force_authenticate(request, user=self.author)
+        response = CollectionRetrieveUpdateView.as_view()(request, uuid=album.uuid)
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_personal_excludes_authors_drafts(self):
+        draft = self._make_draft_album()
+        published = CollectionFactory(
+            type="album", draft=False, private=False, songs=[]
+        )
+        CollectionCredit.objects.create(collection=published, author=self.author)
+
+        url = reverse("api:collection-user-list", kwargs={"uuid": self.author.uuid})
+        request = self.factory.get(url)
+        force_authenticate(request, user=self.author)
+        response = CollectionPersonalView.as_view()(request, uuid=self.author.uuid)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        created_uuids = {c["uuid"] for c in response.data["created_collections"]}
+        self.assertIn(str(published.uuid), created_uuids)
+        self.assertNotIn(str(draft.uuid), created_uuids)
+
+    def test_album_by_song_404_for_draft(self):
+        song = BaseSongFactory()
+        album = self._make_draft_album()
+        cs = CollectionSong.objects.create(collection=album, song=song)
+
+        url = reverse("api:album-by-song", kwargs={"uuid": cs.uuid})
+
+        for user in (self.author, self.outsider):
+            request = self.factory.get(url)
+            force_authenticate(request, user=user)
+            response = AlbumBySongView.as_view()(request, uuid=cs.uuid)
+            self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    @patch("streaming.api.v1.views.collections.validate_audio")
+    @patch("streaming.api.v1.views.collections.convert_audio.apply_async")
+    def test_author_can_upload_song_to_draft(self, mock_convert, mock_validate):
+        mock_validate.return_value = AudioStreamInfo(
+            duration_seconds=180.0,
+            sample_rate=44100,
+            channels=2,
+            codec_name="mp3",
+            bit_depth=None,
+            bit_rate=320000,
+        )
+        mock_convert.return_value = MagicMock(id="task-id-456")
+        album = self._make_draft_album()
+
+        audio_file = io.BytesIO(b"fake audio content")
+        audio_file.name = "test_song.mp3"
+        payload = {
+            "title": fake.word(),
+            "description": fake.text(max_nb_chars=100),
+            "audio": audio_file,
+            "authors": [str(self.author.uuid)],
+            "operation_id": "op-test-123",
+        }
+
+        url = reverse(
+            "api:collection-song-create",
+            kwargs={"collection_uuid": album.uuid},
+        )
+        request = self.factory.post(url, payload, format="multipart")
+        force_authenticate(request, user=self.author)
+        response = CollectionSongCreateView.as_view()(
+            request, collection_uuid=album.uuid
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
+        self.assertTrue(
+            CollectionSong.objects.filter(
+                collection=album, song__uuid=response.data["song_uuid"]
+            ).exists()
+        )

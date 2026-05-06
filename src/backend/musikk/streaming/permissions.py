@@ -22,10 +22,13 @@ class IsPublicOrCollectionAuthor(BasePermission):
         if collection is None:
             return False
 
-        if not collection.private:
-            return True
+        if collection.draft:
+            return False
 
-        return _is_collection_author(request.user, collection)
+        if collection.private:
+            return _is_collection_author(request.user, collection)
+
+        return True
 
 
 class IsCollecitonAuthor(BasePermission):

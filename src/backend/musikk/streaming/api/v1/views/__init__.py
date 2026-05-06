@@ -5,9 +5,6 @@ from streaming.api.v1.views.collections import (
     CollectionAddLikedView as CollectionAddLikedView,
 )
 from streaming.api.v1.views.collections import (
-    CollectionDetailView as CollectionDetailView,
-)
-from streaming.api.v1.views.collections import (
     CollectionListCreateView as CollectionListCreateView,
 )
 from streaming.api.v1.views.collections import (
@@ -15,6 +12,9 @@ from streaming.api.v1.views.collections import (
 )
 from streaming.api.v1.views.collections import (
     CollectionRemoveSong as CollectionRemoveSong,
+)
+from streaming.api.v1.views.collections import (
+    CollectionRetrieveUpdateView as CollectionRetrieveUpdateView,
 )
 from streaming.api.v1.views.collections import (
     CollectionRetrieveView as CollectionRetrieveView,

@@ -121,8 +121,8 @@ export function AlbumSongUploadSection({ albumUUID, onComplete }: AlbumSongUploa
                     <div className="flex items-center justify-between gap-2">
                         <p className="text-xs text-muted-foreground">
                             {allSongsReady
-                                ? "All songs uploaded. You can complete the album."
-                                : `${readyCount} of ${totalCount} songs uploaded. Upload all songs to complete.`}
+                                ? "All songs uploaded. You can create the album."
+                                : `${readyCount} of ${totalCount} songs uploaded. Upload all songs to create.`}
                         </p>
                         <Button
                             type="button"
@@ -130,7 +130,7 @@ export function AlbumSongUploadSection({ albumUUID, onComplete }: AlbumSongUploa
                             onClick={onComplete}
                             className="shrink-0"
                         >
-                            Complete Album
+                            Create Album
                         </Button>
                     </div>
                 </div>

@@ -48,11 +48,13 @@ class CollectionSerializerBasic(BaseModelSerializer):
             "is_liked",
             "type",
             "private",
+            "draft",
         ]
         extra_kwargs = BaseModelSerializer.Meta.extra_kwargs | {
             "title": {"read_only": True},
             "image": {"read_only": True},
             "private": {"read_only": True},
+            "draft": {"read_only": True},
         }
 
     def get_is_liked(self, obj) -> bool | None:
@@ -116,6 +118,7 @@ class CollectionCreateSerializer(BaseModelSerializer):
             "image",
             "type",
             "private",
+            "draft",
         ]
         extra_kwargs = {
             **BaseModelSerializer.Meta.extra_kwargs,
@@ -142,3 +145,33 @@ class CollectionCreateSerializer(BaseModelSerializer):
                 )
 
         return collection
+
+
+class CollectionUpdateSerializer(BaseModelSerializer):
+    class Meta(BaseModelSerializer.Meta):
+        model = Collection
+        fields = BaseModelSerializer.Meta.fields + [
+            "title",
+            "description",
+            "image",
+            "draft",
+        ]
+
+    def validate(self, attrs):
+        is_publishing = (
+            "draft" in attrs and attrs["draft"] is False and self.instance.draft
+        )
+        if is_publishing:
+            unprocessed_songs = list(
+                self.instance.base_songs.filter(draft=True).values_list(
+                    "uuid", flat=True
+                )
+            )
+            if unprocessed_songs:
+                raise serializers.ValidationError(
+                    {
+                        "detail": "Some songs are not processed",
+                        "songs": [str(u) for u in unprocessed_songs],
+                    }
+                )
+        return attrs

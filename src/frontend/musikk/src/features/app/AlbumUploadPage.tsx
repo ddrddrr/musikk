@@ -1,8 +1,12 @@
+import { getErrorDetail } from "@/api/errorUtils.ts";
 import { UUID } from "@/api/types.ts";
+import { updateCollection } from "@/features/collections/api/mutations.ts";
 import { Collection } from "@/features/collections/types.ts";
 import { BackButton } from "@/features/common/BackButton.tsx";
+import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { AlbumSongUploadSection } from "../album-upload/components/AlbumSongUploadSection.tsx";
 import { CollectionForm } from "../collections/components/CollectionForm.tsx";
 import { useCollectionCreation } from "../collections/hooks/useCollectionCreation.ts";
@@ -15,6 +19,16 @@ export function AlbumUploadPage() {
         type: "album",
         onSuccess: (collection: Collection) => {
             setAlbumUUID(collection.uuid);
+        },
+    });
+
+    const publishAlbumMutation = useMutation({
+        mutationFn: (uuid: UUID) => updateCollection(uuid, { draft: false }),
+        onSuccess: (collection) => {
+            navigate(`/collection/${collection.uuid}/`);
+        },
+        onError: (error) => {
+            toast.error(getErrorDetail(error, "Failed to create album"));
         },
     });
 
@@ -47,13 +61,11 @@ export function AlbumUploadPage() {
                             </div>
                             <h1 className="text-center text-2xl font-bold">Upload Songs</h1>
                             <p className="mb-6 text-center text-sm text-muted-foreground">
-                                Add and upload all songs before completing the album.
+                                Add and upload all songs before creating the album.
                             </p>
                             <AlbumSongUploadSection
                                 albumUUID={albumUUID}
-                                onComplete={() => {
-                                    navigate(`/collection/${albumUUID}/`);
-                                }}
+                                onComplete={() => publishAlbumMutation.mutate(albumUUID)}
                             />
                         </>
                     )}

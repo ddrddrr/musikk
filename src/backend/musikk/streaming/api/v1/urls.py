@@ -3,37 +3,35 @@ from django.urls import path
 from streaming.api.v1.views import (
     FriendsLatestListenedView,
 )
-from streaming.api.v1.views.profile import StreamingProfileRetrieveView
-
-from streaming.api.v1.views.songs import (
-    SongAddLikedView,
-    CollectionSongRetrieveView,
-    SongUserCollections,
-)
 from streaming.api.v1.views.collections import (
+    AlbumBySongView,
+    CollectionAddLikedView,
     CollectionListCreateView,
     CollectionPersonalView,
-    CollectionDetailView,
-    CollectionAddLikedView,
     CollectionRemoveSong,
-    AlbumBySongView,
+    CollectionRetrieveUpdateView,
     CollectionRetrieveView,
     CollectionSongCreateView,
 )
-
+from streaming.api.v1.views.profile import StreamingProfileRetrieveView
 from streaming.api.v1.views.song_queue import (
-    PlayerStateRetrieveView,
-    QueueAddSongView,
-    QueueAddCollectionView,
-    PlayerPlaySongView,
-    PlayerPlayCollectionView,
-    QueueAppendRandomSongsView,
-    QueueRemoveItemView,
+    MoveContextToQueueView,
     PlayerClearView,
     PlayerNextView,
+    PlayerPlayCollectionView,
+    PlayerPlaySongView,
     PlayerPrevView,
+    PlayerStateRetrieveView,
+    QueueAddCollectionView,
+    QueueAddSongView,
+    QueueAppendRandomSongsView,
+    QueueRemoveItemView,
     QueueReorderView,
-    MoveContextToQueueView,
+)
+from streaming.api.v1.views.songs import (
+    CollectionSongRetrieveView,
+    SongAddLikedView,
+    SongUserCollections,
 )
 
 song_urls = [
@@ -82,7 +80,7 @@ collection_urls = [
     ),
     path(
         "collections/detail/<uuid:uuid>",
-        CollectionDetailView.as_view(),
+        CollectionRetrieveUpdateView.as_view(),
         name="collection-detail",
     ),
     path(
