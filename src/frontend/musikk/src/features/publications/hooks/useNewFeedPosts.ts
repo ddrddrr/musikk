@@ -16,7 +16,7 @@ function useNewPosts(
     const { data } = useQuery({
         queryKey: [...queryKey, "poll"],
         queryFn: () => fetchPublicationPage(url, 1, 0),
-        refetchInterval: 30_000,
+        refetchInterval: 10_000, // 10s
     });
 
     const latestUUID = data?.results[0]?.uuid;

@@ -14,7 +14,7 @@ export function useFriendsListeningQuery() {
             const res = await api_client.get(FriendActivityURLs.listeningToList);
             return res.data;
         },
-        refetchInterval: 30_000, // 30s
+        refetchInterval: 10_000, // 10s
     });
 }
 
