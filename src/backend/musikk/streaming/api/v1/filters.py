@@ -1,7 +1,8 @@
+from django.db.models import Q
 from django_filters import rest_framework as filters
+from users.models import UserFollow
 
 from streaming.models.collections import Collection, CollectionType
-from users.models import UserFollow
 
 
 class CollectionFilter(filters.FilterSet):
@@ -20,22 +21,15 @@ class CollectionFilter(filters.FilterSet):
         return queryset.filter(collection_credits__author__uuid=value).distinct()
 
     def filter_connection(self, queryset, name, value):
-        collection_ids = []
         if value == "friends":
-            collection_ids = []
-            for friend in self.request.user.friends:
-                collection_ids.extend(
-                    friend.streamingprofile.followed_collections.values_list(
-                        "id", flat=True
-                    )
-                )
-
+            user_ids = self.request.user.friends.values_list("pk", flat=True)
         elif value == "followed":
-            for follow_obj in UserFollow.objects.filter(from_user=self.request.user):
-                collection_ids.extend(
-                    follow_obj.to_user.streamingprofile.followed_collections.values_list(
-                        "id", flat=True
-                    )
-                )
+            user_ids = UserFollow.objects.filter(
+                from_user=self.request.user
+            ).values_list("to_user_id", flat=True)
+        else:
+            return queryset.none()
 
-        return queryset.filter(id__in=collection_ids).distinct()
+        return queryset.filter(
+            Q(followers__user__in=user_ids) | Q(collection_credits__author__in=user_ids)
+        ).distinct()
