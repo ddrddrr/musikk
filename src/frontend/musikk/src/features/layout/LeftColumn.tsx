@@ -1,12 +1,12 @@
 import { CollectionCard } from "@/features/collections/components/CollectionCard.tsx";
 import { ColletionCreateButton } from "@/features/collections/components/ColletionCreateButton.tsx";
 import { EmptyState } from "@/features/common/EmptyState.tsx";
-import { UserCollectionsContext } from "@/features/user/providers/userCollectionsContext.ts";
-import { useContext, useMemo } from "react";
+import { usePersonalCollections } from "@/features/user/hooks/usePersonalCollections.ts";
+import { useMemo } from "react";
 
 export function LeftColumn() {
-    const { liked_songs, history, created_collections, followed_collections } =
-        useContext(UserCollectionsContext);
+    const { data } = usePersonalCollections();
+    const { liked_songs, history, created_collections, followed_collections } = data ?? {};
 
     const collections = useMemo(() => {
         const created = Array.isArray(created_collections) ? created_collections : [];
