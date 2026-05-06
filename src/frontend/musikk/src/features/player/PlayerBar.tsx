@@ -74,12 +74,16 @@ export function PlayerBar({
             if (isThisDeviceActive) {
                 const audio = audioRef.current;
                 if (audio) {
-                    // changing currentTime "clicks" without a fade
+                    // keep seeking=true until audio.currentTime is updated, otherwise
+                    // stale timeupdate events fired during fadeOut overwrite currentTime
+                    // with the pre-seek position and the slider goes back
                     void (async () => {
                         await fadeOut();
                         audio.currentTime = t;
+                        setSeeking(false);
                         fadeIn();
                     })();
+                    return;
                 }
             }
 
