@@ -92,7 +92,7 @@ export function PlayerBar({
     const displayTime = seeking ? seekTime : currentTime;
 
     return (
-        <div className="border-t border-foreground bg-card px-4 py-2">
+        <div className="flex h-20 items-center border-t border-foreground bg-card px-4 py-2">
             <div className="flex w-full items-center justify-between gap-4">
                 {playingSong && (
                     <div className="flex min-w-0 items-center gap-3">
