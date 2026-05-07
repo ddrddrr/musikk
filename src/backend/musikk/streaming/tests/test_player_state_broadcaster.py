@@ -3,7 +3,11 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from django.test import TestCase
 from users.tests.factories import BaseUserFactory
 
-from streaming.managers.playback_manager import PlaybackManager, PlaybackState
+from streaming.managers.playback_manager import (
+    ActivePlayback,
+    PlaybackManager,
+    PlaybackState,
+)
 from streaming.tests.factories import CollectionSongFactory
 from streaming.ws.events import ServerEvent
 from streaming.ws.state_broadcasters.player import PlayerStateBroadcaster
@@ -53,10 +57,13 @@ class TestPlayerStateBroadcaster(TestCase):
     def test_broadcast_snapshot_with_current_song_serializes_full_payload(self):
         self._set_current_song()
         self.mock_get_playback_state.return_value = PlaybackState(
-            current_song_uuid=str(self.collection_song.uuid),
-            is_playing=True,
-            last_known_song_pos_ms=12500,
-            last_known_at_server_ms=1_700_000_000_000,
+            active=ActivePlayback(
+                current_song_uuid=str(self.collection_song.uuid),
+                play_instance_uuid="11111111-1111-1111-1111-111111111111",
+                is_playing=True,
+                last_known_song_pos_ms=12500,
+                last_known_at_server_ms=1_700_000_000_000,
+            ),
             version=3,
         )
 
@@ -82,8 +89,14 @@ class TestPlayerStateBroadcaster(TestCase):
         self.assertIn("is_liked", payload["current_song"]["song"])
         self.assertEqual(payload["current_song"]["song"]["is_liked"], False)
         self.assertEqual(payload["server_ts_ms"], 1_700_000_000_000)
-        self.assertEqual(payload["playback_state"]["last_known_song_pos_ms"], 12500)
-        self.assertTrue(payload["playback_state"]["is_playing"])
+        self.assertEqual(payload["playback_state"]["version"], 3)
+        active = payload["playback_state"]["active"]
+        self.assertEqual(active["last_known_song_pos_ms"], 12500)
+        self.assertTrue(active["is_playing"])
+        self.assertEqual(
+            active["play_instance_uuid"],
+            "11111111-1111-1111-1111-111111111111",
+        )
 
     def test_broadcast_snapshot_without_current_song_returns_null(self):
         self.mock_get_playback_state.return_value = None
@@ -97,10 +110,13 @@ class TestPlayerStateBroadcaster(TestCase):
 
     def test_broadcast_seek_emits_seek_event_with_playback_state(self):
         self.mock_get_playback_state.return_value = PlaybackState(
-            current_song_uuid=str(self.collection_song.uuid),
-            is_playing=True,
-            last_known_song_pos_ms=42_500,
-            last_known_at_server_ms=1_700_000_000_000,
+            active=ActivePlayback(
+                current_song_uuid=str(self.collection_song.uuid),
+                play_instance_uuid="22222222-2222-2222-2222-222222222222",
+                is_playing=True,
+                last_known_song_pos_ms=42_500,
+                last_known_at_server_ms=1_700_000_000_000,
+            ),
             version=4,
         )
 
@@ -114,10 +130,13 @@ class TestPlayerStateBroadcaster(TestCase):
                 "payload": {
                     "server_ts_ms": 1_700_000_000_000,
                     "playback_state": {
-                        "current_song_uuid": str(self.collection_song.uuid),
-                        "is_playing": True,
-                        "last_known_song_pos_ms": 42_500,
-                        "last_known_at_server_ms": 1_700_000_000_000,
+                        "active": {
+                            "current_song_uuid": str(self.collection_song.uuid),
+                            "play_instance_uuid": "22222222-2222-2222-2222-222222222222",
+                            "is_playing": True,
+                            "last_known_song_pos_ms": 42_500,
+                            "last_known_at_server_ms": 1_700_000_000_000,
+                        },
                         "version": 4,
                     },
                 },

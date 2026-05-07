@@ -3,7 +3,7 @@ from collections.abc import Callable
 from websockets.action_handler import WSActionHandler
 
 from streaming.managers.device_manager import DeviceManager
-from streaming.managers.playback_manager import PlaybackManager, PlaybackState
+from streaming.managers.playback_manager import ActivePlayback, PlaybackManager
 from streaming.ws.playback_controller import PlaybackController
 from streaming.ws.state_broadcasters.device import DeviceStateBroadcaster
 
@@ -61,7 +61,7 @@ class PlaybackWSActionHandler(WSActionHandler):
         song_pos_ms = self._parse_song_pos_ms(payload)
         if song_pos_ms is None:
             return
-        if self._state_synced_with_fe(payload) is None:
+        if self._active_synced_with_fe(payload) is None:
             return
 
         self._auto_activate_if_no_active_device()
@@ -72,25 +72,25 @@ class PlaybackWSActionHandler(WSActionHandler):
         song_pos_ms = self._parse_song_pos_ms(payload)
         if song_pos_ms is None:
             return
-        prev_state = self._state_synced_with_fe(payload)
-        if prev_state is None:
+        prev_active = self._active_synced_with_fe(payload)
+        if prev_active is None:
             return
 
-        self.playback_controller.sync(song_pos_ms, prev_state)
+        self.playback_controller.sync(song_pos_ms, prev_active)
 
-    def _state_synced_with_fe(self, payload: dict) -> PlaybackState | None:
-        """Returns the stored state iff the FE-reported uuid matches the stored one.
+    def _active_synced_with_fe(self, payload: dict) -> ActivePlayback | None:
+        """Returns the stored active playback iff the FE-reported uuid matches the stored one.
 
         Multiple consumers per user (multi-tab/multi-browser) race on the same
         per-user playback state. If a tab acts on a song the user has since
         moved past, drop the action — the next snapshot will resync that tab.
         """
         state = self.manager.get_playback_state()
-        if not state or state.current_song_uuid is None:
+        if not state or state.active is None:
             return None
-        if payload.get("current_song_uuid") != state.current_song_uuid:
+        if payload.get("current_song_uuid") != state.active.current_song_uuid:
             return None
-        return state
+        return state.active
 
     def _auto_activate_if_no_active_device(self):
         # we can seek on a device that isn't active yet

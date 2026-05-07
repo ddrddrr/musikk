@@ -42,19 +42,6 @@ export function useSetDeviceActiveAction() {
     return setDeviceActiveAction;
 }
 
-export function useDeviceHeartbeatAction() {
-    const ws = useWSClient();
-    const deviceHeartbeatAction = useCallback(
-        (device: ThisDevice) =>
-            ws.send({
-                action: "device.heartbeat",
-                payload: { device_id: device.id },
-            }),
-        [ws],
-    );
-    return deviceHeartbeatAction;
-}
-
 export function useSetDeviceVolumeAction() {
     const ws = useWSClient();
     const setDeviceVolumeAction = useCallback(
@@ -105,7 +92,7 @@ export function useSyncAction() {
     const ws = useWSClient();
     return useCallback(
         (songPosMs: number, currentSongUuid: string | null) =>
-            ws.send({
+            ws.sendIfOpen({
                 action: "playback.sync",
                 payload: { song_pos_ms: songPosMs, current_song_uuid: currentSongUuid },
             }),

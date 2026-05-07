@@ -22,13 +22,15 @@ class DeviceWSActionHandler(WSActionHandler):
             "device.register": self.handle_register,
             "device.set_active": self.handle_set_active,
             "device.set_volume": self.handle_set_volume,
-            "device.heartbeat": self.handle_heartbeat,
         }
 
     def on_disconnect(self):
         if not self.device_id:
             return
-        was_active = self.manager.clear_device(self.device_id)
+        was_active = self.manager.clear_device(
+            device_id=self.device_id,
+            channel_name=self.consumer.channel_name,
+        )
         if was_active:
             # if the active device disconnected, stop playback so the next
             # device the user picks doesn't autoplay
@@ -45,8 +47,12 @@ class DeviceWSActionHandler(WSActionHandler):
             return
 
         # FE owns the durable per-device volume in localStorage; BE state is
-        # volatile (TTL + cleared on disconnect) so the FE re-asserts it here
-        register_kwargs = {"device_id": device_id, "name": device_name}
+        # volatile (cleared on disconnect) so the FE re-asserts it here
+        register_kwargs = {
+            "device_id": device_id,
+            "channel_name": self.consumer.channel_name,
+            "name": device_name,
+        }
         volume = payload.get("volume")
         if isinstance(volume, int) and 0 <= volume <= 100:
             register_kwargs["volume"] = volume
@@ -56,10 +62,9 @@ class DeviceWSActionHandler(WSActionHandler):
         self.manager.register_device(**register_kwargs)
         self.device_broadcaster.broadcast_devices()
 
+        # the player snapshot is not broadcast on every register since it doesn't change
+        # but the new device needs to now the initial values, so we send it directly
         self.player_broadcaster.send_snapshot_to_channel(
-            self.consumer.channel_layer, self.consumer.channel_name
-        )
-        self.device_broadcaster.send_devices_to_channel(
             self.consumer.channel_layer, self.consumer.channel_name
         )
 
@@ -89,13 +94,4 @@ class DeviceWSActionHandler(WSActionHandler):
             return
 
         self.manager.set_device_volume(device_id=device_id, volume=volume)
-        self.device_broadcaster.broadcast_devices()
-
-    def handle_heartbeat(self, payload: dict):
-        device_id = payload.get("device_id")
-        if not device_id:
-            self.consumer.send_error("`device_id` is required for device.heartbeat")
-            return
-
-        self.manager.touch_device(device_id=device_id)
         self.device_broadcaster.broadcast_devices()

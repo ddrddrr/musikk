@@ -4,6 +4,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 import os
+import tempfile
 from pathlib import Path
 from typing import Literal
 
@@ -255,6 +256,9 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = "users.BaseUser"
 
 ### MEDIA
+UPLOAD_TMP_DIR = config(
+    "UPLOAD_TMP_DIR", default=os.path.join(tempfile.gettempdir(), "musikk_uploads")
+)
 MEDIA_ROOT = config("MEDIA_ROOT", default=os.path.join(ROOT_DIR, "media"))
 # Relative to MEDIA_ROOT
 AUDIO_CONTENT_PATH = config("AUDIO_CONTENT_PATH", default="audio")

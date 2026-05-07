@@ -4,11 +4,6 @@ from typing import TypedDict
 from redis_helpers import get_default_redis_conn
 from utils.data import try_decode
 
-# heartbeat TTL seconds
-# 2x the 3s FE heartbeat + 1s so a single missed beat doesn't remove active device
-DEVICE_TTL_SECONDS = 7
-
-
 DEFAULT_VOLUME = 100
 
 
@@ -35,37 +30,19 @@ class DeviceManager:
     def register_device(
         self,
         device_id: str,
+        channel_name: str,
         name: str | None = None,
         volume: int = DEFAULT_VOLUME,
     ) -> str:
         r = get_default_redis_conn()
 
-        device_data = {"name": name, "volume": volume}
-        r.set(
-            self._device_key(device_id),
-            json.dumps(device_data),
-            ex=DEVICE_TTL_SECONDS,
-        )
+        device_data = {
+            "channel_name": channel_name,
+            "name": name,
+            "volume": volume,
+        }
+        r.set(self._device_key(device_id), json.dumps(device_data))
         r.sadd(self._devices_set_key(), device_id)
-        return device_id
-
-    def touch_device(self, device_id: str) -> str:
-        r = get_default_redis_conn()
-
-        device_data = {}
-        existing_device_raw = r.get(self._device_key(device_id))
-        if existing_device_raw:
-            try:
-                device_data = json.loads(existing_device_raw)
-            except Exception:
-                # TODO
-                pass
-
-        r.set(
-            self._device_key(device_id),
-            json.dumps(device_data),
-            ex=DEVICE_TTL_SECONDS,
-        )
         return device_id
 
     def get_active_device_id(self) -> str | None:
@@ -84,7 +61,6 @@ class DeviceManager:
             device_id = try_decode(raw_device_id)
             raw_device = r.get(self._device_key(device_id))
             if not raw_device:
-                r.srem(self._devices_set_key(), device_id)
                 continue
 
             try:
@@ -108,7 +84,6 @@ class DeviceManager:
         prev_active = try_decode(r.get(self._active_device_key()))
         if prev_active == device_id:
             return False
-        # no ttl, should be cleared explicitely
         r.set(self._active_device_key(), device_id)
         return True
 
@@ -124,17 +99,20 @@ class DeviceManager:
                 pass
 
         device_data["volume"] = volume
-        # set the same ttl as before since device 1 can update the
-        # volume of device 2
-        ttl = r.ttl(self._device_key(device_id))
-        r.set(
-            self._device_key(device_id),
-            json.dumps(device_data),
-            ex=ttl if ttl > 0 else DEVICE_TTL_SECONDS,
-        )
+        r.set(self._device_key(device_id), json.dumps(device_data))
 
-    def clear_device(self, device_id: str) -> bool:
+    def clear_device(self, device_id: str, channel_name: str) -> bool:
+        """Removes the device only if any concrete ws conn (`channel_name`) is still attached to it"""
         r = get_default_redis_conn()
+
+        raw = r.get(self._device_key(device_id))
+        if raw:
+            try:
+                data = json.loads(raw)
+            except Exception:
+                data = {}
+            if data.get("channel_name") and data["channel_name"] != channel_name:
+                return False
 
         r.delete(self._device_key(device_id))
         r.srem(self._devices_set_key(), device_id)

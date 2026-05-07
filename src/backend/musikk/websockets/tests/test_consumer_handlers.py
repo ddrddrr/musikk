@@ -2,7 +2,7 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 from django.test import TestCase
 from social.ws import TypingWSActionHandler
-from streaming.managers.playback_manager import PlaybackState
+from streaming.managers.playback_manager import ActivePlayback, PlaybackState
 from streaming.ws.action_handlers.device import DeviceWSActionHandler
 from streaming.ws.action_handlers.playback import PlaybackWSActionHandler
 from streaming.ws.events import ServerEvent
@@ -64,7 +64,6 @@ class TestBaseConsumer(TestCase):
                 "device.register",
                 "device.set_active",
                 "device.set_volume",
-                "device.heartbeat",
                 "playback.activate",
                 "playback.stop",
                 "playback.seek",
@@ -248,21 +247,16 @@ class TestDeviceWSActionHandler(TestCase):
         self.broadcast_devices_patcher = patch.object(
             DeviceStateBroadcaster, "broadcast_devices"
         )
-        self.send_devices_patcher = patch.object(
-            DeviceStateBroadcaster, "send_devices_to_channel"
-        )
         # patch the controller's stop so we can assert the
         # transition_pause + snapshot pair atomically without hitting Redis
         self.playback_stop_patcher = patch.object(PlaybackController, "stop")
         self.mock_broadcast_state = self.broadcast_state_patcher.start()
         self.mock_send_state = self.send_state_patcher.start()
         self.mock_broadcast_devices = self.broadcast_devices_patcher.start()
-        self.mock_send_devices = self.send_devices_patcher.start()
         self.mock_playback_stop = self.playback_stop_patcher.start()
         self.addCleanup(self.broadcast_state_patcher.stop)
         self.addCleanup(self.send_state_patcher.stop)
         self.addCleanup(self.broadcast_devices_patcher.stop)
-        self.addCleanup(self.send_devices_patcher.stop)
         self.addCleanup(self.playback_stop_patcher.stop)
 
     @patch("streaming.ws.action_handlers.device.DeviceManager")
@@ -271,17 +265,17 @@ class TestDeviceWSActionHandler(TestCase):
         handler.handle_register({"device_id": "device1", "name": "My Device"})
 
         mock_manager_cls.return_value.register_device.assert_called_once_with(
-            device_id="device1", name="My Device"
+            device_id="device1",
+            channel_name=self.consumer.channel_name,
+            name="My Device",
         )
         self.assertEqual(handler.device_id, "device1")
         self.assertEqual(self.consumer.device_id, "device1")
-        # group broadcast for already-connected clients about the new device,
-        # and direct delivery of full snapshot + device list to the joining channel
+        # the group broadcast catches up the joining channel on the device list
+        # since it is already in the user group; the player snapshot is delivered
+        # directly because it is not broadcast on every register
         self.mock_broadcast_devices.assert_called_once_with()
         self.mock_send_state.assert_called_once_with(
-            self.consumer.channel_layer, self.consumer.channel_name
-        )
-        self.mock_send_devices.assert_called_once_with(
             self.consumer.channel_layer, self.consumer.channel_name
         )
         self.mock_broadcast_state.assert_not_called()
@@ -298,7 +292,6 @@ class TestDeviceWSActionHandler(TestCase):
         self.mock_broadcast_state.assert_not_called()
         self.mock_send_state.assert_not_called()
         self.mock_broadcast_devices.assert_not_called()
-        self.mock_send_devices.assert_not_called()
 
     @patch("streaming.ws.action_handlers.device.DeviceManager")
     def test_register_forwards_valid_volume(self, mock_manager_cls):
@@ -311,7 +304,10 @@ class TestDeviceWSActionHandler(TestCase):
         )
 
         mock_manager_cls.return_value.register_device.assert_called_once_with(
-            device_id="device1", name="My Device", volume=42
+            device_id="device1",
+            channel_name=self.consumer.channel_name,
+            name="My Device",
+            volume=42,
         )
 
     @patch("streaming.ws.action_handlers.device.DeviceManager")
@@ -344,30 +340,6 @@ class TestDeviceWSActionHandler(TestCase):
         self.mock_broadcast_state.assert_not_called()
         self.mock_send_state.assert_not_called()
         self.mock_broadcast_devices.assert_not_called()
-        self.mock_send_devices.assert_not_called()
-
-    @patch("streaming.ws.action_handlers.device.DeviceManager")
-    def test_heartbeat_calls_manager(self, mock_manager_cls):
-        handler = DeviceWSActionHandler(self.consumer)
-        handler.handle_heartbeat({"device_id": "device1"})
-
-        mock_manager_cls.return_value.touch_device.assert_called_once_with(
-            device_id="device1"
-        )
-        self.mock_broadcast_devices.assert_called_once_with()
-        self.mock_broadcast_state.assert_not_called()
-
-    @patch("streaming.ws.action_handlers.device.DeviceManager")
-    def test_heartbeat_missing_device_id(self, mock_manager_cls):
-        handler = DeviceWSActionHandler(self.consumer)
-        handler.handle_heartbeat({})
-
-        self.consumer.send_error.assert_called_once_with(
-            "`device_id` is required for device.heartbeat"
-        )
-        mock_manager_cls.return_value.touch_device.assert_not_called()
-        self.mock_broadcast_devices.assert_not_called()
-        self.mock_broadcast_state.assert_not_called()
 
     @patch("streaming.ws.action_handlers.device.DeviceManager")
     def test_set_active_changed_stops_playback(self, mock_manager_cls):
@@ -448,7 +420,9 @@ class TestDeviceWSActionHandler(TestCase):
         handler.device_id = "device1"
         handler.on_disconnect()
 
-        mock_manager.clear_device.assert_called_once_with("device1")
+        mock_manager.clear_device.assert_called_once_with(
+            device_id="device1", channel_name=self.consumer.channel_name
+        )
         self.mock_playback_stop.assert_called_once_with()
         self.mock_broadcast_devices.assert_called_once_with()
 
@@ -473,7 +447,9 @@ class TestDeviceWSActionHandler(TestCase):
         handler.device_id = "device1"
         handler.on_disconnect()
 
-        mock_manager.clear_device.assert_called_once_with("device1")
+        mock_manager.clear_device.assert_called_once_with(
+            device_id="device1", channel_name=self.consumer.channel_name
+        )
         self.mock_playback_stop.assert_not_called()
         # only the device list changed; no need to re-broadcast player state
         self.mock_broadcast_state.assert_not_called()
@@ -532,10 +508,14 @@ class TestPlaybackWSActionHandler(TestCase):
         )
         self.addCleanup(self.event_channel_layer_patcher.stop)
 
+    @patch.object(PlaybackWSActionHandler, "_current_song_uuid", return_value="cs-1")
     @patch("streaming.ws.playback_controller.PlaybackManager")
     @patch("streaming.ws.action_handlers.playback.PlaybackManager")
     def test_activate_calls_manager_and_broadcasts(
-        self, _mock_handler_manager_cls, mock_controller_manager_cls
+        self,
+        _mock_handler_manager_cls,
+        mock_controller_manager_cls,
+        _mock_current_song_uuid,
     ):
         mock_controller_manager = mock_controller_manager_cls.return_value
         mock_controller_manager.get_playback_state.return_value = None
@@ -573,10 +553,13 @@ class TestPlaybackWSActionHandler(TestCase):
     ):
         mock_handler_manager = mock_handler_manager_cls.return_value
         mock_handler_manager.get_playback_state.return_value = PlaybackState(
-            current_song_uuid="cs-1",
-            is_playing=True,
-            last_known_song_pos_ms=0,
-            last_known_at_server_ms=0,
+            active=ActivePlayback(
+                current_song_uuid="cs-1",
+                play_instance_uuid="pi-1",
+                is_playing=True,
+                last_known_song_pos_ms=0,
+                last_known_at_server_ms=0,
+            ),
             version=0,
         )
         mock_broadcaster_manager_cls.return_value.get_playback_state.return_value = None
@@ -609,10 +592,13 @@ class TestPlaybackWSActionHandler(TestCase):
         # multi-tab race: stale tab seeks song the user has since moved past
         mock_handler_manager = mock_handler_manager_cls.return_value
         mock_handler_manager.get_playback_state.return_value = PlaybackState(
-            current_song_uuid="cs-current",
-            is_playing=True,
-            last_known_song_pos_ms=0,
-            last_known_at_server_ms=0,
+            active=ActivePlayback(
+                current_song_uuid="cs-current",
+                play_instance_uuid="pi-current",
+                is_playing=True,
+                last_known_song_pos_ms=0,
+                last_known_at_server_ms=0,
+            ),
             version=0,
         )
         self.consumer.device_id = "device1"
@@ -673,10 +659,13 @@ class TestPlaybackWSActionHandler(TestCase):
         mock_handler_manager = mock_handler_manager_cls.return_value
         # prior calculated position is close enough that no broadcast is needed
         mock_handler_manager.get_playback_state.return_value = PlaybackState(
-            current_song_uuid="cs-1",
-            is_playing=False,
-            last_known_song_pos_ms=12100,
-            last_known_at_server_ms=0,
+            active=ActivePlayback(
+                current_song_uuid="cs-1",
+                play_instance_uuid="pi-1",
+                is_playing=False,
+                last_known_song_pos_ms=12100,
+                last_known_at_server_ms=0,
+            ),
             version=0,
         )
         mock_broadcaster_manager_cls.return_value.get_playback_state.return_value = None
@@ -691,26 +680,29 @@ class TestPlaybackWSActionHandler(TestCase):
         )
         self.mock_event_channel_layer.group_send.assert_not_called()
 
-    @patch(
-        "streaming.ws.state_broadcasters.player.now_server_ms",
-        return_value=1_700_000_000_000,
-    )
     @patch("streaming.ws.state_broadcasters.player.PlaybackManager")
     @patch("streaming.ws.playback_controller.PlaybackManager")
     @patch("streaming.ws.action_handlers.playback.PlaybackManager")
-    def test_sync_broadcasts_when_drift_exceeds_threshold(
+    def test_sync_broadcasts_snapshot_when_drift_exceeds_threshold(
         self,
         mock_handler_manager_cls,
         mock_controller_manager_cls,
         mock_broadcaster_manager_cls,
-        _mock_now,
     ):
+        # drift correction broadcasts as a snapshot (not a seek): re-firing
+        # PLAYBACK_SEEK at the same version makes the active tab yank
+        # audio.currentTime back, feeding into the next sync and creating a
+        # bouncing loop. PlayerStateBroadcaster.broadcast_snapshot is patched
+        # at class level so we assert on the mock directly.
         mock_handler_manager = mock_handler_manager_cls.return_value
         mock_handler_manager.get_playback_state.return_value = PlaybackState(
-            current_song_uuid="cs-1",
-            is_playing=False,
-            last_known_song_pos_ms=5000,
-            last_known_at_server_ms=0,
+            active=ActivePlayback(
+                current_song_uuid="cs-1",
+                play_instance_uuid="pi-1",
+                is_playing=False,
+                last_known_song_pos_ms=5000,
+                last_known_at_server_ms=0,
+            ),
             version=0,
         )
         mock_broadcaster_manager_cls.return_value.get_playback_state.return_value = None
@@ -723,17 +715,8 @@ class TestPlaybackWSActionHandler(TestCase):
         mock_controller_manager_cls.return_value.transition_sync.assert_called_once_with(
             12000
         )
-        self.mock_event_channel_layer.group_send.assert_called_once_with(
-            f"user_{self.user.uuid}",
-            {
-                "type": "ws_event",
-                "event": ServerEvent.PLAYBACK_SEEK,
-                "payload": {
-                    "server_ts_ms": 1_700_000_000_000,
-                    "playback_state": None,
-                },
-            },
-        )
+        self.mock_broadcast_state.assert_called_once_with()
+        self.mock_event_channel_layer.group_send.assert_not_called()
 
     @patch("streaming.ws.playback_controller.PlaybackManager")
     @patch("streaming.ws.action_handlers.playback.PlaybackManager")
@@ -756,10 +739,13 @@ class TestPlaybackWSActionHandler(TestCase):
     ):
         mock_handler_manager = mock_handler_manager_cls.return_value
         mock_handler_manager.get_playback_state.return_value = PlaybackState(
-            current_song_uuid="cs-current",
-            is_playing=True,
-            last_known_song_pos_ms=0,
-            last_known_at_server_ms=0,
+            active=ActivePlayback(
+                current_song_uuid="cs-current",
+                play_instance_uuid="pi-current",
+                is_playing=True,
+                last_known_song_pos_ms=0,
+                last_known_at_server_ms=0,
+            ),
             version=0,
         )
 
@@ -784,10 +770,13 @@ class TestPlaybackWSActionHandler(TestCase):
     ):
         mock_handler_manager_cls.return_value.get_playback_state.return_value = (
             PlaybackState(
-                current_song_uuid="cs-1",
-                is_playing=True,
-                last_known_song_pos_ms=0,
-                last_known_at_server_ms=0,
+                active=ActivePlayback(
+                    current_song_uuid="cs-1",
+                    play_instance_uuid="pi-1",
+                    is_playing=True,
+                    last_known_song_pos_ms=0,
+                    last_known_at_server_ms=0,
+                ),
                 version=0,
             )
         )
@@ -823,10 +812,13 @@ class TestPlaybackWSActionHandler(TestCase):
     ):
         mock_handler_manager_cls.return_value.get_playback_state.return_value = (
             PlaybackState(
-                current_song_uuid="cs-1",
-                is_playing=True,
-                last_known_song_pos_ms=0,
-                last_known_at_server_ms=0,
+                active=ActivePlayback(
+                    current_song_uuid="cs-1",
+                    play_instance_uuid="pi-1",
+                    is_playing=True,
+                    last_known_song_pos_ms=0,
+                    last_known_at_server_ms=0,
+                ),
                 version=0,
             )
         )
@@ -856,10 +848,13 @@ class TestPlaybackWSActionHandler(TestCase):
     ):
         mock_handler_manager_cls.return_value.get_playback_state.return_value = (
             PlaybackState(
-                current_song_uuid="cs-1",
-                is_playing=True,
-                last_known_song_pos_ms=0,
-                last_known_at_server_ms=0,
+                active=ActivePlayback(
+                    current_song_uuid="cs-1",
+                    play_instance_uuid="pi-1",
+                    is_playing=True,
+                    last_known_song_pos_ms=0,
+                    last_known_at_server_ms=0,
+                ),
                 version=0,
             )
         )

@@ -1,4 +1,8 @@
-from streaming.managers.playback_manager import PlaybackManager, PlaybackState
+from streaming.managers.playback_manager import (
+    ActivePlayback,
+    PlaybackManager,
+    PlaybackState,
+)
 from streaming.ws.state_broadcasters.player import PlayerStateBroadcaster
 
 
@@ -32,35 +36,32 @@ class PlaybackController:
         self._broadcaster.broadcast_snapshot()
 
     def activate(self, current_song_uuid: str | None) -> None:
-        # carry the playback position forward only when it belongs to the song
-        # we're about to play; otherwise a fresh song would anchor at the
-        # previous song's offset
+        if current_song_uuid is None:
+            return
+
         prev_state = self._manager.get_playback_state() or PlaybackState.empty()
-        if prev_state.current_song_uuid == current_song_uuid:
-            anchor_pos_ms = prev_state.calculate_song_pos_ms()
+        prev_active = prev_state.active
+        if (
+            prev_active is not None
+            and prev_active.current_song_uuid == current_song_uuid
+        ):
+            estimated_song_pos_ms = prev_active.calculate_song_pos_ms()
         else:
-            anchor_pos_ms = 0
-        self._manager.transition_start_playing(current_song_uuid, anchor_pos_ms)
+            estimated_song_pos_ms = 0
+        self._manager.transition_start_playing(current_song_uuid, estimated_song_pos_ms)
         self._broadcaster.broadcast_snapshot()
 
     def seek(self, song_pos_ms: int) -> None:
         self._manager.transition_seek(song_pos_ms)
         self._broadcaster.broadcast_seek()
 
-    def sync(self, song_pos_ms: int, prev_state: PlaybackState) -> None:
-        """Active device reports its real `audio.currentTime`, and we overwrite the stored
-        `last_known_song_pos_ms` / `last_known_at_server_ms` pair with that fresh value.
-
-        Drift correction broadcasts as a snapshot rather than a seek because a sync
-        is not a user-driven seek. Broadcasting as `playback.seek` at the same version
-        causes the FE to re-fire `fireSeekRequest` on the active tab, yanking
-        `audio.currentTime` to whatever the last sync reported - which feeds back into
-        the next sync and produces a same-version bouncing loop, especially when
-        multiple consumers per user each run the active-tab sync loop.
+    def sync(self, song_pos_ms: int, prev_active: ActivePlayback) -> None:
+        """Active device sends its real `audio.currentTime`, and we overwrite the stored
+        `last_known_song_pos_ms` / `last_known_at_server_ms` pair with that fresh value
         """
         self._manager.transition_sync(song_pos_ms)
         if (
-            abs(song_pos_ms - prev_state.calculate_song_pos_ms())
+            abs(song_pos_ms - prev_active.calculate_song_pos_ms())
             > self.SYNC_DRIFT_BROADCAST_THRESHOLD_MS
         ):
             self._broadcaster.broadcast_snapshot()

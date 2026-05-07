@@ -144,12 +144,18 @@ export class AudioPlayerController {
         this.playbackState = next;
         this.notify();
 
-        const songChanged =
-            (prev?.collectionSong.uuid ?? null) !== (next?.collectionSong.uuid ?? null);
-        const playingChanged = (prev?.isPlaying ?? false) !== (next?.isPlaying ?? false);
+        const songChanged = prev?.collectionSong.uuid !== next?.collectionSong.uuid;
+        const instanceChanged = prev?.playInstanceUuid !== next?.playInstanceUuid;
+        const wasPlaying = prev?.isPlaying ?? false;
+        const isPlaying = next?.isPlaying ?? false;
+        const playingChanged = wasPlaying !== isPlaying;
+
         if (songChanged) {
             this.loadOrUnload();
             this.playOrPause();
+        } else if (instanceChanged) {
+            if (playingChanged) this.playOrPause();
+            this.seekAudioElement();
         } else if (playingChanged) {
             this.playOrPause();
         }

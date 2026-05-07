@@ -23,6 +23,7 @@ export class WSClient {
     private listeners = new Map<string, Set<MessageHandler>>();
     private pendingMessages: string[] = [];
     private topicSubscriptions = new Map<string, number>();
+    private openHandlers = new Set<() => void>();
 
     constructor(url: string) {
         this.url = url;
@@ -51,6 +52,14 @@ export class WSClient {
 
             for (const topic of this.topicSubscriptions.keys()) {
                 this.ws?.send(JSON.stringify({ action: "subscribe", payload: { topic } }));
+            }
+
+            for (const handler of this.openHandlers) {
+                try {
+                    handler();
+                } catch (error) {
+                    console.error("WS Error in open handler:", error);
+                }
             }
 
             if (this.pendingMessages.length > 0) {
@@ -164,6 +173,12 @@ export class WSClient {
         this.flush();
     }
 
+    sendIfOpen({ action, payload }: UserAction) {
+        const ws = this.ws;
+        if (ws?.readyState !== WebSocket.OPEN) return;
+        ws.send(JSON.stringify({ action, payload }));
+    }
+
     // the invariant is that the pendingMessages arr is empty before we call send()
     // and after onopen (in connect)
     private flush() {
@@ -183,6 +198,20 @@ export class WSClient {
         const ws = this.ws;
         if (ws?.readyState !== WebSocket.OPEN) return;
         ws.send(JSON.stringify(action));
+    }
+
+    onOpen(handler: () => void): () => void {
+        this.openHandlers.add(handler);
+        if (this.isOpen()) {
+            try {
+                handler();
+            } catch (error) {
+                console.error("WS Error in open handler:", error);
+            }
+        }
+        return () => {
+            this.openHandlers.delete(handler);
+        };
     }
 
     subscribeTopic(topic: string): () => void {
