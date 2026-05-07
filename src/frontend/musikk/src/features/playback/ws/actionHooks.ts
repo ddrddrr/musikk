@@ -1,9 +1,6 @@
 import { ThisDevice } from "@/features/playback/hooks/useCurrentDevice.ts";
 import { useWSClient } from "@/hooks/useWSClient.ts";
 import { useCallback } from "react";
-import { useThrottledCallback } from "use-debounce";
-
-const TICK_INTERVAL_MS = 1500;
 
 // TODO: one hook or multiple?
 export function useRegisterDeviceAction() {
@@ -95,23 +92,23 @@ export function usePlaybackActions() {
 export function useSeekAction() {
     const ws = useWSClient();
     return useCallback(
-        (position: number, collectionSongUuid: string | null) =>
+        (songPosMs: number, currentSongUuid: string | null) =>
             ws.send({
                 action: "playback.seek",
-                payload: { position, collection_song_uuid: collectionSongUuid },
+                payload: { song_pos_ms: songPosMs, current_song_uuid: currentSongUuid },
             }),
         [ws],
     );
 }
 
-export function useTickAction() {
+export function useSyncAction() {
     const ws = useWSClient();
-    return useThrottledCallback(
-        (position: number, collectionSongUuid: string | null) =>
+    return useCallback(
+        (songPosMs: number, currentSongUuid: string | null) =>
             ws.send({
-                action: "playback.tick",
-                payload: { position, collection_song_uuid: collectionSongUuid },
+                action: "playback.sync",
+                payload: { song_pos_ms: songPosMs, current_song_uuid: currentSongUuid },
             }),
-        TICK_INTERVAL_MS,
+        [ws],
     );
 }

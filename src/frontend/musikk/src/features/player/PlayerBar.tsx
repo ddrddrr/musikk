@@ -1,7 +1,8 @@
 import { MediaThumbnail } from "@/features/common/MediaThumbnail.tsx";
+import { useCalculateSongPosMs } from "@/features/playback/hooks/useCalculateSongPosMs.ts";
 import {
     PlaybackContext,
-    PlaybackTimeContext,
+    PlayerControllerContext,
 } from "@/features/playback/providers/playbackContext.ts";
 import { ChangeActiveDeviceDropdown } from "@/features/player/ChangeActiveDeviceDropdown.tsx";
 import { useVolume } from "@/features/player/hooks/useVolume.ts";
@@ -11,89 +12,47 @@ import { useNavigateToSongAlbum } from "@/features/songs/hooks/useNavigateToSong
 import { Button } from "@/features/ui/button";
 import { Slider } from "@/features/ui/slider";
 import { AuthorLinks } from "@/features/user/components/AuthorLinks.tsx";
+import { formatDuration } from "@/utils/formatDuration.ts";
 import { ListMusic, SkipBack, SkipForward, Volume2, VolumeX } from "lucide-react";
 import React, { useCallback, useContext, useState } from "react";
 
-function formatTime(seconds: number) {
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
-}
-
 interface PlayerBarProps {
-    audioRef: React.RefObject<HTMLAudioElement | null>;
-    seeking: boolean;
-    setSeeking: (s: boolean) => void;
     setIsQueueOpen: React.Dispatch<React.SetStateAction<boolean>>;
     isMutedFallback: boolean;
     onUnmute: () => Promise<void>;
     setUserVolume: (value: number) => void;
-    fadeIn: (durationMs?: number) => void;
-    fadeOut: (durationMs?: number) => Promise<void>;
 }
 export function PlayerBar({
-    audioRef,
-    seeking,
-    setSeeking,
     setIsQueueOpen,
     isMutedFallback,
     onUnmute,
     setUserVolume,
-    fadeIn,
-    fadeOut,
 }: PlayerBarProps) {
-    const { playingCollectionSong, isThisDeviceActive, totalDuration, seek } =
-        useContext(PlaybackContext);
-    const { currentTime } = useContext(PlaybackTimeContext);
+    const { playbackState, totalDuration } = useContext(PlaybackContext);
+    const controller = useContext(PlayerControllerContext);
+    const playingCollectionSong = playbackState?.collectionSong;
     const { volume, setVolume, handleVolumeCommit, handleMuteToggle } = useVolume({
         setUserVolume,
     });
-    const [seekTime, setSeekTime] = useState(0);
+    const [seekDraftMs, setSeekDraftMs] = useState<number | null>(null);
     const nextMutation = useQueueNext();
     const prevMutation = useQueuePrev();
     const navigateToAlbum = useNavigateToSongAlbum();
 
-    // if the audio is playing, coming to and end and the person is seeking back
-    // the audio will switch
-    // this is expected as there is no proper way to prevent the audio from switching
-    // and seek at the same time (same, e.g., in Spotify)
-    const handleSeek = useCallback(
-        (value: number[]) => {
-            setSeeking(true);
-            setSeekTime(value[0]);
-        },
-        [setSeeking],
-    );
+    const calculateSongPosMs = useCalculateSongPosMs(playbackState);
+    const displayMs = seekDraftMs ?? calculateSongPosMs;
+
+    const handleSeek = useCallback((value: number[]) => setSeekDraftMs(value[0] * 1000), []);
 
     const handleSeekCommit = useCallback(
         (value: number[]) => {
-            const t = value[0];
-            setSeekTime(t);
-            seek(t);
-
-            if (isThisDeviceActive) {
-                const audio = audioRef.current;
-                if (audio) {
-                    // keep seeking=true until audio.currentTime is updated, otherwise
-                    // stale timeupdate events fired during fadeOut overwrite currentTime
-                    // with the pre-seek position and the slider goes back
-                    void (async () => {
-                        await fadeOut();
-                        audio.currentTime = t;
-                        setSeeking(false);
-                        fadeIn();
-                    })();
-                    return;
-                }
-            }
-
-            setSeeking(false);
+            controller.applyUserSeek(value[0] * 1000);
+            setSeekDraftMs(null);
         },
-        [seek, audioRef, setSeeking, isThisDeviceActive, fadeIn, fadeOut],
+        [controller],
     );
 
     const playingSong = playingCollectionSong?.song;
-    const displayTime = seeking ? seekTime : currentTime;
 
     return (
         <div className="flex h-20 items-center border-t border-foreground bg-card px-4 py-2">
@@ -124,9 +83,9 @@ export function PlayerBar({
                 <div className="flex min-w-0 flex-1 items-center justify-end gap-4">
                     {playingCollectionSong && (
                         <div className="flex max-w-[350px] min-w-0 basis-1/2 items-center gap-1">
-                            <span className="text-right text-xs">{formatTime(displayTime)}</span>
+                            <span className="text-right text-xs">{formatDuration(displayMs)}</span>
                             <Slider
-                                value={[displayTime]}
+                                value={[displayMs / 1000]}
                                 min={0}
                                 max={totalDuration || 100}
                                 step={1}
@@ -134,7 +93,7 @@ export function PlayerBar({
                                 onValueCommit={handleSeekCommit}
                                 className="flex-1 cursor-pointer"
                             />
-                            <span className="text-xs">{formatTime(totalDuration)}</span>
+                            <span className="text-xs">{formatDuration(totalDuration * 1000)}</span>
                         </div>
                     )}
 

@@ -22,7 +22,7 @@ class FriendsLatestListenedView(APIView):
 
         friends_latest_listened = []
         for f in friends_qs:
-            if not PlaybackManager(user_uuid=f.uuid).is_playback_active():
+            if not PlaybackManager(user_uuid=f.uuid).is_playing():
                 continue
             current = f.streamingprofile.player.current_collection_song
             if current is None:

@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from websockets.event_helpers import send_ws_event, user_group
 
 from streaming.api.v1.serializers.songs import CollectionSongRetrieveSerializer
-from streaming.managers.playback_manager import PlaybackManager
+from streaming.managers.playback_manager import PlaybackManager, now_server_ms
 from streaming.ws.events import ServerEvent
 
 User = get_user_model()
@@ -15,37 +15,42 @@ class PlayerStateBroadcaster:
         self._user = User.objects.filter(uuid=user_uuid).first()
         self._playback_manager = PlaybackManager(user_uuid=user_uuid)
 
-    def broadcast_state(self, include_position: bool = True) -> None:
+    def broadcast_snapshot(self) -> None:
         send_ws_event(
             user_group(self.user_uuid),
             ServerEvent.PLAYBACK_SNAPSHOT,
-            **self.build_snapshot(include_position=include_position),
+            **self._build_snapshot(),
         )
 
-    def send_state_to_channel(self, channel_layer, channel_name: str) -> None:
+    def broadcast_seek(self) -> None:
+        playback_state = self._playback_manager.get_playback_state()
+        send_ws_event(
+            user_group(self.user_uuid),
+            ServerEvent.PLAYBACK_SEEK,
+            server_ts_ms=now_server_ms(),
+            playback_state=playback_state.to_dict() if playback_state else None,
+        )
+
+    def broadcast_queue_changed(self) -> None:
+        send_ws_event(user_group(self.user_uuid), ServerEvent.QUEUE_CHANGED)
+
+    def send_snapshot_to_channel(self, channel_layer, channel_name: str) -> None:
         # used on device.register so the joining connection gets initial state
         atos(channel_layer.send)(
             channel_name,
             {
                 "type": "ws_event",
                 "event": ServerEvent.PLAYBACK_SNAPSHOT,
-                "payload": self.build_snapshot(),
+                "payload": self._build_snapshot(),
             },
         )
 
-    def build_snapshot(self, include_position: bool = True) -> dict:
-        # position omitted on group broadcasts triggered by device.register
-        # so already-connected clients don't rewind
-        position_snapshot = self._playback_manager.get_position() or {}
-        current_song = self._serialize_current_song()
-        # the redis flag can outlive the song it referred to, so check, if there is an active song still
-        is_playback_active = (
-            current_song is not None and self._playback_manager.is_playback_active()
-        )
+    def _build_snapshot(self) -> dict:
+        playback_state = self._playback_manager.get_playback_state()
         return {
-            "current_song": current_song,
-            "is_playback_active": is_playback_active,
-            "position": position_snapshot.get("position") if include_position else None,
+            "current_song": self._serialize_current_song(),
+            "server_ts_ms": now_server_ms(),
+            "playback_state": playback_state.to_dict() if playback_state else None,
         }
 
     # not the best that we have to serialize in here, but currently no easy workaround

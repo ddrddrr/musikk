@@ -4,11 +4,10 @@ import { PlaybackContext } from "@/features/playback/providers/playbackContext.t
 import { useContext } from "react";
 
 export function useSongPlayHandler(collectionSong: CollectionSong) {
-    const { isPlaybackActive, playingCollectionSong } = useContext(PlaybackContext);
+    const { isPlaybackActive, playbackState } = useContext(PlaybackContext);
     const handlePlay = useHandlePlay();
 
-    const isThisChosen = collectionSong.uuid === playingCollectionSong?.uuid;
-
+    const isThisChosen = collectionSong.uuid === playbackState?.collectionSong.uuid;
     const onClick = () => {
         if (isThisChosen) {
             // TODO: unify to proper calls with () => void or smth ...

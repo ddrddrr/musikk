@@ -15,7 +15,8 @@ import {
 import { useContext } from "react";
 
 export function useHandlePlay() {
-    const { playingCollectionSong, isPlaybackActive } = useContext(PlaybackContext);
+    const { playbackState, isPlaybackActive } = useContext(PlaybackContext);
+    const playingCollectionSong = playbackState?.collectionSong;
     const device = useCurrentDevice();
     const { activeDevice } = useDeviceList();
     const setDeviceActiveAction = useSetDeviceActiveAction();

@@ -3,7 +3,7 @@ from collections.abc import Callable
 from websockets.action_handler import WSActionHandler
 
 from streaming.managers.device_manager import DeviceManager
-from streaming.managers.playback_manager import PlaybackManager
+from streaming.ws.playback_controller import PlaybackController
 from streaming.ws.state_broadcasters.device import DeviceStateBroadcaster
 from streaming.ws.state_broadcasters.player import PlayerStateBroadcaster
 
@@ -13,7 +13,7 @@ class DeviceWSActionHandler(WSActionHandler):
         super().__init__(consumer)
         self.device_id: str | None = None
         self.manager = DeviceManager(user_uuid=consumer.user_uuid)
-        self.playback_manager = PlaybackManager(user_uuid=consumer.user_uuid)
+        self.playback_controller = PlaybackController(user_uuid=consumer.user_uuid)
         self.device_broadcaster = DeviceStateBroadcaster(user_uuid=consumer.user_uuid)
         self.player_broadcaster = PlayerStateBroadcaster(user_uuid=consumer.user_uuid)
 
@@ -32,8 +32,7 @@ class DeviceWSActionHandler(WSActionHandler):
         if was_active:
             # if the active device disconnected, stop playback so the next
             # device the user picks doesn't autoplay
-            self.playback_manager.stop()
-            self.player_broadcaster.broadcast_state(include_position=False)
+            self.playback_controller.stop()
         self.device_broadcaster.broadcast_devices()
 
     def handle_register(self, payload: dict):
@@ -57,7 +56,7 @@ class DeviceWSActionHandler(WSActionHandler):
         self.manager.register_device(**register_kwargs)
         self.device_broadcaster.broadcast_devices()
 
-        self.player_broadcaster.send_state_to_channel(
+        self.player_broadcaster.send_snapshot_to_channel(
             self.consumer.channel_layer, self.consumer.channel_name
         )
         self.device_broadcaster.send_devices_to_channel(
@@ -73,8 +72,7 @@ class DeviceWSActionHandler(WSActionHandler):
         # stop the playback and only then broadcast new devices
         changed = self.manager.set_active_device(device_id=device_id)
         if changed:
-            self.playback_manager.stop()
-            self.player_broadcaster.broadcast_state(include_position=False)
+            self.playback_controller.stop()
         self.device_broadcaster.broadcast_devices()
 
     def handle_set_volume(self, payload: dict):

@@ -80,7 +80,7 @@ export function SongQueue() {
         },
     });
     const { data: queue, error, isPending, refetch } = useQueue();
-    const { playingCollectionSong } = useContext(PlaybackContext);
+    const { playbackState } = useContext(PlaybackContext);
 
     if (error) {
         return <QueryErrorBox message="Failed to load queue" onRetry={() => void refetch()} />;
@@ -96,7 +96,7 @@ export function SongQueue() {
 
     const items = queue?.items ?? [];
     const contextItems = queue?.context_items ?? [];
-    const currentSong = playingCollectionSong?.song;
+    const currentSong = playbackState?.collectionSong.song;
 
     return (
         <div className="flex h-full w-full">
