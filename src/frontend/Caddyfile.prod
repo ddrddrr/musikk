@@ -12,6 +12,11 @@ musikk.stream {
             header_up X-Forwarded-Proto {scheme}
         }
     }
+    handle /ws/* {
+        reverse_proxy server:8000 {
+            header_up X-Forwarded-Proto {scheme}
+        }
+    }
     handle {
         root /var/www/frontend
         try_files {path} /index.html
