@@ -2,6 +2,7 @@ import dataclasses
 import tempfile
 from pathlib import Path
 
+from django.conf import settings
 from django.db import transaction
 from musikk.pagination import BaseLimitOffsetPagination
 from rest_framework import status
@@ -67,11 +68,13 @@ class CollectionListCreateView(ListCreateAPIView):
         return permissions
 
     def post(self, request, *args, **kwargs):
-        send_ws_event(
-            user_group(self.request.user.uuid),
-            ServerEvent.COLLECTIONS_PERSONAL_CHANGED,
-        )
-        return super().post(request, *args, **kwargs)
+        response = super().post(request, *args, **kwargs)
+        if response.status_code == status.HTTP_201_CREATED:
+            send_ws_event(
+                user_group(self.request.user.uuid),
+                ServerEvent.COLLECTIONS_PERSONAL_CHANGED,
+            )
+        return response
 
 
 class CollectionPersonalView(APIView):
@@ -276,7 +279,10 @@ class CollectionSongCreateView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        with tempfile.NamedTemporaryFile(delete=False) as tmp:
+        upload_tmp_dir = Path(settings.UPLOAD_TMP_DIR)
+        upload_tmp_dir.mkdir(parents=True, exist_ok=True)
+
+        with tempfile.NamedTemporaryFile(dir=upload_tmp_dir, delete=False) as tmp:
             for chunk in audio.chunks():
                 tmp.write(chunk)
             temp_path = tmp.name
@@ -298,15 +304,19 @@ class CollectionSongCreateView(APIView):
         )
 
         UploadManager(song_uuid=base_song_inst.uuid).set_status("queued")
-        convert_audio.apply_async(
-            kwargs={
-                "file_path": temp_path,
-                "song_uuid": str(base_song_inst.uuid),
-                "initiator_uuid": str(request.user.uuid),
-                "operation_id": request.data["operation_id"],
-                "audio_info": dataclasses.asdict(audio_info),
-            }
-        )
+        try:
+            convert_audio.apply_async(
+                kwargs={
+                    "file_path": temp_path,
+                    "song_uuid": str(base_song_inst.uuid),
+                    "initiator_uuid": str(request.user.uuid),
+                    "operation_id": request.data["operation_id"],
+                    "audio_info": dataclasses.asdict(audio_info),
+                }
+            )
+        except Exception:
+            Path(temp_path).unlink(missing_ok=True)
+            raise
         return Response(
             data={
                 "song_uuid": str(base_song_inst.uuid),
