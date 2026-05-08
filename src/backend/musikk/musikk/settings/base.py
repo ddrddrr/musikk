@@ -229,7 +229,7 @@ DATABASES = {
         "PORT": config("POSTGRES_PORT", default="5435"),
     },
 }
-
+CONN_MAX_AGE = config("CONN_MAX_AGE", cast=int, default=5)
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
