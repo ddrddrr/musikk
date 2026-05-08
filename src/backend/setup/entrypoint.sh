@@ -41,6 +41,8 @@ done
 uv run python manage.py check --deploy &&
 uv run python manage.py migrate &&
 uv run python manage.py collectstatic --noinput &&
-daphne -b 0.0.0.0 -p ${DJANGO_PORT} \
+
+# exec so SIGTERM reaches uvicorn directly and workers shut down gracefully
+exec daphne -b 0.0.0.0 -p ${DJANGO_PORT} \
   --ping-interval 5 --ping-timeout 5 \
   musikk.asgi:application
