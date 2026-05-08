@@ -175,6 +175,9 @@ export function useCreateChatMessage() {
             void queryClient.invalidateQueries({
                 queryKey: publicationKeys.chatMessages(variables.chatUUID),
             });
+            void queryClient.invalidateQueries({
+                queryKey: publicationKeys.userChats(variables.userUUID),
+            });
         },
     });
 }

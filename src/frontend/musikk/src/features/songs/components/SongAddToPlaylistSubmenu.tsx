@@ -3,7 +3,7 @@ import {
     collectionRemoveSong,
     createCollectionSong,
 } from "@/features/collections/api/mutations.ts";
-import { Collection, CollectionSong } from "@/features/collections/types.ts";
+import { CollectionSong } from "@/features/collections/types.ts";
 import { EmptyState } from "@/features/common/EmptyState.tsx";
 import { useCollectionMemberships } from "@/features/songs/queries.ts";
 import { songKeys } from "@/features/songs/queryKeys.ts";
@@ -26,7 +26,6 @@ export function SongAddToPlaylistSubmenu({ collectionSong }: SongAddToPlaylistSu
     const queryClient = useQueryClient();
     const { data: library } = useUserLibrary();
     const created_collections = library?.created_collections;
-    const liked_songs = library?.liked_songs;
 
     const { data: collectionEntries = [] } = useCollectionMemberships(collectionSong.uuid);
 
@@ -60,7 +59,6 @@ export function SongAddToPlaylistSubmenu({ collectionSong }: SongAddToPlaylistSu
     // albums are immutable
     const playlists =
         created_collections?.filter((collection) => collection.type === "playlist") ?? [];
-    const userCollections: Collection[] = [...(liked_songs ? [liked_songs] : []), ...playlists];
 
     const handleCollectionClick = (collectionUUID: string) => {
         const existing = collectionEntries.find((e) => e.collection_uuid === collectionUUID);
@@ -85,10 +83,10 @@ export function SongAddToPlaylistSubmenu({ collectionSong }: SongAddToPlaylistSu
                 Add to Playlist
             </DropdownMenuSubTrigger>
             <DropdownMenuSubContent className="max-h-64 w-64 overflow-y-auto">
-                {userCollections.length === 0 && (
+                {playlists.length === 0 && (
                     <EmptyState variant="inline" message="No playlists yet" className="px-4 py-2" />
                 )}
-                {userCollections.map((collection) => {
+                {playlists.map((collection) => {
                     const isInCollection = collectionEntries.some(
                         (e) => e.collection_uuid === collection.uuid,
                     );

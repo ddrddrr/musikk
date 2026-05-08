@@ -1,3 +1,4 @@
+import { PostAttachment } from "@/features/publications/components/posts/PostAttachment.tsx";
 import { PostHeader } from "@/features/publications/components/posts/PostHeader.tsx";
 import { Publication } from "@/features/publications/types.ts";
 
@@ -27,6 +28,11 @@ export function Comment({ comment, setReplyTo }: CommentProps) {
                     comment.content
                 )}
             </p>
+            {!comment.is_deleted && comment.attachment && (
+                <div className="mt-2">
+                    <PostAttachment attachment={comment.attachment} />
+                </div>
+            )}
             <button
                 onClick={() => setReplyTo(comment)}
                 className="mt-1 text-xs text-info hover:underline"
