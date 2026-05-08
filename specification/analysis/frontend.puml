@@ -1,0 +1,25 @@
+@startuml FrontendSystem
+' TODO
+actor User as user
+
+skinparam packageStyle rectangle
+
+package "Reverse Proxy / Static Server" as caddy
+
+package "Frontend (Static)" as frontend {
+    [React UI] as react
+    [Shaka Player] as shaka
+}
+
+user ---> react : Interact with UI
+react ---> user : Present Data
+react ---> caddy : API Calls
+react ---> caddy : Event Stream Subscription
+caddy ---> react : API Responses
+caddy ---> react: Server-Sent Events
+
+shaka ---> caddy : Audio Requests
+caddy ---> shaka : Audio Data/Representation
+shaka --> react : Playback Events
+
+@enduml

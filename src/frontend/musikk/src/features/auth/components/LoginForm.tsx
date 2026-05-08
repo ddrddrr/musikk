@@ -1,0 +1,85 @@
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
+import * as z from "zod";
+
+import { setFormServerErrors } from "@/api/errorUtils.ts";
+import { EmailField } from "@/features/auth/components/EmailField.tsx";
+import { PasswordField } from "@/features/auth/components/PasswordField.tsx";
+import { Button } from "@/features/ui/button.tsx";
+import { CardContent } from "@/features/ui/card.tsx";
+import { Form } from "@/features/ui/form.tsx";
+import { Spinner } from "@/features/ui/spinner";
+import { useAuth } from "@/hooks/useAuth.ts";
+
+const loginSchema = z.object({
+    email: z.string().min(5, "Email is required."),
+    password: z.string().min(8, "Password is required."),
+});
+type LoginFormValues = z.infer<typeof loginSchema>;
+
+export function LoginForm() {
+    const { login } = useAuth();
+    const navigate = useNavigate();
+    const [loading, setLoading] = useState(false);
+
+    const form = useForm<LoginFormValues>({
+        resolver: zodResolver(loginSchema),
+    });
+    const serverErrorMessage = form.formState.errors.root?.serverError?.message;
+
+    const onSubmit = async (values: LoginFormValues) => {
+        setLoading(true);
+        try {
+            await login(values.email, values.password);
+            void navigate("/");
+        } catch (error) {
+            setFormServerErrors(form, error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <CardContent>
+            <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-6">
+                    <EmailField />
+                    <PasswordField name={"password"} />
+
+                    <Button
+                        type="submit"
+                        variant="brand"
+                        size="lg"
+                        className="w-full"
+                        disabled={loading}
+                    >
+                        {loading ? <Spinner /> : "Login"}
+                    </Button>
+
+                    {serverErrorMessage && (
+                        <div className="rounded-sm border-2 border-destructive bg-destructive p-4 text-destructive-foreground">
+                            <p className="font-medium">{serverErrorMessage}</p>
+                        </div>
+                    )}
+
+                    <div className="text-center">
+                        <p className="text-foreground">
+                            Don&#39;t have an account?
+                            <Button
+                                type="button"
+                                onClick={() => void navigate("/signup")}
+                                variant="link"
+                                size="sm"
+                                className="ml-1 text-brand hover:text-brand-hover"
+                            >
+                                Sign up
+                            </Button>
+                        </p>
+                    </div>
+                </form>
+            </Form>
+        </CardContent>
+    );
+}

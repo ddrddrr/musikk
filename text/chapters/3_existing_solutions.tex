@@ -1,0 +1,194 @@
+\chapter{Existing Platforms}\label{ch:platforms}
+
+In this chapter, existing platforms and services are examined to gain a better understanding
+of the instruments people use when interacting with music.
+Additionally, this chapter provides insight
+into the potential features that could be implemented in the resulting application.
+
+Firstly, streaming services are discussed, as the main aim of the thesis is to create
+a system for music streaming.
+Then, other music-related services~(e.g., forums) are presented,
+as they offer alternative possibilities for engaging with audio content
+that may be beneficial for the future platform.
+Lastly, platforms such as YouTube and TikTok are examined,
+because the survey has shown that they are a popular way to interact with music~\ref{fig:music_discovery_methods}.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=0.4\textheight]{charts/discovery methods.png}
+    \caption{Music Discovery Methods Popularity}
+    \label{fig:music_discovery_methods}
+\end{figure}
+
+
+\section{Streaming Services}
+As already illustrated in Figure~\ref{fig:consumption_methods},
+and further confirmed by the study of the International Federation of
+the Phonographic Industry~\parencite{music_stats_2024},
+the most common way of music consumption and discovery is through streaming services.
+Although many options are available, this section only considers those that are both popular and
+have unique features.
+The descriptions, rather than offering a general portrayal of each platform,
+will focus on the service-specific social features.
+
+\subsection{Spotify}
+One of the most prominent social features on Spotify is the ``Spotify Jam'' feature~\parencite{spotify_jam}.
+It lets people create a collective song queue that is then synchronized among all connected users.
+Moreover, volume, the order of songs, and other playback aspects can be controlled individually by each user.
+
+Another notable feature is ``Friend Activity''~\parencite{spotify_friend_activ},
+the followers of a given user are currently listening to.
+
+The ``Listening Parties'' feature also deserves a mention: these are live chats with a limited capacity
+that can be joined for a short time when new music is being released~\parencite{spotify_party_1,spotify_party_2}.
+This somewhat brings the offline collective music discovery experience to the online world.
+
+During the implementation of this thesis~(the text was initially written in spring–summer 2025),
+Spotify has also added support for user-to-user chats~(from September 2025)~\parencite{spotify_chat}.
+This further supports the claim that social features are in demand on music platforms.
+
+\subsection{VK Music}
+VK Music is a music service integrated into the VK social network.
+Consequently, it is possible to send songs and playlists via private messages or add them to
+posts in groups.
+VK Music also provides an ``Updates'' tab, which is populated by the audio materials that
+any followed user or group has added to their ``Liked Feed''~\parencite{vk_music}.
+
+\subsection{SoundCloud}
+SoundCloud is one of the few platforms that lets its users leave comments
+and reactions on songs and playlists~\parencite{sc_comments,sc_reactions}.
+In addition, each user has a feed consisting of personal uploads and
+reposts of others' content~\parencite{sc_reposts}, which is visible when visiting their profile.
+
+\subsection{Bandcamp}
+Every Bandcamp user has a profile with four tabs: ``collection'',
+``wishlist'', ``followers'', and ``following''.
+The most interesting feature is under the ``following'' tab: users can subscribe to available genres and then
+specify the ones they want to showcase to others viewing their profile.
+The ``wishlist'' tab is also noteworthy,
+as in this tab the users can showcase what they are looking forward to listening to in the future.
+
+This concludes the streaming services section.
+Services that are focused on music, but not on the streaming itself, are discussed next.
+
+
+\section{Forums, Blogs, and Other Music Media}
+Different resources are gathered under these umbrella terms, from professional music review websites
+to amateur and personal pages.
+Again, only widely used services that offer something noteworthy are listed.
+
+\subsection{Rate Your Music}
+
+\begin{quote}
+    ``Rate Your Music is one of the largest music databases online. It is an incredible tool that
+    can help you find and learn about new music to listen to.''~\parencite{ryt}\\
+\end{quote}
+%TODO: add something else? seems kinda little
+This website is one of the biggest platforms with user-created content.
+Every member can write reviews and set ratings for music releases,
+contribute to the ``wiki'' consisting of genres, thematic lists, and charts,
+and connect with other members of the forum.
+
+\subsection{last.fm}
+Last.fm is primarily a listening statistics and music discovery service.
+However, it also has a couple of notable social features:
+\begin{enumerate}
+    \item A global and personal events pages.
+    In the former, users are able to browse the upcoming events near their location, and in the latter
+    they are able to showcase which events they plan to attend.
+    Other users can then see, either on the event page or on that user’s profile,
+    which events the user is interested in and/or plans to attend.
+    \item A ``Neighbours’’ tab.
+    The ``Neighbours’’ tab shows other users with similar listening habits,
+    based on shared artists and an overall compatibility score.
+    \item ``Shouts'' section.
+    The ``Shouts'' section is a profile-scoped feed, where the users can leave comments
+    and reply to what others have written.
+\end{enumerate}
+
+This section has introduced a couple of possible features not previously seen
+in the listed streaming services, such as discussion forums and profile feeds.
+
+The following section examines platforms that are not primarily focused
+on music but still influence how people engage with it.
+
+
+\section{General-Purpose Platforms}
+As mentioned earlier, one of the most interesting results of the survey is the high number of people
+discovering music on platforms that are not focused on music.
+Services like Instagram, YouTube, and TikTok, which are primarily used
+for sharing videos and other user-generated content, have become closely tied
+to how people find music and listen to it.
+In recent years, these platforms have started to promote music more directly by allowing users to
+embed tracks within their platform-native content.
+
+Instagram, for example, added a special audio tool that lets users include music in their short
+videos (``Reels''~\parencite{inst_audio}), helping songs reach more people through visual content.
+
+YouTube automatically identifies songs used in videos and displays them in the description,
+making it easier to find and listen to them.
+
+TikTok has had an even bigger impact: many songs have gone viral and later became hits
+in charts and streaming apps because people use
+them in popular videos~(these are often called ``TikTok Hits'').
+
+This shows that big platforms are not just reacting to users’ interest in music, they
+actively help promote it by connecting songs with content that people want to watch and share.
+
+An integration with such services can be a big plus for the platform.
+A possible feature could be a badge stating~``This track was in a TikTok user Alice123 sent you today!''.
+
+
+\section*{Summary}
+
+The table~\ref{tab:social_features} summarizes the comparison between the features mentioned
+in the sections above.\\
+\textbf{Difficulty} suggests the possible complexity of implementation.\\
+\textbf{Mode} assumes the typical context in which the feature operates.\\
+\textbf{Social Interaction Level} indicates user involvement when using the feature.\\
+
+\begin{table}[h]
+    \centering
+    \caption{Comparison of Service‐Specific Social Features}
+    \label{tab:social_features}
+    \begin{tabularx}{\textwidth}{lXXX}
+        \toprule
+        \textbf{Feature} & \textbf{Interaction Level} & \textbf{Mode} & \textbf{Difficulty} \\
+        \midrule
+        Chat                          & Very High & Pair        & High      \\
+        Common Listening              & High      & Group       & Very High \\
+        Forums/Wiki                   & High      & Group       & Medium    \\
+        Personal Feed                & High      & Individual  & Low       \\
+        Song/Playlist Comments        & High      & Group       & Low       \\
+        Listening Parties             & Medium    & Group       & Very High \\
+        Post Embeddings             & Medium    & Group       & Medium    \\
+        Friends' Listening Activity   & Medium    & Pair        & Low       \\
+%       TODO: probably not genres, but newly added content in general
+        Following Genres Display      & Low       & Individual  & Medium    \\
+        Real-Life Events Section      & Low       & Group       & High      \\
+        Music Wishlist                & Low       & Individual  & Low       \\
+        External Services Integration & Low       & Pair/Group  & High      \\
+        \bottomrule
+    \end{tabularx}
+\end{table}
+
+Overall, it is clear that numerous music-related platforms with social
+features built in are available across the Internet.
+However, services that focus on the actual audio delivery often support just a subset of the
+possible features.
+This, in turn, forces users to use multiple platforms in order to meet their needs.
+This project aims to bridge that gap, gathering multiple social features in one app.
+
+Based on the research done in the previous and current chapters, the following social features were chosen
+for implementation, as they provide a good balance between the complexity of implementation
+and the level of social interaction:
+
+\begin{itemize}
+    \item Chat.
+    \item Personal/Global Feed.\footnote{In comparison to \texttt{last.fm}, a common view with posts
+    from multiple authors is going to be implemented as well.}
+    \item Song/Playlist Comments.
+    \item Friends' Listening Activity.
+\end{itemize}
+
+These and further requirements for the application are listed in the next chapter \chapterref{ch:specification}.

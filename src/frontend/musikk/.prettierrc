@@ -1,0 +1,14 @@
+{
+  "tailwindStylesheet": "./src/index.css",
+  "trailingComma": "all",
+  "tabWidth": 4,
+  "semi": true,
+  "singleQuote": false,
+  "printWidth": 100,
+  "bracketSpacing": true,
+  "plugins": [
+    "prettier-plugin-organize-imports",
+    "prettier-plugin-tailwindcss"
+  ],
+  "organizeImportsSkipDestructiveCodeActions": true
+}

@@ -1,0 +1,121 @@
+name: musikk
+
+services:
+  server:
+    build:
+      context: ./src/backend/
+      dockerfile: Dockerfile
+    env_file:
+      - .env.prod
+    environment:
+      DJANGO_SETTINGS_MODULE: musikk.settings.prod
+      UPLOAD_TMP_DIR: /var/uploads_tmp
+    restart: unless-stopped
+    depends_on:
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    expose:
+      - 8000
+    volumes:
+      - django_static:/app/staticfiles
+      - django_media:/app/media
+      - upload_tmp:/var/uploads_tmp
+    healthcheck:
+      test: [ "CMD", "curl", "-fsS", "http://localhost:${DJANGO_PORT}/health/" ]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 30s
+    networks:
+      - main
+
+  database:
+    image: postgres:17
+    command: [ "postgres", "-c", "max_connections=300" ]
+    env_file:
+      - .env.prod
+    restart: unless-stopped
+    expose:
+      - 5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}" ]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - main
+
+  celery_worker:
+    build:
+      context: ./src/backend/
+      dockerfile: Dockerfile
+    entrypoint: [ "./start-celery-worker.sh" ]
+    env_file:
+      - .env.prod
+    environment:
+      DJANGO_SETTINGS_MODULE: musikk.settings.prod
+      UPLOAD_TMP_DIR: /var/uploads_tmp
+    restart: unless-stopped
+    depends_on:
+      redis:
+        condition: service_healthy
+      database:
+        condition: service_healthy
+    volumes:
+      - django_media:/app/media
+      - upload_tmp:/var/uploads_tmp
+    networks:
+      - main
+
+  redis:
+    image: redis:8.0-alpine
+    command: [ "redis-server","--requirepass","${REDIS_PASSWORD}" ]
+    expose:
+      - 6379
+    env_file:
+      - .env.prod
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping" ]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - main
+
+  proxy:
+    build:
+      context: ./src/frontend
+      dockerfile: Dockerfile
+    env_file:
+      - .env.prod
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ${CADDYFILE:-./src/frontend/Caddyfile.prod}:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+      - django_static:/app/staticfiles
+      - django_media:/app/media
+    networks:
+      - main
+
+volumes:
+  postgres_data:
+  caddy_data:
+  caddy_config:
+  django_static:
+  django_media:
+  # mounted at /var rather than /tmp because the volume persists across
+  # container restarts and /tmp can be cleared by OS whenever
+  # (we remove temporary files manually via a scheduled task later)
+  upload_tmp:
+
+networks:
+  main:

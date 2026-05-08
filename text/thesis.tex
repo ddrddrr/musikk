@@ -1,0 +1,104 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% I, the copyright holder of this work, release this work into the
+%% public domain. This applies worldwide. In some countries this may
+%% not be legally possible; if so: I grant anyone the right to use
+%% this work for any purpose, without any conditions, unless such
+%% conditions are required by law.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[
+    digital,
+    oneside,
+    nosansbold,  %% The `nosansbold` option prevents the use of the
+%% sans-serif type face for bold text. Replace with
+%% `sansbold` to use sans-serif type face for bold text.
+    nocolorbold,
+    lof,
+    lot,
+]{fithesis4}
+
+%% The following section sets up the locales used in the thesis.
+\usepackage[resetfonts]{cmap}
+\usepackage[T1,T2A]{fontenc}
+\usepackage[
+    main=english,
+    english, german, czech, slovak
+]{babel}
+\usepackage[htt]{hyphenat}
+\usepackage[newfloat]{minted}
+\usepackage{adjustbox}
+
+%% The following section sets up the metadata of the thesis.
+\thesissetup{
+    date        = \the\year/\the\month/\the\day,
+    university  = mu,
+    faculty     = fi,
+    type        = bc,
+    author      = Kirill Vorozhtsov,
+    gender      = m,
+    advisor     = {Mgr. Luděk Bártek, Ph.D},
+    title       = {Musikk: A Modern, Social-First Music Streaming Platform},
+    keywords    = {Audio Streaming, Python, JavaScript, MPEG-DASH, HLS, WebSockets},
+    abstract    = {%
+        This bachelor's thesis aims to develop
+        a web-based music streaming platform focused on social interactions between users.
+
+        The theoretical part presents a survey that analyzes people's
+        music listening habits, showing that such a platform could attract a solid user base.
+        It then compares existing music-related services with built-in social
+        features and derives functional and non-functional requirements for the proposed system.
+        Then, based on these requirements, suitable technologies and architectural patterns are selected.
+
+
+        The practical part covers the implementation details of the platform, including data model,
+        audio processing, API design, and representation layer.
+
+        The result is a fully functional and deployed application.
+    },
+    thanks      = {%
+        I would like to thank Mgr. Luděk Bártek, Ph.D., for his time and
+        the valuable advice he provided for this thesis.
+    },
+    bib         = {bibliography.bib},
+    facultyLogo = fithesis-fi,
+}
+\usepackage{makeidx}
+\makeindex
+\usepackage{paralist} %% Compact list environments
+\usepackage{amsmath}  %% Mathematics
+\usepackage{amsthm}
+\usepackage{amsfonts}
+\usepackage{url}      %% Hyperlinks
+\usepackage{markdown} %% Lightweight markup
+\usepackage{listings} %% Source code highlighting
+\lstset{
+    basicstyle      = \ttfamily,
+    identifierstyle = \color{black},
+    keywordstyle    = \color{blue},
+    keywordstyle    = {[2]\color{cyan}},
+    keywordstyle    = {[3]\color{olive}},
+    stringstyle     = \color{teal},
+    commentstyle    = \itshape\color{magenta},
+    breaklines      = true,
+}
+\usepackage{floatrow} %% Putting captions above tables
+\floatsetup[table]{capposition=top}
+\usepackage[babel]{csquotes}
+\usepackage{graphicx}
+\usepackage[sorting=none]{biblatex}
+\usepackage{hyperref} %% Context-sensitive quotation marks
+
+% macros
+\newcommand{\chapterref}[1]{%
+    \textbf{\hyperref[#1]{Chapter~\ref*{#1}}}%
+}
+
+\begin{document}
+    \input{chapters/1_intro}
+    \input{chapters/2_survey}
+    \input{chapters/3_existing_solutions}
+    \input{chapters/4_specification}
+    \input{chapters/5_implementation_planning}
+    \input{chapters/6_implementation}
+    \input{chapters/appendix}
+\end{document}

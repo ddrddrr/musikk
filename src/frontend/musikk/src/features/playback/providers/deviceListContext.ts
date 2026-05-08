@@ -1,0 +1,8 @@
+import { IPlaybackDevice } from "@/features/playback/types.ts";
+import { createContext } from "react";
+
+interface DeviceListContextProps {
+    deviceList: IPlaybackDevice[];
+    activeDevice: IPlaybackDevice | null;
+}
+export const DeviceListContext = createContext<DeviceListContextProps | undefined>(undefined);

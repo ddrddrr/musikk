@@ -1,0 +1,148 @@
+import logging
+import tempfile
+from enum import StrEnum
+from pathlib import Path
+from dataclasses import dataclass
+
+from django.conf import settings
+
+from utils.cmd import run_shell_command
+from utils.storage import (
+    local_dir_to_django_storage,
+    delete_django_storage_dir,
+)
+
+logger = logging.getLogger(__name__)
+
+
+class ManifestType(StrEnum):
+    MPD = "mpd"
+    M3U8 = "m3u8"
+
+
+@dataclass(frozen=True)
+class SongRepresentation:
+    """
+    Attributes:
+        content_path (str | Path): storage prefix/directory where packaged content was uploaded.
+        manifests (dict[ManifestType, str]): mapping from manifest type to storage path.
+    """
+
+    content_path: str | Path
+    manifests: dict[ManifestType, str]
+
+
+def build_shaka_packager_command(
+    file_paths: list[Path],
+    tmpdir: str,
+    bin_path: str = settings.SHAKA_PACKAGER_BIN,
+    segment_duration: int = 3,  # s
+) -> tuple[list[str], Path, Path]:
+    """
+    Build a shaka-packager command that creates DASH (MPD) and HLS (M3U8) manifests.
+
+    Returns:
+        cmd, mpd_output_path, hls_master_output_path
+
+    shaka-packager flags:
+        - `input=<path>,stream=audio,init_segment=...,segment_template=...,playlist_name=...`
+            added per every file;
+            pick audio stream, define where to write the init segment,
+            the naming pattern for media segments, and the per-representation HLS playlist filename
+        - `--segment_duration <seconds>`
+            target segment duration (default==3s)
+        - `--generate_static_live_mpd`
+            produce a DASH manifest with type="static", so seeking works properly
+            (default is "dynamic")
+        - `--mpd_output=<path>`
+            DASH manifest path
+        - `--hls_master_playlist_output=<path>`
+            HLS master playlist path
+    """
+    tmpdir_path = Path(tmpdir)
+
+    inputs: list[str] = []
+    for i, fpath in enumerate(file_paths):
+        base = f"audio_{i}"
+        init_seg = tmpdir_path / f"{base}_init.mp4"
+        segment_tmpl = tmpdir_path / f"{base}_$Number$.m4s"
+        playlist_name = f"{base}.m3u8"
+
+        arg = (
+            f"input={fpath.as_posix()},stream=audio,"
+            f"init_segment={init_seg.as_posix()},"
+            f"segment_template={segment_tmpl.as_posix()},"
+            f"playlist_name={playlist_name}"
+        )
+        inputs.append(arg)
+
+    mpd_out = tmpdir_path / "manifest.mpd"
+    hls_master_out = tmpdir_path / "master.m3u8"
+
+    cmd = [bin_path]
+    cmd.extend(inputs)
+    cmd.extend(["--segment_duration", str(segment_duration)])
+    cmd.append("--generate_static_live_mpd")
+    cmd.append(f"--mpd_output={mpd_out.as_posix()}")
+    cmd.append(f"--hls_master_playlist_output={hls_master_out.as_posix()}")
+
+    return cmd, mpd_out, hls_master_out
+
+
+class ShakaPackagerWrapper:
+    """
+    Wrapper around shaka-packager:
+        - Downloads input audio files from Django storage to a temporary directory
+        - Runs shaka-packager to produce DASH (MPD) and HLS (M3U8) manifests + segments
+        - Uploads the generated files to Django storage under `storage_dir`
+    """
+
+    def __init__(
+        self,
+        do_cleanup: bool = True,
+    ):
+        self.do_cleanup = do_cleanup
+
+    def package_audio_files(
+        self, local_input_paths: list[Path], storage_dir: str | Path
+    ) -> SongRepresentation:
+        """
+        Packages multiple audio files into DASH (MPD) and HLS (M3U8) manifests using shaka-packager.
+
+        Args:
+            local_input_paths: list of local filesystem paths to converted audio files.
+            storage_dir: storage prefix/directory where output files will be uploaded (e.g. 'audio/song123')
+
+        Returns:
+            SongRepresentation with content_path set to storage_dir and manifests mapping.
+        """
+        assert local_input_paths, "No input files provided."
+
+        storage_dir = str(storage_dir)
+        with tempfile.TemporaryDirectory() as tmpdir:
+            try:
+                cmd, mpd_out, hls_master_out = build_shaka_packager_command(
+                    file_paths=local_input_paths, tmpdir=tmpdir
+                )
+
+                run_shell_command(cmd)
+                orig_to_transferred_path_map = local_dir_to_django_storage(
+                    local_dir=tmpdir, storage_prefix=storage_dir
+                )
+
+                manifests = {
+                    ManifestType.MPD: orig_to_transferred_path_map[str(mpd_out)],
+                    ManifestType.M3U8: orig_to_transferred_path_map[
+                        str(hls_master_out)
+                    ],
+                }
+
+                return SongRepresentation(content_path=storage_dir, manifests=manifests)
+            except Exception:
+                logger.exception(f"Shaka Packager packaging failed for {storage_dir}")
+                if self.do_cleanup:
+                    delete_django_storage_dir(storage_dir=storage_dir)
+                raise
+
+
+ShakaPackagerMPDAndM3U8 = ShakaPackagerWrapper()

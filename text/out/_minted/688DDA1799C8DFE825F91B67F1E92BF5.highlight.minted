@@ -1,0 +1,31 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k}{class}\PYG{+w}{ }\PYG{n+nc}{Publication}\PYG{p}{(}\PYG{n}{BaseModel}\PYG{p}{)}\PYG{p}{:}
+    \PYG{k}{class}\PYG{+w}{ }\PYG{n+nc}{PublicationType}\PYG{p}{(}\PYG{n}{models}\PYG{o}{.}\PYG{n}{TextChoices}\PYG{p}{)}\PYG{p}{:}
+        \PYG{n}{COMMENT} \PYG{o}{=} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{comment}\PYG{l+s+s2}{\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Comment}\PYG{l+s+s2}{\PYGZdq{}}
+        \PYG{n}{POST} \PYG{o}{=} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{post}\PYG{l+s+s2}{\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Post}\PYG{l+s+s2}{\PYGZdq{}}
+
+    \PYG{n}{RELATED\PYGZus{}MODEL\PYGZus{}TYPE\PYGZus{}MAP} \PYG{o}{=} \PYG{p}{\PYGZob{}}
+        \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{user}\PYG{l+s+s2}{\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{users.StreamingUser}\PYG{l+s+s2}{\PYGZdq{}}\PYG{p}{,}
+        \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{collection}\PYG{l+s+s2}{\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{streaming.SongCollection}\PYG{l+s+s2}{\PYGZdq{}}\PYG{p}{,}
+        \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{song}\PYG{l+s+s2}{\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{streaming.SongCollectionSong}\PYG{l+s+s2}{\PYGZdq{}}\PYG{p}{,}
+    \PYG{p}{\PYGZcb{}}
+
+    \PYG{n+nb}{type} \PYG{o}{=} \PYG{n}{models}\PYG{o}{.}\PYG{n}{CharField}\PYG{p}{(}\PYG{n}{choices}\PYG{o}{=}\PYG{n}{PublicationType}\PYG{o}{.}\PYG{n}{choices}\PYG{p}{)}
+    \PYG{n}{content} \PYG{o}{=} \PYG{n}{models}\PYG{o}{.}\PYG{n}{CharField}\PYG{p}{(}\PYG{n}{max\PYGZus{}length}\PYG{o}{=}\PYG{l+m+mi}{255}\PYG{p}{)}
+    \PYG{n}{user} \PYG{o}{=} \PYG{n}{models}\PYG{o}{.}\PYG{n}{ForeignKey}\PYG{p}{(}
+        \PYG{n}{settings}\PYG{o}{.}\PYG{n}{AUTH\PYGZus{}USER\PYGZus{}MODEL}\PYG{p}{,} \PYG{n}{null}\PYG{o}{=}\PYG{k+kc}{True}\PYG{p}{,}
+        \PYG{n}{on\PYGZus{}delete}\PYG{o}{=}\PYG{n}{models}\PYG{o}{.}\PYG{n}{SET\PYGZus{}NULL}
+    \PYG{p}{)}
+    \PYG{n}{parent} \PYG{o}{=} \PYG{n}{models}\PYG{o}{.}\PYG{n}{ForeignKey}\PYG{p}{(}
+        \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{self}\PYG{l+s+s2}{\PYGZdq{}}\PYG{p}{,} \PYG{n}{null}\PYG{o}{=}\PYG{k+kc}{True}\PYG{p}{,} \PYG{n}{blank}\PYG{o}{=}\PYG{k+kc}{True}\PYG{p}{,}
+        \PYG{n}{related\PYGZus{}name}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{replies}\PYG{l+s+s2}{\PYGZdq{}}\PYG{p}{,} \PYG{n}{on\PYGZus{}delete}\PYG{o}{=}\PYG{n}{models}\PYG{o}{.}\PYG{n}{SET\PYGZus{}NULL}
+    \PYG{p}{)}
+    \PYG{n}{is\PYGZus{}deleted} \PYG{o}{=} \PYG{n}{models}\PYG{o}{.}\PYG{n}{BooleanField}\PYG{p}{(}\PYG{n}{default}\PYG{o}{=}\PYG{k+kc}{False}\PYG{p}{)}
+
+    \PYG{n}{content\PYGZus{}type} \PYG{o}{=} \PYG{n}{models}\PYG{o}{.}\PYG{n}{ForeignKey}\PYG{p}{(}
+        \PYG{n}{ContentType}\PYG{p}{,} \PYG{n}{null}\PYG{o}{=}\PYG{k+kc}{True}\PYG{p}{,}
+        \PYG{n}{blank}\PYG{o}{=}\PYG{k+kc}{True}\PYG{p}{,} \PYG{n}{on\PYGZus{}delete}\PYG{o}{=}\PYG{n}{on\PYGZus{}content\PYGZus{}type\PYGZus{}delete}
+    \PYG{p}{)}
+    \PYG{n}{object\PYGZus{}id} \PYG{o}{=} \PYG{n}{models}\PYG{o}{.}\PYG{n}{PositiveIntegerField}\PYG{p}{(}\PYG{n}{null}\PYG{o}{=}\PYG{k+kc}{True}\PYG{p}{,} \PYG{n}{blank}\PYG{o}{=}\PYG{k+kc}{True}\PYG{p}{)}
+    \PYG{n}{content\PYGZus{}object} \PYG{o}{=} \PYG{n}{GenericForeignKey}\PYG{p}{(}\PYG{p}{)}
+\end{MintedVerbatim}

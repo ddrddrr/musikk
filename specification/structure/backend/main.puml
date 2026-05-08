@@ -1,0 +1,170 @@
+@startuml ClassDiagramMain
+
+skinparam groupInheritance 2
+skinparam linetype ortho
+skinparam nodesep 80
+skinparam ranksep 100
+
+note as n1
+This diagram outlines the structure of the application.
+All models inherit from `BaseModel`.
+Backwards relations that are not omitted (thus created automatically by Django)
+are omitted for brevity.
+Only custom or overridden methods are shown.
+Black diamonds represent Composition, white diamonds - Aggregation.
+White arrows represent inheritance, black arrows - usage as an attribute.
+end note
+
+' ### Base
+class BaseModel <<DjangoModel>> {
+    uuid: UUID
+    date_added: datetime
+    date_modified: datetime
+}
+
+' ### Users
+class BaseUser <<DjangoModel>> {
+    email: str
+    display_name: str
+    bio: str
+    avatar: str
+    is_admin: bool
+    is_active: bool
+    get_password_reset_api_url(): str
+}
+
+class StreamingUser <<DjangoModel>> {
+    save(): void
+}
+BaseUser <|- StreamingUser
+
+StreamingUser *-- "1" PlaybackState
+StreamingUser *-- "0..1" LikedSongs
+StreamingUser *-- "0..1" SongQueue
+StreamingUser *-- "0..1" UserHistory
+StreamingUser --> "0..*" StreamingUser : friends
+StreamingUser --> "0..*" Artist : followed
+StreamingUser o-- "0..*" SongCollection : followed_song_collections
+
+class Artist <<DjangoModel>> {
+}
+StreamingUser <|- Artist
+Artist o-- "0..*" BaseSong : owned_songs
+Artist o-- "0..*" SongCollection : owned_song_collections
+
+' ### Streaming
+class PlaybackState <<DjangoModel>> {
+    is_playing: bool
+    active_device(): PlaybackDevice
+}
+class PlaybackDevice <<DjangoModel>> {
+    name: str
+    is_active: bool
+}
+PlaybackState *-- "0..*" PlaybackDevice
+
+' ### Songs
+class BaseSong <<DjangoModel>> {
+    title: str
+    description: str
+    image: str
+    content_path: str
+    mpd: str
+    is_available(): bool
+    delete(): void
+}
+BaseSong o-- "0..*" Artist : authors
+
+
+class SongAuthor <<DjangoModel>> {
+    author_priority: int
+}
+SongAuthor --> BaseSong
+SongAuthor --> Artist
+
+' ### Collections
+class SongCollection <<DjangoModel>> {
+    type: str
+    title: str
+    description: str
+    image: str
+    private: bool
+    ordered_songs(): list
+}
+SongCollection o-- "0..*" StreamingUser : authors
+
+
+class SongCollectionAuthor <<DjangoModel>> {
+    author_priority: int
+}
+SongCollectionAuthor --> SongCollection
+SongCollectionAuthor --> StreamingUser
+
+class SongCollectionSong <<DjangoModel>> {
+    position: int
+    save(): void
+}
+SongCollectionSong *-- "1" BaseSong
+SongCollectionSong *-- "1" SongCollection
+
+' Specialized Collections
+class LikedSongs <<DjangoModel>> {
+    save(): void
+}
+SongCollection <|- LikedSongs
+
+class UserHistory <<DjangoModel>> {
+    save(): void
+}
+SongCollection <|- UserHistory
+
+' ### Queue
+class SongQueue <<DjangoModel>> {
+    head: SongQueueNode
+    tail: SongQueueNode
+    add_after: SongQueueNode
+    song_count: int
+    add_song(): SongQueueNode
+    add_collection(): list
+    shift_head_forward(): SongQueueNode
+    shift_head_backwards(): SongQueueNode
+    clear(): void
+    is_empty(): bool
+    delete_node(): bool
+}
+class SongQueueNode <<DjangoModel>> {
+    delete(): void
+}
+SongQueue *-- "0..*" SongQueueNode
+SongQueueNode --> SongCollectionSong
+
+' ### Social
+class Publication <<DjangoModel>> {
+    type: str
+    content: str
+    is_deleted: bool
+    delete(): void
+    get_root(): Publication
+}
+Publication --> StreamingUser : user
+Publication --> Publication : parent
+
+' ### Notifications
+class Notification <<DjangoModel>> {
+    is_read: bool
+}
+class ReplyNotification <<DjangoModel>> {
+}
+Notification <|- ReplyNotification
+ReplyNotification --> Publication : orig_comment
+ReplyNotification --> Publication : reply_comment
+
+class FriendRequestNotification <<DjangoModel>> {
+}
+Notification <|- FriendRequestNotification
+FriendRequestNotification --> StreamingUser : sender
+FriendRequestNotification --> StreamingUser : receiver
+
+SongAuthor -[hidden]right- BaseUser
+BaseModel -[hidden]right- Notification
+@enduml

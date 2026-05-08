@@ -1,0 +1,6 @@
+{% load i18n %}{% autoescape off %}{% blocktranslate with site_name=current_site.name %}Hello from {{ site_name }}!{% endblocktranslate %}
+
+{% blocktranslate %}To confirm your account, go to {{ activate_url }}{% endblocktranslate %}
+
+Happy listening!
+{{ current_site.domain }}{% endautoescape %}

@@ -1,0 +1,24 @@
+import { CollectionSong } from "@/features/collections/types.ts";
+import { useHandlePlay } from "@/features/playback/hooks/useHandlePlay.ts";
+import { PlaybackContext } from "@/features/playback/providers/playbackContext.ts";
+import { useContext } from "react";
+
+export function useSongPlayHandler(collectionSong: CollectionSong) {
+    const { isPlaybackActive, playbackState } = useContext(PlaybackContext);
+    const handlePlay = useHandlePlay();
+
+    const isThisChosen = collectionSong.uuid === playbackState?.collectionSong.uuid;
+    const onClick = () => {
+        if (isThisChosen) {
+            // TODO: unify to proper calls with () => void or smth ...
+            handlePlay();
+        } else {
+            handlePlay({ newSong: collectionSong });
+        }
+    };
+
+    return {
+        isThisPlaying: isThisChosen && isPlaybackActive,
+        onClick,
+    };
+}

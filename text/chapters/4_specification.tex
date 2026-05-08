@@ -1,0 +1,129 @@
+\chapter{Specification}\label{ch:specification}
+
+% TODO use case diagrams
+In this chapter the general outline of the application is specified via functional and non-functional requirements.
+The individual requirements are constructed based on the `MoSCoW' criteria~\parencite{moscow}.
+``Must Have'' requirements specify functionality without which the application would not be finished.
+Those are the main features and technical aspects that must be implemented.
+``Should Have'' requirements mostly represent features that would greatly improve the user experience,
+but are not strictly needed for the application to be fully working.
+``Could Have'' requirements are reserved for possible future ideas which most probably would not be
+implemented in the current scope of the thesis.
+
+
+\section{Important Terms}
+Below is the list of important terms that appear throughout the requirements sections and further chapters:
+\begin{itemize}
+    \item \textbf{Anonymous User} – A User who is not yet registered in the system or has not logged in.
+    \item \textbf{User} – An object containing information such as email, display name and other User parameters.
+    \item \textbf{User Profile} – A Frontend-only abstraction which shows Base User information.
+    \item \textbf{Artist} - A User with additional privileges, for example, Song or Collection creation.
+    \item \textbf{Follower/Followee} - A relationship between a User and another User where one subscribes to another.
+    \item \textbf{Friend} - A Followee and Follower who are mutually subscribed to each other.
+    \item \textbf{Song} – An object representing a processed audio
+    file with additional metadata such as title or creation date.
+    \item \textbf{Collection} – A container that holds multiple Songs.
+    \item \textbf{Playlist} – A Collection consisting of pre-existing~(already uploaded) Songs.
+    \item \textbf{Album} – A Collection consisting of newly uploaded Songs.
+    \item \textbf{Playback} – A process during which the User is receiving or manipulating audio data.
+    \item \textbf{Playback Item} – A Song or a Collection.
+    \item \textbf{Playback Queue} – A User-specific list of Playback Items which determines the playing Song order.
+    \item \textbf{Playback Device} – A device on which the app is currently used.
+    \item \textbf{Friend Activity} – A display of the Songs currently listened to by the User's Friends.
+    \item \textbf{Publication} – Textual User input.
+    \item \textbf{Attachment} - Non-textual User input.
+    For example, a Song attached to a Publication.
+    \item \textbf{Reply} – The same as Publication, but created in relation to another, `parent' Publication.
+    \item \textbf{Feed} - A list of Publications accessible by any User.
+    Either User-specific or Global (from multiple Users).
+    \item \textbf{Chat} - A list of Publications specific to two or more Users.
+\end{itemize}
+\clearpage
+
+
+\section{Functional Requirements}
+
+\subsection*{Must Have}
+\begin{itemize}
+    \item The system shall support User and Artist models.
+    \item The system shall allow Anonymous Users to create a User model and log in to the system using an email and a password.
+    \item The system shall allow Users to change provided information~(name, bio, avatar, etc.) after the model creation.
+    \item The system shall support over-the-net audio Playback.
+    \item The system shall provide a way to control the audio Playback.
+    That includes shifting the Playback backward and forward, stopping and resuming it.
+    \item The system shall provide a way to display Playback Items uploaded to it.
+    \item The system shall limit content presentation based on a specific User.
+    That includes Playback Items, User Profile, User Playback Devices, and other related items.
+    \item The system shall support the creation of Playback Items.
+    Playlists shall be created by all Users.
+    Albums shall be created by Artists only.
+    \item The system shall provide a Playback Queue and the ability to add or remove Playback Items from it.
+    %  TODO: improve wording
+    \item The system shall provide chat capabilities.
+    \item The system shall provide a way for Users to add Publications~(Comments) under Collections.
+%    TODO: add info about other feeds
+    \item The system shall provide a personal Publication system~(Feed).
+    \item The system shall provide a way for Users to create relations to other Users.
+    \item The system shall have a way to search and filter Playback Items, Users, and Artists.
+\end{itemize}
+
+\subsection*{Should Have}
+\begin{itemize}
+    \item The system shall support adding Attachments, such as Songs or Collections, to Publications.
+    \item The system shall provide a notification system.
+    It shall display information about Users who followed the target User, new Reply Publication, etc.
+    \item The system shall make it possible to filter Playback Items/Publications based on the User's relations to other Users.
+    \item The system shall make it possible to add new Playback Devices and switch between them.
+\end{itemize}
+
+\subsection*{Could Have}
+\begin{itemize}
+%    TODO add smth else
+    \item The system shall make it possible for multiple Users to listen to Songs in a synchronized manner.
+    \item The system shall provide an Artist interface that allows Artists to see statistics related to their content.
+    \item The system shall have a forum section.
+\end{itemize}
+
+\clearpage
+
+
+\section{Non-functional Requirements}
+
+\subsection*{Must Have}
+\begin{itemize}
+    \item
+    The system shall provide access to its contents only to authorized Users.
+    The only exceptions shall be the ``Log In'' and ``Sign Up'' pages.
+    \item
+    The system shall make unauthorized access to data as complex as possible, so that even in the case of misconfiguration of access rights, the data are hard to access.
+    \item
+    The system shall store uploaded content securely.
+    \item
+    The system shall store and transport sensitive User information safely.
+    I.e., it should use safe transport protocols, such as HTTPS and WSS~.
+    \item
+    The system should be resistant to the most common web-based attacks: CSRF, XSS, etc.
+    \item
+    The system shall, in case of unexpected failure, remain rendered on the screen and show the appropriate non-technical message to the User.
+    \item
+    The system shall render newly available information without User input.
+    That includes updates to Publications, Playback Items, Playback Queue, and other related items.
+    \item
+    The system shall minimize the network load it has on the server and the User device.
+    That includes reducing the data footprint and implementing eager loading strategies.
+\end{itemize}
+
+\subsection*{Should Have}
+\begin{itemize}
+    \item The system shall provide a responsive search method that reacts dynamically to User input.
+    \item The system shall synchronize Playback across multiple devices.
+\end{itemize}
+
+\subsection*{Could Have}
+\begin{itemize}
+        % TODO  infinite scroll but more abstract wording
+    \item The system shall
+    \item The system shall support offline Playback.
+\end{itemize}
+
+The next chapter presents the high-level technology choices used for the implementation.

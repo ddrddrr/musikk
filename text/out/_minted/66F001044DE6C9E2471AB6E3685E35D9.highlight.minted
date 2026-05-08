@@ -1,0 +1,16 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+packager
+\PYG{+w}{  }\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{input=*file path 1*,stream=audio,}
+\PYG{l+s+s2}{   init\PYGZus{}segment=*base path*/audio\PYGZus{}0\PYGZus{}init.mp4,}
+\PYG{l+s+s2}{   segment\PYGZus{}template=*base path*/audio\PYGZus{}0\PYGZus{}}\PYG{n+nv}{\PYGZdl{}Number}\PYGZdl{}\PYG{l+s+s2}{.m4s,}
+\PYG{l+s+s2}{   playlist\PYGZus{}name=audio\PYGZus{}0.m3u8}\PYG{l+s+s2}{\PYGZdq{}}
+\PYG{+w}{  }\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{input=*file path 2*,stream=audio,}
+\PYG{l+s+s2}{   init\PYGZus{}segment=*base path*/audio\PYGZus{}1\PYGZus{}init.mp4,}
+\PYG{l+s+s2}{   segment\PYGZus{}template=*base path*/audio\PYGZus{}1\PYGZus{}}\PYG{n+nv}{\PYGZdl{}Number}\PYGZdl{}\PYG{l+s+s2}{.m4s,}
+\PYG{l+s+s2}{   playlist\PYGZus{}name=audio\PYGZus{}1.m3u8}\PYG{l+s+s2}{\PYGZdq{}}
+\PYG{+w}{  }...
+\PYG{+w}{  }\PYGZhy{}\PYGZhy{}segment\PYGZus{}duration\PYG{+w}{ }\PYG{l+m}{3}
+\PYG{+w}{  }\PYGZhy{}\PYGZhy{}generate\PYGZus{}static\PYGZus{}live\PYGZus{}mpd
+\PYG{+w}{  }\PYGZhy{}\PYGZhy{}mpd\PYGZus{}output\PYG{o}{=}*base\PYG{+w}{ }path*/manifest.mpd
+\PYG{+w}{  }\PYGZhy{}\PYGZhy{}hls\PYGZus{}master\PYGZus{}playlist\PYGZus{}output\PYG{o}{=}*base\PYG{+w}{ }path*/master.m3u8
+\end{MintedVerbatim}

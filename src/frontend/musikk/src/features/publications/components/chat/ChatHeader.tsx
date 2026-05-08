@@ -1,0 +1,106 @@
+import { ChevronDown } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+
+import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
+import { ChatAttachmentsList } from "@/features/publications/components/chat/ChatAttachmentsList.tsx";
+import { useChatImage } from "@/features/publications/hooks/useChatImage.ts";
+import { Chat } from "@/features/publications/types.ts";
+import { Button } from "@/features/ui/button.tsx";
+import { Popover, PopoverContent, PopoverTrigger } from "@/features/ui/popover.tsx";
+import { ScrollArea } from "@/features/ui/scroll-area.tsx";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/features/ui/tabs.tsx";
+import { UserAvatar } from "@/features/user/components/UserAvatar.tsx";
+import { UserIdentifier } from "@/features/user/components/UserIdentifier.tsx";
+
+interface ChatHeaderProps {
+    chat: Chat;
+}
+
+export function ChatHeader({ chat }: ChatHeaderProps) {
+    const currentUserUUID = useUserUUID();
+    const navigate = useNavigate();
+    const otherMember = chat.is_direct
+        ? chat.members.find((m) => m.uuid !== currentUserUUID)
+        : undefined;
+    const { chatImg, chatImgAlt } = useChatImage(chat);
+
+    return (
+        <div className="flex gap-x-4 border-b-2 border-foreground bg-muted p-4">
+            <Popover>
+                <PopoverTrigger asChild>
+                    <button
+                        type="button"
+                        aria-label="Show chat info and attachments"
+                        className="relative rounded-full transition hover:ring-2 hover:ring-foreground"
+                    >
+                        <UserAvatar src={chatImg} alt={chatImgAlt} size="sm" />
+                        <span className="absolute right-0 bottom-0 flex size-4 items-center justify-center rounded-full border border-foreground bg-muted">
+                            <ChevronDown className="size-3 text-foreground" />
+                        </span>
+                    </button>
+                </PopoverTrigger>
+
+                <PopoverContent align="start" className="w-64">
+                    <Tabs defaultValue={chat.is_direct ? "info" : "members"}>
+                        <TabsList className="w-full">
+                            {chat.is_direct ? (
+                                <TabsTrigger value="info">Info</TabsTrigger>
+                            ) : (
+                                <TabsTrigger value="members">Members</TabsTrigger>
+                            )}
+                            <TabsTrigger value="attachments">Attachments</TabsTrigger>
+                        </TabsList>
+
+                        {chat.is_direct && otherMember && (
+                            <TabsContent value="info">
+                                <div className="flex flex-col items-center gap-2 py-2">
+                                    <UserAvatar
+                                        src={otherMember.avatar}
+                                        alt={otherMember.display_name}
+                                        size="md"
+                                    />
+                                    <Button
+                                        variant="link"
+                                        size="fit"
+                                        className="text-sm font-semibold"
+                                        onClick={() => void navigate(`/users/${otherMember.uuid}`)}
+                                    >
+                                        {otherMember.display_name}
+                                    </Button>
+                                    {otherMember.bio && (
+                                        <div className="max-h-20 overflow-y-auto text-sm text-muted-foreground">
+                                            <p className="whitespace-pre-wrap">{otherMember.bio}</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </TabsContent>
+                        )}
+
+                        {!chat.is_direct && (
+                            <TabsContent value="members">
+                                {/*TODO: should scroll area be used more in general? eg in search/songs for collection etc
+                                should this border variant be moved there?*/}
+                                <div className={"rounded-sm border border-foreground"}>
+                                    <ScrollArea className="max-h-48">
+                                        <div className="flex flex-col gap-2 py-2">
+                                            {chat.members.map((member) => (
+                                                <UserIdentifier key={member.uuid} user={member} />
+                                            ))}
+                                        </div>
+                                    </ScrollArea>
+                                </div>
+                            </TabsContent>
+                        )}
+
+                        <TabsContent value="attachments">
+                            <ChatAttachmentsList chatUUID={chat.uuid} />
+                        </TabsContent>
+                    </Tabs>
+                </PopoverContent>
+            </Popover>
+            <div>
+                <h2 className="text-lg font-bold">{chat.title}</h2>
+            </div>
+        </div>
+    );
+}
