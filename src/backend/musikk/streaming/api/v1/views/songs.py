@@ -79,12 +79,12 @@ class SongUserCollections(APIView):
 
         profile: StreamingProfile = request.user.streamingprofile
         user_collection_ids = list(
-            profile.created_collections.values_list("id", flat=True)
+            profile.created_collections.values_list("pk", flat=True)
         )
-        user_collection_ids.append(profile.liked_songs.id)
+        user_collection_ids.append(profile.liked_songs.pk)
 
         rows = CollectionSong.objects.filter(
-            song=collection_song.song, collection__id__in=user_collection_ids
+            song=collection_song.song, collection__pk__in=user_collection_ids
         ).values_list("collection__uuid", "uuid")
 
         return Response(

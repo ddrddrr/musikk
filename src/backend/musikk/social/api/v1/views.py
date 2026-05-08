@@ -141,7 +141,7 @@ class UserChatsListCreateView(ListCreateAPIView):
 
     def get_queryset(self):
         return Chat.objects.filter(
-            id__in=ChatMember.objects.filter(member=self.request.user).values_list(
+            pk__in=ChatMember.objects.filter(member=self.request.user).values_list(
                 "chat_id", flat=True
             )
         ).prefetch_related("chatmember_set__member")
@@ -159,7 +159,7 @@ class ChatRetrieveView(RetrieveAPIView):
 
     def get_queryset(self):
         return Chat.objects.filter(
-            id__in=ChatMember.objects.filter(member=self.request.user).values_list(
+            pk__in=ChatMember.objects.filter(member=self.request.user).values_list(
                 "chat_id", flat=True
             )
         ).prefetch_related("chatmember_set__member")

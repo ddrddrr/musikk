@@ -20,7 +20,7 @@ class Publication(UserContent):
         help_text="The model for which this Publication is created. "
         "Can be SongCollection or User (as in user feed), etc.",
     )
-    created_for_id = models.PositiveIntegerField()
+    created_for_id = models.UUIDField()
     created_for_object = GenericForeignKey("created_for_type", "created_for_id")
 
     attachment_type = models.ForeignKey(
@@ -30,7 +30,7 @@ class Publication(UserContent):
         null=True,
         blank=True,
     )
-    attachment_id = models.PositiveIntegerField(null=True, blank=True)
+    attachment_id = models.UUIDField(null=True, blank=True)
     attachment_object = GenericForeignKey("attachment_type", "attachment_id")
 
     def get_root(self):

@@ -85,10 +85,10 @@ class UserLibraryView(APIView):
         ctx = {"request": request}
 
         created_qs = collection_optimizations(profile.created_collections)
-        created_ids = list(created_qs.values_list("id", flat=True))
+        created_ids = list(created_qs.values_list("pk", flat=True))
 
         liked_qs = collection_optimizations(
-            profile.liked_collections.exclude(id__in=created_ids)
+            profile.liked_collections.exclude(pk__in=created_ids)
         )
 
         history = CollectionSerializerBasic(profile.history, context=ctx).data

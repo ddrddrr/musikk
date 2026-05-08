@@ -126,8 +126,8 @@ class TestPlaybackContext(TestCase):
         )
         window = ctx.window()
 
-        song_ids = [s.id for s in window]
-        assert self.songs[1].id not in song_ids
+        song_ids = [s.pk for s in window]
+        assert self.songs[1].pk not in song_ids
         assert len(window) == 4
 
     def test_window_returns_empty_without_collection(self):

@@ -78,7 +78,7 @@ class TestCollectionCommentsListCreateView(TestCase):
     def test_create_publication_requires_authentication(self):
         payload = {"content": fake.paragraph(nb_sentences=2)}
         response = self._post(payload, user=None)
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 401)
 
     def test_root_publication_creation(self):
         payload = {"content": fake.paragraph(nb_sentences=2)}

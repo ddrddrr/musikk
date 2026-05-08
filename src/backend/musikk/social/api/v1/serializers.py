@@ -170,7 +170,7 @@ class UserChatRetrieveSerializer(BaseModelSerializer):
 
         user = getattr(self.context.get("request"), "user", None)
         cm = ChatMember.objects.get(chat=obj, member=user)  # validated in the view
-        return cm.last_read_message_id == pub.id
+        return cm.last_read_message_id == pub.pk
 
     def get_members(self, obj):
         # expects prefetch_related('chatmember_set__member') in the view
