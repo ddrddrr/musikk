@@ -51,7 +51,7 @@ class CollectionListCreateView(ListCreateAPIView):
     def get_queryset(self):
         qs = super().get_queryset()
         if self.request.method == "GET":
-            qs = collection_optimizations(qs, self.request.user)
+            qs = collection_optimizations(qs)
         return qs
 
     def get_serializer_class(self):
@@ -72,23 +72,23 @@ class CollectionListCreateView(ListCreateAPIView):
         if response.status_code == status.HTTP_201_CREATED:
             send_ws_event(
                 user_group(self.request.user.uuid),
-                ServerEvent.COLLECTIONS_PERSONAL_CHANGED,
+                ServerEvent.LIBRARY_CHANGED,
             )
         return response
 
 
-class CollectionPersonalView(APIView):
+class UserLibraryView(APIView):
     serializer_class = CollectionSerializerBasic
 
     def get(self, request, *args, **kwargs):
         profile = request.user.streamingprofile
         ctx = {"request": request}
 
-        created_qs = collection_optimizations(profile.created_collections, request.user)
+        created_qs = collection_optimizations(profile.created_collections)
         created_ids = list(created_qs.values_list("id", flat=True))
 
-        followed_qs = collection_optimizations(
-            profile.followed_collections.exclude(id__in=created_ids), request.user
+        liked_qs = collection_optimizations(
+            profile.liked_collections.exclude(id__in=created_ids)
         )
 
         history = CollectionSerializerBasic(profile.history, context=ctx).data
@@ -96,8 +96,8 @@ class CollectionPersonalView(APIView):
         created_collections = CollectionSerializerBasic(
             created_qs, context=ctx, many=True
         ).data
-        followed_collections = CollectionSerializerBasic(
-            followed_qs, context=ctx, many=True
+        liked_collections = CollectionSerializerBasic(
+            liked_qs, context=ctx, many=True
         ).data
 
         return Response(
@@ -106,7 +106,7 @@ class CollectionPersonalView(APIView):
                 "history": history,
                 "liked_songs": liked_songs,
                 "created_collections": created_collections,
-                "followed_collections": followed_collections,
+                "liked_collections": liked_collections,
             },
         )
 
@@ -136,7 +136,7 @@ class CollectionRetrieveView(APIView):
         collection.delete()
         send_ws_event(
             user_group(request.user.uuid),
-            ServerEvent.COLLECTIONS_PERSONAL_CHANGED,
+            ServerEvent.LIBRARY_CHANGED,
         )
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -177,7 +177,7 @@ class CollectionRetrieveUpdateView(RetrieveUpdateAPIView):
         if was_draft and not instance.draft:
             send_ws_event(
                 user_group(request.user.uuid),
-                ServerEvent.COLLECTIONS_PERSONAL_CHANGED,
+                ServerEvent.LIBRARY_CHANGED,
             )
 
         return Response(
@@ -195,11 +195,12 @@ class CollectionAddLikedView(APIView):
         with transaction.atomic():
             collection = get_object_or_404(Collection, uuid=collection_uuid)
             self.check_object_permissions(request, collection)
-            self.request.user.streamingprofile.followed_collections.add(collection)
+            self.request.user.streamingprofile.liked_collections.add(collection)
 
         group = user_group(self.request.user.uuid)
         send_ws_event(group, ServerEvent.COLLECTION_CHANGED)
-        send_ws_event(group, ServerEvent.COLLECTIONS_PERSONAL_CHANGED)
+        send_ws_event(group, ServerEvent.LIBRARY_CHANGED)
+        send_ws_event(group, ServerEvent.LIKED_COLLECTIONS_CHANGED)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def delete(self, request, *args, **kwargs):
@@ -207,11 +208,12 @@ class CollectionAddLikedView(APIView):
         with transaction.atomic():
             collection = get_object_or_404(Collection, uuid=collection_uuid)
             self.check_object_permissions(request, collection)
-            self.request.user.streamingprofile.followed_collections.remove(collection)
+            self.request.user.streamingprofile.liked_collections.remove(collection)
 
         group = user_group(self.request.user.uuid)
         send_ws_event(group, ServerEvent.COLLECTION_CHANGED)
-        send_ws_event(group, ServerEvent.COLLECTIONS_PERSONAL_CHANGED)
+        send_ws_event(group, ServerEvent.LIBRARY_CHANGED)
+        send_ws_event(group, ServerEvent.LIKED_COLLECTIONS_CHANGED)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 

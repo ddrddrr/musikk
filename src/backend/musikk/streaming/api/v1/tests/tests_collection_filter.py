@@ -45,7 +45,7 @@ class TestCollectionConnectionFilter(TestCase):
         self.regular_friend_followed = self._authored_collection(
             self.stranger, type=CollectionType.PLAYLIST
         )
-        self.regular_friend.streamingprofile.followed_collections.add(
+        self.regular_friend.streamingprofile.liked_collections.add(
             self.regular_friend_followed
         )
 

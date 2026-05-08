@@ -41,10 +41,25 @@ export function useUserWsEvents() {
             void client.invalidateQueries({ queryKey: userKeys.followers(to_uuid) });
         });
 
+        const unsubLikedSongs = ws.subscribe("user.liked_songs.changed", () => {
+            void client.invalidateQueries({ queryKey: userKeys.likedSongs });
+        });
+
+        const unsubLikedCollections = ws.subscribe("user.liked_collections.changed", () => {
+            void client.invalidateQueries({ queryKey: userKeys.likedCollections });
+        });
+
+        const unsubLibrary = ws.subscribe("user.library.changed", () => {
+            void client.invalidateQueries({ queryKey: ["userLibrary"] });
+        });
+
         return () => {
             unsubUpdated();
             unsubFollowed();
             unsubUnfollowed();
+            unsubLikedSongs();
+            unsubLikedCollections();
+            unsubLibrary();
         };
     }, [ws, client]);
 }

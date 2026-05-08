@@ -1,6 +1,6 @@
+from base.serializers import BaseModelSerializer
 from rest_framework import serializers
 
-from base.serializers import BaseModelSerializer
 from streaming.api.v1.serializers.collections import CollectionSerializerBasic
 from streaming.models import StreamingProfile
 
@@ -8,7 +8,7 @@ from streaming.models import StreamingProfile
 class StreamingProfileGetSerializer(BaseModelSerializer):
     user = serializers.UUIDField(source="user.uuid", read_only=True)
     player = serializers.UUIDField(source="player.uuid", read_only=True)
-    followed_collections = serializers.SerializerMethodField(read_only=True)
+    liked_collections = serializers.SerializerMethodField(read_only=True)
     history = serializers.SerializerMethodField(read_only=True)
     liked_songs = serializers.SerializerMethodField(read_only=True)
 
@@ -17,14 +17,14 @@ class StreamingProfileGetSerializer(BaseModelSerializer):
         fields = BaseModelSerializer.Meta.fields + [
             "user",
             "player",
-            "followed_collections",
+            "liked_collections",
             "history",
             "liked_songs",
         ]
 
-    def get_followed_collections(self, obj: StreamingProfile) -> list[dict]:
+    def get_liked_collections(self, obj: StreamingProfile) -> list[dict]:
         return CollectionSerializerBasic(
-            obj.followed_collections.all(),
+            obj.liked_collections.all(),
             many=True,
             context=self.context,
         ).data

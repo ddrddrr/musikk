@@ -85,9 +85,6 @@ class TestPlayerStateBroadcaster(TestCase):
             payload["current_song"]["uuid"], str(self.collection_song.uuid)
         )
         self.assertIn("song", payload["current_song"])
-        # is_liked must serialize without an HTTP request in context
-        self.assertIn("is_liked", payload["current_song"]["song"])
-        self.assertEqual(payload["current_song"]["song"]["is_liked"], False)
         self.assertEqual(payload["server_ts_ms"], 1_700_000_000_000)
         self.assertEqual(payload["playback_state"]["version"], 3)
         active = payload["playback_state"]["active"]

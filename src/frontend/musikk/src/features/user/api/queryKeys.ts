@@ -6,5 +6,7 @@ export const userKeys = {
     friends: (uuid: UUID) => [...userKeys.base, uuid, "friends"] as const,
     followers: (uuid: UUID) => [...userKeys.base, uuid, "followers"] as const,
     followed: (uuid: UUID) => [...userKeys.base, uuid, "followed"] as const,
-    collectionsPersonal: (uuid: UUID) => ["collectionsPersonal", uuid] as const,
+    library: (uuid: UUID) => ["userLibrary", uuid] as const,
+    likedSongs: ["user-liked-songs"] as const,
+    likedCollections: ["user-liked-collections"] as const,
 };

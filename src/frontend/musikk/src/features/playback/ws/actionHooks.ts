@@ -7,8 +7,8 @@ export function useRegisterDeviceAction() {
     const ws = useWSClient();
     const registerDeviceAction = useCallback(
         (device: ThisDevice) => {
-            // BE forgets device volume across disconnects (TTL + cleared on disconnect),
-            // so we re-assert localStorage as the source of truth on every register
+            // volume is stored as a key in redis on be (with ttl),
+            // so we use localStorage as the source of truth
             const payload: {
                 device_id: string;
                 name: string;

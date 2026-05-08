@@ -102,7 +102,7 @@ def _create_collections(
     return collections
 
 
-def seed_followed_collections(
+def seed_liked_collections(
     users: list[BaseUser],
     collections: list[Collection],
 ):
@@ -115,8 +115,8 @@ def seed_followed_collections(
     total = 0
     for user in users:
         profile = StreamingProfile.objects.get(user=user)
-        to_follow = random.sample(public, k=random.randint(1, min(3, len(public))))
-        profile.followed_collections.add(*to_follow)
-        total += len(to_follow)
+        to_like = random.sample(public, k=random.randint(1, min(3, len(public))))
+        profile.liked_collections.add(*to_like)
+        total += len(to_like)
 
-    print(f"Generated {total} collection follows across {len(users)} users")
+    print(f"Generated {total} collection likes across {len(users)} users")

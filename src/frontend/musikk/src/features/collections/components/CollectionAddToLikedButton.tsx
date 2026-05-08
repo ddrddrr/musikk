@@ -1,6 +1,8 @@
 import { getErrorDetail } from "@/api/errorUtils.ts";
 import { Button } from "@/features/ui/button.tsx";
-import { useMutation } from "@tanstack/react-query";
+import { userKeys } from "@/features/user/api/queryKeys.ts";
+import { useIsCollectionLiked } from "@/features/user/hooks/useUserLikes.ts";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Check, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { collectionAddToLiked, collectionRemoveFromLiked } from "../api/mutations.ts";
@@ -15,9 +17,16 @@ export function CollectionAddToLikedButton({
     collection,
     showComments,
 }: CollectionAddToLikedButtonProps) {
+    const queryClient = useQueryClient();
+    const isLiked = useIsCollectionLiked(collection.uuid);
+
+    const invalidateLikedCollections = () =>
+        queryClient.invalidateQueries({ queryKey: userKeys.likedCollections });
+
     const collectionAddToLikedMutation = useMutation({
         mutationFn: collectionAddToLiked,
         onSuccess: () => {
+            void invalidateLikedCollections();
             toast.success("Added to liked collections");
         },
         onError: (error) => {
@@ -27,6 +36,7 @@ export function CollectionAddToLikedButton({
     const collectionRemoveFromLikedMutation = useMutation({
         mutationFn: collectionRemoveFromLiked,
         onSuccess: () => {
+            void invalidateLikedCollections();
             toast.success("Removed from liked collections");
         },
         onError: (error) => {
@@ -35,12 +45,8 @@ export function CollectionAddToLikedButton({
     });
     const sizeClass = showComments ? "size-8" : "size-12";
 
-    const renderAddIcon = () => {
-        return collection.is_liked ? <Check size={20} /> : <Plus size={20} />;
-    };
-
     function handleClick(collection: Collection) {
-        if (collection.is_liked) {
+        if (isLiked) {
             collectionRemoveFromLikedMutation.mutate({ collectionUUID: collection.uuid });
             return;
         }
@@ -49,12 +55,12 @@ export function CollectionAddToLikedButton({
 
     return (
         <Button
-            variant={collection.is_liked ? "brand" : "muted"}
+            variant={isLiked ? "brand" : "muted"}
             size="icon"
             onClick={() => handleClick(collection)}
             className={sizeClass}
         >
-            {renderAddIcon()}
+            {isLiked ? <Check size={20} /> : <Plus size={20} />}
         </Button>
     );
 }

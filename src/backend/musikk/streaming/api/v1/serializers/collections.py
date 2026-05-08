@@ -1,6 +1,6 @@
 from base.serializers import BaseModelSerializer, UUIDListField
 from django.db import transaction
-from django.db.models import Exists, OuterRef, Prefetch, QuerySet
+from django.db.models import Prefetch, QuerySet
 from rest_framework import serializers
 from users.api.v1.serializers import BaseUserSerializer
 
@@ -12,32 +12,18 @@ from streaming.models.collections import Collection, CollectionCredit, Collectio
 from streaming.models.songs import CollectionSong
 
 
-def collection_optimizations(qs: QuerySet, user) -> QuerySet:
-    """Optimize collection queries (e.g. by prefetching related objects)
-
-    Without this, `get_authors` and `get_is_liked` each fall back
-    to per-object queries.
-    """
-    qs = qs.prefetch_related(
+def collection_optimizations(qs: QuerySet) -> QuerySet:
+    """Prefetch credits so `get_authors` doesn't fetch authors per-obj"""
+    return qs.prefetch_related(
         Prefetch(
             "collection_credits",
             queryset=CollectionCredit.objects.select_related("author"),
         )
     )
-    if user is not None and not user.is_anonymous:
-        qs = qs.annotate(
-            is_liked_annotated=Exists(
-                Collection.objects.filter(
-                    pk=OuterRef("pk"), followers=user.streamingprofile
-                )
-            )
-        )
-    return qs
 
 
 class CollectionSerializerBasic(BaseModelSerializer):
     authors = serializers.SerializerMethodField(read_only=True, allow_null=True)
-    is_liked = serializers.SerializerMethodField(read_only=True, allow_null=True)
 
     class Meta:
         model = Collection
@@ -45,7 +31,6 @@ class CollectionSerializerBasic(BaseModelSerializer):
             "title",
             "image",
             "authors",
-            "is_liked",
             "type",
             "private",
             "draft",
@@ -56,16 +41,6 @@ class CollectionSerializerBasic(BaseModelSerializer):
             "private": {"read_only": True},
             "draft": {"read_only": True},
         }
-
-    def get_is_liked(self, obj) -> bool | None:
-        if (annotated := getattr(obj, "is_liked_annotated", None)) is not None:
-            return annotated
-        user = self.context.get("user")
-        if user is None and (req := self.context.get("request")) is not None:
-            user = req.user
-        if user is None or user.is_anonymous:
-            return None
-        return user.streamingprofile.followed_collections.filter(pk=obj.pk).exists()
 
     def get_authors(self, obj) -> dict:
         cache = getattr(obj, "_prefetched_objects_cache", None) or {}

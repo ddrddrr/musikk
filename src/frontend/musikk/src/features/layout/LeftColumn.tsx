@@ -1,17 +1,17 @@
 import { CollectionCard } from "@/features/collections/components/CollectionCard.tsx";
 import { ColletionCreateButton } from "@/features/collections/components/ColletionCreateButton.tsx";
 import { EmptyState } from "@/features/common/EmptyState.tsx";
-import { usePersonalCollections } from "@/features/user/hooks/usePersonalCollections.ts";
+import { useUserLibrary } from "@/features/user/hooks/useUserLibrary.ts";
 import { useMemo } from "react";
 
 export function LeftColumn() {
-    const { data } = usePersonalCollections();
-    const { liked_songs, history, created_collections, followed_collections } = data ?? {};
+    const { data } = useUserLibrary();
+    const { liked_songs, history, created_collections, liked_collections } = data ?? {};
 
     const collections = useMemo(() => {
         const created = Array.isArray(created_collections) ? created_collections : [];
-        const followed = Array.isArray(followed_collections) ? followed_collections : [];
-        let all = [...created, ...followed];
+        const liked = Array.isArray(liked_collections) ? liked_collections : [];
+        let all = [...created, ...liked];
 
         if (history != null) {
             all = [history, ...all];
@@ -21,7 +21,7 @@ export function LeftColumn() {
         }
 
         return all;
-    }, [liked_songs, history, created_collections, followed_collections]);
+    }, [liked_songs, history, created_collections, liked_collections]);
 
     return (
         <div className="flex w-1/5 flex-col overflow-y-auto bg-brand p-4 pb-40">

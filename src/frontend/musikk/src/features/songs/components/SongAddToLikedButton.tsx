@@ -1,9 +1,9 @@
 import { getErrorDetail } from "@/api/errorUtils.ts";
-import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
 import { addToLikedSongs, removeFromLikedSongs } from "@/features/collections/api/mutations.ts";
 import { CollectionSong } from "@/features/collections/types.ts";
 import { Button } from "@/features/ui/button.tsx";
 import { userKeys } from "@/features/user/api/queryKeys.ts";
+import { useIsSongLiked } from "@/features/user/hooks/useUserLikes.ts";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Check, Plus } from "lucide-react";
 import { toast } from "sonner";
@@ -16,17 +16,15 @@ interface SongCardProps {
 
 export function SongAddToLikedButton({ collectionSong, className = "", size = 40 }: SongCardProps) {
     const queryClient = useQueryClient();
-    const userUUID = useUserUUID();
+    const isLiked = useIsSongLiked(collectionSong.song.uuid);
 
-    const invalidatePersonal = () =>
-        queryClient.invalidateQueries({
-            queryKey: userKeys.collectionsPersonal(userUUID),
-        });
+    const invalidateLikedSongs = () =>
+        queryClient.invalidateQueries({ queryKey: userKeys.likedSongs });
 
     const addToLikedSongsMutation = useMutation({
         mutationFn: addToLikedSongs,
         onSuccess: () => {
-            void invalidatePersonal();
+            void invalidateLikedSongs();
             toast.success("Added to liked songs");
         },
         onError: (error) => {
@@ -37,7 +35,7 @@ export function SongAddToLikedButton({ collectionSong, className = "", size = 40
     const removeFromLikedSongsMutation = useMutation({
         mutationFn: removeFromLikedSongs,
         onSuccess: () => {
-            void invalidatePersonal();
+            void invalidateLikedSongs();
             toast.success("Removed from liked songs");
         },
         onError: (error) => {
@@ -48,7 +46,7 @@ export function SongAddToLikedButton({ collectionSong, className = "", size = 40
     const iconSize = Math.floor(size * 0.6);
 
     function handleClick(collectionSong: CollectionSong) {
-        if (collectionSong.song.is_liked) {
+        if (isLiked) {
             removeFromLikedSongsMutation.mutate({ collectionSongUUID: collectionSong.uuid });
             return;
         }
@@ -57,13 +55,13 @@ export function SongAddToLikedButton({ collectionSong, className = "", size = 40
 
     return (
         <Button
-            variant={collectionSong.song.is_liked ? "brand" : "muted"}
+            variant={isLiked ? "brand" : "muted"}
             size="icon"
             onClick={() => handleClick(collectionSong)}
             style={{ width: size, height: size }}
             className={className}
         >
-            {collectionSong.song.is_liked ? <Check size={iconSize} /> : <Plus size={iconSize} />}
+            {isLiked ? <Check size={iconSize} /> : <Plus size={iconSize} />}
         </Button>
     );
 }

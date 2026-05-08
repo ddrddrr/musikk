@@ -11,7 +11,6 @@ from streaming.models import BaseSong, CollectionSong, SongCredit
 class BaseSongRetrieveSerializer(BaseModelSerializer):
     mpd = serializers.SerializerMethodField(read_only=True)
     m3u8 = serializers.SerializerMethodField(read_only=True)
-    is_liked = serializers.SerializerMethodField(read_only=True, allow_null=True)
     authors = serializers.SerializerMethodField(read_only=True, allow_null=True)
 
     class Meta:
@@ -22,7 +21,6 @@ class BaseSongRetrieveSerializer(BaseModelSerializer):
             "description",
             "mpd",
             "m3u8",
-            "is_liked",
             "authors",
             "duration_ms",
             "loudness_lufs",
@@ -34,16 +32,6 @@ class BaseSongRetrieveSerializer(BaseModelSerializer):
 
     def get_m3u8(self, obj):
         return default_storage.url(obj.m3u8)
-
-    def get_is_liked(self, obj):
-        user = self.context.get("user")
-        if user is None and (req := self.context.get("request")) is not None:
-            user = req.user
-        if user is None or user.is_anonymous:
-            return None
-        return CollectionSong.objects.filter(
-            song=obj, collection=user.streamingprofile.liked_songs
-        ).exists()
 
     def get_authors(self, obj):
         cache = getattr(obj, "_prefetched_objects_cache", None) or {}

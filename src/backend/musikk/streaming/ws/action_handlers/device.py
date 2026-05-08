@@ -24,6 +24,8 @@ class DeviceWSActionHandler(WSActionHandler):
             "device.set_volume": self.handle_set_volume,
         }
 
+    # on_disconnect will be called when the ws connection is aborted, i.e,
+    # when the device will stop sending ws pongs, i.e., become "dead"
     def on_disconnect(self):
         if not self.device_id:
             return
@@ -46,8 +48,6 @@ class DeviceWSActionHandler(WSActionHandler):
             )
             return
 
-        # FE owns the durable per-device volume in localStorage; BE state is
-        # volatile (cleared on disconnect) so the FE re-asserts it here
         register_kwargs = {
             "device_id": device_id,
             "channel_name": self.consumer.channel_name,

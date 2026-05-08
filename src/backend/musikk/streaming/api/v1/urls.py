@@ -7,13 +7,17 @@ from streaming.api.v1.views.collections import (
     AlbumBySongView,
     CollectionAddLikedView,
     CollectionListCreateView,
-    CollectionPersonalView,
     CollectionRemoveSong,
     CollectionRetrieveUpdateView,
     CollectionRetrieveView,
     CollectionSongCreateView,
+    UserLibraryView,
 )
-from streaming.api.v1.views.profile import StreamingProfileRetrieveView
+from streaming.api.v1.views.profile import (
+    MeLikedCollectionsView,
+    MeLikedSongsView,
+    StreamingProfileRetrieveView,
+)
 from streaming.api.v1.views.song_queue import (
     MoveContextToQueueView,
     PlayerClearView,
@@ -69,9 +73,9 @@ collection_urls = [
         name="collection-remove-song",
     ),
     path(
-        "collections/personal/<uuid:uuid>",
-        CollectionPersonalView.as_view(),
-        name="collection-user-list",
+        "users/<uuid:uuid>/library",
+        UserLibraryView.as_view(),
+        name="user-library",
     ),
     path(
         "collections/<uuid:uuid>",
@@ -164,7 +168,17 @@ streaming_profile_urls = [
         "streaming-profile",
         StreamingProfileRetrieveView.as_view(),
         name="streaming-profile",
-    )
+    ),
+    path(
+        "me/liked-songs",
+        MeLikedSongsView.as_view(),
+        name="me-liked-songs",
+    ),
+    path(
+        "me/liked-collections",
+        MeLikedCollectionsView.as_view(),
+        name="me-liked-collections",
+    ),
 ]
 urlpatterns = (
     song_urls

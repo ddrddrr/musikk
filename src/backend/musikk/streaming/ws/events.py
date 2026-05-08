@@ -8,5 +8,7 @@ class ServerEvent(StrEnum):
     QUEUE_CHANGED = "queue.changed"
     # TODO: rename to collection open changed
     COLLECTION_CHANGED = "collection.changed"
-    COLLECTIONS_PERSONAL_CHANGED = "collections.personal.changed"
+    LIBRARY_CHANGED = "user.library.changed"
+    LIKED_SONGS_CHANGED = "user.liked_songs.changed"
+    LIKED_COLLECTIONS_CHANGED = "user.liked_collections.changed"
     SONG_UPLOAD = "song.upload"

@@ -11,13 +11,8 @@ export function useCollectionWsEvents() {
             void client.invalidateQueries({ queryKey: ["openCollection"] });
         });
 
-        const unsubPersonal = ws.subscribe("collections.personal.changed", () => {
-            void client.invalidateQueries({ queryKey: ["collectionsPersonal"] });
-        });
-
         return () => {
             unsubCollection();
-            unsubPersonal();
         };
     }, [ws, client]);
 }

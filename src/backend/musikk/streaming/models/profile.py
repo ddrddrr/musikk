@@ -40,7 +40,7 @@ class StreamingProfile(BaseModel):
         "streaming.PlayerState",
         on_delete=models.CASCADE,
     )
-    followed_collections = models.ManyToManyField(
+    liked_collections = models.ManyToManyField(
         "streaming.Collection",
         related_name="followers",
         blank=True,

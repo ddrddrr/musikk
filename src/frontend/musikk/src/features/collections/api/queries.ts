@@ -23,17 +23,15 @@ export async function fetchCollections(
     return res.data;
 }
 
-interface FetchCollectionsPersonalParams {
+interface FetchUserLibraryParams {
     history: Collection;
     liked_songs: Collection;
     created_collections: Collection[];
-    followed_collections: Collection[];
+    liked_collections: Collection[];
 }
 
-export async function fetchCollectionsPersonal(
-    userUUID: UUID,
-): Promise<FetchCollectionsPersonalParams> {
-    const response = await api_client.get(CollectionURLs.collectionPersonal(userUUID));
+export async function fetchUserLibrary(userUUID: UUID): Promise<FetchUserLibraryParams> {
+    const response = await api_client.get(CollectionURLs.userLibrary(userUUID));
     return response.data;
 }
 

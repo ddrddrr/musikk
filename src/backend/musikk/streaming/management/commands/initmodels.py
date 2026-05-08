@@ -8,7 +8,7 @@ from streaming.management.seeders.audio import seed_songs
 from streaming.management.seeders.audio_gen import generate_audio_files
 from streaming.management.seeders.collections import (
     seed_collections,
-    seed_followed_collections,
+    seed_liked_collections,
 )
 from streaming.management.seeders.images import ImageProvider
 from streaming.management.seeders.notifications import seed_notifications
@@ -108,8 +108,8 @@ class Command(BaseCommand):
                 image_provider=image_provider,
             )
 
-            self.stdout.write("\nGenerating followed collections")
-            seed_followed_collections(
+            self.stdout.write("\nGenerating liked collections")
+            seed_liked_collections(
                 users=all_users,
                 collections=playlists + albums,
             )

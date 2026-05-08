@@ -11,7 +11,6 @@ export interface Collection extends BaseModel {
     description: string;
     authors: BaseUser[];
     image?: string;
-    is_liked: boolean;
     type: CollectionType;
     private: boolean;
 }

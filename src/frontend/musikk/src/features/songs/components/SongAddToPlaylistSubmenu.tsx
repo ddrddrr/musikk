@@ -13,7 +13,7 @@ import {
     DropdownMenuSubContent,
     DropdownMenuSubTrigger,
 } from "@/features/ui/dropdown-menu.tsx";
-import { usePersonalCollections } from "@/features/user/hooks/usePersonalCollections.ts";
+import { useUserLibrary } from "@/features/user/hooks/useUserLibrary.ts";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Check, ListPlus, Plus } from "lucide-react";
 import { toast } from "sonner";
@@ -24,9 +24,9 @@ interface SongAddToPlaylistSubmenuProps {
 
 export function SongAddToPlaylistSubmenu({ collectionSong }: SongAddToPlaylistSubmenuProps) {
     const queryClient = useQueryClient();
-    const { data: personal } = usePersonalCollections();
-    const created_collections = personal?.created_collections;
-    const liked_songs = personal?.liked_songs;
+    const { data: library } = useUserLibrary();
+    const created_collections = library?.created_collections;
+    const liked_songs = library?.liked_songs;
 
     const { data: collectionEntries = [] } = useCollectionMemberships(collectionSong.uuid);
 

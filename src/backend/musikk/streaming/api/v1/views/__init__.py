@@ -8,9 +8,6 @@ from streaming.api.v1.views.collections import (
     CollectionListCreateView as CollectionListCreateView,
 )
 from streaming.api.v1.views.collections import (
-    CollectionPersonalView as CollectionPersonalView,
-)
-from streaming.api.v1.views.collections import (
     CollectionRemoveSong as CollectionRemoveSong,
 )
 from streaming.api.v1.views.collections import (
@@ -21,6 +18,9 @@ from streaming.api.v1.views.collections import (
 )
 from streaming.api.v1.views.collections import (
     CollectionSongCreateView as CollectionSongCreateView,
+)
+from streaming.api.v1.views.collections import (
+    UserLibraryView as UserLibraryView,
 )
 from streaming.api.v1.views.connections import (
     FriendsLatestListenedView as FriendsLatestListenedView,

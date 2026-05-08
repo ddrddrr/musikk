@@ -12,7 +12,7 @@ export function useDeletePlaylist() {
         mutationFn: deleteCollection,
         onSuccess: () => {
             toast.success("Playlist deleted");
-            void queryClient.invalidateQueries({ queryKey: ["collectionsPersonal"] });
+            void queryClient.invalidateQueries({ queryKey: ["userLibrary"] });
             void queryClient.invalidateQueries({ queryKey: ["openCollection"] });
             void navigate("/");
         },

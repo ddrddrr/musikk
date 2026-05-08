@@ -15,7 +15,7 @@ import {
 import { SongContainer } from "@/features/songs/components/SongContainer.tsx";
 import { SongMenuButton } from "@/features/songs/components/SongMenuButton.tsx";
 import { Spinner } from "@/features/ui/spinner";
-import { usePersonalCollections } from "@/features/user/hooks/usePersonalCollections.ts";
+import { useUserLibrary } from "@/features/user/hooks/useUserLibrary.ts";
 import { cn } from "@/lib/utils.ts";
 import { useCallback, useState } from "react";
 import { useMatch, useNavigate } from "react-router-dom";
@@ -27,8 +27,8 @@ interface CollectionContainerProps {
 export function CollectionContainer({ collectionUUID }: CollectionContainerProps) {
     const navigate = useNavigate();
     const currUserUUID = useUserUUID();
-    const { data: personalCollections } = usePersonalCollections();
-    const { liked_songs, history, created_collections } = personalCollections ?? {};
+    const { data: library } = useUserLibrary();
+    const { liked_songs, history, created_collections } = library ?? {};
     let showComments = !!useMatch("/collection/:uuid/comments");
 
     const {

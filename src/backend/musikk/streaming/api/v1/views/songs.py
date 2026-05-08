@@ -40,6 +40,7 @@ class SongAddLikedView(APIView):
         group = user_group(self.request.user.uuid)
         send_ws_event(group, ServerEvent.QUEUE_CHANGED)
         send_ws_event(group, ServerEvent.COLLECTION_CHANGED)
+        send_ws_event(group, ServerEvent.LIKED_SONGS_CHANGED)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def delete(self, *args, **kwargs):
@@ -55,6 +56,7 @@ class SongAddLikedView(APIView):
         group = user_group(self.request.user.uuid)
         send_ws_event(group, ServerEvent.QUEUE_CHANGED)
         send_ws_event(group, ServerEvent.COLLECTION_CHANGED)
+        send_ws_event(group, ServerEvent.LIKED_SONGS_CHANGED)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 

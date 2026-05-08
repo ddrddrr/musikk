@@ -13,11 +13,11 @@ from streaming.api.v1.views.collections import (
     AlbumBySongView,
     CollectionAddLikedView,
     CollectionListCreateView,
-    CollectionPersonalView,
     CollectionRemoveSong,
     CollectionRetrieveUpdateView,
     CollectionRetrieveView,
     CollectionSongCreateView,
+    UserLibraryView,
 )
 from streaming.audio.probes import AudioStreamInfo
 from streaming.models import Collection
@@ -191,7 +191,7 @@ class TestCollectionAddLikedView(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertTrue(
-            self.artist.streamingprofile.followed_collections.filter(
+            self.artist.streamingprofile.liked_collections.filter(
                 uuid=collection.uuid
             ).exists()
         )
@@ -549,17 +549,17 @@ class TestDraftVisibility(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
-    def test_personal_excludes_authors_drafts(self):
+    def test_library_excludes_authors_drafts(self):
         draft = self._make_draft_album()
         published = CollectionFactory(
             type="album", draft=False, private=False, songs=[]
         )
         CollectionCredit.objects.create(collection=published, author=self.author)
 
-        url = reverse("api:collection-user-list", kwargs={"uuid": self.author.uuid})
+        url = reverse("api:user-library", kwargs={"uuid": self.author.uuid})
         request = self.factory.get(url)
         force_authenticate(request, user=self.author)
-        response = CollectionPersonalView.as_view()(request, uuid=self.author.uuid)
+        response = UserLibraryView.as_view()(request, uuid=self.author.uuid)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         created_uuids = {c["uuid"] for c in response.data["created_collections"]}

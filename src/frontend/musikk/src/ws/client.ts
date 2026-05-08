@@ -173,6 +173,8 @@ export class WSClient {
         this.flush();
     }
 
+    // send bypassing the pendingMessages queue, if ws is open
+    // otherwise drop the payload
     sendIfOpen({ action, payload }: UserAction) {
         const ws = this.ws;
         if (ws?.readyState !== WebSocket.OPEN) return;
