@@ -1,6 +1,9 @@
-from asgiref.sync import async_to_sync as atos
 from django.contrib.auth import get_user_model
-from websockets.event_helpers import send_ws_event, user_group
+from websockets.event_helpers import (
+    send_ws_event,
+    send_ws_event_to_channel,
+    user_group,
+)
 
 from streaming.api.v1.serializers.songs import CollectionSongRetrieveSerializer
 from streaming.managers.playback_manager import PlaybackManager, now_server_ms
@@ -36,13 +39,11 @@ class PlayerStateBroadcaster:
 
     def send_snapshot_to_channel(self, channel_layer, channel_name: str) -> None:
         # used on device.register so the joining connection gets initial state
-        atos(channel_layer.send)(
+        send_ws_event_to_channel(
+            channel_layer,
             channel_name,
-            {
-                "type": "ws_event",
-                "event": ServerEvent.PLAYBACK_SNAPSHOT,
-                "payload": self._build_snapshot(),
-            },
+            ServerEvent.PLAYBACK_SNAPSHOT,
+            **self._build_snapshot(),
         )
 
     def _build_snapshot(self) -> dict:

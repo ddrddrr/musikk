@@ -23,6 +23,9 @@ const MAX_CONCURRENT_UPLOADS = 3;
 
 type UploadAction =
     | { type: "initializeJobs"; pending: SongUploadJob[]; skipped: SongUploadJob[] }
+    | { type: "markUploading"; operationID: UUID }
+    | { type: "markServerQueued"; operationID: UUID }
+    | { type: "markFailed"; operationID: UUID; detail?: string }
     | { type: "wsEvent"; payload: UploadEventPayload }
     | { type: "clear"; operationID: UUID };
 
@@ -31,7 +34,7 @@ function uploadReducer(state: SongUploadState, action: UploadAction): SongUpload
         case "initializeJobs": {
             const next = { ...state };
             for (const job of action.pending) {
-                next[job.operationID] = { status: "queued" };
+                next[job.operationID] = { status: "pending" };
             }
             for (const job of action.skipped) {
                 next[job.operationID] = state[job.operationID] ?? {
@@ -40,6 +43,35 @@ function uploadReducer(state: SongUploadState, action: UploadAction): SongUpload
                 };
             }
             return next;
+        }
+        case "markUploading": {
+            const existing = state[action.operationID];
+            if (!existing) return state;
+            return {
+                ...state,
+                [action.operationID]: { ...existing, status: "uploading" },
+            };
+        }
+        case "markServerQueued": {
+            const existing = state[action.operationID];
+            // a ws event may have already changed this, so don't change
+            if (!existing || existing.status !== "uploading") return state;
+            return {
+                ...state,
+                [action.operationID]: { ...existing, status: "queued" },
+            };
+        }
+        case "markFailed": {
+            const existing = state[action.operationID];
+            if (!existing) return state;
+            return {
+                ...state,
+                [action.operationID]: {
+                    ...existing,
+                    status: "failed",
+                    detail: action.detail,
+                },
+            };
         }
         case "wsEvent": {
             const existing = state[action.payload.operation_id];
@@ -92,14 +124,25 @@ export function useSongUpload() {
             const results: PromiseSettledResult<{ operationID: UUID; songUUID: UUID }>[] = [];
             for (let i = 0; i < pending.length; i += MAX_CONCURRENT_UPLOADS) {
                 const batch = pending.slice(i, i + MAX_CONCURRENT_UPLOADS).map(async (job) => {
-                    const res = await uploadCollectionSong({
-                        operationID: job.operationID,
-                        collectionUUID,
-                        title: job.data.title,
-                        audio: job.data.audio,
-                        image: job.data.image,
-                    });
-                    return { operationID: job.operationID, songUUID: res.song_uuid };
+                    dispatch({ type: "markUploading", operationID: job.operationID });
+                    try {
+                        const res = await uploadCollectionSong({
+                            operationID: job.operationID,
+                            collectionUUID,
+                            title: job.data.title,
+                            audio: job.data.audio,
+                            image: job.data.image,
+                        });
+                        dispatch({ type: "markServerQueued", operationID: job.operationID });
+                        return { operationID: job.operationID, songUUID: res.song_uuid };
+                    } catch (err) {
+                        dispatch({
+                            type: "markFailed",
+                            operationID: job.operationID,
+                            detail: getErrorDetail(err, "Failed to upload song"),
+                        });
+                        throw err;
+                    }
                 });
                 results.push(...(await Promise.allSettled(batch)));
             }

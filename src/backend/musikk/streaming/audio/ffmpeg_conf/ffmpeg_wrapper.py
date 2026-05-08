@@ -5,15 +5,15 @@ from pathlib import Path
 
 from streaming.audio.config import DEFAULT_LOSSY_BITRATE, is_lossy_codec
 from streaming.audio.exceptions import AudioProcessingPipelineError
-from streaming.audio.probes import AudioStreamInfo
 from streaming.audio.ffmpeg_conf.converters import (
-    FFMPEGAudioConverter,
-    FLAC_CONVERTER,
-    AACHEv2_CONVERTER,
     AAC_96_CONVERTER,
     AAC_160_CONVERTER,
     AAC_320_CONVERTER,
+    FLAC_CONVERTER,
+    AACHEv2_CONVERTER,
+    FFMPEGAudioConverter,
 )
+from streaming.audio.probes import AudioStreamInfo
 
 logger = logging.getLogger(__name__)
 
@@ -34,6 +34,8 @@ class FFMPEGWrapper:
         assert audio_converters, "`audio_converters` must be set"
         self.audio_converters: list[FFMPEGAudioConverter] = audio_converters
 
+    # TODO: a single ffmpeg call that does all of the encdoing in one pass would probably be faster (reads the input only 1x)
+    #  but not clear how to signify errors in that case (and in general its harder to reason about)
     def convert_audio(
         self,
         file_path: str | Path,

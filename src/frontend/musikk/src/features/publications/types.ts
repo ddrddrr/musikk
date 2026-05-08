@@ -5,7 +5,7 @@ import { BaseUser } from "@/features/user/types.ts";
 
 export type AttachmentType = "collection" | "song" | "user";
 export type AttachmentObj = Collection | CollectionSong | BaseUser;
-export type PublicationForType = "collection" | "feed";
+export type PublicationForType = "collection" | "feed" | "chat";
 
 export interface PublicationForObject {
     type: PublicationForType;

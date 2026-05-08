@@ -1,14 +1,15 @@
 from typing import TypedDict
 
 from django.db import models
-
 from streaming.api.v1.serializers import (
     CollectionSerializerBasic,
     CollectionSongRetrieveSerializer,
 )
-from users.api.v1.serializers import BaseUserSerializer
 from streaming.models import Collection, CollectionSong
+from users.api.v1.serializers import BaseUserSerializer
 from users.models import BaseUser
+
+from social.models.chat import Chat
 
 
 class TypeToModelError(Exception):
@@ -109,5 +110,14 @@ ATTACHMENT_RESOLVER = TypeToModelResolver.from_map(
         "collection": CollectionSerializerBasic,
         "song": CollectionSongRetrieveSerializer,
         "user": BaseUserSerializer,
+    },
+)
+
+
+CREATED_FOR_RESOLVER = TypeToModelResolver.from_map(
+    type_model_map={
+        "feed": BaseUser,
+        "collection": Collection,
+        "chat": Chat,
     },
 )

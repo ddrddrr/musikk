@@ -1,5 +1,6 @@
 from unittest.mock import AsyncMock, MagicMock, patch
 
+import msgpack
 from django.test import TestCase
 from users.tests.factories import BaseUserFactory
 
@@ -94,6 +95,31 @@ class TestPlayerStateBroadcaster(TestCase):
             active["play_instance_uuid"],
             "11111111-1111-1111-1111-111111111111",
         )
+
+    def test_broadcast_snapshot_message_is_msgpack_serializable(self):
+        """
+        Regression: channels_redis serializes group messages with msgpack,
+        which rejects UUID instances. Auto-generated relational fields on
+        DRF serializers (e.g. CollectionSong.collection) emit raw UUID PKs,
+        so the snapshot must be coerced before transport.
+        """
+        self._set_current_song()
+        self.mock_get_playback_state.return_value = PlaybackState(
+            active=ActivePlayback(
+                current_song_uuid=str(self.collection_song.uuid),
+                play_instance_uuid="33333333-3333-3333-3333-333333333333",
+                is_playing=True,
+                last_known_song_pos_ms=0,
+                last_known_at_server_ms=1_700_000_000_000,
+            ),
+            version=1,
+        )
+
+        PlayerStateBroadcaster(user_uuid=str(self.user.uuid)).broadcast_snapshot()
+
+        args, _ = self.mock_channel_layer.group_send.call_args
+        _, message = args
+        msgpack.packb(message)
 
     def test_broadcast_snapshot_without_current_song_returns_null(self):
         self.mock_get_playback_state.return_value = None

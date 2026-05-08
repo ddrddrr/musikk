@@ -1,17 +1,17 @@
-import { api_client } from "@/api/axiosConf.ts";
+import { api_client_public } from "@/api/axiosConf.ts";
 import { AuthURLs } from "@/api/endpoints.ts";
 
 export async function initCsrf(): Promise<void> {
-    await api_client.get(AuthURLs.csrf);
+    await api_client_public.get(AuthURLs.csrf);
 }
 
 export async function login(email: string, password: string): Promise<void> {
     await initCsrf();
-    await api_client.post(AuthURLs.login, { email, password });
+    await api_client_public.post(AuthURLs.login, { email, password });
 }
 
 export async function logout(): Promise<void> {
-    await api_client.post(AuthURLs.logout, {});
+    await api_client_public.post(AuthURLs.logout, {});
 }
 
 interface registrationParams {
@@ -25,7 +25,7 @@ export async function register(payload: registrationParams) {
     const { password1, password2, email, userRole } = payload;
     const is_artist = userRole === "Artist";
 
-    await api_client.post(AuthURLs.register, {
+    await api_client_public.post(AuthURLs.register, {
         password1,
         password2,
         email,
@@ -34,5 +34,5 @@ export async function register(payload: registrationParams) {
 }
 
 export async function verifyEmail(confirmationKey: string) {
-    await api_client.post(AuthURLs.verifyEmail, { key: confirmationKey });
+    await api_client_public.post(AuthURLs.verifyEmail, { key: confirmationKey });
 }

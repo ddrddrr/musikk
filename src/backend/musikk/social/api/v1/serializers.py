@@ -5,7 +5,7 @@ from rest_framework import serializers
 from users.api.v1.serializers import BaseUserSerializer
 
 from social.api.v1.fields import TypeModelRefField
-from social.api.v1.type_model_maps import ATTACHMENT_RESOLVER
+from social.api.v1.type_model_maps import ATTACHMENT_RESOLVER, CREATED_FOR_RESOLVER
 from social.api.v1.validators import validate_participants_are_friends
 from social.models import Publication
 from social.models.chat import Chat, ChatMember
@@ -68,6 +68,7 @@ class PublicationRetrieveSerializer(BaseModelSerializer):
     root_author_uuid = serializers.SerializerMethodField(read_only=True)
 
     attachment = serializers.SerializerMethodField(read_only=True)
+    created_for = serializers.SerializerMethodField(read_only=True)
     parent_uuid = serializers.SerializerMethodField(allow_null=True, read_only=True)
     parent_author = serializers.SerializerMethodField(allow_null=True, read_only=True)
     parent_repr = serializers.SerializerMethodField(allow_null=True, read_only=True)
@@ -81,6 +82,7 @@ class PublicationRetrieveSerializer(BaseModelSerializer):
             "content",
             "is_deleted",
             "attachment",
+            "created_for",
             # TODO: probably make a single obj
             "parent_uuid",
             "parent_author",
@@ -98,6 +100,11 @@ class PublicationRetrieveSerializer(BaseModelSerializer):
 
         return ATTACHMENT_RESOLVER.serialize_model_instance(
             obj.attachment_object, context=self.context
+        )
+
+    def get_created_for(self, obj) -> dict:
+        return CREATED_FOR_RESOLVER.get_model_instance_representation(
+            obj.created_for_object
         )
 
     def get_parent_uuid(self, obj) -> str | None:

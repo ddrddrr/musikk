@@ -1,13 +1,21 @@
-import { api_client } from "@/api/axiosConf.ts";
+import { api_client, api_client_public } from "@/api/axiosConf.ts";
 import { UUID } from "@/api/types.ts";
 import { UserURLs } from "@/features/user/api/endpoints.ts";
 import { userKeys } from "@/features/user/api/queryKeys.ts";
 import { BaseUser } from "@/features/user/types.ts";
 import { skipToken, useQuery } from "@tanstack/react-query";
+import axios from "axios";
 
 export async function fetchMe(): Promise<BaseUser | null> {
-    const res = await api_client.get(UserURLs.me);
-    return res.data.me;
+    try {
+        const res = await api_client_public.get(UserURLs.me);
+        return res.data.me;
+    } catch (err) {
+        if (axios.isAxiosError(err) && err.response?.status === 401) {
+            return null;
+        }
+        throw err;
+    }
 }
 
 export async function fetchUser(userUUID: UUID): Promise<BaseUser> {
