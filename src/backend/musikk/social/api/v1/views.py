@@ -11,7 +11,7 @@ from rest_framework.generics import (
 from streaming.models import Collection
 from streaming.models.collections import CollectionType
 from users.models import BaseUser
-from websockets.event_helpers import send_ws_event
+from websockets.event_helpers import send_ws_event, user_group
 from websockets.topics import topic_group
 
 from social.api.v1.filters import PublicationConnectionFilter
@@ -126,6 +126,11 @@ class ChatMessagesListCreateView(PublicationsListCreateMixin, ListCreateAPIView)
             member=self.request.user
         )
         for cm in other_members:
+            send_ws_event(
+                user_group(cm.member.uuid),
+                ServerEvent.CHAT_MESSAGES_CHANGED,
+                chat_uuid=chat_uuid,
+            )
             ChatMessageNotification.objects.create(
                 message=self._created_publication,
                 chat=chat,

@@ -7,16 +7,23 @@ import { BaseUser } from "@/features/user/types.ts";
 
 type PostAttachmentProps = {
     attachment: Attachment | null;
+    size?: "compact" | "normal";
 };
 
-export function PostAttachment({ attachment }: PostAttachmentProps) {
+export function PostAttachment({ attachment, size = "normal" }: PostAttachmentProps) {
     if (!attachment) return null;
 
     switch (attachment.type) {
         case "collection":
             return <CollectionCard collection={attachment.obj as Collection} size="small" />;
         case "song":
-            return <SongContainer collectionSong={attachment.obj as CollectionSong} />;
+            return (
+                <SongContainer
+                    collectionSong={attachment.obj as CollectionSong}
+                    size={size}
+                    showImage={size !== "compact"}
+                />
+            );
         case "user":
             return <UserCard user={attachment.obj as BaseUser} size="small" />;
         default:

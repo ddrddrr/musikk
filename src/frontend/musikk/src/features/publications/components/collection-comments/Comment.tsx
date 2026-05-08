@@ -30,7 +30,7 @@ export function Comment({ comment, setReplyTo }: CommentProps) {
             </p>
             {!comment.is_deleted && comment.attachment && (
                 <div className="mt-2">
-                    <PostAttachment attachment={comment.attachment} />
+                    <PostAttachment attachment={comment.attachment} size="compact" />
                 </div>
             )}
             <button

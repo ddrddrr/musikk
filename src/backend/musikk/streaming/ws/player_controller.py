@@ -32,7 +32,7 @@ class PlayerController:
 
     def clear(self) -> None:
         self._player.clear()
-        self._sync_curr_play_state()
+        self._sync_queue_state()
 
     def prev(self) -> None:
         if self._player.is_empty():

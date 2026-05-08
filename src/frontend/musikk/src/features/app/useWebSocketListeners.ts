@@ -1,6 +1,7 @@
 import { useCollectionWsEvents } from "@/features/collections/wsEvents.ts";
 import { useNotificationWsEvents } from "@/features/notifications/wsEvents.ts";
 import { useDeviceLifecycle } from "@/features/playback/hooks/useDeviceLifecycle.ts";
+import { useUserChatsWsEvents } from "@/features/publications/hooks/useUserChatsWsEvents.ts";
 import { useQueueWsEvents } from "@/features/song-queue/wsEvents.ts";
 import { useUserWsEvents } from "@/features/user/wsEvents.ts";
 import { useErrorEvent } from "@/ws/useErrorEvent.ts";
@@ -13,4 +14,5 @@ export function useWebSocketListeners() {
     useQueueWsEvents();
     useCollectionWsEvents();
     useNotificationWsEvents();
+    useUserChatsWsEvents();
 }
