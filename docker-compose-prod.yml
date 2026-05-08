@@ -9,6 +9,7 @@ services:
       - .env.prod
     environment:
       DJANGO_SETTINGS_MODULE: musikk.settings.prod
+      UPLOAD_TMP_DIR: /var/uploads_tmp
     restart: unless-stopped
     depends_on:
       database:
@@ -20,6 +21,7 @@ services:
     volumes:
       - django_static:/app/staticfiles
       - django_media:/app/media
+      - upload_tmp:/var/uploads_tmp
     healthcheck:
       test: [ "CMD", "curl", "-fsS", "http://localhost:${DJANGO_PORT}/health/" ]
       interval: 10s
@@ -55,6 +57,7 @@ services:
       - .env.prod
     environment:
       DJANGO_SETTINGS_MODULE: musikk.settings.prod
+      UPLOAD_TMP_DIR: /var/uploads_tmp
     restart: unless-stopped
     depends_on:
       redis:
@@ -63,6 +66,7 @@ services:
         condition: service_healthy
     volumes:
       - django_media:/app/media
+      - upload_tmp:/var/uploads_tmp
     networks:
       - main
 
@@ -107,6 +111,10 @@ volumes:
   caddy_config:
   django_static:
   django_media:
+  # mounted at /var rather than /tmp because the volume persists across
+  # container restarts and /tmp can be cleared by OS whenever
+  # (we remove temporary files manually via a scheduled task later)
+  upload_tmp:
 
 networks:
   main:
