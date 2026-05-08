@@ -40,7 +40,7 @@ export function PostForm({ feedUserUUID, replyTo, setReplyTo, onSuccess }: PostF
 
         createPostMutation.mutate(
             {
-                userUUID: feedUserUUID,
+                userUUID: replyTo ? replyTo.created_for.uuid : feedUserUUID,
                 content: formData.content,
                 parentUUID: replyTo?.uuid,
                 attachmentType,
