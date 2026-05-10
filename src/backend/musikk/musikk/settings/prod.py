@@ -17,8 +17,13 @@ REST_FRAMEWORK = REST_FRAMEWORK | {
     "DEFAULT_THROTTLE_RATES": {"anon": "10/m", "user": "500/m"},
 }
 
-DATABASES["default"]["CONN_MAX_AGE"] = config("DB_CONN_MAX_AGE", default=60, cast=int)
-DATABASES["default"]["CONN_HEALTH_CHECKS"] = True
+DATABASES["default"]["OPTIONS"] = {
+    "pool": {
+        "min_size": 2,
+        "max_size": 10,
+        "timeout": 10,
+    },
+}
 
 CSRF_COOKIE_SECURE = config("CSRF_COOKIE_SECURE", default=True, cast=bool)
 SESSION_COOKIE_SECURE = config("SESSION_COOKIE_SECURE", default=True, cast=bool)
