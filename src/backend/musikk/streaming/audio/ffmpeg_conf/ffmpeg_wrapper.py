@@ -18,11 +18,6 @@ from streaming.audio.probes import AudioStreamInfo
 logger = logging.getLogger(__name__)
 
 
-class StreamingProtocol(StrEnum):
-    DASH = "dash"
-    HLS = "hls"
-
-
 class FFMPEGWrapper:
     """
     Runs FFmpeg converters in parallel via ThreadPoolExecutor and writes output
