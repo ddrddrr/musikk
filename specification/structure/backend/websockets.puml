@@ -1,0 +1,90 @@
+@startuml WebsocketsClassDiagram
+
+!include ../../_style.puml
+
+note as n1
+A single per-user connection is opened on `/ws/user`.
+`BaseConsumer` multiplexes incoming JSON actions to a chain
+of `WSActionHandler`s.
+The streaming-side handlers (`DeviceWSActionHandler`,
+`PlaybackWSActionHandler`) delegate to managers, controllers
+and broadcasters owned by the streaming app
+(see structure/backend/streaming_ws.puml).
+end note
+
+class JsonWebsocketConsumer <<channels>> {
+}
+
+class BaseConsumer <<async_consumer>> {
+    user: BaseUser
+    user_uuid: str
+    group_name: str
+    device_id: str
+    subscribed_topics: set[str]
+    --
+    connect()
+    disconnect(close_code)
+    receive_json(content)
+    ws_event(event)   <<group dispatch>>
+    send_error(message)
+}
+
+abstract class WSActionHandler <<abstract>> {
+    consumer: BaseConsumer
+    --
+    {abstract} get_actions(): dict[str, Callable]
+    on_disconnect()
+}
+
+note left of WSActionHandler
+Subclasses list only their `handle_<action>` methods.
+The corresponding action on which the `handle_<action>`
+method is called is denoted as `<<somekey>>`.
+
+end note
+
+class DeviceWSActionHandler {
+    handle_register(payload) <<device.register>>
+    handle_set_active(payload) <<device.set_active>>
+    handle_set_volume(payload) <<device.set_volume>>
+}
+
+class PlaybackWSActionHandler {
+    handle_activate(payload) <<playback.activate>>
+    handle_stop(payload) <<playback.stop>>
+    handle_seek(payload) <<playback.seek>>
+    handle_sync_server_to_active(payload) <<playback.sync>>
+}
+
+class TopicWSActionHandler {
+    handle_subscribe(payload) <<subscribe>>
+    handle_unsubscribe(payload) <<unsubscribe>>
+}
+
+class TypingWSActionHandler {
+    handle_typing(payload) <<typing>>
+}
+
+class TopicValidatorRegistry <<module-level>> {
+    TOPIC_VALIDATORS: dict[str, Callable]
+}
+note right of TopicValidatorRegistry
+Feature apps register prefixes via
+@topic_validator(prefix), e.g., "chat",
+"collection_comments".
+end note
+
+JsonWebsocketConsumer <|-- BaseConsumer
+WSActionHandler <|-- DeviceWSActionHandler
+WSActionHandler <|- PlaybackWSActionHandler
+WSActionHandler <|-- TopicWSActionHandler
+WSActionHandler <|- TypingWSActionHandler
+
+BaseConsumer "1" o-- "1..*" WSActionHandler : action_handler_classes
+TopicWSActionHandler ..> TopicValidatorRegistry : validates via
+
+note right of BaseConsumer
+group_name = "user_<uuid>"i
+end note
+
+@enduml

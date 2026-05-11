@@ -1,0 +1,75 @@
+@startuml StreamingClassDiagram
+
+!include ../../_style.puml
+
+note as n1
+The `streaming` app owns the audio-related data: songs,
+collections and their author relations.
+`mpd` and `m3u8` paths on BaseSong are populated by the audio pipeline
+after the Celery task finishes(see structure/backend/audio.puml)
+end note
+
+class BaseUser <<external>>
+
+enum CollectionType <<TextChoices>> {
+    PLAYLIST
+    ALBUM
+    HISTORY
+    LIKED
+}
+
+class BaseSong <<DjangoModel>> {
+    title: str
+    description: str
+    image: ImageField
+    draft: bool
+    content_path: str
+    mpd: str
+    m3u8: str
+    duration_ms: int
+    source_codec: str
+    source_bitrate: int
+    loudness_lufs: float
+    true_peak_dbtp: float
+    --
+    is_available(): bool
+    delete(): void
+}
+
+class SongCredit <<DjangoModel>> {
+    author_priority: int
+}
+
+class Collection <<DjangoModel>> {
+    type: CollectionType
+    title: str
+    description: str
+    image: ImageField
+    private: bool
+    draft: bool
+    --
+    ordered_songs(): list[BaseSong]
+}
+
+class CollectionCredit <<DjangoModel>> {
+    author_priority: int
+}
+
+class CollectionSong <<DjangoModel>> {
+    position: int
+    --
+    save(): auto-positions at tail
+}
+
+Collection ..> CollectionType
+
+BaseSong "1" --o "0..*" SongCredit : credits
+SongCredit --> "0..1" BaseUser : author\n(role=ARTIST)
+
+Collection "1" --o "0..*" CollectionCredit : collection_credits
+CollectionCredit --> "0..1" BaseUser : author
+
+Collection "1" --o "0..*" CollectionSong : collectionsongs
+CollectionSong --> "1" BaseSong : song
+
+@enduml

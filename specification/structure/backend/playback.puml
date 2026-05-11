@@ -1,0 +1,96 @@
+@startuml PlaybackClassDiagram
+
+!include ../../_style.puml
+
+note as n1
+Playback handling is split into three parts:
+
+- PlayerState owns the currently-playing song and history pointer
+- SongQueue holds user-overlayed items (priority over context).
+  Items are retrieved lazily from QueueSources.
+- PlaybackContext tracks the cursor inside the active Collection.
+
+PlayerState consumes SongQueue first, then PlaybackContext
+StreamingProfile is created per BaseUser via a post_save signal.
+end note
+
+class BaseUser <<external>>
+class Collection <<external>>
+class CollectionSong <<external>>
+
+enum SourceType <<TextChoices>> {
+    SONG
+    COLLECTION
+}
+
+class StreamingProfile <<DjangoModel>> {
+    --
+    history(): Collection
+    liked_songs(): Collection
+    created_collections(): QuerySet[Collection]
+}
+
+class PlayerState <<DjangoModel>> {
+    history_cursor: int
+    --
+    play_song(cs)
+    play_collection(c)
+    advance(): CollectionSong | None
+    choose_queue_song(item)
+    choose_context_song(cs)
+    move_from_context_to_queue(cs, position)
+    prev(): CollectionSong | None
+    clear()
+    is_empty(): bool
+}
+
+class SongQueue <<DjangoModel>> {
+    next_item_position: Decimal
+    --
+    insert(obj, position?)
+    insert_song(cs, position?)
+    insert_collection(c)
+    remove(item)
+    pop_first(): CollectionSong | None
+    pop_until(position)
+    clear()
+    window(cap=50): list[QueueItem]
+    reorder(item, before?, after?)
+}
+
+class QueueItem <<DjangoModel>> {
+    position: Decimal
+}
+
+class QueueSource <<DjangoModel>> {
+    source_type: SourceType
+    collection_cursor: int
+}
+
+class PlaybackContext <<DjangoModel>> {
+    cursor: int
+    skip_indices: list[int]
+    --
+    advance(): CollectionSong | None
+    skip(position)
+    setup(collection, start_position=-1)
+    window(limit=50): list[CollectionSong]
+}
+
+StreamingProfile --> "1" BaseUser : user (1:1)
+StreamingProfile --> "1" PlayerState : player (1:1)
+StreamingProfile o-- "0..*" Collection : liked_collections
+
+PlayerState --> "1" SongQueue : queue (1:1)
+PlayerState --> "1" PlaybackContext : context (1:1)
+PlayerState --> "0..1" CollectionSong : current_collection_song
+
+SongQueue *-- "0..*" QueueItem
+SongQueue *-- "0..*" QueueSource
+QueueItem --> "1" CollectionSong : collection_song
+QueueSource --> "0..1" CollectionSong : collection_song
+QueueSource --> "0..1" Collection : collection
+QueueSource ..> SourceType
+PlaybackContext --> "0..1" Collection : collection
+
+@enduml

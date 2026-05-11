@@ -1,0 +1,59 @@
+@startuml AudioUploadFlow
+
+!include ../_style.puml
+
+title Audio upload pipeline (album creation)
+
+actor Artist as artist
+
+box "Frontend" #EEF2F8
+participant "AlbumUploadPage" as frontend
+end box
+
+box "Backend" #F8EFE5
+participant "CollectionSongCreateView" as backend
+database "Database" as database
+participant "Celery worker\nconvert_audio" as worker
+participant "AudioProcessingPipeline\n(FFmpeg + Shaka)" as audio_pipeline
+collections "Media storage" as media_storage
+end box
+
+note over backend, worker
+Redis/Django Channels are omitted for brevity
+end note
+
+== Submit ==
+artist -> frontend : drop audio + form
+frontend -> backend : POST /collections/<uuid>/songs\n(multipart, operation_id)
+backend -> backend : write temp file,\nrun validate_audio()
+backend -> database : create draft BaseSong + CollectionSong
+backend -> worker : enqueue convert_audio\n(song_uuid, file_path,\noperation_id, audio_info)
+backend -->> frontend : ws event "song.upload"\nstatus = "queued"
+backend --> frontend : 202 Accepted\n{ song_uuid, collection_song_uuid }
+frontend -> artist : render upload status\n("queued")
+
+== Process ==
+worker -->> frontend : ws event "song.upload"\nstatus = "processing"
+frontend -> artist : render status\n("processing")
+worker -> audio_pipeline : run(source, final_storage_dir)
+audio_pipeline -> audio_pipeline : FFmpeg transcode\n(FLAC + AAC variants)
+audio_pipeline -> audio_pipeline : Shaka Packager\n(segments/manifests)
+audio_pipeline -> media_storage : write segments/manifests
+audio_pipeline --> worker : ProcessingResult
+
+== Persist + notify ==
+worker -> database : save BaseSong with draft = False
+note right
+populates mpd, m3u8, duration_ms,
+loudness_lufs, true_peak_dbtp
+end note
+worker -->> frontend : ws event "song.upload"\nstatus = "ready"\npayload { uuid, operation_id }
+frontend -> artist : render status\n("ready", song playable)
+
+alt Pipeline or DB error
+worker -> media_storage : delete partial content
+worker -->> frontend : ws event "song.upload"\nstatus = "failed"
+frontend -> artist : render status\n("failed", error shown)
+end
+
+@enduml

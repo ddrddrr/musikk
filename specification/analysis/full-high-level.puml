@@ -1,8 +1,8 @@
 @startuml HighLevelSystem
 
-actor User as user
+!include ../_style.puml
 
-skinparam packageStyle rectangle
+actor User as user
 
 package frontend
 package proxy

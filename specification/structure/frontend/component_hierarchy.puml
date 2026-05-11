@@ -1,0 +1,60 @@
+@startuml FrontendComponentHierarchy
+
+!include ../../_style.puml
+
+package "main.tsx" {
+    [QueryClientProvider\n(TanStack Query)] as query_provider
+    [ErrorBoundary] as error_boundary
+    query_provider --> error_boundary
+}
+
+package "App.tsx" {
+    [BrowserRouter] as router
+    [AuthProvider\n(useQuery /me, axios 401 -> logout)] as auth
+
+    package "Public routes" {
+        [LoginPage]
+        [SignUpPage]
+        [EmailVerificationPage]
+    }
+
+    [RequireAuth\n(redirect if not authenticated)] as require_auth
+
+    package "Authenticated providers" as authenticated_providers {
+        [WebSocketProvider\n(WSClient singleton, /ws/user)] as ws_provider
+        [DeviceListProvider] as device_list_provider
+        [PlaybackProvider\n(AudioPlayerController,\nuseSyncExternalStore)] as playback_provider
+        [LoudnessPresetProvider] as loudness_provider
+    }
+
+    package "AuthenticatedApp" as authenticated_app {
+        package "AuthenticatedLayout (Outlet host)" {
+            [Header / left col / right col] as layout_columns
+            [HomePage / AlbumUploadPage / SettingsPage] as route_pages
+            [PlayerBox\n(<audio> elem, Shaka player,\nplayback controls)] as player
+            [Toaster (sonner)] as toast
+        }
+    }
+}
+
+package "Network Clients" {
+    [WSClient] as ws_client
+    [axios api_client] as api_client
+    [axios api_client_public] as api_client_public
+    [authRef.logout] as auth_ref
+}
+
+error_boundary --> router
+router --> auth
+auth --> require_auth
+require_auth --> authenticated_providers
+authenticated_providers --> authenticated_app
+
+ws_provider .up.> ws_client : owns
+authenticated_app ...> ws_client : create WS server event listeners
+api_client ..> auth_ref : 401 -> logout
+auth ..> api_client : uses
+authenticated_app ..> api_client : uses
+"Public routes" ..> api_client_public : uses
+
+@enduml

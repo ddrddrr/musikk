@@ -1,0 +1,61 @@
+@startuml AuthFlow
+
+!include ../_style.puml
+
+title Authentication and session lifecycle
+
+actor User as user
+
+box "Frontend" #EEF2F8
+participant "AuthProvider\n(LoginPage, SignUpPage)" as frontend
+end box
+
+box "Backend" #F8EFE5
+participant "dj-rest-auth + allauth" as backend
+database "Database" as database
+end box
+
+note over frontend, backend
+The SPA uses two axios clients: api_client_public
+(no auth) for csrf/sign-up/verification/login/logout,
+and api_client (with session cookie and CSRF token)
+for all other requests
+end note
+
+== Sign-up ==
+user -> frontend : fill registration form
+frontend -> backend : POST /auth/registration
+backend -> database : insert inactive user
+note right of backend : sends verification\nemail
+backend --> frontend : 201 Created
+frontend -> user : "check your inbox"
+
+== Email confirmation ==
+note over user : opens email,\nclicks verification link
+user -> frontend : open /email-confirmation/<key>
+frontend -> backend : POST /auth/registration/verify-email
+backend -> database : activate user
+backend --> frontend : 200 OK
+frontend -> user : "email confirmed,\nyou can log in"
+
+== Login ==
+user -> frontend : email + password
+frontend -> backend : GET /csrf
+backend --> frontend : Set-Cookie csrftoken
+frontend -> backend : POST /auth/login\n(X-CSRFToken)
+backend -> database : verify credentials,\ncreate session
+backend --> frontend : 200 OK\nSet-Cookie sessionid
+frontend -> backend : GET /users/me\n(AuthProvider refetch)
+backend --> frontend : { user }
+frontend -> user : navigate to /\n(authenticated)
+
+== Session (cookie) expired ==
+user -> frontend : action
+frontend -> backend : API call (stale sessionid)
+backend --> frontend : 401 Unauthorized
+frontend -> backend : POST /auth/logout
+backend -> database : delete session
+backend --> frontend : 200 OK
+frontend -> user : redirect to /login
+
+@enduml

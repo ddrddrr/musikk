@@ -1,0 +1,40 @@
+@startuml UsersClassDiagram
+
+!include ../../_style.puml
+
+note as n1
+The `users` app owns the user model and the follower/followee relation.
+There is no separate Artist model: the role is a flag
+(`UserRole.ARTIST`) on `BaseUser`.
+end note
+
+enum UserRole <<TextChoices>> {
+    BASE
+    ARTIST
+}
+
+class BaseUser <<DjangoModel>> {
+    email: EmailField  <<unique>>
+    display_name: str
+    bio: str
+    avatar: ImageField
+    role: UserRole
+    is_staff: bool
+    is_active: bool
+    --
+    is_artist(): bool
+    friends(): QuerySet[BaseUser]
+    following(): QuerySet[BaseUser]
+}
+
+class UserFollow <<DjangoModel>> {
+    --
+    Meta:
+      unique_together = (from_user, to_user)
+}
+
+BaseUser ..> UserRole
+UserFollow --> "1" BaseUser : from_user
+UserFollow --> "1" BaseUser : to_user
+
+@enduml

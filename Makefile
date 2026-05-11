@@ -1,4 +1,4 @@
-.PHONY: setup setup-ffmpeg setup-shaka check check-ffmpeg check-shaka clean run-local-full run-local-full-down run-local-full-seed run-local-full-clear
+.PHONY: setup setup-ffmpeg setup-shaka check check-ffmpeg check-shaka clean run-local-full run-local-full-down run-local-full-seed run-local-full-clear diagrams
 
 UNAME := $(shell uname -s)
 ARCH := $(shell uname -m)
@@ -66,3 +66,6 @@ run-local-full-seed:
 
 run-local-full-clear:
 	docker compose --env-file .env.prod -f docker-compose-prod.yml exec server uv run python manage.py clearmodels
+
+diagrams:
+	plantuml -tpng --output-dir $(abspath text/diagrams) --exclude "**/_style.puml" "specification/**.puml"

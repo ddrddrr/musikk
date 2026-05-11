@@ -1,0 +1,78 @@
+@startuml WebsocketLifecycle
+
+!include ../_style.puml
+
+title WebSocket lifecycle
+
+actor "User\n(browser tab)" as user
+
+box "Frontend" #EEF2F8
+participant "WSClient" as frontend
+end box
+
+box "Backend" #F8EFE5
+participant "ASGI server" as backend_entry
+participant "AuthMiddlewareStack" as auth_middleware
+participant "BaseConsumer" as consumer
+participant "WSActionHandlers" as handler_chain
+queue "Redis\n(Channels layer)" as redis
+collections "Other consumers\n(other tabs / users\nin the same topic group)" as other_consumers
+participant "Producer\n(view, manager,\ncelery task, ...)" as producer
+end box
+
+note over consumer
+One BaseConsumer per browser tab.
+A user with N tabs joins the
+user_<uuid> group N times, so a
+broadcast to that group reaches
+every tab.
+end note
+
+== Handshake ==
+user -> frontend : open page
+frontend -> backend_entry : Establish WS conn at /ws/user
+backend_entry -> auth_middleware : resolve user
+auth_middleware -> consumer : connect()
+alt authenticated
+  consumer -> redis : group_add("user_<uuid>")
+  consumer -> consumer : initialise user action handlers
+  consumer --> frontend : accept
+  frontend -> user : WS open\n(ready for actions/events)
+else anonymous
+  consumer --> frontend : close (4xx)
+  frontend -> user : no WS connection
+end
+
+== Topic subscription example ==
+note over other_consumers : already joined\n"topic.chat.<uuid>"\nvia the same flow
+user -> frontend : open chat
+frontend -> consumer : ws action "subscribe"\n{ topic: "chat.<uuid>" }
+consumer -> handler_chain : dispatch via action_map
+handler_chain -> handler_chain : TopicWSActionHandler\nvalidates prefix + topic_id
+handler_chain -> redis : group_add("topic.chat.<uuid>")
+note over consumer, other_consumers
+Many consumers (different tabs, different users)
+can be members of the same topic group.
+end note
+
+== Client action example ==
+user -> frontend : audio playing
+frontend -> consumer : ws action "playback.sync"\n{ song_pos_ms, current_song_uuid }
+consumer -> handler_chain : dispatch via action_map
+handler_chain -> handler_chain : PlaybackWSActionHandler\nupdates PlayerState
+
+== Server event example ==
+producer -> redis : channel_layer.group_send(\n  "topic.chat.<uuid>",\n  ws_event "chat.message")
+redis -->> consumer : deliver
+redis -->> other_consumers : deliver
+consumer -->> frontend : ws event "chat.message"\n{ message_id, body, ... }
+frontend -> user : render new message
+note over other_consumers : same delivery to every\nother subscribed consumer
+
+== Disconnect ==
+user -> frontend : close tab
+frontend -> consumer : close
+consumer -> handler_chain : on_disconnect per handler\n(clear device, drop topics, ...)
+consumer -> redis : group_discard("user_<uuid>")
+
+@enduml

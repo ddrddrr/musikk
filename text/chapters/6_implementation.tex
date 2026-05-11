@@ -12,7 +12,7 @@ components used for the presentation and interaction.
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=1\textwidth, keepaspectratio]{diagrams/system}
+    \includegraphics[width=1\textwidth, keepaspectratio]{diagrams/HighLevelSystem}
     \caption{System Overview}
     \label{fig:system_overview}
 \end{figure}
@@ -21,19 +21,22 @@ A high-level overview of the entire system can be seen in the following diagram~
 %TODO: move to attachments
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=1\textwidth, keepaspectratio]{diagrams/backend}
-    \caption{Backend}
+    \includegraphics[width=1\textwidth, keepaspectratio]{diagrams/BackendSystem}
+    \caption{Backend Architecture}
     \label{fig:backend}
 \end{figure}
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=1\textwidth, keepaspectratio]{diagrams/frontend}
-    \caption{Frontend}
+    \includegraphics[width=1\textwidth, keepaspectratio]{diagrams/FrontendSystem}
+    \caption{Frontend Architecture}
     \label{fig:frontend}
 \end{figure}
-The complete Backend class diagram is shown in~\ref{fig:backend} and
-the Frontend component diagram is presented in~\ref{fig:frontend}.
-There is no separate ERD diagram, since the class diagram encompasses the data model as well.
+The high-level Backend architecture, with its main parts and the connections between them, is shown in~\ref{fig:backend}.
+The corresponding Frontend architecture is presented in~\ref{fig:frontend}.
+The per-app Backend class diagrams, the Frontend component hierarchy, and the behavioural sequence diagrams
+can be found in the \texttt{specification/} directory, under
+\texttt{specification/structure/backend/}, \texttt{specification/structure/frontend/component\_hierarchy.puml},
+and \texttt{specification/behavior/} paths.
 
 
 \section{Configuration}
@@ -459,14 +462,6 @@ valid login to use the system.
 %No separate ERD diagram is provided, as Django's models, which define the data structure,
 %are encapsulated into the class diagram.
 %
-%\begin{figure}[htbp]
-%    \centering
-%    \begin{adjustbox}{angle=90, width=1.4\textwidth, center}
-%        \includegraphics{diagrams/class}
-%    \end{adjustbox}
-%    \caption{Backend Class Diagram}
-%    \label{fig:beclassdiagram}
-%\end{figure}
 %
 %\subsection{Directory \texttt{base}}\label{subsec:base}
 %This app defines the abstract \texttt{BaseModel} class from which all other models inherit.

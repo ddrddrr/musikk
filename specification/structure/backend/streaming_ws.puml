@@ -1,0 +1,167 @@
+@startuml StreamingWsClassDiagram
+
+!include ../../_style.puml
+
+note as n1
+The streaming app's ws  layer that
+`DeviceWSActionHandler` and `PlaybackWSActionHandler` delegate to
+(see structure/backend/websockets.puml).
+
+- Managers handle state: `DeviceManager` keeps the
+  device set + active device; `PlaybackManager` keeps a
+  versioned `PlaybackState` per user. State is kept in Redis.
+- Controllers combine manager mutations and broadcasts
+  so a ws action becomes "mutate internal state, then notify clients".
+- Broadcasters serialize state into WS messages (server events)
+ and send them to the clients.
+
+`PlayerController` is also called from REST views
+(streaming/api/v1/views/song_queue.py)
+end note
+
+class PlayerDomain <<collapsed>> {
+    BaseUser
+    PlayerState
+    SongQueue
+    QueueItem
+    Collection
+    CollectionSong
+}
+
+note right of PlayerDomain
+Not a real class. Collapses the Django-model
+classes `PlayerController` reads and mutates
+into one box for readability
+(see structure/backend/streaming.puml)
+end note
+
+together {
+    class DeviceWSActionHandler <<external>>
+    class PlaybackWSActionHandler <<external>>
+}
+
+class Device <<TypedDict>> {
+    id: str
+    name: str
+    is_active: bool
+    volume: int
+}
+
+class ActivePlayback <<dataclass>> {
+    current_song_uuid: str
+    play_instance_uuid: str
+    is_playing: bool
+    last_known_song_pos_ms: int
+    last_known_at_server_ms: int
+    --
+    calculate_song_pos_ms(): int
+}
+
+class PlaybackState <<dataclass>> {
+    active: ActivePlayback | None
+    version: int
+    --
+    {static} empty(): PlaybackState
+}
+
+together {
+    class DeviceManager {
+        --
+        register_device(device_id, channel_name, name?, volume?)
+        get_active_device_id(): str | None
+        get_devices(): list[Device]
+        set_active_device(device_id): bool
+        set_device_volume(device_id, volume)
+        clear_device(device_id, channel_name): bool
+    }
+
+    class PlaybackManager {
+        SEEK_VERSION_BUMP_THRESHOLD_MS = 10  #ms
+        --
+        is_playing(): bool
+        get_playback_state(): PlaybackState | None
+        set_playback_state(state)
+        clear_playback_state()
+        transition_start_playing(song_uuid, song_pos_ms): PlaybackState
+        transition_pause(): PlaybackState
+        transition_seek(song_pos_ms): PlaybackState
+        transition_change_song(song_uuid): PlaybackState
+        transition_sync(song_pos_ms): PlaybackState
+    }
+}
+
+together {
+    class PlaybackController {
+        SYNC_DRIFT_BROADCAST_THRESHOLD_MS = 500  #ms
+        user_uuid: str
+        --
+        activate(current_song_uuid)
+        stop()
+        seek(song_pos_ms)
+        sync(song_pos_ms, prev_active)
+    }
+
+    class PlayerController {
+        user_uuid: str
+        --
+        play_song(cs)
+        play_collection(c)
+        prev()
+        advance()
+        clear()
+        choose_queue_song(item)
+        add_song_to_queue(cs)
+        add_collection_to_queue(c)
+        remove_queue_item(item)
+        reorder_queue(item, before?, after?)
+        move_context_to_queue(cs, before?, after?)
+    }
+}
+
+together {
+    class DeviceStateBroadcaster {
+        user_uuid: str
+        --
+        broadcast_devices()
+    }
+
+    class PlayerStateBroadcaster {
+        user_uuid: str
+        --
+        broadcast_snapshot()
+        broadcast_seek()
+        broadcast_queue_changed()
+        send_snapshot_to_channel(channel_layer, channel_name)
+    }
+}
+
+' Structural composition
+DeviceManager ..> Device : returns
+PlaybackManager *-- "0..1" PlaybackState
+PlaybackState *-- "0..1" ActivePlayback
+
+' WS entry points -> streaming layer
+DeviceWSActionHandler ..> DeviceManager
+DeviceWSActionHandler ..> PlaybackController
+DeviceWSActionHandler ..> DeviceStateBroadcaster
+DeviceWSActionHandler ..> PlayerStateBroadcaster
+
+PlaybackWSActionHandler ..> PlaybackManager
+PlaybackWSActionHandler ..> PlaybackController
+PlaybackWSActionHandler ..> DeviceManager
+PlaybackWSActionHandler ..> DeviceStateBroadcaster
+
+' Controllers
+PlaybackController ..> PlaybackManager
+PlaybackController ..> PlayerStateBroadcaster
+
+PlayerController ..> PlaybackManager
+PlayerController ..> PlayerStateBroadcaster
+PlayerController ..> PlayerDomain : reads / mutates
+
+' Broadcasters
+DeviceStateBroadcaster ..> DeviceManager : reads
+PlayerStateBroadcaster ..> PlaybackManager : reads
+PlayerStateBroadcaster ..> PlayerDomain : reads
+
+@enduml

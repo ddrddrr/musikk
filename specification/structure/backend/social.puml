@@ -1,0 +1,54 @@
+@startuml SocialClassDiagram
+
+!include ../../_style.puml
+
+note as n1
+The `social` app owns user-authored text content.
+`Publication` is a model used for
+- collection comments (created_for_object = Collection),
+- user feed posts (created_for_object = BaseUser),
+- chat messages (created_for_object = Chat),
+plus optional attachments (Song, Collection, ...).
+end note
+
+class BaseUser <<external>>
+
+abstract class UserContent <<abstract>> {
+    content: str
+    is_deleted: bool
+    --
+    delete(): soft delete
+}
+UserContent ---> "0..1" BaseUser : author
+
+class Publication <<DjangoModel>> {
+    created_for_type: ContentType
+    created_for_id: UUID
+    attachment_type: ContentType
+    attachment_id: UUID
+    --
+    get_root(): Publication
+}
+
+class Chat <<DjangoModel>> {
+    title: str
+    image: ImageField
+    is_direct: bool
+}
+
+class ChatMember <<DjangoModel>> {
+    --
+    Meta:
+      unique(chat, member)
+}
+
+UserContent <|--- Publication
+
+Publication ---> "0..1" Publication : parent
+Publication "1" ---o "0..*" Publication : replies
+
+Chat "1" ---o "0..*" ChatMember : members
+ChatMember ---> "1" BaseUser : member
+ChatMember ---> "0..1" Publication : last_read_message
+
+@enduml

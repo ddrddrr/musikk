@@ -1,192 +1,149 @@
-@startuml AudioProcessingArchitecture
-skinparam linetype ortho
-skinparam nodesep 80
-skinparam ranksep 100
+@startuml AudioClassDiagram
 
-' ### Enums & Data Classes
+!include ../../_style.puml
+
 enum ManifestType <<StrEnum>> {
-  MPD
-  M3U8
+    MPD
+    M3U8
 }
-note right of ManifestType
-MPD = "mpd"
-M3U8 = "m3u8"
-end note
-
-enum StreamingProtocol <<StrEnum>> {
-  DASH
-  HLS
-}
-note right of StreamingProtocol
-DASH = "dash"
-HLS  = "hls"
-end note
 
 class SongRepresentation <<dataclass>> {
-  content_path: str or Path
-  manifests: dict[ManifestType, str]
+    content_path: Path
+    manifests: dict[ManifestType, str]
 }
 
 class ProcessingContext <<dataclass>> {
-  orig_audio_file_path: str
-  intermediate_dir: str
-  final_dir: str
-  converted_paths: list[str]
-  song_repr: SongRepresentation or None
+    orig_audio_file_path: str
+    intermediate_dir: str
+    final_dir: str
+    converted_paths: list[str]
+    song_repr: SongRepresentation | None
 }
 
 class ProcessingResult {
-  song_repr: SongRepresentation
-  context: ProcessingContext
+    song_repr: SongRepresentation
+    context: ProcessingContext
 }
 
-SongRepresentation --> ManifestType : <<uses>>
+SongRepresentation --> ManifestType
 ProcessingContext o-- "0..1" SongRepresentation
 ProcessingResult *-- "1" SongRepresentation
 ProcessingResult *-- "1" ProcessingContext
 
-' ### Pipeline Components
 abstract class Step {
-  {abstract} process(ctx: ProcessingContext): void
-  rollback(ctx: ProcessingContext): void
+    {abstract} process(ctx: ProcessingContext): void
+    rollback(ctx: ProcessingContext): void
 }
 
 class ProcessingPipeline {
-  steps: list[Step]
-  do_cleanup: bool
-  run(source: str, final_storage_dir: str): ProcessingResult
+    steps: list[Step]
+    do_cleanup: bool
+    run(source: str, final_storage_dir: str): ProcessingResult
 }
 
 ProcessingPipeline o-- "1..*" Step
-ProcessingPipeline ..> ProcessingContext : <<creates>>
-ProcessingPipeline --> ProcessingResult : <<outputs>>
+ProcessingPipeline ..> ProcessingContext
+ProcessingPipeline --> ProcessingResult : output
 
 class FFmpegStep {
-  wrapper: FFMPEGWrapper
-  process(ctx: ProcessingContext): void
-  rollback(ctx: ProcessingContext): void
+    wrapper: FFMPEGWrapper
+    process(ctx: ProcessingContext): void
+    rollback(ctx: ProcessingContext): void
 }
 
 class ShakaPackagerStep {
-  wrapper: ShakaPackagerWrapper
-  process(ctx: ProcessingContext): void
-  rollback(ctx: ProcessingContext): void
+    wrapper: ShakaPackagerWrapper
+    process(ctx: ProcessingContext): void
+    rollback(ctx: ProcessingContext): void
 }
 
 Step <|-- FFmpegStep
 Step <|-- ShakaPackagerStep
 
-' ### FFmpeg Components
 class FFMPEGWrapper {
-  audio_converters: list[FFMPEGAudioConverter]
-  audio_content_path: Path
-  do_cleanup: bool
-  convert_audio(file_path: str or Path, storage_dir: str or Path): list[str]
+    audio_converters: list[FFMPEGAudioConverter]
+    audio_content_path: Path
+    do_cleanup: bool
+    convert_audio(file_path: Path, storage_dir: Path): list[str]
 }
 
 class FFMPEGAudioConverter {
-  encoder: flac or libfdk_aac
-  bitrate: int or None
-  extras: list[str]
-  timeout: int or None
-  convert_song(file_path: Path, storage_dir: Path): str
+    encoder: flac | libfdk_aac
+    bitrate: int | None
+    extras: list[str]
+    timeout: int | None
+    convert_song(file_path: Path, storage_dir: Path): str
 }
 
 class FFMPEGCommand {
-  input_path: Path
-  output_path: Path
-  encoder: str
-  bitrate: int or None
-  extras: list[str]
-  strip_non_audio: bool
-  movflags_faststart: bool
-  build(): list[str]
+    input_path: Path
+    output_path: Path
+    encoder: str
+    bitrate: int | None
+    extras: list[str]
+    strip_non_audio: bool
+    movflags_faststart: bool
+    build(): list[str]
 }
 
 FFmpegStep o-- "1" FFMPEGWrapper
 FFMPEGWrapper o-- "1..*" FFMPEGAudioConverter
-FFMPEGAudioConverter ..> FFMPEGCommand : <<creates>>
+FFMPEGAudioConverter ..> FFMPEGCommand
 
-' FFmpeg Converter Instances (as objects)
-object FLAC_CONVERTER <<instance>> {
-  encoder = "flac"
+class FFMPEGConverters <<collapsed>> {
+    FLAC_CONVERTER       (flac, lossless)
+    AACHEv2_CONVERTER    (libfdk_aac, 24 kbps, aac_he_v2)
+    AAC_96_CONVERTER     (libfdk_aac, 96 kbps)
+    AAC_160_CONVERTER    (libfdk_aac, 160 kbps)
+    AAC_320_CONVERTER    (libfdk_aac, 320 kbps)
 }
 
-object AACHEv2_CONVERTER <<instance>> {
-  encoder = "libfdk_aac"
-  bitrate = 24
-  extras  = ["-profile", "aac_he_v2"]
-}
+note right of FFMPEGConverters
+Not a real class. Collapses the five
+FFMPEGAudioConverter instances used by
+the full pipeline into one box for readability.
+end note
 
-object AAC_96_CONVERTER <<instance>> {
-  encoder = "libfdk_aac"
-  bitrate = 96
-}
+FFMPEGAudioConverter <.. FFMPEGConverters
 
-object AAC_160_CONVERTER <<instance>> {
-  encoder = "libfdk_aac"
-  bitrate = 160
-}
-
-object AAC_320_CONVERTER <<instance>> {
-  encoder = "libfdk_aac"
-  bitrate = 320
-}
-
-FFMPEGAudioConverter <.. FLAC_CONVERTER : <<instanceOf>>
-FFMPEGAudioConverter <.. AACHEv2_CONVERTER : <<instanceOf>>
-FFMPEGAudioConverter <.. AAC_96_CONVERTER : <<instanceOf>>
-FFMPEGAudioConverter <.. AAC_160_CONVERTER : <<instanceOf>>
-FFMPEGAudioConverter <.. AAC_320_CONVERTER : <<instanceOf>>
-
-' FFmpeg Wrapper Instances (as objects)
 object FFMPEGFlacOnly <<instance>> {
-  audio_converters = [FLAC_CONVERTER]
+    audio_converters = [FLAC_CONVERTER]
 }
 
 object FFMPEGFull <<instance>> {
-  audio_converters = [FLAC_CONVERTER,\n AACHEv2_CONVERTER,\n AAC_96_CONVERTER,\n AAC_160_CONVERTER,\n AAC_320_CONVERTER]
+    audio_converters = all FFMPEGConverters
 }
 
-FFMPEGWrapper <.. FFMPEGFlacOnly : <<instanceOf>>
-FFMPEGWrapper <.. FFMPEGFull : <<instanceOf>>
+FFMPEGWrapper <.. FFMPEGFlacOnly
+FFMPEGWrapper <.. FFMPEGFull
 
-' ### Shaka Packager Components
 class ShakaPackagerWrapper {
-  do_cleanup: bool
-  package_audio_files(input_storage_paths: list[str], storage_dir: str or Path): SongRepresentation
+    do_cleanup: bool
+    package_audio_files(input_storage_paths: list[str], storage_dir: Path): SongRepresentation
 }
 
 class ShakaPackagerCommand {
-  local_paths: list[Path]
-  tmpdir: Path
-  bin_path: str
-  segment_duration: int
-  build(): tuple[list[str], Path, Path]
+    local_paths: list[Path]
+    tmpdir: Path
+    bin_path: str
+    segment_duration: int
+    build(): tuple[list[str], Path, Path]
 }
 
 ShakaPackagerStep o-- "1" ShakaPackagerWrapper
-ShakaPackagerWrapper ..> ShakaPackagerCommand : <<creates>>
-ShakaPackagerWrapper --> SongRepresentation : <<outputs>>
+ShakaPackagerWrapper ..> ShakaPackagerCommand
+ShakaPackagerWrapper --> SongRepresentation : output
 
-' Shaka Packager Instance (as object)
 object ShakaPackagerMPDAndM3U8 <<instance>> {
 }
 
-ShakaPackagerWrapper <.. ShakaPackagerMPDAndM3U8 : <<instanceOf>>
+ShakaPackagerWrapper <.. ShakaPackagerMPDAndM3U8
 
-' ### Pipeline Instance (as object)
 object AudioProcessingPipeline <<instance>> {
-  steps = [FFmpegStep(FFMPEGFull), ShakaPackagerStep(ShakaPackagerMPDAndM3U8)]
-  do_cleanup = true
+    steps = [\n   FFmpegStep(FFMPEGFull),\n   ShakaPackagerStep(ShakaPackagerMPDAndM3U8)\n]
+    do_cleanup = true
 }
 
-ProcessingPipeline <.. AudioProcessingPipeline : <<instanceOf>>
-
-' ### Layout hints
-FLAC_CONVERTER -[hidden]right- AACHEv2_CONVERTER
-AACHEv2_CONVERTER -[hidden]right- AAC_96_CONVERTER
-AAC_96_CONVERTER -[hidden]right- AAC_160_CONVERTER
-AAC_160_CONVERTER -[hidden]right- AAC_320_CONVERTER
+ProcessingPipeline <.. AudioProcessingPipeline
 
 @enduml
