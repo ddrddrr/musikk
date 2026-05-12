@@ -1,0 +1,9 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+ffmpeg\PYG{+w}{ }\PYGZhy{}i\PYG{+w}{ }input.wav\PYG{+w}{ }\PYG{l+s+se}{\PYGZbs{}}
+\PYG{+w}{    }\PYGZhy{}vn\PYG{+w}{ }\PYGZhy{}sn\PYG{+w}{ }\PYGZhy{}dn\PYG{+w}{ }\PYG{l+s+se}{\PYGZbs{}}
+\PYG{+w}{    }\PYGZhy{}af\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}aresample=out\PYGZus{}chlayout=stereo,aresample=44100,aformat=sample\PYGZus{}fmts=s16\PYGZdq{}}\PYG{+w}{ }\PYG{l+s+se}{\PYGZbs{}}
+\PYG{+w}{    }\PYGZhy{}c:a\PYG{+w}{ }libfdk\PYGZus{}aac\PYG{+w}{ }\PYG{l+s+se}{\PYGZbs{}}
+\PYG{+w}{    }\PYGZhy{}b:a\PYG{+w}{ }160k\PYG{+w}{ }\PYG{l+s+se}{\PYGZbs{}}
+\PYG{+w}{    }\PYGZhy{}movflags\PYG{+w}{ }+faststart\PYG{+w}{ }\PYG{l+s+se}{\PYGZbs{}}
+\PYG{+w}{    }libfdk\PYGZus{}aac\PYGZhy{}160\PYGZhy{}\PYGZlt{}uuid\PYGZgt{}.mp4
+\end{MintedVerbatim}

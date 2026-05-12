@@ -1,0 +1,44 @@
+@startuml UseCasesCommunication
+
+!include ../../_style.puml
+left to right direction
+
+title Communication
+
+actor User as user
+
+package "Publications" {
+  usecase "Create Publication" as UC_AUTHOR
+  usecase "Post on Feed" as UC_POST
+  usecase "Comment on Collection" as UC_COMMENT
+  usecase "Reply to Publication" as UC_REPLY
+  usecase "Attach content\n(Song / Collection / User)" as UC_ATTACH
+  usecase "Delete own Publication" as UC_DELETE
+}
+
+package "Chat" {
+  usecase "Open Chat" as UC_OPEN_CHAT
+  usecase "Send Chat message" as UC_CHAT_MSG
+  usecase "Add member to group Chat" as UC_ADD_MEMBER
+}
+
+package "Notifications" {
+  usecase "View notifications" as UC_NOTIF
+}
+
+user --> UC_POST
+user --> UC_COMMENT
+user --> UC_CHAT_MSG
+user --> UC_DELETE
+user --> UC_OPEN_CHAT
+user --> UC_ADD_MEMBER
+user --> UC_NOTIF
+
+UC_POST     --|> UC_AUTHOR
+UC_COMMENT  --|> UC_AUTHOR
+UC_CHAT_MSG --|> UC_AUTHOR
+
+UC_REPLY  ...> UC_AUTHOR : <<extend>>
+UC_ATTACH ...> UC_AUTHOR : <<extend>>
+
+@enduml

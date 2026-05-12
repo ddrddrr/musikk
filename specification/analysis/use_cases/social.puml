@@ -1,0 +1,22 @@
+@startuml UseCasesSocial
+
+!include ../../_style.puml
+left to right direction
+
+title Social
+
+actor User as user
+
+package "Social" {
+  usecase "Follow User" as UC_FOLLOW
+  usecase "Unfollow User" as UC_UNFOLLOW
+  usecase "View connections\n(Followers / Followed / Friends)" as UC_VIEW_CONN
+  usecase "View Friend Activity" as UC_FRIEND_ACT
+}
+
+user --> UC_FOLLOW
+user --> UC_UNFOLLOW
+user --> UC_VIEW_CONN
+user --> UC_FRIEND_ACT
+
+@enduml

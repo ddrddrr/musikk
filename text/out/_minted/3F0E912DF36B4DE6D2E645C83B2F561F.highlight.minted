@@ -1,0 +1,9 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+packager\PYG{+w}{ }\PYG{l+s+se}{\PYGZbs{}}
+\PYG{+w}{  }\PYG{l+s+s1}{\PYGZsq{}input=/tmp/in/libfdk\PYGZus{}aac\PYGZhy{}96\PYGZhy{}\PYGZlt{}uuid\PYGZgt{}.mp4,stream=audio,init\PYGZus{}segment=/tmp/out/audio\PYGZus{}0\PYGZus{}init.mp4,segment\PYGZus{}template=/tmp/out/audio\PYGZus{}0\PYGZus{}\PYGZdl{}Number\PYGZdl{}.m4s,playlist\PYGZus{}name=audio\PYGZus{}0.m3u8\PYGZsq{}}\PYG{+w}{ }\PYG{l+s+se}{\PYGZbs{}}
+\PYG{+w}{  }\PYG{l+s+s1}{\PYGZsq{}input=/tmp/in/libfdk\PYGZus{}aac\PYGZhy{}160\PYGZhy{}\PYGZlt{}uuid\PYGZgt{}.mp4,stream=audio,init\PYGZus{}segment=/tmp/out/audio\PYGZus{}1\PYGZus{}init.mp4,segment\PYGZus{}template=/tmp/out/audio\PYGZus{}1\PYGZus{}\PYGZdl{}Number\PYGZdl{}.m4s,playlist\PYGZus{}name=audio\PYGZus{}1.m3u8\PYGZsq{}}\PYG{+w}{ }\PYG{l+s+se}{\PYGZbs{}}
+\PYG{+w}{  }\PYGZhy{}\PYGZhy{}segment\PYGZus{}duration\PYG{+w}{ }\PYG{l+m}{3}\PYG{+w}{ }\PYG{l+s+se}{\PYGZbs{}}
+\PYG{+w}{  }\PYGZhy{}\PYGZhy{}generate\PYGZus{}static\PYGZus{}live\PYGZus{}mpd\PYG{+w}{ }\PYG{l+s+se}{\PYGZbs{}}
+\PYG{+w}{  }\PYGZhy{}\PYGZhy{}mpd\PYGZus{}output\PYG{o}{=}/tmp/out/manifest.mpd\PYG{+w}{ }\PYG{l+s+se}{\PYGZbs{}}
+\PYG{+w}{  }\PYGZhy{}\PYGZhy{}hls\PYGZus{}master\PYGZus{}playlist\PYGZus{}output\PYG{o}{=}/tmp/out/master.m3u8
+\end{MintedVerbatim}

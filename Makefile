@@ -1,4 +1,4 @@
-.PHONY: setup setup-ffmpeg setup-shaka check check-ffmpeg check-shaka clean run-local-full run-local-full-down run-local-full-seed run-local-full-clear diagrams
+.PHONY: setup setup-ffmpeg setup-shaka check check-ffmpeg check-shaka clean run-local-full run-local-full-down run-local-full-seed run-local-full-clear diagrams text
 
 UNAME := $(shell uname -s)
 ARCH := $(shell uname -m)
@@ -69,3 +69,7 @@ run-local-full-clear:
 
 diagrams:
 	plantuml -tpng --output-dir $(abspath text/diagrams) --exclude "**/_style.puml" "specification/**.puml"
+
+text:
+	mkdir -p text/out
+	cd text && uv run --no-project --python 3.13 -- latexmk -pdf -outdir=out thesis.tex

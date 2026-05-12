@@ -20,10 +20,10 @@ There are four main approaches used today: Basic Download, Progressive Download,
     with the media as raw binary data in its body.~\parencite{mime_octet_stream}
     Only when the full transfer has completed, the user can start the Playback.
 
-    This method poses several limitations: for high-quality files, it typically requires
+    This method has several limitations: for high-quality files, it typically requires
     significant storage space and time to download.
-    Additionally, if the user’s connection is unstable, it can make the application, which relies
-    on playback, unusable.
+    Additionally, if the user’s connection is unstable, it can make the application (which relies
+    on playback) unusable.
     In cases of poor network conditions, the situation can be partially improved by
     providing multiple representations of the same file, such as a highly compressed version
     alongside a lossless one.
@@ -54,7 +54,7 @@ There are four main approaches used today: Basic Download, Progressive Download,
     The player only needs a small buffer in memory, and older data
     can be discarded once it has been played.
     The browser may still cache recently fetched ranges,
-    but the application does not need to persist large portions of the file on disk.
+    but the application does not need to persist complete files on disk.
 
     In addition, it becomes possible to approximate adaptive playback.
     One approach, presented by~\citeauthor{progressive_download}~\parencite{progressive_download},
@@ -65,11 +65,11 @@ There are four main approaches used today: Basic Download, Progressive Download,
     using HTTP byte ranges, but chooses the
     track that best matches the current network conditions.
     However, seamless switching requires the representations to be prepared
-    in a compatible way; for example, corresponding parts of each track
+    in a compatible way: for example, corresponding parts of each track
     must cover the same playback time intervals and start at safe switching points.
 
     \item \textbf{Segmented HTTP Streaming}\label{it:streaming}\\
-    With Segmented HTTP Streaming, the audio file is first split into many small files (chunks),
+    With Segmented HTTP Streaming, the audio file is first split into many small audio files (chunks),
     and a special manifest file is then generated that lists the chunks
     and describes which time range each chunk covers~(usually a couple of seconds).~\parencite{dash_technical}
     The most common implementations of this approach are MPEG-DASH and HLS, both of which are
@@ -77,7 +77,7 @@ There are four main approaches used today: Basic Download, Progressive Download,
     The client then downloads the individual chunks and uses them for playback instead
     of working with byte range requests for a single large file,
     as was the case with Progressive Download.
-    Since the manifest provides a mapping of chunks to audio time slots,
+    Since the manifest provides a mapping of chunks to audio time segments,
     this makes it possible to play the audio from any point and enables seeking.
 
     Moreover, the original audio file can first be encoded into multiple formats of different sizes.
@@ -108,7 +108,7 @@ Streaming was chosen as the playback method for this thesis.
 Basic Download was excluded because it requires downloading the whole file
 before playback can start, making the usability of the application limited.
 Progressive Download improves startup time and seeking, but adapting to changing network
-conditions is not a standard part of the approach and would require custom preprocessing of
+conditions is not standardized and would require custom preprocessing of
 audio files on the server side, as well as writing client logic that could utilize this approach.
 Peer-to-Peer transfer was also excluded, since it would rely on users’ devices as sources of audio data,
 making playback speed dependent on peer availability and location.
@@ -119,7 +119,7 @@ Additionally, its integration into the service, as will be demonstrated
 later in \chapterref{ch:implementation}, is straightforward.
 
 The next key choice would be the authentication method, as it can significantly influence both
-the design of the Frontend and Backend parts.
+the design of the Frontend and Backend.
 
 
 \section{Authentication}
@@ -145,9 +145,9 @@ Token Authentication, and Third-Party Authentication~(OAuth2).
     Base64-encoded for transport but not encrypted in any way.
     If the browser side is compromised, or if this header ends up in a log or telemetry record, for
     instance after HTTPS is terminated at an internal proxy~\parencite{azure_tls_termination}, what
-    leaks is the password itself rather than an opaque session identifier.
-    Revocation, therefore, requires a password change, which also signs the User out of every other
-    place where the same credentials are used.
+    leaks is the password itself rather than some opaque value.
+    Revocation, therefore, requires a password change, which can not be transparently done without User
+    interaction.
 
     Moreover, there is no protocol-level notion of \textit{logout} or per-device sessions.
     Since the browser keeps attaching the cached credentials on its own, the Frontend has to resort
@@ -160,8 +160,8 @@ Token Authentication, and Third-Party Authentication~(OAuth2).
     their credentials on every request.
     Initially, the user must log in with their credentials in the same manner as for Basic Authentication.
     But, instead of the browser caching and reusing the credentials, the server that processed the request
-    creates a \textit{session} record, usually a data structure holding relevant user information,
-    such as ID, roles, etc., and instructs the browser to set a cookie with the session ID\@.
+    creates a \textit{session} record, usually a data structure holding relevant user information (ID, roles, etc.),
+    and instructs the browser to set a cookie with the session ID\@.
     This ID is later sent on subsequent requests instead of the user credentials and is
     used to identify the logged-in user.~\parencite{session_auth}
 
@@ -172,7 +172,7 @@ Token Authentication, and Third-Party Authentication~(OAuth2).
     of features that depend on temporary state.
 
     The main trade-off is the need for a session store, typically implemented using a relational database or an
-    in-memory key–value store, such as \texttt{redis}~\parencite{redis}.
+    in-memory key–value store.
     This introduces additional operational
     complexity, infrastructure dependencies, and potential bottlenecks if not configured correctly.
 
@@ -187,27 +187,31 @@ Token Authentication, and Third-Party Authentication~(OAuth2).
     the corresponding user record and looks it up on every request.
     This is similar to a session, but the identifier travels in a header instead of a cookie.
     Such tokens can be revoked at any moment by deleting the stored record.
+%    TODO: cite jwt
     The second variant is the \textit{self-contained token}, such as JSON Web Tokens~(JWT).
-    Here the token itself carries a signed payload with the user identity and permissions, so the
+    Here the token itself carries a payload with the user identity and permissions, so the
     server only needs to verify the signature with a shared secret or a public key, without any lookup.
     This removes the dependency on a central token store and can simplify scaling, since any
     instance that knows the verification key can accept requests.
 
-    Token Authentication fits well for clients that are not browsers, such as command-line tools,
-    mobile applications, and IoT devices, where sending cookies is inconvenient.
+    Token Authentication works well for clients that are not browsers, such as command-line tools,
+    mobile applications, and IoT devices, where sending cookies is inconvenient and the token can be
+    securely stored.
     It is also commonly used for public APIs and distributed systems, where independent services need
     to authenticate to each other without sharing a central session store.
 
     Nevertheless, Token Authentication has a few notable trade-offs.
-    The token is sent with every request, similarly to Basic Authentication, so it is exposed to
-    the same logging and telemetry concerns whenever HTTPS is terminated before the application.
-    For self-contained tokens, revocation is also hard: once issued, a token usually stays valid
+    For self-contained tokens, revocation is hard: once issued, a token usually stays valid
     until its expiry time has elapsed.
     It is possible to keep a \textit{revocation list} and check every request against it, but
     that brings back state, coordination, and additional latency.
-    In a single-page application, the token also has to be stored somewhere on the client side
-    (memory, \texttt{localStorage}, etc.), which has its own security implications and adds extra
-    code on the Frontend.
+%    TODO: cite XSS / HttpOnly references
+    In a single-page application, the token also has to be stored somewhere on the client side.
+    If held in \texttt{localStorage}, it is reachable from any script on the page, so a
+    Cross-Site Scripting~(XSS) injection can obtain it, while session cookies marked
+    \texttt{HttpOnly} are not exposed to scripts.
+    Moreover, the Frontend has to attach the token to every request and handle token refresh
+    explicitly, whereas cookies are sent by the browser automatically.
 
     \item \textbf{Third-Party Authentication~(OAuth2)} \\
     Third-Party Authentication delegates user login to a third-party
@@ -229,7 +233,7 @@ Token Authentication, and Third-Party Authentication~(OAuth2).
 \end{itemize}
 
 Based on the characteristics of the authentication methods, it was
-decided to use Session Authentication.
+decided to use the Session Authentication.
 
 Compared to Basic Authentication, it avoids sending user credentials with every request,
 supports explicit logout, per-session security policies, and extra session-related data.
@@ -243,12 +247,14 @@ Another important concept that must be addressed is the server-client communicat
 
 
 \section{Server-Client Communication}
-Some of the features outlined in \chapterref{ch:specification}~(such as immediate content updates,
-chat, and playback handling) require bi-directional communication.
+Some of the features outlined in \chapterref{ch:specification}~(such as playback handling,
+% TODO: there was no immediate content updates in spec chapter no? but smth else was...
+and immediate content updates) require bi-directional communication.
 Hence, a method for communication from the server to the client must be added.
 
 Because this is a web application, techniques such as Webhooks, gRPC, Pub/Sub, and others that
 are not directly supported by browsers are not discussed.
+%TODO: cite?
 Traditional Polling is also not considered due to its performance limitations and inefficiency.
 P2P techniques~(e.g., WebRTC) are not listed because the application's architecture is client-server,
 not peer-to-peer.
@@ -274,7 +280,7 @@ Long Polling, Server-Sent Events, WebSockets, and Push API\@.
     The server can then reuse that open connection to send an
     unlimited number of responses~(events).~\parencite{sse}
     Compared to Long Polling, SSE does not need to open a new HTTP connection for every update,
-    thereby reducing the number of requests.
+    reducing the number of requests.
     At the same time, it is still based on plain HTTP, so it works
     in most browsers and fits well into networking setups.
 
@@ -287,9 +293,9 @@ Long Polling, Server-Sent Events, WebSockets, and Push API\@.
     WebSockets, in comparison to SSE, provide full-duplex communication over
     a single TCP connection.
     This is achieved by firstly creating a standard HTTP connection and then upgrading it to the
-    WebSocket protocol via the WebSocket Protocol Handshake.~\parencite{websockets}.
+    WebSocket protocol via the WebSocket Protocol Handshake.~\parencite{websockets}
     This method allows messages to be sent both ways at any moment and is suited for
-    applications that require frequent (i.e., multiple times per second) two-way communication.~\parencite{server_client_comparison}
+    applications that require frequent two-way communication.~\parencite{server_client_comparison}
 
     However, adding WebSockets to an application, as well as SSE, requires additional infrastructure and logic for
     managing connections and message routing.
@@ -309,10 +315,10 @@ Long Polling, Server-Sent Events, WebSockets, and Push API\@.
     is only started when events such as push notifications need to be handled.
 
     While this mechanism is useful for notification systems, where short delivery time is not critical,
-    it is not suitable for interactions that require an immediate response,
+    it is unsuitable for interactions that require an immediate response,
     such as updating the User's current Playback state.
     Messages can be delayed inside the browser because multiple sites may have pending
-    push messages to process, and the browser is free to schedule or throttle service worker execution
+    push messages to process, and the browser can throttle service worker execution
     and limit the resources available to it.
     As a result, push notifications typically have higher and less predictable latency
     compared to direct communication protocols, such as WebSockets.~\parencite{pushapi}
@@ -321,6 +327,15 @@ Long Polling, Server-Sent Events, WebSockets, and Push API\@.
 Based on the requirements outlined in \chapterref{ch:specification}, at least three features
 would require server-to-client communication:
 \begin{itemize}
+    \item \textbf{Playback state synchronization.}
+    Any Playback Device the User acts on has to send the change to the server, whether it is
+    a play, pause, seek, or song switch, and the Active Playback Device additionally sends
+    periodic position updates to correct drift.
+    Even at a moderate rate, these events add up, and each one would otherwise need its own
+    HTTP request.
+    The server then forwards the new Playback state to the User's other Playback Devices to
+    keep them in sync.
+
     \item \textbf{Real-time typing indicators in Chats and Comment threads.}
     The client would send multiple short updates to the server while the User is typing.
     The server would then broadcasst these events to the other participants, so that the current
@@ -330,14 +345,6 @@ would require server-to-client communication:
     When another User sends a message in an open Chat, or posts a Comment under a Collection
     that the User is currently viewing, the new content should appear on the screen immediately,
     without periodic polling from the client.
-
-    \item \textbf{Playback state synchronization.}
-    The primary device would need to transmit Playback updates to the server whenever the actual
-    playback position drifts from the expected one, plus a periodic heartbeat.
-    Even at a moderate cadence, these updates can become numerous, and each one would otherwise
-    have to be a separate HTTP request.
-    The server would then propagate the synchronized playback position to all other active
-    devices to ensure consistency.
 \end{itemize}
 
 The initial implementation used SSE.
@@ -352,17 +359,15 @@ that burst is a separate HTTP request.
 Even with a single User this adds extra lag, and with many Users active at the same time it puts
 real load on the server.
 
-Additionally, Django Channels~\parencite{django_channels} ships with first-class WebSocket
-support, providing ASGI consumers, named groups, and per-user broadcast as part of the framework.
-The same capabilities on top of SSE would require a separate pub/sub layer, since Channels does
-not target SSE.
+Additionally, mature WebSocket support is widely available in modern Python web frameworks,
+often as a built-in feature with primitives such as named groups and per-user broadcast.
+Equivalent SSE support is less standardized and typically requires a separate pub/sub layer.
 
 For these reasons, WebSockets are used as the primary mechanism for real-time communication.
 The drawbacks listed above are accepted in exchange for a uniform bidirectional channel and
-lower friction with the chosen Backend framework.
+lower integration cost with the chosen Backend framework.
 
-At this point, the core technologies that could influence the choice of languages and
-frameworks are known, and the Backend is discussed in the subsequent step.
+These choices define what the Backend and Frontend have to support, and Backend is discussed next.
 
 
 \section{Backend}

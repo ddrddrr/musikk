@@ -8,9 +8,9 @@ package frontend
 package proxy
 package backend
 
-proxy ---> user: Static Files (HTML/CSS/JS)
+proxy --down-> user: Static Files (HTML/CSS/JS)
 
-user ---> frontend: Interacts via UI
+user -right--> frontend: Interacts via UI
 frontend ---> proxy: API Requests / WebSocket Actions
 proxy ---> backend: Forward API Requests / WebSocket Actions
 backend ---> proxy: JSON Responses / WebSocket Events

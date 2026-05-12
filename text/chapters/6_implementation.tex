@@ -10,49 +10,49 @@ but rather will discuss the complete system components.
 In other words, each part will contain the data model, the business logic, the API and the Frontend
 components used for the presentation and interaction.
 
+A high-level overview of the entire system can be seen in the following diagram~\ref{fig:system_overview}.
+
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=1\textwidth, keepaspectratio]{diagrams/HighLevelSystem}
+    \includegraphics[width=0.6\textwidth, keepaspectratio]{diagrams/HighLevelSystem}
     \caption{System Overview}
     \label{fig:system_overview}
 \end{figure}
-A high-level overview of the entire system can be seen in the following diagram~\ref{fig:system_overview}.
 
-%TODO: move to attachments
+The high-level Backend architecture, with its main parts and the connections between them, is shown in~\ref{fig:backend}.
+The corresponding Frontend architecture is presented in~\ref{fig:frontend}.
+The per-app Backend class diagrams, the Frontend component hierarchy
+can be found in the \path{specification/structure} directory.
+
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=1\textwidth, keepaspectratio]{diagrams/BackendSystem}
+    \includegraphics[height=0.5\textheight, angle=-90, keepaspectratio]{diagrams/BackendSystem}
     \caption{Backend Architecture}
     \label{fig:backend}
 \end{figure}
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=1\textwidth, keepaspectratio]{diagrams/FrontendSystem}
+    \includegraphics[height=0.5\textheight, angle=-90, keepaspectratio]{diagrams/FrontendSystem}
     \caption{Frontend Architecture}
     \label{fig:frontend}
 \end{figure}
-The high-level Backend architecture, with its main parts and the connections between them, is shown in~\ref{fig:backend}.
-The corresponding Frontend architecture is presented in~\ref{fig:frontend}.
-The per-app Backend class diagrams, the Frontend component hierarchy, and the behavioural sequence diagrams
-can be found in the \texttt{specification/} directory, under
-\texttt{specification/structure/backend/}, \texttt{specification/structure/frontend/component\_hierarchy.puml},
-and \texttt{specification/behavior/} paths.
 
 
 \section{Configuration}
 This section lists the concrete frameworks, libraries and tools that were used when creating the system.
 % TODO: add missing citations
+% TODO: a word about be/fe structure which dir structure they follow how to find files etc
 
 \subsection{Backend Configuration}
 \begin{itemize}
     \item Language: \texttt{python@3.14}
-    \item Package Manager, Env Manager: \texttt{uv}~\parencite{uv}, \texttt{envrc}
+    \item Package Manager: \texttt{uv}~\parencite{uv}
     \item Framework: \texttt{django@5.2}
     \item WebSocket Management: \texttt{django-channels}
     \item ASGI Server: \texttt{daphne}~\parencite{daphne}
     \item API: \texttt{django-rest-framework}, \texttt{django-filter}~\parencite{django_filter},
     \item Backgroud Tasks: \texttt{celery}
-    \item Cache/Key-Value Store: \texttt{redis}
+    \item Cache/Key-Value Store: \texttt{redis}~\parencite{redis}
     \item Authentication: \texttt{dj-rest-auth}~\parencite{dj_rest_auth}
     \item Database: \texttt{postgres:17}
 \end{itemize}
@@ -75,232 +75,184 @@ This section lists the concrete frameworks, libraries and tools that were used w
     \item Forms, Data Validation: \texttt{react-hook-form}, \texttt{zod}
     \item Audio Playback: \texttt{shaka-player}
 \end{itemize}
-% TODO
 
 \subsection{Deployment Configuration}
 \begin{itemize}
     \item Docker
     \item Docker Compose
-    \item Docker Registry (private)
-    \item Caddy
-    \item Hetzner
-    \item Mail: Mailgun
+    \item Reverse Proxy: Caddy
+    \item VPS Hosting: Hetzner
+    \item Mail Service: Mailgun
     \item Domain Management: PorkBun
 \end{itemize}
 
 
 \section{Audio Processing and Streaming}
-This section provides the core principles of Audio Processing and Streaming.
+This section describes how an uploaded audio file is turned into output
+that can be streamed to the Frontend. The Streaming Protocols are
+described first, since they constrain the codec and container choices
+made by every later stage of the pipeline.
 
-As was stated in the \chapterref{ch:planning} Segmented HTTP Streaming is going to be
-used as the main method of audio presentation; therefore the Streaming Protocols are discussed first.
-Then, the stages that are needed to make an audio file streamable are described: Transcoding and Packaging.
-These stages are presented in the reverse order, as Packaging sets requirements that affect Transcoding.
-In the end of the section, the software tools used for those processing steps are selected.
+This section stays at the level of what each stage does and what
+parameters it uses. The deeper rationale and the per-flag breakdown
+of every call are in \path{text/extras/audio_processing_details.tex}.
+Anything mentioned below but not explained in detail is covered there.
 
 \subsection{Streaming Protocols}
-Two protocols were chosen for audio streaming: MPEG-DASH\parencite{dash} and HLS\parencite{hls}.
-The basic pricnipals behind them were
-introduced in the \hyperref[it:streaming]{Segmented HTTP Streaming} section.
+Two protocols are used: MPEG-DASH~\parencite{dash} on devices that
+support Media Source Extensions, and HLS~\parencite{hls} on iOS, which
+does not support MSE\@. The basic principles behind both protocols
+were covered in the \hyperref[it:streaming]{Segmented HTTP Streaming}
+section.
 
-At first, only DASH was considered, because it works better in varying network conditions~\parencite{hls_vs_dash},
-and is not limited to only a select amount of audio codecs.~\parencite{dash_technical}
-
-% todo links to all players?
-However, DASH support in audio players is typically implemented
-via browser Media Source Extensions\parencite{mse}, which iOS does not support.\parencite{msecaniuse}
-Since iOS accounts for roughly 15\% of all operating systems
-worldwide~\parencite{os_percentage}, HLS support had to be added as well.
-
-Both streaming protocols will therefore be used: DASH on devices that support MSE, and HLS on iOS\@.
-
-With the protocols selected, the audio representation that is required for protocols to work is discussed next.
+Both protocols expect audio split into short chunks paired with a
+manifest. The Packaging step is the one that produces those.
 
 \subsection{Packaging}
-Packaging is the step where the encoded audio is prepared for Streaming.~\parencite{packaging_def}
-It mainly includes dividing the audio into chunks and generating manifest files
-that reference them~(an \texttt{*.mpd} file for DASH and \texttt{*.m3u8} files for HLS).
+Packaging cuts the transcoded audio into short fragmented MP4 segments
+and generates a DASH manifest (\texttt{*.mpd}) and an HLS master
+playlist (\texttt{*.m3u8}) that point at them.~\parencite{packaging_def}
+The segments follow Common Media Application Format~(CMAF), so a single
+set of chunks works for both protocols. The output is one
+initialization segment (\texttt{*\_init.mp4}) per representation and a
+sequence of media segments (\texttt{*.m4s}).
 
-Because the platform serves both DASH and HLS, it is useful to generate only one set of chunks and reuse it
-for both streaming methods.
-For this reason, the packaged output follows Common Media Application Format~(CMAF), \footnote{
-    This is usually not implied strictly by packager utilities, but can be observer by running, e.g.,
-    `ffprobe` CLI utility on the converted file.
-}
-which defines a common way to store chunks as fragmented MP4~(fMP4) containers.~\parencite{cmaf}
-
-The resulting output would contain one initialization segment (\texttt{*\_init.mp4}), which stores audio metadata
-and decoder setup, and a sequence of media segments (\texttt{*.m4s}),
-which store the audio data in short time intervals.
-In addition, this approach is required for streaming FLAC
-encoded (lossless) audio via HLS.~\parencite{apple_hls_specs_flac_container}
-
-But before the audio is packaged, it needs to be converted to different formats in order to support bitrate
-switching.
-The next subsection discusses this process, which is called Transcoding.
-
-\subsection{Transcoding}
-Transcoding is the process of decoding audio data and re-encoding it,
-typically to a different codec (see explanation below) and/or different encoding settings: bitrate, sample rate, channels, etc.
-
-Usually, when high-quality audio is recorded, it is initially saved in raw audio formats, such as WAV,
-which results in big file sizes which are impractical for Streaming\@.\footnote{
-    For instance, the resulting WAV file for a 3-minute stereo audio
-    recording with a bit depth of 24 bits and a sample rate of 41khz is approximately 50 MB\@.
-}
-To reduce the size, the audio is usually processed using a special program called a \textit{codec},
-which compresses and stores audio in a more efficient format.
-
-Lossless codecs, such as FLAC~\parencite{flac_xiph}, keep all audio information, so the audio sounds exactly
-the same as the original raw data.
-In contrast, lossy codecs~(MP3~\parencite{mp3}, AAC~\parencite{aac}, OPUS~\parencite{opus}, etc.)
-remove some information to reduce file size, which can slightly reduce quality, especially at low bitrates.
-
-In this implementation, the lossless FLAC codec and lossy AAC and HE-AAC codecs were selected due to their
-good performance in web-based streaming scenarios.~\parencite{codec_evaluation_1, codec_evaluation_2, codec_evaluation_3}:
-Other codecs that theoretically promise to provide better sound quality at smaller file sizes,
-such as Opus or MP3, were also researched; however, for higher bitrates that are used in Streaming they did not
-provide any advantage.
-Moreover, only *-AAC and FLAC codecs are supported for HLS streaming.~\parencite{apple_hls_specs_audio}
-
-Codecs usually provide several parameters that affect the output, such as sample rate, the number
-of channels, and bitrate.
-Bitrate describes how much audio data is stored or transmitted per second and is typically expressed in KB/s\@.
-It is commonly used because it provides a direct way to control the trade-off between audio
-quality and file size.
-
-Before selecting the encoding configuration, it is also important to distinguish
-between two encoding strategies: Constant Bitrate~(CBR)~\parencite{cbr}
-and Variable Bitrate~(VBR).~\parencite{vbr}
-
-CBR keeps the bitrate fixed across the entire audio file, resulting in predictable chunk
-sizes and smooth playback during Streaming.
-VBR adjusts the bitrate depending on content complexity,
-which can provide better quality at a smaller size compared to CBR,
-but can lead to inconsistent segment sizes, making Streaming less stable~\parencite{cbrvbrcomp}.
-% TODO: this is not the reason no, cbr was chosen because we can have multiple representations
-% what if vbr is still too big for some conditions?
-% or multi-vbr also exists...
-For this reason, a \textbf{multi-CBR setup} was selected.
-While less efficient in terms of quality-to-size ratio compared to VBR,
-CBR provides better predictability when Streaming.
-
-The following configuration was chosen based on the available
-research and recommendations~\parencite{codec_evaluation_1, codec_evaluation_2,
-    codec_evaluation_3, spotify_codecs, apple_hls_specs_audio, mdn_aac}:
-\begin{itemize}
-    \item \textbf{AAC}: 96, 160, and 320 kbps
-    \item \textbf{AAC-HEv2}: 24 kbps
-    \item \textbf{FLAC}: lossless
-\end{itemize}
-As mentioned before, multiple bitrates are included in order to support adaptive streaming.
-
-The tools which are used to do the Packaging and Transcoding are introduced next.
+Packaging only arranges existing audio. The CLI tools that produce and
+analyze that audio in the first place are introduced next.
 
 \subsection{Processing Tools}
-Transcoding is done via \texttt{ffmpeg}~\parencite{ffmpeg}, which is an open-source CLI tool.
-It is used because it offers support for all of the selected codecs, can be run programmatically as a script
-and provides high speed of audio conversion, since it is written in C and is optimized to use multiple threads.
-%TODO: improve
-\texttt{ffmpeg} provides multiple codec implementations, out of which \texttt{libfdk\_aac} and \texttt{flac} were used.
-While there is only one codec for FLAC, \texttt{ffmpeg} has three for AAC:
+Three CLI tools drive the pipeline: FFmpeg~\parencite{ffmpeg} for
+Transcoding and audio analysis, FFprobe (shipped with FFmpeg) for
+reading source metadata, and Shaka Packager~\parencite{shaka_packager}
+for the Packaging step. FFmpeg can package too, but its output had
+compatibility issues with Shaka Player~\parencite{shaka_player}, used
+on the Frontend for Playback, so a separate packager was chosen.
+
+With FFmpeg in place as the encoder and analyzer, the Transcoding
+configuration it runs can be described.
+
+\subsection{Transcoding}
+Transcoding decodes the source audio and re-encodes it into the target
+codecs and bitrates. Raw audio formats such as WAV are too large for
+Streaming, for example a 3-minute stereo 24-bit 44.1\,kHz recording is
+roughly 50\,MB\@. Lossless FLAC and lossy AAC/HE-AACv2 were selected as
+the output codecs, since HLS only allows a small set of audio
+codecs.~\parencite{apple_hls_specs_audio} The AAC encoder used is
+\texttt{libfdk\_aac}, chosen over the other AAC encoders shipped with
+FFmpeg for its quality and licensing terms.
+
+The output configuration was chosen based on existing research:~\parencite{codec_evaluation_1, codec_evaluation_2,
+    codec_evaluation_3, spotify_codecs, apple_hls_specs_audio, mdn_aac}
 \begin{itemize}
-    \item \texttt{aac_at} - the best available codec in terms of quality.~\parencite{aac_codec_cmp_1,aac_codec_cmp_2,aac_codec_cmp_3}
-    However, it was excluded due to its licencing policy which states that this codec could be used only on Apple-branded devices.\parencite{aac_at_licensing,ffmpeg_aac}
-    \item \texttt{aac} - the \texttt{ffmpeg}'s own AAC codec implementation.
-    It was also rejected, since the quality it provides is sub-par (even stated by the official documentation),
-    lacking behing the other two codecs.~\parencite{aac_codec_cmp_1,aac_codec_cmp_2,aac_codec_cmp_3, ffmpeg_aac}
-    \item \texttt{libfdk_aac} - the second best codec in terms of quality and the codec that was eventually chosen.
-    Although, it also has licencing issues, notably any binaries, Docker images and other distribution methods which
-    use it can not be made public or freely shipped to other devices, it is available for use
-    free of charge in closed-source projects.~\parencite{vialicensing_aac, spdx_aac, ffmpeg_aac}
+    \item \textbf{AAC}: 96, 160, and 320\,kbps
+    \item \textbf{HE-AACv2}: 24\,kbps
+    \item \textbf{FLAC}: lossless
+\end{itemize}
+Multiple bitrates support adaptive streaming. The AAC tiers use
+Constant Bitrate~(CBR), so the Frontend's Adaptive Bitrate logic has a
+stable per-tier bandwidth to pick from.
+
+Transcoding assumes a clean, well-bounded input. The Audio
+Preprocessing step described next ensures that each upload is valid
+and within the proper limits, and also captures the metadata of the result.
+
+\subsection{Audio Preprocessing}
+\label{subsec:audio_preprocessing}
+Before Transcoding, the upload is validated and normalized. After
+Transcoding, the loudness is measured. The sub-blocks below cover
+input validation, metadata extraction, the normalization filter chain,
+and the loudness measurement.
+
+\subsubsection*{Input validation}
+The upload passes through a chain of checks. The file-size and MIME checks
+run on the raw bytes. Other checks use values reported by FFprobe. Together
+they restrict the worst-case storage and Transcoding time of a single upload:
+\begin{itemize}
+    \item \textbf{MIME type}, inspected with
+    \texttt{python-magic}~\parencite{pythonmagic}, must be \texttt{audio/*}
+    and belong to an allow-list of supported subtypes.
+    \item \textbf{Codec}, reported by FFprobe, must belong to an allow-list
+    of well-tested codecs.
+    \item \textbf{File size}: up to 2\,GB, roughly a 2-hour 24-bit,
+    48\,kHz stereo WAV\@.
+    \item \textbf{Duration}: up to 7200\,s (2\,h).
+    \item \textbf{Sample rate}: 1\,Hz to 384\,kHz.
+    \item \textbf{Channel count}: 1 to 8.
+\end{itemize}
+The allow-lists are defined in \path{streaming/audio/config.py}.
+
+\subsubsection*{Input metadata extraction}
+FFprobe reads the source codec, sample rate, channel count, bit depth,
+duration, and bitrate. These values are reused by the input validation
+above. They also narrow which outputs the Transcoding step produces:
+FLAC is skipped for lossy sources, and AAC tiers whose target
+bitrate is above the source bitrate are dropped.
+
+\subsubsection*{Normalization and loudness}
+Three normalization filters run as a single FFmpeg \texttt{-af} chain
+applied inside every Transcoding subprocess. A separate loudness
+measurement then runs after Transcoding. The steps are:
+\begin{itemize}
+    \item \textbf{Channel normalization}. Sources with three or more
+    channels are downmixed to stereo. Mono and stereo inputs are kept
+    as-is.
+    \item \textbf{Sample rate normalization}. Each source is resampled to
+    the base of its rate family (44.1\,kHz or 48\,kHz). Files below
+    44.1\,kHz are kept as-is. Non-family rates default to 44.1\,kHz.
+    \item \textbf{Bit depth conversion}. All audio is converted to signed
+    16-bit samples, since \texttt{libfdk\_aac} does not accept higher
+    precision.
+    \item \textbf{Loudness measurement}. After Transcoding, FFmpeg's
+    \texttt{ebur128} filter produces an integrated value in Loudness Units
+    relative to Full Scale~(LUFS) and a true peak in dBTP\@. The
+    measurement runs on the FLAC output if it was produced, otherwise on
+    the first AAC output. Both values are stored on the Song and used by
+    the Frontend player to apply a consistent Playback gain.
 \end{itemize}
 
-The resulting \texttt{ffmpeg} command that is used for Transcoding looks like this:
-% TODO: make on same page
-\begin{minted}{bash}
-ffmpeg -i *input file path*
-    -vn -sn -dn
-    -c:a *encoder* *encoder extras*
-    -b:a *bitrate*
-    -movflags
-    +faststart
-    *resulting file path*
-\end{minted}
+Once Transcoding and Packaging finish, the original upload and the
+intermediate transcoded MP4s are removed. Only the packaged segments,
+manifests, and the loudness values stored on the Song row survive.
 
-Where individual flags are:
-\begin{itemize}
-    \item \texttt{-i *input file path*} selects the input media file.
-    \item \texttt{-vn} disables video streams.
-    \item \texttt{-sn} disables subtitle streams.
-    \item \texttt{-dn} disables data streams.
-    \item \texttt{-c:a *encoder*} selects the audio encoder/codec used for the output~(e.g., \texttt{flac}, \texttt{libfdk\_aac}).
-    \item *encoder extras* are additional encoder-specific options~(e.g., \texttt{-profile aac\_he\_v2} for \texttt{libfdk\_aac}).
-    \item \texttt{-b:a *bitrate*} sets the target audio bitrate~(e.g., \texttt{96k}).
-    \item \texttt{-movflags +faststart} moves the MP4 metadata~(\texttt{moov} atom~\parencite{moov})
-    to the beginning of the file to improve download/streaming startup.
-    \item \texttt{*resulting file path*} sets the output file path.
-\end{itemize}
+The Backend code that drives all of these stages is described next.
 
-Even though \texttt{ffmpeg} is able to do the Packaging step as well, a dedicated packager tool was decided to be used.
-This is due to the problems that \texttt{ffmpeg} had with generating manifests which are
-% todo link to frontend
-% todo say about problems that were there?
-compatible with Shaka Player~\parencite{shaka_player}~(that is used on the Frontend for audio playback, see Frontend section for details)
-As a consequence, Shaka Packager was selected for the packaging step.~\parencite{shaka_packager}
-It supports both DASH and HLS, can generate CMAF-style fMP4 segments, and can produce both manifests in one run.
-In addition, it integrates well with Shaka Player.
+\subsection{Backend Pipeline}
+The Backend code lives under
+\path{src/backend/musikk/streaming/audio/} and the class layout is
+shown in \path{text/diagrams/AudioClassDiagram.png}.
 
-The resulting Shaka Packager command that is used for Packaging looks like this:
-\begin{minted}{bash}
-packager
-  "input=*file path 1*,stream=audio,
-   init_segment=*base path*/audio_0_init.mp4,
-   segment_template=*base path*/audio_0_$Number$.m4s,
-   playlist_name=audio_0.m3u8"
-  "input=*file path 2*,stream=audio,
-   init_segment=*base path*/audio_1_init.mp4,
-   segment_template=*base path*/audio_1_$Number$.m4s,
-   playlist_name=audio_1.m3u8"
-  ...
-  --segment_duration 3
-  --generate_static_live_mpd
-  --mpd_output=*base path*/manifest.mpd
-  --hls_master_playlist_output=*base path*/master.m3u8
-\end{minted}
+Pre-pipeline validation (the file-size, MIME, and FFprobe-based checks
+from the previous subsection) runs in \texttt{validators.py} before any
+audio subprocess is started. The pipeline itself,
+\texttt{AudioProcessingPipeline} in \texttt{processing\_pipeline.py},
+threads a shared \texttt{ProcessingContext} through a chain of
+\texttt{Step} instances. The configured chain runs \texttt{FFmpegStep},
+then \texttt{LoudnessMeasurementStep}, then \texttt{ShakaPackagerStep}.
+Each \texttt{Step} is a thin orchestrator that delegates to a wrapper
+object: \texttt{FFmpegStep} calls into \texttt{FFMPEGFull}, and
+\texttt{ShakaPackagerStep} calls into \texttt{ShakaPackagerMPDAndM3U8}.
+Each step has a \texttt{rollback} method. If a step raises, the
+previously executed steps are rolled back in reverse order. The
+rollback clears the per-run temporary directory and removes any output
+already written to Django storage.
 
-Where individual flags are:
-\begin{itemize}
-    \item \texttt{packager} -- the Shaka Packager binary.
-    \item \texttt{"input=*file path N*,stream=audio,init\_segment=*path*,
-        segment\_template=*path*,playlist\_name=*name*"} defines one packaging input, where:
-    \begin{itemize}
-        \item \texttt{input=*path*} is the local path to the downloaded source audio file.
-        \item \texttt{stream=audio} selects the audio stream from the file for packaging.
-        \item \texttt{init\_segment=*path*} sets the output path for the CMAF/fMP4 initialization segment~(\texttt{*\_init.mp4}).
-        \item \texttt{segment\_template=*path*} sets the template for media segment file names.
-        \item \texttt{playlist\_name=*name*} sets the name of the per-representation HLS media playlist~(variant playlist), e.g., \texttt{audio\_0.m3u8}.
-    \end{itemize}
-    \item \texttt{--segment\_duration 3} sets the target segment duration in seconds.
-    \item \texttt{--generate\_static\_live\_mpd} generates a static MPD with, which is used for better compatibility with audio players.
-    \item \texttt{--mpd\_output=*path*} sets the output path for the DASH manifest~(\texttt{manifest.mpd}).
-    \item \texttt{--hls\_master\_playlist\_output=*path*} sets the output path for the HLS master playlist~(\texttt{master.m3u8}).
-\end{itemize}
+\texttt{FFmpegStep} runs one FFmpeg subprocess per output tier in
+parallel via a \texttt{ThreadPoolExecutor} sized to the number of
+selected tiers. Threads are used rather than processes because FFmpeg
+itself is multi-threaded inside each subprocess, so the Python side
+only waits on the subprocess to finish. A process pool would add
+overhead without speeding anything up.
 
-\subsection{Backend Wrappers}
-...
+How this pipeline is launched as a background task, and how its status
+reaches the Frontend, is covered later in the Audio Upload section.
+
+With the Backend producing CMAF segments and both manifests in Django
+storage, the Frontend only needs a player that can consume either
+manifest format. That player is described next.
 
 \subsection{Frontend Playback}
 On the Frontend the Playback is achieved via \texttt{shaka-player}.
 The individual components can be found under the ... dir
-% todo celery task (and why we use it in general)
-% the progres status manager (link to ws section)
-% todo transition
-
-
-% TODO explain models, views/serializers, api structure
-% then fe components, hooks, how api works there
-% also dir structure
 
 
 \section{WebSocket Communication}
@@ -308,7 +260,7 @@ This section describes the WebSocket setup, i.e., how the WS channels are create
 how the server or the client sends/receives the WS messages.
 
 Messages that are sent from the server to the client are internally called ``events'', while messages
-from the client to the server -- ``actions''.
+from the client to the server - ``actions''.
 
 \subsection{Backend Handling}
 The Backend WS configuration can be found under the \texttt{src/backend/musikk/websockets} directory.
@@ -319,7 +271,7 @@ a broadcast group under the \texttt{user\_*user uuid*} key,
 and creates any relevant event processing classes (see further sections for more information).
 In addition, it is responsible for sending the ``events'' and routing the received ``actions'' to their handlers.
 
-A \texttt{/ws/user} endpoint is exposed and must be used for connection establishment.
+A \texttt{/ws/user} endpoint is exposed and is used for connection establishment.
 
 \subsection{Frontend Handling}
 Frontend WS configuration is located in the \texttt{src/frontend/musikk/src/ws} directory.
@@ -358,22 +310,19 @@ Users in the system are represented by a \texttt{BaseUser} model which holds a
 discriminator \texttt{role} field that can be of two types: an ``Artist'' or a ``Base''.
 %TODO: section ref
 An ``Artist'' role gives the User additional permissions, such as uploading new Songs or creating Albums (see ...).
-Currently there are no additional properties that the Artist need to have, however, in the future this design
-could be extended, for example, with a new ArtistProfile model that would
-include additional information, such as upcoming Artist events or revenue data.
 
-Each user is uniquely identified by their email; display_name defaults to a random
+Each user is uniquely identified by their email. The \texttt{display\_name} defaults to a random
 string and does not need to be unique.
 
 Apart from basic configuration, Users can also have relations to other Users,
-which is modeled by the \texttt{UserFollow} model.
+which are modeled by the \texttt{UserFollow} model.
 The system intentially does not create a separate model for Friend relations: this is inferred
 by a presence of a ``mutual follow'', i.e., two existing \texttt{UserFollow} relations where the
-\texttt{from_user} and \texttt{to_user} foreign keys are mirrored in each model instance.
+\texttt{from\_user} and \texttt{to\_user} foreign keys are mirrored in each model instance.
 
 \subsection{API}
 The API provides a standard set of endpoints: a \texttt{MeView} which allows the User
-to retrieve or update their information; a \texttt{UserRetrieveView} that returns the non-sensitive
+to retrieve or update their information, a \texttt{UserRetrieveView} that returns the non-sensitive
 information about any specfic User in the system; a \texttt{FollowedView} which lets Users follow/unfollow
 other Users and retrieve the Users they Follow. \texttt{FollowersView} and \texttt{FriendsView} return the
 Followers of a User and their Friends respectively.
@@ -406,24 +355,53 @@ This section presents the account creation flow and the following authentication
 
 The platform can not be accessed by Anonymous Users, hence, every User has to have an account and a
 valid login to use the system.
+% todo sequence diagram link specification/behavior/auth_flow.puml
 
 \subsection{Backend and API}
 % dont write your own auth (https://users.umiacs.umd.edu/~tudor/courses/ENEE757/Fall14/papers/Fu01.pdf)
-% dj-rest-auth(rest wrapper around allauth); custom setup for user creation(BaseRegisterSerializer)
+% dj-rest-auth(rest wrapper around allauth), how it works, which endpoints we have briefly
 % urls that are used
-% django password?
-% email confirmation flow and mail backend (can be also disabled via a flag)
-% (say about link vs otp)
+% email confirmation flow briefly
+% say about link vs otp, why we use link
 
 \subsection{Frontend Handling}
-% auth dir;
+% auth/non auth clients
+% redirects, route gating
 % components for registration/login
-% requireauth gating,
 % cookies
 
 
-\section{Playback Items and Song Queue}
-% todo: songs, collections, song queue
+\section{Playback Items}
+% songs
+% collections
+% authors
+% here mostly about the data containers
+% say about albums but they are going to be mostly discussed in  \section{Audio Upload}
+
+\subsection{Data Model}
+
+\subsection{API}
+
+\subsection{Frontend Presentation}
+
+
+\section{Audio Upload}
+% how are created, the flow with upload op id, celery, ws events with status updates, draft states,
+% link back to audio validation
+
+\subsection{Data Model}
+
+\subsection{API}
+
+\subsection{Frontend Presentation}
+
+
+\section{Song Queue}
+% the rationale behing splitting into queue and context
+% how it roughly works now on BE
+% why not linked list (was done like that before, was hard to maintain and reason about) and just decimal positions
+% smth else worth mentioning
+% mb move some of that info to the data model part
 
 \subsection{Data Model}
 
@@ -433,7 +411,9 @@ valid login to use the system.
 
 
 \section{Playback and Device Handling}
-% here mostly about redis
+% here mostly about WS, redis, the synchronisation, the params we have etc
+% in fe the audio pipeline why we use syncexternalstore instead of hooks as before (didnt work good)
+% ramps, gains, audioapi, etc
 
 \subsection{Data Model}
 
@@ -442,7 +422,60 @@ valid login to use the system.
 \subsection{Frontend Presentation}
 
 
-% TODO: cont with search, social, notifications
+\section{Publications}
+% chats, comments, posts, feeds
+
+\subsection{Data Model}
+
+\subsection{API}
+
+\subsection{Frontend Presentation}
+
+
+\section{Search}
+% how search works, pg trigrams
+% attachments on fe
+
+\subsection{Data Model}
+
+\subsection{API}
+
+\subsection{Frontend Presentation}
+
+
+\section{Friend Activity}
+% explain the feature
+
+\subsection{Data Model}
+
+\subsection{API}
+
+\subsection{Frontend Presentation}
+
+
+\section{Notifications}
+% how and when are created how rendered which we have right now
+
+\subsection{Data Model}
+
+\subsection{API}
+
+\subsection{Frontend Presentation}
+
+
+\section{Security}
+% talk about cors, csrf, xss(owasp)
+% talk about input validation(owasp)
+% talk about owasp cheatsheet for webapps
+
+
+\section{Deployment}
+% talk about licensing issues and how ffmpeg has to be built from source
+% and why there is no public image distributed
+% say about caddy (used because modern, auto https, smth else)
+% leave a todo which ill fill in with details about hetzner, porkbun, mails etc
+
+
 %\section{Backend and API}
 %The Backend and API description is organized by the individual folders under
 %the \texttt{musikk/src/backend/musikk} directory.

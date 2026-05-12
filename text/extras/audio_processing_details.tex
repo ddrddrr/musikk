@@ -1,0 +1,459 @@
+%%
+%% Detailed notes on the audio processing pipeline.
+%%
+%% This file expands on the "Audio Processing and Streaming" section of
+%% chapter 6 (text/chapters/6_implementation.tex). The main chapter
+%% names every stage briefly and lists the chosen parameters. This file
+%% gives the deeper rationale: codec comparisons, CBR versus VBR,
+%% sample-rate theory, loudness standards, and a per-flag breakdown of
+%% every CLI invocation.
+%%
+%% The file is self-contained and can be compiled on its own, or it can
+%% be included into the thesis via \input{} if a future revision wants
+%% to fold the notes into an appendix.
+%%
+
+\documentclass[a4paper,11pt]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[main=english]{babel}
+\usepackage[newfloat]{minted}
+\usepackage{hyperref}
+\usepackage[sorting=none]{biblatex}
+\addbibresource{audio_processing_details.bib}
+
+\title{Audio Processing Pipeline: Detailed Notes}
+\author{Kirill Vorozhtsov}
+\date{}
+
+\begin{document}
+\maketitle
+
+These notes expand on the \textit{Audio Processing and Streaming} section
+of chapter 6 of the thesis. The main section names every stage briefly
+and lists the chosen parameters. The sections below give the deeper
+rationale for each choice.
+
+\section{Streaming Protocols}
+At first, only DASH was considered, because it works better in varying
+network conditions~\parencite{hls_vs_dash} and is not limited to a small
+set of audio codecs.~\parencite{dash_technical}
+
+However, DASH support in audio players is typically implemented via
+browser Media Source Extensions~\parencite{mse}, which iOS does not
+support.~\parencite{msecaniuse} Since iOS accounts for roughly 15\% of
+all operating systems worldwide~\parencite{os_percentage}, HLS support
+had to be added as well.
+
+Both protocols are therefore used: DASH on devices that support MSE,
+and HLS on iOS\@.
+
+\section{Packaging}
+Because the platform serves both DASH and HLS, it is useful to generate
+only one set of chunks and reuse it for both streaming methods. For
+this reason, the packaged output follows Common Media Application
+Format~(CMAF), which defines a common way to store chunks as fragmented
+MP4~(fMP4) containers.~\parencite{cmaf} This is usually not stated
+explicitly by packager utilities, but can be observed by running, for
+example, the \texttt{ffprobe} CLI utility on a packaged segment.
+
+The resulting output contains one initialization segment
+(\texttt{*\_init.mp4}), which stores audio metadata and decoder setup,
+and a sequence of media segments (\texttt{*.m4s}), which store the
+audio data in short time intervals. In addition, this approach is
+required for streaming FLAC encoded (lossless) audio via
+HLS\@.~\parencite{apple_hls_specs_flac_container}
+
+\section{Processing Tools}
+Three CLI tools are used in the processing pipeline: FFmpeg for
+Transcoding and audio analysis, FFprobe for reading audio metadata,
+and Shaka Packager for the Packaging step.
+
+FFmpeg~\parencite{ffmpeg} is an open-source CLI tool. It supports all
+of the selected codecs, can be run programmatically as a script, and
+converts audio at high speed because it is written in C and is
+optimized to use multiple threads. The pipeline uses it both as the
+transcoder and as the host for the filter graph applied during Audio
+Preprocessing.
+
+FFprobe ships with the FFmpeg project and reads metadata from audio
+files. The Audio Preprocessing pipeline uses it to read the source
+codec, sample rate, channel count, bit depth, duration, and bitrate of
+every upload before transcoding.
+
+Even though FFmpeg is able to do the Packaging step as well, a separate
+packager tool was chosen. This is due to the problems that FFmpeg had
+with generating manifests which are compatible with Shaka
+Player~\parencite{shaka_player}, used on the Frontend for Playback. As
+a consequence, Shaka Packager was selected for the packaging
+step.~\parencite{shaka_packager} It supports both DASH and HLS, can
+generate CMAF-style fMP4 segments, and can produce both manifests in
+one run. In addition, it integrates well with Shaka Player.
+
+\section{Transcoding}
+\subsection{Why transcoding is needed}
+Usually, when high-quality audio is recorded, it is initially saved in
+raw audio formats, such as WAV, which results in big file sizes that
+are impractical for Streaming. For instance, the resulting WAV file for
+a 3-minute stereo audio recording with a bit depth of 24 bits and a
+sample rate of 44.1\,kHz is approximately 50\,MB\@.
+
+To reduce the size, the audio is usually processed using a special
+program called a \textit{codec}, which compresses and stores audio in a
+more efficient format.
+
+Lossless codecs, such as FLAC~\parencite{flac_xiph}, keep all audio
+information, so the audio sounds exactly the same as the original raw
+data. In contrast, lossy codecs (MP3~\parencite{mp3},
+AAC~\parencite{aac}, OPUS~\parencite{opus}, etc.) remove some
+information to reduce file size, which can slightly reduce quality,
+especially at low bitrates.
+
+In this implementation, the lossless FLAC codec and lossy AAC/HE-AAC
+codecs were selected due to their good performance in web-based
+streaming scenarios.~\parencite{codec_evaluation_1,
+codec_evaluation_2, codec_evaluation_3}
+
+Other codecs that promise better sound quality at smaller file sizes,
+such as Opus, were also considered. However, only *-AAC and FLAC/ALAC
+codecs are supported for HLS
+streaming.~\parencite{apple_hls_specs_audio}
+
+\subsection{AAC encoder choice}
+FFmpeg ships several AAC encoder implementations, only one of which is
+used here:
+\begin{itemize}
+    \item \texttt{aac\_at} is the best available codec in terms of
+    quality.~\parencite{aac_codec_cmp_1,aac_codec_cmp_2,aac_codec_cmp_3}
+    However, it was excluded due to its licensing policy, which states
+    that this codec could be used only on Apple-branded
+    devices.~\parencite{aac_at_licensing,ffmpeg_aac}
+    \item \texttt{aac} is FFmpeg's own AAC implementation. It was also
+    rejected, since the quality it provides is sub-par (even stated by
+    the official documentation), behind the other two
+    codecs.~\parencite{aac_codec_cmp_1,aac_codec_cmp_2,aac_codec_cmp_3,ffmpeg_aac}
+    \item \texttt{libfdk\_aac} is the second best codec in terms of
+    quality and the codec that was eventually chosen. It also has
+    licensing issues: any binaries, Docker images, and other
+    distribution methods which use it cannot be made public or freely
+    shipped to other devices. However, it is available for use free of
+    charge in closed-source
+    projects.~\parencite{vialicensing_aac, spdx_aac, ffmpeg_aac}
+\end{itemize}
+For FLAC, FFmpeg provides a single \texttt{flac} encoder, which is used
+directly.
+
+\subsection{Bitrate strategy: CBR versus VBR}
+Codecs usually provide several parameters that affect the output, such
+as sample rate, the number of channels, and bitrate. Bitrate describes
+how much audio data is stored or transmitted per second and is
+typically expressed in kilobits per second (kbps). It is commonly used
+because it provides a direct way to control the trade-off between
+audio quality and file size.
+
+Before selecting the encoding configuration, it is also important to
+distinguish between two encoding strategies: Constant
+Bitrate~(CBR)~\parencite{cbr} and Variable
+Bitrate~(VBR).~\parencite{vbr}
+
+CBR keeps the bitrate fixed across the entire audio file, so each
+representation has a known, stable bandwidth. VBR adjusts the bitrate
+depending on content complexity, which gives better quality at a
+smaller size compared to CBR, but the per-segment size varies within a
+single representation.~\parencite{cbrvbrcomp}
+
+The platform serves several tiers in parallel and lets the Frontend's
+Adaptive Bitrate~(ABR) logic pick one based on the measured network
+throughput. A stable per-tier bandwidth is the input ABR needs, so a
+multi-CBR setup was selected. The same effect could in principle be
+reached with constrained VBR tiers, but the simplicity of a fixed
+per-tier bitrate was preferred for the project scope.
+
+\subsection{Generation loss for lossy sources}
+Transcoding a lossy source into AAC causes generation loss: every
+lossy pass discards some audio, so re-encoding what was already lossy
+compounds the damage. The pipeline still performs the conversion
+because DASH and HLS need every representation in the same codec. With
+FLAC and AAC chosen as the output codecs, lossy uploads have to be
+re-encoded into AAC anyway.
+% TODO: cite generation loss / cascaded lossy coding.
+
+\section{Audio Preprocessing}
+\subsection{Input validation limits}
+The upload passes through a chain of validation checks. The file-size
+and MIME checks run on the raw bytes. The remaining constraints check
+values read from the file by FFprobe. Raw-audio storage scales linearly
+with duration, sample rate, channel count, and bit depth, so the
+constraints together bound the worst-case storage and Transcoding time
+of a single upload:
+\begin{itemize}
+    \item \textbf{MIME type}. The first 2048 bytes of the file are
+    inspected with \texttt{python-magic}~\parencite{pythonmagic}, and
+    the type must start with \texttt{audio/}. The subtype must also
+    belong to an allow-list of subtypes that map to the supported
+    codecs, defined in the \texttt{ALLOWED\_FILE\_TYPES} variable in
+    \texttt{streaming/audio/config.py}. This step detects malformed or
+    non-audio uploads before any audio tool is invoked.
+    \item \textbf{Codec allow-list}. A container can contain different
+    codecs (for example, an \texttt{.mp4} file can hold AAC or ALAC),
+    so the codec name FFprobe reports must also belong to
+    \texttt{ALLOWED\_CODECS} in \texttt{streaming/audio/config.py}.
+    The list only covers popular codecs, since FFmpeg's decoders for
+    rare codecs are less tested and can produce a Transcoded file with
+    wrong duration or corrupted samples.
+    \item \textbf{File size: 2\,GB}. Roughly a 2-hour 24-bit, 48\,kHz
+    stereo WAV\@. An arbitrary number, but real music files usually
+    stay well below this, so the cap mostly guards against accidental
+    or malicious oversize uploads.
+    \item \textbf{Duration: up to 7200\,s (2\,h)}. Covers DJ sets and
+    long mixes while keeping the upload and Transcoding time
+    reasonable.
+    \item \textbf{Sample rate: 1\,Hz to 384\,kHz}. The upper bound
+    matches the highest rate in the supported sample rate families,
+    described in the Sample rate normalization step below.
+    \item \textbf{Channel count: 1 to 8}. Covers mono through 7.1
+    surround, which is the practical upper bound for source audio.
+\end{itemize}
+
+\subsection{FFprobe invocation}
+\begin{minted}{bash}
+ffprobe -v error -select_streams a \
+    -show_entries stream=codec_name,sample_rate,channels,bits_per_raw_sample,duration,bit_rate \
+    -show_entries format=duration,bit_rate \
+    -of json input.wav
+\end{minted}
+
+The flags are:
+\begin{itemize}
+    \item \texttt{-v error} suppresses informational and warning
+    output, keeping only actual errors.
+    \item \texttt{-select\_streams a} restricts probing to audio
+    streams.
+    \item \texttt{-show\_entries stream=...} returns only the
+    per-stream fields the wrapper consumes.
+    \item \texttt{-show\_entries format=...} adds a fallback for
+    \texttt{duration} and \texttt{bit\_rate}, since some containers
+    (notably WAV) only report them at the format level.
+    \item \texttt{-of json} produces structured output that the
+    wrapper parses.
+\end{itemize}
+
+\subsection{Tier selection}
+Tier selection drops output tiers that cannot help the listener. A
+lossy source skips the FLAC tier, since re-encoding lossy audio as
+lossless cannot recover the information the source codec already
+discarded. It would only add storage. An AAC tier whose target bitrate
+sits above the source bitrate is dropped for the same reason: lossy
+re-encoding cannot add detail above what the source already carries.
+
+\subsection{Channel normalization}
+The normalization step reduces every track to mono or stereo. Music
+releases are mostly mastered in stereo, and the chosen Streaming
+Protocols and the loudness measurement step below are also defined for
+mono or stereo input. Surround formats such as Dolby Atmos need a
+different container, extra information in the manifest, and
+per-platform decoder support, none of which fit the project scope.
+% TODO: cite stereo as the dominant streaming and listening format
+% TODO: cite Dolby Atmos container and decoder requirements
+
+Mono inputs stay mono, since upmixing to stereo would not add
+information, only file size. Stereo inputs stay stereo. Sources with
+three or more channels are downmixed to stereo by inserting
+\texttt{aresample=out\_chlayout=stereo} into the FFmpeg filter chain.
+
+\subsection{Sample rate normalization}
+Human hearing tops out around 20\,kHz. The Nyquist-Shannon theorem
+says a sample rate must be at least twice the highest frequency in the
+signal to represent it without aliasing. A 44.1\,kHz rate therefore
+covers the audible band with a small margin, and source rates above
+that carry no perceptual gain, only larger files.
+% TODO: cite Nyquist-Shannon sampling theorem
+% TODO: cite Lavry "Optimal sample rate for quality audio" (https://lavryengineering.com/pdfs/lavry-white-paper-the_optimal_sample_rate_for_quality_audio.pdf)
+
+Music masters use one of two standard rates, 44.1\,kHz or 48\,kHz, or
+an integer multiple of one of them. The step groups each source into
+its family and resamples down to the family base. An integer-ratio
+resample is cheap to compute and stays close to the original signal.
+Files below 44.1\,kHz are left as-is, since upsampling adds no
+information. Non-family rates default to 44.1\,kHz. Resampling is done
+by inserting \texttt{aresample=<rate>} into the FFmpeg filter chain.
+
+\subsection{Bit depth conversion}
+All audio is converted to signed 16-bit samples via
+\texttt{aformat=sample\_fmts=s16}. The conversion is unconditional
+because \texttt{libfdk\_aac}, the encoder used for the AAC tiers, does
+not accept higher-precision sample formats. FLAC accepts higher
+precision, but feeding the same filter chain to every tier keeps the
+Transcoding command uniform.
+
+\subsection{Loudness theory}
+Loudness normalization keeps perceived volume steady across tracks.
+Human hearing is not flat: equal-loudness contours described by
+ISO~226 show that perceived loudness depends on both amplitude and
+frequency, so two files with the same digital peak can sound very
+different. Without normalization, a playlist that mixes tracks from
+different masters would have the listener constantly reaching for the
+volume knob.
+% TODO: cite ISO 226 equal-loudness contours
+% TODO: cite Audio Normalization overview (https://en.wikipedia.org/wiki/Audio_normalization)
+% TODO: cite Spotify loudness normalization (https://support.spotify.com/it/artists/article/loudness-normalization/)
+
+ITU-R BS.1770 is the standard algorithm for measuring loudness. It
+produces an integrated value in Loudness Units relative to Full
+Scale~(LUFS), using a frequency weighting (K-weighting) shaped to
+approximate human hearing and a channel weighting model. EBU R128
+wraps the algorithm into a normalization recommendation, with a
+broadcast target of \(-23\)\,LUFS. Streaming services use higher
+targets because listening conditions differ from broadcast, for
+example Spotify at \(-14\)\,LUFS and Apple at \(-16\)\,LUFS.
+% TODO: cite ITU-R BS.1770 (https://www.itu.int/rec/R-REC-BS.1770-5-202311-I/en)
+% TODO: cite EBU R128 (https://en.wikipedia.org/wiki/EBU_R_128)
+
+Two other units appear here. Decibels Full Scale~(dBFS) measure sample
+amplitude relative to the maximum representable value, so 0\,dBFS is
+the largest sample and recorded peaks are typically negative. True
+peak in dBFS~(dBTP) measures the peak of the reconstructed analog
+waveform after digital-to-analog conversion, not the peak of the
+stored samples. The distinction matters: a sequence of samples that
+all sit below 0\,dBFS can still reconstruct to over 0\,dBFS, producing
+inter-sample peaks that clip on Playback. True-peak measurement uses
+an oversampled signal to catch this.
+
+\subsection{Why loudness is measured after Transcoding}
+FFmpeg's \texttt{ebur128} filter with \texttt{peak=true} produces both
+an integrated LUFS value and a true peak in dBTP. The measurement
+runs after Transcoding, on the FLAC output if it was produced,
+otherwise on the first AAC output. FLAC is preferred when available
+because it preserves the normalized signal bit-perfectly. The measured
+values therefore describe the normalization output without being
+nudged by the lossy AAC encoder.
+
+The measurement happens after Transcoding rather than on the source
+file for two reasons. First, the listener hears the post-processing
+audio. Channel downmix changes overall loudness, since each channel
+contributes to the perceived sum. Sample-rate conversion can also
+shift true peaks slightly. The stored values therefore have to
+describe what actually plays. Second, the \texttt{ebur128} summary
+reports the peak as a per-channel list on multichannel inputs. For
+example, a six-channel source produces a summary line such as
+\texttt{Peak: -1.1 -2.3 -1.5 -2.1 -3.0 -1.8 dBFS}, which is ambiguous
+as a single per-track value. After downmix to stereo the list has at
+most two entries, and the wrapper records the maximum of the two.
+
+\section{Pipeline invocations}
+\subsection{FFmpeg transcoding flags}
+The FFmpeg invocation for the AAC 160\,kbps tier on a stereo 44.1\,kHz
+source is:
+\begin{minted}{bash}
+ffmpeg -i input.wav \
+    -vn -sn -dn \
+    -af "aresample=out_chlayout=stereo,aresample=44100,aformat=sample_fmts=s16" \
+    -c:a libfdk_aac \
+    -b:a 160k \
+    -movflags +faststart \
+    libfdk_aac-160-<uuid>.mp4
+\end{minted}
+
+The flags are:
+\begin{itemize}
+    \item \texttt{-i input.wav} selects the input media file.
+    \item \texttt{-vn -sn -dn} strip any video, subtitle, and data
+    streams so only the audio stream is processed.
+    \item \texttt{-af "..."} applies the audio filter graph for
+    normalization (channel downmix, sample-rate normalization, bit-depth
+    conversion).
+    \item \texttt{-c:a libfdk\_aac} selects the audio encoder. The
+    other encoders used by the pipeline are \texttt{flac} for the
+    lossless tier and \texttt{libfdk\_aac} with the additional
+    \texttt{-profile aac\_he\_v2} flag for the HE-AACv2 24\,kbps tier.
+    \item \texttt{-b:a 160k} sets the target audio bitrate. This flag
+    is omitted for the FLAC tier, since it is lossless.
+    \item \texttt{-movflags +faststart} moves the MP4 metadata (the
+    \texttt{moov} atom~\parencite{moov}) to the start of the file, so
+    Playback can begin before the whole file is downloaded.
+    \item The trailing positional argument is the output file path.
+    The wrapper uses the pattern \texttt{<encoder>-<bitrate>-<uuid>.mp4}
+    for the lossy tiers and \texttt{flac-static-<uuid>.mp4} for the
+    lossless tier.
+\end{itemize}
+
+\subsection{Shaka Packager flags}
+The Shaka Packager invocation for two of the AAC tiers is:
+\begin{minted}[breaklines]{bash}
+packager \
+  'input=/tmp/in/libfdk_aac-96-<uuid>.mp4,stream=audio,init_segment=/tmp/out/audio_0_init.mp4,segment_template=/tmp/out/audio_0_$Number$.m4s,playlist_name=audio_0.m3u8' \
+  'input=/tmp/in/libfdk_aac-160-<uuid>.mp4,stream=audio,init_segment=/tmp/out/audio_1_init.mp4,segment_template=/tmp/out/audio_1_$Number$.m4s,playlist_name=audio_1.m3u8' \
+  --segment_duration 3 \
+  --generate_static_live_mpd \
+  --mpd_output=/tmp/out/manifest.mpd \
+  --hls_master_playlist_output=/tmp/out/master.m3u8
+\end{minted}
+
+The Backend builds this command as a Python list and invokes it via
+\texttt{subprocess}, without a shell, so the \texttt{\$Number\$} token
+is passed to the packager literally. The shell rendering above wraps
+each per-input argument in single quotes to prevent bash from
+expanding it.
+
+The flags are:
+\begin{itemize}
+    \item \texttt{packager} is the Shaka Packager binary.
+    \item Each \texttt{input=...} argument defines one representation.
+    The keys are:
+    \begin{itemize}
+        \item \texttt{input=<path>} is the local path to the
+        transcoded audio file.
+        \item \texttt{stream=audio} selects only the audio stream from
+        that file.
+        \item \texttt{init\_segment=<path>} sets the output path for
+        the CMAF/fMP4 initialization segment (\texttt{*\_init.mp4}).
+        \item \texttt{segment\_template=<path>} sets the template for
+        media segment file names. \texttt{\$Number\$} is a placeholder
+        that the packager substitutes with the segment index.
+        \item \texttt{playlist\_name=<name>} sets the file name of the
+        per-representation HLS variant playlist, for example
+        \texttt{audio\_0.m3u8}.
+    \end{itemize}
+    \item \texttt{--segment\_duration 3} sets the target segment
+    length in seconds. The value of 3\,s was chosen as a balance
+    between bitrate-switching responsiveness and HTTP request
+    overhead.
+    \item \texttt{--generate\_static\_live\_mpd} switches the DASH
+    manifest type from \texttt{dynamic} (the default) to
+    \texttt{static}, which is what audio-on-demand clients expect and
+    what enables seeking through the track.
+    \item \texttt{--mpd\_output=<path>} sets the output path for the
+    DASH manifest (\texttt{manifest.mpd}).
+    \item \texttt{--hls\_master\_playlist\_output=<path>} sets the
+    output path for the HLS master playlist (\texttt{master.m3u8}).
+\end{itemize}
+
+\subsection{ebur128 loudness measurement flags}
+The FFmpeg invocation for the loudness pass, run on the FLAC output if
+it was produced or otherwise on the first AAC output, is:
+\begin{minted}{bash}
+ffmpeg -i flac-static-<uuid>.mp4 \
+    -filter:a ebur128=peak=true \
+    -f null -
+\end{minted}
+
+The flags are:
+\begin{itemize}
+    \item \texttt{-i <path>} selects the transcoded audio file the
+    wrapper picked for measurement.
+    \item \texttt{-filter:a ebur128=peak=true} runs the \texttt{ebur128}
+    audio filter. \texttt{peak=true} enables true-peak measurement
+    (dBTP) alongside the integrated LUFS value, so the wrapper gets
+    both numbers from a single pass.
+    \item \texttt{-f null -} discards the audio output, since only the
+    summary the filter prints on stderr is needed. The trailing
+    \texttt{-} tells FFmpeg to write the (discarded) output to stdout.
+\end{itemize}
+
+The wrapper parses the printed summary, extracts the \texttt{I:} (LUFS)
+and \texttt{Peak:} (dBTP) values, and stores them on the Song row.
+
+\printbibliography
+
+\end{document}

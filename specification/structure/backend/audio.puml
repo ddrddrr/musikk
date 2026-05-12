@@ -51,6 +51,10 @@ class FFmpegStep {
     rollback(ctx: ProcessingContext): void
 }
 
+class LoudnessMeasurementStep {
+    process(ctx: ProcessingContext): void
+}
+
 class ShakaPackagerStep {
     wrapper: ShakaPackagerWrapper
     process(ctx: ProcessingContext): void
@@ -58,6 +62,7 @@ class ShakaPackagerStep {
 }
 
 Step <|-- FFmpegStep
+Step <|-- LoudnessMeasurementStep
 Step <|-- ShakaPackagerStep
 
 class FFMPEGWrapper {
@@ -140,7 +145,7 @@ object ShakaPackagerMPDAndM3U8 <<instance>> {
 ShakaPackagerWrapper <.. ShakaPackagerMPDAndM3U8
 
 object AudioProcessingPipeline <<instance>> {
-    steps = [\n   FFmpegStep(FFMPEGFull),\n   ShakaPackagerStep(ShakaPackagerMPDAndM3U8)\n]
+    steps = [\n   FFmpegStep(FFMPEGFull),\n   LoudnessMeasurementStep(),\n   ShakaPackagerStep(ShakaPackagerMPDAndM3U8)\n]
     do_cleanup = true
 }
 
