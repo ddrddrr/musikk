@@ -3,8 +3,6 @@ from musikk.settings.base import *
 DEBUG = False
 CELERY_TASK_ALWAYS_EAGER = False
 
-# we serve from the same domain
-CORS_ALLOWED_ORIGINS = []
 CSRF_TRUSTED_ORIGINS = [
     config("SERVICE_URL", default="https://musikk.stream"),
 ]

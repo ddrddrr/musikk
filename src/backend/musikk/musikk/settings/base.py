@@ -8,7 +8,6 @@ import tempfile
 from pathlib import Path
 from typing import Literal
 
-from corsheaders.defaults import default_headers
 from decouple import AutoConfig, Csv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -25,21 +24,11 @@ DEBUG = config("DEBUG", default=True, cast=bool)
 ALLOWED_HOSTS = config(
     "DJANGO_ALLOWED_HOSTS", default="localhost,127.0.0.1", cast=Csv()
 )
-# TODO: remove, we dont need cross-origin requests
-CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOW_HEADERS = (
-    *default_headers,
-    "Bearer",
-    "Last-Event-ID",
-    "Access-Control-Allow-Origin",
-    "Access-Control-Allow-Credentials",
-)
 
 ### Core
 INSTALLED_APPS = [
     "daphne",
     "channels",
-    "corsheaders",
     "jazzmin",
     "django.contrib.admin",
     "django.contrib.auth",
@@ -72,7 +61,6 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
-    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
