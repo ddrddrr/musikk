@@ -1,0 +1,53 @@
+@startuml FrontendUser
+
+!include ../../_style.puml
+
+title User feature - component hierarchy and IO boundary
+' Source: src/frontend/musikk/src/features/user/
+
+package "Pages" {
+    [ProfilePage]
+}
+
+package "Presentation" {
+    [ProfileForm]
+    [Connections]
+    [UserCard]
+    [UserAvatar]
+    [UserIdentifier]
+}
+
+ProfilePage --> ProfileForm
+ProfilePage --> UserAvatar
+Connections --> UserCard
+UserCard --> UserAvatar
+UserCard --> UserIdentifier
+UserIdentifier --> UserAvatar
+
+package "State (providers + hooks)" {
+    [UserConnectionsProvider\n(friends, followers, followed)] as connections_provider
+    [useFollowUser] as use_follow
+    [useUserWsEvents] as use_user_ws
+    [useUserLibrary / useUserLikes] as use_library_likes
+}
+
+ProfilePage ..> use_follow : uses
+UserCard ..> use_follow : uses
+Connections ..> connections_provider : reads
+use_follow ..> connections_provider : invalidates
+
+cloud "Backend\n/api/v1" as backend
+queue "WSClient\nuser group" as ws
+
+' --- HTTP ---
+ProfilePage ..> backend : GET /users/{uuid}
+ProfileForm ..> backend : PATCH /users/me
+connections_provider ..> backend : GET /users/{uuid}/friends\nGET /users/{uuid}/followers\nGET /users/{uuid}/followed
+use_follow ..> backend : POST /users/{uuid}/followed\nDELETE /users/{uuid}/followed
+use_library_likes ..> backend : GET /me/liked-songs\nGET /me/liked-collections\nGET /users/{uuid}/library
+
+' --- WS (events received) ---
+use_user_ws <.. ws : user.updated\nuser.followed\nuser.unfollowed\nuser.liked_songs.changed\nuser.liked_collections.changed\nuser.library.changed
+use_user_ws ..> connections_provider : invalidates query keys
+
+@enduml

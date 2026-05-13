@@ -1,0 +1,78 @@
+@startuml ChatLifecycle
+
+!include ../_style.puml
+
+title Chat message lifecycle (send + cross-client reconcile + typing)
+
+actor "User A" as user_a
+actor "User B" as user_b
+
+box "User A clients" #EEF2F8
+participant "Tab 1\n(active chat)" as tab_a1
+participant "Tab 2\n(user chats list)" as tab_a2
+end box
+
+box "User B clients" #EEF2F8
+participant "Tab 3\n(active chat)" as tab_b
+end box
+
+box "Backend" #F8EFE5
+participant "ChatMessagesListCreateView\n(DRF)" as view
+database "Database" as db
+participant "Channels layer\n(topic chat.<uuid>)" as channels
+end box
+
+note over tab_a1, tab_b
+A and B subscribe to the chat topic via useChatWsEvents (-> useTopicSubscription).
+Topic-group membership is reference-counted in WSClient, so the
+subscription holds while ChatBox is mounted on any tab.
+end note
+
+== Subscribe ==
+tab_a1 -> channels : ws action "subscribe"\n{ topic: "chat.<uuid>" }
+tab_b -> channels : ws action "subscribe"\n{ topic: "chat.<uuid>" }
+
+== Typing (throttled, 3s interval) ==
+user_a -> tab_a1 : keystroke in ChatMessageForm
+tab_a1 -> channels : ws action "typing"\n{ topic: "chat.<uuid>" }
+note right of channels : backend caps to 1 send / 2s per group\n(TypingWSActionHandler)
+channels -->> tab_b : ws event "chat.typing"\n{ user_uuid, display_name }
+tab_b -> user_b : show TypingIndicator\n(TTL 5s, decays locally)
+
+== Send message ==
+user_a -> tab_a1 : submit message
+tab_a1 -> view : POST /users/{A}/chats/{uuid}/messages\n{ content, attachment? }
+view -> db : insert Publication (Chat scope)
+view -> channels : send_ws_event(topic_group("chat", uuid),\n"chat.messages.changed", { chat_uuid })
+view --> tab_a1 : 201 Created\n{ publication }
+note right of tab_a1
+useCreateChatMessage onSuccess
+invalidates publicationKeys.chatMessages(uuid)
+and publicationKeys.userChats(A)
+end note
+tab_a1 -> view : refetch GET /users/{A}/chats/{uuid}/messages
+
+channels -->> tab_a1 : ws event "chat.messages.changed"
+channels -->> tab_a2 : ws event "chat.messages.changed"
+channels -->> tab_b : ws event "chat.messages.changed"
+
+note over tab_a1, tab_b
+useUserChatsWsEvents invalidates:
+  * publicationKeys.chatMessages(chat_uuid)
+  * publicationKeys.chatAttachments(chat_uuid)
+  * userChats list
+Each tab refetches only the queries currently mounted in it.
+end note
+
+tab_a2 -> view : refetch GET /users/{A}/chats (preview list updates)
+tab_b -> view : refetch GET /users/{B}/chats/{uuid}/messages
+
+== Scroll anchor on incoming message ==
+note over tab_b
+useScrollAnchor + useNewMessagesIndicator:
+if the user is scrolled away from the bottom when a new message lands,
+the scroll position is held in place and a NewMessagesIndicator
+is shown until the user scrolls down or clicks the indicator.
+end note
+
+@enduml

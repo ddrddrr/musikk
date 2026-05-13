@@ -1,0 +1,72 @@
+@startuml WsCacheInvalidation
+
+!include ../_style.puml
+
+title WS-driven cache invalidation across tabs (follow as the worked example)
+
+actor "User A" as user_a
+actor "User B" as user_b
+
+box "User A clients" #EEF2F8
+participant "Tab 1\n(active)" as tab1
+participant "Tab 2\n(open, profile of B)" as tab2
+end box
+
+box "User B clients" #EEF2F8
+participant "Tab 3" as tab3
+end box
+
+box "Backend" #F8EFE5
+participant "FollowedView\n(DRF)" as view
+database "Database" as db
+participant "Channels layer\n(user groups)" as channels
+end box
+
+note over tab1, tab3
+Each tab is a separate WS consumer in the same user_group(uuid).
+A mutation that fans out via WS reaches every tab of every connected
+user, so React Query caches stay coherent without per-tab polling.
+end note
+
+== Mutation ==
+user_a -> tab1 : click "Follow B"
+tab1 -> view : POST /users/{B}/followed
+view -> db : insert UserFollow(A, B)
+view -> db : insert FollowerNotification(A -> B)
+
+== Broadcast ==
+view -> channels : send_ws_event(user_group(A), "user.followed", {from, to})
+view -> channels : send_ws_event(user_group(B), "user.followed", {from, to})
+view --> tab1 : 204 No Content
+
+channels -->> tab1 : ws event "user.followed"
+channels -->> tab2 : ws event "user.followed"
+channels -->> tab3 : ws event "user.followed"
+
+== Cache invalidation (per tab) ==
+note over tab1, tab3
+useUserWsEvents.ts (frontend) reacts identically in every tab:
+invalidates userKeys.followed(from_uuid), userKeys.friends(from_uuid),
+userKeys.followers(to_uuid). TanStack refetches only the queries that
+are currently mounted in that tab.
+end note
+
+tab1 -> view : refetch GET /users/{A}/followed (mounted)
+tab2 -> view : refetch GET /users/{B}/followers (mounted on B's profile)
+tab3 -> view : refetch GET /users/{B}/followers (if mounted)
+
+user_b -> tab3 : sees new follower without page reload
+
+== Side note: same pattern, other features ==
+note over channels, tab3
+The same invalidate-on-WS pattern is reused by:
+  * notifications.changed -> notificationKeys.base
+  * user.library.changed / user.liked_songs.changed
+    / user.liked_collections.changed -> userKeys.likedSongs etc.
+  * queue.changed -> queueKeys.base
+  * chat.messages.changed -> publicationKeys.chatMessages(uuid)
+  * collection.comments.changed -> publicationKeys.comments(uuid)
+Only the event name and the invalidated keys differ.
+end note
+
+@enduml

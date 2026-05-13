@@ -34,7 +34,11 @@ AudioInput: TypeAlias = BytesLike | Pathish | SeekableReader
 
 def _validate_size_type(song: AudioInput) -> None:
     """
-    Validate size and type
+    First pass of the upload chain. Operates on the raw bytes alone so we
+    can reject the obvious cases (oversized payloads, non-audio MIME
+    sniffed from the first 2048 bytes, formats outside the allow list)
+    without spawning FFprobe. Anything past this gate is worth the cost
+    of a probe.
     """
     header: bytes
     size: int
@@ -86,7 +90,14 @@ def _validate_size_type(song: AudioInput) -> None:
 
 def _validate_audio_properties(info: AudioStreamInfo) -> None:
     """
-    Validate duration, sample rate, channels, codec
+    Second pass of the upload chain, run only after the first pass and
+    FFprobe metadata extraction have succeeded. The size and MIME checks
+    in the first pass cannot bound transcoding cost on their own because
+    a short file can still hide an exotic codec, a sample rate the
+    decoder will reject, or a channel count the packager cannot map to a
+    stereo HLS/DASH ladder. The chosen limits and the trade-offs behind
+    each one are documented in the Audio Processing Pipeline Details
+    appendix of the thesis.
     """
     if info.duration_seconds > MAX_DURATION_SECONDS:
         raise ValidationError(

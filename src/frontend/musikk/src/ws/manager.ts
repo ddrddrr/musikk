@@ -1,8 +1,7 @@
 import { WSClient } from "./client";
 
-// This manager is used due to weird React shenanigans
-// prev simple solution with keeping a single instance in a ref and simply closing
-// with useEffect didn't properly work...
+// Refcounted singleton so React 19 StrictMode double-mounts and multiple
+// consumers share a single WS connection instead of tearing it down.
 class WebSocketManager {
     private static client: WSClient | null = null;
     private static subscribers = 0;

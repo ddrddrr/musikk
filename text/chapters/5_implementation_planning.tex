@@ -15,92 +15,55 @@ There are four main approaches used today: Basic Download, Progressive Download,
 
 \begin{itemize}
     \item \textbf{Basic Download}\\
-    Basic Download works by downloading the entire file before Playback begins.
-    It does so by making a standard HTTP GET request to which the server sends back an HTTP response
-    with the media as raw binary data in its body.~\parencite{mime_octet_stream}
-    Only when the full transfer has completed, the user can start the Playback.
-
-    This method has several limitations: for high-quality files, it typically requires
-    significant storage space and time to download.
-    Additionally, if the user’s connection is unstable, it can make the application (which relies
-    on playback) unusable.
-    In cases of poor network conditions, the situation can be partially improved by
-    providing multiple representations of the same file, such as a highly compressed version
-    alongside a lossless one.
-    However, after the download has started, the system is unable to
-    adapt to the changing network state.
-    In other words, the user is tied to the version of the file that has started
-    to download and cannot benefit from, for instance, switching from a slow
-    mobile network to a fast Wi-Fi connection.
+    With Basic Download, the entire file must arrive before Playback can start.
+    The client issues a standard HTTP GET, and the server returns the media as
+    raw binary data in the response body.~\parencite{mime_octet_stream}
+    For high-quality files this means significant storage space and download
+    time, and once a download has started the system cannot adapt to a change
+    in network conditions.
 
     \item \textbf{Progressive Download}
     \footnote{Sometimes called `Pseudo-Streaming'.~\parencite{pseudo_streaming}}
     \\
-%    TODO: the transition doesnt sound right...
-    Progressive Download also utilizes HTTP to get the content,
-    but the client does not need to download the entire file before playback starts.
-    Instead, it fetches a short initial part, begins playback, and continues downloading
-    further parts as needed.
+    Progressive Download lets Playback start before the full file arrives.
+    The client fetches a short initial part over HTTP, begins Playback, and
+    requests further parts as needed, usually via HTTP byte-range
+    requests.~\parencite{range_http_requests}
+    The player relies on audio container metadata~(e.g., the header of an MP4
+    file) that maps playback time to byte offsets, so it can request the next
+    few seconds of audio or seek to a different position.~\parencite{progressive_download}
 
-    This is usually implemented with HTTP byte-range requests.~\parencite{range_http_requests}
-    To make this possible, the client relies on audio container
-    metadata~(e.g., the header of an MP4 file) that maps playback time to
-    byte offsets.~\parencite{progressive_download}
-    With that mapping, the player can request the next few seconds of audio
-    and also seek by requesting a different range.
-
-    In comparison to Basic Download, since the file no longer needs to be downloaded fully,
-    storage becomes less of an issue.
-    The player only needs a small buffer in memory, and older data
-    can be discarded once it has been played.
-    The browser may still cache recently fetched ranges,
-    but the application does not need to persist complete files on disk.
-
-    In addition, it becomes possible to approximate adaptive playback.
-    One approach, presented by~\citeauthor{progressive_download}~\parencite{progressive_download},
-%    TODO: explain sep tracks?
-    involves storing multiple representations of the same audio file as separate tracks inside a single
-    container file~(e.g., MP4) and switching between them during playback.
-    The client then continues requesting parts of the file
-    using HTTP byte ranges, but chooses the
-    track that best matches the current network conditions.
-    However, seamless switching requires the representations to be prepared
-    in a compatible way: for example, corresponding parts of each track
-    must cover the same playback time intervals and start at safe switching points.
+    Storage becomes less of an issue than with Basic Download, since the player
+    only needs a small in-memory buffer and older data can be discarded once
+    played.
+    Adaptive playback is also possible, but it is not standardized.
+    It requires custom preprocessing of the audio on the server and custom
+    client logic to choose between representations during Playback.
 
     \item \textbf{Segmented HTTP Streaming}\label{it:streaming}\\
-    With Segmented HTTP Streaming, the audio file is first split into many small audio files (chunks),
-    and a special manifest file is then generated that lists the chunks
-    and describes which time range each chunk covers~(usually a couple of seconds).~\parencite{dash_technical}
-    The most common implementations of this approach are MPEG-DASH and HLS, both of which are
-    described in \chapterref{ch:implementation}.
-    The client then downloads the individual chunks and uses them for playback instead
-    of working with byte range requests for a single large file,
-    as was the case with Progressive Download.
-    Since the manifest provides a mapping of chunks to audio time segments,
-    this makes it possible to play the audio from any point and enables seeking.
+    Segmented HTTP Streaming bakes adaptive playback into the protocol itself,
+    rather than leaving it to the application.
+    The audio file is split into many small chunks, and a manifest is generated
+    that lists the chunks and describes which time range each chunk
+    covers~(usually a couple of seconds).~\parencite{dash_technical}
+    The most common implementations of this approach are MPEG-DASH and HLS,
+    both of which are described in \chapterref{ch:implementation}.
+    The client downloads individual chunks instead of working with byte ranges
+    in a single large file, and the manifest provides the chunk-to-time mapping
+    needed for Playback and seeking.
 
-    Moreover, the original audio file can first be encoded into multiple formats of different sizes.
-    Then, it is possible to preprocess those files and create a single manifest that
-    allows choosing chunks of different sizes and quality for the same time slot.
-    As a result, chunks can be selected based on network
-    conditions or device capabilities, providing a more optimized playback.
-
-    Compared to Progressive Download, Streaming makes adaptive playback simpler,
-    because the manifest provides a standardized way to describe multiple representations
-    and their timing.
-    It also simplifies retries and caching, since each chunk is fetched as a separate
-    HTTP resource and can be handled efficiently by standard HTTP caches and CDNs.~\parencite{cdn_caching}
-    Finally, the client logic becomes more straightforward: instead of computing byte
-    ranges inside a large file, the player selects the next chunk from the manifest.
+    The original audio file can also be encoded into multiple representations of
+    different sizes and qualities, all referenced by the same manifest.
+    The client picks chunks based on network conditions or device capabilities,
+    and since each chunk is a separate HTTP resource, retries and caching are
+    handled efficiently by standard HTTP caches and
+    CDNs.~\parencite{cdn_caching}
 
     \item \textbf{Peer-to-Peer}\\
-    In standard P2P audio transfer, audio data is shared directly between users'
-    devices rather than being served from a central server.~\parencite{p2p_computing}
-    Each user acts as both a client and a server, sending data to and
-    consuming audio from other users in the peer-to-peer network.
-    This method can reduce server load and improve access speed, but it relies heavily on user
-    participation and network conditions.
+    With Peer-to-Peer transfer, audio data is shared directly between users'
+    devices rather than served from a central server.~\parencite{p2p_computing}
+    This can reduce server load, but Playback speed depends on peer availability
+    and the network conditions on the other end.
 \end{itemize}
 
 Streaming was chosen as the playback method for this thesis.
@@ -129,107 +92,75 @@ Token Authentication, and Third-Party Authentication~(OAuth2).
 
 \begin{itemize}
     \item \textbf{Basic Authentication} \\
-    Basic Authentication sends a username and password with each HTTP request made from the
-    browser.
-    They are placed in the HTTP \texttt{Authorization} header, typically
-    Base64-encoded.~\parencite{basic_auth}
+    With Basic Authentication, what is sent on every request is the User's actual
+    password, Base64-encoded for transport but not encrypted in any way.
+    The credentials are placed in the HTTP \texttt{Authorization} header, and the
+    browser typically caches them after the first successful login and attaches
+    the header to subsequent requests on its own.~\parencite{basic_auth}
 
-    The browser then usually caches those credentials after the first successful login and
-    automatically attaches the header to subsequent requests.
-    \footnote{This is usually not clearly stated in the browser documentation.
-    However, for example, in the case of Mozilla this is implied in bug tracker tickets and user
-    documentation~\parencite{basic_auth_mozilla_bugtracker}~\parencite{basic_auth_mozilla_caching}. }
-
-    Nonetheless, it has multiple problems, even if used over HTTPS\@.
-    The value sent in the \texttt{Authorization} header is the User's actual password,
-    Base64-encoded for transport but not encrypted in any way.
-    If the browser side is compromised, or if this header ends up in a log or telemetry record, for
-    instance after HTTPS is terminated at an internal proxy~\parencite{azure_tls_termination}, what
-    leaks is the password itself rather than some opaque value.
-    Revocation, therefore, requires a password change, which can not be transparently done without User
-    interaction.
-
-    Moreover, there is no protocol-level notion of \textit{logout} or per-device sessions.
-    Since the browser keeps attaching the cached credentials on its own, the Frontend has to resort
-    to workarounds to sign a User out, such as sending a request with deliberately wrong credentials
-    in the \texttt{Authorization} header so the browser discards the cached value.
-    Otherwise, the User has to clear the browser cache manually~\parencite{basic_auth_mozilla_bugtracker}.
+    If this value leaks, for instance into a log or telemetry record after HTTPS
+    is terminated at an internal proxy~\parencite{azure_tls_termination}, what
+    leaks is the password itself rather than an opaque token.
+    Revocation therefore requires a password change.
+    There is also no protocol-level notion of \textit{logout} or per-device
+    sessions, so signing a User out requires Frontend-side workarounds.
 
     \item \textbf{Cookie-Based Session Authentication} \\
-    Session authentication makes it possible to identify users without sending
-    their credentials on every request.
-    Initially, the user must log in with their credentials in the same manner as for Basic Authentication.
-    But, instead of the browser caching and reusing the credentials, the server that processed the request
-    creates a \textit{session} record, usually a data structure holding relevant user information (ID, roles, etc.),
-    and instructs the browser to set a cookie with the session ID\@.
-    This ID is later sent on subsequent requests instead of the user credentials and is
-    used to identify the logged-in user.~\parencite{session_auth}
+    Session authentication keeps the credential on the server and only sends an
+    opaque identifier to the client.
+    The user logs in with their credentials, the server creates a \textit{session}
+    record holding the relevant user information~(ID, roles, and so on), and
+    instructs the browser to set a cookie with the session
+    ID\@.~\parencite{session_auth}
+    This ID is sent on subsequent requests instead of the credentials and
+    identifies the logged-in user.
 
-    Compared to Basic Authentication, this enables server-side logout and revocation~
-    (by deleting or invalidating sessions), per-session security policies
-    such as device tracking, inactivity timeouts,
-    centralized control of active logins, and a simpler implementation
-    of features that depend on temporary state.
-
-    The main trade-off is the need for a session store, typically implemented using a relational database or an
-    in-memory key–value store.
-    This introduces additional operational
-    complexity, infrastructure dependencies, and potential bottlenecks if not configured correctly.
+    Compared to Basic Authentication, this enables explicit server-side logout
+    and revocation~(by deleting or invalidating sessions), as well as per-session
+    policies such as device tracking and inactivity timeouts.
+    The main trade-off is the need for a session store, typically a relational
+    database or an in-memory key-value store, which adds infrastructure and a
+    potential bottleneck if not configured correctly.
 
     \item \textbf{Token Authentication} \\
-    Token Authentication replaces raw credentials with a token that the client presents on each
-    request instead of the login and password.
-    The token is issued by the server after a successful login and is later sent
-    by the client in the \texttt{Authorization} header, usually under the \texttt{Bearer} identifier.
-
-    There are two common variants of this approach.
-    The first one is the \textit{database-backed token}: the server stores the token together with
-    the corresponding user record and looks it up on every request.
-    This is similar to a session, but the identifier travels in a header instead of a cookie.
-    Such tokens can be revoked at any moment by deleting the stored record.
-%    TODO: cite jwt
-    The second variant is the \textit{self-contained token}, such as JSON Web Tokens~(JWT).
-    Here the token itself carries a payload with the user identity and permissions, so the
-    server only needs to verify the signature with a shared secret or a public key, without any lookup.
-    This removes the dependency on a central token store and can simplify scaling, since any
-    instance that knows the verification key can accept requests.
-
-    Token Authentication works well for clients that are not browsers, such as command-line tools,
-    mobile applications, and IoT devices, where sending cookies is inconvenient and the token can be
-    securely stored.
-    It is also commonly used for public APIs and distributed systems, where independent services need
-    to authenticate to each other without sharing a central session store.
-
-    Nevertheless, Token Authentication has a few notable trade-offs.
-    For self-contained tokens, revocation is hard: once issued, a token usually stays valid
-    until its expiry time has elapsed.
-    It is possible to keep a \textit{revocation list} and check every request against it, but
-    that brings back state, coordination, and additional latency.
 %    TODO: cite XSS / HttpOnly references
-    In a single-page application, the token also has to be stored somewhere on the client side.
-    If held in \texttt{localStorage}, it is reachable from any script on the page, so a
-    Cross-Site Scripting~(XSS) injection can obtain it, while session cookies marked
-    \texttt{HttpOnly} are not exposed to scripts.
-    Moreover, the Frontend has to attach the token to every request and handle token refresh
-    explicitly, whereas cookies are sent by the browser automatically.
+    Token Authentication replaces raw credentials with a token issued by the
+    server after login, which the client sends in the \texttt{Authorization}
+    header under the \texttt{Bearer} identifier.
+    For a single-page application, the trade-off that matters most is where
+    the token lives in the browser: if held in \texttt{localStorage}, it is
+    reachable from any script on the page, so a Cross-Site Scripting~(XSS)
+    injection can read it, while session cookies marked \texttt{HttpOnly} are
+    not exposed to scripts.
+
+%    TODO: cite jwt
+    Tokens come in two common variants.
+    A \textit{database-backed token} is stored on the server alongside the
+    user record and looked up on every request, similar to a session but
+    carried in a header instead of a cookie.
+    A \textit{self-contained token}, such as a JSON Web Token~(JWT), carries
+    the user identity and permissions in its payload and is verified by
+    signature, with no lookup.
+    Self-contained tokens simplify horizontal scaling, but revocation is hard.
+    Once issued, a token stays valid until it expires, unless a revocation
+    list is kept, which brings back state and coordination.
+    In both variants, the Frontend has to attach the token to every request
+    and handle refresh explicitly, whereas cookies are sent by the browser
+    automatically.
 
     \item \textbf{Third-Party Authentication~(OAuth2)} \\
-    Third-Party Authentication delegates user login to a third-party
-    identity provider (via the OAuth~2.0 protocol), such as Google, GitHub, and others.~\parencite{oauth2}
-    Instead of handling passwords directly, the application trusts this provider to authenticate
-    the user and assert their identity.
-
-    In the standard authentication flow, the application redirects the user
-    to the provider's endpoint, where the user logs in.
-    The provider then redirects back with an authorization code, which the
-    application exchanges for tokens that can be later used to obtain user information.
-    Using that information, the application can then create internal user models
-    with the provided identity.
-
-    Thus, this approach offloads password storage, multi-factor authentication, and
-    account recovery to the provider.
-    However, it should not be the only authentication method the application provides, since it requires
-    the user to have an account with one of the providers.
+    Third-Party Authentication is a complement to one of the methods above
+    rather than a replacement for it.
+    It delegates login to an external identity provider via the OAuth~2.0
+    protocol, such as Google or GitHub.~\parencite{oauth2}
+    The application redirects the user to the provider, receives an
+    authorization code in the callback, and exchanges it for tokens that
+    identify the user.
+    Password storage, multi-factor authentication, and account recovery are
+    then handed off to the provider.
+    However, this cannot be the only authentication method an application
+    offers, since it would require every user to have an account with one of
+    the supported providers.
 \end{itemize}
 
 Based on the characteristics of the authentication methods, it was
@@ -246,7 +177,7 @@ design.
 Another important concept that must be addressed is the server-client communication.
 
 
-\section{Server-Client Communication}
+\section{Server-Client Communication}\label{sec:server_client_communication}
 Some of the features outlined in \chapterref{ch:specification}~(such as playback handling,
 % TODO: there was no immediate content updates in spec chapter no? but smth else was...
 and immediate content updates) require bi-directional communication.
@@ -263,65 +194,51 @@ This thesis focuses on four commonly used methods for server-client communicatio
 Long Polling, Server-Sent Events, WebSockets, and Push API\@.
 \begin{itemize}
     \item \textbf{Long Polling} \\
-    Long Polling is a technique where the client sends an HTTP request and waits until the server responds,
-    holding the HTTP connection open until a response is received (or a timeout occurs).
-    Once a response is received, the client immediately issues another request, therefore listening to
-    server messages continuously.~\parencite{long_polling}
-    While this method works in environments where server-to-client messages are rare,
-    it is unsuitable for high-throughput scenarios (especially for frequent and small payloads),
-    as it introduces a significant overhead by repeatedly opening and closing HTTP connections.~\parencite{server_client_comparison}
+    Long Polling simulates server-to-client communication by holding an HTTP
+    request open until the server has something to send, after which the
+    client immediately issues another request.~\parencite{long_polling}
+    It works in environments where server messages are rare, but for
+    high-throughput scenarios with frequent small payloads, it adds
+    significant overhead from repeatedly opening and closing HTTP
+    connections.~\parencite{server_client_comparison}
 
     \item \textbf{Server-Sent Events (SSE)} \\
-    SSE is a one-way communication protocol that allows the server to send data
-    to the client over a single, long-lived HTTP connection.
+    SSE is a one-way protocol that lets the server push data to the client
+    over a single long-lived HTTP connection.
+    The client opens the connection with an HTTP request, and the server keeps
+    it open and uses it to send any number of subsequent events.~\parencite{sse}
+    Compared to Long Polling, no new connection is needed per update, while
+    still running over plain HTTP, which fits most networking setups.
 
-    Firstly, the client establishes the connection via an HTTP request, to which the server
-    answers with a response that has its \textit{content type} set to \texttt{text/event-stream}.
-    The server can then reuse that open connection to send an
-    unlimited number of responses~(events).~\parencite{sse}
-    Compared to Long Polling, SSE does not need to open a new HTTP connection for every update,
-    reducing the number of requests.
-    At the same time, it is still based on plain HTTP, so it works
-    in most browsers and fits well into networking setups.
-
-    However, this protocol also requires additional connection handling logic: the proxy
-    and the server must keep track of all connected clients.
-    Moreover, special handling on the Backend must be added in order to
-    properly route messages.~\parencite{django_channels}
+    The trade-off is that the proxy and the server must track all connected
+    clients, and the Backend must add routing logic to deliver each event to
+    the right connection.~\parencite{django_channels}
 
     \item \textbf{WebSockets} \\
-    WebSockets, in comparison to SSE, provide full-duplex communication over
-    a single TCP connection.
-    This is achieved by firstly creating a standard HTTP connection and then upgrading it to the
-    WebSocket protocol via the WebSocket Protocol Handshake.~\parencite{websockets}
-    This method allows messages to be sent both ways at any moment and is suited for
-    applications that require frequent two-way communication.~\parencite{server_client_comparison}
+    WebSockets provide full-duplex communication over a single TCP connection,
+    established by upgrading a standard HTTP connection via the WebSocket
+    Protocol Handshake.~\parencite{websockets}
+    Messages can flow in both directions at any moment, which suits
+    applications that need frequent two-way
+    communication.~\parencite{server_client_comparison}
 
-    However, adding WebSockets to an application, as well as SSE, requires additional infrastructure and logic for
-    managing connections and message routing.
-    In addition, WebSocket messages do not follow the normal HTTP request-response model.
-    They cannot be cached by standard HTTP caches~\parencite{http_caching} or CDNs,
-    and they do not benefit from built-in features such as idempotent retries.
+    As with SSE, adding WebSockets requires extra infrastructure and logic for
+    connection and message routing.
+    In addition, WebSocket messages do not follow the HTTP request-response
+    model, so they cannot be cached by standard HTTP
+    caches~\parencite{http_caching} or CDNs, and they do not benefit from
+    built-in features such as idempotent retries.
 
     \item \textbf{Push API} \\
-    The Push API is a specialized web interface that allows a server to send messages to the browser
-    without a preceding request from the client.~\parencite{pushapi}
-    After the user grants permission, the browser creates a \textit{push subscription}
-    and exposes a special endpoint.~\parencite{http_push}
-    The server can then send data to that endpoint without additional negotiation.
-    When such a request is received, the browser validates it and queues the message for processing
-    by a special background script, called a \textit{service worker}.~\parencite{service_workers_mdn}
-    Each domain (website) can register its own service worker, which is typically dormant and
-    is only started when events such as push notifications need to be handled.
-
-    While this mechanism is useful for notification systems, where short delivery time is not critical,
-    it is unsuitable for interactions that require an immediate response,
-    such as updating the User's current Playback state.
-    Messages can be delayed inside the browser because multiple sites may have pending
-    push messages to process, and the browser can throttle service worker execution
-    and limit the resources available to it.
-    As a result, push notifications typically have higher and less predictable latency
-    compared to direct communication protocols, such as WebSockets.~\parencite{pushapi}
+    The Push API is intended for browser notifications, not for interactive
+    state updates.~\parencite{pushapi}
+    The server sends messages to a per-domain push endpoint, the browser
+    queues them for a background \textit{service worker}, and the browser is
+    free to throttle that worker depending on system
+    load.~\parencite{http_push, service_workers_mdn}
+    The resulting latency is higher and less predictable than with direct
+    protocols such as WebSockets, making the Push API unsuitable for
+    time-sensitive updates such as Playback state.~\parencite{pushapi}
 \end{itemize}
 
 Based on the requirements outlined in \chapterref{ch:specification}, at least three features
@@ -374,15 +291,15 @@ These choices define what the Backend and Frontend have to support, and Backend 
 
 \subsection{Language}
 Python was chosen as the language for the Backend of the application.
-It is well-suited for web development, since it provides many libraries and built-in interfaces
-for HTTP APIs, database access, background processing and other areas which are going to be used
-in the implementation.
-TODO (also that its interpreted and not strongly typed)
-Its syntax also allows fast prototyping,
-which is helpful while iterating on the data model and the overall app architecture.
-Performance is good enough for the scale of this project, as the application is not expected to
-handle very high request rates, and the most computationally heavy task, audio processing, is
-handed off to external CLI tools (see \chapterref{ch:implementation}).
+It is well-suited for web development, since it provides many libraries and
+built-in interfaces for HTTP APIs, database access, background processing, and
+other areas used in the implementation.
+Its syntax also allows fast prototyping, which is helpful while iterating on
+the data model and the overall app architecture.
+Performance is good enough for the scale of this project, as the application
+is not expected to handle very high request rates, and the most computationally
+heavy task, audio processing, is handed off to external CLI tools
+(see \chapterref{ch:implementation}).
 
 \subsection{Python Framework Comparison}
 There are currently three widely used frameworks
@@ -401,20 +318,19 @@ available for Python: FastAPI, Django, and Flask.
     Moreover, routing/middleware is trivial to configure.~\parencite{fastapi_features}
 
     However, FastAPI is relatively new and simple.
-    It can work well for small or highly custom systems, but for standard setups,
-    it lacks many convenience wrappers.
-    For example, the WebSockets integration does not provide connection lifecycle management or message
-    broadcast capabilities.~\parencite{fastapi_websockets}
-    Additionally, no predefined templates are available for basic CRUD operations; therefore,
-    they must be implemented manually, which adds unnecessary complexity.
-
-    And lastly, despite the steady growth of FastAPI usage, the community support
-    is still not as wide as for Django or Flask.~\parencite{so_2024_survey}
+    It can work well for small or highly custom projects, but for standard
+    setups, it lacks many convenience wrappers.
+    For example, the WebSockets integration does not provide connection
+    lifecycle management or message broadcast
+    capabilities.~\parencite{fastapi_websockets}
+    Additionally, no predefined templates are available for basic CRUD
+    operations, so they must be implemented manually, which adds unnecessary
+    complexity.
 
     \item \textbf{Django} \\
     Django is a ``batteries-included''~\parencite{django} framework in the sense that it has
     tools for most of the common web development tasks.
-    It provides built-in user session management, easy CSRF, CORS and XSS protection setup,
+    It provides built-in user session management, easy CSRF and XSS protection setup,
     built-in file storage abstractions, and integrated handling of media files (images, audio, etc.).
     Support for REST APIs can be added through
     \texttt{django\hyp rest\hyp framework}~\parencite{drf}, which provides generic views,
@@ -437,12 +353,11 @@ available for Python: FastAPI, Django, and Flask.
     and many third-party middlewares/libraries remain synchronous / async-unsafe.
 
     \item \textbf{Flask} \\
-%    TODO: again don't think that "also" works
-    Flask is also a lightweight Python web framework.~\parencite{flask}
-    It provides only a small core with routing, request/response handling, and templating, while most
-    other functionality is added through extensions.
-    This modular design is suitable mainly for small services or prototypes with
-    a limited and clearly defined scope.
+    Flask is a lightweight Python web framework that provides only a small core
+    with routing, request/response handling, and templating, while most other
+    functionality is added through extensions.~\parencite{flask}
+    This modular design is suitable mainly for small services or prototypes
+    with a limited and clearly defined scope.
 
     However, for typical JSON-based APIs, FastAPI offers similar functionality with fewer
     dependencies and less setup, while Flask usually requires several additional libraries
@@ -499,9 +414,8 @@ Second, PostgreSQL has native support for UUID values via a dedicated
 This type stores UUIDs in a compact binary form and allows efficient indexing
 and comparison.
 \footnote{If using time-based UUID types, e.g., UUIDv7~\parencite{uuid_v7}}
-In contrast, in many other databases UUIDs must be stored as plaintext~
-(e.g., \texttt{CHAR(36)}), since they do not support this format natively.
-This is less space- and index-efficient.
+In many other databases UUIDs must instead be stored as plaintext~
+(e.g., \texttt{CHAR(36)}), which is less space- and index-efficient.
 Django's \texttt{UUIDField} also maps cleanly to PostgreSQL's native type, so
 UUID-based identifiers can be used without extra configuration.
 
@@ -527,15 +441,10 @@ often only requiring small pieces of JavaScript for interaction.~\parencite{djan
 In contrast, an SPA typically fetches JSON or other data from the server and,
 based on it, renders and updates the user interface directly in the browser.~\parencite{spa}
 
-% TODO: if possible, try to find that article again
 The research for the Frontend began by deciding which of these approaches to use.
-For many web applications, rendering HTML on the server reduces client-side complexity,
-avoids duplicating logic between browser and Backend, and works reliably across a wide
-range of devices and browsers, making it a simpler and more robust default choice.
-
-However, in this project, the application must maintain
-a lot of state directly in the browser: the current playback
-position, the playback queue, the volume level, the chat state, etc.
+In this project, the application must maintain a lot of state directly in the
+browser: the current Playback position, the Playback Queue, the volume level,
+the Chat state, and so on.
 These values change frequently and in small steps, sometimes several times per
 second, and require immediate feedback for the user.
 Moreover, the user interface must respond to events sent by
@@ -583,18 +492,8 @@ This matches the requirements established earlier in this section,
 since values such as the Playback position, queue, volume, and live
 Chat messages change frequently and need to appear on screen
 immediately, without manual DOM updates.
-
-Components are written in JSX, an extension to JavaScript that allows
-HTML-like markup to live next to the component code.
-This makes it natural to define repeating interface pieces once, such
-as a Song row, a Chat message, or a Comment, and reuse them throughout
-the application.
-
-React DevTools~\parencite{react_devtools} also makes it possible to
-inspect the currently rendered components and their state directly in
-the browser, which simplifies debugging.
-React is widely adopted~\parencite{so_react}, so examples and solutions
-to common problems are easy to find.
+React is also widely adopted~\parencite{so_react}, so examples and
+solutions to common problems are easy to find.
 
 
 \section{Summary}

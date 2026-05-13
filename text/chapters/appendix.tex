@@ -1,39 +1,16 @@
-%%
-%% Detailed notes on the audio processing pipeline.
-%%
-%% This file expands on the "Audio Processing and Streaming" section of
-%% chapter 6 (text/chapters/6_implementation.tex). The main chapter
-%% names every stage briefly and lists the chosen parameters. This file
-%% gives the deeper rationale: codec comparisons, CBR versus VBR,
-%% sample-rate theory, loudness standards, and a per-flag breakdown of
-%% every CLI invocation.
-%%
-%% The file is self-contained and can be compiled on its own, or it can
-%% be included into the thesis via \input{} if a future revision wants
-%% to fold the notes into an appendix.
-%%
+\appendix
 
-\documentclass[a4paper,11pt]{article}
 
-\usepackage[T1]{fontenc}
-\usepackage[utf8]{inputenc}
-\usepackage[main=english]{babel}
-\usepackage[newfloat]{minted}
-\usepackage{hyperref}
-\usepackage[sorting=none]{biblatex}
-\addbibresource{audio_processing_details.bib}
+\chapter{Survey Questionnaire}\label{app:questionnaire}
+\includepdf[pages=-,pagecommand={},width=\textwidth]{../extras/survey-questions.pdf}
 
-\title{Audio Processing Pipeline: Detailed Notes}
-\author{Kirill Vorozhtsov}
-\date{}
 
-\begin{document}
-\maketitle
-
+\chapter{Audio Processing Pipeline Details}\label{app:audio_details}
 These notes expand on the \textit{Audio Processing and Streaming} section
-of chapter 6 of the thesis. The main section names every stage briefly
-and lists the chosen parameters. The sections below give the deeper
-rationale for each choice.
+of \chapterref{ch:implementation}. The main chapter names every stage
+briefly and lists the chosen parameters. The sections below give the
+deeper rationale for each choice and a per-flag breakdown of every CLI
+invocation.
 
 \section{Streaming Protocols}
 At first, only DASH was considered, because it works better in varying
@@ -269,7 +246,7 @@ signal to represent it without aliasing. A 44.1\,kHz rate therefore
 covers the audible band with a small margin, and source rates above
 that carry no perceptual gain, only larger files.
 % TODO: cite Nyquist-Shannon sampling theorem
-% TODO: cite Lavry "Optimal sample rate for quality audio" (https://lavryengineering.com/pdfs/lavry-white-paper-the_optimal_sample_rate_for_quality_audio.pdf)
+% TODO: cite Lavry "Optimal sample rate for quality audio"
 
 Music masters use one of two standard rates, 44.1\,kHz or 48\,kHz, or
 an integer multiple of one of them. The step groups each source into
@@ -296,8 +273,8 @@ different. Without normalization, a playlist that mixes tracks from
 different masters would have the listener constantly reaching for the
 volume knob.
 % TODO: cite ISO 226 equal-loudness contours
-% TODO: cite Audio Normalization overview (https://en.wikipedia.org/wiki/Audio_normalization)
-% TODO: cite Spotify loudness normalization (https://support.spotify.com/it/artists/article/loudness-normalization/)
+% TODO: cite Audio Normalization overview
+% TODO: cite Spotify loudness normalization
 
 ITU-R BS.1770 is the standard algorithm for measuring loudness. It
 produces an integrated value in Loudness Units relative to Full
@@ -307,8 +284,8 @@ wraps the algorithm into a normalization recommendation, with a
 broadcast target of \(-23\)\,LUFS. Streaming services use higher
 targets because listening conditions differ from broadcast, for
 example Spotify at \(-14\)\,LUFS and Apple at \(-16\)\,LUFS.
-% TODO: cite ITU-R BS.1770 (https://www.itu.int/rec/R-REC-BS.1770-5-202311-I/en)
-% TODO: cite EBU R128 (https://en.wikipedia.org/wiki/EBU_R_128)
+% TODO: cite ITU-R BS.1770
+% TODO: cite EBU R128
 
 Two other units appear here. Decibels Full Scale~(dBFS) measure sample
 amplitude relative to the maximum representable value, so 0\,dBFS is
@@ -454,6 +431,273 @@ The flags are:
 The wrapper parses the printed summary, extracts the \texttt{I:} (LUFS)
 and \texttt{Peak:} (dBTP) values, and stores them on the Song row.
 
-\printbibliography
 
-\end{document}
+\chapter{Diagram Catalog}\label{app:diagrams}
+The diagrams and charts below illustrate the structure and behavior of
+the application, along with the survey results, and are referenced from
+\chapterref{ch:survey}, \chapterref{ch:specification}, and
+\chapterref{ch:implementation}. The source PlantUML files live under
+\path{specification/}.
+
+\section{Architecture Overview}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.6\textwidth, keepaspectratio]{diagrams/HighLevelSystem}
+    \caption{System Overview}
+    \label{fig:system_overview}
+\end{figure}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=0.5\textheight, angle=-90, keepaspectratio]{diagrams/BackendSystem}
+    \caption{Backend Architecture}
+    \label{fig:backend}
+\end{figure}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=0.5\textheight, angle=-90, keepaspectratio]{diagrams/FrontendSystem}
+    \caption{Frontend Architecture}
+    \label{fig:frontend}
+\end{figure}
+
+\clearpage
+\section{Use Case Diagrams}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.8\textwidth, keepaspectratio]{diagrams/UseCasesAccount}
+    \caption{Use cases: Account and Identity}
+    \label{fig:uc_account}
+\end{figure}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.8\textwidth, keepaspectratio]{diagrams/UseCasesSocial}
+    \caption{Use cases: Social}
+    \label{fig:uc_social}
+\end{figure}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.8\textwidth, keepaspectratio]{diagrams/UseCasesLibrary}
+    \caption{Use cases: Library and Content}
+    \label{fig:uc_library}
+\end{figure}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.8\textwidth, keepaspectratio]{diagrams/UseCasesPlayback}
+    \caption{Use cases: Playback}
+    \label{fig:uc_playback}
+\end{figure}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.8\textwidth, keepaspectratio]{diagrams/UseCasesSearch}
+    \caption{Use cases: Search}
+    \label{fig:uc_search}
+\end{figure}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.8\textwidth, keepaspectratio]{diagrams/UseCasesCommunication}
+    \caption{Use cases: Communication}
+    \label{fig:uc_communication}
+\end{figure}
+
+\clearpage
+\section{Backend Class Diagrams}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=0.85\textheight, keepaspectratio]{diagrams/UsersClassDiagram}
+    \caption{Class diagram: Users}
+    \label{fig:cd_users}
+\end{figure}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=0.85\textheight, keepaspectratio]{diagrams/StreamingClassDiagram}
+    \caption{Class diagram: Streaming (Songs, Collections, Credits)}
+    \label{fig:cd_streaming}
+\end{figure}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=0.5\textheight, angle=-90, keepaspectratio]{diagrams/AudioClassDiagram}
+    \caption{Class diagram: Audio Processing Pipeline}
+    \label{fig:cd_audio}
+\end{figure}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=0.5\textheight, angle=-90, keepaspectratio]{diagrams/PlaybackClassDiagram}
+    \caption{Class diagram: Playback}
+    \label{fig:cd_playback}
+\end{figure}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=0.5\textheight, angle=-90, keepaspectratio]{diagrams/StreamingWsClassDiagram}
+    \caption{Class diagram: Streaming WebSocket Handlers}
+    \label{fig:cd_streaming_ws}
+\end{figure}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=0.5\textheight, angle=-90, keepaspectratio]{diagrams/WebsocketsClassDiagram}
+    \caption{Class diagram: WebSockets Core}
+    \label{fig:cd_websockets}
+\end{figure}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=0.85\textheight, keepaspectratio]{diagrams/SocialClassDiagram}
+    \caption{Class diagram: Social (Publications, Comments, Chats)}
+    \label{fig:cd_social}
+\end{figure}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=0.5\textheight, angle=-90, keepaspectratio]{diagrams/NotificationsClassDiagram}
+    \caption{Class diagram: Notifications}
+    \label{fig:cd_notifications}
+\end{figure}
+
+\clearpage
+\section{Frontend Component Hierarchies}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=0.5\textheight, angle=-90, keepaspectratio]{diagrams/FrontendComponentHierarchy}
+    \caption{Frontend component hierarchy: top level}
+    \label{fig:fe_hierarchy}
+\end{figure}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=0.5\textheight, angle=-90, keepaspectratio]{diagrams/FrontendUser}
+    \caption{Frontend component hierarchy: User Management}
+    \label{fig:fe_user}
+\end{figure}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=0.5\textheight, angle=-90, keepaspectratio]{diagrams/FrontendAuth}
+    \caption{Frontend component hierarchy: Account and Authentication}
+    \label{fig:fe_auth}
+\end{figure}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.95\textwidth, keepaspectratio]{diagrams/FrontendAudioUpload}
+    \caption{Frontend component hierarchy: Audio Upload}
+    \label{fig:fe_audio_upload}
+\end{figure}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=0.5\textheight, angle=-90, keepaspectratio]{diagrams/FrontendSongQueue}
+    \caption{Frontend component hierarchy: Song Queue}
+    \label{fig:fe_song_queue}
+\end{figure}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=0.5\textheight, angle=-90, keepaspectratio]{diagrams/FrontendPlayback}
+    \caption{Frontend component hierarchy: Playback}
+    \label{fig:fe_playback}
+\end{figure}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=0.5\textheight, angle=-90, keepaspectratio]{diagrams/FrontendPublications}
+    \caption{Frontend component hierarchy: Publications}
+    \label{fig:fe_publications}
+\end{figure}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.95\textwidth, keepaspectratio]{diagrams/FrontendNotifications}
+    \caption{Frontend component hierarchy: Notifications}
+    \label{fig:fe_notifications}
+\end{figure}
+
+\clearpage
+\section{Behavior Diagrams}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.95\textwidth, keepaspectratio]{diagrams/WebsocketLifecycle}
+    \caption{WebSocket connection lifecycle}
+    \label{fig:bh_ws_lifecycle}
+\end{figure}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.95\textwidth, keepaspectratio]{diagrams/WsCacheInvalidation}
+    \caption{WebSocket cache invalidation on follow mutation}
+    \label{fig:bh_ws_cache}
+\end{figure}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.95\textwidth, keepaspectratio]{diagrams/AuthFlow}
+    \caption{Account creation, email confirmation, login, and session expiry}
+    \label{fig:bh_auth_flow}
+\end{figure}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.95\textwidth, keepaspectratio]{diagrams/AudioUploadFlow}
+    \caption{Audio upload sequence}
+    \label{fig:bh_audio_upload}
+\end{figure}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.95\textwidth, keepaspectratio]{diagrams/PlaybackSync}
+    \caption{Multi-tab playback synchronization}
+    \label{fig:bh_playback_sync}
+\end{figure}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=0.92\textheight, keepaspectratio]{diagrams/SongQueue}
+    \caption{Song Queue: add a Collection and advance}
+    \label{fig:bh_song_queue}
+\end{figure}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.95\textwidth, keepaspectratio]{diagrams/ChatLifecycle}
+    \caption{Chat connection lifecycle}
+    \label{fig:bh_chat_lifecycle}
+\end{figure}
+
+\clearpage
+\section{Survey Charts}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.8\textwidth, keepaspectratio]{charts/age}
+    \caption{Age Distribution of Respondents}
+    \label{fig:age}
+\end{figure}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=0.4\textheight]{charts/song amount month}
+    \caption{Monthly Song Count per Respondent}
+    \label{fig:song_amount}
+\end{figure}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=0.4\textheight]{charts/listening regularity}
+    \caption{Listening Frequency of Respondents}
+    \label{fig:listen_reg}
+\end{figure}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=0.4\textheight]{charts/constumption_method}
+    \caption{Audio Media Consumption by Age Group}
+    \label{fig:consumption_methods}
+\end{figure}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=0.4\textheight]{charts/streaming platform}
+    \caption{Streaming Platforms Popularity}
+    \label{fig:platform_popularity}
+\end{figure}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=0.4\textheight]{charts/listen together method}
+    \caption{Social Interaction Methods}
+    \label{fig:listentogethermeth}
+\end{figure}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1\textwidth, keepaspectratio]{charts/listen together freq}
+    \caption{Social Interactions Frequency}
+    \label{fig:listentogetherfreq}
+\end{figure}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1\textwidth, keepaspectratio]{charts/share freq}
+    \caption{Music Sharing Frequency}
+    \label{fig:sharefreq}
+\end{figure}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=0.4\textheight]{charts/share method}
+    \caption{Music Sharing Methods}
+    \label{fig:sharemeth}
+\end{figure}

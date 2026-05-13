@@ -1,7 +1,7 @@
+from base.serializers import BaseModelSerializer
 from dj_rest_auth.registration.serializers import RegisterSerializer
 from rest_framework import serializers
 
-from base.serializers import BaseModelSerializer
 from users.models import BaseUser, UserRole
 
 
@@ -34,12 +34,28 @@ class BaseUserSerializer(BaseModelSerializer):
 
 
 class BaseMeSerializer(BaseUserSerializer):
+    """
+    Read shape for `/users/me`. Extends `BaseUserSerializer` with the
+    private `email` field, which is only ever exposed to the
+    authenticated owner of the account and must not leak through public
+    user endpoints.
+    """
+
     class Meta(BaseUserSerializer.Meta):
         model = BaseUser
         fields = BaseUserSerializer.Meta.fields + ["email"]
 
 
 class MeUpdateSerializer(BaseMeSerializer):
+    """
+    Write shape for `PATCH /users/me`. The field list is intentionally a
+    strict subset of `BaseMeSerializer`: `role`, `email`, and
+    `is_artist` are excluded because role transitions, email changes,
+    and the artist flag are handled through dedicated flows rather than
+    a generic profile edit. All remaining fields are optional so that
+    the client can submit partial updates.
+    """
+
     class Meta(BaseMeSerializer.Meta):
         model = BaseUser
         fields = ["display_name", "bio", "avatar"]

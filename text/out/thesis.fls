@@ -239,6 +239,24 @@ INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/csquotes/csquotes.def
 INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/csquotes/csquotes.cfg
 INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/csquotes/csquotes.cfg
 INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/csquotes/csquotes.cfg
+INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/pdfpages/pdfpages.sty
+INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/pdfpages/pdfpages.sty
+INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/tools/calc.sty
+INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/tools/calc.sty
+INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/eso-pic/eso-pic.sty
+INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/eso-pic/eso-pic.sty
+INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/xcolor/xcolor.sty
+INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/xcolor/xcolor.sty
+INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/xcolor/xcolor.sty
+INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/graphics-cfg/color.cfg
+INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/graphics-cfg/color.cfg
+INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/graphics-cfg/color.cfg
+INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/graphics/mathcolor.ltx
+INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/graphics/mathcolor.ltx
+INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/graphics/mathcolor.ltx
+INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/pdfpages/pppdftex.def
+INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/pdfpages/pppdftex.def
+INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/pdfpages/pppdftex.def
 INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/biblatex/biblatex.sty
 INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/biblatex/biblatex.sty
 INPUT /usr/local/texlive/2026/texmf-dist/tex/generic/pdftexcmds/pdftexcmds.sty
@@ -323,25 +341,8 @@ INPUT ./fithesis/style/mu/fithesis-mu-base.sty
 INPUT ./fithesis/style/mu/fithesis-mu-base.sty
 INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/fithesis/style/mu/fithesis-mu-base.sty
 INPUT fithesis/style/mu/fithesis-mu-base.sty
-INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/xcolor/xcolor.sty
-INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/xcolor/xcolor.sty
-INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/graphics-cfg/color.cfg
-INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/graphics-cfg/color.cfg
-INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/graphics-cfg/color.cfg
-INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/graphics/mathcolor.ltx
-INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/graphics/mathcolor.ltx
-INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/graphics/mathcolor.ltx
 INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/caption/caption.sty
 INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/caption/caption.sty
-INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/pdfpages/pdfpages.sty
-INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/pdfpages/pdfpages.sty
-INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/tools/calc.sty
-INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/tools/calc.sty
-INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/eso-pic/eso-pic.sty
-INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/eso-pic/eso-pic.sty
-INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/pdfpages/pppdftex.def
-INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/pdfpages/pppdftex.def
-INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/pdfpages/pppdftex.def
 INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/tools/tabularx.sty
 INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/tools/tabularx.sty
 INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/tools/array.sty
@@ -491,6 +492,12 @@ INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg
 INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg
 INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/graphics/color.sty
 INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/graphics/color.sty
+INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/pdflscape/pdflscape.sty
+INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/pdflscape/pdflscape.sty
+INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/pdflscape/pdflscape-nometadata.sty
+INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/pdflscape/pdflscape-nometadata.sty
+INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/graphics/lscape.sty
+INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/graphics/lscape.sty
 INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/biblatex/lbx/english.lbx
 INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/biblatex/lbx/english.lbx
 INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/biblatex/lbx/english.lbx
@@ -516,12 +523,6 @@ INPUT out/thesis.out
 INPUT out/thesis.out
 INPUT out/thesis.out
 OUTPUT out/thesis.out
-INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/pdflscape/pdflscape.sty
-INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/pdflscape/pdflscape.sty
-INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/pdflscape/pdflscape-nometadata.sty
-INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/pdflscape/pdflscape-nometadata.sty
-INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/graphics/lscape.sty
-INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/graphics/lscape.sty
 INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/microtype/mt-ppl.cfg
 INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/microtype/mt-ppl.cfg
 INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/microtype/mt-ppl.cfg
@@ -675,45 +676,9 @@ INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/amsfonts/symbols/msbm1
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/mathpazo/zplmr7t.tfm
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/mathpazo/zplmr7t.tfm
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/mathpazo/zplmr7t.tfm
-INPUT ./charts/age.png
-INPUT ./charts/age.png
-INPUT ./charts/age.png
-INPUT ./charts/age.png
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc
-INPUT ./charts/song amount month.png
-INPUT ./charts/song amount month.png
-INPUT ./charts/song amount month.png
-INPUT ./charts/song amount month.png
-INPUT ./charts/listening regularity.png
-INPUT ./charts/listening regularity.png
-INPUT ./charts/listening regularity.png
-INPUT ./charts/listening regularity.png
-INPUT ./charts/constumption_method.png
-INPUT ./charts/constumption_method.png
-INPUT ./charts/constumption_method.png
-INPUT ./charts/constumption_method.png
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/tex-gyre/ec-qplr-sc.tfm
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/enc/dvips/tex-gyre/q-ec-sc.enc
-INPUT ./charts/streaming platform.png
-INPUT ./charts/streaming platform.png
-INPUT ./charts/streaming platform.png
-INPUT ./charts/streaming platform.png
-INPUT ./charts/listen together method.png
-INPUT ./charts/listen together method.png
-INPUT ./charts/listen together method.png
-INPUT ./charts/listen together method.png
-INPUT ./charts/listen together freq.png
-INPUT ./charts/listen together freq.png
-INPUT ./charts/listen together freq.png
-INPUT ./charts/listen together freq.png
-INPUT ./charts/share freq.png
-INPUT ./charts/share freq.png
-INPUT ./charts/share freq.png
-INPUT ./charts/share freq.png
-INPUT ./charts/share method.png
-INPUT ./charts/share method.png
-INPUT ./charts/share method.png
-INPUT ./charts/share method.png
 INPUT ./chapters/3_existing_solutions.tex
 INPUT ./chapters/3_existing_solutions.tex
 INPUT ./chapters/3_existing_solutions.tex
@@ -740,6 +705,95 @@ INPUT ./chapters/6_implementation.tex
 INPUT ./chapters/6_implementation.tex
 INPUT ./chapters/6_implementation.tex
 INPUT chapters/6_implementation.tex
+INPUT ./chapters/appendix.tex
+INPUT ./chapters/appendix.tex
+INPUT ./chapters/appendix.tex
+INPUT ./chapters/appendix.tex
+INPUT chapters/appendix.tex
+INPUT out/../extras/survey-questions.pdf
+INPUT out/../extras/survey-questions.pdf
+INPUT out/../extras/survey-questions.pdf
+INPUT out/../extras/survey-questions.pdf
+INPUT out/../extras/survey-questions.pdf
+INPUT out/../extras/survey-questions.pdf
+INPUT out/../extras/survey-questions.pdf
+INPUT out/../extras/survey-questions.pdf
+INPUT out/../extras/survey-questions.pdf
+INPUT out/../extras/survey-questions.pdf
+INPUT out/../extras/survey-questions.pdf
+INPUT out/../extras/survey-questions.pdf
+INPUT out/../extras/survey-questions.pdf
+INPUT out/../extras/survey-questions.pdf
+INPUT out/../extras/survey-questions.pdf
+INPUT out/../extras/survey-questions.pdf
+INPUT out/../extras/survey-questions.pdf
+INPUT out/../extras/survey-questions.pdf
+INPUT out/../extras/survey-questions.pdf
+INPUT out/../extras/survey-questions.pdf
+INPUT out/../extras/survey-questions.pdf
+INPUT out/../extras/survey-questions.pdf
+INPUT out/../extras/survey-questions.pdf
+INPUT out/../extras/survey-questions.pdf
+INPUT out/../extras/survey-questions.pdf
+INPUT out/../extras/survey-questions.pdf
+INPUT out/../extras/survey-questions.pdf
+INPUT out/../extras/survey-questions.pdf
+INPUT out/../extras/survey-questions.pdf
+INPUT out/../extras/survey-questions.pdf
+INPUT out/../extras/survey-questions.pdf
+INPUT out/../extras/survey-questions.pdf
+INPUT out/../extras/survey-questions.pdf
+INPUT out/../extras/survey-questions.pdf
+INPUT out/../extras/survey-questions.pdf
+OUTPUT out/_2EF71E68B4AD97F630480BCEBC1842FB.data.minted
+INPUT out/_2EF71E68B4AD97F630480BCEBC1842FB.config.minted
+INPUT out/_2EF71E68B4AD97F630480BCEBC1842FB.config.minted
+INPUT out/_2EF71E68B4AD97F630480BCEBC1842FB.config.minted
+INPUT ./out/_minted/_2EF71E68B4AD97F630480BCEBC1842FB.index.minted
+INPUT ./out/_minted/_2EF71E68B4AD97F630480BCEBC1842FB.index.minted
+INPUT ./out/_minted/default.style.minted
+INPUT ./out/_minted/default.style.minted
+INPUT out/_minted/default.style.minted
+INPUT ./out/_minted/E8BFD4EA0552731A86839CD36CCD1504.highlight.minted
+INPUT ./out/_minted/E8BFD4EA0552731A86839CD36CCD1504.highlight.minted
+INPUT out/_minted/E8BFD4EA0552731A86839CD36CCD1504.highlight.minted
+INPUT /usr/local/texlive/2026/texmf-dist/fonts/vf/public/mathpazo/zplmr7y.vf
+INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/cm/cmsy10.tfm
+INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/mathpazo/fplmr.tfm
+INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/adobe/palatino/pplr8r.tfm
+INPUT /usr/local/texlive/2026/texmf-dist/fonts/vf/adobe/palatino/pplr7t.vf
+INPUT /usr/local/texlive/2026/texmf-dist/fonts/enc/dvips/base/8r.enc
+INPUT ./out/_minted/0EA45CB16670B63CACEFDA176D3428B4.highlight.minted
+INPUT ./out/_minted/0EA45CB16670B63CACEFDA176D3428B4.highlight.minted
+INPUT out/_minted/0EA45CB16670B63CACEFDA176D3428B4.highlight.minted
+INPUT ./out/_minted/3F0E912DF36B4DE6D2E645C83B2F561F.highlight.minted
+INPUT ./out/_minted/3F0E912DF36B4DE6D2E645C83B2F561F.highlight.minted
+INPUT out/_minted/3F0E912DF36B4DE6D2E645C83B2F561F.highlight.minted
+INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/lm/ts1lmtt.fd
+INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/lm/ts1lmtt.fd
+INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/lm/ts1lmtt.fd
+INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/lm/ts1-lmtt12.tfm
+INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/lm/ec-lmtt8.tfm
+INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/adobe/palatino/pplr7t.tfm
+INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/mathpazo/zplmr7m.tfm
+INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/mathpazo/zplmr7y.tfm
+INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/mathpazo/zplmr7v.tfm
+INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/amsfonts/symbols/msam10.tfm
+INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/amsfonts/symbols/msbm10.tfm
+INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/mathpazo/zplmr7t.tfm
+INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/tex-gyre/ec-qplr.tfm
+INPUT /usr/local/texlive/2026/texmf-dist/fonts/enc/dvips/lm/lm-ts1.enc
+INPUT /usr/local/texlive/2026/texmf-dist/fonts/vf/public/mathpazo/zplmr7m.vf
+INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/mathpazo/fplmri.tfm
+INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/cm/cmmi10.tfm
+INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/adobe/palatino/pplr8r.tfm
+INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/adobe/palatino/pplri8r.tfm
+INPUT /usr/local/texlive/2026/texmf-dist/fonts/vf/public/mathpazo/zplmr7y.vf
+INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/cm/cmsy10.tfm
+INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/mathpazo/fplmr.tfm
+INPUT ./out/_minted/592A8BDDE4A234516984881B262C05EF.highlight.minted
+INPUT ./out/_minted/592A8BDDE4A234516984881B262C05EF.highlight.minted
+INPUT out/_minted/592A8BDDE4A234516984881B262C05EF.highlight.minted
 INPUT ./diagrams/HighLevelSystem.png
 INPUT ./diagrams/HighLevelSystem.png
 INPUT ./diagrams/HighLevelSystem.png
@@ -752,11 +806,166 @@ INPUT ./diagrams/FrontendSystem.png
 INPUT ./diagrams/FrontendSystem.png
 INPUT ./diagrams/FrontendSystem.png
 INPUT ./diagrams/FrontendSystem.png
+INPUT ./diagrams/UseCasesAccount.png
+INPUT ./diagrams/UseCasesAccount.png
+INPUT ./diagrams/UseCasesAccount.png
+INPUT ./diagrams/UseCasesAccount.png
+INPUT ./diagrams/UseCasesSocial.png
+INPUT ./diagrams/UseCasesSocial.png
+INPUT ./diagrams/UseCasesSocial.png
+INPUT ./diagrams/UseCasesSocial.png
+INPUT ./diagrams/UseCasesLibrary.png
+INPUT ./diagrams/UseCasesLibrary.png
+INPUT ./diagrams/UseCasesLibrary.png
+INPUT ./diagrams/UseCasesLibrary.png
+INPUT ./diagrams/UseCasesPlayback.png
+INPUT ./diagrams/UseCasesPlayback.png
+INPUT ./diagrams/UseCasesPlayback.png
+INPUT ./diagrams/UseCasesPlayback.png
+INPUT ./diagrams/UseCasesSearch.png
+INPUT ./diagrams/UseCasesSearch.png
+INPUT ./diagrams/UseCasesSearch.png
+INPUT ./diagrams/UseCasesSearch.png
+INPUT ./diagrams/UseCasesCommunication.png
+INPUT ./diagrams/UseCasesCommunication.png
+INPUT ./diagrams/UseCasesCommunication.png
+INPUT ./diagrams/UseCasesCommunication.png
+INPUT ./diagrams/UsersClassDiagram.png
+INPUT ./diagrams/UsersClassDiagram.png
+INPUT ./diagrams/UsersClassDiagram.png
+INPUT ./diagrams/UsersClassDiagram.png
+INPUT ./diagrams/StreamingClassDiagram.png
+INPUT ./diagrams/StreamingClassDiagram.png
+INPUT ./diagrams/StreamingClassDiagram.png
+INPUT ./diagrams/StreamingClassDiagram.png
+INPUT ./diagrams/AudioClassDiagram.png
+INPUT ./diagrams/AudioClassDiagram.png
+INPUT ./diagrams/AudioClassDiagram.png
+INPUT ./diagrams/AudioClassDiagram.png
+INPUT ./diagrams/PlaybackClassDiagram.png
+INPUT ./diagrams/PlaybackClassDiagram.png
+INPUT ./diagrams/PlaybackClassDiagram.png
+INPUT ./diagrams/PlaybackClassDiagram.png
+INPUT ./diagrams/StreamingWsClassDiagram.png
+INPUT ./diagrams/StreamingWsClassDiagram.png
+INPUT ./diagrams/StreamingWsClassDiagram.png
+INPUT ./diagrams/StreamingWsClassDiagram.png
+INPUT ./diagrams/WebsocketsClassDiagram.png
+INPUT ./diagrams/WebsocketsClassDiagram.png
+INPUT ./diagrams/WebsocketsClassDiagram.png
+INPUT ./diagrams/WebsocketsClassDiagram.png
+INPUT ./diagrams/SocialClassDiagram.png
+INPUT ./diagrams/SocialClassDiagram.png
+INPUT ./diagrams/SocialClassDiagram.png
+INPUT ./diagrams/SocialClassDiagram.png
+INPUT ./diagrams/NotificationsClassDiagram.png
+INPUT ./diagrams/NotificationsClassDiagram.png
+INPUT ./diagrams/NotificationsClassDiagram.png
+INPUT ./diagrams/NotificationsClassDiagram.png
+INPUT ./diagrams/FrontendComponentHierarchy.png
+INPUT ./diagrams/FrontendComponentHierarchy.png
+INPUT ./diagrams/FrontendComponentHierarchy.png
+INPUT ./diagrams/FrontendComponentHierarchy.png
+INPUT ./diagrams/FrontendUser.png
+INPUT ./diagrams/FrontendUser.png
+INPUT ./diagrams/FrontendUser.png
+INPUT ./diagrams/FrontendUser.png
+INPUT ./diagrams/FrontendAuth.png
+INPUT ./diagrams/FrontendAuth.png
+INPUT ./diagrams/FrontendAuth.png
+INPUT ./diagrams/FrontendAuth.png
+INPUT ./diagrams/FrontendAudioUpload.png
+INPUT ./diagrams/FrontendAudioUpload.png
+INPUT ./diagrams/FrontendAudioUpload.png
+INPUT ./diagrams/FrontendAudioUpload.png
+INPUT ./diagrams/FrontendSongQueue.png
+INPUT ./diagrams/FrontendSongQueue.png
+INPUT ./diagrams/FrontendSongQueue.png
+INPUT ./diagrams/FrontendSongQueue.png
+INPUT ./diagrams/FrontendPlayback.png
+INPUT ./diagrams/FrontendPlayback.png
+INPUT ./diagrams/FrontendPlayback.png
+INPUT ./diagrams/FrontendPlayback.png
+INPUT ./diagrams/FrontendPublications.png
+INPUT ./diagrams/FrontendPublications.png
+INPUT ./diagrams/FrontendPublications.png
+INPUT ./diagrams/FrontendPublications.png
+INPUT ./diagrams/FrontendNotifications.png
+INPUT ./diagrams/FrontendNotifications.png
+INPUT ./diagrams/FrontendNotifications.png
+INPUT ./diagrams/FrontendNotifications.png
+INPUT ./diagrams/WebsocketLifecycle.png
+INPUT ./diagrams/WebsocketLifecycle.png
+INPUT ./diagrams/WebsocketLifecycle.png
+INPUT ./diagrams/WebsocketLifecycle.png
+INPUT ./diagrams/WsCacheInvalidation.png
+INPUT ./diagrams/WsCacheInvalidation.png
+INPUT ./diagrams/WsCacheInvalidation.png
+INPUT ./diagrams/WsCacheInvalidation.png
+INPUT ./diagrams/AuthFlow.png
+INPUT ./diagrams/AuthFlow.png
+INPUT ./diagrams/AuthFlow.png
+INPUT ./diagrams/AuthFlow.png
+INPUT ./diagrams/AudioUploadFlow.png
+INPUT ./diagrams/AudioUploadFlow.png
+INPUT ./diagrams/AudioUploadFlow.png
+INPUT ./diagrams/AudioUploadFlow.png
+INPUT ./diagrams/PlaybackSync.png
+INPUT ./diagrams/PlaybackSync.png
+INPUT ./diagrams/PlaybackSync.png
+INPUT ./diagrams/PlaybackSync.png
+INPUT ./diagrams/SongQueue.png
+INPUT ./diagrams/SongQueue.png
+INPUT ./diagrams/SongQueue.png
+INPUT ./diagrams/SongQueue.png
+INPUT ./diagrams/ChatLifecycle.png
+INPUT ./diagrams/ChatLifecycle.png
+INPUT ./diagrams/ChatLifecycle.png
+INPUT ./diagrams/ChatLifecycle.png
+INPUT ./charts/age.png
+INPUT ./charts/age.png
+INPUT ./charts/age.png
+INPUT ./charts/age.png
+INPUT ./charts/song amount month.png
+INPUT ./charts/song amount month.png
+INPUT ./charts/song amount month.png
+INPUT ./charts/song amount month.png
+INPUT ./charts/listening regularity.png
+INPUT ./charts/listening regularity.png
+INPUT ./charts/listening regularity.png
+INPUT ./charts/listening regularity.png
+INPUT ./charts/constumption_method.png
+INPUT ./charts/constumption_method.png
+INPUT ./charts/constumption_method.png
+INPUT ./charts/constumption_method.png
+INPUT ./charts/streaming platform.png
+INPUT ./charts/streaming platform.png
+INPUT ./charts/streaming platform.png
+INPUT ./charts/streaming platform.png
+INPUT ./charts/listen together method.png
+INPUT ./charts/listen together method.png
+INPUT ./charts/listen together method.png
+INPUT ./charts/listen together method.png
+INPUT ./charts/listen together freq.png
+INPUT ./charts/listen together freq.png
+INPUT ./charts/listen together freq.png
+INPUT ./charts/listen together freq.png
+INPUT ./charts/share freq.png
+INPUT ./charts/share freq.png
+INPUT ./charts/share freq.png
+INPUT ./charts/share freq.png
+INPUT ./charts/share method.png
+INPUT ./charts/share method.png
+INPUT ./charts/share method.png
+INPUT ./charts/share method.png
 INPUT out/thesis.aux
 INPUT out/thesis.out
 INPUT out/thesis.out
 INPUT out/thesis.run.xml
 OUTPUT out/thesis.run.xml
+INPUT /usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb
+INPUT /usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb
+INPUT /usr/local/texlive/2026/texmf-dist/fonts/type1/public/lm/lmtk10.pfb
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/type1/public/lm/lmtt10.pfb
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/type1/public/lm/lmtt12.pfb
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/type1/public/tex-gyre/qhvb.pfb
@@ -764,3 +973,4 @@ INPUT /usr/local/texlive/2026/texmf-dist/fonts/type1/public/tex-gyre/qhvr.pfb
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/type1/public/tex-gyre/qplb.pfb
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/type1/public/tex-gyre/qplr.pfb
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/type1/public/tex-gyre/qplri.pfb
+INPUT /usr/local/texlive/2026/texmf-dist/fonts/type1/urw/palatino/uplr8a.pfb
