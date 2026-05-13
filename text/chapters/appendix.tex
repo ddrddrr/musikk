@@ -357,7 +357,7 @@ The flags are:
 
 \subsection{Shaka Packager flags}
 The Shaka Packager invocation for two of the AAC tiers is:
-\begin{minted}[breaklines]{bash}
+\begin{minted}{bash}
 packager \
   'input=/tmp/in/libfdk_aac-96-<uuid>.mp4,stream=audio,init_segment=/tmp/out/audio_0_init.mp4,segment_template=/tmp/out/audio_0_$Number$.m4s,playlist_name=audio_0.m3u8' \
   'input=/tmp/in/libfdk_aac-160-<uuid>.mp4,stream=audio,init_segment=/tmp/out/audio_1_init.mp4,segment_template=/tmp/out/audio_1_$Number$.m4s,playlist_name=audio_1.m3u8' \
@@ -502,7 +502,7 @@ the application, along with the survey results, and are referenced from
 \section{Backend Class Diagrams}
 \begin{figure}[htbp]
     \centering
-    \includegraphics[height=0.85\textheight, keepaspectratio]{diagrams/UsersClassDiagram}
+    \includegraphics[height=0.85\textheight, angle=-90, keepaspectratio]{diagrams/UsersClassDiagram}
     \caption{Class diagram: Users}
     \label{fig:cd_users}
 \end{figure}
@@ -565,7 +565,7 @@ the application, along with the survey results, and are referenced from
 \end{figure}
 \begin{figure}[htbp]
     \centering
-    \includegraphics[height=0.5\textheight, angle=-90, keepaspectratio]{diagrams/FrontendAuth}
+    \includegraphics[height=0.3\textheight, angle=-90, keepaspectratio]{diagrams/FrontendAuth}
     \caption{Frontend component hierarchy: Account and Authentication}
     \label{fig:fe_auth}
 \end{figure}
@@ -583,13 +583,13 @@ the application, along with the survey results, and are referenced from
 \end{figure}
 \begin{figure}[htbp]
     \centering
-    \includegraphics[height=0.5\textheight, angle=-90, keepaspectratio]{diagrams/FrontendPlayback}
+    \includegraphics[height=0.3\textheight, angle=-90, keepaspectratio]{diagrams/FrontendPlayback}
     \caption{Frontend component hierarchy: Playback}
     \label{fig:fe_playback}
 \end{figure}
 \begin{figure}[htbp]
     \centering
-    \includegraphics[height=0.5\textheight, angle=-90, keepaspectratio]{diagrams/FrontendPublications}
+    \includegraphics[height=0.3\textheight, angle=-90, keepaspectratio]{diagrams/FrontendPublications}
     \caption{Frontend component hierarchy: Publications}
     \label{fig:fe_publications}
 \end{figure}
@@ -634,7 +634,7 @@ the application, along with the survey results, and are referenced from
 \end{figure}
 \begin{figure}[htbp]
     \centering
-    \includegraphics[height=0.92\textheight, keepaspectratio]{diagrams/SongQueue}
+    \includegraphics[height=0.7\textheight, keepaspectratio]{diagrams/SongQueue}
     \caption{Song Queue: add a Collection and advance}
     \label{fig:bh_song_queue}
 \end{figure}

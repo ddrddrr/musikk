@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.5.11)  13 MAY 2026 10:35
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.5.11)  13 MAY 2026 10:43
 entering extended mode
  \write18 enabled.
  %&-line parsing enabled.
@@ -1717,15 +1717,15 @@ File: fithesis/style/mu/fithesis-mu-12.clo 2021/02/21
 (./fithesis/style/mu/fithesis-mu-fi.sty
 Package: fithesis/style/mu/fithesis-mu-fi 2021/04/24
 )
-Package hyperref Info: Option `unicode' set `true' on input line 100.
-Package hyperref Info: Option `unicode' set `true' on input line 100.
+Package hyperref Info: Option `unicode' set `true' on input line 107.
+Package hyperref Info: Option `unicode' set `true' on input line 107.
 
 (/usr/local/texlive/2026/texmf-dist/tex/generic/stringenc/se-pdfdoc.def
 File: se-pdfdoc.def 2019/11/29 v1.12 stringenc: PDFDocEncoding
 )
 Package babel-german Info: Using legacy glottonyms
 (babel-german)             `german' denotes pre-1996 spelling. on input line 10
-0.
+7.
 
 (/usr/local/texlive/2026/texmf-dist/tex/generic/babel/locale/de/babel-german.te
 x
@@ -1733,135 +1733,135 @@ Package babel Info: Importing basic data for german
 (babel)             from babel-de.ini. Reported on input line 15.
 )
 Package babel Info: Hyphen rules for 'german' set to \l@ngerman-x-2024-02-28
-(babel)             (\language4). Reported on input line 100.
+(babel)             (\language4). Reported on input line 107.
 Package csquotes Info: Checking for multilingual support...
 Package csquotes Info: ... found 'babel' package.
  (out/thesis.aux)
 \openout1 = `thesis.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 100.
-LaTeX Font Info:    ... okay on input line 100.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 100.
-LaTeX Font Info:    ... okay on input line 100.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 100.
-LaTeX Font Info:    ... okay on input line 100.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 100.
-LaTeX Font Info:    ... okay on input line 100.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 100.
-LaTeX Font Info:    ... okay on input line 100.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 100.
-LaTeX Font Info:    ... okay on input line 100.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 100.
-LaTeX Font Info:    ... okay on input line 100.
-LaTeX Font Info:    Checking defaults for T2A/cmr/m/n on input line 100.
-LaTeX Font Info:    ... okay on input line 100.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 100.
-LaTeX Font Info:    ... okay on input line 100.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 100.
-LaTeX Font Info:    ... okay on input line 100.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 107.
+LaTeX Font Info:    ... okay on input line 107.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 107.
+LaTeX Font Info:    ... okay on input line 107.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 107.
+LaTeX Font Info:    ... okay on input line 107.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 107.
+LaTeX Font Info:    ... okay on input line 107.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 107.
+LaTeX Font Info:    ... okay on input line 107.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 107.
+LaTeX Font Info:    ... okay on input line 107.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 107.
+LaTeX Font Info:    ... okay on input line 107.
+LaTeX Font Info:    Checking defaults for T2A/cmr/m/n on input line 107.
+LaTeX Font Info:    ... okay on input line 107.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 107.
+LaTeX Font Info:    ... okay on input line 107.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 107.
+LaTeX Font Info:    ... okay on input line 107.
 LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 1
-00.
+07.
  (/usr/local/texlive/2026/texmf-dist/tex/latex/lm/t1lmtt.fd
 File: t1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
 
 LaTeX Font Warning: Font shape `T1/lmtt/b/it' in size <12> not available
-(Font)              Font shape `T1/lmtt/b/sl' tried instead on input line 100.
+(Font)              Font shape `T1/lmtt/b/sl' tried instead on input line 107.
 
 
 LaTeX Font Warning: Font shape `T1/lmtt/b/scsl' undefined
-(Font)              using `T1/lmtt/b/sc' instead on input line 100.
+(Font)              using `T1/lmtt/b/sc' instead on input line 107.
 
 
 LaTeX Font Warning: Font shape `T1/lmtt/b/sc' undefined
-(Font)              using `T1/lmtt/b/n' instead on input line 100.
+(Font)              using `T1/lmtt/b/n' instead on input line 107.
 
 LaTeX Font Info:    Font shape `T1/lmtt/bx/n' in size <12> not available
-(Font)              Font shape `T1/lmtt/b/n' tried instead on input line 100.
+(Font)              Font shape `T1/lmtt/b/n' tried instead on input line 107.
 
 LaTeX Font Warning: Font shape `T1/lmtt/bx/it' in size <12> not available
-(Font)              Font shape `T1/lmtt/b/sl' tried instead on input line 100.
+(Font)              Font shape `T1/lmtt/b/sl' tried instead on input line 107.
 
 LaTeX Font Info:    Font shape `T1/lmtt/bx/sl' in size <12> not available
-(Font)              Font shape `T1/lmtt/b/sl' tried instead on input line 100.
+(Font)              Font shape `T1/lmtt/b/sl' tried instead on input line 107.
 
 LaTeX Font Warning: Font shape `T1/lmtt/bx/scsl' undefined
-(Font)              using `T1/lmtt/bx/sc' instead on input line 100.
+(Font)              using `T1/lmtt/bx/sc' instead on input line 107.
 
 
 LaTeX Font Warning: Font shape `T1/lmtt/bx/sc' undefined
-(Font)              using `T1/lmtt/bx/n' instead on input line 100.
+(Font)              using `T1/lmtt/bx/n' instead on input line 107.
 
 
 LaTeX Font Warning: Font shape `T1/lmtt/sbx/sc' undefined
-(Font)              using `T1/lmtt/bx/sc' instead on input line 100.
+(Font)              using `T1/lmtt/bx/sc' instead on input line 107.
 
 
 LaTeX Font Warning: Font shape `T1/lmtt/sbx/n' undefined
-(Font)              using `T1/lmtt/bx/n' instead on input line 100.
+(Font)              using `T1/lmtt/bx/n' instead on input line 107.
 
 
 LaTeX Font Warning: Font shape `T1/lmtt/sbx/it' undefined
-(Font)              using `T1/lmtt/bx/it' instead on input line 100.
+(Font)              using `T1/lmtt/bx/it' instead on input line 107.
 
 
 LaTeX Font Warning: Font shape `T1/lmtt/sbx/sl' undefined
-(Font)              using `T1/lmtt/bx/sl' instead on input line 100.
+(Font)              using `T1/lmtt/bx/sl' instead on input line 107.
 
 
 LaTeX Font Warning: Font shape `T1/lmtt/bx/scsl' undefined
-(Font)              using `T1/lmtt/bx/sc' instead on input line 100.
+(Font)              using `T1/lmtt/bx/sc' instead on input line 107.
 
 LaTeX Font Info:    Font shape `T1/lmtt/bx/sc' in size <12> not available
-(Font)              Font shape `T1/lmtt/b/n' tried instead on input line 100.
+(Font)              Font shape `T1/lmtt/b/n' tried instead on input line 107.
 
 LaTeX Font Warning: Font shape `T1/lmtt/bc/sc' undefined
-(Font)              using `T1/lmtt/c/sc' instead on input line 100.
+(Font)              using `T1/lmtt/c/sc' instead on input line 107.
 
 
 LaTeX Font Warning: Font shape `T1/lmtt/c/n' undefined
-(Font)              using `T1/lmtt/m/n' instead on input line 100.
+(Font)              using `T1/lmtt/m/n' instead on input line 107.
 
 
 LaTeX Font Warning: Font shape `T1/lmtt/c/it' undefined
-(Font)              using `T1/lmtt/c/n' instead on input line 100.
+(Font)              using `T1/lmtt/c/n' instead on input line 107.
 
 
 LaTeX Font Warning: Font shape `T1/lmtt/c/sl' undefined
-(Font)              using `T1/lmtt/c/it' instead on input line 100.
+(Font)              using `T1/lmtt/c/it' instead on input line 107.
 
 
 LaTeX Font Warning: Font shape `T1/lmtt/c/scit' undefined
-(Font)              using `T1/lmtt/c/sc' instead on input line 100.
+(Font)              using `T1/lmtt/c/sc' instead on input line 107.
 
 
 LaTeX Font Warning: Font shape `T1/lmtt/c/sc' undefined
-(Font)              using `T1/lmtt/c/n' instead on input line 100.
+(Font)              using `T1/lmtt/c/n' instead on input line 107.
 
 
 LaTeX Font Warning: Font shape `T1/lmtt/lc/it' in size <12> not available
-(Font)              Font shape `T1/lmtt/lc/sl' tried instead on input line 100.
+(Font)              Font shape `T1/lmtt/lc/sl' tried instead on input line 107.
 
 
 
 LaTeX Font Warning: Font shape `T1/lmtt/lc/scsl' undefined
-(Font)              using `T1/lmtt/lc/sc' instead on input line 100.
+(Font)              using `T1/lmtt/lc/sc' instead on input line 107.
 
 
 LaTeX Font Warning: Font shape `T1/lmtt/lc/sc' undefined
-(Font)              using `T1/lmtt/lc/n' instead on input line 100.
+(Font)              using `T1/lmtt/lc/n' instead on input line 107.
 
 
 LaTeX Font Warning: Font shape `T1/lmtt/m/ui' undefined
-(Font)              using `T1/lmtt/m/n' instead on input line 100.
+(Font)              using `T1/lmtt/m/n' instead on input line 107.
 
 
 LaTeX Font Warning: Font shape `T1/lmtt/bx/ui' undefined
-(Font)              using `T1/lmtt/bx/n' instead on input line 100.
+(Font)              using `T1/lmtt/bx/n' instead on input line 107.
 
 
 LaTeX Font Warning: Font shape `T1/lmtt/m/In' undefined
-(Font)              using `T1/lmtt/m/n' instead on input line 100.
+(Font)              using `T1/lmtt/m/n' instead on input line 107.
 
 Package newfloat Info: `float' package detected.
 (/usr/local/texlive/2026/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
@@ -1935,9 +1935,9 @@ Package biblatex Info: Trying to load bibliographic data...
 Package biblatex Info: ... file 'thesis.bbl' found.
 
 (out/thesis.bbl)
-Package biblatex Info: Reference section=0 on input line 100.
-Package biblatex Info: Reference segment=0 on input line 100.
-Package hyperref Info: Link coloring OFF on input line 100.
+Package biblatex Info: Reference section=0 on input line 107.
+Package biblatex Info: Reference segment=0 on input line 107.
+Package hyperref Info: Link coloring OFF on input line 107.
  (out/thesis.out) (out/thesis.out)
 \@outlinefile=\write10
 \openout10 = `thesis.out'.
@@ -1945,12 +1945,12 @@ Package hyperref Info: Link coloring OFF on input line 100.
 Package microtype Info: Patching varwidth to enable character protrusion.
 \MT@vwid@leftmargin=\dimen353
 \MT@vwid@rightmargin=\dimen354
-LaTeX Info: Redefining \microtypecontext on input line 100.
-Package microtype Info: Applying patch `toc' on input line 100.
-Package microtype Info: Applying patch `eqnum' on input line 100.
-Package microtype Info: Applying patch `footnote' on input line 100.
-Package microtype Info: Applying patch `verbatim' on input line 100.
-LaTeX Info: Redefining \microtypesetup on input line 100.
+LaTeX Info: Redefining \microtypecontext on input line 107.
+Package microtype Info: Applying patch `toc' on input line 107.
+Package microtype Info: Applying patch `eqnum' on input line 107.
+Package microtype Info: Applying patch `footnote' on input line 107.
+Package microtype Info: Applying patch `verbatim' on input line 107.
+LaTeX Info: Redefining \microtypesetup on input line 107.
 Package microtype Info: Generating PDF output.
 Package microtype Info: Character protrusion enabled (level 2).
 Package microtype Info: Using default protrusion set `alltext'.
@@ -1972,40 +1972,40 @@ File: mt-ppl.cfg 2005/11/16 v1.6 microtype config. file: Palatino (RS)
 File: fithesis/logo/mu/fithesis-base-english.pdf Graphic file (type pdf)
 <use fithesis/logo/mu/fithesis-base-english.pdf>
 Package pdftex.def Info: fithesis/logo/mu/fithesis-base-english.pdf  used on in
-put line 100.
+put line 107.
 (pdftex.def)             Requested size: 182.48006pt x 46.97505pt.
 File: fithesis/logo/mu/fithesis-base-english.pdf Graphic file (type pdf)
 <use fithesis/logo/mu/fithesis-base-english.pdf>
 Package pdftex.def Info: fithesis/logo/mu/fithesis-base-english.pdf  used on in
-put line 100.
+put line 107.
 (pdftex.def)             Requested size: 182.48006pt x 46.97505pt.
 File: fithesis/logo/mu/fithesis-base-english.pdf Graphic file (type pdf)
 <use fithesis/logo/mu/fithesis-base-english.pdf>
 Package pdftex.def Info: fithesis/logo/mu/fithesis-base-english.pdf  used on in
-put line 100.
+put line 107.
 (pdftex.def)             Requested size: 182.48006pt x 46.97505pt.
 LaTeX Font Info:    Trying to load font information for T1+qhv on input line 10
-0.
+7.
 
 (/usr/local/texlive/2026/texmf-dist/tex/latex/tex-gyre/t1qhv.fd
 File: t1qhv.fd 2009/09/25 v1.2 font definition file for T1/qhv
 )
 LaTeX Font Info:    Font shape `T1/qhv/m/n' will be
-(Font)              scaled to size 10.35608pt on input line 100.
+(Font)              scaled to size 10.35608pt on input line 107.
 Package microtype Info: Loading generic protrusion settings for font family
 (microtype)             `qhv' (encoding: T1).
 (microtype)             For optimal results, create family-specific settings.
 (microtype)             See the microtype manual for details.
 LaTeX Font Info:    Font shape `T1/qhv/m/n' will be
-(Font)              scaled to size 12.42728pt on input line 100.
+(Font)              scaled to size 12.42728pt on input line 107.
 LaTeX Font Info:    Font shape `T1/qhv/b/n' will be
-(Font)              scaled to size 10.35608pt on input line 100.
+(Font)              scaled to size 10.35608pt on input line 107.
 LaTeX Font Info:    Font shape `T1/qhv/b/n' will be
-(Font)              scaled to size 21.4716pt on input line 100.
+(Font)              scaled to size 21.4716pt on input line 107.
 LaTeX Font Info:    Font shape `T1/qhv/m/n' will be
-(Font)              scaled to size 14.91275pt on input line 100.
+(Font)              scaled to size 14.91275pt on input line 107.
 LaTeX Font Info:    Font shape `T1/qhv/m/n' will be
-(Font)              scaled to size 17.89876pt on input line 100.
+(Font)              scaled to size 17.89876pt on input line 107.
  [1
 
 {/usr/local/texlive/2026/texmf-var/fonts/map/pdftex/updmap/pdftex.map}{/usr/loc
@@ -2018,17 +2018,17 @@ t>
 File: fithesis/logo/mu/fithesis-base-english-color.pdf Graphic file (type pdf)
 <use fithesis/logo/mu/fithesis-base-english-color.pdf>
 Package pdftex.def Info: fithesis/logo/mu/fithesis-base-english-color.pdf  used
- on input line 100.
+ on input line 107.
 (pdftex.def)             Requested size: 182.48006pt x 46.97505pt.
 File: fithesis/logo/mu/fithesis-base-english-color.pdf Graphic file (type pdf)
 <use fithesis/logo/mu/fithesis-base-english-color.pdf>
 Package pdftex.def Info: fithesis/logo/mu/fithesis-base-english-color.pdf  used
- on input line 100.
+ on input line 107.
 (pdftex.def)             Requested size: 182.48006pt x 46.97505pt.
 File: fithesis/logo/mu/fithesis-base-english-color.pdf Graphic file (type pdf)
 <use fithesis/logo/mu/fithesis-base-english-color.pdf>
 Package pdftex.def Info: fithesis/logo/mu/fithesis-base-english-color.pdf  used
- on input line 100.
+ on input line 107.
 (pdftex.def)             Requested size: 182.48006pt x 46.97505pt.
  [1 <./fithesis/logo/mu/fithesis-base-english-color.pdf>]
 \@logowidth=\skip110
@@ -2037,22 +2037,22 @@ Package pdftex.def Info: fithesis/logo/mu/fithesis-base-english-color.pdf  used
 File: fithesis/logo/mu/fithesis-fi-color.pdf Graphic file (type pdf)
 <use fithesis/logo/mu/fithesis-fi-color.pdf>
 Package pdftex.def Info: fithesis/logo/mu/fithesis-fi-color.pdf  used on input 
-line 100.
+line 107.
 (pdftex.def)             Requested size: 276.53154pt x 276.53154pt.
 File: fithesis/logo/mu/fithesis-fi-color.pdf Graphic file (type pdf)
 <use fithesis/logo/mu/fithesis-fi-color.pdf>
 Package pdftex.def Info: fithesis/logo/mu/fithesis-fi-color.pdf  used on input 
-line 100.
+line 107.
 (pdftex.def)             Requested size: 276.53154pt x 276.53154pt.
 File: fithesis/logo/mu/fithesis-fi-color.pdf Graphic file (type pdf)
 <use fithesis/logo/mu/fithesis-fi-color.pdf>
 Package pdftex.def Info: fithesis/logo/mu/fithesis-fi-color.pdf  used on input 
-line 100.
+line 107.
 (pdftex.def)             Requested size: 276.53154pt x 276.53154pt.
 
 [2 <./fithesis/logo/mu/fithesis-fi-color.pdf>]
 LaTeX Font Info:    Trying to load font information for TS1+qpl on input line 1
-00.
+07.
 
 (/usr/local/texlive/2026/texmf-dist/tex/latex/tex-gyre/ts1qpl.fd
 File: ts1qpl.fd 2009/09/25 v1.2 font definition file for TS1/qpl
@@ -2355,19 +2355,13 @@ Overfull \hbox (4.02632pt too wide) in paragraph at lines 805--811
 backend / musikk / notifications$\T1/qpl/m/n/12 (-20) ,
  []
 
-
-Overfull \hbox (51.61269pt too wide) in paragraph at lines 805--811
-\T1/qpl/m/n/12 (-20) the Fron-tend code un-der $\T1/lmtt/c/it/12 src / frontend
- / musikk / src / features / notifications$\T1/qpl/m/n/12 (-20) .
- []
-
 [51]
 Overfull \hbox (4.35893pt too wide) in paragraph at lines 856--861
 \T1/lmtt/c/it/12 Dockerfile$\T1/qpl/m/n/12 (-20) , and the Caddy con-fig-u-ra-t
 ion at $\T1/lmtt/c/it/12 src / frontend / Caddyfile .
  []
 
-) (./chapters/appendix.tex [52] [53]
+[52]) (./chapters/appendix.tex [53]
 Appendix A.
 <../extras/survey-questions.pdf, id=1238, 614.295pt x 794.97pt>
 File: ../extras/survey-questions.pdf Graphic file (type pdf)
@@ -2554,16 +2548,21 @@ nt Bi-trate (CBR) [[]105[]]
 \pydata@fh@0=\write14
 \openout14 = `_2EF71E68B4AD97F630480BCEBC1842FB.data.minted'.
 
-runsystem(latexminted config  --timestamp 20260513103506 2EF71E68B4AD97F630480B
+runsystem(latexminted config  --timestamp 20260513104319 2EF71E68B4AD97F630480B
 CEBC1842FB)...executed.
 
  (out/_2EF71E68B4AD97F630480BCEBC1842FB.config.minted)
-runsystem(latexminted cleanconfig  --timestamp 20260513103506 2EF71E68B4AD97F63
+runsystem(latexminted cleanconfig  --timestamp 20260513104319 2EF71E68B4AD97F63
 0480BCEBC1842FB)...executed.
 
 
 (./out/_minted/default.style.minted)
-(./out/_minted/E8BFD4EA0552731A86839CD36CCD1504.highlight.minted) [66] [67]
+(./out/_minted/E8BFD4EA0552731A86839CD36CCD1504.highlight.minted
+LaTeX Font Info:    Font shape `U/msa/m/n' will be
+(Font)              scaled to size 5.21004pt on input line 3.
+LaTeX Font Info:    Font shape `U/msb/m/n' will be
+(Font)              scaled to size 5.21004pt on input line 3.
+) [66] [67]
 [68{/usr/local/texlive/2026/texmf-dist/fonts/enc/dvips/base/8r.enc}]
 (./out/_minted/0EA45CB16670B63CACEFDA176D3428B4.highlight.minted [69])
 Overfull \hbox (2.35051pt too wide) in paragraph at lines 340--343
@@ -2589,27 +2588,9 @@ Package microtype Info: Loading generic protrusion settings for font family
 (microtype)             For optimal results, create family-specific settings.
 (microtype)             See the microtype manual for details.
 Package microtype Info: Character `texttrademark ' is missing
-(microtype)             in font `TS1/lmtt/m/n/12'.
+(microtype)             in font `TS1/lmtt/m/n/10.95'.
 (microtype)             Ignoring protrusion settings for this character.
-
-Overfull \hbox (700.73653pt too wide) in paragraph at lines 3--3
-[][]\TS1/lmtt/m/n/12 '\T1/lmtt/c/it/12 input=/tmp/in/libfdk_aac[]96[]<uuid>.mp4
-,stream=audio,init_segment=/tmp/out/audio_0_init.mp4,segment_template=/tmp/out/
-audio_0_$Number$.m4s,playlist_name=audio_0.m3u8\TS1/lmtt/m/n/12 '[][] 
- []
-
-LaTeX Font Info:    Font shape `U/msa/m/n' will be
-(Font)              scaled to size 5.21004pt on input line 3.
-LaTeX Font Info:    Font shape `U/msb/m/n' will be
-(Font)              scaled to size 5.21004pt on input line 3.
-
-Overfull \hbox (706.91853pt too wide) in paragraph at lines 4--4
-[][]\TS1/lmtt/m/n/12 '\T1/lmtt/c/it/12 input=/tmp/in/libfdk_aac[]160[]<uuid>.mp
-4,stream=audio,init_segment=/tmp/out/audio_1_init.mp4,segment_template=/tmp/out
-/audio_1_$Number$.m4s,playlist_name=audio_1.m3u8\TS1/lmtt/m/n/12 '[][] 
- []
-
-[70{/usr/local/texlive/2026/texmf-dist/fonts/enc/dvips/lm/lm-ts1.enc}])
+ [70{/usr/local/texlive/2026/texmf-dist/fonts/enc/dvips/lm/lm-ts1.enc}])
 Overfull \hbox (24.06128pt too wide) in paragraph at lines 386--388
 []\T1/lmtt/c/it/12 init_-seg-ment=<path> \T1/qpl/m/n/12 (-20) sets the out-put 
 path for the CMAF/fMP4
@@ -2627,7 +2608,7 @@ Overfull \hbox (0.6572pt too wide) in paragraph at lines 405--407
 ) sets the out-put path for
  []
 
-(./out/_minted/592A8BDDE4A234516984881B262C05EF.highlight.minted [71]) [72]
+[71] (./out/_minted/592A8BDDE4A234516984881B262C05EF.highlight.minted) [72]
 Appendix C.
 <diagrams/HighLevelSystem.png, id=1410, 405.515pt x 571.13374pt>
 File: diagrams/HighLevelSystem.png Graphic file (type png)
@@ -2701,9 +2682,12 @@ Package pdftex.def Info: diagrams/UsersClassDiagram.png  used on input line 505
 .
 (pdftex.def)             Requested size: 656.57327pt x 464.52834pt.
 
-Overfull \hbox (295.22328pt too wide) in paragraph at lines 505--506
+Overfull \hbox (103.17834pt too wide) in paragraph at lines 505--506
  [][] 
  []
+
+
+LaTeX Warning: Float too large for page by 134.57326pt on input line 508.
 
 <diagrams/StreamingClassDiagram.png, id=1467, 1080.035pt x 1120.185pt>
 File: diagrams/StreamingClassDiagram.png Graphic file (type png)
@@ -2784,10 +2768,10 @@ Package pdftex.def Info: diagrams/FrontendUser.png  used on input line 562.
 File: diagrams/FrontendAuth.png Graphic file (type png)
 <use diagrams/FrontendAuth.png>
 Package pdftex.def Info: diagrams/FrontendAuth.png  used on input line 568.
-(pdftex.def)             Requested size: 858.0552pt x 273.25pt.
+(pdftex.def)             Requested size: 514.83311pt x 163.95166pt.
 
 
-LaTeX Warning: Float too large for page by 350.55519pt on input line 571.
+LaTeX Warning: Float too large for page by 7.3331pt on input line 571.
 
 <diagrams/FrontendAudioUpload.png, id=1515, 768.8725pt x 740.7675pt>
 File: diagrams/FrontendAudioUpload.png Graphic file (type png)
@@ -2806,19 +2790,16 @@ File: diagrams/FrontendPlayback.png Graphic file (type png)
 <use diagrams/FrontendPlayback.png>
 Package pdftex.def Info: diagrams/FrontendPlayback.png  used on input line 586.
 
-(pdftex.def)             Requested size: 916.78146pt x 273.25pt.
+(pdftex.def)             Requested size: 550.04526pt x 163.95166pt.
 
-LaTeX Warning: Float too large for page by 394.78145pt on input line 589.
+LaTeX Warning: Float too large for page by 28.04524pt on input line 589.
 
 <diagrams/FrontendPublications.png, id=1518, 3343.49126pt x 1080.035pt>
 File: diagrams/FrontendPublications.png Graphic file (type png)
 <use diagrams/FrontendPublications.png>
 Package pdftex.def Info: diagrams/FrontendPublications.png  used on input line 
 592.
-(pdftex.def)             Requested size: 845.87021pt x 273.25pt.
-
-LaTeX Warning: Float too large for page by 323.8702pt on input line 595.
-
+(pdftex.def)             Requested size: 507.52213pt x 163.95166pt.
 <diagrams/FrontendNotifications.png, id=1519, 855.195pt x 610.28pt>
 File: diagrams/FrontendNotifications.png Graphic file (type png)
 <use diagrams/FrontendNotifications.png>
@@ -2867,9 +2848,9 @@ Package pdftex.def Info: diagrams/PlaybackSync.png  used on input line 631.
 File: diagrams/SongQueue.png Graphic file (type png)
 <use diagrams/SongQueue.png>
 Package pdftex.def Info: diagrams/SongQueue.png  used on input line 637.
-(pdftex.def)             Requested size: 544.93327pt x 502.77899pt.
+(pdftex.def)             Requested size: 414.62917pt x 382.54832pt.
 
-Overfull \hbox (183.58328pt too wide) in paragraph at lines 637--638
+Overfull \hbox (53.27917pt too wide) in paragraph at lines 637--638
  [][] 
  []
 
@@ -2947,96 +2928,96 @@ regularity.png>] [109 <./charts/constumption_method.png> <./charts/streaming pl
 atform.png>] [110 <./charts/listen together method.png> <./charts/listen togeth
 er freq.png>] [111 <./charts/share freq.png> <./charts/share method.png>] [112]
 
-Underfull \hbox (badness 2717) in paragraph at lines 108--108
+Underfull \hbox (badness 2717) in paragraph at lines 115--115
 \T1/lmtt/c/it/12 664508917489819 ? helpref = faq _ content$[] \T1/qpl/m/n/12 (+
 20) (vis-ited on
  []
 
 
-Underfull \hbox (badness 5607) in paragraph at lines 108--108
+Underfull \hbox (badness 5607) in paragraph at lines 115--115
 []\T1/qpl/m/n/12 (+20) Beng Chin Ooi Quang Hieu Vu Mi-hai Lupu. \T1/qpl/m/it/12
  (+20) Peer-to-
  []
 
 
-Underfull \hbox (badness 3199) in paragraph at lines 108--108
+Underfull \hbox (badness 3199) in paragraph at lines 115--115
 \T1/qpl/m/it/12 (+20) Peer Com-put-ing: Prin-ci-ples and Ap-pli-ca-tions\T1/qpl
 /m/n/12 (+20) . \T1/qpl/m/sc/12 (+20) url\T1/qpl/m/n/12 (+20) : []$\T1/lmtt/c/i
 t/12 https :
  []
 
 [113]
-Underfull \hbox (badness 1303) in paragraph at lines 108--108
+Underfull \hbox (badness 1303) in paragraph at lines 115--115
 \T1/lmtt/c/it/12 com / en / 5 . 2 / topics / http / sessions/$[] \T1/qpl/m/n/12
  (+20) (vis-ited on
  []
 
 
-Underfull \hbox (badness 4713) in paragraph at lines 108--108
+Underfull \hbox (badness 4713) in paragraph at lines 115--115
 []\T1/qpl/m/it/12 (+20) Generic Event De-liv-ery Us-ing HTTP Push\T1/qpl/m/n/12
  (+20) . \T1/qpl/m/sc/12 (+20) url\T1/qpl/m/n/12 (+20) : []$\T1/lmtt/c/it/12 ht
 tps :
  []
 
 [114]
-Underfull \hbox (badness 3746) in paragraph at lines 108--108
+Underfull \hbox (badness 3746) in paragraph at lines 115--115
 \T1/lmtt/c/it/12 org / docs / current / textsearch . html$[] \T1/qpl/m/n/12 (+2
 0) (vis-ited on
  []
 
 
-Overfull \hbox (2.24815pt too wide) in paragraph at lines 108--108
+Overfull \hbox (2.24815pt too wide) in paragraph at lines 115--115
 []\T1/qpl/m/it/12 (-20) Django Post-greSQL Sup-port\T1/qpl/m/n/12 (-20) . \T1/q
 pl/m/sc/12 (-20) url\T1/qpl/m/n/12 (-20) : []$\T1/lmtt/c/it/12 https : / / docs
  . djangoproject .
  []
 
 
-Underfull \hbox (badness 1303) in paragraph at lines 108--108
+Underfull \hbox (badness 1303) in paragraph at lines 115--115
 \T1/lmtt/c/it/12 com / en / 5 . 2 / ref / contrib / postgres/$[] \T1/qpl/m/n/12
  (+20) (vis-ited on
  []
 
 [115]
-Underfull \hbox (badness 1337) in paragraph at lines 108--108
+Underfull \hbox (badness 1337) in paragraph at lines 115--115
 \T1/lmtt/c/it/12 questions / tagged / reactjs ? tab = Newest$[] \T1/qpl/m/n/12 
 (+20) (vis-ited on
  []
 
 
-Underfull \hbox (badness 1038) in paragraph at lines 108--108
+Underfull \hbox (badness 1038) in paragraph at lines 115--115
 []\T1/qpl/m/it/12 (+20) uv\T1/qpl/m/n/12 (+20) . \T1/qpl/m/sc/12 (+20) url\T1/q
 pl/m/n/12 (+20) : []$\T1/lmtt/c/it/12 https : / / docs . astral . sh / uv/$[] \
 T1/qpl/m/n/12 (+20) (vis-ited on
  []
 
 [116]
-Underfull \hbox (badness 1968) in paragraph at lines 108--108
+Underfull \hbox (badness 1968) in paragraph at lines 115--115
 \T1/qpl/m/it/12 (+20) de-vices. Bi-trate rec-om-men-da-tions, sec-tion 2.25. \T
 1/qpl/m/sc/12 (+20) url\T1/qpl/m/n/12 (+20) : []$\T1/lmtt/c/it/12 https :
  []
 
 
-Underfull \hbox (badness 1009) in paragraph at lines 108--108
+Underfull \hbox (badness 1009) in paragraph at lines 115--115
 \T1/lmtt/c/it/12 questions / 65205 / linked -[] list -[] in -[] sql$[] \T1/qpl/
 m/n/12 (+20) (vis-ited on
  []
 
 
-Underfull \hbox (badness 2150) in paragraph at lines 108--108
+Underfull \hbox (badness 2150) in paragraph at lines 115--115
 []\T1/qpl/m/it/12 (+20) Caddy\T1/qpl/m/n/12 (+20) . \T1/qpl/m/sc/12 (+20) url\T
 1/qpl/m/n/12 (+20) : []$\T1/lmtt/c/it/12 https : / / caddyserver . com/$[] \T1/
 qpl/m/n/12 (+20) (vis-ited on
  []
 
 [117]
-Underfull \hbox (badness 1087) in paragraph at lines 108--108
+Underfull \hbox (badness 1087) in paragraph at lines 115--115
 \T1/lmtt/c/it/12 http -[] live -[] streaming / about -[] the -[] common -[] med
 ia -[]
  []
 
 
-Underfull \hbox (badness 1221) in paragraph at lines 108--108
+Underfull \hbox (badness 1221) in paragraph at lines 115--115
 []\T1/qpl/m/it/12 (+20) HTTP Live Stream-ing (HLS) au-thor-ing spec-i-fi-ca-tio
 n for Ap-
  []
@@ -3060,11 +3041,11 @@ Package logreq Info: Writing requests to 'thesis.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 48574 strings out of 467525
- 987544 string characters out of 5418982
- 1958833 words of memory out of 5000000
- 75946 multiletter control sequences out of 15000+600000
- 717514 words of font info for 247 fonts, out of 8000000 for 9000
+ 48600 strings out of 467525
+ 987913 string characters out of 5418982
+ 1962936 words of memory out of 5000000
+ 75956 multiletter control sequences out of 15000+600000
+ 725888 words of font info for 259 fonts, out of 8000000 for 9000
  1143 hyphenation exceptions out of 8191
  99i,17n,123p,1183b,2457s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb
@@ -3078,10 +3059,10 @@ type1/public/tex-gyre/qplb.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/
 public/tex-gyre/qplr.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public
 /tex-gyre/qplri.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/urw/palatin
 o/uplr8a.pfb>
-Output written on out/thesis.pdf (132 pages, 4729329 bytes).
+Output written on out/thesis.pdf (132 pages, 4732610 bytes).
 PDF statistics:
  2028 PDF objects out of 2073 (max. 8388607)
  1765 compressed objects within 18 object streams
  418 named destinations out of 1000 (max. 500000)
- 47779 words of extra memory for PDF output out of 51595 (max. 10000000)
+ 52899 words of extra memory for PDF output out of 61914 (max. 10000000)
 
