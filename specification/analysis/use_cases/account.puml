@@ -1,0 +1,28 @@
+@startuml UseCasesAccount
+
+!include ../../_style.puml
+left to right direction
+
+title Account and identity
+
+actor "Anonymous User" as anon
+actor User as user
+
+package "Account and Identity" {
+  usecase "Sign up" as UC_SIGNUP
+  usecase "Verify email" as UC_VERIFY
+  usecase "Log in" as UC_LOGIN
+  usecase "Log out" as UC_LOGOUT
+  usecase "Edit profile\n(name, bio, avatar)" as UC_EDIT
+}
+
+anon --> UC_SIGNUP
+anon --> UC_VERIFY
+anon --> UC_LOGIN
+
+user --> UC_LOGOUT
+user --> UC_EDIT
+
+UC_SIGNUP ..> UC_VERIFY
+
+@enduml

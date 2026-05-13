@@ -1,50 +1,54 @@
-@startuml DjangoServer
+@startuml BackendSystem
 
-skinparam packageStyle rectangle
+!include ../_style.puml
 
-package "Reverse Proxy" as caddy
+package "Reverse Proxy" as proxy
 
-package "Django" as django {
-    [SQL Database] as db
-    [WebSocket Channels] as ws
-    [Data Serializers] as serializers
-}
-package "Audio Processor" as audioproc {
-    [ffmpeg]
-    [shaka packager]
+package "Application Server" as app {
+    [REST API] as rest_api
+    [WebSocket Handler] as ws_handler
+    [Authentication] as auth
 }
 
-entity "Redis" as redis
-
-entity "RabbitMQ" as rmq
-
-package "Celery" as celery {
-    [Celery Worker] as worker
-    [Celery Beat] as beat
+package "Audio Processing" as audio_pipeline {
+    [Transcoder] as transcoder
+    [Packager] as packager
 }
 
-entity "Media Storage" as store
+database "Relational Database" as database
+database "Redis\n(cache, pub/sub, task broker)" as redis
 
-caddy ---> django: API Calls (REST/Binary Data)
-django ---> db: Alter/Get Data
-django ---> ws: Create Event
+package "Background Workers" as workers {
+    [Worker] as worker
+}
 
-django --> serializers: Serialize Data
-serializers -up--> caddy: JSON Response
+folder "Media Storage" as media_storage
 
-caddy ---> django: WebSocket Action
-ws -up--> caddy: WebSocket Event
+proxy ---> rest_api : API requests
+proxy <--- rest_api : JSON responses
 
-django ----> redis: Store WebSocket Connection Data\n Store Temporary User Information
+rest_api --> auth : login / logout / session
+auth --> database : sessions, users
+rest_api ----> database : read / write
 
-django ----> rmq: Publish Audio Processing Task
-beat --> rmq: Schedule Clean Up Task
-rmq --> worker: Deliver Task
-worker ---> ws: Notify About Task State
+proxy <--> ws_handler : WebSocket connection
+ws_handler --> redis : per-user pub/sub
+ws_handler ----> database : permission checks,\nstate reads
 
-worker --> audioproc: Process Audio
-[ffmpeg] -> [shaka packager]
-audioproc ---> store: Upload Audio Chunks/Manifests
-django <--- store: Retrieve for Streaming/Presentation
+note right of ws_handler
+The Server sends WS payload as "Events" to the Frontend
+The Frontend sends WS payload as "Actions" to the Backend
+end note
+
+rest_api ----> redis : enqueue task
+worker --> redis : pull task
+worker ---> database : persist state
+worker --> audio_pipeline : process audio
+audio_pipeline --> media_storage : write segments/manifests
+worker ---> redis : push events
+
+proxy <---- media_storage : audio segments / manifests
+
+transcoder -[hidden]- packager
 
 @enduml

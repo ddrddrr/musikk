@@ -1,0 +1,19 @@
+@startuml HighLevelSystem
+
+!include ../_style.puml
+
+actor User as user
+
+package frontend
+package proxy
+package backend
+
+proxy --down-> user: Static Files (HTML/CSS/JS)
+
+user -right--> frontend: Interacts via UI
+frontend ---> proxy: API Requests / WebSocket Actions
+proxy ---> backend: Forward API Requests / WebSocket Actions
+backend ---> proxy: JSON Responses / WebSocket Events
+proxy ---> frontend: JSON Responses / WebSocket Events
+
+@enduml

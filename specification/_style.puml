@@ -1,0 +1,70 @@
+' Shared PlantUML style for all musikk thesis diagrams.
+' Included by every .puml in specification/ via:
+'   !include ../_style.puml      (analysis/, behavior/)
+'   !include ../../_style.puml   (structure/<frontend|backend>/)
+
+skinparam shadowing false
+skinparam BackgroundColor #FFFFFF
+skinparam DefaultFontName "Helvetica"
+skinparam DefaultMonospacedFontName "Menlo"
+skinparam roundCorner 4
+
+' Class diagrams
+skinparam class {
+  BackgroundColor #FCFCFD
+  BorderColor #2B3A55
+  HeaderBackgroundColor #E8ECF4
+  ArrowColor #2B3A55
+  FontName "Helvetica"
+  AttributeFontName "Menlo"
+}
+
+' <<collapsed>>: a box that visually stands in for several real classes/objects
+' grouped together for readability (not a real class itself).
+skinparam class<<collapsed>> {
+  BackgroundColor #F4F6FB
+  HeaderBackgroundColor #DDE2EB
+}
+hide <<collapsed>> circle
+skinparam groupInheritance 2
+skinparam linetype ortho
+skinparam nodesep 80
+skinparam ranksep 100
+
+' Component / deployment diagrams
+skinparam component {
+  BackgroundColor #FCFCFD
+  BorderColor #2B3A55
+}
+skinparam package {
+  BackgroundColor #F4F6FB
+  BorderColor #2B3A55
+  FontStyle bold
+}
+skinparam node {
+  BackgroundColor #F4F6FB
+  BorderColor #2B3A55
+}
+skinparam database {
+  BackgroundColor #FCFCFD
+  BorderColor #2B3A55
+}
+skinparam packageStyle rectangle
+
+' Sequence diagrams
+skinparam sequence {
+  ParticipantBackgroundColor #FCFCFD
+  ParticipantBorderColor #2B3A55
+  ActorBackgroundColor #FCFCFD
+  ActorBorderColor #2B3A55
+  LifeLineBorderColor #BFC8DA
+  ArrowColor #2B3A55
+  GroupBackgroundColor #E8ECF4
+  GroupBorderColor #2B3A55
+}
+
+' Notes
+skinparam note {
+  BackgroundColor #FFF8E1
+  BorderColor #B0871F
+}

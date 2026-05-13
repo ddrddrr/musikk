@@ -1,0 +1,54 @@
+@startuml FrontendAuth
+
+!include ../../_style.puml
+
+title Auth feature - component hierarchy and IO boundary
+
+package "Public pages" as public_pages {
+    [LoginForm]
+    [SignupForm]
+    [EmailVerificationPage]
+}
+
+package "Presentation" {
+    [EmailField]
+    [PasswordField]
+}
+
+LoginForm --> EmailField
+LoginForm --> PasswordField
+SignupForm --> EmailField
+SignupForm --> PasswordField
+
+package "State (providers + hooks)" {
+    [AuthProvider\n(useQuery user.me, login, logout)] as auth_provider
+    [AuthContext] as auth_context
+    [RequireAuth\n(redirect if not\nauthenticated)] as require_auth
+    [useUserUUID] as use_user_uuid
+
+    auth_provider --> auth_context
+    require_auth ..> auth_context : reads
+    use_user_uuid ..> auth_context : reads
+}
+
+package "Network clients\n(src/api/)" as net_clients {
+    [api_client_public\n(no 401 handler)] as api_public
+    [api_client\n(401 -> logout)] as api_priv
+    [authRef.logout] as auth_ref
+
+    api_priv ..> auth_ref : 401 -> logout
+}
+
+cloud "Backend\n/api/v1" as backend
+
+LoginForm ..> api_public : uses
+SignupForm ..> api_public : uses
+EmailVerificationPage ..> api_public : uses
+api_public ..> backend : GET /csrf\nPOST /auth/registration\nPOST /auth/verify-email\nPOST /auth/login\nPOST /auth/logout
+
+auth_provider ..> api_priv : uses
+api_priv ..> backend : GET /users/me
+
+auth_provider ..> auth_ref : registers logout
+
+@enduml

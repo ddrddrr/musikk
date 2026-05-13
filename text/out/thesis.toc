@@ -5,53 +5,107 @@
 \contentsline {section}{\numberline {2.2}Results}{2}{section.2.2}%
 \contentsline {subsection}{\numberline {2.2.1}Engagement}{3}{subsection.2.2.1}%
 \contentsline {subsection}{\numberline {2.2.2}Listening Methods}{3}{subsection.2.2.2}%
-\contentsline {subsection}{\numberline {2.2.3}Social Interactions}{5}{subsection.2.2.3}%
-\contentsline {section}{\numberline {2.3}Summary}{9}{section.2.3}%
-\contentsline {chapter}{\numberline {3}\bfseries Existing Platforms}{10}{chapter.3}%
-\contentsline {section}{\numberline {3.1}Streaming Services}{10}{section.3.1}%
-\contentsline {subsection}{\numberline {3.1.1}Spotify}{11}{subsection.3.1.1}%
-\contentsline {subsection}{\numberline {3.1.2}VK Music}{11}{subsection.3.1.2}%
-\contentsline {subsection}{\numberline {3.1.3}SoundCloud}{11}{subsection.3.1.3}%
-\contentsline {subsection}{\numberline {3.1.4}Bandcamp}{12}{subsection.3.1.4}%
-\contentsline {section}{\numberline {3.2}Forums, Blogs, and Other Music Media}{12}{section.3.2}%
-\contentsline {subsection}{\numberline {3.2.1}Rate Your Music}{12}{subsection.3.2.1}%
-\contentsline {subsection}{\numberline {3.2.2}last.fm}{12}{subsection.3.2.2}%
-\contentsline {section}{\numberline {3.3}General-Purpose Platforms}{13}{section.3.3}%
-\contentsline {chapter}{\numberline {4}\bfseries Specification}{16}{chapter.4}%
-\contentsline {section}{\numberline {4.1}Important Terms}{16}{section.4.1}%
-\contentsline {section}{\numberline {4.2}Functional Requirements}{18}{section.4.2}%
-\contentsline {section}{\numberline {4.3}Non-functional Requirements}{20}{section.4.3}%
-\contentsline {chapter}{\numberline {5}\bfseries Implementation Planning}{22}{chapter.5}%
-\contentsline {section}{\numberline {5.1}Audio Processing and Playback}{22}{section.5.1}%
-\contentsline {section}{\numberline {5.2}Authentication}{25}{section.5.2}%
-\contentsline {section}{\numberline {5.3}Server-Client Communication}{28}{section.5.3}%
-\contentsline {section}{\numberline {5.4}Backend}{31}{section.5.4}%
-\contentsline {subsection}{\numberline {5.4.1}Language}{31}{subsection.5.4.1}%
-\contentsline {subsection}{\numberline {5.4.2}Python Framework Comparison}{32}{subsection.5.4.2}%
-\contentsline {subsection}{\numberline {5.4.3}Database}{34}{subsection.5.4.3}%
-\contentsline {section}{\numberline {5.5}Frontend}{35}{section.5.5}%
-\contentsline {subsection}{\numberline {5.5.1}Application Type}{35}{subsection.5.5.1}%
-\contentsline {subsection}{\numberline {5.5.2}Language}{36}{subsection.5.5.2}%
-\contentsline {subsection}{\numberline {5.5.3}JavaScript Framework Comparison}{36}{subsection.5.5.3}%
-\contentsline {section}{\numberline {5.6}Summary}{38}{section.5.6}%
-\contentsline {chapter}{\numberline {6}\bfseries Implementation}{40}{chapter.6}%
-\contentsline {section}{\numberline {6.1}Audio Processing and Streaming}{40}{section.6.1}%
-\contentsline {subsection}{\numberline {6.1.1}Streaming Protocols}{41}{subsection.6.1.1}%
-\contentsline {subsection}{\numberline {6.1.2}Packaging}{41}{subsection.6.1.2}%
-\contentsline {subsection}{\numberline {6.1.3}Transcoding}{42}{subsection.6.1.3}%
-\contentsline {subsection}{\numberline {6.1.4}Processing Tools}{43}{subsection.6.1.4}%
-\contentsline {section}{\numberline {6.2}Backend and API}{46}{section.6.2}%
-\contentsline {subsection}{\numberline {6.2.1}Directory \texttt {base}}{47}{subsection.6.2.1}%
-\contentsline {subsection}{\numberline {6.2.2}Directory \texttt {api}}{47}{subsection.6.2.2}%
-\contentsline {subsection}{\numberline {6.2.3}Directory \texttt {users}}{49}{subsection.6.2.3}%
-\contentsline {subsection}{\numberline {6.2.4}\textit {sse}}{51}{subsection.6.2.4}%
-\contentsline {subsection}{\numberline {6.2.5}\textit {streaming}}{52}{subsection.6.2.5}%
-\contentsline {subsubsection}{Songs and Song Collections}{52}{section*.29}%
-\contentsline {subsubsection}{SongQueue}{54}{section*.30}%
-\contentsline {subsubsection}{Playback State and Playback Devices}{56}{section*.31}%
-\contentsline {subsection}{\numberline {6.2.6}\textit {social}}{56}{subsection.6.2.6}%
-\contentsline {subsection}{\numberline {6.2.7}\textit {notifications}}{58}{subsection.6.2.7}%
-\contentsline {subsection}{\numberline {6.2.8}\textit {recommendations}}{59}{subsection.6.2.8}%
-\contentsline {chapter}{\numberline {A}\bfseries Appendix}{60}{appendix.A}%
-\contentsline {section}{\numberline {A.1}Survey Questionnaire}{60}{section.A.1}%
-\contentsline {chapter}{Bibliography}{68}{appendix*.33}%
+\contentsline {subsection}{\numberline {2.2.3}Social Interactions}{3}{subsection.2.2.3}%
+\contentsline {section}{\numberline {2.3}Summary}{5}{section.2.3}%
+\contentsline {chapter}{\numberline {3}\bfseries Existing Platforms}{6}{chapter.3}%
+\contentsline {section}{\numberline {3.1}Streaming Services}{6}{section.3.1}%
+\contentsline {subsection}{\numberline {3.1.1}Spotify}{7}{subsection.3.1.1}%
+\contentsline {subsection}{\numberline {3.1.2}VK Music}{7}{subsection.3.1.2}%
+\contentsline {subsection}{\numberline {3.1.3}SoundCloud}{7}{subsection.3.1.3}%
+\contentsline {subsection}{\numberline {3.1.4}Bandcamp}{8}{subsection.3.1.4}%
+\contentsline {section}{\numberline {3.2}Forums, Blogs, and Other Music Media}{8}{section.3.2}%
+\contentsline {subsection}{\numberline {3.2.1}Rate Your Music}{8}{subsection.3.2.1}%
+\contentsline {subsection}{\numberline {3.2.2}last.fm}{8}{subsection.3.2.2}%
+\contentsline {section}{\numberline {3.3}General-Purpose Platforms}{9}{section.3.3}%
+\contentsline {chapter}{\numberline {4}\bfseries Specification}{12}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Important Terms}{12}{section.4.1}%
+\contentsline {section}{\numberline {4.2}Use Cases}{14}{section.4.2}%
+\contentsline {section}{\numberline {4.3}Functional Requirements}{14}{section.4.3}%
+\contentsline {section}{\numberline {4.4}Non-functional Requirements}{16}{section.4.4}%
+\contentsline {chapter}{\numberline {5}\bfseries Implementation Planning}{18}{chapter.5}%
+\contentsline {section}{\numberline {5.1}Audio Processing and Playback}{18}{section.5.1}%
+\contentsline {section}{\numberline {5.2}Authentication}{20}{section.5.2}%
+\contentsline {section}{\numberline {5.3}Server-Client Communication}{22}{section.5.3}%
+\contentsline {section}{\numberline {5.4}Backend}{25}{section.5.4}%
+\contentsline {subsection}{\numberline {5.4.1}Language}{25}{subsection.5.4.1}%
+\contentsline {subsection}{\numberline {5.4.2}Python Framework Comparison}{25}{subsection.5.4.2}%
+\contentsline {subsection}{\numberline {5.4.3}Database}{27}{subsection.5.4.3}%
+\contentsline {section}{\numberline {5.5}Frontend}{28}{section.5.5}%
+\contentsline {subsection}{\numberline {5.5.1}Application Type}{28}{subsection.5.5.1}%
+\contentsline {subsection}{\numberline {5.5.2}Language}{29}{subsection.5.5.2}%
+\contentsline {subsection}{\numberline {5.5.3}Framework}{30}{subsection.5.5.3}%
+\contentsline {section}{\numberline {5.6}Summary}{30}{section.5.6}%
+\contentsline {chapter}{\numberline {6}\bfseries Implementation}{32}{chapter.6}%
+\contentsline {section}{\numberline {6.1}Stack}{32}{section.6.1}%
+\contentsline {section}{\numberline {6.2}Audio Processing and Streaming}{33}{section.6.2}%
+\contentsline {subsection}{\numberline {6.2.1}Streaming Protocols}{33}{subsection.6.2.1}%
+\contentsline {subsection}{\numberline {6.2.2}Packaging}{33}{subsection.6.2.2}%
+\contentsline {subsection}{\numberline {6.2.3}Processing Tools}{33}{subsection.6.2.3}%
+\contentsline {subsection}{\numberline {6.2.4}Transcoding}{34}{subsection.6.2.4}%
+\contentsline {subsection}{\numberline {6.2.5}Audio Preprocessing}{34}{subsection.6.2.5}%
+\contentsline {subsection}{\numberline {6.2.6}Backend Pipeline}{36}{subsection.6.2.6}%
+\contentsline {subsection}{\numberline {6.2.7}Frontend Playback}{37}{subsection.6.2.7}%
+\contentsline {section}{\numberline {6.3}WebSocket Communication}{37}{section.6.3}%
+\contentsline {subsection}{\numberline {6.3.1}Backend Handling}{37}{subsection.6.3.1}%
+\contentsline {subsection}{\numberline {6.3.2}Frontend Handling}{39}{subsection.6.3.2}%
+\contentsline {section}{\numberline {6.4}User Management}{40}{section.6.4}%
+\contentsline {subsection}{\numberline {6.4.1}User Data Model}{40}{subsection.6.4.1}%
+\contentsline {subsection}{\numberline {6.4.2}Backend}{40}{subsection.6.4.2}%
+\contentsline {subsection}{\numberline {6.4.3}Frontend}{41}{subsection.6.4.3}%
+\contentsline {section}{\numberline {6.5}Account Creation and Authentication}{41}{section.6.5}%
+\contentsline {subsection}{\numberline {6.5.1}Backend}{41}{subsection.6.5.1}%
+\contentsline {subsection}{\numberline {6.5.2}Frontend}{42}{subsection.6.5.2}%
+\contentsline {section}{\numberline {6.6}Playback Items}{43}{section.6.6}%
+\contentsline {subsection}{\numberline {6.6.1}Data Model}{43}{subsection.6.6.1}%
+\contentsline {subsection}{\numberline {6.6.2}Backend}{44}{subsection.6.6.2}%
+\contentsline {subsection}{\numberline {6.6.3}Frontend}{45}{subsection.6.6.3}%
+\contentsline {section}{\numberline {6.7}Audio Upload/Album Creation}{45}{section.6.7}%
+\contentsline {subsection}{\numberline {6.7.1}Submit}{45}{subsection.6.7.1}%
+\contentsline {subsection}{\numberline {6.7.2}Process}{46}{subsection.6.7.2}%
+\contentsline {subsection}{\numberline {6.7.3}Persist and notify}{46}{subsection.6.7.3}%
+\contentsline {subsection}{\numberline {6.7.4}Frontend State Updates}{47}{subsection.6.7.4}%
+\contentsline {section}{\numberline {6.8}Song Queue}{47}{section.6.8}%
+\contentsline {subsection}{\numberline {6.8.1}Data structure}{47}{subsection.6.8.1}%
+\contentsline {subsection}{\numberline {6.8.2}Queue and PlaybackContext}{48}{subsection.6.8.2}%
+\contentsline {subsection}{\numberline {6.8.3}QueueSource and lazy filling}{48}{subsection.6.8.3}%
+\contentsline {section}{\numberline {6.9}Playback and Device Handling}{48}{section.6.9}%
+\contentsline {subsection}{\numberline {6.9.1}Shared state and version counter}{49}{subsection.6.9.1}%
+\contentsline {subsection}{\numberline {6.9.2}Active versus passive clients}{49}{subsection.6.9.2}%
+\contentsline {subsection}{\numberline {6.9.3}Device activation}{50}{subsection.6.9.3}%
+\contentsline {subsection}{\numberline {6.9.4}Frontend controller class}{50}{subsection.6.9.4}%
+\contentsline {section}{\numberline {6.10}Publications}{51}{section.6.10}%
+\contentsline {section}{\numberline {6.11}Search}{51}{section.6.11}%
+\contentsline {section}{\numberline {6.12}Notifications}{51}{section.6.12}%
+\contentsline {section}{\numberline {6.13}Security}{52}{section.6.13}%
+\contentsline {section}{\numberline {6.14}Deployment}{52}{section.6.14}%
+\contentsline {chapter}{\numberline {A}\bfseries Survey Questionnaire}{54}{appendix.A}%
+\contentsline {chapter}{\numberline {B}\bfseries Audio Processing Pipeline Details}{62}{appendix.B}%
+\contentsline {section}{\numberline {B.1}Streaming Protocols}{62}{section.B.1}%
+\contentsline {section}{\numberline {B.2}Packaging}{62}{section.B.2}%
+\contentsline {section}{\numberline {B.3}Processing Tools}{63}{section.B.3}%
+\contentsline {section}{\numberline {B.4}Transcoding}{63}{section.B.4}%
+\contentsline {subsection}{\numberline {B.4.1}Why transcoding is needed}{63}{subsection.B.4.1}%
+\contentsline {subsection}{\numberline {B.4.2}AAC encoder choice}{64}{subsection.B.4.2}%
+\contentsline {subsection}{\numberline {B.4.3}Bitrate strategy: CBR versus VBR}{64}{subsection.B.4.3}%
+\contentsline {subsection}{\numberline {B.4.4}Generation loss for lossy sources}{65}{subsection.B.4.4}%
+\contentsline {section}{\numberline {B.5}Audio Preprocessing}{65}{section.B.5}%
+\contentsline {subsection}{\numberline {B.5.1}Input validation limits}{65}{subsection.B.5.1}%
+\contentsline {subsection}{\numberline {B.5.2}FFprobe invocation}{66}{subsection.B.5.2}%
+\contentsline {subsection}{\numberline {B.5.3}Tier selection}{67}{subsection.B.5.3}%
+\contentsline {subsection}{\numberline {B.5.4}Channel normalization}{67}{subsection.B.5.4}%
+\contentsline {subsection}{\numberline {B.5.5}Sample rate normalization}{67}{subsection.B.5.5}%
+\contentsline {subsection}{\numberline {B.5.6}Bit depth conversion}{68}{subsection.B.5.6}%
+\contentsline {subsection}{\numberline {B.5.7}Loudness theory}{68}{subsection.B.5.7}%
+\contentsline {subsection}{\numberline {B.5.8}Why loudness is measured after Transcoding}{69}{subsection.B.5.8}%
+\contentsline {section}{\numberline {B.6}Pipeline invocations}{69}{section.B.6}%
+\contentsline {subsection}{\numberline {B.6.1}FFmpeg transcoding flags}{69}{subsection.B.6.1}%
+\contentsline {subsection}{\numberline {B.6.2}Shaka Packager flags}{70}{subsection.B.6.2}%
+\contentsline {subsection}{\numberline {B.6.3}ebur128 loudness measurement flags}{72}{subsection.B.6.3}%
+\contentsline {chapter}{\numberline {C}\bfseries Diagram Catalog}{73}{appendix.C}%
+\contentsline {section}{\numberline {C.1}Architecture Overview}{73}{section.C.1}%
+\contentsline {section}{\numberline {C.2}Use Case Diagrams}{76}{section.C.2}%
+\contentsline {section}{\numberline {C.3}Backend Class Diagrams}{82}{section.C.3}%
+\contentsline {section}{\numberline {C.4}Frontend Component Hierarchies}{91}{section.C.4}%
+\contentsline {section}{\numberline {C.5}Behavior Diagrams}{100}{section.C.5}%
+\contentsline {section}{\numberline {C.6}Survey Charts}{107}{section.C.6}%
+\contentsline {chapter}{Bibliography}{112}{appendix*.61}%

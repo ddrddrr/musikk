@@ -1,22 +1,52 @@
 \babel@toc {english}{}\relax 
 \addvspace {4\p@ }
 \addvspace {4\p@ }
-\contentsline {figure}{\numberline {2.1}{\ignorespaces Age Distribution of Respondents}}{3}{figure.caption.8}%
-\contentsline {figure}{\numberline {2.2}{\ignorespaces Monthly Song Count per Respondent}}{4}{figure.caption.9}%
-\contentsline {figure}{\numberline {2.3}{\ignorespaces Listening Frequency of Respondents}}{4}{figure.caption.10}%
-\contentsline {figure}{\numberline {2.4}{\ignorespaces Audio Media Consumption by Age Group}}{5}{figure.caption.11}%
-\contentsline {figure}{\numberline {2.5}{\ignorespaces Streaming Platforms Popularity}}{6}{figure.caption.12}%
-\contentsline {figure}{\numberline {2.6}{\ignorespaces Social Interaction Methods}}{6}{figure.caption.13}%
-\contentsline {figure}{\numberline {2.7}{\ignorespaces Social Interactions Frequency}}{7}{figure.caption.14}%
-\contentsline {figure}{\numberline {2.8}{\ignorespaces Music Sharing Frequency}}{8}{figure.caption.15}%
-\contentsline {figure}{\numberline {2.9}{\ignorespaces Music Sharing Methods}}{8}{figure.caption.16}%
 \addvspace {4\p@ }
-\contentsline {figure}{\numberline {3.1}{\ignorespaces Music Discovery Methods Popularity}}{10}{figure.caption.17}%
+\contentsline {figure}{\numberline {3.1}{\ignorespaces Music Discovery Methods Popularity}}{6}{figure.caption.8}%
 \addvspace {4\p@ }
 \addvspace {4\p@ }
 \addvspace {4\p@ }
-\contentsline {figure}{\numberline {6.1}{\ignorespaces System Overview}}{40}{figure.caption.26}%
-\contentsline {figure}{\numberline {6.2}{\ignorespaces Backend}}{46}{figure.caption.27}%
-\contentsline {figure}{\numberline {6.3}{\ignorespaces Backend Class Diagram}}{48}{figure.caption.28}%
 \addvspace {4\p@ }
-\contentsline {figure}{\numberline {6.4}{\ignorespaces Frontend}}{68}{figure.caption.32}%
+\addvspace {4\p@ }
+\addvspace {4\p@ }
+\contentsline {figure}{\numberline {C.1}{\ignorespaces System Overview}}{73}{figure.caption.20}%
+\contentsline {figure}{\numberline {C.2}{\ignorespaces Backend Architecture}}{74}{figure.caption.21}%
+\contentsline {figure}{\numberline {C.3}{\ignorespaces Frontend Architecture}}{75}{figure.caption.22}%
+\contentsline {figure}{\numberline {C.4}{\ignorespaces Use cases: Account and Identity}}{76}{figure.caption.23}%
+\contentsline {figure}{\numberline {C.5}{\ignorespaces Use cases: Social}}{77}{figure.caption.24}%
+\contentsline {figure}{\numberline {C.6}{\ignorespaces Use cases: Library and Content}}{78}{figure.caption.25}%
+\contentsline {figure}{\numberline {C.7}{\ignorespaces Use cases: Playback}}{79}{figure.caption.26}%
+\contentsline {figure}{\numberline {C.8}{\ignorespaces Use cases: Search}}{80}{figure.caption.27}%
+\contentsline {figure}{\numberline {C.9}{\ignorespaces Use cases: Communication}}{81}{figure.caption.28}%
+\contentsline {figure}{\numberline {C.10}{\ignorespaces Class diagram: Users}}{83}{figure.caption.29}%
+\contentsline {figure}{\numberline {C.11}{\ignorespaces Class diagram: Streaming (Songs, Collections, Credits)}}{84}{figure.caption.30}%
+\contentsline {figure}{\numberline {C.12}{\ignorespaces Class diagram: Audio Processing Pipeline}}{85}{figure.caption.31}%
+\contentsline {figure}{\numberline {C.13}{\ignorespaces Class diagram: Playback}}{86}{figure.caption.32}%
+\contentsline {figure}{\numberline {C.14}{\ignorespaces Class diagram: Streaming WebSocket Handlers}}{87}{figure.caption.33}%
+\contentsline {figure}{\numberline {C.15}{\ignorespaces Class diagram: WebSockets Core}}{88}{figure.caption.34}%
+\contentsline {figure}{\numberline {C.16}{\ignorespaces Class diagram: Social (Publications, Comments, Chats)}}{89}{figure.caption.35}%
+\contentsline {figure}{\numberline {C.17}{\ignorespaces Class diagram: Notifications}}{90}{figure.caption.36}%
+\contentsline {figure}{\numberline {C.18}{\ignorespaces Frontend component hierarchy: top level}}{92}{figure.caption.37}%
+\contentsline {figure}{\numberline {C.19}{\ignorespaces Frontend component hierarchy: User Management}}{93}{figure.caption.38}%
+\contentsline {figure}{\numberline {C.20}{\ignorespaces Frontend component hierarchy: Account and Authentication}}{94}{figure.caption.39}%
+\contentsline {figure}{\numberline {C.21}{\ignorespaces Frontend component hierarchy: Audio Upload}}{95}{figure.caption.40}%
+\contentsline {figure}{\numberline {C.22}{\ignorespaces Frontend component hierarchy: Song Queue}}{96}{figure.caption.41}%
+\contentsline {figure}{\numberline {C.23}{\ignorespaces Frontend component hierarchy: Playback}}{97}{figure.caption.42}%
+\contentsline {figure}{\numberline {C.24}{\ignorespaces Frontend component hierarchy: Publications}}{98}{figure.caption.43}%
+\contentsline {figure}{\numberline {C.25}{\ignorespaces Frontend component hierarchy: Notifications}}{99}{figure.caption.44}%
+\contentsline {figure}{\numberline {C.26}{\ignorespaces WebSocket connection lifecycle}}{100}{figure.caption.45}%
+\contentsline {figure}{\numberline {C.27}{\ignorespaces WebSocket cache invalidation on follow mutation}}{101}{figure.caption.46}%
+\contentsline {figure}{\numberline {C.28}{\ignorespaces Account creation, email confirmation, login, and session expiry}}{102}{figure.caption.47}%
+\contentsline {figure}{\numberline {C.29}{\ignorespaces Audio upload sequence}}{103}{figure.caption.48}%
+\contentsline {figure}{\numberline {C.30}{\ignorespaces Multi-tab playback synchronization}}{104}{figure.caption.49}%
+\contentsline {figure}{\numberline {C.31}{\ignorespaces Song Queue: add a Collection and advance}}{105}{figure.caption.50}%
+\contentsline {figure}{\numberline {C.32}{\ignorespaces Chat connection lifecycle}}{106}{figure.caption.51}%
+\contentsline {figure}{\numberline {C.33}{\ignorespaces Age Distribution of Respondents}}{107}{figure.caption.52}%
+\contentsline {figure}{\numberline {C.34}{\ignorespaces Monthly Song Count per Respondent}}{108}{figure.caption.53}%
+\contentsline {figure}{\numberline {C.35}{\ignorespaces Listening Frequency of Respondents}}{108}{figure.caption.54}%
+\contentsline {figure}{\numberline {C.36}{\ignorespaces Audio Media Consumption by Age Group}}{109}{figure.caption.55}%
+\contentsline {figure}{\numberline {C.37}{\ignorespaces Streaming Platforms Popularity}}{109}{figure.caption.56}%
+\contentsline {figure}{\numberline {C.38}{\ignorespaces Social Interaction Methods}}{110}{figure.caption.57}%
+\contentsline {figure}{\numberline {C.39}{\ignorespaces Social Interactions Frequency}}{110}{figure.caption.58}%
+\contentsline {figure}{\numberline {C.40}{\ignorespaces Music Sharing Frequency}}{111}{figure.caption.59}%
+\contentsline {figure}{\numberline {C.41}{\ignorespaces Music Sharing Methods}}{111}{figure.caption.60}%

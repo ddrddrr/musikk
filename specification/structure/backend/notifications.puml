@@ -1,0 +1,45 @@
+@startuml NotificationsClassDiagram
+
+!include ../../_style.puml
+
+note as n1
+Every concrete Notification uses a NotificationManager that calls
+`send_ws_event(user_group(receiver.uuid), NOTIFICATIONS_CHANGED)`
+in `create()`
+end note
+
+class BaseUser <<external>>
+class Publication <<external>>
+class Chat <<external>>
+
+abstract class Notification <<abstract>>
+
+class NotificationManager <<Manager, broadcasts ws>> {
+    create(**kwargs)
+}
+Notification ..> NotificationManager : managed by
+
+class NotificationProfile <<DjangoModel>> {
+    read_at: datetime
+}
+NotificationProfile --> "1" BaseUser : user (1:1)
+
+class ReplyNotification <<DjangoModel>>
+class FollowerNotification <<DjangoModel>>
+class ChatMessageNotification <<DjangoModel>>
+
+Notification <|-- ReplyNotification
+Notification <|-- FollowerNotification
+Notification <|-- ChatMessageNotification
+
+ReplyNotification --> "0..1" Publication : orig_publication
+ReplyNotification --> "1" Publication : reply_publication
+
+FollowerNotification ---> "1" BaseUser : sender
+FollowerNotification --> "1" BaseUser : receiver
+
+ChatMessageNotification --> "1" Publication : message
+ChatMessageNotification --> "1" Chat : chat
+ChatMessageNotification --> "1" BaseUser : receiver
+
+@enduml

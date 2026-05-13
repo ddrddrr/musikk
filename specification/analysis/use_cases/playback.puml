@@ -1,0 +1,28 @@
+@startuml UseCasesPlayback
+
+!include ../../_style.puml
+left to right direction
+
+title Playback
+
+actor User as user
+
+package "Playback" {
+  usecase "Play Song" as UC_PLAY_SONG
+  usecase "Play Collection" as UC_PLAY_COLL
+  usecase "Control Playback\n(pause, resume, seek,\nnext, previous)" as UC_CONTROL
+  usecase "Manage Playback Queue\n(add, remove, clear)" as UC_QUEUE
+  usecase "Register Playback Device\n(Open New Tab)" as UC_REG_DEV
+  usecase "Switch Active Playback Device" as UC_SWITCH_DEV
+  usecase "Adjust Device volume" as UC_VOLUME
+}
+
+user --> UC_PLAY_SONG
+user --> UC_PLAY_COLL
+user --> UC_CONTROL
+user --> UC_QUEUE
+user --> UC_REG_DEV
+user --> UC_SWITCH_DEV
+user --> UC_VOLUME
+
+@enduml

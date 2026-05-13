@@ -1,0 +1,85 @@
+@startuml SongQueue
+
+!include ../_style.puml
+
+title Song Queue: add a Collection and advance
+
+actor User as user
+
+box "Frontend" #EEF2F8
+participant "Tab" as tab
+end box
+
+box "Backend" #F8EFE5
+participant "QueueView\n(DRF)" as view
+participant "PlayerController" as controller
+participant "PlayerState" as player
+participant "SongQueue" as queue
+participant "PlaybackContext" as context
+database "QueueSource" as source_db
+database "QueueItem" as item_db
+database "CollectionSong" as cs_db
+participant "PlayerStateBroadcaster" as broadcaster
+end box
+
+note over view, broadcaster
+The per-User WS broadcast and the per-tab refetch of
+queueKeys.base after queue.changed are covered in the
+WS cache invalidation diagram and omitted here.
+end note
+
+== Add a Collection ==
+user -> tab : add Album to queue
+tab -> view : POST /api/v1/song-queue/add-collection/<uuid>
+view -> controller : add_collection_to_queue(collection)
+controller -> queue : insert(collection)
+queue -> source_db : create QueueSource\nwith cursor pointing\nat the first object
+note over queue
+The Collection is stored as a reference
+that will be "expanded" later rather than up front.
+end note
+queue -> queue : refill with items
+alt queue already has 30 or more items
+  note over queue : nothing to do
+else queue needs more
+  queue -> cs_db : fetch up to 20 songs\nfrom the source cursor
+  queue -> item_db : create one QueueItem per fetched song,\nappended at the end of the queue
+  alt Collection exhausted
+    queue -> source_db : delete source
+  else more songs remain
+    queue -> source_db : advance source cursor
+  end
+end
+controller -> broadcaster : broadcast_queue_changed()
+broadcaster -->> tab : ws event "queue.changed"
+view --> tab : 204 No Content
+
+== Advance ==
+user -> tab : current Song ends or next pressed
+tab -> view : POST /api/v1/song-queue/shift-head
+view -> controller : advance()
+controller -> player : advance()
+player -> queue : pop the first item
+alt queue had an item
+  queue -> item_db : delete that item
+  queue -> queue : refill ready items if needed
+  queue --> player : popped Song from queue
+  player -> player : record previous Song in History,\nset current Song
+else queue is empty
+  player -> context : ask the Collection for the next song
+  context -> cs_db : next song past the cursor,\nskipping any the User removed
+  alt next song found
+    context -> context : advance the cursor
+    context --> player : next song from Context
+    player -> player : record previous Song in History,\nset current Song
+  else nothing left
+    context --> player : None
+    player -> player : stop playback
+  end
+end
+controller -> broadcaster : broadcast_queue_changed()
+controller -> broadcaster : broadcast_snapshot()
+broadcaster -->> tab : ws events "queue.changed"\nand "playback.snapshot"
+view --> tab : 204 No Content
+
+@enduml

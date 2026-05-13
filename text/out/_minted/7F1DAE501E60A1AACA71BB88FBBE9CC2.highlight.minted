@@ -1,3 +1,0 @@
-\begin{MintedVerbatim}[commandchars=\\\{\}]
-\PYG{n}{permission\PYGZus{}classes} \PYG{o}{=} \PYG{p}{[}\PYG{n}{IsAuthenticated}\PYG{p}{]}
-\end{MintedVerbatim}

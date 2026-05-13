@@ -155,6 +155,12 @@ To run it locally we override the Caddy config and allowed hosts.
    are printed to the server log instead of being sent. To send real mail, set `EMAIL_BACKEND`
    to the mail provider of your choice and fill in the required vars (see `django-anymail`)
 
+   Email confirmation on signup is controlled by `ACCOUNT_EMAIL_VERIFICATION` (django-allauth),
+   which defaults to `mandatory`. When set to `none`, no confirmation email is sent and the
+   account is active immediately, but the signup form still shows the "Confirmation email has
+   been sent" message. In that mode, just navigate to the home page after registering, there
+   is no email step to complete.
+
 2. **Bring it up**
 
    ```

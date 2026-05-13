@@ -1,25 +1,28 @@
 @startuml FrontendSystem
-' TODO
-actor User as user
 
-skinparam packageStyle rectangle
+!include ../_style.puml
 
-package "Reverse Proxy / Static Server" as caddy
+actor "User" as user
 
-package "Frontend (Static)" as frontend {
-    [React UI] as react
-    [Shaka Player] as shaka
+package "Reverse Proxy/Static Files" as proxy
+
+package "Single-Page Application" as spa {
+    [UI] as ui
+    [API Client] as api_client
+    [WebSocket Client] as ws_client
+    [Audio Player] as player
 }
 
-user ---> react : Interact with UI
-react ---> user : Present Data
-react ---> caddy : API Calls
-react ---> caddy : Event Stream Subscription
-caddy ---> react : API Responses
-caddy ---> react: Server-Sent Events
+user ---> ui : interact
+ui ----> user : render
 
-shaka ---> caddy : Audio Requests
-caddy ---> shaka : Audio Data/Representation
-shaka --> react : Playback Events
+ui ..> api_client : queries / mutations
+ui ..> ws_client : subscribe / send
+ui ..> player : drives playback
+
+api_client <---> proxy : API requests / JSON responses
+ws_client <---> proxy : WebSocket connection / events
+player <---> proxy : streaming manifest / audio bytes
+
 
 @enduml

@@ -1,0 +1,38 @@
+@startuml FrontendAudioUpload
+
+!include ../../_style.puml
+
+title Audio upload - component hierarchy and IO boundary
+
+package "Page" {
+    [AlbumUploadPage] as album_upload_page
+}
+
+package "Presentation" {
+    [AlbumSongUploadSection] as upload_section
+    [SongUploadField] as upload_field
+    [SongUploadCard] as upload_card
+    [SongUploadStatusBadge] as status_badge
+}
+
+album_upload_page --> upload_section
+upload_section --> upload_field
+upload_field --> upload_card
+upload_card --> status_badge
+
+package "State (hooks)" {
+    [useSongUpload] as use_song_upload
+    [useSongUploadEvent\n(WS event handler)] as use_upload_event
+}
+
+upload_section ..> use_song_upload : uses
+use_song_upload ..> use_upload_event : merges WS payloads\ninto the reducer
+
+cloud "Backend\n/api/v1" as backend
+queue "WSClient\nuser group" as ws
+
+use_song_upload ..> backend : POST /collections/{uuid}/songs\n(multipart, operation_id)
+
+use_upload_event <.. ws : song.upload\n(status: queued / processing /\nready / failed)
+
+@enduml

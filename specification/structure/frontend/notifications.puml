@@ -1,0 +1,34 @@
+@startuml FrontendNotifications
+
+!include ../../_style.puml
+
+title Notifications - component hierarchy and IO boundary
+' Source: src/frontend/musikk/src/features/notifications/
+
+package "Presentation" {
+    [NotificationBox\n(header trigger + popover)] as notification_box
+    [NotificationOverlay\n(reply / follower / chat sections)] as notification_overlay
+}
+
+notification_box --> notification_overlay
+
+package "State (hooks)" {
+    [useNotificationsQuery] as use_notifications_query
+    [useNotificationWsEvents] as notifications_ws
+}
+
+notification_box ..> use_notifications_query : reads
+notification_overlay ..> use_notifications_query : reads
+
+cloud "Backend\n/api/v1" as backend
+queue "WSClient\nuser group" as ws
+
+' --- HTTP ---
+use_notifications_query ..> backend : GET /notifications
+notification_overlay ..> backend : PATCH /notifications\nDELETE /notifications/{uuid}
+
+' --- WS (events received) ---
+notifications_ws <.. ws : notifications.changed
+notifications_ws ..> use_notifications_query : invalidates notificationKeys.base
+
+@enduml

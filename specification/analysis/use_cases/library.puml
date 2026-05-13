@@ -1,0 +1,37 @@
+@startuml UseCasesLibrary
+
+!include ../../_style.puml
+left to right direction
+
+title Library and content
+
+actor User as user
+actor Artist as artist
+artist --|> user
+
+package "Library and Content" {
+  usecase "Browse own library" as UC_LIBRARY
+  usecase "View Collection" as UC_VIEW_COLL
+  usecase "Create Playlist" as UC_CREATE_PL
+  usecase "Add Song to Playlist" as UC_ADD_SONG
+  usecase "Remove Song from Playlist" as UC_REMOVE_SONG
+  usecase "Like Song" as UC_LIKE_SONG
+  usecase "Like Collection" as UC_LIKE_COLL
+  usecase "Edit own Collection" as UC_EDIT_COLL
+  usecase "Delete own Collection" as UC_DELETE_COLL
+  usecase "Upload Album" as UC_UPLOAD
+}
+
+user --> UC_LIBRARY
+user --> UC_VIEW_COLL
+user --> UC_CREATE_PL
+user --> UC_ADD_SONG
+user --> UC_REMOVE_SONG
+user --> UC_LIKE_SONG
+user --> UC_LIKE_COLL
+user --> UC_EDIT_COLL
+user --> UC_DELETE_COLL
+
+artist --> UC_UPLOAD
+
+@enduml

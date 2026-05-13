@@ -1,445 +1,881 @@
 \chapter{Implementation}\label{ch:implementation}
 
-%TODO: actual section for parts names
-This chapter presents the created platform: first it introduces the configuration of the Backend and the Frontend,
-and then the individual parts of the system, such as User Management and Representation, Audio Processing,
-Publication Creation, etc.
-
-In contrary to the \chapterref{ch:planning}, this chapter will not split Backend and Frontend into different sections,
-but rather will discuss the complete system components.
-In other words, each part will contain the data model, the business logic, the API and the Frontend
-components used for the presentation and interaction.
-
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=1\textwidth, keepaspectratio]{diagrams/system}
-    \caption{System Overview}
-    \label{fig:system_overview}
-\end{figure}
-A high-level overview of the entire system can be seen in the following diagram~\ref{fig:system_overview}.
-
-%TODO: move to attachments
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=1\textwidth, keepaspectratio]{diagrams/backend}
-    \caption{Backend}
-    \label{fig:backend}
-\end{figure}
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=1\textwidth, keepaspectratio]{diagrams/frontend}
-    \caption{Frontend}
-    \label{fig:frontend}
-\end{figure}
-The complete Backend class diagram is shown in~\ref{fig:backend} and
-the Frontend component diagram is presented in~\ref{fig:frontend}.
-There is no separate ERD diagram, since the class diagram encompasses the data model as well.
+This chapter goes over the built application, explaining
+the choices behind each feature, and
+focuses on what is not clear from the diagrams or the source code
+itself. Structure and naming that the diagrams or code already show
+are not repeated in the text. The high-level system overview can be found in
+Figure~\ref{fig:system_overview}, the Backend and Frontend
+architectures in Figures~\ref{fig:backend} and~\ref{fig:frontend}.
+The per-app Backend class diagrams, the Frontend component
+hierarchies, and the behavior diagrams referenced from each section
+are collected in the \hyperref[app:diagrams]{Diagram Catalog}
+appendix.
 
 
-\section{Configuration}
-This section lists the concrete frameworks, libraries and tools that were used when creating the system.
-% TODO: add missing citations
+\section{Stack}\label{sec:stack}
+The Backend runs Django 5.2 on Python 3.14, served by the Daphne
+ASGI server because django-channels needs ASGI for WebSocket
+support~\parencite{daphne}. The HTTP API uses Django REST framework
+with django-filter~\parencite{django_filter}, authentication uses
+dj-rest-auth~\parencite{dj_rest_auth} on top of django-allauth, and
+background work runs on Celery. Database is PostgreSQL 17,
+Redis~\parencite{redis} is used as both the cache and the data layer for
+django-channels. Dependencies are managed with uv~\parencite{uv}.
 
-\subsection{Backend Configuration}
-\begin{itemize}
-    \item Language: \texttt{python@3.14}
-    \item Package Manager, Env Manager: \texttt{uv}~\parencite{uv}, \texttt{envrc}
-    \item Framework: \texttt{django@5.2}
-    \item WebSocket Management: \texttt{django-channels}
-    \item ASGI Server: \texttt{daphne}~\parencite{daphne}
-    \item API: \texttt{django-rest-framework}, \texttt{django-filter}~\parencite{django_filter},
-    \item Backgroud Tasks: \texttt{celery}
-    \item Cache/Key-Value Store: \texttt{redis}
-    \item Authentication: \texttt{dj-rest-auth}~\parencite{dj_rest_auth}
-    \item Database: \texttt{postgres:17}
-\end{itemize}
+The audio pipeline uses FFmpeg~\parencite{ffmpeg} for transcoding and Shaka
+Packager~\parencite{shaka_packager} for segmentation, both invoked
+as external CLI tools.
 
-\subsection{Audio Processing Configuration}
-\begin{itemize}
-    \item Transcoding: \texttt{ffmpeg@8.0.1}
-    \item Packaging: \texttt{shaka-packager@3.4.2}
-\end{itemize}
+The Frontend is a Vite-built React 19 SPA written in TypeScript,
+styled with Tailwind and shadcn/ui. Queries and mutations are managed via
+TanStack Query and HTTP calls go through axios. Forms use
+react-hook-form with zod validation, and Playback uses Shaka
+Player~\parencite{shaka_player} for DASH and HLS streaming.
 
-\subsection{Frontend Configuration}
-\begin{itemize}
-    \item Language: \texttt{typescript@5.9.3}
-    \item Package Manager: \texttt{npm}
-    \item UI: \texttt{react@19.2.0}
-    \item Bundler, Dev Server: \texttt{vite}
-    \item Styling: \texttt{tailwindcss}, \texttt{shadcn/ui}, \texttt{@radix-ui/*}
-    \item Routing: \texttt{react-router-dom}
-    \item Server state + HTTP: \texttt{@tanstack/react-query}, \texttt{axios}
-    \item Forms, Data Validation: \texttt{react-hook-form}, \texttt{zod}
-    \item Audio Playback: \texttt{shaka-player}
-\end{itemize}
-% TODO
+Deployment is a simple Docker Compose behind a Caddy
+reverse proxy on a Hetzner VPS, with Mailgun for mail services
+and PorkBun for the domain.
 
-\subsection{Deployment Configuration}
-\begin{itemize}
-    \item Docker
-    \item Docker Compose
-    \item Docker Registry (private)
-    \item Caddy
-    \item Hetzner
-    \item Mail: Mailgun
-    \item Domain Management: PorkBun
-\end{itemize}
+Full dependency lists are located in
+\path{src/backend/pyproject.toml} and
+\path{src/frontend/musikk/package.json}.
 
 
 \section{Audio Processing and Streaming}
-This section provides the core principles of Audio Processing and Streaming.
+This section follows an uploaded audio file through the pipeline
+that prepares it for Streaming. The Streaming Protocols are covered
+first, since the rest of the pipeline has to match what they allow.
 
-As was stated in the \chapterref{ch:planning} Segmented HTTP Streaming is going to be
-used as the main method of audio presentation; therefore the Streaming Protocols are discussed first.
-Then, the stages that are needed to make an audio file streamable are described: Transcoding and Packaging.
-These stages are presented in the reverse order, as Packaging sets requirements that affect Transcoding.
-In the end of the section, the software tools used for those processing steps are selected.
+This section stays at the level of what each stage does and what
+parameters it uses. The rationale behind the choices and the per-flag breakdown
+of every call are in the \hyperref[app:audio_details]{Audio Processing
+Pipeline Details} appendix. Anything mentioned below but not explained
+in detail is covered there.
 
 \subsection{Streaming Protocols}
-Two protocols were chosen for audio streaming: MPEG-DASH\parencite{dash} and HLS\parencite{hls}.
-The basic pricnipals behind them were
-introduced in the \hyperref[it:streaming]{Segmented HTTP Streaming} section.
+Two protocols are used: MPEG-DASH~\parencite{dash} on devices that
+support Media Source Extensions, and HLS~\parencite{hls} on iOS, which
+does not support MSE\@. The basic principles behind both protocols
+were covered in the \hyperref[it:streaming]{Segmented HTTP Streaming}
+section.
 
-At first, only DASH was considered, because it works better in varying network conditions~\parencite{hls_vs_dash},
-and is not limited to only a select amount of audio codecs.~\parencite{dash_technical}
-
-% todo links to all players?
-However, DASH support in audio players is typically implemented
-via browser Media Source Extensions\parencite{mse}, which iOS does not support.\parencite{msecaniuse}
-Since iOS accounts for roughly 15\% of all operating systems
-worldwide~\parencite{os_percentage}, HLS support had to be added as well.
-
-Both streaming protocols will therefore be used: DASH on devices that support MSE, and HLS on iOS\@.
-
-With the protocols selected, the audio representation that is required for protocols to work is discussed next.
+Both protocols expect audio split into short chunks paired with a
+manifest. The Packaging step is the one that produces those.
 
 \subsection{Packaging}
-Packaging is the step where the encoded audio is prepared for Streaming.~\parencite{packaging_def}
-It mainly includes dividing the audio into chunks and generating manifest files
-that reference them~(an \texttt{*.mpd} file for DASH and \texttt{*.m3u8} files for HLS).
+Packaging cuts the transcoded audio into short fragmented MP4 segments
+and generates a DASH manifest (\texttt{*.mpd}) and an HLS master
+playlist (\texttt{*.m3u8}) that point at them.~\parencite{packaging_def}
+The segments follow Common Media Application Format~(CMAF), so a single
+set of chunks works for both protocols. The output is one
+initialization segment (\texttt{*\_init.mp4}) per representation and a
+sequence of media segments (\texttt{*.m4s}).
 
-Because the platform serves both DASH and HLS, it is useful to generate only one set of chunks and reuse it
-for both streaming methods.
-For this reason, the packaged output follows Common Media Application Format~(CMAF), \footnote{
-    This is usually not implied strictly by packager utilities, but can be observer by running, e.g.,
-    `ffprobe` CLI utility on the converted file.
-}
-which defines a common way to store chunks as fragmented MP4~(fMP4) containers.~\parencite{cmaf}
-
-The resulting output would contain one initialization segment (\texttt{*\_init.mp4}), which stores audio metadata
-and decoder setup, and a sequence of media segments (\texttt{*.m4s}),
-which store the audio data in short time intervals.
-In addition, this approach is required for streaming FLAC
-encoded (lossless) audio via HLS.~\parencite{apple_hls_specs_flac_container}
-
-But before the audio is packaged, it needs to be converted to different formats in order to support bitrate
-switching.
-The next subsection discusses this process, which is called Transcoding.
-
-\subsection{Transcoding}
-Transcoding is the process of decoding audio data and re-encoding it,
-typically to a different codec (see explanation below) and/or different encoding settings: bitrate, sample rate, channels, etc.
-
-Usually, when high-quality audio is recorded, it is initially saved in raw audio formats, such as WAV,
-which results in big file sizes which are impractical for Streaming\@.\footnote{
-    For instance, the resulting WAV file for a 3-minute stereo audio
-    recording with a bit depth of 24 bits and a sample rate of 41khz is approximately 50 MB\@.
-}
-To reduce the size, the audio is usually processed using a special program called a \textit{codec},
-which compresses and stores audio in a more efficient format.
-
-Lossless codecs, such as FLAC~\parencite{flac_xiph}, keep all audio information, so the audio sounds exactly
-the same as the original raw data.
-In contrast, lossy codecs~(MP3~\parencite{mp3}, AAC~\parencite{aac}, OPUS~\parencite{opus}, etc.)
-remove some information to reduce file size, which can slightly reduce quality, especially at low bitrates.
-
-In this implementation, the lossless FLAC codec and lossy AAC and HE-AAC codecs were selected due to their
-good performance in web-based streaming scenarios.~\parencite{codec_evaluation_1, codec_evaluation_2, codec_evaluation_3}:
-Other codecs that theoretically promise to provide better sound quality at smaller file sizes,
-such as Opus or MP3, were also researched; however, for higher bitrates that are used in Streaming they did not
-provide any advantage.
-Moreover, only *-AAC and FLAC codecs are supported for HLS streaming.~\parencite{apple_hls_specs_audio}
-
-Codecs usually provide several parameters that affect the output, such as sample rate, the number
-of channels, and bitrate.
-Bitrate describes how much audio data is stored or transmitted per second and is typically expressed in KB/s\@.
-It is commonly used because it provides a direct way to control the trade-off between audio
-quality and file size.
-
-Before selecting the encoding configuration, it is also important to distinguish
-between two encoding strategies: Constant Bitrate~(CBR)~\parencite{cbr}
-and Variable Bitrate~(VBR).~\parencite{vbr}
-
-CBR keeps the bitrate fixed across the entire audio file, resulting in predictable chunk
-sizes and smooth playback during Streaming.
-VBR adjusts the bitrate depending on content complexity,
-which can provide better quality at a smaller size compared to CBR,
-but can lead to inconsistent segment sizes, making Streaming less stable~\parencite{cbrvbrcomp}.
-% TODO: this is not the reason no, cbr was chosen because we can have multiple representations
-% what if vbr is still too big for some conditions?
-% or multi-vbr also exists...
-For this reason, a \textbf{multi-CBR setup} was selected.
-While less efficient in terms of quality-to-size ratio compared to VBR,
-CBR provides better predictability when Streaming.
-
-The following configuration was chosen based on the available
-research and recommendations~\parencite{codec_evaluation_1, codec_evaluation_2,
-    codec_evaluation_3, spotify_codecs, apple_hls_specs_audio, mdn_aac}:
-\begin{itemize}
-    \item \textbf{AAC}: 96, 160, and 320 kbps
-    \item \textbf{AAC-HEv2}: 24 kbps
-    \item \textbf{FLAC}: lossless
-\end{itemize}
-As mentioned before, multiple bitrates are included in order to support adaptive streaming.
-
-The tools which are used to do the Packaging and Transcoding are introduced next.
+Packaging only arranges existing audio. The CLI tools that produce and
+analyze that audio in the first place are introduced next.
 
 \subsection{Processing Tools}
-Transcoding is done via \texttt{ffmpeg}~\parencite{ffmpeg}, which is an open-source CLI tool.
-It is used because it offers support for all of the selected codecs, can be run programmatically as a script
-and provides high speed of audio conversion, since it is written in C and is optimized to use multiple threads.
-%TODO: improve
-\texttt{ffmpeg} provides multiple codec implementations, out of which \texttt{libfdk\_aac} and \texttt{flac} were used.
-While there is only one codec for FLAC, \texttt{ffmpeg} has three for AAC:
+Three CLI tools run the pipeline: FFmpeg~\parencite{ffmpeg} for
+Transcoding and audio analysis, FFprobe (shipped with FFmpeg) for
+reading source metadata, and Shaka Packager~\parencite{shaka_packager}
+for the Packaging step. FFmpeg can package too, but its output had
+compatibility issues with Shaka Player~\parencite{shaka_player}, used
+on the Frontend for Playback, so a separate packager was chosen.
+
+With FFmpeg in place as the encoder and analyzer, the Transcoding
+configuration it runs can be described.
+
+\subsection{Transcoding}
+Transcoding decodes the source audio and re-encodes it into the target
+codecs and bitrates. Raw audio formats such as WAV are too large for
+Streaming, for example a 3-minute stereo 24-bit 44.1\,kHz recording is
+roughly 50\,MB\@. Lossless FLAC and lossy AAC/HE-AACv2 were selected as
+the output codecs, since HLS only allows a small set of audio
+codecs.~\parencite{apple_hls_specs_audio} The AAC encoder used is
+\texttt{libfdk\_aac}, chosen over the other AAC encoders shipped with
+FFmpeg for its quality and licensing terms.
+
+The output configuration was chosen based on existing research:~\parencite{codec_evaluation_1, codec_evaluation_2,
+    codec_evaluation_3, spotify_codecs, apple_hls_specs_audio, mdn_aac}
 \begin{itemize}
-    \item \texttt{aac_at} - the best available codec in terms of quality.~\parencite{aac_codec_cmp_1,aac_codec_cmp_2,aac_codec_cmp_3}
-    However, it was excluded due to its licencing policy which states that this codec could be used only on Apple-branded devices.\parencite{aac_at_licensing,ffmpeg_aac}
-    \item \texttt{aac} - the \texttt{ffmpeg}'s own AAC codec implementation.
-    It was also rejected, since the quality it provides is sub-par (even stated by the official documentation),
-    lacking behing the other two codecs.~\parencite{aac_codec_cmp_1,aac_codec_cmp_2,aac_codec_cmp_3, ffmpeg_aac}
-    \item \texttt{libfdk_aac} - the second best codec in terms of quality and the codec that was eventually chosen.
-    Although, it also has licencing issues, notably any binaries, Docker images and other distribution methods which
-    use it can not be made public or freely shipped to other devices, it is available for use
-    free of charge in closed-source projects.~\parencite{vialicensing_aac, spdx_aac, ffmpeg_aac}
+    \item \textbf{AAC}: 96, 160, and 320\,kbps
+    \item \textbf{HE-AACv2}: 24\,kbps
+    \item \textbf{FLAC}: lossless
+\end{itemize}
+Multiple bitrates support adaptive streaming. The AAC tiers use
+Constant Bitrate~(CBR), so the Frontend's Adaptive Bitrate logic has a
+stable per-tier bandwidth to pick from.
+
+Transcoding needs a clean input with reasonable parameters. The Audio
+Preprocessing step described next ensures that each upload is valid
+and within the proper limits, and also captures the metadata of the result.
+
+\subsection{Audio Preprocessing}
+\label{subsec:audio_preprocessing}
+Before Transcoding, the upload is validated and normalized. After
+Transcoding, the loudness is measured. The sub-blocks below cover
+input validation, metadata extraction, the normalization filter chain,
+and the loudness measurement.
+
+\subsubsection*{Input validation}
+The upload passes through a chain of checks. The file-size and MIME checks
+run on the raw bytes. Other checks use values reported by FFprobe. Together
+they restrict the worst-case storage and Transcoding time of a single upload:
+\begin{itemize}
+    \item \textbf{MIME type}, inspected with
+    \texttt{python-magic}~\parencite{pythonmagic}, must be \texttt{audio/*}
+    and belong to an allow-list of supported subtypes.
+    \item \textbf{Codec}, reported by FFprobe, must belong to an allow-list
+    of stable codecs.
+    \item \textbf{File size}: up to 2\,GB, roughly a 2-hour 24-bit,
+    48\,kHz stereo WAV\@.
+    \item \textbf{Duration}: up to 7200\,s (2\,h).
+    \item \textbf{Sample rate}: 1\,Hz to 384\,kHz.
+    \item \textbf{Channel count}: 1 to 8.
+\end{itemize}
+The allow-lists are defined in \path{streaming/audio/config.py}.
+
+\subsubsection*{Input metadata extraction}
+FFprobe reads the source codec, sample rate, channel count, bit depth,
+duration, and bitrate. These values are reused by the input validation
+above. They also narrow which outputs the Transcoding step produces:
+FLAC is skipped for lossy sources, and AAC tiers whose target
+bitrate is above the source bitrate are dropped.
+
+\subsubsection*{Normalization and loudness}
+Three normalization filters run as a single FFmpeg \texttt{-af} chain
+applied inside every Transcoding subprocess. A separate loudness
+measurement then runs after Transcoding. The steps are:
+\begin{itemize}
+    \item \textbf{Channel normalization}. Sources with three or more
+    channels are downmixed to stereo. Mono and stereo inputs are kept
+    as-is.
+    \item \textbf{Sample rate normalization}. Each source is resampled to
+    the base of its rate family (44.1\,kHz or 48\,kHz). Files below
+    44.1\,kHz are kept as-is. Non-family rates default to 44.1\,kHz.
+    \item \textbf{Bit depth conversion}. All audio is converted to signed
+    16-bit samples, since \texttt{libfdk\_aac} does not accept higher
+    precision.
+    \item \textbf{Loudness measurement}. After Transcoding, FFmpeg's
+    \texttt{ebur128} filter produces an integrated value in Loudness Units
+    relative to Full Scale~(LUFS) and a true peak in dBTP\@. The
+    measurement runs on the FLAC output if it was produced, otherwise on
+    the first AAC output. Both values are stored on the Song and used by
+    the Frontend player to apply a consistent Playback gain.
 \end{itemize}
 
-The resulting \texttt{ffmpeg} command that is used for Transcoding looks like this:
-% TODO: make on same page
-\begin{minted}{bash}
-ffmpeg -i *input file path*
-    -vn -sn -dn
-    -c:a *encoder* *encoder extras*
-    -b:a *bitrate*
-    -movflags
-    +faststart
-    *resulting file path*
-\end{minted}
+Once Transcoding and Packaging finish, the original upload and the
+intermediate transcoded MP4s are removed. Only the packaged segments,
+manifests, and the loudness values stored on the Song row survive.
 
-Where individual flags are:
-\begin{itemize}
-    \item \texttt{-i *input file path*} selects the input media file.
-    \item \texttt{-vn} disables video streams.
-    \item \texttt{-sn} disables subtitle streams.
-    \item \texttt{-dn} disables data streams.
-    \item \texttt{-c:a *encoder*} selects the audio encoder/codec used for the output~(e.g., \texttt{flac}, \texttt{libfdk\_aac}).
-    \item *encoder extras* are additional encoder-specific options~(e.g., \texttt{-profile aac\_he\_v2} for \texttt{libfdk\_aac}).
-    \item \texttt{-b:a *bitrate*} sets the target audio bitrate~(e.g., \texttt{96k}).
-    \item \texttt{-movflags +faststart} moves the MP4 metadata~(\texttt{moov} atom~\parencite{moov})
-    to the beginning of the file to improve download/streaming startup.
-    \item \texttt{*resulting file path*} sets the output file path.
-\end{itemize}
+The Backend code that runs all of these stages is described next.
 
-Even though \texttt{ffmpeg} is able to do the Packaging step as well, a dedicated packager tool was decided to be used.
-This is due to the problems that \texttt{ffmpeg} had with generating manifests which are
-% todo link to frontend
-% todo say about problems that were there?
-compatible with Shaka Player~\parencite{shaka_player}~(that is used on the Frontend for audio playback, see Frontend section for details)
-As a consequence, Shaka Packager was selected for the packaging step.~\parencite{shaka_packager}
-It supports both DASH and HLS, can generate CMAF-style fMP4 segments, and can produce both manifests in one run.
-In addition, it integrates well with Shaka Player.
+\subsection{Backend Pipeline}\label{subsec:backend_pipeline}
+The Backend code is under
+\path{src/backend/musikk/streaming/audio/}, the class layout is
+shown in Figure~\ref{fig:cd_audio}.
 
-The resulting Shaka Packager command that is used for Packaging looks like this:
-\begin{minted}{bash}
-packager
-  "input=*file path 1*,stream=audio,
-   init_segment=*base path*/audio_0_init.mp4,
-   segment_template=*base path*/audio_0_$Number$.m4s,
-   playlist_name=audio_0.m3u8"
-  "input=*file path 2*,stream=audio,
-   init_segment=*base path*/audio_1_init.mp4,
-   segment_template=*base path*/audio_1_$Number$.m4s,
-   playlist_name=audio_1.m3u8"
-  ...
-  --segment_duration 3
-  --generate_static_live_mpd
-  --mpd_output=*base path*/manifest.mpd
-  --hls_master_playlist_output=*base path*/master.m3u8
-\end{minted}
+Pre-pipeline validation (the file-size, MIME, and FFprobe-based checks
+from the previous subsection) is defined in \texttt{validators.py} and runs before any
+audio processing is started. The pipeline itself, in \texttt{processing\_pipeline.py},
+holds a shared \texttt{ProcessingContext} which is used by
+\texttt{Step} instances, so it is easy to add new steps or change existing.
+The configured step chain runs \texttt{FFmpegStep},
+then \texttt{LoudnessMeasurementStep}, then \texttt{ShakaPackagerStep}.
+Each \texttt{Step} hands off to a CLI command wrapper:
+\texttt{FFmpegStep} calls \texttt{FFMPEGFull}, and
+\texttt{ShakaPackagerStep} calls \texttt{ShakaPackagerMPDAndM3U8}.
+Each step has a \texttt{rollback} method. If a step raises, the
+previously executed steps are rolled back in reverse order. The
+rollback clears the per-run temporary directory and removes any output
+already written to Django storage.
 
-Where individual flags are:
-\begin{itemize}
-    \item \texttt{packager} -- the Shaka Packager binary.
-    \item \texttt{"input=*file path N*,stream=audio,init\_segment=*path*,
-        segment\_template=*path*,playlist\_name=*name*"} defines one packaging input, where:
-    \begin{itemize}
-        \item \texttt{input=*path*} is the local path to the downloaded source audio file.
-        \item \texttt{stream=audio} selects the audio stream from the file for packaging.
-        \item \texttt{init\_segment=*path*} sets the output path for the CMAF/fMP4 initialization segment~(\texttt{*\_init.mp4}).
-        \item \texttt{segment\_template=*path*} sets the template for media segment file names.
-        \item \texttt{playlist\_name=*name*} sets the name of the per-representation HLS media playlist~(variant playlist), e.g., \texttt{audio\_0.m3u8}.
-    \end{itemize}
-    \item \texttt{--segment\_duration 3} sets the target segment duration in seconds.
-    \item \texttt{--generate\_static\_live\_mpd} generates a static MPD with, which is used for better compatibility with audio players.
-    \item \texttt{--mpd\_output=*path*} sets the output path for the DASH manifest~(\texttt{manifest.mpd}).
-    \item \texttt{--hls\_master\_playlist\_output=*path*} sets the output path for the HLS master playlist~(\texttt{master.m3u8}).
-\end{itemize}
+\texttt{FFmpegStep} runs one FFmpeg subprocess per output tier in
+parallel via a \texttt{ThreadPoolExecutor} sized to the number of
+selected tiers. Threads are used rather than processes because FFmpeg
+itself is multi-threaded inside each subprocess, so the Python side
+only waits on the subprocess to finish.
 
-\subsection{Backend Wrappers}
-...
+When this pipeline is started, and how its
+status reaches the Frontend, is covered in the Audio Upload section.
 
 \subsection{Frontend Playback}
-On the Frontend the Playback is achieved via \texttt{shaka-player}.
-The individual components can be found under the ... dir
-% todo celery task (and why we use it in general)
-% the progres status manager (link to ws section)
-% todo transition
+As mentioned in the \hyperref[sec:stack]{Stack} section, Shaka Player is used for Streaming on the Frontend.
+It is an open-source JavaScript player for DASH and HLS that reads the
+Streaming manifests, fetches segments over HTTP, and passes them into an
+HTML audio element, picking the audio tier that matches the available
+bandwidth. That audio element is owned by the
+\texttt{AudioPlayerController} described in the Playback and Device
+Handling section.
+
+This concludes the audio pipeline. The next section covers the
+WebSocket layer.
 
 
-% TODO explain models, views/serializers, api structure
-% then fe components, hooks, how api works there
-% also dir structure
+\section{WebSocket Communication}\label{sec:ws}
+This section covers the WebSocket setup of the application. The
+Backend code is under \path{src/backend/musikk/websockets}, the
+Frontend code under \path{src/frontend/musikk/src/ws}. The end-to-end
+connection lifecycle is shown in
+Figure~\ref{fig:bh_ws_lifecycle}, and the class layout in
+Figure~\ref{fig:cd_websockets}.
 
-
-\section{WebSocket Communication}
-This section describes the WebSocket setup, i.e., how the WS channels are created, and
-how the server or the client sends/receives the WS messages.
-
-Messages that are sent from the server to the client are internally called ``events'', while messages
-from the client to the server -- ``actions''.
+Two message-direction terms are used throughout the text.
+\textit{Events} are messages sent from the server to the client.
+\textit{Actions} are messages sent from the client to the server.
 
 \subsection{Backend Handling}
-The Backend WS configuration can be found under the \texttt{src/backend/musikk/websockets} directory.
+All real-time features share a single connection at \path{/ws/user}.
+With one connection per feature, ordering between features would be
+lost: a Playback Device switch and a Playback activation could arrive
+in any order. Per-User Backend state would also be split across one
+consumer per feature, and the upgrade handshake plus cookie
+authentication would be duplicated for each connection.
+% TODO: probably cite
+Each extra connection also adds memory and file-descriptor overhead
+on the server, runs into the browser's per-origin WebSocket limit,
+and needs its own reconnect handling on the Frontend.
 
-The \texttt{BaseConsumer} class is responsible for processing the incoming WS connection attempts:
-it first validates that the User is authenticated, adds it to
-a broadcast group under the \texttt{user\_*user uuid*} key,
-and creates any relevant event processing classes (see further sections for more information).
-In addition, it is responsible for sending the ``events'' and routing the received ``actions'' to their handlers.
+As discussed in \hyperref[sec:server_client_communication]{Server-Client Communication},
+WebSocket support is added via \texttt{django-channels}.
+The \texttt{BaseConsumer} class handles one accepted connection, and the
+\texttt{AuthMiddlewareStack} resolves the User from the session
+cookie before the connection is accepted.
+Anonymous connection attempts are not permitted and an error is returned.
+For broadcasts to multiple connected clients, django-channels provides
+Groups. A Group is a set of consumers that any consumer can
+join, and a single send to the Group reaches every member.
 
-A \texttt{/ws/user} endpoint is exposed and must be used for connection establishment.
+Two kinds of groups are used. The User's own group
+\texttt{user\_<uuid>}, joined on connect, holds ``private'' changes:
+Playback Device list, Notifications, Liked Songs change and other relevant events.
+A User with several tabs (devices) open uses one consumer per tab, and all of them
+are joined to the same \texttt{user\_<uuid>} group, hence a ``private''
+broadcast reaches every tab.
+Named topic groups (\texttt{topic.<prefix>.<id>}) can be joined by several different Users
+at once and are used for shared traffic: Chat messages, Collection Comments,
+and typing indicators.
+
+Each feature provides an action handler class that declares the
+action keys it owns. The consumer then assembles a single
+action-to-handler map, and whenever a valid action is received, calls the
+relevant handler for it.
+
+Actions are handled by WSActionHandler classes. Each handler maps
+action keys to the methods that run them. The consumer dispatches every
+incoming action to the method registered for its key.
+
+Events are sent through two helpers, \texttt{send\_ws\_event} for a
+group and \texttt{send\_ws\_event\_to\_channel} for a single channel,
+so any part of the Backend can emit them. DRF views, Celery tasks, and
+Django signal handlers all call these helpers directly.
+
+When the connection closes, each handler runs an
+\texttt{on\_disconnect} hook so per-feature state is released: joined
+topic groups are dropped, the registered Playback Device is cleared,
+and so on. A Playback event can also include an excluded device id, in
+which case the consumer skips delivery to the device with the specified id.
+This is useful, since the device that sends an update already is in the updated state
+and does not need a WS event with the new data from the server.
 
 \subsection{Frontend Handling}
-Frontend WS configuration is located in the \texttt{src/frontend/musikk/src/ws} directory.
+The Frontend opens a single connection to \path{/ws/user}.
+Authentication is implicit, the browser sends the session cookie along
+with the upgrade request. The WS-handling code is split into two
+classes, \texttt{WSClient} and \texttt{WebSocketManager}.
 
-The \texttt{WSClient} class provides methods for connection creation/closure, ``action'' dispatch, and
-``event'' processing.
+Reconnect logic is also added, so a tab that is put in the background or a brief network outage
+does not require a page refresh or manual actions from the user.
+Reconnects use exponential backoff with a 30\,s ceiling and random
+jitter. The jitter prevents many tabs from reconnecting at the same
+time after an outage.
 
-Since many different parts of the Frontend may want to react to the same ``events'', it also
-exposes a Pub-Sub mechanism that lets other functions/components register
-custom callbacks in reaction to ``events''.
+\texttt{WSClient} wraps the native \texttt{WebSocket} interface.
+Most outbound actions go through the \texttt{send} method, which queues
+them and flushes the queue when the connection is open.
+An action issued while the connection is down is therefore not lost, and the order
+of queued actions is preserved on flush. The exception is the periodic
+Playback position sync action, it is sent only if the connection
+is open and dropped otherwise, so stale Playback positions are not queued and replayed later on.
 
-In addition, a basic reconnect mechanism is added, so that the connections are not dropped
-indefinitely, for example, during short network outages.
-Moreover, a queue is added for outgoing ``actions'', so that they are not lost, if the client is not
-able to send them at the time of creation.
-All created ``actions'' are first added to the \texttt{pendingMessages} list, and only if the
-connection is established and healthy are then sent to the server.
+Named topic subscriptions are also handled via the \texttt{WSClient}.
+Subscriptions are reference-counted: only the first topic
+subscriber runs a \texttt{subscribe} action, and only the last
+unsubscriber sends runs the \texttt{unsubscribe} action. Both actions also bypass the
+queue, because a \texttt{subscribe} action must reach the server before any
+later action that depends on the topic.
+On reconnect, the on-open handler re-initializes every
+currently used topic.
 
-A separate \texttt{WebSocketManager} class manages the WS connection lifecycle.
-It monitors the amount of open connections and provides an interface to create/delete them.
-% TODO: cite devmode
-It was mostly added due to the duplicate connection issues which appeared when using React in
-development mode.
+\texttt{WebSocketManager} owns the single \texttt{WSClient} via a
+refcount. \texttt{connect} returns the existing client and increments
+the counter. \texttt{disconnect} closes the connection only when the
+counter reaches zero. Without the refcount, one subscriber unmounting
+(including the double-mount React's StrictMode triggers in development)
+would tear down the connection shared with the others, drop their
+topic subscriptions, and force a fresh handshake plus re-subscription
+on the next mount.
 
-With WebSocket Communication discussed, User-related functionality is presented next.
+Feature code does not touch either class directly. Instead it uses
+hooks (e.g., \texttt{useChatWsEvents}) that subscribe to a topic and
+register listeners for the matching events.
+
+WebSocket connection is also used for Frontend cache invalidation.
+The tab which changes the data invalidates the affected React Query
+key on mutation success, and every other open tab does the same when
+the server event signifying that new data is available arrives.
 
 
 \section{User Management}
-This section outlines the User data model and presentation layers.
-
-The relevant Backend code is located in the \texttt{src/backend/musikk/users} directory,
-the Frontend code in the \texttt{src/frontend/musikk/src/features/user} directory.
+This section covers how Users are modelled, how the Frontend renders
+them, and the API that connects the two. The Backend code is under
+\path{src/backend/musikk/users}, the Frontend code under
+\path{src/frontend/musikk/src/features/user}. The class diagram is
+shown in Figure~\ref{fig:cd_users}, and the Frontend component
+hierarchy in Figure~\ref{fig:fe_user}.
 
 \subsection{User Data Model}
-Users in the system are represented by a \texttt{BaseUser} model which holds a
-discriminator \texttt{role} field that can be of two types: an ``Artist'' or a ``Base''.
-%TODO: section ref
-An ``Artist'' role gives the User additional permissions, such as uploading new Songs or creating Albums (see ...).
-Currently there are no additional properties that the Artist need to have, however, in the future this design
-could be extended, for example, with a new ArtistProfile model that would
-include additional information, such as upcoming Artist events or revenue data.
+A single \texttt{BaseUser} model covers every account, with a
+\texttt{role} discriminator field that is either ``Base'' or ``Artist''.
+An Artist is not a separate subclass, just a role value.
+There are currently no Artist-only fields, so a separate table is not needed for now.
+The \texttt{IsArtist} permission reads the field to gate Artist-only
+endpoints such as Album upload.
 
-Each user is uniquely identified by their email; display_name defaults to a random
-string and does not need to be unique.
+Each User is uniquely identified by their email. The
+\texttt{display\_name} is not unique and defaults to a random string,
+so a new account always has a usable name before the User picks one.
 
-Apart from basic configuration, Users can also have relations to other Users,
-which is modeled by the \texttt{UserFollow} model.
-The system intentially does not create a separate model for Friend relations: this is inferred
-by a presence of a ``mutual follow'', i.e., two existing \texttt{UserFollow} relations where the
-\texttt{from_user} and \texttt{to_user} foreign keys are mirrored in each model instance.
+User-to-User relations are modelled by a single \texttt{UserFollow}
+table. Friendship is not a separate model. A Friend is inferred from a
+mutual follow, two \texttt{UserFollow} rows in opposite directions.
+The \texttt{BaseUser.friends} property computes that join directly in
+the ORM, so the Friend set is never stored.
 
-\subsection{API}
-The API provides a standard set of endpoints: a \texttt{MeView} which allows the User
-to retrieve or update their information; a \texttt{UserRetrieveView} that returns the non-sensitive
-information about any specfic User in the system; a \texttt{FollowedView} which lets Users follow/unfollow
-other Users and retrieve the Users they Follow. \texttt{FollowersView} and \texttt{FriendsView} return the
-Followers of a User and their Friends respectively.
+\subsection{Backend}
+The endpoints are listed in
+\path{src/backend/musikk/users/api/v1/urls.py}.
 
-The endpoints access is gated by permissions so that, e.g., only User's Friends would be able to see their
-Followers (defined in \texttt{src/backend/musikk/users/permissions.py}).
+The \texttt{/users/me} endpoint splits the serializer by HTTP method.
+GET returns the public fields plus the User's own email. PATCH
+exposes only \texttt{display\_name}, \texttt{bio}, and \texttt{avatar}.
+The split exists so that the role, email, and \texttt{is\_artist} flag
+cannot be written through the same endpoint as profile edits, even if
+extra fields are sent in the payload. The public retrieve endpoint
+called for another User omits the email, so an email address only ever
+reaches the owner of the account.
 
-\subsection{Frontend Presentation}
-On the Frontend each User has a \texttt{ProfilePage} which is used to view and edit User's
-information.
-When visiting another User's Profile it is possible to follow/unfollow them using a dedicated button.
-The same can be done from the \texttt{UserCard} context menu.
-In addition, the Profile component renders the User Feed, see ... for more details.
+A follow does more than insert a row. The POST handler is idempotent
+through \texttt{get\_or\_create}, so a double-click does not create a
+duplicate notification.
 
-\texttt{UserCard}, \texttt{UserAvatar} and \texttt{UserIdentifier} components are used throughout the application
-where User presentation is needed.
-For example, a \texttt{UserCard} is rendered for each Author/User search result and UserIdentifier is
-shown in Comment/Post headers, so that the users are easier to identify.
+A successful follow also creates a \texttt{FollowerNotification} that appears in the
+target's Notifications. Unfollow is a DELETE on the same path. It
+broadcasts \texttt{USER\_UNFOLLOWED} to both groups and removes the
+matching \texttt{FollowerNotification}, so the target's Notification window
+does not keep an invalid entry.
 
-User's Connections (Followed/Followers/Friend) are exposed via a \texttt{UserConnectionsProvider}.
-And a WS ``events'' handler is added so that the User or Connection-related updates trigger UI re-renders.
+Three list endpoints under \path{/users/<uuid>/} (\path{friends},
+\path{followers}, \path{followed}) are gated by the \texttt{IsSelfOrFriend}
+permission, so the connection lists are visible only to the owner or
+to one of their Friends (the social relations of a User are not
+considered public information).
 
-
-With the User-related functionality discussed, the following section discusses the actual code that
-controls how the User accounts are created and validated.
+\subsection{Frontend}
+\texttt{ProfilePage} covers both the own-profile and other-User views
+with one component, switching between an ``Edit Profile'' dialog and a
+``Follow/Unfollow'' button based on whose UUID is in the route. The
+page layout is otherwise identical between the two views, so a split
+into two components would mostly mean keeping two copies in sync.
+Three tabs sit below the header: Posts, Playlists, and Albums. The
+Albums tab is shown only on Artist profiles.
 
 
 \section{Account Creation and Authentication}
-This section presents the account creation flow and the following authentication mechanisms.
+This section covers how a new account is created, how the email
+address is verified, and how the resulting Session is established and
+maintained. The Backend code is under
+\path{src/backend/musikk/users} and the Frontend code under
+\path{src/frontend/musikk/src/features/auth}. The end-to-end flow
+across sign-up, email confirmation, login, and session expiry is shown
+in Figure~\ref{fig:bh_auth_flow}. The Frontend component hierarchy is
+in Figure~\ref{fig:fe_auth}.
 
-The platform can not be accessed by Anonymous Users, hence, every User has to have an account and a
-valid login to use the system.
+\subsection{Backend}
+The Backend does not implement its own authentication
+stack, since session handling, password validation, and email verification
+are security-sensitive and easy to get wrong.~\parencite{dont_write_your_own_auth}
+Instead authentication is built using django-allauth, the standard Django package
+for authentication management.
+The REST endpoints on top of allauth are provided by
+\texttt{dj-rest-auth}~\parencite{dj_rest_auth} (located in \path{/api/v1/auth/}).
 
-\subsection{Backend and API}
-% dont write your own auth (https://users.umiacs.umd.edu/~tudor/courses/ENEE757/Fall14/papers/Fu01.pdf)
-% dj-rest-auth(rest wrapper around allauth); custom setup for user creation(BaseRegisterSerializer)
-% urls that are used
-% django password?
-% email confirmation flow and mail backend (can be also disabled via a flag)
-% (say about link vs otp)
+allauth is configured to identify Users by email, with
+\texttt{ACCOUNT\_LOGIN\_METHODS = ["email"]} and the username field
+disabled. Sign-up therefore takes only email, password, and a password
+confirmation. \texttt{BaseRegisterSerializer} adds a write-only
+\texttt{is\_artist} boolean and sets the new User's \texttt{role} to
+``Artist'' when the flag is true, so the role choice is set during
+sign-up rather than requiring a separate upgrade step.
 
-\subsection{Frontend Handling}
-% auth dir;
-% components for registration/login
-% requireauth gating,
-% cookies
+A custom \texttt{BaseAccountAdapter} class overrides the default authentication
+flow. \texttt{clean\_email} rejects an email that already exists
+case-insensitively, since the stock allauth check is case-sensitive
+and would let \texttt{user@x.com} and \texttt{User@X.com} register as
+separate accounts. RFC 5321 permits the local part of an address to be
+% TODO cite
+case-sensitive, but states that relying on it is a bad practice.
+In addition, \texttt{get\_email\_confirmation\_url} returns a Frontend URL instead
+of a predefined HTML template\@.
+
+Email verification is set to mandatory, i.e., a new account
+exists in the database immediately after registration, but
+login is blocked until the link in the verification email has been
+opened.
+
+Sessions use the \texttt{cached\_db} backend. Each session is written
+to the database and also kept in Redis, so lookups for currently active
+clients avoid a database query.
+A \path{/api/v1/csrf} endpoint is called once by the Frontend before
+login to set the \texttt{csrftoken} cookie, since Django's CSRF
+middleware requires the matching header on every ``unsafe'' request.
+
+\subsection{Frontend}
+Two axios clients are configured in
+\path{src/frontend/musikk/src/api/axiosConf.ts}. The split exists
+because the authenticated client defines a response processing step that
+triggers a global logout on 401, which would loop on the login request.
+Both clients share a request interceptor that copies the
+\texttt{csrftoken} cookie into the \texttt{X-CSRFToken} header on
+unsafe methods.
+
+\texttt{AuthProvider} owns the authenticated User via a
+\texttt{useQuery} against \path{/users/me}. The presence of a User in
+that cache is what \texttt{isAuthenticated} checks, so consumers stay
+in sync with server state rather than a locally tracked boolean. A
+successful login refetches the query. A logout clears the React Query
+cache and removes the \texttt{sessionid} and \texttt{csrftoken}
+cookies.
+
+The 401 handler on the authenticated client uses a shared
+\texttt{authRef.logout} reference rather than calling \texttt{logout}
+directly. The reference is set inside an effect in
+\texttt{AuthProvider} and cleared on unmount. This keeps the axios
+module free of React imports and avoids a full-page redirect, which
+would remount the app and lose any operations that are currently being processed
+before the logout can finish.
+
+The Backend also exposes password reset and password change endpoints
+under \path{/api/v1/auth/}, but the SPA does not currently expose UI
+for either, so these flows are reachable only through direct API calls
+today.
+
+The next section covers the main data Users work with:
+Songs and the Collections that group them.
 
 
-\section{Playback Items and Song Queue}
-% todo: songs, collections, song queue
+\section{Playback Items}\label{sec:playback_items}
+This section covers the Song/Collection models and their Author relations.
+The Backend code is located under \path{src/backend/musikk/streaming}.
+The Frontend code is split across the \path{songs/} and \path{collections/}
+subdirectories under \path{src/frontend/musikk/src/features/}.
+The class diagram is shown in Figure~\ref{fig:cd_streaming}.
+
+The audio pipeline fields on Song and the Album upload flow are covered
+in the \hyperref[sec:audio_upload]{Audio Upload} section. Playback
+Queue design is covered in \hyperref[sec:song_queue]{Song Queue} and
+Playback logic in \hyperref[sec:playback]{Playback and Device Handling}.
 
 \subsection{Data Model}
+\texttt{BaseSong} represents the literal Song object, i.e., the fields that make each
+song playable and identifiable: title, description, image, \texttt{draft} flag and the paths to the streaming
+manifests that point at the audio.
+The manifests, the \texttt{content\_path}, and the source
+metadata fields (loudness, true peak, codec, bitrate) are written by
+the audio pipeline once the Celery task finishes.
 
-\subsection{API}
+The app has only one Song container, the Collection class. It has four kinds,
+Playlist, Album, History, and Liked Songs, which are values of a
+\texttt{type} discriminator, the same pattern as the \texttt{role}
+field on \texttt{BaseUser}. It makes it possible to reuse one set of retrieve, list,
+and ordering operations, and only one Collection page component on the
+Frontend that is reused for all four kinds.
 
-\subsection{Frontend Presentation}
+\texttt{CollectionSong} pairs a \texttt{BaseSong} with a Collection at
+an integer \texttt{position}. It also serves as the public identifier
+of a Song in the API\@. \path{/songs/<uuid>} resolves to a
+\texttt{CollectionSong}, not a \texttt{BaseSong}, and the Frontend
+passes that uuid everywhere it references a Song. The reason is that
+most actions on a Song target its slot in a specific Collection, not
+the Song in the abstract. Remove from this Playlist, jump to the Album,
+render play button state in Collection view etc.
+A URL that accepts \texttt{BaseSong} would have to either also include the
+Collection uuid in every call, or do a lookup to find the row.
+
+Authorship is stored in two join tables, \texttt{SongCredit} and
+\texttt{CollectionCredit}. \texttt{SongCredit} restricts the
+author to Users with the Artist role, while \texttt{CollectionCredit}
+accepts any User, since Playlists can be created by regular Users as well.
+
+\subsection{Backend}
+The endpoints are listed in
+\path{src/backend/musikk/streaming/api/v1/urls.py}.
+
+The Collection manager exposes the queries that filter on the type
+discriminator: \texttt{.playlists()}, \texttt{.albums()},
+\texttt{.histories()}, \texttt{.liked()}, plus \texttt{.public()} and
+\texttt{.published()}. List views such as User Library, Album by Song,
+and the Liked Collections view use these helpers, so the type filter is
+not repeated in each view.
+
+Liking a Song and adding a Song to a Playlist both create a
+\texttt{CollectionSong} row, however they are exposed as two separate
+endpoints, \path{/liked-songs/add-song/<uuid>} and
+\path{/collections/<uuid>/songs}. The liked-songs Collection is always
+the User's own, so the URL needs only the Song uuid. A Playlist add
+takes any of the User's Playlists in the URL and requires the User to
+own it. The split is mainly there to keep the Frontend cache simple.
+The like endpoint emits a dedicated \texttt{LIKED\_SONGS\_CHANGED}
+event, which invalidates a single Frontend query that holds the set
+of liked Song uuids. Every like button reads its state from that set,
+so one round-trip re-renders every instance of button on the page.
+Routing the operation through the generic Playlist endpoint
+would leave like state as a per-row \texttt{is\_liked} flag, and the
+only invalidation signal would be the generic
+\texttt{COLLECTION\_CHANGED} event. The same Song shown in an Album
+view and the Playback queue would then have two stale flags until
+both queries were updated (this was the original design, replaced for exactly that reason).
+
+\subsection{Frontend}
+There are two main components which are reused throughout the application:
+\texttt{SongCard} and \texttt{CollectionCard}. Each takes the item to render plus an optional
+\texttt{onClick} callback, a \texttt{size} variant, and a custom class
+name, so that they can be cleanly added to any other component.
+% TODO introduce song container already here?
 
 
-\section{Playback and Device Handling}
-% here mostly about redis
+\section{Audio Upload/Album Creation}\label{sec:audio_upload}
+This section covers how an Artist uploads new Songs and creates new
+Albums. The end-to-end sequence is shown in
+Figure~\ref{fig:bh_audio_upload}. The three subsections below reflect
+the three phases of that diagram: Submit, Process, Persist and
+notify. A final subsection covers how Frontend handles the upload-related server
+events. The Backend view \texttt{CollectionSongCreateView} is at
+\path{src/backend/musikk/streaming/api/v1/views/collections.py}.
+The Celery task \texttt{convert\_audio} is at
+\path{src/backend/musikk/streaming/audio/tasks.py}. The pipeline
+modules are under \path{src/backend/musikk/streaming/audio}. The Frontend code is
+under \path{src/frontend/musikk/src/features/album-upload}, with the
+component hierarchy in Figure~\ref{fig:fe_audio_upload}.
 
-\subsection{Data Model}
+\subsection{Submit}
+The Artist first creates a draft Album from a form on the Frontend.
+The Artist then attaches one or more audio files for the Album Songs,
+and the Frontend runs simple file-type and size checks on each.
+For every attached file, a multipart POST request is made to
+\path{/api/v1/song-queue/collections/<uuid>/songs}. The view writes
+the file to a temporary path, runs the pre-pipeline validation
+from the \hyperref[subsec:audio_preprocessing]{Audio Preprocessing}
+section, creates a Song row with
+\texttt{draft=true}, enqueues the Celery task, and returns
+\texttt{202 Accepted} with the new Song UUID\@. The HTTP request does
+not block on transcoding, which takes minutes for a long file.
 
-\subsection{API}
+The \texttt{draft} flag is the safety boundary. Public list and
+retrieve endpoints filter on \texttt{draft=false}, so a Song that is
+still being processed is invisible to every listing query. The flag
+is cleared only after the task writes the final manifests and audio
+data to the Song row. A failed task leaves the Song row
+hidden rather than partially visible. The related Album also has the
+draft flag, and the Artist should publish the Album with a
+separate PATCH request once every Song has finished.
 
-\subsection{Frontend Presentation}
+The Frontend sends an \textit{operation id} with the upload
+request. The id propagates back along with every event the task sends later, so
+the client can match progress back to its own upload even when
+several uploads run in parallel from the same User.
+
+\subsection{Process}
+The Celery task runs the Audio Pipeline
+(see \hyperref[subsec:backend_pipeline]{Backend Pipeline}) with the
+validated data passed from the view.
+Splitting the work into a Celery task keeps the HTTP path
+fast and lets retries, scaling, and worker isolation come from the
+existing task infrastructure rather than from view code.
+
+At each stage completion the task broadcasts a
+\texttt{song.upload} event on the per-User WebSocket group with the
+stage name, the Song UUID, and the operation id.
+
+If a stage fails, the pipeline rolls the prior stages back in
+reverse order and emits a failure event. The Song row stays in the draft
+state, hidden from every listing, until a cleanup job removes it.
+
+\subsection{Persist and notify}
+The final Song row write happens in one DB transaction.
+The Song appears in listings only after that
+transaction commit, so an inconsistent half-populated row is never observable.
+
+Cleanup runs on two paths. The task itself deletes the files created during processing
+if the commit fails, so a crashed worker does not leave
+orphaned segment files next to a missing row. A separate management
+command, \texttt{prune\_draft\_albums}, finds Album rows that have
+been in the draft state and deletes them
+together with their Songs and segments. The combination keeps the
+storage and the database aligned without locking the request path.
+
+\subsection{Frontend State Updates}
+% todo cite reducers?
+The Frontend keeps a per-operation status reducer. The listener at
+\path{src/frontend/musikk/src/features/album-upload/useWsEvents.ts}
+routes each incoming event into the reducer keyed on the operation
+id. The Album Upload page can then show accurate per-Song progress
+instead of a generic spinner.
+
+This concludes the upload path. The next section covers the Song Queue,
+the structure the User selects Playback Items from.
 
 
-% TODO: cont with search, social, notifications
+\section{Song Queue}\label{sec:song_queue}
+This section covers how the User can enqueue playable items in the application.
+The model code is under \path{src/backend/musikk/streaming/models/song_queue.py},
+the Frontend component hierarchy is in Figure~\ref{fig:fe_song_queue},
+and the Backend sequence for adding a Collection and advancing is
+in Figure~\ref{fig:bh_song_queue}.
+
+\subsection{Data structure}
+The Queue supports several frequent operations: insert at a random index,
+reorder, remove an item, pop from the
+front, pop several items up to a certain one, bulk append multiple items,
+and read the upcoming items in order.
+A straightforward doubly linked list in SQL from the first draft of the implementation
+did not work well for most of these. Every insert, reorder, or remove
+cascaded pointer updates, and reading items in order needs traversal
+rather than an indexed range scan. A decimal index approach was chosen based on
+online discussions on this topic~\parencite{llsql1,llsql2}.
+The current model stores each \texttt{QueueItem} with a
+\texttt{Decimal} position and inserts a new item at the midpoint
+between its neighbours. A single insertion is then one DB write and
+reads are a simple range query.
+
+The trade-off is index exhaustion after repeated inserts
+at the same spot. The position column is \texttt{Decimal(24, 12)},
+which gives 12 fractional digits and can support around 30
+consecutive midpoint inserts between the same two neighbours.
+Realistic editing depth stays well below this, so the limit is
+accepted as-is. Appends use a separate
+\texttt{next\_item\_position} counter that grows by a fixed gap
+(\texttt{POSITION\_GAP = 1000}), so appended items never collide and
+never consume limited precision.
+
+\subsection{Queue and PlaybackContext}
+The Queue itself is split into two classes. \texttt{SongQueue} holds
+items the User added explicitly, ordered by \texttt{position}.
+\texttt{PlaybackContext} tracks the Collection that is currently
+playing through a cursor into \texttt{CollectionSong.position} and a
+list of skipped indices. On advance, the Queue is consumed first, then
+the Context. If no items are left, Playback stops.
+That split makes it possible to queue up many items lazily, shift through them,
+and then return back to the original Collection.
+
+Since SongQueue and PlaybackContext are mostly independant from each other,
+a new \texttt{PlayerState} class was introduced that
+orchestrates the transitions between them.
+
+\subsection{QueueSource and lazy filling}
+Bulk-appending a large Collection does not materialize all items up
+front. A \texttt{QueueSource} stores either a single Song or a
+Collection with a cursor, and the \texttt{\_fill} method converts
+Sources into Items in batches when the materialized item count drops
+below \texttt{REFILL\_THRESHOLD = 30}. Each fill creates up to
+\texttt{FILL\_BATCH = 20} items. This keeps the Queue table small
+even when the User queues an entire Album with hundreds of tracks,
+and it lets the Frontend show a stable window of upcoming items
+without paging through thousands of rows.
+
+
+\section{Playback and Device Handling}\label{sec:playback}
+The communication is server-authoritative. The Backend keeps one
+\texttt{PlaybackState} object per User in Redis, and every WS action
+from any client is applied to that state.
+The server then broadcasts the resulting snapshot to every connected
+User tab. The Backend models are in
+Figure~\ref{fig:cd_playback}, the runtime managers, controllers, and
+broadcasters in Figure~\ref{fig:cd_streaming_ws}, the FE component
+hierarchy in Figure~\ref{fig:fe_playback}, and the multi-tab sync
+sequence in Figure~\ref{fig:bh_playback_sync}.
+
+The first design did the opposite and treated each connected tab as
+the source of truth. A tab emitted state events on local user actions,
+and the server broadcasted them to every other tab of the same User.
+This had two problems. First, changes from different tabs
+often caused race conditions (e.g., on fast seeks).
+Two tabs could both believe they were the active Player, and
+the server had no way to choose between their conflicting position
+updates. Second, a late event from a stale tab could arrive after a
+newer mutation and overwrite it, because there was no version on the
+state for the server to compare against.
+
+\subsection{Shared state and version counter}
+The \texttt{PlaybackState} holds the current
+\texttt{ActivePlayback}~(Song, position, play instance UUID), the
+list of Devices, and a monotonically increasing \texttt{version}
+that increments on every mutation. Every event sent to clients
+includes the version, and the active client sends it back on every
+mutating action. The server drops actions with an older version,
+which closes both races above.
+
+The play instance UUID is set when a Song becomes the active
+Playback and changes on every transition. It disambiguates the case
+where the same Song was added twice to the Queue: resuming Playback
+after the User skips to the second instance does not pick up the
+saved position from the first instance.
+
+\subsection{Active versus passive clients}
+Exactly one Device is the active Playback Device at any given time,
+and only that Device owns an \texttt{audio} element. The active
+client treats \texttt{audio.currentTime} as the ground truth and
+periodically reports it to the server. The server records the
+arrival time on the state, storing the pair
+\texttt{last\_known\_song\_pos\_ms} (the reported audio position) and
+\texttt{last\_known\_at\_server\_ms} (the server clock when it
+arrived).
+
+Passive clients have no audio element. They estimate the current
+song position as \texttt{last\_known\_song\_pos\_ms} plus the time
+that has passed since \texttt{last\_known\_at\_server\_ms}. Clients
+do not have direct access to the server clock, so every broadcast
+includes the server's current timestamp, which each client uses to
+keep its own estimate of the server clock up to date. The estimate
+stays correct as long as the active client sends updates often enough to
+keep the pair fresh.
+
+\subsection{Device activation}
+The active Device id is stored on the state, and at any moment it is
+either set to one connected Device or empty. When it is empty, every
+tab is passive and no tab holds the \texttt{audio} element. The first
+play action from the User sets it. The Frontend on the tab that
+issued the play checks whether an active Device exists, and if not
+it sends \texttt{device.set\_active} for its own Device id
+before the \texttt{playback.activate}. The Backend also auto-picks
+the issuing Device when a \texttt{playback.seek} arrives with no
+active Device, so the seek is not lost.
+
+A change of active Device is a \texttt{device.set\_active} WS action
+(initiated by the Device dropdown) followed by a broadcast of
+the new Device list. The Backend pauses
+Playback on the transition so the newly active tab does not
+autoresume on a Device the User is not necessarily near. The currently
+active tab then unloads its audio element. The newly active tab loads
+the manifest for the current Song at the position included in the
+broadcast snapshot.
+
+\subsection{Frontend controller class}
+The Frontend Player is a class, \texttt{AudioPlayerController}, not
+a React hook. The hook version was dropped because each WebSocket
+handler kept a copy of the React Playback state from the moment it was
+registered. The handler was not re-registered on state changes, so
+every later event read that stale data. The class is the centralized state
+provider, to which React components subscribe through
+\texttt{useSyncExternalStore}. This makes it possible to control the audio-related
+data in one place and avoid synchronization issues.
+
+
+\section{Publications}
+This section covers Posts, Collection Comments, Chat messages, and
+Replies, all of which share the Publication model. The Backend code
+is under \path{src/backend/musikk/social}, the Frontend code under
+\path{src/frontend/musikk/src/features/publications}. The class
+diagram is shown in Figure~\ref{fig:cd_social}, the Frontend
+component hierarchy in Figure~\ref{fig:fe_publications}, and the
+Chat connection lifecycle in Figure~\ref{fig:bh_chat_lifecycle}.
+
+% TODO
+
+\section{Search}
+This section covers full-text Search across Songs, Albums, Playlists,
+Users, and Artists. The Backend code is under
+\path{src/backend/musikk/recommendations}, the Frontend code under
+\path{src/frontend/musikk/src/features/search}.
+
+% TODO
+
+\section{Notifications}
+This section covers how Notifications are modelled, emitted, and
+delivered. The Backend code is under
+\path{src/backend/musikk/notifications}, the Frontend code under\\
+\path{src/frontend/musikk/src/features/notifications}. The class
+diagram is shown in Figure~\ref{fig:cd_notifications} and the
+Frontend component hierarchy in Figure~\ref{fig:fe_notifications}.
+
+There are three Notification kinds: a Reply to a Publication the User
+authored, a new Follower, and a new Chat message. The first design
+used one shared \texttt{Notification} base with three concrete
+subclasses through Django's multi-table inheritance, and each row
+held an \texttt{is\_read} boolean. This worked well at the start,
+because every kind had the same two operations, list and mark read,
+and one query covered all of them, but as the kinds gained more fields of
+their own, the shared base became hard to work with. A Reply points to two
+Publications, a Follower to two Users, and a Chat message to a Chat
+together with the message and the receiver. The columns almost do not
+overlap, so a shared row was mostly nulls, and every read needed an
+extra join into one of the concrete tables.
+
+The code is therefore in the middle of a change toward three separate
+models. Each kind is now its own \texttt{BaseModel} subclass with its
+own Serializer and custom Manager, and creation happens at the call
+site that caused the Notification, in the social and users views.
+Each Manager overrides \texttt{create} to emit a
+\texttt{notifications.changed} event on the receiver's per-User
+WebSocket group, which invalidates the Notifications query on every
+open tab. Read state was also made simpler. The per-row
+\texttt{is\_read} boolean was replaced by a single
+\texttt{NotificationProfile.read\_at} timestamp per User, set up on
+User creation through a \texttt{post\_save} signal handler. The
+Serializer computes \texttt{is\_read} for each row by comparing
+\texttt{date\_added} against that timestamp, so "mark all as read"
+becomes one field update.
+
+What still stays shared is the HTTP surface seen by the Frontend. One
+\texttt{/notifications} endpoint returns a response with three
+buckets, a \texttt{PATCH} on the same path updates \texttt{read\_at},
+and \texttt{DELETE /notifications/<uuid>} checks the three tables in
+turn to find the matching row. This shape still suits the Frontend,
+which fetches all kinds together for the badge and the list view, but
+the differences between kinds are no longer hidden behind a common
+base.
+
+
+\section{Security}
+% TODO: cors not needed
+% xss, csrf, owasp headers cheathess, owasp web cheatsheet
+
+
+\section{Deployment}
+This section covers the production deployment setup. The Docker
+Compose file is at \path{docker-compose-prod.yml}. The Backend and
+Frontend Dockerfiles are at \path{src/backend/Dockerfile} and
+\path{src/frontend/Dockerfile}, and the Caddy configuration at
+\path{src/frontend/Caddyfile.prod}.
+
+The Backend, the Postgres database, the Redis instance, and the
+Celery worker run as four containers under Docker Compose on a
+single Hetzner VPS\@. The Frontend is built into static files at
+image-build time and served by the same Backend container.
+Caddy~\parencite{caddy} is the reverse proxy in front of them.
+Mail is created by the Mailgun service via
+\texttt{django-anymail}, and the domain is managed at PorkBun.
+FFmpeg is built from source inside the container with
+\texttt{libfdk\_aac} enabled, since the prebuilt distributions ship
+without it and AAC encoding quality on the bundled native encoder is
+visibly worse. The resulting image is not published in a public registry, since the
+FFmpeg with libfdk\_aac binary cannot be redistributed due the
+licensing issues ~\parencite{ffmpeg_aac}.
+
+% TODO: add a citation for the AAC licensing summary once a clean source is in the bib
+
+
 %\section{Backend and API}
 %The Backend and API description is organized by the individual folders under
 %the \texttt{musikk/src/backend/musikk} directory.
@@ -459,14 +895,6 @@ valid login to use the system.
 %No separate ERD diagram is provided, as Django's models, which define the data structure,
 %are encapsulated into the class diagram.
 %
-%\begin{figure}[htbp]
-%    \centering
-%    \begin{adjustbox}{angle=90, width=1.4\textwidth, center}
-%        \includegraphics{diagrams/class}
-%    \end{adjustbox}
-%    \caption{Backend Class Diagram}
-%    \label{fig:beclassdiagram}
-%\end{figure}
 %
 %\subsection{Directory \texttt{base}}\label{subsec:base}
 %This app defines the abstract \texttt{BaseModel} class from which all other models inherit.

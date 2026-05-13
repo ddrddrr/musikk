@@ -19,6 +19,9 @@
 
 %% The following section sets up the locales used in the thesis.
 \usepackage[resetfonts]{cmap}
+%% at least partially fixes the space-rendering issue
+\input{glyphtounicode}
+\pdfgentounicode=1
 \usepackage[T1,T2A]{fontenc}
 \usepackage[
     main=english,
@@ -26,6 +29,13 @@
 ]{babel}
 \usepackage[htt]{hyphenat}
 \usepackage[newfloat]{minted}
+\setminted{
+    breaklines=true,
+    breakanywhere=true,
+    fontsize=\small,
+    breaksymbolleft=\raisebox{0.4ex}{\tiny\(\hookrightarrow\)},
+    breakindent=2em,
+}
 \usepackage{adjustbox}
 
 %% The following section sets up the metadata of the thesis.
@@ -40,24 +50,24 @@
     title       = {Musikk: A Modern, Social-First Music Streaming Platform},
     keywords    = {Audio Streaming, Python, JavaScript, MPEG-DASH, HLS, WebSockets},
     abstract    = {%
-        This bachelor's thesis aims to develop
-        a web-based music streaming platform focused on social interactions between users.
+    This bachelor's thesis aims to develop
+    a web-based music streaming platform focused on social interactions between users.
 
-        The theoretical part presents a survey that analyzes people's
-        music listening habits, showing that such a platform could attract a solid user base.
-        It then compares existing music-related services with built-in social
-        features and derives functional and non-functional requirements for the proposed system.
-        Then, based on these requirements, suitable technologies and architectural patterns are selected.
+    The theoretical part presents a survey that analyzes people's
+    music listening habits, showing that such a platform could attract a solid user base.
+    It then compares existing music-related services with built-in social
+    features and derives functional and non-functional requirements for the proposed system.
+    Then, based on these requirements, suitable technologies and architectural patterns are selected.
 
 
-        The practical part covers the implementation details of the platform, including data model,
-        audio processing, API design, and representation layer.
+    The practical part covers the implementation details of the platform, including data model,
+    audio processing, API design, and representation layer.
 
-        The result is a fully functional and deployed application.
+    The result is a fully functional and deployed application.
     },
     thanks      = {%
-        I would like to thank Mgr. Luděk Bártek, Ph.D., for his time and
-        the valuable advice he provided for this thesis.
+    I would like to thank Mgr. Luděk Bártek, Ph.D., for his time and
+    the valuable advice he provided for this thesis.
     },
     bib         = {bibliography.bib},
     facultyLogo = fithesis-fi,
@@ -85,6 +95,7 @@
 \floatsetup[table]{capposition=top}
 \usepackage[babel]{csquotes}
 \usepackage{graphicx}
+\usepackage{pdfpages}
 \usepackage[sorting=none]{biblatex}
 \usepackage{hyperref} %% Context-sensitive quotation marks
 
