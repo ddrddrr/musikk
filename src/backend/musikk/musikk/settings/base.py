@@ -124,7 +124,6 @@ REST_FRAMEWORK = {
     ],
     "DEFAULT_RENDERER_CLASSES": [
         "rest_framework.renderers.JSONRenderer",
-        # TODO: probably remove in prod
         "rest_framework.renderers.BrowsableAPIRenderer",
     ],
     "DEFAULT_FILTER_BACKENDS": [
@@ -138,6 +137,11 @@ REST_FRAMEWORK = {
 ### AUTH
 SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_HTTPONLY = False
+SESSION_COOKIE_SAMESITE = "Lax"
+CSRF_COOKIE_SAMESITE = "Lax"
+
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = "DENY"
 
 # Used by dj-rest-auth
 SITE_ID = 1

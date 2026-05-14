@@ -61,8 +61,8 @@
   During the preparation of this thesis, the following AI tools were used:
 
   \begin{itemize}
-      \item \textbf{ChatGPT}: Used for debugging and code improvements, as well as LaTeX formatting.
-      \item \textbf{Grammarly}: Used for text correction.
+      \item \textbf{ChatGPT}: Used for writing most of the tests, debugging and refactoring, as well as LaTeX formatting.
+      \item \textbf{Grammarly}: Used for text corrections.
   \end{itemize}
  }
 

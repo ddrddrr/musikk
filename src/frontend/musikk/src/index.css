@@ -1,10 +1,12 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "@fontsource-variable/ubuntu-sans";
+@import "@fontsource-variable/ubuntu-sans/wght-italic.css";
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-    --font-sans: "Ubuntu Sans", ui-sans-serif, system-ui, sans-serif;
+    --font-sans: "Ubuntu Sans Variable", ui-sans-serif, system-ui, sans-serif;
     --radius-sm: calc(var(--radius) - 4px);
     --radius-md: calc(var(--radius) - 2px);
     --radius-lg: var(--radius);

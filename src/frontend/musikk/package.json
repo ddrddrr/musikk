@@ -10,6 +10,7 @@
         "preview": "vite preview"
     },
     "dependencies": {
+        "@fontsource-variable/ubuntu-sans": "^5.2.10",
         "@hookform/resolvers": "^5.2.2",
         "@radix-ui/react-avatar": "^1.1.11",
         "@radix-ui/react-collapsible": "^1.1.12",

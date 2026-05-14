@@ -22,14 +22,14 @@ class SourceType(models.TextChoices):
 # two possible item types that could be added to the Queue
 # can be implemented in the future if other item types will be supported by the Queue
 class QueueSource(BaseModel):
-    """
-    A deferred queue entry that has not been turned into a `QueueItem`
-    yet. A song source yields one item and then deletes itself. A
-    collection source yields up to `FILL_BATCH` items per refill cycle
-    and keeps going across cycles until its collection runs out,
-    tracking progress in `collection_cursor`. Keeping the source around
-    instead of expanding it up front is how the queue can accept a long
-    collection without writing thousands of rows at once.
+    """A queue entry that has not become a `QueueItem` yet.
+
+    A song source turns into one item, then deletes itself.
+    A collection source produces up to `FILL_BATCH` items per refill, and keeps going
+    across refills until the collection ends; `collection_cursor` tracks how far it is now.
+    We keep the source around instead of
+    expanding it up front, so the queue can take a long collection
+    without writing thousands of rows at once.
     """
 
     queue = models.ForeignKey(
@@ -59,13 +59,13 @@ class QueueSource(BaseModel):
 
 
 class QueueItem(BaseModel):
-    """
-    A real, materialized entry in a `SongQueue`. `position` is a
-    high-precision decimal so a new item can be slotted between two
-    neighbours by taking their midpoint, without renumbering anything
-    else. Ordering and the `(queue, position)` index both depend on
-    it, so callers should always go through `SongQueue` instead of
-    setting `position` directly.
+    """An entry in a `SongQueue`.
+
+    `position` is a decimal with high precision, so a new item
+    can be placed between two neighbours by taking the midpoint,
+    without the need to renumber other items.
+    Sort order and the `(queue, position)` index both use it, so callers
+    should set positions through `SongQueue`, not by hand.
     """
 
     queue = models.ForeignKey(
@@ -91,16 +91,15 @@ class QueueItem(BaseModel):
 # and then click the second song manually (in the collection window)
 # should the deleted song reappear?
 class PlaybackContext(BaseModel):
-    """
-    Tracks where playback is within the current collection. `cursor`
-    holds the `CollectionSong.position` of the last song that played,
-    or `-1` if nothing has played yet, which makes the next-song lookup
-    a simple `position__gt=cursor`. `skip_indices` holds positions the
-    user pulled out of the context (removed, or moved into the queue).
-    Without it those songs would come back on the next `advance()`
-    because the underlying rows still exist. Positions are used instead
-    of ids because the resulting queries are cheaper and deletions only
-    need to compare against the cursor.
+    """Tracks where playback is inside the currently selected collection.
+
+    `cursor` holds the `CollectionSong.position` of the last song
+    that played, or `-1` if nothing has played yet. This makes the
+    next-song query a simple `position__gt=cursor`.
+
+    `skip_indices` holds positions of items the user took out of the context
+    (removed, or moved into the queue). Without it those songs would
+    come back on the next `advance()`, because the rows still exist.
     """
 
     collection = models.ForeignKey(
@@ -166,19 +165,21 @@ class PlaybackContext(BaseModel):
 # TODO: with the curr precision of the position on repeated inserts in the same position we can
 # eventually reach the situation where the positions will become equal due to the lack of precision
 class SongQueue(BaseModel):
-    """
-    User-added items layered on top of the current `PlaybackContext`.
-    The queue always wins: `PlayerState.advance` pops from here first
-    and only falls back to the context once the queue is empty.
+    """Items the user added on top of the current `PlaybackContext`.
 
-    Items come in two flavours. `QueueItem` rows are the real, ordered
-    entries that `pop_first`, `window`, and `reorder` work with.
-    `QueueSource` rows are deferred backing that `_fill` turns into
-    items whenever the count drops below `REFILL_THRESHOLD`, adding at
-    most `FILL_BATCH` per cycle. `next_item_position` is the append
-    cursor used by `_calculate_append_position`. All inserts go through
-    this class so the position scheme and refill rules stay in one
-    place.
+    The queue has priority over PlaybackContext: "play next"
+    takes from here first, and only falls back
+    to the context when the queue is empty.
+
+    There are two kinds of rows. `QueueItem` rows are the real,
+    ordered entries used by `pop_first`, `window`, and `reorder`.
+    `QueueSource` rows are kept in storage and not yet expanded;
+    `_fill` turns them into items when the item count drops below
+    `REFILL_THRESHOLD`, adding at most `FILL_BATCH` per cycle.
+
+    `next_item_position` is the append position used by
+    `_calculate_append_position`. All inserts go through this class,
+    so the position scheme and refill rules stay in one place.
     """
 
     next_item_position = models.DecimalField(
@@ -365,18 +366,12 @@ class SongQueue(BaseModel):
 
 
 class PlayerState(BaseModel):
-    """
-    Owns the playback order. The job is split three ways: `PlayerState`
-    holds the currently-playing song and the history cursor,
-    `SongQueue` holds items the user explicitly added, and
-    `PlaybackContext` is whichever collection is playing through (for
-    example after the user hit play on a playlist).
+    """An orchestrator for SongQueue and PlaybackContext-related operations.
 
-    `advance` looks at the queue first and only falls back to
-    `context.advance()` once the queue is empty, so user-enqueued items
-    always beat the context. If both are empty playback stops. `prev`
-    steps back through history and pushes the current song to the
-    front of the queue, so pressing forward again returns to it.
+    Holds the song that is playing now and the history cursor,
+    and ties `SongQueue` and `PlaybackContext` together to
+    decide what plays next. Without this class the two would
+    have no shared owner and no agreed order between them.
     """
 
     current_collection_song = models.ForeignKey(
@@ -416,6 +411,13 @@ class PlayerState(BaseModel):
         self.play_song(first_song)
 
     def advance(self) -> CollectionSong | None:
+        """Move to the next song.
+
+        Takes from the queue first and only falls back to
+        `context.advance()` when the queue is empty, so user-added
+        items always win over the context. Returns the new current
+        song, or `None` when both are empty and playback stops.
+        """
         with transaction.atomic():
             song = self.queue.pop_first()
             if song:
@@ -463,6 +465,13 @@ class PlayerState(BaseModel):
             return item
 
     def prev(self) -> CollectionSong | None:
+        """Move to the previous song.
+
+        Steps back through the user's history and pushes the
+        current song to the front of the queue, so pressing next
+        returns to it. Returns the new current song, or `None` if
+        there is no older entry to go back to.
+        """
         with transaction.atomic():
             history = self.streamingprofile.history
             entry = (
@@ -498,10 +507,12 @@ class PlayerState(BaseModel):
 
     def clear(self) -> None:
         """
-        Clears the queue and resets history cursor.
-        The history is cleared because prev() pushes
-        songs into the queue and clearing without rewinding the cursor would
-        make those songs unreachable.
+        Clears the queue and resets the history cursor.
+
+        The cursor must reset because `prev()` pushes the current
+        song into the queue. If we cleared the queue but kept the
+        cursor, the cursor could point past the most recent history
+        entries, making them unreachable from `prev()`.
         """
         with transaction.atomic():
             self.queue.clear()
