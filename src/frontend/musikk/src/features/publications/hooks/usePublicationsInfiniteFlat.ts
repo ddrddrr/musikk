@@ -7,7 +7,10 @@ import {
     useGlobalFeedPosts,
 } from "@/features/publications/api/queries.ts";
 
-export function useGlobalFeedPostsFlat(reverse = true, connection?: "friends" | "followed") {
+export function useGlobalFeedPostsFlat(
+    reverse = true,
+    connection?: "friends" | "followed" | "mine",
+) {
     const query = useGlobalFeedPosts(connection);
     const result = useInfiniteFlat(query, reverse);
     return { ...result, publicationsFlat: result.itemsFlat };
@@ -16,7 +19,7 @@ export function useGlobalFeedPostsFlat(reverse = true, connection?: "friends" | 
 export function useFeedPostsFlat(
     userUUID: UUID,
     reverse = true,
-    connection?: "friends" | "followed",
+    connection?: "friends" | "followed" | "mine",
 ) {
     const query = useFeedPosts(userUUID, connection);
     const result = useInfiniteFlat(query, reverse);

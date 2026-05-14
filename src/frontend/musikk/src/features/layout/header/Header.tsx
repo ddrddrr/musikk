@@ -36,7 +36,13 @@ export const Header = memo(function Header() {
             </div>
 
             <div className="col-span-3 flex items-center justify-start gap-4">
-                <h1 className="text-xl font-bold">Musikk</h1>
+                <button
+                    type="button"
+                    className="cursor-pointer text-xl font-bold"
+                    onClick={() => void navigate("/")}
+                >
+                    Musikk
+                </button>
                 <SearchBar />
             </div>
 

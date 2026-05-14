@@ -2,6 +2,15 @@ import { BackButton } from "@/features/common/BackButton.tsx";
 import { LoudnessPresetSelector } from "@/features/player/LoudnessPresetSelector.tsx";
 import { LoudnessPresetContext } from "@/features/player/providers/loudnessPresetContext.ts";
 import { Button } from "@/features/ui/button";
+import {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/features/ui/dialog.tsx";
+import { ProfileForm } from "@/features/user/components/ProfileForm.tsx";
 import { useAuth } from "@/hooks/useAuth.ts";
 import { useContext } from "react";
 
@@ -25,6 +34,25 @@ export function SettingsPage() {
                     </div>
                     <LoudnessPresetSelector value={preset} onChange={setPreset} />
                 </div>
+
+                <Dialog>
+                    <DialogTrigger asChild>
+                        <Button
+                            variant="ghost"
+                            size="lg"
+                            className="border-2 border-foreground text-lg"
+                        >
+                            Edit profile
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Edit Profile</DialogTitle>
+                            <DialogClose />
+                        </DialogHeader>
+                        <ProfileForm />
+                    </DialogContent>
+                </Dialog>
 
                 <Button
                     onClick={logout}
