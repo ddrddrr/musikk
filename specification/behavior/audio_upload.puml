@@ -27,10 +27,9 @@ artist -> frontend : drop audio + form
 frontend -> backend : POST /collections/<uuid>/songs\n(multipart, operation_id)
 backend -> backend : write temp file,\nrun validate_audio()
 backend -> database : create draft BaseSong + CollectionSong
+backend -> backend : UploadManager.set_status("queued")
 backend -> worker : enqueue convert_audio\n(song_uuid, file_path,\noperation_id, audio_info)
-backend -->> frontend : ws event "song.upload"\nstatus = "queued"
 backend --> frontend : 202 Accepted\n{ song_uuid, collection_song_uuid }
-frontend -> artist : render upload status\n("queued")
 
 == Process ==
 worker -->> frontend : ws event "song.upload"\nstatus = "processing"
@@ -47,7 +46,7 @@ note right
 populates mpd, m3u8, duration_ms,
 loudness_lufs, true_peak_dbtp
 end note
-worker -->> frontend : ws event "song.upload"\nstatus = "ready"\npayload { uuid, operation_id }
+worker -->> frontend : ws event "song.upload"\nstatus = "ready"\npayload { uuid, status, operation_id }
 frontend -> artist : render status\n("ready", song playable)
 
 alt Pipeline or DB error

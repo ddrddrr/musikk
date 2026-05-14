@@ -1,2 +1,43 @@
-% TODO: discuss audio-upload improvements (e.g. resumable uploads,
-%       per-stage retries, progress for the Process phase)
+\chapter{Conclusion}\label{ch:conclusion}
+
+The goal of this thesis was to design and implement a music streaming
+platform with built-in features for social interaction around music.
+The motivation came from two sources. The survey
+in~\chapterref{ch:survey} showed that listening to and sharing music
+is a common social activity, and that around 60\% of respondents would
+use extra social features if a streaming platform offered them. The
+review of existing platforms in~\chapterref{ch:platforms} then showed
+that current services cover only a subset of these features, which
+forces Users to switch between several apps. Based on this,
+requirements were defined with the MoSCoW
+method~(\chapterref{ch:specification}), the main technologies were
+picked through a comparison of the available
+options~(\chapterref{ch:planning}), and the application itself was
+built and described in~\chapterref{ch:implementation}.
+
+The main outcome of this work is the deployed application, which
+gathers in one place the social features that are otherwise
+split across the services reviewed in~\chapterref{ch:platforms}.
+These are added on top of a standard music-streaming core: audio upload
+with multi-bitrate Transcoding, MPEG-DASH and HLS Streaming,
+a Playback Queue, and Search across Songs, Collections, Users, and Artists.
+The Playback state is server-authoritative and synchronized across a User's open tabs and
+Devices over a single WebSocket connection. The application covers
+all the ``Must Have'' and ``Should Have'' requirements
+from~\chapterref{ch:specification}.
+
+Compared to the platforms reviewed in~\chapterref{ch:platforms}, no
+single existing service combines all of these features. Spotify Jam
+offers shared Playback and Chat, SoundCloud has Comments under tracks, VK
+Music has shared posts, and last.fm has profile feeds, but each
+service covers only a part of the set.
+
+
+\section{Closing Remarks}
+
+The outcome of this thesis can be considered successful. The
+application meets the requirements defined during the planning phase,
+the architecture is documented, and the code is open to extension.
+The project covers a wide set of topics, from audio Streaming and
+real-time communication to social features and full-stack deployment.
+This has greatly improved the author's programming and system design skills.

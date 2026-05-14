@@ -3,7 +3,6 @@
 !include ../../_style.puml
 
 title Notifications - component hierarchy and IO boundary
-' Source: src/frontend/musikk/src/features/notifications/
 
 package "Presentation" {
     [NotificationBox\n(header trigger + popover)] as notification_box
@@ -23,11 +22,10 @@ notification_overlay ..> use_notifications_query : reads
 cloud "Backend\n/api/v1" as backend
 queue "WSClient\nuser group" as ws
 
-' --- HTTP ---
 use_notifications_query ..> backend : GET /notifications
-notification_overlay ..> backend : PATCH /notifications\nDELETE /notifications/{uuid}
+notification_box ..> backend : PATCH /notifications (on popover close)
+notification_overlay ..> backend : DELETE /notifications/{uuid}\n(via useDeleteNotificationMutation, unused today)
 
-' --- WS (events received) ---
 notifications_ws <.. ws : notifications.changed
 notifications_ws ..> use_notifications_query : invalidates notificationKeys.base
 

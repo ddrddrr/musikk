@@ -15,7 +15,7 @@ end note
 class JsonWebsocketConsumer <<channels>> {
 }
 
-class BaseConsumer <<async_consumer>> {
+class BaseConsumer <<sync_consumer>> {
     user: BaseUser
     user_uuid: str
     group_name: str
@@ -69,9 +69,8 @@ class TopicValidatorRegistry <<module-level>> {
     TOPIC_VALIDATORS: dict[str, Callable]
 }
 note right of TopicValidatorRegistry
-Feature apps register prefixes via
-@topic_validator(prefix), e.g., "chat",
-"collection_comments".
+Other apps register prefixes via
+@topic_validator(prefix)
 end note
 
 JsonWebsocketConsumer <|-- BaseConsumer
@@ -84,7 +83,7 @@ BaseConsumer "1" o-- "1..*" WSActionHandler : action_handler_classes
 TopicWSActionHandler ..> TopicValidatorRegistry : validates via
 
 note right of BaseConsumer
-group_name = "user_<uuid>"i
+group_name = "user_<uuid>"
 end note
 
 @enduml

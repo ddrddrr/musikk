@@ -10,7 +10,7 @@ actor User as user
 package "Search" {
   usecase "Search\n(Songs / Albums / Playlists /\nUsers / Artists)" as UC_SEARCH
   usecase "Browse Feed" as UC_BROWSE
-  usecase "Filter Feed by relation\n(random / followed / friends)" as UC_FILTER
+  usecase "Filter Feed by relation\n(mine / followed / friends)" as UC_FILTER
 }
 
 user --> UC_SEARCH

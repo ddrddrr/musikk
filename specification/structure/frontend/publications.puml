@@ -3,97 +3,61 @@
 !include ../../_style.puml
 
 title Publications - component hierarchy and IO boundary
-' Source: src/frontend/musikk/src/features/publications/
-' Covers Posts (Feed), Collection Comments, and Chat.
 
 package "Posts (Feed)" {
-    [GlobalFeed / UserFeed] as feed_pages
+    [GlobalFeed\n+ PostCreateButton / PostCreateDialog\n+ useGlobalFeedPostsFlat\n+ useNewFeedPosts] as global_feed
+    [UserFeed\n+ useFeedPostsFlat\n+ useNewFeedPosts] as user_feed
     [PostTabContent] as post_tab
-    [PostTree] as post_tree
-    [PostHeader / PostReplies /\nPostReplySection / PostForm /\nPostAttachment] as post_pieces
+    [PostTree\n+ PostHeader / PostReplies /\n  PostReplySection / PostForm /\n  PostAttachment] as post_tree
+    cloud "Backend\n/api/v1" as backend_posts
 }
 
-feed_pages --> post_tab
+global_feed --> post_tab
 post_tab --> post_tree
-post_tree --> post_pieces
+user_feed --> post_tree
+
+global_feed ..> backend_posts : GET /feed/posts
+user_feed ..> backend_posts : GET /feed/{user_uuid}/posts
+post_tree ..> backend_posts : GET, POST /publications/{uuid}/children\nPOST /feed/posts
 
 package "Collection Comments" {
-    [CommentBox] as comment_box
-    [CommentList] as comment_list
-    [CommentForm / Comment] as comment_pieces
+    [CommentBox\n+ CommentList\n+ CommentForm / Comment\n+ useCollectionCommentsFlat\n+ useCollectionCommentsWsEvents\n+ useTypingIndicator (send + receive)\n+ scroll hooks] as comment_box
+    cloud "Backend\n/api/v1" as backend_comments
+    queue "WSClient\ncollection_comments.{uuid}" as ws_comments
 }
 
-comment_box --> comment_list
-comment_box --> comment_pieces
-comment_list --> comment_pieces
+comment_box ..> backend_comments : GET, POST /collections/{uuid}/comments
+comment_box <..> ws_comments : collection.comments.changed
 
 package "Chat" {
-    [ChatBoxRouteHandler / ChatPreviewList] as chat_entry
-    [ChatBox] as chat_box
-    [ChatHeader / ChatMessageList /\nChatMessageForm / ChatMessage] as chat_pieces
+    [ChatBoxRouteHandler / ChatPreviewList\n+ UserChatsProvider\n+ useUserChatsWsEvents\n  (global cache invalidation)] as chat_entry
+    [ChatBox\n+ ChatHeader / ChatMessageList /\n  ChatMessageForm / ChatMessage\n+ useChatMessagesFlat\n+ useChatWsEvents\n+ useTypingIndicator (send + receive)\n+ scroll hooks (useScrollAnchor /\n  useAutoScrollToBottom /\n  useNewMessagesIndicator)] as chat_box
     [ChatStartDirectList / ChatNewGroupForm] as chat_start
+    cloud "Backend\n/api/v1" as backend_chat
+    queue "WSClient\nchat.{uuid} +\nper-user group" as ws_chat
 }
 
 chat_entry --> chat_box
 chat_entry --> chat_start
-chat_box --> chat_pieces
 
-package "Shared" {
-    [AttachmentPicker] as attachment_picker
-    [LoadOlder / LoadNewerButton] as load_buttons
-    [NewMessagesIndicator] as new_msg_indicator
-    [TypingIndicator] as typing_indicator
-}
+chat_box ..> backend_chat : GET, POST /users/{uuid}/chats/{chat}/messages
+chat_start ..> backend_chat : POST /users/{uuid}/chats\nPOST .../{chat}/members
+chat_box <..> ws_chat : chat.messages.changed
+chat_entry <.. ws_chat : chat.messages.changed\n(per-user group)
 
-post_pieces ..> attachment_picker : uses
-chat_pieces ..> attachment_picker : uses
-post_tree ..> load_buttons : uses
-chat_pieces ..> load_buttons : uses
-chat_pieces ..> new_msg_indicator : uses
-chat_box ..> typing_indicator : uses
-
-package "State (providers + hooks)" {
-    [UserChatsProvider] as user_chats_provider
-    [usePublicationsInfiniteFlat\n(cursor pagination)] as use_pubs_infinite
-    [useChatWsEvents\n(topic subscription)] as use_chat_ws
-    [useCollectionCommentsWsEvents\n(topic subscription)] as use_col_comments_ws
-    [useUserChatsWsEvents] as use_user_chats_ws
-    [useTypingIndicator\n(throttled sender +\nlistener)] as use_typing
-    [useNewFeedPosts / useScrollAnchor /\nuseAutoScrollToBottom /\nuseNewMessagesIndicator] as scroll_hooks
-}
-
-post_tab ..> use_pubs_infinite : uses
-comment_list ..> use_pubs_infinite : uses
-chat_pieces ..> use_pubs_infinite : uses
-feed_pages ..> scroll_hooks : uses
-chat_pieces ..> scroll_hooks : uses
-chat_entry ..> use_chat_ws : subscribes
-comment_box ..> use_col_comments_ws : subscribes
-chat_entry ..> user_chats_provider : reads
-user_chats_provider ..> use_user_chats_ws : invalidates on events
-typing_indicator ..> use_typing : reads typers
-chat_pieces ..> use_typing : notifyTyping
-
-cloud "Backend\n/api/v1" as backend
-queue "WSClient\ntopic groups" as ws
-
-' --- HTTP ---
-use_pubs_infinite ..> backend : GET /feed/posts\nGET /feed/{user_uuid}/posts\nGET /publications/{uuid}/children\nGET /collections/{uuid}/comments\nGET /users/{uuid}/chats/{chat}/messages
-post_pieces ..> backend : POST /feed/posts\nPOST /publications/{uuid}/children
-comment_pieces ..> backend : POST /collections/{uuid}/comments
-chat_pieces ..> backend : POST /users/{uuid}/chats/{chat}/messages
-chat_start ..> backend : POST /users/{uuid}/chats\nPOST /users/{uuid}/chats/{chat}/members
-
-' --- WS subscribe (named topics) ---
-use_chat_ws ..> ws : subscribe topic chat.{uuid}
-use_col_comments_ws ..> ws : subscribe topic collection_comments.{uuid}
-
-' --- WS events received ---
-use_user_chats_ws <.. ws : chat.messages.changed
-use_col_comments_ws <.. ws : collection.comments.changed
-use_typing <.. ws : chat.typing\ncollection_comments.typing
-
-' --- WS action sent ---
-use_typing ..> ws : action "typing"\n{ topic }
+note as combined_note
+  == Shared building blocks
+  - AttachmentPicker: post and chat composers
+  - LoadOlder / LoadNewerButton: post tree, chat, comments
+  - NewMessagesIndicator: chat
+  - TypingIndicator: chat, comments
+  ==  Typing indicator (chat + comments)
+  - client sends action "typing" { topic }
+  - server emits {topic}.typing back on the same topic
+  == Duplication
+  All Backend / WSClient nodes refer to the same service
+  and the same WS connection - duplicated per package
+  for readability.
+end note
 
 @enduml

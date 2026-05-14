@@ -89,3 +89,7 @@ media/*
 
 ### Macos
 .DS_Store
+
+### LaTeX build artifacts
+text/out/*
+!text/out/thesis.pdf

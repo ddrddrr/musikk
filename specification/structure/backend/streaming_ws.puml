@@ -95,7 +95,7 @@ together {
         SYNC_DRIFT_BROADCAST_THRESHOLD_MS = 500  #ms
         user_uuid: str
         --
-        activate(current_song_uuid)
+        activate(current_song_uuid: str | None)
         stop()
         seek(song_pos_ms)
         sync(song_pos_ms, prev_active)
@@ -137,7 +137,7 @@ together {
 
 ' Structural composition
 DeviceManager ..> Device : returns
-PlaybackManager *-- "0..1" PlaybackState
+PlaybackManager ..> PlaybackState : reads/writes Redis
 PlaybackState *-- "0..1" ActivePlayback
 
 ' WS entry points -> streaming layer
@@ -154,6 +154,7 @@ PlaybackWSActionHandler ..> DeviceStateBroadcaster
 ' Controllers
 PlaybackController ..> PlaybackManager
 PlaybackController ..> PlayerStateBroadcaster
+PlaybackController ..> ActivePlayback : reads (prev_active for sync)
 
 PlayerController ..> PlaybackManager
 PlayerController ..> PlayerStateBroadcaster

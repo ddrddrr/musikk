@@ -24,8 +24,10 @@ UserContent ---> "0..1" BaseUser : author
 class Publication <<DjangoModel>> {
     created_for_type: ContentType
     created_for_id: UUID
+    created_for_object: GenericForeignKey
     attachment_type: ContentType
     attachment_id: UUID
+    attachment_object: GenericForeignKey
     --
     get_root(): Publication
 }

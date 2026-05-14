@@ -13,31 +13,38 @@ end box
 
 box "Backend" #F8EFE5
 participant "PlaybackController" as backend
-database "Database" as database
+database "Redis\n(PlaybackManager)" as redis
 end box
 
 note over active_tab, passive_tabs
 Only the active tab owns an HTMLAudioElement
 and decodes audio. Passive tabs render position
-from the server snapshot fields
+from ActivePlayback fields
 (last_known_song_pos_ms, last_known_at_server_ms)
-plus elapsed clock time on the client.
+plus elapsed time relative to server_ts_ms.
 end note
 
 == Periodic sync (active tab only) ==
 note over active_tab : audio playing
 active_tab -> backend : ws action "playback.sync"\n{ song_pos_ms, current_song_uuid }
 backend -> backend : drop if FE current_song_uuid is stale
-backend -> database : update PlayerState\n(last_known_song_pos_ms,\nlast_known_at_server_ms)
+backend -> redis : update ActivePlayback\n(last_known_song_pos_ms,\nlast_known_at_server_ms)
 
 == Snapshot broadcast ==
-backend -->> passive_tabs : broadcast ws event "playback.snapshot"\n(active tab excluded)
+backend -->> active_tab : broadcast ws event "playback.snapshot"\n(includes server_ts_ms)
+backend -->> passive_tabs : broadcast ws event "playback.snapshot"\n(includes server_ts_ms)
+note over backend
+broadcast happens only when measured
+drift exceeds SYNC_DRIFT_BROADCAST_THRESHOLD_MS
+(500 ms); no exclude_device_id is used,
+so the active tab also receives it
+end note
 passive_tabs -> user : advance progress bar\n(synced with server clock)
 
 == Seek (any tab) ==
 user -> passive_tabs : move seek knob
 passive_tabs -> backend : ws action "playback.seek"\n{ song_pos_ms, current_song_uuid }
-backend -> database : update PlayerState
+backend -> redis : update ActivePlayback
 backend -->> active_tab : broadcast ws event "playback.seek"
 active_tab -> user : reposition <audio>,\naudio jumps to new position
 backend -->> passive_tabs : broadcast ws event "playback.snapshot"

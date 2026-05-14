@@ -15,7 +15,7 @@ package "Presentation" {
     [PasswordField]
 }
 
-LoginForm --> EmailField
+LoginForm ---> EmailField
 LoginForm --> PasswordField
 SignupForm --> EmailField
 SignupForm --> PasswordField
@@ -41,13 +41,13 @@ package "Network clients\n(src/api/)" as net_clients {
 
 cloud "Backend\n/api/v1" as backend
 
-LoginForm ..> api_public : uses
-SignupForm ..> api_public : uses
-EmailVerificationPage ..> api_public : uses
+LoginForm ..> auth_provider : calls login(useAuth)
+SignupForm ..> api_public : calls register()
+EmailVerificationPage ..> api_public : verifies key
 api_public ..> backend : GET /csrf\nPOST /auth/registration\nPOST /auth/verify-email\nPOST /auth/login\nPOST /auth/logout
 
-auth_provider ..> api_priv : uses
-api_priv ..> backend : GET /users/me
+auth_provider ..> api_public : GET /users/me\n(via api_client_public to skip 401 -> logout on first fetch)
+api_priv ..> backend : (authenticated requests for the rest of the app)
 
 auth_provider ..> auth_ref : registers logout
 

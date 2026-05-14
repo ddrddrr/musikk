@@ -13,7 +13,6 @@ package "Publications" {
   usecase "Comment on Collection" as UC_COMMENT
   usecase "Reply to Publication" as UC_REPLY
   usecase "Attach content\n(Song / Collection / User)" as UC_ATTACH
-  usecase "Delete own Publication" as UC_DELETE
 }
 
 package "Chat" {
@@ -29,7 +28,6 @@ package "Notifications" {
 user --> UC_POST
 user --> UC_COMMENT
 user --> UC_CHAT_MSG
-user --> UC_DELETE
 user --> UC_OPEN_CHAT
 user --> UC_ADD_MEMBER
 user --> UC_NOTIF

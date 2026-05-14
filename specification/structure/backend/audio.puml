@@ -8,7 +8,7 @@ enum ManifestType <<StrEnum>> {
 }
 
 class SongRepresentation <<dataclass>> {
-    content_path: Path
+    content_path: str | Path
     manifests: dict[ManifestType, str]
 }
 
@@ -16,13 +16,18 @@ class ProcessingContext <<dataclass>> {
     orig_audio_file_path: str
     intermediate_dir: str
     final_dir: str
+    audio_info: AudioStreamInfo
     converted_paths: list[str]
     song_repr: SongRepresentation | None
+    loudness_lufs: float | None
+    true_peak_dbtp: float | None
 }
 
 class ProcessingResult {
     song_repr: SongRepresentation
     context: ProcessingContext
+    loudness_lufs: float | None
+    true_peak_dbtp: float | None
 }
 
 SongRepresentation --> ManifestType
@@ -38,7 +43,7 @@ abstract class Step {
 class ProcessingPipeline {
     steps: list[Step]
     do_cleanup: bool
-    run(source: str, final_storage_dir: str): ProcessingResult
+    run(source: str, final_storage_dir: str, audio_info: AudioStreamInfo): ProcessingResult
 }
 
 ProcessingPipeline o-- "1..*" Step
@@ -53,7 +58,6 @@ class FFmpegStep {
 
 class LoudnessMeasurementStep {
     process(ctx: ProcessingContext): void
-}
 
 class ShakaPackagerStep {
     wrapper: ShakaPackagerWrapper
@@ -67,9 +71,8 @@ Step <|-- ShakaPackagerStep
 
 class FFMPEGWrapper {
     audio_converters: list[FFMPEGAudioConverter]
-    audio_content_path: Path
-    do_cleanup: bool
-    convert_audio(file_path: Path, storage_dir: Path): list[str]
+    convert_audio(file_path, output_dir, audio_info: AudioStreamInfo, filters: list[str] | None): list[str]
+    _select_converters(audio_info: AudioStreamInfo): list[FFMPEGAudioConverter]
 }
 
 class FFMPEGAudioConverter {
@@ -77,18 +80,18 @@ class FFMPEGAudioConverter {
     bitrate: int | None
     extras: list[str]
     timeout: int | None
-    convert_song(file_path: Path, storage_dir: Path): str
+    lossless: bool
+    convert_song(file_path: Path, storage_dir: Path, filters: list[str] | None): str
 }
 
-class FFMPEGCommand {
+class "build_ffmpeg_command()" as FFMPEGCommand <<function>> {
     input_path: Path
     output_path: Path
     encoder: str
     bitrate: int | None
-    extras: list[str]
-    strip_non_audio: bool
-    movflags_faststart: bool
-    build(): list[str]
+    extras: list[str] | None
+    filters: list[str] | None
+    returns list[str]
 }
 
 FFmpegStep o-- "1" FFMPEGWrapper
@@ -124,15 +127,15 @@ FFMPEGWrapper <.. FFMPEGFull
 
 class ShakaPackagerWrapper {
     do_cleanup: bool
-    package_audio_files(input_storage_paths: list[str], storage_dir: Path): SongRepresentation
+    package_audio_files(local_input_paths: list[Path], storage_dir: str | Path): SongRepresentation
 }
 
-class ShakaPackagerCommand {
-    local_paths: list[Path]
-    tmpdir: Path
+class "build_shaka_packager_command()" as ShakaPackagerCommand <<function>> {
+    file_paths: list[Path]
+    tmpdir: str
     bin_path: str
     segment_duration: int
-    build(): tuple[list[str], Path, Path]
+    returns (list[str], Path, Path)
 }
 
 ShakaPackagerStep o-- "1" ShakaPackagerWrapper
