@@ -13,6 +13,9 @@ REST_FRAMEWORK = REST_FRAMEWORK | {
         "rest_framework.throttling.UserRateThrottle",
     ],
     "DEFAULT_THROTTLE_RATES": {"anon": "10/m", "user": "500/m"},
+    "DEFAULT_RENDERER_CLASSES": [
+        "rest_framework.renderers.JSONRenderer",
+    ],
 }
 
 DATABASES["default"]["OPTIONS"] = {
