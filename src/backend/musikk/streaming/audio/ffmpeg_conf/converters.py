@@ -3,7 +3,6 @@ from typing import Literal
 from uuid import uuid4
 
 from django.conf import settings
-
 from utils.cmd import run_shell_command
 
 
@@ -57,7 +56,7 @@ class FFMPEGAudioConverter:
         encoder: Literal["flac", "libfdk_aac"],
         bitrate: int | None = None,
         extras: list[str] | None = None,
-        timeout: int | None = 60,
+        timeout: int | None = 600,
         lossless: bool = False,
     ):
         self.encoder = encoder
@@ -85,7 +84,8 @@ class FFMPEGAudioConverter:
                 bitrate=self.bitrate,
                 extras=self.extras,
                 filters=filters,
-            )
+            ),
+            timeout=self.timeout,
         )
 
         return output_path

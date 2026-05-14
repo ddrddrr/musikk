@@ -1,13 +1,18 @@
-import subprocess
 import shlex
+import subprocess
 
 
 def run_shell_command(
-    command: list[str], timeout: int = 60
+    command: list[str], timeout: int | None = 60
 ) -> subprocess.CompletedProcess[str]:
     try:
         return subprocess.run(
-            command, capture_output=True, text=True, timeout=timeout, check=True
+            command,
+            capture_output=True,
+            text=True,
+            errors="replace",
+            timeout=timeout,
+            check=True,
         )
     except subprocess.TimeoutExpired as exc:
         exc.add_note(f"timeout after {exc.timeout}s; cmd={shlex.join(command)}")
