@@ -4,13 +4,10 @@ This chapter goes over the built application, explaining
 the choices behind each feature, and
 focuses on what is not clear from the diagrams or the source code
 itself. Structure and naming that the diagrams or code already show
-are not repeated in the text. The high-level system overview can be found in
-Figure~\ref{fig:system_overview}, the Backend and Frontend
-architectures in Figures~\ref{fig:backend} and~\ref{fig:frontend}.
-The per-app Backend class diagrams, the Frontend component
-hierarchies, and the behavior diagrams referenced from each section
-are collected in the \hyperref[app:diagrams]{Diagram Catalog}
-appendix.
+are not repeated in the text. The high-level system overview is in
+\path{text/diagrams/HighLevelSystem.png}, the Backend and Frontend
+architectures in \path{text/diagrams/BackendSystem.png} and
+\path{text/diagrams/FrontendSystem.png}.
 
 
 \section{Stack}\label{sec:stack}
@@ -174,7 +171,7 @@ The Backend code that runs all of these stages is described next.
 \subsection{Backend Pipeline}\label{subsec:backend_pipeline}
 The Backend code is under
 \path{src/backend/musikk/streaming/audio/}, the class layout is
-shown in Figure~\ref{fig:cd_audio}.
+in \path{text/diagrams/AudioClassDiagram.png}.
 
 Pre-pipeline validation (the file-size, MIME, and FFprobe-based checks
 from the previous subsection) is defined in \texttt{validators.py} and runs before any
@@ -217,102 +214,101 @@ WebSocket layer.
 This section covers the WebSocket setup of the application. The
 Backend code is under \path{src/backend/musikk/websockets}, the
 Frontend code under \path{src/frontend/musikk/src/ws}. The end-to-end
-connection lifecycle is shown in
-Figure~\ref{fig:bh_ws_lifecycle}, and the class layout in
-Figure~\ref{fig:cd_websockets}.
+connection lifecycle is in
+\path{text/diagrams/WebsocketLifecycle.png}, and the class layout in
+\path{text/diagrams/WebsocketsClassDiagram.png}.
 
-Two message-direction terms are used throughout the text.
-\textit{Events} are messages sent from the server to the client.
-\textit{Actions} are messages sent from the client to the server.
+Two WS message-related terms are used throughout the text: \textit{Events} are messages sent
+from the server to the client and \textit{Actions} are messages sent from the client to the server.
 
 \subsection{Backend Handling}
+% say about multiplexing on a single connection
 All real-time features share a single connection at \path{/ws/user}.
-With one connection per feature, ordering between features would be
-lost: a Playback Device switch and a Playback activation could arrive
-in any order. Per-User Backend state would also be split across one
-consumer per feature, and the upgrade handshake plus cookie
-authentication would be duplicated for each connection.
+With one connection per feature, additional message ordering logic would
+need to be implemented: for example, a Playback Device switch and a Playback
+activation actions could arrive in any order and it would not be clear which one to process first.
 % TODO: probably cite
-Each extra connection also adds memory and file-descriptor overhead
-on the server, runs into the browser's per-origin WebSocket limit,
+In addition, each extra connection also adds memory and file-descriptor overhead
+on the server, can run into the browser's connection limit,
 and needs its own reconnect handling on the Frontend.
 
 As discussed in \hyperref[sec:server_client_communication]{Server-Client Communication},
 WebSocket support is added via \texttt{django-channels}.
-The \texttt{BaseConsumer} class handles one accepted connection, and the
-\texttt{AuthMiddlewareStack} resolves the User from the session
-cookie before the connection is accepted.
-Anonymous connection attempts are not permitted and an error is returned.
+The \texttt{BaseConsumer} class manages connections and is instantiated once per connection.
+
 For broadcasts to multiple connected clients, django-channels provides
-Groups. A Group is a set of consumers that any consumer can
-join, and a single send to the Group reaches every member.
+groups. A group is a set of consumers instances (connections), and a message send
+to the group reaches every member.
 
 Two kinds of groups are used. The User's own group
-\texttt{user\_<uuid>}, joined on connect, holds ``private'' changes:
+\texttt{user\_<uuid>}, which transmits ``private'' messages:
 Playback Device list, Notifications, Liked Songs change and other relevant events.
 A User with several tabs (devices) open uses one consumer per tab, and all of them
 are joined to the same \texttt{user\_<uuid>} group, hence a ``private''
 broadcast reaches every tab.
 Named topic groups (\texttt{topic.<prefix>.<id>}) can be joined by several different Users
-at once and are used for shared traffic: Chat messages, Collection Comments,
+at once and are used for shared messages: Chat messages, Collection Comments,
 and typing indicators.
 
-Each feature provides an action handler class that declares the
-action keys it owns. The consumer then assembles a single
-action-to-handler map, and whenever a valid action is received, calls the
-relevant handler for it.
-
-Actions are handled by WSActionHandler classes. Each handler maps
-action keys to the methods that run them. The consumer dispatches every
-incoming action to the method registered for its key.
+Actions are handled by WSActionHandler subclasses.
+Each handler defines a maps of action names to the methods that run them.
+The consumer then dispatches every incoming action to the handler method registered for its name.
+% TODO: mb say that this could be improved eg with registry pattern because right now there is reverse coupling
 
 Events are sent through two helpers, \texttt{send\_ws\_event} for a
 group and \texttt{send\_ws\_event\_to\_channel} for a single channel,
 so any part of the Backend can emit them. DRF views, Celery tasks, and
-Django signal handlers all call these helpers directly.
+Django signal handlers can call these helpers directly or use the special Broadcaster
+classes introduced in % TODO: link to the playback section
 
 When the connection closes, each handler runs an
 \texttt{on\_disconnect} hook so per-feature state is released: joined
 topic groups are dropped, the registered Playback Device is cleared,
-and so on. A Playback event can also include an excluded device id, in
+and so on.
+
+A Playback event can also include an excluded device id, in
 which case the consumer skips delivery to the device with the specified id.
 This is useful, since the device that sends an update already is in the updated state
 and does not need a WS event with the new data from the server.
 
 \subsection{Frontend Handling}
-The Frontend opens a single connection to \path{/ws/user}.
+Frontend opens a single connection to \path{/ws/user}.
 Authentication is implicit, the browser sends the session cookie along
 with the upgrade request. The WS-handling code is split into two
 classes, \texttt{WSClient} and \texttt{WebSocketManager}.
 
-Reconnect logic is also added, so a tab that is put in the background or a brief network outage
-does not require a page refresh or manual actions from the user.
+Reconnect logic is implemented, so a tab that is put to the background
+or a brief network outage does not require a page refresh
+or manual actions from the user.
 Reconnects use exponential backoff with a 30\,s ceiling and random
 jitter. The jitter prevents many tabs from reconnecting at the same
 time after an outage.
 
 \texttt{WSClient} wraps the native \texttt{WebSocket} interface.
-Most outbound actions go through the \texttt{send} method, which queues
+Most actions go through the \texttt{send} method, which queues
 them and flushes the queue when the connection is open.
 An action issued while the connection is down is therefore not lost, and the order
 of queued actions is preserved on flush. The exception is the periodic
 Playback position sync action, it is sent only if the connection
-is open and dropped otherwise, so stale Playback positions are not queued and replayed later on.
+is open. Otherwise, for example, stale seek actions would be replayed on reconnect,
+even if the Playback position has already moved and stabilized.
 
-Named topic subscriptions are also handled via the \texttt{WSClient}.
+Named topic subscriptions are handled via the \texttt{WSClient} as well.
 Subscriptions are reference-counted: only the first topic
 subscriber runs a \texttt{subscribe} action, and only the last
-unsubscriber sends runs the \texttt{unsubscribe} action. Both actions also bypass the
-queue, because a \texttt{subscribe} action must reach the server before any
-later action that depends on the topic.
-On reconnect, the on-open handler re-initializes every
-currently used topic.
+unsubscriber runs the \texttt{unsubscribe} action. Both actions also bypass
+the queue. On reconnect, the on-open handler reads the refcount map and
+sends a \texttt{subscribe} for every topic in it. If subscribe also used
+the queue, the server would get the same subscribe twice. If unsubscribe
+used the queue, a subscribe and an unsubscribe sent while the connection
+was down would still reach the server on reconnect, even though the
+Frontend no longer needs the topic.
 
 \texttt{WebSocketManager} owns the single \texttt{WSClient} via a
 refcount. \texttt{connect} returns the existing client and increments
 the counter. \texttt{disconnect} closes the connection only when the
 counter reaches zero. Without the refcount, one subscriber unmounting
-(including the double-mount React's StrictMode triggers in development)
+(including the React's StrictMode double-mount in development)
 would tear down the connection shared with the others, drop their
 topic subscriptions, and force a fresh handshake plus re-subscription
 on the next mount.
@@ -332,16 +328,14 @@ This section covers how Users are modelled, how the Frontend renders
 them, and the API that connects the two. The Backend code is under
 \path{src/backend/musikk/users}, the Frontend code under
 \path{src/frontend/musikk/src/features/user}. The class diagram is
-shown in Figure~\ref{fig:cd_users}, and the Frontend component
-hierarchy in Figure~\ref{fig:fe_user}.
+in \path{text/diagrams/UsersClassDiagram.png}, and the Frontend
+component hierarchy in \path{text/diagrams/FrontendUser.png}.
 
 \subsection{User Data Model}
 A single \texttt{BaseUser} model covers every account, with a
 \texttt{role} discriminator field that is either ``Base'' or ``Artist''.
-An Artist is not a separate subclass, just a role value.
-There are currently no Artist-only fields, so a separate table is not needed for now.
-The \texttt{IsArtist} permission reads the field to gate Artist-only
-endpoints such as Album upload.
+An Artist is not a separate subclass, only a role value, since there are currently
+no Artist-only fields (a separate database table is not needed).
 
 Each User is uniquely identified by their email. The
 \texttt{display\_name} is not unique and defaults to a random string,
@@ -380,7 +374,7 @@ Three list endpoints under \path{/users/<uuid>/} (\path{friends},
 \path{followers}, \path{followed}) are gated by the \texttt{IsSelfOrFriend}
 permission, so the connection lists are visible only to the owner or
 to one of their Friends (the social relations of a User are not
-considered public information).
+considered public).
 
 \subsection{Frontend}
 \texttt{ProfilePage} covers both the own-profile and other-User views
@@ -388,8 +382,6 @@ with one component, switching between an ``Edit Profile'' dialog and a
 ``Follow/Unfollow'' button based on whose UUID is in the route. The
 page layout is otherwise identical between the two views, so a split
 into two components would mostly mean keeping two copies in sync.
-Three tabs sit below the header: Posts, Playlists, and Albums. The
-Albums tab is shown only on Artist profiles.
 
 
 \section{Account Creation and Authentication}
@@ -398,17 +390,16 @@ address is verified, and how the resulting Session is established and
 maintained. The Backend code is under
 \path{src/backend/musikk/users} and the Frontend code under
 \path{src/frontend/musikk/src/features/auth}. The end-to-end flow
-across sign-up, email confirmation, login, and session expiry is shown
-in Figure~\ref{fig:bh_auth_flow}. The Frontend component hierarchy is
-in Figure~\ref{fig:fe_auth}.
+across sign-up, email confirmation, login, and session expiry is in
+\path{text/diagrams/AuthFlow.png}. The Frontend component hierarchy
+is in \path{text/diagrams/FrontendAuth.png}.
 
 \subsection{Backend}
 The Backend does not implement its own authentication
 stack, since session handling, password validation, and email verification
 are security-sensitive and easy to get wrong.~\parencite{dont_write_your_own_auth}
-Instead authentication is built using django-allauth, the standard Django package
-for authentication management.
-The REST endpoints on top of allauth are provided by
+Instead authentication is built using \texttt{django-allauth} and REST endpoints
+on top of allauth are provided by
 \texttt{dj-rest-auth}~\parencite{dj_rest_auth} (located in \path{/api/v1/auth/}).
 
 allauth is configured to identify Users by email, with
@@ -437,9 +428,6 @@ opened.
 Sessions use the \texttt{cached\_db} backend. Each session is written
 to the database and also kept in Redis, so lookups for currently active
 clients avoid a database query.
-A \path{/api/v1/csrf} endpoint is called once by the Frontend before
-login to set the \texttt{csrftoken} cookie, since Django's CSRF
-middleware requires the matching header on every ``unsafe'' request.
 
 \subsection{Frontend}
 Two axios clients are configured in
@@ -450,14 +438,6 @@ Both clients share a request interceptor that copies the
 \texttt{csrftoken} cookie into the \texttt{X-CSRFToken} header on
 unsafe methods.
 
-\texttt{AuthProvider} owns the authenticated User via a
-\texttt{useQuery} against \path{/users/me}. The presence of a User in
-that cache is what \texttt{isAuthenticated} checks, so consumers stay
-in sync with server state rather than a locally tracked boolean. A
-successful login refetches the query. A logout clears the React Query
-cache and removes the \texttt{sessionid} and \texttt{csrftoken}
-cookies.
-
 The 401 handler on the authenticated client uses a shared
 \texttt{authRef.logout} reference rather than calling \texttt{logout}
 directly. The reference is set inside an effect in
@@ -466,21 +446,22 @@ module free of React imports and avoids a full-page redirect, which
 would remount the app and lose any operations that are currently being processed
 before the logout can finish.
 
-The Backend also exposes password reset and password change endpoints
-under \path{/api/v1/auth/}, but the SPA does not currently expose UI
-for either, so these flows are reachable only through direct API calls
-today.
+% TODO: move later to the improvements section along with otjer stuff
+%The Backend also exposes password reset and password change endpoints
+%under \path{/api/v1/auth/}, but the SPA does not currently expose UI
+%for either, so these flows are reachable only through direct API calls
+%today.
 
-The next section covers the main data Users work with:
-Songs and the Collections that group them.
+The next section covers the main objects Users interact with:
+Songs and Collections.
 
 
-\section{Playback Items}\label{sec:playback_items}
+\section{Songs and Collections}\label{sec:songs_collections}
 This section covers the Song/Collection models and their Author relations.
 The Backend code is located under \path{src/backend/musikk/streaming}.
 The Frontend code is split across the \path{songs/} and \path{collections/}
 subdirectories under \path{src/frontend/musikk/src/features/}.
-The class diagram is shown in Figure~\ref{fig:cd_streaming}.
+The class diagram is in \path{text/diagrams/StreamingClassDiagram.png}.
 
 The audio pipeline fields on Song and the Album upload flow are covered
 in the \hyperref[sec:audio_upload]{Audio Upload} section. Playback
@@ -489,27 +470,24 @@ Playback logic in \hyperref[sec:playback]{Playback and Device Handling}.
 
 \subsection{Data Model}
 \texttt{BaseSong} represents the literal Song object, i.e., the fields that make each
-song playable and identifiable: title, description, image, \texttt{draft} flag and the paths to the streaming
-manifests that point at the audio.
-The manifests, the \texttt{content\_path}, and the source
-metadata fields (loudness, true peak, codec, bitrate) are written by
-the audio pipeline once the Celery task finishes.
+song playable and identifiable: title, description, image, \texttt{draft}
+flag and the paths to the streaming manifests.
 
 The app has only one Song container, the Collection class. It has four kinds,
-Playlist, Album, History, and Liked Songs, which are values of a
-\texttt{type} discriminator, the same pattern as the \texttt{role}
-field on \texttt{BaseUser}. It makes it possible to reuse one set of retrieve, list,
+Playlist, Album, History, and Liked Songs, which are discriminated by a string field,
+the same pattern as the \texttt{role} field on \texttt{BaseUser}.
+This makes it possible to reuse one set of retrieve, list,
 and ordering operations, and only one Collection page component on the
 Frontend that is reused for all four kinds.
+% TODO: say why its fine for collections(the one model) and bad for notifications in the improvements section
 
 \texttt{CollectionSong} pairs a \texttt{BaseSong} with a Collection at
 an integer \texttt{position}. It also serves as the public identifier
-of a Song in the API\@. \path{/songs/<uuid>} resolves to a
-\texttt{CollectionSong}, not a \texttt{BaseSong}, and the Frontend
-passes that uuid everywhere it references a Song. The reason is that
+of a Song for most of the API endpoints. E.g., \path{/songs/<uuid>} resolves to a
+\texttt{CollectionSong}, not a \texttt{BaseSong}. The reason is that
 most actions on a Song target its slot in a specific Collection, not
-the Song in the abstract. Remove from this Playlist, jump to the Album,
-render play button state in Collection view etc.
+the Song in the abstract. ``Remove from this Playlist'', ``jump to the Album',
+render play button state, etc.
 A URL that accepts \texttt{BaseSong} would have to either also include the
 Collection uuid in every call, or do a lookup to find the row.
 
@@ -535,17 +513,17 @@ endpoints, \path{/liked-songs/add-song/<uuid>} and
 \path{/collections/<uuid>/songs}. The liked-songs Collection is always
 the User's own, so the URL needs only the Song uuid. A Playlist add
 takes any of the User's Playlists in the URL and requires the User to
-own it. The split is mainly there to keep the Frontend cache simple.
+own it. The split is mainly there to keep the Frontend cache handling simple.
 The like endpoint emits a dedicated \texttt{LIKED\_SONGS\_CHANGED}
 event, which invalidates a single Frontend query that holds the set
 of liked Song uuids. Every like button reads its state from that set,
-so one round-trip re-renders every instance of button on the page.
+so one update re-renders every instance of button on the page.
 Routing the operation through the generic Playlist endpoint
 would leave like state as a per-row \texttt{is\_liked} flag, and the
 only invalidation signal would be the generic
-\texttt{COLLECTION\_CHANGED} event. The same Song shown in an Album
-view and the Playback queue would then have two stale flags until
-both queries were updated (this was the original design, replaced for exactly that reason).
+\texttt{COLLECTION\_CHANGED} event (this was the original design).
+The same CollectionSong shown in an Album view and the Playback queue
+would then have two stale flags until both queries were updated.
 
 \subsection{Frontend}
 There are two main components which are reused throughout the application:
@@ -556,93 +534,79 @@ name, so that they can be cleanly added to any other component.
 
 
 \section{Audio Upload/Album Creation}\label{sec:audio_upload}
-This section covers how an Artist uploads new Songs and creates new
-Albums. The end-to-end sequence is shown in
-Figure~\ref{fig:bh_audio_upload}. The three subsections below reflect
-the three phases of that diagram: Submit, Process, Persist and
-notify. A final subsection covers how Frontend handles the upload-related server
-events. The Backend view \texttt{CollectionSongCreateView} is at
-\path{src/backend/musikk/streaming/api/v1/views/collections.py}.
-The Celery task \texttt{convert\_audio} is at
-\path{src/backend/musikk/streaming/audio/tasks.py}. The pipeline
-modules are under \path{src/backend/musikk/streaming/audio}. The Frontend code is
-under \path{src/frontend/musikk/src/features/album-upload}, with the
-component hierarchy in Figure~\ref{fig:fe_audio_upload}.
+This section covers the design choices behind the Audio Upload.
+The end-to-end sequence is in
+\path{text/diagrams/AudioUploadFlow.png} and the Frontend component
+hierarchy in \path{text/diagrams/FrontendAudioUpload.png}. The
+Backend view \texttt{CollectionSongCreateView} is at
+\path{src/backend/musikk/streaming/api/v1/views/collections.py}. The
+Celery task \texttt{convert\_audio} is at
+\path{src/backend/musikk/streaming/audio/tasks.py}. The Frontend code
+is under \path{src/frontend/musikk/src/features/album-upload}.
 
-\subsection{Submit}
-The Artist first creates a draft Album from a form on the Frontend.
-The Artist then attaches one or more audio files for the Album Songs,
-and the Frontend runs simple file-type and size checks on each.
-For every attached file, a multipart POST request is made to
-\path{/api/v1/song-queue/collections/<uuid>/songs}. The view writes
-the file to a temporary path, runs the pre-pipeline validation
-from the \hyperref[subsec:audio_preprocessing]{Audio Preprocessing}
-section, creates a Song row with
-\texttt{draft=true}, enqueues the Celery task, and returns
-\texttt{202 Accepted} with the new Song UUID\@. The HTTP request does
-not block on transcoding, which takes minutes for a long file.
+Audio uploads are modeled as asynchronous jobs because transcoding
+a long file can take minutes. Holding the HTTP request open for that
+long would give Frontend no way to show progress and
+time out behind a reverse proxy. Hence, the view validates the file,
+writes it to a temporary path, creates the Song row with
+\texttt{draft=true}, enqueues a Celery task that does the
+heavy processing ``in the background'', and quickly returns
+\texttt{202 Accepted} with the new Song UUID\@.
+Frontend generates an \textit{operation id} per file and sends it in
+each Song upload request. The Celery task then includes the operation
+id in every WebSocket event it emits, so Frontend can update the
+right Song upload field even when several uploads from the same User
+run in parallel.
 
-The \texttt{draft} flag is the safety boundary. Public list and
-retrieve endpoints filter on \texttt{draft=false}, so a Song that is
-still being processed is invisible to every listing query. The flag
-is cleared only after the task writes the final manifests and audio
-data to the Song row. A failed task leaves the Song row
-hidden rather than partially visible. The related Album also has the
-draft flag, and the Artist should publish the Album with a
-separate PATCH request once every Song has finished.
+The view writes the file to a temporary path instead of passing
+its bytes to the task. Celery serializes task arguments through
+Redis, which keeps every queued message in RAM. A long lossless
+file would therefore sit in the broker until the worker picks it
+up, and a few concurrent uploads could easily fill up broker's memory.
+The view passes only the path to the task, which both processes can
+reach.
 
-The Frontend sends an \textit{operation id} with the upload
-request. The id propagates back along with every event the task sends later, so
-the client can match progress back to its own upload even when
-several uploads run in parallel from the same User.
+Both Frontend and Backend validate the audio file. The Frontend
+checks file size and MIME type before the request, to reject
+obviously invalid files early. The Backend runs the same checks in
+\texttt{validate\_audio}, plus duration, sample rate, channels, and
+codec, before enqueuing the task. The Frontend check is a UX
+shortcut, not a trust boundary. Any client can call the API
+directly, so the Backend check is the one that actually decides if
+the file is accepted.
 
-\subsection{Process}
-The Celery task runs the Audio Pipeline
-(see \hyperref[subsec:backend_pipeline]{Backend Pipeline}) with the
-validated data passed from the view.
-Splitting the work into a Celery task keeps the HTTP path
-fast and lets retries, scaling, and worker isolation come from the
-existing task infrastructure rather than from view code.
+A Song that is still being processed has no audio data yet, so it
+cannot be played. The Song is therefore created with
+\texttt{draft=true}, and the flag is cleared only after the Celery
+task writes the final audio fields, in one database transaction.
+Public list and retrieve endpoints filter on \texttt{draft=false},
+so a Song that is still processing, or that has failed, is invisible
+to every listing query. Without the flag, every public endpoint
+would need its own status check, and a ``half-built'' Song could leak
+into search results. The Album has the same flag, and the Artist
+publishes the Album (which sets the flag to false)
+with a separate PATCH once every Song is processed.
 
-At each stage completion the task broadcasts a
-\texttt{song.upload} event on the per-User WebSocket group with the
-stage name, the Song UUID, and the operation id.
+Cleanup of the Song row is split from the Celery task. The task
+removes the files it created on failure, but leaves the row in
+place, because the Artist may retry a failed Song or leave the
+page mid-upload and come back. If the task deleted the row on
+failure, the Album the Artist is still editing would lose its
+Songs. A separate management command, \texttt{prune\_draft\_albums},
+removes Album rows that have stayed in draft longer than a
+configurable window, together with their Songs and segments (can be ran via cron).
 
-If a stage fails, the pipeline rolls the prior stages back in
-reverse order and emits a failure event. The Song row stays in the draft
-state, hidden from every listing, until a cleanup job removes it.
-
-\subsection{Persist and notify}
-The final Song row write happens in one DB transaction.
-The Song appears in listings only after that
-transaction commit, so an inconsistent half-populated row is never observable.
-
-Cleanup runs on two paths. The task itself deletes the files created during processing
-if the commit fails, so a crashed worker does not leave
-orphaned segment files next to a missing row. A separate management
-command, \texttt{prune\_draft\_albums}, finds Album rows that have
-been in the draft state and deletes them
-together with their Songs and segments. The combination keeps the
-storage and the database aligned without locking the request path.
-
-\subsection{Frontend State Updates}
-% todo cite reducers?
-The Frontend keeps a per-operation status reducer. The listener at
-\path{src/frontend/musikk/src/features/album-upload/useWsEvents.ts}
-routes each incoming event into the reducer keyed on the operation
-id. The Album Upload page can then show accurate per-Song progress
-instead of a generic spinner.
-
-This concludes the upload path. The next section covers the Song Queue,
-the structure the User selects Playback Items from.
+This concludes the upload path. The next section covers the Song
+Queue, the structure the User selects Playback Items from.
 
 
 \section{Song Queue}\label{sec:song_queue}
 This section covers how the User can enqueue playable items in the application.
 The model code is under \path{src/backend/musikk/streaming/models/song_queue.py},
-the Frontend component hierarchy is in Figure~\ref{fig:fe_song_queue},
-and the Backend sequence for adding a Collection and advancing is
-in Figure~\ref{fig:bh_song_queue}.
+the Frontend component hierarchy is in
+\path{text/diagrams/FrontendSongQueue.png}, and the Backend sequence
+for adding a Collection and advancing is in
+\path{text/diagrams/SongQueue.png}.
 
 \subsection{Data structure}
 The Queue supports several frequent operations: insert at a random index,
@@ -651,37 +615,34 @@ front, pop several items up to a certain one, bulk append multiple items,
 and read the upcoming items in order.
 A straightforward doubly linked list in SQL from the first draft of the implementation
 did not work well for most of these. Every insert, reorder, or remove
-cascaded pointer updates, and reading items in order needs traversal
-rather than an indexed range scan. A decimal index approach was chosen based on
+cascaded pointer updates, and reading items in order needed linear traversal
+rather than a single range scan. A decimal index approach was chosen based on
 online discussions on this topic~\parencite{llsql1,llsql2}.
 The current model stores each \texttt{QueueItem} with a
 \texttt{Decimal} position and inserts a new item at the midpoint
-between its neighbours. A single insertion is then one DB write and
+between its neighbours. A single insertion is a single DB write and
 reads are a simple range query.
 
-The trade-off is index exhaustion after repeated inserts
-at the same spot. The position column is \texttt{Decimal(24, 12)},
-which gives 12 fractional digits and can support around 30
-consecutive midpoint inserts between the same two neighbours.
-Realistic editing depth stays well below this, so the limit is
-accepted as-is. Appends use a separate
-\texttt{next\_item\_position} counter that grows by a fixed gap
-(\texttt{POSITION\_GAP = 1000}), so appended items never collide and
-never consume limited precision.
+The trade-off is that the position value can run out of precision
+when the User keeps inserting at the same spot. The position column
+is \texttt{Decimal(24, 12)}, so it has 12 fractional digits. This is
+enough for about 30 midpoint inserts between the same two neighbours
+before no number is left to put between them. However, in practice, the User
+does not edit the Queue that deeply most of the time, so this limit is fine for now.
+Appends use a separate \texttt{next\_item\_position} counter
+instead. The counter grows by a fixed gap
+(\texttt{POSITION\_GAP = 1000}), so appended items never land on the
+same position and never use up the fractional digits.
 
 \subsection{Queue and PlaybackContext}
 The Queue itself is split into two classes. \texttt{SongQueue} holds
 items the User added explicitly, ordered by \texttt{position}.
 \texttt{PlaybackContext} tracks the Collection that is currently
 playing through a cursor into \texttt{CollectionSong.position} and a
-list of skipped indices. On advance, the Queue is consumed first, then
-the Context. If no items are left, Playback stops.
-That split makes it possible to queue up many items lazily, shift through them,
-and then return back to the original Collection.
-
-Since SongQueue and PlaybackContext are mostly independant from each other,
-a new \texttt{PlayerState} class was introduced that
-orchestrates the transitions between them.
+list of skipped indices. On advance, the Queue is consumed first,
+then the Context. If no items are left, Playback stops. The split
+lets the User add items on top of a playing Collection, work through
+them, and then return to where the Collection was.
 
 \subsection{QueueSource and lazy filling}
 Bulk-appending a large Collection does not materialize all items up
@@ -694,162 +655,324 @@ even when the User queues an entire Album with hundreds of tracks,
 and it lets the Frontend show a stable window of upcoming items
 without paging through thousands of rows.
 
+% TODO: linking sentence
+
 
 \section{Playback and Device Handling}\label{sec:playback}
-The communication is server-authoritative. The Backend keeps one
-\texttt{PlaybackState} object per User in Redis, and every WS action
-from any client is applied to that state.
-The server then broadcasts the resulting snapshot to every connected
-User tab. The Backend models are in
-Figure~\ref{fig:cd_playback}, the runtime managers, controllers, and
-broadcasters in Figure~\ref{fig:cd_streaming_ws}, the FE component
-hierarchy in Figure~\ref{fig:fe_playback}, and the multi-tab sync
-sequence in Figure~\ref{fig:bh_playback_sync}.
+This section covers how Playback state is kept in sync across a User's
+tabs and Devices. The Backend code is under
+\path{src/backend/musikk/streaming}, with WS action handlers in
+\path{src/backend/musikk/streaming/ws/action_handlers/playback.py} and
+the per-User state stored in Redis via \texttt{PlaybackManager}. The
+Frontend code is under
+\path{src/frontend/musikk/src/features/player} and
+\path{src/frontend/musikk/src/features/playback}. The Backend models
+are in \path{text/diagrams/PlaybackClassDiagram.png}, the runtime
+managers, controllers, and broadcasters in
+\path{text/diagrams/StreamingWsClassDiagram.png}, the Frontend
+component hierarchy in \path{text/diagrams/FrontendPlayback.png}, and
+the multi-tab sync sequence in \path{text/diagrams/PlaybackSync.png}.
 
-The first design did the opposite and treated each connected tab as
-the source of truth. A tab emitted state events on local user actions,
-and the server broadcasted them to every other tab of the same User.
-This had two problems. First, changes from different tabs
-often caused race conditions (e.g., on fast seeks).
-Two tabs could both believe they were the active Player, and
-the server had no way to choose between their conflicting position
-updates. Second, a late event from a stale tab could arrive after a
-newer mutation and overwrite it, because there was no version on the
-state for the server to compare against.
+Playback is server-authoritative. The Backend keeps one
+\texttt{PlaybackState} object per User (covering all User connections)
+in Redis. Every WS action from any client updates that state, and the
+server then broadcasts the updated state to every connected User tab.
+
+An earlier design let each tab keep its own state and used the server
+only to pass updates to the other tabs. That design was dropped because
+the server could not order the events. Suppose tab A sends a seek to
+30\,s and tab B sends a seek to 90\,s 50\,ms later. Network jitter could
+swap the order in which the two broadcasts reach a third tab, so its
+position would end at 30\,s even though 90\,s was the newer action. The
+server had no way to pick a winner. The server-authoritative model fixes
+this because every state change goes through one ordered point and gets
+a fresh version number, described in the next subsection.
 
 \subsection{Shared state and version counter}
-The \texttt{PlaybackState} holds the current
-\texttt{ActivePlayback}~(Song, position, play instance UUID), the
-list of Devices, and a monotonically increasing \texttt{version}
-that increments on every mutation. Every event sent to clients
-includes the version, and the active client sends it back on every
-mutating action. The server drops actions with an older version,
-which closes both races above.
+\texttt{PlaybackState} has two fields. The first is
+\texttt{ActivePlayback}, the part of the state which
+has the actual Playback-related values. It holds
+the current Song UUID, the play instance UUID, an is-playing flag, and
+the position pair (Song position and the server time at which it was
+read). \texttt{ActivePlayback} is a separate object because it only
+exists while a Song is loaded (when nothing is playing, the field is
+\texttt{None}). The second field is a monotonically increasing
+\texttt{version} number kept on \texttt{PlaybackState} itself, so it
+survives across pauses and Song changes.
 
-The play instance UUID is set when a Song becomes the active
-Playback and changes on every transition. It disambiguates the case
-where the same Song was added twice to the Queue: resuming Playback
-after the User skips to the second instance does not pick up the
-saved position from the first instance.
+The version increments on every ``real'' state change (seek, pause, etc., not clock sync).
+Every event sent to clients includes the current version.
+A tab keeps the version of its last applied event and drops any broadcast whose version is older than
+that, which protects against out-of-order arrivals like the one
+described above. The Backend itself does not use the version to drop
+incoming actions. Instead, every mutating action from a tab includes
+the Song UUID the tab thinks is current, and the Backend drops the
+action if that UUID does not match the one in \texttt{ActivePlayback}.
+A mismatch means the tab is acting on a Song the User has since moved
+past.
 
-\subsection{Active versus passive clients}
-Exactly one Device is the active Playback Device at any given time,
-and only that Device owns an \texttt{audio} element. The active
-client treats \texttt{audio.currentTime} as the ground truth and
-periodically reports it to the server. The server records the
-arrival time on the state, storing the pair
-\texttt{last\_known\_song\_pos\_ms} (the reported audio position) and
+The play instance UUID is regenerated when a new Song becomes the
+active Playback item. It disambiguates Queue entries that point at the
+same Song. Queue entries are \texttt{CollectionSong}s, and the User can
+put the same \texttt{CollectionSong} into the Queue more than once in a
+row. Without the UUID, resuming after a skip to the second occurrence
+would inherit the position saved for the first.
+
+\subsection{Position estimation on passive tabs}
+Exactly one Device is the active Playback Device at any time. Only the
+active tab loads the current Song into its HTML audio element. If every
+tab loaded the Song, the User would hear several streams at once.
+
+The audio element itself stays mounted on every tab, even when empty.
+The Web Audio API pipeline (covered later in this section) binds to
+this element. Building the pipeline needs a User gesture, so the
+Frontend builds it once on the first gesture (see the autoplay
+subsection below). Keeping the element mounted on every tab lets the
+same pipeline survive tab switches.
+
+The active tab reads the current Song position directly from its audio
+element. Passive tabs do not have a Song loaded, but they still need
+to show the position slider. They therefore estimate the position from
+the server's last known value.
+
+Only the active tab reports the position to the server. It reads the
+\texttt{currentTime} attribute of its audio element and sends that
+value.
+The server stores the pair \texttt{last\_known\_song\_pos\_ms} (the reported position) and
 \texttt{last\_known\_at\_server\_ms} (the server clock when it
-arrived).
-
-Passive clients have no audio element. They estimate the current
-song position as \texttt{last\_known\_song\_pos\_ms} plus the time
-that has passed since \texttt{last\_known\_at\_server\_ms}. Clients
-do not have direct access to the server clock, so every broadcast
-includes the server's current timestamp, which each client uses to
-keep its own estimate of the server clock up to date. The estimate
-stays correct as long as the active client sends updates often enough to
-keep the pair fresh.
+arrived). Any client estimates the current position as
+\texttt{last\_known\_song\_pos\_ms} plus the time that has passed
+since \texttt{last\_known\_at\_server\_ms}. Clients do not have
+direct access to the server clock. Each broadcast includes the
+server's current timestamp, and the client compares it with its own
+local clock at receive time to learn how far the two clocks are
+apart. It then adds that gap to its local clock whenever it needs
+to estimate what the server clock reads now.
+% TODO: improvements section should mention network round-trip correction and stronger clock-sync schemes.
+The active tab updates the pair when its audio position diverges
+from its own estimate by more than 500\,ms, and on a 20\,s heartbeat
+otherwise. The heartbeat is needed because the drift check itself
+depends on the active tab's estimate of the server clock, which gets
+less accurate without fresh broadcasts.
 
 \subsection{Device activation}
-The active Device id is stored on the state, and at any moment it is
-either set to one connected Device or empty. When it is empty, every
-tab is passive and no tab holds the \texttt{audio} element. The first
-play action from the User sets it. The Frontend on the tab that
-issued the play checks whether an active Device exists, and if not
-it sends \texttt{device.set\_active} for its own Device id
-before the \texttt{playback.activate}. The Backend also auto-picks
-the issuing Device when a \texttt{playback.seek} arrives with no
-active Device, so the seek is not lost.
+The active Device id is tracked on the server alongside the Device
+list, in a separate Redis key from \texttt{PlaybackState}. The Backend
+never fills it automatically. A User can have several tabs and Devices
+open at once, and the Backend cannot tell which one the User currently
+uses. Another reason to avoid an auto-pick is the browser autoplay policy:
+the User click that sets the active Device also counts as the browser
+gesture needed to start audio on that tab (see the next subsection).
+
+When no Device is active, every tab is passive. The first play action
+from the User sets the active Device id. The Frontend on the tab that
+issued the play checks whether an active Device exists, and if not it
+sends \texttt{device.set\_active} for its own Device id before the
+\texttt{playback.activate}. Skipping to the next or previous Song goes
+through the same play action path, so it sets the active Device the
+same way. The seek action does not go through the play action path on
+the Frontend, because the position slider is its own UI component.
+The Backend therefore picks the Device that sent the seek when no
+Device is active yet, so the next play does not need a separate
+\texttt{device.set\_active}.
 
 A change of active Device is a \texttt{device.set\_active} WS action
-(initiated by the Device dropdown) followed by a broadcast of
-the new Device list. The Backend pauses
-Playback on the transition so the newly active tab does not
-autoresume on a Device the User is not necessarily near. The currently
-active tab then unloads its audio element. The newly active tab loads
-the manifest for the current Song at the position included in the
-broadcast snapshot.
+(initiated by the Device dropdown) followed by a broadcast of the new
+Device list. The Backend pauses Playback on the transition. Without
+the pause, the newly active tab would try to resume audio without a
+User gesture on that tab, which the browser would block
+(again, see the next subsection on autoplay).
 
-\subsection{Frontend controller class}
-The Frontend Player is a class, \texttt{AudioPlayerController}, not
-a React hook. The hook version was dropped because each WebSocket
-handler kept a copy of the React Playback state from the moment it was
-registered. The handler was not re-registered on state changes, so
-every later event read that stale data. The class is the centralized state
-provider, to which React components subscribe through
-\texttt{useSyncExternalStore}. This makes it possible to control the audio-related
-data in one place and avoid synchronization issues.
+\subsection{Browser autoplay handling}
+% TODO: cite Chrome autoplay policy https://developer.chrome.com/blog/autoplay
+Browser autoplay policies add two constraints. First, browsers only
+let the page create or resume an \texttt{AudioContext} (the Web Audio
+API starting point used by the pipeline in the next subsection) while
+the browser is still handling a User click or key press. The Frontend
+listens for the first \texttt{pointerdown} or \texttt{keydown} anywhere
+on the page and builds the pipeline inside that handler, so the first
+User action counts as the gesture. Second, \texttt{audio.play()} itself
+is gesture-gated. If the User had another tab playing, then closed it
+and resumes from a tab they have not interacted with yet,
+\texttt{audio.play()} rejects with \texttt{NotAllowedError}\@. The
+Frontend catches this and retries with the audio element muted, which
+browsers always allow, and the UI shows an Unmute control. The Unmute
+click is the gesture that lets the Frontend resume the
+\texttt{AudioContext} and switch the audio element back to unmuted.
+
+\subsection{Frontend playback control}
+The Frontend Player is a class, \texttt{AudioPlayerController}, not a
+React hook. An earlier version of the Frontend used a hook (named
+\texttt{usePlayer}). In that version, each WebSocket handler held a
+``frozen copy'' of the React Playback state from the moment it was
+attached, and was never re-attached, so later events kept reading the
+old values. The class form removes this problem because it owns the
+Playback state directly as a field. React components subscribe to the
+class through \texttt{useSyncExternalStore} and re-render on changes,
+while the WS handlers read the same field directly and always see the
+current value.
+
+The Playback needs per-Song loudness normalization, and the HTML
+\texttt{audio} element does not offer it. The Frontend therefore
+routes audio through a Web Audio API graph between the audio element
+and the speakers. The graph is owned by an \texttt{AudioContext}, the
+starting point for any Web Audio API work. It has four stages. The
+first gain stage applies the normalization, using the stored LUFS
+measurement of the Song. The second is the User's volume slider. The
+third adds short volume fades around play, pause, and seek, because
+abrupt cuts make audible clicks. A compressor at the end catches the
+peaks, because a loudness boost on a quiet Song can push the signal
+past the clipping point.
+
+With Playback covered, the next section turns to Publications:
+Posts, Collection Comments, Chat messages, and Replies.
 
 
 \section{Publications}
-This section covers Posts, Collection Comments, Chat messages, and
-Replies, all of which share the Publication model. The Backend code
-is under \path{src/backend/musikk/social}, the Frontend code under
+This section is about Posts, Collection Comments, Chat messages, and
+Replies. The Backend code is under \path{src/backend/musikk/social},
+the Frontend code under
 \path{src/frontend/musikk/src/features/publications}. The class
-diagram is shown in Figure~\ref{fig:cd_social}, the Frontend
-component hierarchy in Figure~\ref{fig:fe_publications}, and the
-Chat connection lifecycle in Figure~\ref{fig:bh_chat_lifecycle}.
+diagram is in \path{text/diagrams/SocialClassDiagram.png}, the
+Frontend component hierarchy in
+\path{text/diagrams/FrontendPublications.png}, and the Chat
+connection lifecycle in \path{text/diagrams/ChatLifecycle.png}.
 
-% TODO
+All four kinds use the same Django model, \texttt{Publication}. The
+model stores the author, the text, an optional \texttt{parent}
+Publication for Replies, and a \texttt{created\_for} field that points
+to the object the Publication is written for. This object is a User
+for Posts, a Collection for Collection Comments, and a Chat for Chat
+messages. An optional attachment field can point to a Song or a
+Collection. The shared model was chosen because every kind has the
+same basic shape. A User writes some text. The text can be a Reply to
+another Publication, and it can have a Song or a Collection attached.
+This shared model has some downsides that are discussed later.
+% TODO: hyperref improvements section once written
 
-\section{Search}
+At first, the API was built the same way. One endpoint took the
+\texttt{created\_for} type and id, and then chose the right logic
+inside. This became hard once the rules for each kind started to be
+different. Collection Comments are only allowed on public, non-draft
+Albums or Playlists. Posts are only allowed on the User's own Feed.
+Chat messages are only allowed between Chat members. This needs two
+extra models, \texttt{Chat} and \texttt{ChatMember}, which do not fit
+into the shared row. The side effects are also different. A new
+Collection Comment sends an event on the
+\texttt{collection\_comments.<uuid>} topic. A new Chat message sends
+events on the \texttt{chat.<uuid>} topic and on the user group of
+every other Chat member. A new Post sends nothing, because the Feed
+list is reloaded by HTTP polling. Each kind also has its own
+Notification rules. A Reply creates a Reply Notification for the
+parent author, and a Chat message creates a Chat message Notification
+for every other Chat member. With one endpoint, every request had to
+check \texttt{created\_for\_type} right at the start to choose the
+permissions, the event, and the Notification.
+
+The API was therefore split into one endpoint per kind,
+\path{/feed/<user_uuid>/posts}, \path{/collections/<uuid>/comments},
+and \path{/users/<user_uuid>/chats/<chat_uuid>/messages}. Each view
+keeps the rules for its kind in one place, so this branching is no
+longer needed. A shared mixin, \texttt{PublicationsListCreateMixin},
+still holds the common create and list code. The per-kind views only
+override the permission checks, the \texttt{created\_for} lookup, and
+the post-create hook. Replies work the same way for all four kinds,
+because a Reply has the same shape regardless of its root Publication.
+They are created through the same endpoint as the root, with the
+\texttt{parent} field set. They are read through one shared endpoint,
+\path{/publications/<uuid>/children}. The database keeps one table for
+all kinds, and the API uses the names that the Frontend already
+expects.
+
+
+\section{Search}\label{sec:search}
 This section covers full-text Search across Songs, Albums, Playlists,
 Users, and Artists. The Backend code is under
 \path{src/backend/musikk/recommendations}, the Frontend code under
 \path{src/frontend/musikk/src/features/search}.
 
-% TODO
+The Frontend talks to the Backend through one endpoint,
+\path{GET /search?q=...}. The response has five groups: Songs,
+Albums, Playlists, Users, and Artists. Each bucket has up to ten
+matches, sorted by similarity. Items with a score at or below 0.3 are
+dropped. Song matches are returned as their Collection Song row from a
+public Album, so the Frontend can reuse the same Song card it uses
+elsewhere.
+
+As stated in \chapterref{ch:planning}, the Backend uses PostgreSQL with
+trigram matching, available to Django through
+\texttt{django.\-contrib.\-postgres.\-search}. This module has four
+trigram classes: \texttt{TrigramSimilarity},
+\texttt{TrigramWordSimilarity}, \texttt{TrigramStrictWordSimilarity},
+and \texttt{TrigramDistance}. \texttt{TrigramSimilarity} was chosen
+because it scores the whole field against the query, which fits the
+short labels searched here: Song titles, Collection titles, and User
+display names. The two word-level variants are meant for longer text
+where the query should match one word inside a larger field, for
+example a description or an article body. \texttt{TrigramDistance} is
+the same metric, only inverted for sorting, so the choice between the
+two is style, not behavior.
+
+The same module also exposes PostgreSQL full-text search through
+\texttt{SearchVector}, \texttt{SearchQuery}, and \texttt{SearchRank}.
+These work well for long text, however, they do not handle typos by default,
+which is what this UI needs.
+
 
 \section{Notifications}
-This section covers how Notifications are modelled, emitted, and
+This section shows how Notifications are modelled, emitted, and
 delivered. The Backend code is under
-\path{src/backend/musikk/notifications}, the Frontend code under\\
+\path{src/backend/musikk/notifications}, the Frontend code under
 \path{src/frontend/musikk/src/features/notifications}. The class
-diagram is shown in Figure~\ref{fig:cd_notifications} and the
-Frontend component hierarchy in Figure~\ref{fig:fe_notifications}.
+diagram is in \path{text/diagrams/NotificationsClassDiagram.png} and
+the Frontend component hierarchy in
+\path{text/diagrams/FrontendNotifications.png}.
 
-There are three Notification kinds: a Reply to a Publication the User
-authored, a new Follower, and a new Chat message. The first design
-used one shared \texttt{Notification} base with three concrete
-subclasses through Django's multi-table inheritance, and each row
-held an \texttt{is\_read} boolean. This worked well at the start,
-because every kind had the same two operations, list and mark read,
-and one query covered all of them, but as the kinds gained more fields of
-their own, the shared base became hard to work with. A Reply points to two
-Publications, a Follower to two Users, and a Chat message to a Chat
-together with the message and the receiver. The columns almost do not
-overlap, so a shared row was mostly nulls, and every read needed an
-extra join into one of the concrete tables.
+There are three Notification kinds. The first is a Reply to a
+Publication the User authored. The second is a new Follower. The
+third is a new Chat message. The first design used one shared
+\texttt{Notification} base with three concrete subclasses through
+Django's multi-table inheritance. Each row held an \texttt{is\_read}
+boolean. This worked well at the start. Every kind had the same two
+operations, list and mark read, and one query covered all of them.
+However, the kinds soon gained more fields of their own, and the
+shared base no longer fit well. A Reply points to two Publications, a
+Follower to two Users, and a Chat message to a Chat together with the
+message and the receiver. The columns almost do not overlap. As a
+result, a shared row was mostly nulls, and every read needed an extra
+join into one of the concrete tables. In contrast to Publications,
+which still use one shared model with mostly-null rows, Notifications
+have been split into three separate models.
 
-The code is therefore in the middle of a change toward three separate
-models. Each kind is now its own \texttt{BaseModel} subclass with its
-own Serializer and custom Manager, and creation happens at the call
-site that caused the Notification, in the social and users views.
-Each Manager overrides \texttt{create} to emit a
-\texttt{notifications.changed} event on the receiver's per-User
-WebSocket group, which invalidates the Notifications query on every
-open tab. Read state was also made simpler. The per-row
-\texttt{is\_read} boolean was replaced by a single
-\texttt{NotificationProfile.read\_at} timestamp per User, set up on
-User creation through a \texttt{post\_save} signal handler. The
-Serializer computes \texttt{is\_read} for each row by comparing
-\texttt{date\_added} against that timestamp, so "mark all as read"
-becomes one field update.
+Each kind is its own \texttt{BaseModel} subclass with its own
+Serializer and custom Manager. In comparison to other parts of the
+application, managers here are used to emit a
+\texttt{notifications.changed} WS event instead of the API views.
+% TODO: probalby also add to improvmenets section later
 
-What still stays shared is the HTTP surface seen by the Frontend. One
-\texttt{/notifications} endpoint returns a response with three
-buckets, a \texttt{PATCH} on the same path updates \texttt{read\_at},
-and \texttt{DELETE /notifications/<uuid>} checks the three tables in
+Read state was also made simpler. The per-row \texttt{is\_read}
+boolean was replaced by one \texttt{NotificationProfile.read\_at}
+timestamp per User. The profile is created on User registration
+through a \texttt{post\_save} signal handler. The Serializer computes
+\texttt{is\_read} for each row by comparing \texttt{date\_added}
+against that timestamp. As a result, ``mark all as read'' becomes one
+field update.
+
+What still stays shared is the REST API seen by the Frontend. One
+\texttt{GET /notifications} endpoint returns a response with three
+buckets. A \texttt{PATCH} on the same path updates \texttt{read\_at}.
+A \texttt{DELETE /notifications/<uuid>} checks the three tables in
 turn to find the matching row. This shape still suits the Frontend,
-which fetches all kinds together for the badge and the list view, but
-the differences between kinds are no longer hidden behind a common
-base.
+which fetches all kinds together for the badge and the list view.
+However, the differences between kinds are no longer hidden behind a
+common base.
 
 
 \section{Security}
-% TODO: cors not needed
-% xss, csrf, owasp headers cheathess, owasp web cheatsheet
+% TODO: cors not needed, explain why
+% xss, csrf, http headers
+% input validation (already was mostly explained)
+% local storage, http only cookies
 
 
 \section{Deployment}
@@ -874,745 +997,3 @@ FFmpeg with libfdk\_aac binary cannot be redistributed due the
 licensing issues ~\parencite{ffmpeg_aac}.
 
 % TODO: add a citation for the AAC licensing summary once a clean source is in the bib
-
-
-%\section{Backend and API}
-%The Backend and API description is organized by the individual folders under
-%the \texttt{musikk/src/backend/musikk} directory.
-%
-%Most of the subsections are comprised of the following parts:
-%\begin{enumerate}
-%    \item \textbf{Models} – Objects that define the data schema using Django's ORM\@.
-%    \item \textbf{Serializers} – Code that converts Django models or native Python types into
-%    formats suitable for HTTP transmission (and vice versa).
-%    \item \textbf{Views} – Handlers for HTTP requests
-%    that provide the relevant business logic and return appropriate responses.
-%\end{enumerate}
-%
-%In order to better understand the overall Backend data model and class composition,
-%a full class diagram can be seen first.~\ref{fig:beclassdiagram}.
-%It shows attributes, methods, and relationships of classes.
-%No separate ERD diagram is provided, as Django's models, which define the data structure,
-%are encapsulated into the class diagram.
-%
-%
-%\subsection{Directory \texttt{base}}\label{subsec:base}
-%This app defines the abstract \texttt{BaseModel} class from which all other models inherit.
-%
-%It has three attributes: \texttt{uuid, date\_added, date\_modified}.
-%Date attributes are set on model creation and modification.
-%\texttt{uuid} has to be explained.
-%Since all the data fetching in Frontend will happen via the REST API,
-%a unique resource identifier is needed. The drawback of using an \texttt{ID} of the model record,
-%which is added by default for all models by Django, is the possibility of enumeration attacks~\ref{enumattack}
-%and unauthorized scraping of the web page. It is much easier to get an existing ID and
-%simply send requests to API endpoints with an incremented ID value than to guess a random 128-bit string.
-%
-%A retrieve serializer for the \texttt{BaseModel} is defined as well,
-%it is also the base class for the serializers of other models.
-%
-%\subsection{Directory \texttt{api}}
-%Firstly, it is necessary to say that the resulting API follows REST~\parencite{restdef} practices; it only deviates from them
-%when strictly following the rules would degrade the readability and usability of the API.
-%This can happen, for example, when an endpoint is used to execute an action instead of a data operation.
-%The other rule that is not followed is the presence of hypermedia links on related resources,
-%as in the current architecture, it makes more sense to use
-%individual model identifiers and construct URLs from them instead.
-%
-%The API itself is versioned, with the current version being \textit{v1}.
-%In the case of the following apps, all the API-related files are always defined under the \path{api/v1} folder.
-%
-%As for the endpoint, all views that operate on data in some way require authentication, which can be determined
-%by the presence of
-%\\\mintinline{python}{permission_classes = [IsAuthenticated]}\\
-%attribute on the view. User roles
-%are also differentiated by checking the existence of the appropriate model, e.g., for Song creation, the User set
-%on request has to have a corresponding \texttt{Artist} instance.
-%
-%\subsection{Directory \texttt{users}}
-%User classes and token logic are defined in this app.
-%
-%There are three main User classes:
-%\begin{itemize}
-%    \item \texttt{BaseUser} - declares common fields for all other models, such as \texttt{email, display\_name} and others.
-%    \item \texttt{StreamingUser} - the main class representing an account with privileges to use the streaming platform.\\
-%    Additional attributes are declared for it, namely:
-%    \begin{itemize}
-%        \item Relations to other users: \texttt{friends}, which are other \texttt{StreamingUsers},\\
-%        friend requests of whom the user has accepted (or the other way around);\\
-%        \texttt{followed} - the \texttt{Artist}s to the updates to which the User has subscribed.
-%
-%        \item User-specific Song Collections: \texttt{history} containing all listened Songs,\\
-%        \texttt{liked\_songs} containing favourited Songs,\\
-%        and \texttt{followed\_song\_collections} - the Collections which the user has saved to their profile.
-%
-%        \item \texttt{song\_queue} - a special structure containing already/to be listened to Songs of the User,\\
-%        it will be described later in the dedicated app.
-%    \end{itemize}
-%    \item \texttt{Artist}: a subclass of \texttt{StreamingUser} with additional capabilities, such as Song uploads.
-%\end{itemize}
-%
-%JWTTokens are also customized in this app.
-%They are based on the implementation from \texttt{djangorestframework-simplejwt}~\parencite{simplejwt}.
-%The token system follows the standard logic of access and refresh tokens:
-%the access token is short-lived and used to authenticate regular API requests,
-%while the refresh token is long-lived and can be used to obtain new access tokens without requiring
-%the user to re-authenticate.
-%
-%Authentication for each HTTP request involves attaching the access token as an HTTP \textit{Bearer} header.
-%After parsing the request, the token is retrieved and validated.
-%After validation, the User identifier is extracted and used to identify the corresponding User record.
-%User validation logic is changed so it uses User's \texttt{uuid}, hence it is added to the token payload.
-%This is done for the same reasons outlined in the \nameref{subsec:base}.
-%
-%Basic serializers for all User models are declared,
-%allowing for retrieving information about specific Users or their creations and updates.
-%
-%The following views are added as well:
-%\begin{itemize}
-%    \item \texttt{UserRetrieveUpdateView}
-%    \item \texttt{UserCreateView}
-%    \item \texttt{UserFriendsView}
-%    \item \texttt{UserFollowedView}
-%    \item \texttt{UserFriendsCreateDeleteView}
-%    \item \texttt{ArtistFollowersView}
-%    \item \texttt{UserEventViewSet}
-%\end{itemize}
-%
-%The purpose of all views, except for the last one, is to send the information
-%about Users or perform create/update actions on the related data.
-%
-%UserEventViewSet is a special view used to implement the SSE connection,
-%the details are provided in the subsection \nameref{sec:sse}.
-%
-%Views for token generation and renewal have also been declared. Their respective endpoints are:
-%
-%\begin{itemize}
-%    \item \texttt{/api/v1/token/} — accepts user credentials (email and password) and returns a
-%    token pair (access and refresh tokens).
-%    \item \texttt{/api/v1/token/refresh/} — accepts a refresh token and returns a new access token.
-%\end{itemize}
-%
-%\subsection{\textit{sse}}\label{sec:sse}
-%As was mentioned in Chapter \nameref{ch:planning}, \texttt{django-eventstream} package is used for the Server Sent Events
-%configuration. Internally, it creates special objects called \textit{channels} to which clients can subscribe
-%via an HTTP request. Then, when a new event for a specific channel is created,
-%e.g., via the \texttt{django-eventstream.send\_event()} method, all clients subscribed to that channel
-%will receive an HTTP response with the specified content.
-%
-%`UserEventViewSet` listens for incoming SSE connection requests from Users and creates a personalized channel using the User's UUID.
-%
-%Events are used throughout the system primarily to signify to the Frontend that some data is stale.
-%An example of this is the aforementioned `UserFriendsView`, the post request handler of which is defined like this:
-%
-%\begin{minipage}{\textwidth}
-%    \begin{minted}{python}
-%    class UserFriendsCreateDeleteView(APIView):
-%    ...
-%    def post(self, request, *args, **kwargs):
-%        ...
-%        user.friends.add(sender)
-%        Event.invalidate_event(
-%            EventChannels.user_events(user.uuid),
-%            ["user", "friends", str(user.uuid)]
-%        )
-%        ...
-%    \end{minted}
-%\end{minipage}
-%\\
-%\\
-%Here, the custom \texttt{invalidate\_event} signifies to the Frontend that the \texttt{friends}
-%list has changed and should be refetched.
-%
-%The \textit{invalidate} logic is present for views operating on models used in the Frontend, specifically in view handlers which change data.
-%That way, the client will always have fresh information.
-%
-%Event re-delivery is also handled by the package set with this parameter in Django settings:
-%
-%\begin{flushleft}
-%    \begin{minted}{python}
-%    EVENTSTREAM_STORAGE_CLASS = \
-%        'django_eventstream.storage.DjangoModelStorage'
-%    \end{minted}
-%\end{flushleft}
-%
-%This tells the package to store the events in the database and in case of network failure
-%or client disconnect they are redelivered.
-%
-%Since the SSE part has been explained, it is safe to consider the main part of the application
-%-- the \textit{streaming} package.
-%
-%\subsection{\textit{streaming}}
-%This app defines the main models responsible for the audio content and playback handling.
-%
-%\subsubsection{Songs and Song Collections}
-%The backbone of the application is the \texttt{BaseSong} and \texttt{SongCollection} models, which are declared
-%in \path{streaming/songs.py} and \path{streaming/song_collections.py} files.
-%
-%\begin{itemize}
-%
-%    \item
-%    \texttt{BaseSong} contains the metadata about each individual song - \texttt{title},
-%    \texttt{description} and \texttt{image}.
-%
-%    Then, there are attributes that contain the information about the underlying song file:
-%    - \texttt{content\_path} representing the root directory with Song files(chunks, manifests)
-%    - \texttt{mpd, m3u8} providing manifest paths for DASH and HLS, respectively.
-%
-%    The last attribute is \texttt{draft}. It is used in the Song creation process, which will be explained in the
-%    view description.
-%
-%    \item
-%    \texttt{SongCollection} represents a container for Songs and can be of two types(set with \texttt{type} attribute)
-%    -- either a Playlist or an Album.
-%    A Playlist is a collection formed from existing Songs, which both StreamingUsers and Artists can create. An Album, on the other hand, is a collection that can be created only by an Artist
-%    containing unique, uploaded Songs.
-%
-%    Because an individual \texttt{BaseSong} can be in multiple collections, a Many-to-Many relation is defined between
-%    \texttt{BaseSong} and \texttt{SongCollection} named \texttt{SongCollectionSong}.
-%    A \texttt{position} attribute is added to enable the arbitrary ordering of the songs.
-%
-%    Another attribute on the \texttt{SongCollection} is \texttt{comments}.
-%    As the name suggests, these are pieces of text that each User can add to the collection. The underlying
-%    model is discussed in the \nameref{subsec:social}.
-%
-%    The same metadata as in \texttt{BaseSong} can also be set.
-%    However, there is one extra attribute - \texttt{private}.
-%    It is used to signify which collections should not appear, e.g., in global search results.
-%
-%    In addition, there are two subclasses of \texttt{SongCollection} - \texttt{UserHistory} and \texttt{LikedSongs}.
-%    They are moved to separate classes because, in the future, they will most probably have custom logic added to them.
-%    In the app's current version, only the ordering that makes the newest added songs appear first is defined.
-%
-%\end{itemize}
-%
-%Each \texttt{SongCollection} and \texttt{BaseSong} also has a relation to the Users that created it(and visa versa).
-%It is defined as an M2M relationship with an intermediary table - \texttt{SongCollectionAuthor} and
-%\texttt{SongAuthor}. Attribute \texttt{author\_priority} sets the order in which the authors should be returned from
-%the API and displayed on the Frontend.
-%
-%As for the views and endpoints - a standard set of CRUD operations is implemented for both models.
-%Additionally, there are special views for User interactions with models, such as \texttt{SongAddLikedView}, which adds
-%the provided Song to User's \texttt{LikedSongs} or \texttt{SongCollectionRemoveSong}, which lets the User remove a Song
-%from a collection, if that User created it.
-%
-%However, some things have to be said about Song and Collection creation.
-%The design choice is not to allow users to create isolated Song instances; if the User wants to upload Songs separately from a Collection, a single-song Album would
-%be created instead. This greatly simplifies the logic when handling User playback interactions later on.
-%For example, it makes it possible to use the aforementioned \texttt{SongCollectionSong}
-%instead of \texttt{BaseSong} in most views. As this relation contains the information about both models,
-%we can, for instance, accurately show not only which Song is playing, but a Collection as well,
-%without tracking both models.
-%This has further benefits, which can be seen in the Frontend implementation.
-%\\
-%Apart from that, the Collection creation process is multi-stage, and two views are responsible for it:
-%\texttt{SongCreateView} and \texttt{SongCollectionCreateView}.
-%Whenever a User wants to create a new Collection, firstly the Songs are processed.
-%If an error happens during this stage, the response with successful and failed Songs is returned, and \texttt{draft} attribute is set to \textit{True} for the created Songs.
-%This is done because the User can abort the process of creation, e.g.,
-%by closing the whole browser application, and there would be no proper way to signal what Songs should be deleted.
-%A simple crontab job or \texttt{celery} library could be utilized to run periodic tasks which would clean up
-%Songs in the draft state.
-%\\
-%When creating a Song, multiple validation stages are made for the User input, both on the Frontend and the Backend.
-%For instance, \path{ffmpeg_wrapper.py} checks the audio file size, its mime type via~\parencite{pythonmagic} library, and the
-%underlying format, with available formats specified in \path{ffmpeg_wrapper.ALLOWED_FILE_TYPES} variable.
-%
-%Having discussed the main building blocks of the audio content part of the application,
-%\texttt{SongQueue}, which operates on these models, can be presented.
-%
-%\subsubsection{SongQueue}
-%\texttt{SongQueue} represents a list of previously listened Songs and the ones that are going to be
-%listened by the User.
-%
-%The choice of the underlying structure was made based on the desired operations.
-%Basic addition and removal from the queue had to be supported, as well as the differentiation
-%between playing a Song/Collection or adding it to the queue.
-%For example, when a user clicks play on a Song, it has to become the new "head" of the queue.
-%In case of clicking "add to queue" this Song would be added after other items
-%that have been queued previously. This implies that addition/removal can happen in any part
-%of the list. As a result, a Doubly Linked List pattern has been chosen for this model.
-%
-%As the queue information had to be persisted in the database, a common implementation with
-%nodes that point(using foreign keys) to the next and previous node might not have been the most efficient. An interesting approach proposed online was to use a \textit{position} column
-%instead of foreign key references. That way it would be possible to retrieve the whole queue with an SQL statement
-%like this:
-%
-%\begin{minted}{sql}
-%SELECT *
-%FROM (join node table, queue table, and StreamingUser table
-%      to find the queue nodes of a particular User)
-%WHERE node.position > (join queue and nodes to find the head of the queue)
-%ORDER BY node.position
-%\end{minted}
-%
-%While using a \texttt{position} column simplifies queue traversal and ordering, it introduces potential
-%issues when it comes to frequent inserts and deletes.
-%
-%Every time a node is inserted between two existing positions, a new \texttt{position} value must be chosen
-%such that the ordering remains correct. If positions are represented by integers, repeated insertions
-%between tightly packed values (e.g., inserting between positions 1 and 2) will eventually require
-%re-indexing the entire list to free up space. This operation can be expensive in terms of performance.
-%Similar problems can occur during deletes as well.
-%
-%These limitations could be mitigated, for example, by using high-precision floating point numbers,
-%powers of numbers or large increments like 1000 to delay the need for full re-indexing.
-%However, without the data showing the expected usage of the queue, it is hard to tell whether this approach would
-%be beneficial.
-%
-%That is why a more straightforward approach with identifiers of neighboring nodes was chosen, at least for now.
-%
-%Two models comprise the queue functionality - \texttt{SongQueueNode} and \texttt{SongQueue} itself.
-%
-%Each node carries information about the \texttt{SongCollectionSong} attached to it, as well as
-%links to the previous and next node.
-%
-%\texttt{SongQueue} has foreign keys to the nodes which signify the \texttt{head} and \texttt{tail} of the queue.
-%Moreover, a special, third attribute is declared - \texttt{add\_after}. This is also
-%a foreign key to one of the nodes, but this time, it indicates the node after which items
-%should be added when the "add to queue" action is selected.
-%I.e. if the user had selected "play" on a Song, it would become the queue head.
-%Then, if the user selected "add to queue" on five different Songs,
-%then the head would still point to the playing Song, but \texttt{add\_after} would
-%contain the key of the fifth Song added using the second action.
-%
-%Multiple operations are supported, with the main ones being:
-%\begin{itemize}
-%    \item Setting the queue head. In the case of Collections, e.g.,
-%    when the User clicks "play" on a Collection object, the entire Collection is added to the queue.
-%    \item Shifting the queue head backward and forward.
-%    \item Removing a node.
-%    \item Clearing the entire queue.
-%\end{itemize}
-%
-%
-%The final aspect that needs to be addressed is managing the playback state.
-%
-%\subsubsection{Playback State and Playback Devices}
-%The term "playback" represents the state of the sound, whether it is being played in a given moment.
-%Each User has an attribute named \texttt{playback\_state} represented by the \texttt{PlaybackState} model.
-%The playback can be toggled by using the \texttt{PlaybackState.is\_playing} attribute.
-%
-%Because the User can open multiple instances of an application, the playback handling can not be
-%unloaded to the Frontend only, as it would not be synchronized across the application instances.
-%
-%As a result, the application has to differentiate the User's "sessions", which is done
-%via the \texttt{PlaybackDevice} model.
-%It represents the individual devices on which the application is currently open.
-%Each device has \texttt{is\_active} attribute, signifying where the sound should be played and where
-%to display controls(seek bar, volume).
-%
-%It would be expected for all instances of the application to show the same playback state(playing/stopped),
-%and intuitively clicking the play button would have to result in playback being toggled on the active device with
-%visual confirmation on all other devices. In addition, the active device must be able to be switched, which is done
-%by the appropriate \texttt{PlaybackDeviceActivateView} handler.
-%
-%The standard serializers and views allowing state/device manipulation are implemented.
-%However, \texttt{PlaybackDeviceDeleteView} deviates from the standard rules, as it allows non-authenticated requests
-%and softens the CSRF restrictions. This is done due to browser limitations, shown in the \nameref{subsec:fedevices}.
-%The authentication is still made "by hand" inside the handler itself.
-%
-%This concludes the audio part of the application.
-%
-%\subsection{\textit{social}}\label{subsec:social}
-%Before examining the contents of the \textit{social} app, an important Django concept
-%has to be brought up -- the \texttt{ContentType} framework and \texttt{Generic Relation}~\parencite{djangocontenttype}.
-%
-%The \texttt{ContentType} framework provides a way to refer to any model in the system
-%using a generic identifier.
-%\texttt{GenericRelation} uses the \texttt{ContentType} framework by storing the target
-%model’s type and primary key in two separate fields: a foreign key to the
-%\texttt{ContentType} model and an object ID.
-%Together, these allow a single relation to point to any instance of any model,
-%enabling polymorphic associations without hardcoding specific model references.
-%
-%This concept is used to implement the \texttt{Publication} model.
-%
-%For a better understanding, the model code can be found below.
-%Here, the \texttt{content\_object} field is a \texttt{GenericForeignKey}
-%that dynamically joins the \texttt{content\_type} and \texttt{object\_id}
-%fields to establish a reference to any model instance.
-%This allows each \texttt{Publication} instance to be associated with
-%an arbitrary object, such as a Song or a Collection, without requiring a
-%fixed foreign key to a specific model.
-%
-%\begin{minted}{python}
-%class Publication(BaseModel):
-%    class PublicationType(models.TextChoices):
-%        COMMENT = "comment", "Comment"
-%        POST = "post", "Post"
-%
-%    RELATED_MODEL_TYPE_MAP = {
-%        "user": "users.StreamingUser",
-%        "collection": "streaming.SongCollection",
-%        "song": "streaming.SongCollectionSong",
-%    }
-%
-%    type = models.CharField(choices=PublicationType.choices)
-%    content = models.CharField(max_length=255)
-%    user = models.ForeignKey(
-%        settings.AUTH_USER_MODEL, null=True,
-%        on_delete=models.SET_NULL
-%    )
-%    parent = models.ForeignKey(
-%        "self", null=True, blank=True,
-%        related_name="replies", on_delete=models.SET_NULL
-%    )
-%    is_deleted = models.BooleanField(default=False)
-%
-%    content_type = models.ForeignKey(
-%        ContentType, null=True,
-%        blank=True, on_delete=on_content_type_delete
-%    )
-%    object_id = models.PositiveIntegerField(null=True, blank=True)
-%    content_object = GenericForeignKey()
-%\end{minted}
-%
-%Another attribute that needs an explanation is \texttt{type}.
-%Currently, it can have one of two values - \texttt{comment} and \texttt{post}.
-%The comment type is used for comments under audio content(collections),
-%while \texttt{posts} represent standalone User publications.
-%
-%The \texttt{Publication} model also contains a \texttt{parent} attribute, allowing for
-%building trees of publications(i.e., replies).
-%
-%Standard CRUD serializers and views for publications are provided,
-%with the addition of custom handling of the related models.
-%
-%Views related to the publication creation also have a special handling
-%of instances that are considered as replies. They create a special
-%\texttt{ReplyNotification} object, discussed in the next subsection \nameref{subsec:notif}.
-%
-%\subsection{\textit{notifications}}\label{subsec:notif}
-%In order to notify users about actions such as replies to their publications
-%or new friend requests, a notification system was implemented.
-%
-%The following two notification types are currently supported:
-%\begin{itemize}
-%    \item \texttt{ReplyNotification} – created when a user replies to a publication (e.g., comment).
-%    It stores references to both the original and reply comments. The corresponding manager triggers an SSE
-%    event to the original author's channel, making Frontend refresh the notifications list.
-%    \item \texttt{FriendRequestNotification} – created when a friend request is sent.
-%    It stores references to both the sender and the receiver. Upon creation, same as for \texttt{ReplyNotification}
-%    an SSE event is emitted to the receiver's channel.
-%\end{itemize}
-%
-%Both classes inherit from \texttt{Notification} class. It has a single attribute -- \texttt{is\_read} which helps to
-%differentiate between already seen and new notifications on the Frontend
-%
-%\subsection{\textit{recommendations}}
-%The \textit{recommendations} app currently provides basic search functionality across Songs,
-%Collections and Users using Django’s native PostgreSQL full-text support.
-%
-%The core search logic is implemented in the \texttt{SearchView},
-%which uses \texttt{TrigramSimilarity} to retrieve fuzzy matches based on string similarity.
-%Trigram search is appropriate for this purpose because many
-%of the search targets, such as usernames or collection titles, often contain informal,
-%abbreviated or non-standard text.
-%In such cases, traditional vector-based full-text search
-%(e.g., via \texttt{SearchVector}) would perform worse, as it is optimized for longer,
-%more "text-like" content.
-%
-%A dedicated search engine like \textit{Elasticsearch} was not introduced for two reasons:
-%\begin{enumerate}
-%    \item The scale of the platform does not currently justify the additional
-%    infrastructure, deployment, and synchronization complexity that comes
-%    with search engines.
-%    \item PostgreSQL's trigram extension provides sufficient performance
-%    and accuracy for the expected use case.
-%    Moreover, Django offers first-class support for it
-%    through the \texttt{django.contrib.postgres.search} module.
-%\end{enumerate}
-%
-%This design ensures efficient search behavior while avoiding unnecessary overheads.
-%
-%With the API and server-side logic in place, the focus now shifts to the Frontend, where user-facing interactions, state management, and playback handling are implemented.
-%
-%
-%%
-%%
-%%\section{Frontend}
-%%As stated in Chapter \nameref{ch:planning}, React was used as the library for the Frontend implementation.
-%%Alongside React, these tools were used as well:
-%%\begin{itemize}
-%%    \item \texttt{shadcn/ui}~\parencite{shadcn} and \texttt{tailwindcss} –-
-%%    used to build UI components.
-%%
-%%    \item \texttt{@tanstack/react-query}~\parencite{tanstack}
-%%    manages data fetching, caching, and synchronization;
-%%    \texttt{axios} is used for making HTTP requests.
-%%
-%%    \item \texttt{react-router-dom}~\parencite{reactrouterdom} –- handles client-side routing and navigation between views.
-%%
-%%    \item \texttt{react-hook-form}~\parencite{reacthookform} –- provides form state management.
-%%
-%%    \item \texttt{Vite}~\parencite{vite} –- used as the build tool for development and production.
-%%\end{itemize}
-%%
-%%The development cycle mostly looked like this:
-%%\begin{enumerate}
-%%    \item Define a static component with pure JSX, outline what data it needs and where it should be placed.
-%%    \item Define the state logic inside the component.
-%%    \item Add API endpoints and queries/mutations needed by the component.
-%%    \item Test the component with actual data from the Backend.
-%%    \item Refactor, e.g., lift state, move data to a provider, or split a larger component into smaller ones.
-%%    \item Style the component using \texttt{shadcn} and \texttt{tailwindcss}.
-%%\end{enumerate}
-%%
-%%\subsection{Authentication}
-%%Since most of the API endpoints require authentication, a token has to be added to every
-%%request. Firstly, on the User log in, the application tries to obtain a token pair by sending
-%%a plain POST request to the appropriate endpoint. User credentials are added to the payload,
-%%but as the application is served only with HTTPS and the payload is encoded, everything is secure.
-%%
-%%After getting the tokens, they are added to the cookie storage with a specified expiration time.
-%%It is worth mentioning that this is not the best practice when
-%%working with tokens; storing tokens in JavaScript-set
-%%cookies exposes them to \textbf{Cross-Site Scripting} attacks.
-%%
-%%A more secure approach is to store the access token in memory(e.g., as a JS variable) and the
-%%refresh token in an HttpOnly, secure cookie. However, the Backend would have to be heavily customized for that, and
-%%the implementation is left for future application versions.
-%%
-%%After getting the tokens, every further request needs to set them as the HTTP \textit{Bearer} header.
-%%This is done via a feature called \textit{axios interceptors}~\parencite{axiosintercept}.
-%%They allow any custom logic to be executed before or after the request.
-%%
-%%The request interceptor checks whether the access token exists and, if it does, adds it to the request.
-%%The response interceptor has an "on error" handler for responses with \textit{NOT AUTHORIZED} status code(401); this usually means that the token was not set on the request. Hence, it tries to obtain a new one
-%%by sending a request to the token refresh endpoint. If the token is successfully refreshed, the original request will be
-%%retried. Otherwise, the request is rejected.
-%%
-%%The implementation of the discussed techniques can be found in \path{src/auth/authentication}
-%%and \path{src/config/axiosConf}.
-%%
-%%Next, the actual interactions between API and data management are presented.
-%%
-%%\subsection{Data Management}
-%%Data management is performed with \texttt{@tanstack/react-query} library, especially with its
-%%\texttt{useQuery} and \texttt{useMutation} hooks. These hooks handle asynchronous data
-%%fetching and mutation while providing built-in caching,
-%%automatic retries, and background updates.
-%%
-%%An example of a query and mutation can be seen below:
-%%
-%%\begin{minted}{typescript}
-%%    export function usePlaybackRetrieveQuery() {
-%%    return useQuery<IPlaybackState>({
-%%        queryFn: async () => {
-%%            const res = await api.get(PlaybackURLs.retrieve);
-%%            return res.data;
-%%        },
-%%        queryKey: ["playback"],
-%%    });
-%%}
-%%
-%%    ...
-%%
-%%    export async function commentCreate({ objType, objUUID,
-%%        content, replyToUUID }: IAddCommentParams) {
-%%    const data = {
-%%        content,
-%%        parent: replyToUUID,
-%%    };
-%%    await api.post(CommentURLs.commentCreate(
-%%        objType, objUUID
-%%    ), data);
-%%}
-%%\end{minted}
-%%
-%%
-%%An important note is the \texttt{queryKey} attribute in the \texttt{useQuery} hook
-%%, which is used to label and organize the data being fetched.
-%%A query can be "invalidated" using that key, which means that React Query will mark the data as outdated.
-%%Then, it will automatically fetch fresh data the next time it is needed -—
-%%like when the component shows again, or the user focuses the tab.
-%%
-%%
-%%Some data that has to be accessible on multiple levels of the application(in different components) are moved to
-%%providers. They enable data access without needing to refetch in each component. Moreover, each component, which depends on the provider's data, will be updated when this data changes.
-%%
-%%An example of a provider:
-%%
-%%\begin{minted}[style=xcode]{typescript}
-%%    export function UserCollectionsProvider(
-%%        { children }: UserCollectionsProviderProps
-%%    ) {
-%%    const userUUID = useUserUUID();
-%%
-%%    const { data } = useQuery({
-%%        queryKey: ["collectionsPersonal"],
-%%        queryFn: userUUID ? () =>
-%%            fetchCollectionsPersonal(userUUID) : undefined,
-%%        enabled: !!userUUID,
-%%    });
-%%    const contextValue = {
-%%        history: data?.history ?? null,
-%%        liked_songs: data?.liked_songs ?? null,
-%%        followed_collections: data?.followed_collections ?? null,
-%%    };
-%%
-%%    return (
-%%        <UserCollectionsContext.Provider value={contextValue}>
-%%        {children}
-%%        </UserCollectionsContext.Provider>
-%%    );
-%%}
-%%\end{minted}
-%%
-%%And the usage of the context it provides:
-%%\begin{minted}{typescript}
-%%export function LeftColumn() {
-%%    const { liked_songs, history, followed_collections } =
-%%        useContext(UserCollectionsContext);
-%%    //render the collections
-%%}
-%%\end{minted}
-%%
-%%These techniques, alongside the React state management, make data management efficient, ensuring proper caching and
-%%reusing of data.
-%%
-%%\subsection{SSE}
-%%The Frontend implementation of Server Sent Events is provided in the \path{src/hooks/useEvent} hook.
-%%It leverages the \texttt{eventsource} library~\parencite{eventsource} to manage the low-level SSE connection,
-%%while the hook itself implements custom logic for authentication, reconnection, and message handling.
-%%
-%%As presented in \nameref{sec:sse}, the only message type implemented is an "invalidate" message.
-%%This message contains one parameter - the key of the query to be invalidated.
-%%That way, the Backend can control what data and when to refresh on the Frontend.
-%%
-%%The connection is created only once in the \texttt{HomePage} component.
-%%
-%%\subsection{Playback and Player}
-%%As both \textit{DASH} and \textit{HLS} deliver segmented media via manifest files,
-%%a compatible player is needed on the Frontend to handle parsing, buffering, and adaptive streaming.
-%%
-%%\texttt{Shaka Player}~\parencite{shaka_player} was chosen for this purpose, as it supports both DASH and HLS with a unified API.
-%%Moreover, it integrates well with React components and provides features like
-%%adaptive bitrate switching and error handling.
-%%
-%%An alternative approach would be combining the MPEG-DASH reference player~\parencite{dashref}
-%%with \texttt{hls.js}~\ref{hlsjs}, but this would require handling two separate
-%%libraries with different APIs and event models, making the playback logic more complex.
-%%Shaka Player simplifies this with a single consistent interface.
-%%
-%%Then, it is necessary to differentiate between browsers in order to select the appropriate manifest to download.
-%%Two simple functions are defined to get the proper manifest path:
-%%
-%%\begin{minted}{typescript}
-%%    const isSafari = useMemo(() => {
-%%        return /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-%%    }, []);
-%%
-%%    const url = useMemo(() => {
-%%        if (!playingCollectionSong) return undefined;
-%%        return isSafari ? playingCollectionSong.song.m3u8 : playingCollectionSong.song.mpd;
-%%    }, [queueHead, playingCollectionSong, isSafari]);
-%%\end{minted}
-%%
-%%Different conditions drive the playback itself. For example, a User can click
-%%a \texttt{SongPlayButton} and that will either stop or resume the playback or start
-%%a new one with the specified Song. One of another such conditions is the end of the
-%%playback of the current Song, in such case, the mutation responsible for the queue head
-%%shift is invoked, and the playback is either initialized with the next Song or stopped, if the
-%%queue is empty.
-%%
-%%\subsection{Device Handling}\label{subsec:fedevices}
-%%User device management was one of the most challenging parts.
-%%
-%%The expected behaviour from the application would be to register a new device when
-%%the User logs in, then show the list of devices on
-%%which the service is running, and when a new device is chosen, switch the playback to it.
-%%When the application is closed, the device should be removed from the list of active devices.
-%%
-%%The registration and switching part is not complicated -- it is possible to send
-%%a device registration request on the first render of the \texttt{App} component,
-%%which is mounted only once. The result of this request,
-%%containing the device's unique identifier, then would be added to the \textit{LocalStorage}.
-%%Then, on page refresh, the presence of this variable could be checked, and additional requests
-%%could be omitted.
-%%
-%%
-%%However, issues arise when the device needs to be removed.
-%%Modern browsers do not provide a reliable mechanism to trigger actions on
-%%page or window close~\parencite{chromelfapi,beacons}.
-%%The \texttt{beforeunload} and \texttt{unload} events,
-%%which signal page refresh, redirection, or closure,
-%%are inconsistent -- particularly on mobile platforms and Safari.
-%%
-%%
-%%Chrome documentation recommends using the \texttt{visibilitychange} event to detect when
-%%a page becomes hidden. While this event is more
-%%consistently supported, it is triggered by actions such as
-%%tab switches or window minimization, which do not imply that the
-%%playback device should be deactivated or removed.
-%%
-%%
-%%Even implementing heartbeats -- periodic requests to the Backend
-%%indicating that the device is still in use -— would require additional Backend
-%%logic to manage device lifecycles. A more robust solution could
-%%be an external process, for example, based on the \texttt{celery} library,
-%%to monitor and control device lifespan.
-%%However, this approach remains to be implemented.
-%%
-%%For now, the handler works with the \texttt{unload} effect,
-%%as it is proven to fire in around 90\% cases in modern
-%%desktop browsers~\parencite{beacons}.
-%%
-%%\subsection{Components}
-%%All UI components follow a consistent structure in both composition and logic.
-%%
-%%The component hierarchy is decomposed into several levels:
-%%
-%%\begin{itemize}
-%%    \item \textbf{Groupings and Logic Providers} – High-level wrappers that provide context,
-%%    routing or shared state to nested components, for example \texttt{App} or \texttt{HomePage}.
-%%    \item \textbf{Layout Components} – Define page structure and positioning
-%%    (e.g., \texttt{Header}, \texttt{RightColumn}, \texttt{PlayerBox}).
-%%    \item \textbf{Data Representation Components} – Render fetched data and define interactions on it.
-%%    \item \textbf{UI Subcomponents} – Reusable elements like buttons,
-%%    inputs, and fields used across higher-level components.
-%%\end{itemize}
-%%
-%%This layered organization ensures a clear separation of concerns,
-%%and simplifies maintenance.
-%%
-%%The use of the \texttt{shadcn/ui} component library and \texttt{lucide-react}
-%%icon set further improves consistency and maintainability
-%%across the interface by providing standardized, customizable,
-%%and accessible UI building blocks.
-%%
-%%
-%%Once both Backend and Frontend were fully developed
-%%and tested, the final step was to make the platform accessible
-%%to users.
-%%
-%%
-%%\section{Deployment}
-%%
-%%In order to make the application publicly accessible,
-%%it was deployed to a virtual private server hosted on Hetzner.
-%%The project uses Docker to build and isolate the application environment,
-%%including containers for the Django backend, PostgreSQL database,
-%%and static file serving.
-%%
-%%Separate Dockerfiles are provided for the Backend and Reverse Proxy + Frontend build.
-%%Both builds are split into multiple stages to ensure the smallest image size possible.
-%%
-%%%TODO say about aac licensing and why it is not an issue, proper cite
-%%One thing has to be pointed out about the Backend image. \texttt{ffmpeg}, which is used for audio
-%%processing is not installed as a package or a binary but is instead built from the source.
-%%This is due to the restriction of the \texttt{libfdk\_aac}~\parencite{libfdkaac} library, which is not free software
-%%and cannot be distributed in precompiled binaries due to licensing constraints.
-%%As a result, the library must be compiled manually and linked during the build process.
-%%
-%%Images are then built locally and pushed to a private Docker registry
-%%for reuse and ease of production deployment. Docker compose is used for the
-%%orchestration.
-%%
-%%The web server and reverse proxy are handled by \texttt{Caddy}~\parencite{caddy},
-%%which simplifies HTTPS setup and certificate renewal.
-%%Domain configuration was managed through \texttt{Porkbun}~\parencite{porkbun},
-%%which provided DNS records pointing to the Hetzner~\parencite{hetzner} server.
-%%
-%%The application itself can be accessed at \url{https://musikk.stream}.

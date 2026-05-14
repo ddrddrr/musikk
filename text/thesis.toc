@@ -56,52 +56,55 @@
 \contentsline {section}{\numberline {6.5}Account Creation and Authentication}{42}{section.6.5}%
 \contentsline {subsection}{\numberline {6.5.1}Backend}{43}{subsection.6.5.1}%
 \contentsline {subsection}{\numberline {6.5.2}Frontend}{43}{subsection.6.5.2}%
-\contentsline {section}{\numberline {6.6}Songs and Collections}{44}{section.6.6}%
-\contentsline {subsection}{\numberline {6.6.1}Data Model}{44}{subsection.6.6.1}%
+\contentsline {section}{\numberline {6.6}Playback Items}{44}{section.6.6}%
+\contentsline {subsection}{\numberline {6.6.1}Data Model}{45}{subsection.6.6.1}%
 \contentsline {subsection}{\numberline {6.6.2}Backend}{45}{subsection.6.6.2}%
-\contentsline {subsection}{\numberline {6.6.3}Frontend}{45}{subsection.6.6.3}%
+\contentsline {subsection}{\numberline {6.6.3}Frontend}{46}{subsection.6.6.3}%
 \contentsline {section}{\numberline {6.7}Audio Upload/Album Creation}{46}{section.6.7}%
-\contentsline {section}{\numberline {6.8}Song Queue}{47}{section.6.8}%
-\contentsline {subsection}{\numberline {6.8.1}Data structure}{47}{subsection.6.8.1}%
-\contentsline {subsection}{\numberline {6.8.2}Queue and PlaybackContext}{48}{subsection.6.8.2}%
-\contentsline {subsection}{\numberline {6.8.3}QueueSource and lazy filling}{48}{subsection.6.8.3}%
-\contentsline {section}{\numberline {6.9}Playback and Device Handling}{49}{section.6.9}%
-\contentsline {subsection}{\numberline {6.9.1}Shared state and version counter}{49}{subsection.6.9.1}%
-\contentsline {subsection}{\numberline {6.9.2}Position estimation on passive tabs}{50}{subsection.6.9.2}%
+\contentsline {subsection}{\numberline {6.7.1}Submit}{47}{subsection.6.7.1}%
+\contentsline {subsection}{\numberline {6.7.2}Process}{47}{subsection.6.7.2}%
+\contentsline {subsection}{\numberline {6.7.3}Persist and notify}{48}{subsection.6.7.3}%
+\contentsline {subsection}{\numberline {6.7.4}Frontend State Updates}{48}{subsection.6.7.4}%
+\contentsline {section}{\numberline {6.8}Song Queue}{48}{section.6.8}%
+\contentsline {subsection}{\numberline {6.8.1}Data structure}{49}{subsection.6.8.1}%
+\contentsline {subsection}{\numberline {6.8.2}Queue and PlaybackContext}{49}{subsection.6.8.2}%
+\contentsline {subsection}{\numberline {6.8.3}QueueSource and lazy filling}{50}{subsection.6.8.3}%
+\contentsline {section}{\numberline {6.9}Playback and Device Handling}{50}{section.6.9}%
+\contentsline {subsection}{\numberline {6.9.1}Shared state and version counter}{50}{subsection.6.9.1}%
+\contentsline {subsection}{\numberline {6.9.2}Active versus passive clients}{51}{subsection.6.9.2}%
 \contentsline {subsection}{\numberline {6.9.3}Device activation}{51}{subsection.6.9.3}%
-\contentsline {subsection}{\numberline {6.9.4}Browser autoplay handling}{52}{subsection.6.9.4}%
-\contentsline {subsection}{\numberline {6.9.5}Frontend playback control}{52}{subsection.6.9.5}%
-\contentsline {section}{\numberline {6.10}Publications}{53}{section.6.10}%
-\contentsline {section}{\numberline {6.11}Search}{54}{section.6.11}%
-\contentsline {section}{\numberline {6.12}Notifications}{54}{section.6.12}%
-\contentsline {section}{\numberline {6.13}Security}{55}{section.6.13}%
-\contentsline {section}{\numberline {6.14}Deployment}{55}{section.6.14}%
-\contentsline {chapter}{\numberline {A}\bfseries Survey Questionnaire}{57}{appendix.A}%
-\contentsline {chapter}{\numberline {B}\bfseries Audio Processing Pipeline Details}{65}{appendix.B}%
-\contentsline {section}{\numberline {B.1}Streaming Protocols}{65}{section.B.1}%
-\contentsline {section}{\numberline {B.2}Packaging}{65}{section.B.2}%
-\contentsline {section}{\numberline {B.3}Processing Tools}{66}{section.B.3}%
-\contentsline {section}{\numberline {B.4}Transcoding}{66}{section.B.4}%
-\contentsline {subsection}{\numberline {B.4.1}Why transcoding is needed}{66}{subsection.B.4.1}%
-\contentsline {subsection}{\numberline {B.4.2}AAC encoder choice}{67}{subsection.B.4.2}%
-\contentsline {subsection}{\numberline {B.4.3}Bitrate strategy: CBR versus VBR}{67}{subsection.B.4.3}%
-\contentsline {subsection}{\numberline {B.4.4}Generation loss}{68}{subsection.B.4.4}%
-\contentsline {section}{\numberline {B.5}Audio Preprocessing}{68}{section.B.5}%
-\contentsline {subsection}{\numberline {B.5.1}Input validation limits}{68}{subsection.B.5.1}%
-\contentsline {subsection}{\numberline {B.5.2}FFprobe invocation}{69}{subsection.B.5.2}%
-\contentsline {subsection}{\numberline {B.5.3}Tier selection}{70}{subsection.B.5.3}%
-\contentsline {subsection}{\numberline {B.5.4}Channel normalization}{70}{subsection.B.5.4}%
-\contentsline {subsection}{\numberline {B.5.5}Sample rate normalization}{70}{subsection.B.5.5}%
-\contentsline {subsection}{\numberline {B.5.6}Bit depth conversion}{71}{subsection.B.5.6}%
-\contentsline {subsection}{\numberline {B.5.7}Loudness theory}{71}{subsection.B.5.7}%
-\contentsline {subsection}{\numberline {B.5.8}Why loudness is measured after Transcoding}{72}{subsection.B.5.8}%
-\contentsline {section}{\numberline {B.6}Pipeline invocations}{72}{section.B.6}%
-\contentsline {subsection}{\numberline {B.6.1}FFmpeg transcoding flags}{72}{subsection.B.6.1}%
-\contentsline {subsection}{\numberline {B.6.2}Shaka Packager flags}{73}{subsection.B.6.2}%
-\contentsline {subsection}{\numberline {B.6.3}ebur128 loudness measurement flags}{75}{subsection.B.6.3}%
-\contentsline {chapter}{\numberline {C}\bfseries Diagram Catalog}{76}{appendix.C}%
-\contentsline {section}{\numberline {C.1}Use Case Diagrams}{76}{section.C.1}%
-\contentsline {section}{\numberline {C.2}Frontend Component Hierarchies}{82}{section.C.2}%
-\contentsline {section}{\numberline {C.3}Behavior Diagrams}{84}{section.C.3}%
-\contentsline {section}{\numberline {C.4}Survey Charts}{85}{section.C.4}%
-\contentsline {chapter}{Bibliography}{90}{appendix*.37}%
+\contentsline {subsection}{\numberline {6.9.4}Frontend controller class}{52}{subsection.6.9.4}%
+\contentsline {section}{\numberline {6.10}Publications}{52}{section.6.10}%
+\contentsline {section}{\numberline {6.11}Search}{52}{section.6.11}%
+\contentsline {section}{\numberline {6.12}Notifications}{52}{section.6.12}%
+\contentsline {section}{\numberline {6.13}Security}{54}{section.6.13}%
+\contentsline {section}{\numberline {6.14}Deployment}{54}{section.6.14}%
+\contentsline {chapter}{\numberline {A}\bfseries Survey Questionnaire}{55}{appendix.A}%
+\contentsline {chapter}{\numberline {B}\bfseries Audio Processing Pipeline Details}{56}{appendix.B}%
+\contentsline {section}{\numberline {B.1}Streaming Protocols}{56}{section.B.1}%
+\contentsline {section}{\numberline {B.2}Packaging}{56}{section.B.2}%
+\contentsline {section}{\numberline {B.3}Processing Tools}{57}{section.B.3}%
+\contentsline {section}{\numberline {B.4}Transcoding}{57}{section.B.4}%
+\contentsline {subsection}{\numberline {B.4.1}Why transcoding is needed}{57}{subsection.B.4.1}%
+\contentsline {subsection}{\numberline {B.4.2}AAC encoder choice}{58}{subsection.B.4.2}%
+\contentsline {subsection}{\numberline {B.4.3}Bitrate strategy: CBR versus VBR}{58}{subsection.B.4.3}%
+\contentsline {subsection}{\numberline {B.4.4}Generation loss for lossy sources}{59}{subsection.B.4.4}%
+\contentsline {section}{\numberline {B.5}Audio Preprocessing}{59}{section.B.5}%
+\contentsline {subsection}{\numberline {B.5.1}Input validation limits}{59}{subsection.B.5.1}%
+\contentsline {subsection}{\numberline {B.5.2}FFprobe invocation}{60}{subsection.B.5.2}%
+\contentsline {subsection}{\numberline {B.5.3}Tier selection}{61}{subsection.B.5.3}%
+\contentsline {subsection}{\numberline {B.5.4}Channel normalization}{61}{subsection.B.5.4}%
+\contentsline {subsection}{\numberline {B.5.5}Sample rate normalization}{61}{subsection.B.5.5}%
+\contentsline {subsection}{\numberline {B.5.6}Bit depth conversion}{62}{subsection.B.5.6}%
+\contentsline {subsection}{\numberline {B.5.7}Loudness theory}{62}{subsection.B.5.7}%
+\contentsline {subsection}{\numberline {B.5.8}Why loudness is measured after Transcoding}{63}{subsection.B.5.8}%
+\contentsline {section}{\numberline {B.6}Pipeline invocations}{63}{section.B.6}%
+\contentsline {subsection}{\numberline {B.6.1}FFmpeg transcoding flags}{63}{subsection.B.6.1}%
+\contentsline {subsection}{\numberline {B.6.2}Shaka Packager flags}{64}{subsection.B.6.2}%
+\contentsline {subsection}{\numberline {B.6.3}ebur128 loudness measurement flags}{66}{subsection.B.6.3}%
+\contentsline {chapter}{\numberline {C}\bfseries Diagram Catalog}{67}{appendix.C}%
+\contentsline {section}{\numberline {C.1}Use Case Diagrams}{67}{section.C.1}%
+\contentsline {section}{\numberline {C.2}Frontend Component Hierarchies}{73}{section.C.2}%
+\contentsline {section}{\numberline {C.3}Behavior Diagrams}{75}{section.C.3}%
+\contentsline {section}{\numberline {C.4}Survey Charts}{76}{section.C.4}%
+\contentsline {chapter}{Bibliography}{81}{appendix*.37}%

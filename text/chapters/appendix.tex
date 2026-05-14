@@ -147,7 +147,7 @@ multi-CBR setup was selected. The same effect could in principle be
 reached with constrained VBR tiers, but the simplicity of a fixed
 per-tier bitrate was preferred for the project scope.
 
-\subsection{Generation loss for lossy sources}
+\subsection{Generation loss}
 Transcoding a lossy source into AAC causes generation loss: every
 lossy pass discards some audio, so re-encoding what was already lossy
 compounds the damage. The pipeline still performs the conversion
@@ -435,31 +435,9 @@ and \texttt{Peak:} (dBTP) values, and stores them on the Song row.
 \chapter{Diagram Catalog}\label{app:diagrams}
 The diagrams and charts below illustrate the structure and behavior of
 the application, along with the survey results, and are referenced from
-\chapterref{ch:survey}, \chapterref{ch:specification}, and
-\chapterref{ch:implementation}. The source PlantUML files live under
-\path{specification/}.
+\chapterref{ch:survey} and \chapterref{ch:specification}. The source
+PlantUML files live under \path{specification/}.
 
-\section{Architecture Overview}
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.6\textwidth, keepaspectratio]{diagrams/HighLevelSystem}
-    \caption{System Overview}
-    \label{fig:system_overview}
-\end{figure}
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[height=0.5\textheight, angle=-90, keepaspectratio]{diagrams/BackendSystem}
-    \caption{Backend Architecture}
-    \label{fig:backend}
-\end{figure}
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[height=0.5\textheight, angle=-90, keepaspectratio]{diagrams/FrontendSystem}
-    \caption{Frontend Architecture}
-    \label{fig:frontend}
-\end{figure}
-
-\clearpage
 \section{Use Case Diagrams}
 \begin{figure}[htbp]
     \centering
@@ -499,57 +477,6 @@ the application, along with the survey results, and are referenced from
 \end{figure}
 
 \clearpage
-\section{Backend Class Diagrams}
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[height=0.85\textheight, angle=-90, keepaspectratio]{diagrams/UsersClassDiagram}
-    \caption{Class diagram: Users}
-    \label{fig:cd_users}
-\end{figure}
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[height=0.85\textheight, keepaspectratio]{diagrams/StreamingClassDiagram}
-    \caption{Class diagram: Streaming (Songs, Collections, Credits)}
-    \label{fig:cd_streaming}
-\end{figure}
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[height=0.5\textheight, angle=-90, keepaspectratio]{diagrams/AudioClassDiagram}
-    \caption{Class diagram: Audio Processing Pipeline}
-    \label{fig:cd_audio}
-\end{figure}
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[height=0.5\textheight, angle=-90, keepaspectratio]{diagrams/PlaybackClassDiagram}
-    \caption{Class diagram: Playback}
-    \label{fig:cd_playback}
-\end{figure}
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[height=0.5\textheight, angle=-90, keepaspectratio]{diagrams/StreamingWsClassDiagram}
-    \caption{Class diagram: Streaming WebSocket Handlers}
-    \label{fig:cd_streaming_ws}
-\end{figure}
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[height=0.5\textheight, angle=-90, keepaspectratio]{diagrams/WebsocketsClassDiagram}
-    \caption{Class diagram: WebSockets Core}
-    \label{fig:cd_websockets}
-\end{figure}
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[height=0.85\textheight, keepaspectratio]{diagrams/SocialClassDiagram}
-    \caption{Class diagram: Social (Publications, Comments, Chats)}
-    \label{fig:cd_social}
-\end{figure}
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[height=0.5\textheight, angle=-90, keepaspectratio]{diagrams/NotificationsClassDiagram}
-    \caption{Class diagram: Notifications}
-    \label{fig:cd_notifications}
-\end{figure}
-
-\clearpage
 \section{Frontend Component Hierarchies}
 \begin{figure}[htbp]
     \centering
@@ -557,92 +484,14 @@ the application, along with the survey results, and are referenced from
     \caption{Frontend component hierarchy: top level}
     \label{fig:fe_hierarchy}
 \end{figure}
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[height=0.5\textheight, angle=-90, keepaspectratio]{diagrams/FrontendUser}
-    \caption{Frontend component hierarchy: User Management}
-    \label{fig:fe_user}
-\end{figure}
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[height=0.3\textheight, angle=-90, keepaspectratio]{diagrams/FrontendAuth}
-    \caption{Frontend component hierarchy: Account and Authentication}
-    \label{fig:fe_auth}
-\end{figure}
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.95\textwidth, keepaspectratio]{diagrams/FrontendAudioUpload}
-    \caption{Frontend component hierarchy: Audio Upload}
-    \label{fig:fe_audio_upload}
-\end{figure}
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[height=0.5\textheight, angle=-90, keepaspectratio]{diagrams/FrontendSongQueue}
-    \caption{Frontend component hierarchy: Song Queue}
-    \label{fig:fe_song_queue}
-\end{figure}
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[height=0.3\textheight, angle=-90, keepaspectratio]{diagrams/FrontendPlayback}
-    \caption{Frontend component hierarchy: Playback}
-    \label{fig:fe_playback}
-\end{figure}
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[height=0.3\textheight, angle=-90, keepaspectratio]{diagrams/FrontendPublications}
-    \caption{Frontend component hierarchy: Publications}
-    \label{fig:fe_publications}
-\end{figure}
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.95\textwidth, keepaspectratio]{diagrams/FrontendNotifications}
-    \caption{Frontend component hierarchy: Notifications}
-    \label{fig:fe_notifications}
-\end{figure}
 
 \clearpage
 \section{Behavior Diagrams}
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.95\textwidth, keepaspectratio]{diagrams/WebsocketLifecycle}
-    \caption{WebSocket connection lifecycle}
-    \label{fig:bh_ws_lifecycle}
-\end{figure}
-\begin{figure}[htbp]
-    \centering
     \includegraphics[width=0.95\textwidth, keepaspectratio]{diagrams/WsCacheInvalidation}
     \caption{WebSocket cache invalidation on follow mutation}
     \label{fig:bh_ws_cache}
-\end{figure}
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.95\textwidth, keepaspectratio]{diagrams/AuthFlow}
-    \caption{Account creation, email confirmation, login, and session expiry}
-    \label{fig:bh_auth_flow}
-\end{figure}
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.95\textwidth, keepaspectratio]{diagrams/AudioUploadFlow}
-    \caption{Audio upload sequence}
-    \label{fig:bh_audio_upload}
-\end{figure}
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.95\textwidth, keepaspectratio]{diagrams/PlaybackSync}
-    \caption{Multi-tab playback synchronization}
-    \label{fig:bh_playback_sync}
-\end{figure}
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[height=0.7\textheight, keepaspectratio]{diagrams/SongQueue}
-    \caption{Song Queue: add a Collection and advance}
-    \label{fig:bh_song_queue}
-\end{figure}
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.95\textwidth, keepaspectratio]{diagrams/ChatLifecycle}
-    \caption{Chat connection lifecycle}
-    \label{fig:bh_chat_lifecycle}
 \end{figure}
 
 \clearpage
@@ -700,4 +549,10 @@ the application, along with the survey results, and are referenced from
     \includegraphics[height=0.4\textheight]{charts/share method}
     \caption{Music Sharing Methods}
     \label{fig:sharemeth}
+\end{figure}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=0.4\textheight]{charts/discovery methods.png}
+    \caption{Music Discovery Methods Popularity}
+    \label{fig:music_discovery_methods}
 \end{figure}
