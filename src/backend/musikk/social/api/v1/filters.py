@@ -15,6 +15,8 @@ class PublicationConnectionFilter(filters.FilterSet):
         base_qs = queryset.filter(parent__isnull=True)
 
         match value:
+            case "mine":
+                return base_qs.filter(author=self.request.user)
             case "friends":
                 return base_qs.filter(author__in=self.request.user.friends.all())
             case "followed":

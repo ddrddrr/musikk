@@ -32,7 +32,7 @@ function usePublicationListInfinite(
     });
 }
 
-export function useGlobalFeedPosts(connection?: "friends" | "followed") {
+export function useGlobalFeedPosts(connection?: "friends" | "followed" | "mine") {
     const params = connection ? { connection } : undefined;
     return usePublicationListInfinite(
         PublicationURLs.globalFeedPosts(),
@@ -41,7 +41,7 @@ export function useGlobalFeedPosts(connection?: "friends" | "followed") {
     );
 }
 
-export function useFeedPosts(userUUID: UUID, connection?: "friends" | "followed") {
+export function useFeedPosts(userUUID: UUID, connection?: "friends" | "followed" | "mine") {
     const params = connection ? { connection } : undefined;
     return usePublicationListInfinite(
         PublicationURLs.feedPosts(userUUID),
