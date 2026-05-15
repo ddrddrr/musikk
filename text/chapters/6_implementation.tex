@@ -35,7 +35,8 @@ Player~\parencite{shaka_player} for DASH and HLS streaming.
 
 Deployment is a simple Docker Compose behind a Caddy
 reverse proxy on a Hetzner VPS, with Mailgun for mail services
-and Porkbun for the domain.
+and Porkbun for the domain.\footnote{The deployed application is
+available at \url{https://musikk.stream}.}
 
 Full dependency lists are located in
 \path{src/backend/pyproject.toml} and
@@ -110,7 +111,7 @@ result.
 Audio Preprocessing has two parts. Before Transcoding, the upload is
 validated and normalized. After Transcoding, the loudness is measured.
 
-\subsubsection*{Input validation}
+\subsubsection*{Input Validation}
 The upload passes through a chain of checks. The file-size and MIME
 checks run on the raw bytes. The rest read values from FFprobe: codec
 allow-list, duration, sample rate, and channel count. The exact
@@ -118,7 +119,7 @@ limits and the allow-lists are listed in the
 \hyperref[app:audio_details]{Audio Processing Pipeline Details}
 appendix.
 
-\subsubsection*{Input metadata extraction}
+\subsubsection*{Input Metadata Extraction}
 FFprobe reads the source codec, sample rate, channel count, bit depth,
 duration, and bitrate. These values are reused by the input validation
 above. They also narrow which outputs the Transcoding step produces:
@@ -139,7 +140,7 @@ Three normalization filters run as a part of the Transcoding command:
     higher precision.
 \end{itemize}
 
-\subsubsection*{Loudness measurement}
+\subsubsection*{Loudness Measurement}
 After Transcoding, FFmpeg's \texttt{ebur128} filter produces an
 integrated value in Loudness Units relative to Full Scale~(LUFS) and
 a true peak in dBTP\@. The measurement runs on the FLAC output if it
@@ -202,7 +203,7 @@ several Users and used for shared messages: Chat messages, Collection
 Comments, and typing indicators.
 
 A Playback event can include an excluded device id, in which case the
-consumer skips delivery to that device. This is useful because the
+consumer skips delivery to that device. This is useful because usually the
 device that sent the update already has the new state and does not
 need to receive its own event back.
 
@@ -379,9 +380,10 @@ Songs and Collections.
 \section{Songs and Collections}\label{sec:songs_collections}
 This section covers the Song/Collection models and their Author relations.
 The Backend code is located under \path{src/backend/musikk/streaming}.
-The Frontend code is split across the \path{songs/} and \path{collections/}
-subdirectories under \path{src/frontend/musikk/src/features/}.
-The class diagram is in \path{text/diagrams/StreamingClassDiagram.png}.
+The Frontend code is split across the \path{songs/}
+and \path{collections/} subdirectories
+under \path{src/frontend/musikk/src/features/}.
+See \path{text/diagrams/StreamingClassDiagram.png} for the class diagram.
 
 The audio pipeline fields on Song and the Album upload flow are covered
 in the \hyperref[sec:audio_upload]{Audio Upload} section. Playback
@@ -447,13 +449,15 @@ so any other component can include them without extra setup.
 \section{Audio Upload/Album Creation}\label{sec:audio_upload}
 This section covers the design choices behind the Audio Upload.
 The end-to-end sequence is in
-\path{text/diagrams/AudioUploadFlow.png} and the Frontend component
-hierarchy in \path{text/diagrams/FrontendAudioUpload.png}. The
-Backend view \texttt{CollectionSongCreateView} is at
-\path{src/backend/musikk/streaming/api/v1/views/collections.py}. The
-Celery task \texttt{convert\_audio} is at
-\path{src/backend/musikk/streaming/audio/tasks.py}. The Frontend code
-is under \path{src/frontend/musikk/src/features/album-upload}.
+\path{text/diagrams/AudioUploadFlow.png},
+and the Frontend component hierarchy in
+\path{text/diagrams/FrontendAudioUpload.png}.
+The Backend view \texttt{CollectionSongCreateView} is at
+\path{src/backend/musikk/streaming/api/v1/views/collections.py}.
+The Celery task \texttt{convert\_audio} is at
+\path{src/backend/musikk/streaming/audio/tasks.py}.
+The Frontend code is under
+\path{src/frontend/musikk/src/features/album-upload}.
 
 Transcoding a long file can take minutes. The view therefore
 validates the file, writes it to a temporary path, creates the Song
@@ -550,18 +554,22 @@ is kept consistent across the User's tabs and Devices.
 
 \section{Playback and Device Handling}\label{sec:playback}
 This section covers how Playback state is kept in sync across a User's
-tabs and Devices. The Backend code is under
-\path{src/backend/musikk/streaming}, with WS action handlers in
-\path{src/backend/musikk/streaming/ws/action_handlers/playback.py} and
-the per-User state stored in Redis via \texttt{PlaybackManager}. The
-Frontend code is under
-\path{src/frontend/musikk/src/features/player} and
-\path{src/frontend/musikk/src/features/playback}. The Backend models
-are in \path{text/diagrams/PlaybackClassDiagram.png}, the runtime
-managers, controllers, and broadcasters in
-\path{text/diagrams/StreamingWsClassDiagram.png}, the Frontend
-component hierarchy in \path{text/diagrams/FrontendPlayback.png}, and
-the multi-tab sync sequence in \path{text/diagrams/PlaybackSync.png}.
+tabs and Devices.
+The Backend code is under \path{src/backend/musikk/streaming},
+with WS action handlers in
+\path{src/backend/musikk/streaming/ws/action_handlers/playback.py},
+and the per-User state stored in Redis via \texttt{PlaybackManager}.
+The Frontend code is under
+\path{src/frontend/musikk/src/features/player}
+and \path{src/frontend/musikk/src/features/playback}.
+The Backend models are in
+\path{text/diagrams/PlaybackClassDiagram.png}.
+The runtime managers, controllers, and broadcasters are in
+\path{text/diagrams/StreamingWsClassDiagram.png}.
+The Frontend component hierarchy is in
+\path{text/diagrams/FrontendPlayback.png},
+and the multi-tab sync sequence in
+\path{text/diagrams/PlaybackSync.png}.
 
 Playback is server-authoritative. The Backend keeps one
 \texttt{PlaybackState} object per User (covering all User connections)
@@ -578,7 +586,7 @@ server had no way to pick a winner. The server-authoritative model fixes
 this because every state change goes through a single ordered path and gets
 a fresh version number, described in the next subsection.
 
-\subsection{Shared state and version counter}
+\subsection{Shared State and Version Counter}
 \texttt{PlaybackState} holds two pieces: \texttt{ActivePlayback},
 which stores the actual Playback values, and a monotonically
 increasing \texttt{version} number. \texttt{ActivePlayback} is a
@@ -605,7 +613,7 @@ put the same \texttt{CollectionSong} into the Queue more than once in a
 row. Without the UUID, resuming after a skip to the second occurrence
 would inherit the position saved for the first.
 
-\subsection{Position estimation on passive tabs}
+\subsection{Position Estimation on Passive Tabs}
 Exactly one Device is the active Playback Device at any time. Only the
 active tab loads the current Song into its HTML audio element. If every
 tab loaded the Song, the User would hear several streams at once.
@@ -634,7 +642,7 @@ local clock at receive time to learn how far the two clocks are
 apart. It then adds that gap to its local clock whenever it needs
 to estimate what the server clock reads now. The limits of this
 simple clock-gap method are discussed in
-\hyperref[subsec:imp_clock]{Playback synchronization} in the
+\hyperref[subsec:imp_clock]{Playback Synchronization} in the
 improvements chapter.
 
 The active tab updates the pair when its audio position diverges
@@ -643,7 +651,7 @@ otherwise. The heartbeat is needed because the drift check itself
 depends on the active tab's estimate of the server clock, which gets
 less accurate without fresh broadcasts.
 
-\subsection{Device activation}
+\subsection{Device Activation}
 The active Device id is tracked on the server alongside the Device
 list, in a separate Redis key from \texttt{PlaybackState}. The Backend
 never fills it automatically. A User can have several tabs and Devices
@@ -710,14 +718,16 @@ Posts, Collection Comments, Chat messages, and Replies.
 
 
 \section{Publications}\label{sec:publications}
-This section is about Posts, Collection Comments, Chat messages, and
-Replies. The Backend code is under \path{src/backend/musikk/social},
-the Frontend code under
-\path{src/frontend/musikk/src/features/publications}. The class
-diagram is in \path{text/diagrams/SocialClassDiagram.png}, the
-Frontend component hierarchy in
-\path{text/diagrams/FrontendPublications.png}, and the Chat
-connection lifecycle in \path{text/diagrams/ChatLifecycle.png}.
+This section is about Posts, Collection Comments, Chat messages, and Replies.
+The Backend code is under \path{src/backend/musikk/social}.
+The Frontend code is under
+\path{src/frontend/musikk/src/features/publications}.
+The class diagram is in
+\path{text/diagrams/SocialClassDiagram.png}.
+The Frontend component hierarchy is in
+\path{text/diagrams/FrontendPublications.png},
+and the Chat connection lifecycle in
+\path{text/diagrams/ChatLifecycle.png}.
 
 All four kinds use the same Django model, \texttt{Publication}. The
 model stores the author, the text, an optional \texttt{parent}
@@ -729,7 +739,7 @@ Collection. The shared model was chosen because every kind has the
 same basic shape: a User writes some text, the text can be a Reply to
 another Publication, and it can have a Song or a Collection attached.
 This shared model has some downsides that are discussed in
-\hyperref[subsec:imp_be_refactors]{Backend refactors}.
+\hyperref[subsec:imp_be_refactors]{Backend Refactors}.
 
 At first, the API was built the same way. One endpoint took the
 \texttt{created\_for} type and id, and chose the right logic inside.
@@ -742,11 +752,12 @@ the shared row. Per-kind logic for permissions, WebSocket events,
 and Notifications also differs, so every request to the shared
 endpoint had to start with a \texttt{created\_for\_type} switch.
 
-The API was therefore split into one endpoint per kind,
-\path{/feed/<user_uuid>/posts}, \path{/collections/<uuid>/comments},
-and \path{/users/<user_uuid>/chats/<chat_uuid>/messages}. Each view
-keeps the rules for its kind in one place, so this branching is no
-longer needed. A shared mixin still holds the common create and list
+The API was therefore split into one endpoint per kind:
+\path{/feed/<user_uuid>/posts},
+\path{/collections/<uuid>/comments},
+and \path{/users/<user_uuid>/chats/<chat_uuid>/messages}.
+Each view keeps the rules for its kind in one place,
+so this branching is no longer needed. A shared mixin still holds the common create and list
 code, and per-kind views override what differs between kinds.
 Replies work the same way for all four kinds,
 because a Reply has the same shape regardless of its root Publication.
@@ -786,12 +797,13 @@ by default, and this UI needs that.
 
 
 \section{Notifications}
-This section shows how Notifications are modelled, emitted, and
-delivered. The Backend code is under
-\path{src/backend/musikk/notifications}, the Frontend code under
-\path{src/frontend/musikk/src/features/notifications}. The class
-diagram is in \path{text/diagrams/NotificationsClassDiagram.png} and
-the Frontend component hierarchy in
+This section shows how Notifications are modelled, emitted, and delivered.
+The Backend code is under \path{src/backend/musikk/notifications}.
+The Frontend code is under
+\path{src/frontend/musikk/src/features/notifications}.
+The class diagram is in
+\path{text/diagrams/NotificationsClassDiagram.png},
+and the Frontend component hierarchy in
 \path{text/diagrams/FrontendNotifications.png}.
 
 There are three Notification kinds: a Reply to a Publication the User
@@ -816,7 +828,7 @@ application, managers here are used to emit a
 \texttt{notifications.changed} WS event instead of the API views.
 This coupling between the data layer and the WebSocket layer is
 discussed further in \hyperref[subsec:imp_be_refactors]{Backend
-refactors}.
+Refactors}.
 
 Read state was also made simpler. The per-row \texttt{is\_read}
 boolean was replaced by one \texttt{NotificationProfile.read\_at}
@@ -837,8 +849,8 @@ common base.
 
 
 \section{Security}\label{sec:security}
-This section names the OWASP topics~\parencite{owasp_cheatsheets} the application addresses and
-the gaps that remain. A full penetration test is out of scope.
+This section goes over the OWASP guidelines~\parencite{owasp_cheatsheets} the application
+addresses and the gaps that remain.
 
 \subsection{Transport and Origin}
 Caddy~\parencite{caddy} terminates TLS in production, and Django
@@ -868,16 +880,14 @@ Audio uploads follow the OWASP File Upload cheat sheet~\parencite{owasp_file_upl
 checks described in the Audio Processing and Streaming section. All
 database access goes through the Django ORM, so SQL injection is not
 a surface. The only gap left is that image uploads are accepted but
-not re-encoded. Re-encoding through Pillow and stripping metadata
-would close this.
+not re-encoded.
 
 \subsection{WebSocket Security}
 The WebSocket setup (authentication on upgrade, Origin pinning,
 per-topic subscribe validation) is covered in the WebSocket
 Communication section and matches the OWASP WebSocket security
 guidance~\parencite{owasp_websocket}. The remaining gap is that action handlers have no
-per-connection rate limit. A token bucket per connection would
-contain a misbehaving client without harming normal use.
+per-connection rate limit.
 
 \subsection{HTTP Response Headers}
 The OWASP Secure Headers project~\parencite{owasp_secure_headers} recommends a small set of response
@@ -892,11 +902,11 @@ microphone, or geolocation APIs.
 
 
 \section{Deployment}
-This section covers the production deployment setup. The Docker
-Compose file is at \path{docker-compose-prod.yml}. The Backend and
-Frontend Dockerfiles are at \path{src/backend/Dockerfile} and
-\path{src/frontend/Dockerfile}, and the Caddy configuration at
-\path{src/frontend/Caddyfile.prod}.
+This section covers the production deployment setup.
+The Docker Compose file is at \path{docker-compose-prod.yml}.
+The Backend and Frontend Dockerfiles are at
+\path{src/backend/Dockerfile} and \path{src/frontend/Dockerfile}.
+The Caddy configuration is at \path{src/frontend/Caddyfile.prod}.
 
 The Backend, the Postgres database, the Redis instance, and the
 Celery worker run as four containers under Docker Compose on a

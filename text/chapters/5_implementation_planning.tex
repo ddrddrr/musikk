@@ -4,12 +4,12 @@ Before the actual implementation could begin, it was necessary to choose the lan
 frameworks, and other technologies that would decide the overall architecture of the application.
 Since the goal is a web application, this chapter only looks at web-suitable technologies.
 % TODO: specify what fe/be are?
-This chapter discusses the following areas: Audio Processing and Playback, Authentication,
+This chapter discusses the following areas: Audio Playback, Authentication,
 Server-Client Communication, Backend, and Frontend.
 
 
-\section{Audio Processing and Playback}
-Audio Processing and Playback are the most important aspects of the application and were researched first.
+\section{Audio Playback}
+Audio Playback is the most important aspect of the application and is researched first.
 There are four main approaches used today: Basic Download, Progressive Download, Streaming, and Peer-to-Peer.
 
 \begin{itemize}
@@ -139,7 +139,7 @@ Token Authentication, and Third-Party Authentication~(OAuth2).
     signature, with no lookup.
     Self-contained tokens simplify horizontal scaling, but revocation is hard.
     Once issued, a token stays valid until it expires, unless a revocation
-    list is kept, which adds state and coordination back.
+    list is kept, which adds state and coordination.
     In both variants, the Frontend has to attach the token to every request
     and handle refresh explicitly, while cookies are sent by the browser
     automatically.
@@ -235,7 +235,7 @@ Long Polling, Server-Sent Events, WebSockets, and Push API\@.
 Based on the requirements listed in \chapterref{ch:specification}, at least three features
 would require server-to-client communication:
 \begin{itemize}
-    \item \textbf{Playback state synchronization.}
+    \item \textbf{Playback state synchronization.}\\
     Any Playback Device the User acts on has to send the change to the server, whether it is
     a play, pause, seek, or Song switch, and the Active Playback Device also sends
     periodic position updates to correct drift.
@@ -244,12 +244,12 @@ would require server-to-client communication:
     The server then forwards the new Playback state to the User's other Playback Devices to
     keep them in sync.
 
-    \item \textbf{Real-time typing indicators in Chats and Comment threads.}
+    \item \textbf{Real-time typing indicators in Chats and Comment threads.}\\
     The client would send multiple short updates to the server while the User is typing.
     The server would then broadcast these events to the other participants, so that the current
     typing activity is displayed in real-time.
 
-    \item \textbf{Live Chat messages and Comments.}
+    \item \textbf{Live Chat messages and Comments.}\\
     When another User sends a message in an open Chat, or posts a Comment under a Collection
     that the User is currently viewing, the new content should appear on the screen immediately,
     without periodic polling from the client.
@@ -272,7 +272,7 @@ often built in with named groups and per-user broadcast.
 SSE has less standardized support and typically requires a separate Pub/Sub layer.
 
 For these reasons, WebSockets are used as the primary mechanism for real-time communication.
-The drawbacks listed above are accepted in exchange for one two-way channel for everything and
+The drawbacks listed above are accepted in exchange for a single two-way channel for everything and
 lower integration cost with the chosen Backend framework.
 
 These choices define what the Backend and Frontend have to support, and the Backend is discussed next.
@@ -368,8 +368,6 @@ implementation time.
 The limited support for asynchronous code is also less of a problem for this
 project, since WebSocket handling already requires Django to run under ASGI through
 \texttt{daphne}~(which \texttt{django-channels} depends on).
-For the synchronous request paths, Instagram has shown that Django can still handle large
-loads.~\parencite{django_instagram}
 
 Having established the Backend framework, the next step was to choose the database.
 
@@ -454,11 +452,9 @@ pre-processing~(e.g., compilation to WebAssembly).
 This simplifies the development, build, and deployment processes, and for this reason the
 client application is based on JavaScript.
 
-The project, however, does not use plain JavaScript, but rather TypeScript~\parencite{typescript} on top of it.
-TypeScript is a typed superset of JavaScript that compiles to plain JavaScript, so the code
-that the browser actually runs is still JavaScript.
-The benefit comes from the additional type checking performed during the build step, which
-catches many simple errors before the code is run.
+The project uses TypeScript~\parencite{typescript}, a typed superset of JavaScript
+that compiles to plain JavaScript. Its main benefit is build-time type checking,
+which catches many type-related errors before execution.
 
 \subsection{Framework}
 Modern Frontend development is mostly based on libraries or frameworks

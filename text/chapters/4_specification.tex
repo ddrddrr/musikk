@@ -46,8 +46,6 @@ Below is the list of important terms that appear throughout the requirements sec
 
 
 \section{Use Cases}\label{sec:use_cases}
-A use case describes what an actor (User) can do with the system.
-
 While the requirements in the following sections list what the system must do,
 use cases show the same functionality from the actor's perspective.
 This can make further modeling simpler, since the minimal subset of actions
@@ -58,8 +56,8 @@ Library and Content, Playback, Search, and Communication.
 Each group has its own use case diagram.
 The Artist actor inherits from the User actor, so every use case available to a User is also available to an Artist.
 
-The use case diagrams for each group are kept under
-\path{text/diagrams/}, for example \path{text/diagrams/UseCasesAccount.png}.
+The use case diagrams for each group are kept under \path{text/diagrams/},
+for example \path{text/diagrams/UseCasesAccount.png}.
 
 
 \section{Functional Requirements}
@@ -69,21 +67,14 @@ The use case diagrams for each group are kept under
     \item The system shall support User and Artist models.
     \item The system shall allow Anonymous Users to create a User model and log in to the system.
     \item The system shall allow Users to change model information~(name, bio, avatar, etc.) after the creation.
-    \item The system shall support audio Playback over the network.
-    \item The system shall provide a way to control the audio Playback.
-    \item The system shall provide a way to display Playback Items uploaded to it.
-    \item The system shall provide each User with a library view of their owned/liked content.
-    \item The system shall limit content presentation based on a specific User.
-    That includes Playback Items, User Profile, User Playback Devices, and other related items.
+    \item The system shall provide audio Playback over the network, with User-controlled Playback and a modifiable Playback Queue.
+    \item The system shall let Users browse Playback Items, including a personal library of owned and liked content.
     \item The system shall support the creation of Playback Items.
     Playlists shall be created by all Users.
     Albums shall be created by Artists only.
-    \item The system shall provide a Playback Queue that the User can modify.
     \item The system shall allow Users to mark individual Songs and entire Collections as liked.
     \item The system shall provide Chat capabilities, including direct Chats between two Users and group Chats with multiple members.
-    \item The system shall allow any Publication to be created as a Reply to another Publication.
-    \item The system shall allow Users to add Publications~(Comments) under public Collections.
-    \item The system shall provide a personal Feed of a single User's Publications and a global Feed that aggregates Publications across Users.
+    \item The system shall support a Publication system, including Replies, Comments on public Collections, and per-User and global Feeds.
     \item The system shall allow Users to follow and unfollow other Users.
     Mutual follows shall be treated as a Friend relation.
     \item The system shall have a way to search Playback Items, Users, and Artists.
@@ -95,7 +86,7 @@ The use case diagrams for each group are kept under
     \item The system shall support adding Attachments, such as Songs, Collections, or Users, to Publications and Chat messages.
     \item The system shall provide a Notification system.
     \item The system shall make it possible to filter content by the viewer's relation to the author.
-    \item The system shall allow a User to switch the Active Playback Device between them.
+    \item The system shall allow a User to switch the Active Playback Device.
 \end{itemize}
 
 \subsection*{Could Have}
@@ -107,7 +98,7 @@ The use case diagrams for each group are kept under
 \end{itemize}
 
 
-\section{Non-functional Requirements}
+\section{Non-Functional Requirements}
 
 \subsection*{Must Have}
 \begin{itemize}
@@ -115,15 +106,10 @@ The use case diagrams for each group are kept under
     The system shall provide access to its contents only to authorized Users.
     The only exceptions shall be the ``Log In'' and ``Sign Up'' pages.
     \item
-    The system shall make unauthorized access to data as difficult as possible, so that even
-    with misconfigured access rights the data stays unreadable.
-    \item
-    The system shall store uploaded content securely.
+    The system shall harden against common web threats~(CSRF, XSS, etc.) and follow defense in depth, so that stored content stays protected and misconfigured access does not expose data.
     \item
     The system shall store and transport sensitive User information safely.
     I.e., it should use safe transport protocols, such as HTTPS and WSS.
-    \item
-    The system should be resistant to the most common web-based attacks: CSRF, XSS, etc.
     \item
     The system shall, in case of unexpected failure, remain rendered on the screen and show the appropriate non-technical message to the User.
     \item

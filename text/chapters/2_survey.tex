@@ -1,20 +1,20 @@
 \chapter{Music Consumption Survey}\label{ch:survey}
 
-To better support the choice of topic and demonstrate that a music streaming platform
-centered on social interactions could be a relevant service, a brief survey was conducted.
-It examined individual music listening and discovery habits, platform usage patterns,
-music-related interactions between people, and attitudes
-towards potential social features on the platform.
+To support the choice of topic and show that a music streaming platform
+focused on social interactions could be useful, a short survey was conducted.
+It looked at personal music listening and discovery habits, how people use
+platforms, how people interact about music, and opinions
+on possible social features on the platform.
 
 
 \section{Methods}
 The service chosen for the questionnaire was Google Forms~\parencite{googleforms}.
-It provides a simple interface for survey creation, allows easy sharing of the form,
-and supports extracting results as CSV files.
+It has a simple interface for creating surveys, makes the form easy to share,
+and can export results as CSV files.
 
 The questionnaire consists of 15 questions.
-Most of them are multiple-choice and closed-ended, with some allowing a custom answer.
-All custom answers are grouped under the ``other'' category in the provided figures.
+Most are multiple-choice with fixed options, and some allow a custom answer.
+All custom answers are grouped under the ``other'' category in the figures below.
 Answers in their original form can be found in the full survey.
 
 The complete questionnaire is included in the thesis repository under
@@ -22,97 +22,99 @@ The complete questionnaire is included in the thesis repository under
 
 
 \section{Results}
-This section presents the survey outcomes and analyzes their significance.
-Not all questions are discussed. For example, some questions about music discovery are omitted.
+This section presents the survey results and discusses what they mean.
+Not all questions are discussed. For example, some questions about music discovery are left out.
 
-A total of 119 people participated, with the majority being in the 18 to 30 age group,
+A total of 119 people took part, with most being in the 18 to 30 age group,
 with the exact distribution shown in \path{text/charts/age.png}.
 
 \subsection{Engagement}
-Firstly, it was necessary to determine whether respondents listen
-to music frequently and whether they use streaming platforms for this purpose.
+First, the survey needed to find out whether respondents listen
+to music often and whether they use streaming platforms for it.
 
-Over 50\% of respondents reported listening to more than 500 songs per month, i.e.,
-16 songs a day on average (\path{text/charts/song amount month.png}),
-and nearly 80\% stated that they listen to music daily (\path{text/charts/listening regularity.png}).
+Over 50\% of respondents reported listening to more than 500 songs per month,
+i.e., 16 songs a day on average
+(\path{text/charts/song amount month.png}).
+Nearly 80\% stated that they listen to music daily
+(\path{text/charts/listening regularity.png}).
 
-The numbers show that people have a strong interest in music, and
-the next step was to determine how the audio content is mostly accessed.
+The numbers show that people are very interested in music, and
+the next step was to find out how they mostly access it.
 
 \subsection{Listening Methods}
-As shown in \path{text/charts/constumption_method.png}, the proportion of respondents using streaming
-platforms across all age groups is approaching 100\%, with slightly higher
+As shown in \path{text/charts/constumption_method.png}, the share of respondents using streaming
+platforms across all age groups is close to 100\%, with slightly higher
 numbers in the younger age groups.
 Although downloaded files and physical media are still used,
-especially among people aged 30 to 60, they are usually only a secondary option next to streaming solutions.
+especially among people aged 30 to 60, they are usually only a secondary option next to streaming services.
 
 The question about the popularity of individual platforms showed that Spotify is the most used one,
-which aligns with global statistics~\parencite{spotifypopularity}.
-However, Yandex Music, coming in second place, deserves further explanation.
+which matches global statistics~\parencite{spotifypopularity}.
+However, Yandex Music, coming in second place, needs further explanation.
 Most of the respondents were from Russian-speaking countries, specifically Russia, and,
 with many Western companies leaving the Russian market in 2022, including music streaming services~\parencite{spotify_russia_exit},
-most users have moved to locally available products: Yandex Music~\parencite{yandex_music}, VK Music~\parencite{vk_music}, and
+most users have switched to local products: Yandex Music~\parencite{yandex_music}, VK Music~\parencite{vk_music}, and
 Zvuk~\parencite{zvuk}.
 This also explains why other popular region-specific platforms,
 such as Amazon Music~(US), QQ Music~(China),
-and JioSaavn~(India), are absent from the survey.
+and JioSaavn~(India), do not appear in the survey.
 
-The complete statistics are shown in \path{text/charts/streaming platform.png}.
+See \path{text/charts/streaming platform.png} for the complete statistics.
 
 The survey showed that streaming services are indeed widely used.
-The next important step was to analyze the regularity of music-centered social interactions.
+The next step was to look at how often music-related social interactions happen.
 
 \subsection{Social Interactions}
-The results of Question 10 indicate that nearly all respondents (99.2\%) reported listening to music with
-others at least sometimes, primarily in offline settings such as gatherings
+The results of Question 10 show that nearly all respondents (99.2\%) said they listen to music with
+others at least sometimes, mostly in offline settings such as gatherings
 or car journeys (\path{text/charts/listen together method.png}).
-Online collaborative listening methods, although less common, were also mentioned by a quarter
+Online shared listening methods, although less common, were also mentioned by a quarter
 of respondents.
 
-Question 11 (\path{text/charts/listen together freq.png}) examines the frequency of these interactions:
-the results show that a significant portion of respondents engage in shared listening regularly.
-Around 60\% reported doing so at least a few times per month,
-with a smaller group indicating almost daily interactions.
-This supports the previously mentioned idea in \chapterref{ch:intro}
-that music consumption is a common social activity.
+Question 11 (\path{text/charts/listen together freq.png}) looks at how often these interactions happen:
+the results show that many respondents take part in shared listening regularly.
+Around 60\% said they do so at least a few times per month,
+with a smaller group reporting almost daily interactions.
+This supports the earlier idea in \chapterref{ch:intro}
+that listening to music is a common social activity.
 
 The next question asks: ``How often do you/your friends share/discuss music?''.
-While the previous question focused on real-time in-person collective listening,
-this one looks at more intentional and active musical interactions, such as sharing songs,
+While the previous question focused on real-time in-person shared listening,
+this one looks at more deliberate and active music-related interactions, such as sharing songs,
 recommending music, or discussing it.
-Here, music is the primary purpose of engagement, rather than background.
-The same trend as before can be observed in the responses:
-over 70\% (\path{text/charts/share freq.png}) indicated that they share music at least several
+Here, music is the main point of the activity, not background.
+The same trend as before appears in the responses:
+over 70\% (\path{text/charts/share freq.png}) said that they share music at least several
 times a month, with many doing so weekly or more often.
-This further confirms the active social role of music.
+This further confirms that music plays an active social role.
 
 Question 13, ``How does that happen?'' (in terms of music sharing),
 asks about the specific ways people share music.
-Many respondents (\path{text/charts/share method.png}) stated that they typically send links
+Many respondents (\path{text/charts/share method.png}) said that they usually send links
 from streaming platforms through external messaging apps.
-While this shows an apparent demand for sharing music online, it also reveals a gap among platforms,
-as these interactions remain fragmented.
-Hence, enabling such exchanges directly within the streaming app could provide a smoother
-and more uniform experience.
+While this shows a clear demand for sharing music online, it also shows a gap among platforms,
+as these interactions stay split across apps.
+Hence, allowing this sharing directly within the streaming app could give a smoother
+and more consistent experience.
 
 Responses to the question ``Would you say that you know a lot of people with similar music taste?''
 were mixed, with a near-even split.
 This suggests that while some users already have a social circle with similar music taste, many do not.
 In addition, when asked
 ``Would you like to connect with others who share your musical taste, or influence those around you to explore and appreciate the music you enjoy?'',
-the majority answered positively.
+most answered yes.
 
-This data further supports the idea that social discovery features could be useful within a streaming platform.
-Moreover, over 60\% of participants stated in Question 15 that they would use
-additional social features if available on a streaming platform.
+This data further supports the idea that social discovery features could be useful in a streaming platform.
+Moreover, over 60\% of participants said in Question 15 that they would use
+extra social features if available on a streaming platform.
 
 
 \section{Summary}
-Overall, the results indicate that people listen to music frequently,
-with streaming services being their primary medium of accessing it.
-The data also suggest that music plays an important role in everyday life
+Overall, the results show that people listen to music often,
+with streaming services being their main way of accessing it.
+The data also show that music plays an important role in everyday life
 and often appears in social situations.
 
 Yet, existing platforms only partly support interaction between users.
 This makes the idea of a music streaming service with built-in social features both relevant and
-likely to address real user needs.
+likely to meet real user needs.

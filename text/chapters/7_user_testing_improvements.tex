@@ -8,13 +8,14 @@ This section lists known gaps and possible next steps for the
 app.
 
 
-\subsection{Out-of-scope items}\label{subsec:imp_out_of_scope}
+\subsection{Out-of-Scope Items}\label{subsec:imp_out_of_scope}
 On the Frontend, several features are missing. There is no
 mobile layout and no offline Playback, and the interface is
 English-only. Accessibility is also only partial. For example,
 some clickable elements use \texttt{div} instead of
 \texttt{button}, and the custom controls have no Accessible Rich
-Internet Applications~(ARIA) roles or labels.
+Internet Applications~(ARIA) roles or labels. There is also no
+Digital Rights Management~(DRM) mechanism.
 
 In addition, a few Backend features have no Frontend
 counterpart. The password reset and password change endpoints
@@ -27,7 +28,7 @@ and Celery logs over SSH\@. There is no error reporter, no metrics
 pipeline, and no structured log format.
 
 
-\subsection{Search and recommendations}\label{subsec:imp_search}
+\subsection{Search and Recommendations}\label{subsec:imp_search}
 \hyperref[sec:search]{Search} ranks results only by how close the
 strings match, and does not use any signal from the User's
 listening history. A mix of trigram and full-text search, with a
@@ -39,7 +40,7 @@ endpoint that adds random Songs to the Queue currently returns
 \texttt{HTTP 501}.
 
 
-\subsection{Playback synchronization}\label{subsec:imp_clock}
+\subsection{Playback Synchronization}\label{subsec:imp_clock}
 The clock calculation method from
 \hyperref[sec:playback]{Playback and Device Handling} only takes
 the difference between the client and server clocks at receive
@@ -50,7 +51,7 @@ the round-trip as the offset, and average several samples (this
 is the approach NTP uses).~\parencite{rfc5905_ntp}
 
 
-\subsection{Backend refactors}\label{subsec:imp_be_refactors}
+\subsection{Backend Refactors}\label{subsec:imp_be_refactors}
 The three Notification managers send
 \texttt{notifications.changed} inside
 \texttt{Manager.create}. As a result, the data layer is coupled
@@ -81,7 +82,7 @@ payload is enough, the handler should call
 only as a fallback. This would remove the extra round-trip.
 
 
-\subsection{Test coverage}\label{subsec:imp_tests}
+\subsection{Test Coverage}\label{subsec:imp_tests}
 Backend test coverage is not high. The Notifications app has no
 tests at all, the audio conversion tests only cover lossless
 source inputs, and the endpoints are not tested thoroughly.

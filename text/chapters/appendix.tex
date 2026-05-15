@@ -46,7 +46,7 @@ codec, sample rate, channel count, bit depth, duration, and bitrate of
 every upload before Transcoding.
 
 \section{Transcoding}
-\subsection{AAC encoder choice}
+\subsection{AAC Encoder Choice}
 FFmpeg comes with several AAC encoder implementations, only one of
 which is used here:
 \begin{itemize}
@@ -68,7 +68,7 @@ which is used here:
 For FLAC, FFmpeg provides a single \texttt{flac} encoder, which is
 used directly.~\parencite{ffmpeg_flac}
 
-\subsection{Bitrate strategy: CBR versus VBR}
+\subsection{Bitrate Strategy: CBR Versus VBR}
 Bitrate describes how much audio data is stored or sent per second.
 It is usually given in kilobits per second (kbps) and is the main way
 to balance audio quality against file size.
@@ -87,7 +87,7 @@ logic needs a stable per-tier bandwidth to pick from. The same effect
 could in principle be reached with constrained VBR tiers, but the
 fixed per-tier bitrate is simpler for the project scope.
 
-\subsection{Generation loss}
+\subsection{Generation Loss}
 Transcoding a lossy source into AAC causes generation loss~\parencite{generation_loss}. Every
 lossy pass throws away some audio, so re-encoding what was already
 lossy makes the loss worse. The pipeline still does the conversion
@@ -96,7 +96,7 @@ With FLAC and AAC chosen as the output codecs, lossy uploads have to
 be re-encoded into AAC anyway.
 
 \section{Audio Preprocessing}
-\subsection{Input validation limits}
+\subsection{Input Validation Limits}
 The upload passes through a chain of validation checks. The
 file-size and MIME checks run on the raw bytes. The remaining checks
 read values from the file with FFprobe. Raw audio storage grows
@@ -130,7 +130,7 @@ time of a single upload:
     surround, which is the practical upper bound for source audio.
 \end{itemize}
 
-\subsection{FFprobe invocation}
+\subsection{FFprobe Invocation}
 \begin{minted}{bash}
 ffprobe -v error -select_streams a \
     -show_entries stream=codec_name,sample_rate,channels,bits_per_raw_sample,duration,bit_rate \
@@ -153,7 +153,7 @@ The flags are:
     wrapper parses.
 \end{itemize}
 
-\subsection{Channel normalization}
+\subsection{Channel Normalization}
 The normalization step reduces every track to mono or stereo. Music
 releases are mostly mastered in stereo, and the chosen Streaming
 Protocols and the loudness measurement step below are also defined
@@ -166,7 +166,7 @@ information, only file size. Stereo inputs stay stereo. Sources with
 three or more channels are downmixed to stereo by adding
 \texttt{aresample=out\_chlayout=stereo} to the FFmpeg filter chain.
 
-\subsection{Sample rate normalization}
+\subsection{Sample Rate Normalization}
 Human hearing tops out around 20\,kHz. The Nyquist-Shannon theorem~\parencite{shannon_sampling}
 says a sample rate must be at least twice the highest frequency in
 the signal to represent it without aliasing. A 44.1\,kHz rate
@@ -182,7 +182,7 @@ upsampling adds no information. Non-family rates default to
 44.1\,kHz. Resampling is done by adding \texttt{aresample=<rate>}
 to the FFmpeg filter chain.
 
-\subsection{Bit depth conversion}
+\subsection{Bit Depth Conversion}
 All audio is converted to signed 16-bit samples through
 \texttt{aformat=sample\_fmts=s16}. The conversion is always applied,
 because \texttt{libfdk\_aac}, the encoder used for the AAC tiers,
@@ -190,7 +190,7 @@ does not accept higher-precision sample formats. FLAC accepts higher
 precision, but using the same filter chain for every tier keeps the
 Transcoding command the same across tiers.
 
-\subsection{Loudness theory}
+\subsection{Loudness Theory}
 Loudness normalization keeps the perceived volume steady across
 tracks~\parencite{audio_normalization}. Human hearing is not flat: equal-loudness contours described
 by ISO~226~\parencite{iso226} show that perceived loudness depends on both amplitude
@@ -218,7 +218,7 @@ sequence of samples that are all below 0\,dBFS can still reconstruct
 to over 0\,dBFS, producing inter-sample peaks that clip on Playback.
 True-peak measurement uses an oversampled signal to catch this.
 
-\subsection{Why loudness is measured after Transcoding}
+\subsection{Why Loudness Is Measured After Transcoding}
 FFmpeg's \texttt{ebur128} filter with \texttt{peak=true} produces
 both an integrated LUFS value and a true peak in dBTP. The
 measurement runs after Transcoding, on the FLAC output if it was
@@ -239,8 +239,8 @@ example, a six-channel source produces a summary line such as
 as a single per-track value. After downmix to stereo the list has
 at most two entries, and the wrapper records the maximum of the two.
 
-\section{Pipeline invocations}
-\subsection{FFmpeg transcoding flags}
+\section{Pipeline Invocations}
+\subsection{FFmpeg Transcoding Flags}
 The FFmpeg command for the AAC 160\,kbps tier on a stereo 44.1\,kHz
 source is:
 \begin{minted}{bash}
@@ -277,7 +277,7 @@ The flags are:
     \texttt{flac-static-<uuid>.mp4} for the lossless tier.
 \end{itemize}
 
-\subsection{Shaka Packager flags}
+\subsection{Shaka Packager Flags}
 The Shaka Packager command for two of the AAC tiers is:
 \begin{minted}{bash}
 packager \
@@ -330,7 +330,7 @@ The flags are:
     output path for the HLS master playlist (\texttt{master.m3u8}).
 \end{itemize}
 
-\subsection{ebur128 loudness measurement flags}
+\subsection{ebur128 Loudness Measurement Flags}
 The FFmpeg command for the loudness pass, run on the FLAC output
 if it was produced or otherwise on the first AAC output, is:
 \begin{minted}{bash}
