@@ -32,10 +32,10 @@ end note
 tab_a1 -> channels : ws action "subscribe"\n{ topic: "chat.<uuid>" }
 tab_b -> channels : ws action "subscribe"\n{ topic: "chat.<uuid>" }
 
-== Typing (throttled, 3s interval) ==
+== Typing ==
 user_a -> tab_a1 : keystroke in ChatMessageForm
 tab_a1 -> channels : ws action "typing"\n{ topic: "chat.<uuid>" }
-note right of channels : backend caps to 1 send / 2s per group\n(TypingWSActionHandler)
+note right of channels : backend restricts to 1 send per 2s\n(TypingWSActionHandler._last_sent)
 channels -->> tab_b : ws event "chat.typing"\n{ user_uuid, display_name }
 tab_b -> user_b : show TypingIndicator\n(TTL 5s, decays locally)
 
@@ -44,17 +44,17 @@ user_a -> tab_a1 : submit message
 tab_a1 -> view : POST /users/{A}/chats/{uuid}/messages\n{ content, attachment? }
 view -> db : insert Publication (Chat scope)
 view -> channels : send_ws_event(topic_group("chat", uuid),\n"chat.messages.changed", { chat_uuid })
+view -> channels : per-recipient send_ws_event(user_group(member),\n"chat.messages.changed")\n(also creates ChatMessageNotification rows)
 view --> tab_a1 : 201 Created\n{ publication }
 note right of tab_a1
 useCreateChatMessage onSuccess
 invalidates publicationKeys.chatMessages(uuid)
-and publicationKeys.userChats(A)
+and publicationKeys.userChats(<owner>).
 end note
-tab_a1 -> view : refetch GET /users/{A}/chats/{uuid}/messages
 
-channels -->> tab_a1 : ws event "chat.messages.changed"
-channels -->> tab_a2 : ws event "chat.messages.changed"
-channels -->> tab_b : ws event "chat.messages.changed"
+channels -->> tab_a1 : ws event "chat.messages.changed" (topic group)
+channels -->> tab_a2 : ws event "chat.messages.changed" (per-user group)
+channels -->> tab_b : ws event "chat.messages.changed" (topic + per-user group)
 
 note over tab_a1, tab_b
 useUserChatsWsEvents invalidates:
@@ -67,12 +67,5 @@ end note
 tab_a2 -> view : refetch GET /users/{A}/chats (preview list updates)
 tab_b -> view : refetch GET /users/{B}/chats/{uuid}/messages
 
-== Scroll anchor on incoming message ==
-note over tab_b
-useScrollAnchor + useNewMessagesIndicator:
-if the user is scrolled away from the bottom when a new message lands,
-the scroll position is held in place and a NewMessagesIndicator
-is shown until the user scrolls down or clicks the indicator.
-end note
 
 @enduml

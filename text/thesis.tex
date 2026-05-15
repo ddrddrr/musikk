@@ -48,20 +48,20 @@
     gender      = m,
     advisor     = {Mgr. Luděk Bártek, Ph.D},
     title       = {Music Managment Application},
-    keywords    = {Audio Streaming, Python, JavaScript, MPEG-DASH, HLS, WebSockets},
+    keywords    = {Audio Streaming, Python, JavaScript, Web Application, WebSockets},
     abstract    = {%
     This bachelor's thesis aims to develop
     a web-based music management and streaming platform focused on social interactions between users.
 
     The theoretical part presents a survey that analyzes people's
-    music listening habits, showing that such a platform could attract a solid user base.
+    music listening habits, showing that such a platform could attract a user base.
     It then compares existing music-related services with built-in social
     features and derives functional and non-functional requirements for the proposed system.
     Then, based on these requirements, suitable technologies and architectural patterns are selected.
 
-%    TODO
-    The practical part covers the implementation details of the platform, including data model,
-    audio processing, API design, and representation layer.
+    The practical part describes the built application. It explains the choices behind each feature,
+    focusing on what is not clear from the diagrams and the source code.
+    It then discusses the user testing outcomes and lists possible improvements.
 
     The result is a fully functional and deployed application.
     },
@@ -79,6 +79,8 @@
 \usepackage{amsthm}
 \usepackage{amsfonts}
 \usepackage{url}      %% Hyperlinks
+\setlength{\emergencystretch}{3em}
+\Urlmuskip=0mu plus 1mu\relax
 \usepackage{markdown} %% Lightweight markup
 \usepackage{listings} %% Source code highlighting
 \lstset{
@@ -111,5 +113,7 @@
     \input{chapters/4_specification}
     \input{chapters/5_implementation_planning}
     \input{chapters/6_implementation}
+    \input{chapters/7_user_testing_improvements}
+    \input{chapters/8_conclusion}
     \input{chapters/appendix}
 \end{document}

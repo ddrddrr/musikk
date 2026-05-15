@@ -10,6 +10,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/features/ui/dropdown-menu.tsx";
+import { IconTooltip } from "@/features/ui/tooltip";
 import { AuthorLinks } from "@/features/user/components/AuthorLinks.tsx";
 import { cn } from "@/lib/utils.ts";
 import { EllipsisVertical, Trash2 } from "lucide-react";
@@ -35,11 +36,18 @@ function PlaylistMenuDropdown({
 }) {
     return (
         <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <Button variant="muted" size="icon" className={showComments ? "size-8" : "size-12"}>
-                    <EllipsisVertical size={20} />
-                </Button>
-            </DropdownMenuTrigger>
+            <IconTooltip label="More Actions">
+                <DropdownMenuTrigger asChild>
+                    <Button
+                        variant="muted"
+                        size="icon"
+                        aria-label="More Actions"
+                        className={showComments ? "size-8" : "size-12"}
+                    >
+                        <EllipsisVertical size={20} />
+                    </Button>
+                </DropdownMenuTrigger>
+            </IconTooltip>
             <DropdownMenuContent>
                 <DropdownMenuItem variant="destructive" onSelect={onDeleteClick}>
                     <Trash2 />

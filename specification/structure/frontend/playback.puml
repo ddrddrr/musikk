@@ -3,56 +3,45 @@
 !include ../../_style.puml
 
 title Playback and devices - component hierarchy and IO boundary
-' Source: src/frontend/musikk/src/features/player/ (audio element, UI controls)
-' and src/frontend/musikk/src/features/playback/ (state, devices, server clock).
-' Combined because the player reads playback providers directly.
 
 package "Presentation (player/)" {
-    [PlayerBox\n(<audio> + pipeline)] as player_box
+    [PlayerBox\n(<audio> element)] as player_box
     [PlayerBar] as player_bar
     [PlayerPlayButton] as play_button
     [ChangeActiveDeviceDropdown] as device_dropdown
+}
+
+package "Presentation (settings/)" {
     [LoudnessPresetSelector] as loudness_selector
 }
 
 player_box --> player_bar
 player_bar --> play_button
 player_bar --> device_dropdown
-player_bar --> loudness_selector
 
 package "State (providers + hooks)" {
-    [PlaybackProvider] as playback_provider
-    [DeviceListProvider] as device_list_provider
-    [LoudnessPresetProvider] as loudness_provider
-    [AudioPlayerController] as controller
-    [useAudioPipeline\n(Shaka + WebAudio gain)] as use_pipeline
-    [usePlayer\n(autoplay, onEnded)] as use_player
-    [useHandlePlay / useHandleSwitchDevice] as use_handle_actions
-    [useCalculateSongPosMs / useTotalDuration] as use_pos_dur
-    [usePlaybackWsEvents / useSubscribePlaybackEvents] as use_pb_ws
+    [PlaybackProvider\n+ AudioPlayerController (Shaka + audio elem)\n+ usePlayer (autoplay, onEnded)\n+ useSubscribePlaybackEvents\n+ useCalculateSongPosMs / useTotalDuration\n+ useHandlePlay] as playback_provider
+    [DeviceListProvider\n+ useDeviceLifecycle (re-register on WS open)\n+ useHandleSwitchDevice] as device_list_provider
+    [LoudnessPresetProvider\n+ useAudioPipeline (WebAudio gain + loudness)] as loudness_provider
 }
 
-player_box ..> use_pipeline : uses
-player_box ..> use_player : uses
-player_bar ..> use_pos_dur : reads position/duration
-play_button ..> use_handle_actions : activate playback
-device_dropdown ..> device_list_provider : reads
-device_dropdown ..> use_handle_actions : switch device
+player_box ..> loudness_provider : uses
+player_box ..> playback_provider : uses
+player_bar ..> playback_provider : reads pos/dur,\napplyUserSeek
+play_button ..> playback_provider : activate playback
+device_dropdown ..> device_list_provider : reads / switch device
 loudness_selector ..> loudness_provider : reads / writes
-use_pipeline ..> controller : drives playback
+playback_provider ..> loudness_provider : invokes fade/sync callbacks
 
 cloud "Backend\n(media / signed URLs)" as backend
 queue "WSClient\nuser group" as ws
 
-' --- HTTP ---
-player_box ..> backend : GET *.mpd / *.m3u8\nGET *.m4s segments
+playback_provider ...> backend : GET *.mpd / *.m3u8\nGET *.m4s segments
 
-' --- WS actions sent ---
-playback_provider ..> ws : device.register\ndevice.set_active\ndevice.set_volume\nplayback.activate / stop\nplayback.seek / sync
+device_list_provider ..> ws : device.register
+playback_provider ..> ws : device.set_active / set_volume\nplayback.activate / stop\nplayback.seek / sync
 
-' --- WS events received ---
-device_list_provider <.. ws : device.list
-use_pb_ws <.. ws : playback.snapshot\nplayback.seek
-use_pb_ws ..> controller : applyServerSnapshot / applyServerSeek
+device_list_provider <.right. ws : device.list
+playback_provider <.... ws : playback.snapshot\nplayback.seek
 
 @enduml

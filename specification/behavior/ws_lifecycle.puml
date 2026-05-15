@@ -39,7 +39,8 @@ alt authenticated
   consumer --> frontend : accept
   frontend -> user : WS open\n(ready for actions/events)
 else anonymous
-  consumer --> frontend : close (4xx)
+  consumer -> consumer : connect() returns without accept()
+  consumer --> frontend : close (Channels default code)
   frontend -> user : no WS connection
 end
 
@@ -72,7 +73,7 @@ note over other_consumers : same delivery to every\nother subscribed consumer
 == Disconnect ==
 user -> frontend : close tab
 frontend -> consumer : close
-consumer -> handler_chain : on_disconnect per handler\n(clear device, drop topics, ...)
 consumer -> redis : group_discard("user_<uuid>")
+consumer -> handler_chain : on_disconnect per handler\n(clear device, drop topics, ...)
 
 @enduml

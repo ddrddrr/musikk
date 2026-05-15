@@ -10,7 +10,7 @@ package "main.tsx" {
 
 package "App.tsx" {
     [BrowserRouter] as router
-    [AuthProvider\n(useQuery /me, axios 401 -> logout)] as auth
+    [AuthProvider\n(useQuery /me via api_client_public,\nregisters logout in authRef)] as auth
 
     package "Public routes" {
         [LoginPage]
@@ -28,9 +28,11 @@ package "App.tsx" {
     }
 
     package "AuthenticatedApp" as authenticated_app {
+        [useWebSocketListeners\n(global WS event handlers,\ndevice lifecycle)] as ws_listeners
         package "AuthenticatedLayout (Outlet host)" {
             [Header / left col / right col] as layout_columns
-            [HomePage / AlbumUploadPage / SettingsPage] as route_pages
+            [HomePage\n(also mounts UserConnectionsProvider,\nUserChatsProvider)] as home_page
+            [AlbumUploadPage / SettingsPage] as other_pages
             [PlayerBox\n(<audio> elem, Shaka player,\nplayback controls)] as player
             [Toaster (sonner)] as toast
         }
@@ -51,10 +53,10 @@ require_auth --> authenticated_providers
 authenticated_providers --> authenticated_app
 
 ws_provider .up.> ws_client : owns
-authenticated_app ...> ws_client : create WS server event listeners
+ws_listeners ...> ws_client : registers global WS handlers
 api_client ..> auth_ref : 401 -> logout
-auth ..> api_client : uses
+auth ..> api_client_public : GET /users/me
 authenticated_app ..> api_client : uses
-"Public routes" ..> api_client_public : uses
+"Public routes" ..up.> api_client_public : uses
 
 @enduml

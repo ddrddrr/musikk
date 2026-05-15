@@ -1,6 +1,0 @@
-\begin{MintedVerbatim}[commandchars=\\\{\}]
-ffprobe\PYG{+w}{ }\PYGZhy{}v\PYG{+w}{ }error\PYG{+w}{ }\PYGZhy{}select\PYGZus{}streams\PYG{+w}{ }a\PYG{+w}{ }\PYG{l+s+se}{\PYGZbs{}}
-\PYG{+w}{    }\PYGZhy{}show\PYGZus{}entries\PYG{+w}{ }\PYG{n+nv}{stream}\PYG{o}{=}codec\PYGZus{}name,sample\PYGZus{}rate,channels,bits\PYGZus{}per\PYGZus{}raw\PYGZus{}sample,duration,bit\PYGZus{}rate\PYG{+w}{ }\PYG{l+s+se}{\PYGZbs{}}
-\PYG{+w}{    }\PYGZhy{}show\PYGZus{}entries\PYG{+w}{ }\PYG{n+nv}{format}\PYG{o}{=}duration,bit\PYGZus{}rate\PYG{+w}{ }\PYG{l+s+se}{\PYGZbs{}}
-\PYG{+w}{    }\PYGZhy{}of\PYG{+w}{ }json\PYG{+w}{ }input.wav
-\end{MintedVerbatim}

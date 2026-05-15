@@ -1,8 +1,8 @@
 \chapter{Specification}\label{ch:specification}
 
 In this chapter the general outline of the application is given via use cases and functional/non-functional requirements.
-The individual requirements are constructed based on the `MoSCoW' criteria~\parencite{moscow}.
-``Must Have'' requirements specify functionality without which the application can not be considered finished.
+The individual requirements are constructed based on the ``MoSCoW'' criteria~\parencite{moscow}.
+``Must Have'' requirements specify functionality without which the application cannot be considered finished.
 Those are the main features and technical aspects that must be implemented.
 ``Should Have'' requirements mostly represent features that would greatly improve the user experience,
 but are not strictly needed for the application to be fully working.
@@ -13,33 +13,32 @@ implemented in the current scope of the thesis.
 \section{Important Terms}
 Below is the list of important terms that appear throughout the requirements sections and further chapters:
 \begin{itemize}
-    \item \textbf{Anonymous User} – A User who is not yet registered in the system or has not logged in.
-    \item \textbf{User} – An object containing information such as email, display name and other User parameters.
-    \item \textbf{User Profile} – A Frontend-only abstraction which shows Base User information.
-    \item \textbf{Artist} - A User with additional privileges, for example, Song or Collection creation.
-    \item \textbf{Follower/Followee} - A relationship between a User and another User where one subscribes to another.
-    \item \textbf{Friend} - A Followee and Follower who are mutually subscribed to each other.
-    \item \textbf{Song} – An object representing a processed audio
+    \item \textbf{Anonymous User}: A User who is not yet registered in the system or has not logged in.
+    \item \textbf{User}: An object containing information such as email, display name and other User parameters.
+    \item \textbf{User Profile}: A Frontend-only abstraction which shows Base User information.
+    \item \textbf{Artist}: A User with additional privileges, for example, Song or Collection creation.
+    \item \textbf{Follower/Followee}: A relationship between a User and another User where one subscribes to another.
+    \item \textbf{Friend}: A Followee and Follower who are mutually subscribed to each other.
+    \item \textbf{Song}: An object representing a processed audio
     file with additional metadata such as title or creation date.
-    \item \textbf{Collection} – A container that holds multiple Songs.
-    \item \textbf{Playlist} – A Collection consisting of pre-existing~(already uploaded) Songs.
-    \item \textbf{Album} – A Collection consisting of newly uploaded Songs.
-    \item \textbf{Playback} – A process during which the User is receiving or manipulating audio data.
-    \item \textbf{Playback Item} – A Song or a Collection.
-    \item \textbf{Playback Queue} – A User-specific list of Playback Items which determines the playing Song order.
-    \item \textbf{Liked Songs} – A private, system-managed Collection that holds the Songs a User has marked as liked.
-    \item \textbf{History} – A private, system-managed Collection that records the Songs a User has played.
-    \item \textbf{Playback Device} – A device on which the app is currently used.
-    \item \textbf{Active Playback Device} – The User's Playback Device that is currently producing audio.
+    \item \textbf{Collection}: A container that holds multiple Songs.
+    \item \textbf{Playlist}: A Collection consisting of pre-existing~(already uploaded) Songs.
+    \item \textbf{Album}: A Collection consisting of newly uploaded Songs.
+    \item \textbf{Playback}: A process during which the User is receiving or manipulating audio data.
+    \item \textbf{Playback Item}: A Song or a Collection.
+    \item \textbf{Playback Queue}: A User-specific list of Playback Items which determines the playing Song order.
+    \item \textbf{Liked Songs}: A private, system-managed Collection that holds the Songs a User has marked as liked.
+    \item \textbf{History}: A private, system-managed Collection that records the Songs a User has played.
+    \item \textbf{Playback Device}: A device on which the app is currently used.
+    \item \textbf{Active Playback Device}: The User's Playback Device that is currently producing audio.
     All other Playback Devices are passive and mirror the Active Device's Playback position.
-    \item \textbf{Friend Activity} – A display of the Songs currently listened to by the User's Friends.
-    \item \textbf{Publication} – Textual User input.
-    \item \textbf{Attachment} - Non-textual User input.
+    \item \textbf{Friend Activity}: A display of the Songs currently listened to by the User's Friends.
+    \item \textbf{Publication}: Textual User input.
+    \item \textbf{Attachment}: Non-textual User input.
     For example, a Song attached to a Publication.
-    \item \textbf{Reply} – The same as Publication, but created in relation to another, `parent' Publication.
-    \item \textbf{Feed} - A list of Publications.
-    Either User-specific or Global (from multiple Users).
-    \item \textbf{Chat} - A list of Publications specific to two or more Users.
+    \item \textbf{Reply}: The same as Publication, but created in relation to another, ``parent'' Publication.
+    \item \textbf{Feed}: A list of Publications, either User-specific or Global (from multiple Users).
+    \item \textbf{Chat}: A list of Publications specific to two or more Users.
 \end{itemize}
 \clearpage
 
@@ -47,21 +46,18 @@ Below is the list of important terms that appear throughout the requirements sec
 
 
 \section{Use Cases}\label{sec:use_cases}
-A use case describes what an actor(User) can do with the system.
-
 While the requirements in the following sections list what the system must do,
 use cases show the same functionality from the actor's perspective.
 This can make further modeling simpler, since the minimal subset of actions
-any given User can take is clearly defined.
+any given User can take is defined explicitly.
 
 The use cases are split into six groups: Account and Identity, Social,
 Library and Content, Playback, Search, and Communication.
 Each group has its own use case diagram.
 The Artist actor inherits from the User actor, so every use case available to a User is also available to an Artist.
 
-The use case diagrams for each group are collected in the
-\hyperref[app:diagrams]{Diagram Catalog} appendix~(Figures~\ref{fig:uc_account}
-through~\ref{fig:uc_communication}).
+The use case diagrams for each group are kept under \path{text/diagrams/},
+for example \path{text/diagrams/UseCasesAccount.png}.
 
 
 \section{Functional Requirements}
@@ -71,21 +67,14 @@ through~\ref{fig:uc_communication}).
     \item The system shall support User and Artist models.
     \item The system shall allow Anonymous Users to create a User model and log in to the system.
     \item The system shall allow Users to change model information~(name, bio, avatar, etc.) after the creation.
-    \item The system shall support over-the-net audio Playback.
-    \item The system shall provide a way to control the audio Playback.
-    \item The system shall provide a way to display Playback Items uploaded to it.
-    \item The system shall provide each User with a library view of their owned/liked content.
-    \item The system shall limit content presentation based on a specific User.
-    That includes Playback Items, User Profile, User Playback Devices, and other related items.
+    \item The system shall provide audio Playback over the network, with User-controlled Playback and a modifiable Playback Queue.
+    \item The system shall let Users browse Playback Items, including a personal library of owned and liked content.
     \item The system shall support the creation of Playback Items.
     Playlists shall be created by all Users.
     Albums shall be created by Artists only.
-    \item The system shall provide a Playback Queue that the User can modify.
     \item The system shall allow Users to mark individual Songs and entire Collections as liked.
     \item The system shall provide Chat capabilities, including direct Chats between two Users and group Chats with multiple members.
-    \item The system shall allow any Publication to be created as a Reply to another Publication.
-    \item The system shall allow Users to add Publications~(Comments) under public Collections.
-    \item The system shall provide a personal Feed of a single User's Publications and a global Feed that aggregates Publications across Users.
+    \item The system shall support a Publication system, including Replies, Comments on public Collections, and per-User and global Feeds.
     \item The system shall allow Users to follow and unfollow other Users.
     Mutual follows shall be treated as a Friend relation.
     \item The system shall have a way to search Playback Items, Users, and Artists.
@@ -95,9 +84,9 @@ through~\ref{fig:uc_communication}).
 \subsection*{Should Have}
 \begin{itemize}
     \item The system shall support adding Attachments, such as Songs, Collections, or Users, to Publications and Chat messages.
-    \item The system shall provide a notification system.
-    \item The system shall make it possible to filter content by by the viewer's relation to the author.
-    \item The system shall allow a User to the Active Playback Device between them.
+    \item The system shall provide a Notification system.
+    \item The system shall make it possible to filter content by the viewer's relation to the author.
+    \item The system shall allow a User to switch the Active Playback Device.
 \end{itemize}
 
 \subsection*{Could Have}
@@ -105,11 +94,11 @@ through~\ref{fig:uc_communication}).
     \item The system shall make it possible for multiple Users to listen to Songs in a synchronized manner.
     \item The system shall provide an Artist interface that allows Artists to see statistics related to their content.
     \item The system shall have a forum section.
-    \item The system shall provide content recommendations based on a User's listening history
+    \item The system shall provide content recommendations based on a User's listening history.
 \end{itemize}
 
 
-\section{Non-functional Requirements}
+\section{Non-Functional Requirements}
 
 \subsection*{Must Have}
 \begin{itemize}
@@ -117,15 +106,10 @@ through~\ref{fig:uc_communication}).
     The system shall provide access to its contents only to authorized Users.
     The only exceptions shall be the ``Log In'' and ``Sign Up'' pages.
     \item
-    The system shall make unauthorized access to data as complex as possible, so that even in the
-    case of misconfiguration of access rights, the data are hard to get to.
-    \item
-    The system shall store uploaded content securely.
+    The system shall harden against common web threats~(CSRF, XSS, etc.) and follow defense in depth, so that stored content stays protected and misconfigured access does not expose data.
     \item
     The system shall store and transport sensitive User information safely.
-    I.e., it should use safe transport protocols, such as HTTPS and WSS~.
-    \item
-    The system should be resistant to the most common web-based attacks: CSRF, XSS, etc.
+    I.e., it should use safe transport protocols, such as HTTPS and WSS.
     \item
     The system shall, in case of unexpected failure, remain rendered on the screen and show the appropriate non-technical message to the User.
     \item
@@ -142,7 +126,7 @@ through~\ref{fig:uc_communication}).
 \subsection*{Could Have}
 \begin{itemize}
     \item The system shall support offline Playback.
-    \item The system should integrate a DRM mechanism.
+    \item The system should integrate a Digital Rights Management (DRM) mechanism.
 \end{itemize}
 
 The next chapter presents the high-level technology choices used for the implementation.

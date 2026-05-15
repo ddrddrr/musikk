@@ -33,7 +33,7 @@ frontend -> user : "check your inbox"
 == Email confirmation ==
 note over user : opens email,\nclicks verification link
 user -> frontend : open /email-confirmation/<key>
-frontend -> backend : POST /auth/registration/verify-email
+frontend -> backend : POST /auth/verify-email
 backend -> database : activate user
 backend --> frontend : 200 OK
 frontend -> user : "email confirmed,\nyou can log in"

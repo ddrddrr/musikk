@@ -56,7 +56,7 @@ class CollectionCredit <<DjangoModel>> {
 }
 
 class CollectionSong <<DjangoModel>> {
-    position: int
+    position: int | None
     --
     save(): auto-positions at tail
 }

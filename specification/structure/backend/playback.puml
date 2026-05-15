@@ -38,7 +38,7 @@ class PlayerState <<DjangoModel>> {
     advance(): CollectionSong | None
     choose_queue_song(item)
     choose_context_song(cs)
-    move_from_context_to_queue(cs, position)
+    move_from_context_to_queue(cs, position: Decimal)
     prev(): CollectionSong | None
     clear()
     is_empty(): bool

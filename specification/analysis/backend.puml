@@ -11,6 +11,7 @@ package "Application Server" as app {
 }
 
 package "Audio Processing" as audio_pipeline {
+    [Probe] as probe
     [Transcoder] as transcoder
     [Packager] as packager
 }
@@ -49,6 +50,7 @@ worker ---> redis : push events
 
 proxy <---- media_storage : audio segments / manifests
 
+probe -[hidden]- transcoder
 transcoder -[hidden]- packager
 
 @enduml

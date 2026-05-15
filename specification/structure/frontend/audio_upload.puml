@@ -16,9 +16,10 @@ package "Presentation" {
 }
 
 album_upload_page --> upload_section
-upload_section --> upload_field
-upload_field --> upload_card
+upload_section --> upload_card
+upload_card --> upload_field
 upload_card --> status_badge
+upload_field --> status_badge
 
 package "State (hooks)" {
     [useSongUpload] as use_song_upload

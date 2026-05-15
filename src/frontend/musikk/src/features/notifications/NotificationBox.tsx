@@ -5,6 +5,7 @@ import { notificationKeys } from "@/features/notifications/queryKeys.ts";
 import { Button } from "@/features/ui/button.tsx";
 import { Popover, PopoverContent, PopoverTrigger } from "@/features/ui/popover.tsx";
 import { Spinner } from "@/features/ui/spinner";
+import { IconTooltip } from "@/features/ui/tooltip";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Sparkle } from "lucide-react";
 import { useMemo } from "react";
@@ -46,18 +47,25 @@ export function NotificationBox() {
 
     return (
         <Popover onOpenChange={handleOpenChange}>
-            <PopoverTrigger asChild>
-                <div className="relative">
-                    <Button variant="ghost" size="icon" className="text-brand-foreground">
-                        <Sparkle className="size-5" />
-                    </Button>
-                    {unreadCount > 0 && (
-                        <span className="absolute -top-1 -right-1 rounded-full bg-amber-200 px-1.5 py-0.5 text-xs font-bold text-foreground">
-                            {unreadCount}
-                        </span>
-                    )}
-                </div>
-            </PopoverTrigger>
+            <IconTooltip label="Notifications">
+                <PopoverTrigger asChild>
+                    <div className="relative">
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            aria-label="Notifications"
+                            className="text-brand-foreground"
+                        >
+                            <Sparkle className="size-5" />
+                        </Button>
+                        {unreadCount > 0 && (
+                            <span className="absolute -top-1 -right-1 rounded-full bg-amber-200 px-1.5 py-0.5 text-xs font-bold text-foreground">
+                                {unreadCount}
+                            </span>
+                        )}
+                    </div>
+                </PopoverTrigger>
+            </IconTooltip>
             <PopoverContent className="w-96 p-0">
                 <NotificationOverlay notifications={data} />
             </PopoverContent>

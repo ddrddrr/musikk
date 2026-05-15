@@ -3,23 +3,25 @@
 !include ../../_style.puml
 
 title Song queue - component hierarchy and IO boundary
-' Source: src/frontend/musikk/src/features/song-queue/
 
 package "Presentation" {
     [SongQueue\n(now playing +\nqueue + clear)] as song_queue
+    [SongQueueActions\n(per-row)] as queue_row_actions
     [SongQueuePlayButton] as queue_play_button
 }
 
-song_queue --> queue_play_button
+song_queue --> queue_row_actions
+queue_row_actions --> queue_play_button
 
 package "State (hooks)" {
     [useQueue / useQueueClear] as queue_api_hooks
-    [useQueuePlayHandler] as queue_play_handler
-    [useQueueWsEvents] as queue_ws_events
+    [usePlaySong / usePlayCollection /\nuseAddSong / useAddCollection /\nuseMoveToQueue / useQueueNext / useQueuePrev] as queue_mutations
+    [useQueuePlayHandler\n(per-row skipTo)] as queue_play_handler
+    [useQueueWsEvents\n(global, via useWebSocketListeners)] as queue_ws_events
 }
 
-song_queue ..> queue_api_hooks : uses
-song_queue ..> queue_play_handler : uses
+song_queue ..> queue_api_hooks : useQueue / useQueueClear
+song_queue ..> queue_api_hooks : removeItem (inline mutation)
 queue_play_button ..> queue_play_handler : uses
 
 package "External providers" as external_providers {
@@ -31,13 +33,12 @@ song_queue ..> playback_context : reads (now playing)
 cloud "Backend\n/api/v1" as backend
 queue "WSClient\nuser group" as ws
 
-' --- HTTP ---
-queue_api_hooks ..> backend : GET /song-queue\nPOST /song-queue/clear\nPOST /song-queue/append-random
-queue_play_handler ..> backend : POST /song-queue/set-head-song/{uuid}\nPOST /song-queue/set-head-collection/{uuid}\nPOST /song-queue/shift-head[/{uuid}]\nPOST /song-queue/shift-head-backwards
-song_queue ..> backend : POST /song-queue/remove-node/{uuid}\nPOST /song-queue/reorder\nPOST /song-queue/move-to-queue\nPOST /song-queue/add-song/{uuid}\nPOST /song-queue/add-collection/{uuid}
+queue_api_hooks ..> backend : GET /song-queue\nPOST /song-queue/clear
+queue_play_handler ..> backend : POST /song-queue/shift-head/{uuid}
+queue_mutations .up.> backend : POST /song-queue/* (set-head, add, move, shift)
+song_queue ..> backend : POST /song-queue/remove-node/{uuid}
 
-' --- WS (events received) ---
-queue_ws_events <.. ws : queue.changed
+queue_ws_events <... ws : queue.changed
 queue_ws_events ..> queue_api_hooks : invalidates queueKeys.base
 
 @enduml

@@ -1,0 +1,91 @@
+\chapter{User Testing and Further Improvements}\label{ch:user_testing_improvements}
+
+% TODO: user testing outcomes
+
+
+\section{Further Improvements}\label{sec:improvements}
+This section lists known gaps and possible next steps for the
+app.
+
+
+\subsection{Out-of-Scope Items}\label{subsec:imp_out_of_scope}
+On the Frontend, several features are missing. There is no
+mobile layout and no offline Playback, and the interface is
+English-only. Accessibility is also only partial. For example,
+some clickable elements use \texttt{div} instead of
+\texttt{button}, and the custom controls have no Accessible Rich
+Internet Applications~(ARIA) roles or labels. There is also no
+Digital Rights Management~(DRM) mechanism.
+
+In addition, a few Backend features have no Frontend
+counterpart. The password reset and password change endpoints
+exist under \path{/api/v1/auth/}, but the SPA has no UI for
+them. Similarly, the Queue view does not support drag-to-reorder,
+even though the Backend has a reorder endpoint.
+
+Finally, production troubleshooting relies on reading the Daphne
+and Celery logs over SSH\@. There is no error reporter, no metrics
+pipeline, and no structured log format.
+
+
+\subsection{Search and Recommendations}\label{subsec:imp_search}
+\hyperref[sec:search]{Search} ranks results only by how close the
+strings match, and does not use any signal from the User's
+listening history. A mix of trigram and full-text search, with a
+small re-ranker based on what the User has played, could improve
+the results.
+
+In addition, there is no Recommendations engine and the Backend
+endpoint that adds random Songs to the Queue currently returns
+\texttt{HTTP 501}.
+
+
+\subsection{Playback Synchronization}\label{subsec:imp_clock}
+The clock calculation method from
+\hyperref[sec:playback]{Playback and Device Handling} only takes
+the difference between the client and server clocks at receive
+time. As a result, on slow networks the estimate is off by about
+the one-way packet trip time. A better method would record both
+the send time and the receive time of each broadcast, use half
+the round-trip as the offset, and average several samples (this
+is the approach NTP uses).~\parencite{rfc5905_ntp}
+
+
+\subsection{Backend Refactors}\label{subsec:imp_be_refactors}
+The three Notification managers send
+\texttt{notifications.changed} inside
+\texttt{Manager.create}. As a result, the data layer is coupled
+to the WebSocket layer. The broadcast call should move into the
+view or a small service object, the same way other parts of the
+app do it.
+
+A similar problem appears in the
+\hyperref[sec:publications]{Publications} section, which uses
+one Django model for Posts, Collection Comments, Chat messages,
+and Replies. The data is similar, but the behavior for each
+kind is very different. For example, Collection Comments are
+only allowed on public non-draft Collections, and Posts are only
+allowed on the User's own Feed. Chat messages, in turn, need
+\texttt{Chat} and \texttt{ChatMember} support. The API is
+already split into one endpoint per kind. Therefore, the next
+step is to split the model in the same way Notifications were
+split.
+
+
+\subsection{Frontend Cache Strategy}\label{subsec:imp_cache}
+Almost every WebSocket event handler on the Frontend calls\\
+\texttt{queryClient.invalidateQueries}, even when the event
+payload already has the new state. As a result, every change
+forces a refetch and shows a short loading state. Where the
+payload is enough, the handler should call
+\texttt{queryClient.setQueryData} instead, and keep invalidation
+only as a fallback. This would remove the extra round-trip.
+
+
+\subsection{Test Coverage}\label{subsec:imp_tests}
+Backend test coverage is not high. The Notifications app has no
+tests at all, the audio conversion tests only cover lossless
+source inputs, and the endpoints are not tested thoroughly.
+Moreover, the Frontend has no automated tests at all. Component
+tests with React Testing Library and some smoke tests for the
+main flows would be a good next step.

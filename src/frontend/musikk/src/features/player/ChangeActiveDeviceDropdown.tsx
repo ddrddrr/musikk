@@ -8,6 +8,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/features/ui/dropdown-menu.tsx";
+import { IconTooltip } from "@/features/ui/tooltip";
 import { Computer } from "lucide-react";
 
 export function ChangeActiveDeviceDropdown() {
@@ -15,11 +16,13 @@ export function ChangeActiveDeviceDropdown() {
     const handleSwitchDevice = useHandleSwitchDevice();
     return (
         <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
-                    <Computer className="size-5" strokeWidth="2" />
-                </Button>
-            </DropdownMenuTrigger>
+            <IconTooltip label="Devices" side="top">
+                <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" aria-label="Devices">
+                        <Computer className="size-5" strokeWidth="2" />
+                    </Button>
+                </DropdownMenuTrigger>
+            </IconTooltip>
             <DropdownMenuContent align="end">
                 {deviceList.length === 0 && (
                     <EmptyState

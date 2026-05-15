@@ -1,5 +1,0 @@
-\begin{MintedVerbatim}[commandchars=\\\{\}]
-ffmpeg\PYG{+w}{ }\PYGZhy{}i\PYG{+w}{ }flac\PYGZhy{}static\PYGZhy{}\PYGZlt{}uuid\PYGZgt{}.mp4\PYG{+w}{ }\PYG{l+s+se}{\PYGZbs{}}
-\PYG{+w}{    }\PYGZhy{}filter:a\PYG{+w}{ }\PYG{n+nv}{ebur128}\PYG{o}{=}\PYG{n+nv}{peak}\PYG{o}{=}\PYG{n+nb}{true}\PYG{+w}{ }\PYG{l+s+se}{\PYGZbs{}}
-\PYG{+w}{    }\PYGZhy{}f\PYG{+w}{ }null\PYG{+w}{ }\PYGZhy{}
-\end{MintedVerbatim}

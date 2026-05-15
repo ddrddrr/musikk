@@ -1,13 +1,16 @@
 \chapter{Implementation}\label{ch:implementation}
 
-This chapter goes over the built application, explaining
-the choices behind each feature, and
-focuses on what is not clear from the diagrams or the source code
-itself. Structure and naming that the diagrams or code already show
-are not repeated in the text. The high-level system overview is in
-\path{text/diagrams/HighLevelSystem.png}, the Backend and Frontend
-architectures in \path{text/diagrams/BackendSystem.png} and
-\path{text/diagrams/FrontendSystem.png}.
+This chapter goes over the built application and explains the choices
+behind each feature. It focuses on what is not clear from the diagrams
+or the source code. The reader is expected to go through the diagrams
+and the code first, and then read the sections that explain
+non-obvious choices. Structure and naming that the diagrams or code
+already show are not repeated in the text. The high-level system
+overview is in \path{text/diagrams/HighLevelSystem.png}, the Backend
+and Frontend architectures in \path{text/diagrams/BackendSystem.png}
+and \path{text/diagrams/FrontendSystem.png}, and the top-level
+Frontend component hierarchy in
+\path{text/diagrams/FrontendComponentHierarchy.png}.
 
 
 \section{Stack}\label{sec:stack}
@@ -16,7 +19,7 @@ ASGI server because django-channels needs ASGI for WebSocket
 support~\parencite{daphne}. The HTTP API uses Django REST framework
 with django-filter~\parencite{django_filter}, authentication uses
 dj-rest-auth~\parencite{dj_rest_auth} on top of django-allauth, and
-background work runs on Celery. Database is PostgreSQL 17,
+background work runs on Celery. The database is PostgreSQL 17, and
 Redis~\parencite{redis} is used as both the cache and the data layer for
 django-channels. Dependencies are managed with uv~\parencite{uv}.
 
@@ -32,7 +35,8 @@ Player~\parencite{shaka_player} for DASH and HLS streaming.
 
 Deployment is a simple Docker Compose behind a Caddy
 reverse proxy on a Hetzner VPS, with Mailgun for mail services
-and PorkBun for the domain.
+and Porkbun for the domain.\footnote{The deployed application is
+available at \url{https://musikk.stream}.}
 
 Full dependency lists are located in
 \path{src/backend/pyproject.toml} and
@@ -45,52 +49,39 @@ that prepares it for Streaming. The Streaming Protocols are covered
 first, since the rest of the pipeline has to match what they allow.
 
 This section stays at the level of what each stage does and what
-parameters it uses. The rationale behind the choices and the per-flag breakdown
-of every call are in the \hyperref[app:audio_details]{Audio Processing
-Pipeline Details} appendix. Anything mentioned below but not explained
-in detail is covered there.
+parameters it uses. The reasoning behind the choices and the per-flag
+breakdown of every call are in the \hyperref[app:audio_details]{Audio
+Processing Pipeline Details} appendix. Anything mentioned below but
+not explained in detail is covered there.
 
 \subsection{Streaming Protocols}
 Two protocols are used: MPEG-DASH~\parencite{dash} on devices that
-support Media Source Extensions, and HLS~\parencite{hls} on iOS, which
-does not support MSE\@. The basic principles behind both protocols
-were covered in the \hyperref[it:streaming]{Segmented HTTP Streaming}
-section.
-
-Both protocols expect audio split into short chunks paired with a
-manifest. The Packaging step is the one that produces those.
+support Media Source Extensions~(MSE), and HLS~\parencite{hls} on iOS,
+which does not support MSE that DASH needs. The basic principles
+behind both were covered in the \hyperref[it:streaming]{Segmented HTTP
+Streaming} section. Both protocols expect audio split into short
+chunks paired with a manifest, produced by the Packaging step
+described next.
 
 \subsection{Packaging}
 Packaging cuts the transcoded audio into short fragmented MP4 segments
 and generates a DASH manifest (\texttt{*.mpd}) and an HLS master
 playlist (\texttt{*.m3u8}) that point at them.~\parencite{packaging_def}
-The segments follow Common Media Application Format~(CMAF), so a single
-set of chunks works for both protocols. The output is one
-initialization segment (\texttt{*\_init.mp4}) per representation and a
-sequence of media segments (\texttt{*.m4s}).
+The segments follow Common Media Application Format~(CMAF), so one set
+of chunks works for both protocols.
 
-Packaging only arranges existing audio. The CLI tools that produce and
-analyze that audio in the first place are introduced next.
-
-\subsection{Processing Tools}
-Three CLI tools run the pipeline: FFmpeg~\parencite{ffmpeg} for
-Transcoding and audio analysis, FFprobe (shipped with FFmpeg) for
-reading source metadata, and Shaka Packager~\parencite{shaka_packager}
-for the Packaging step. FFmpeg can package too, but its output had
-compatibility issues with Shaka Player~\parencite{shaka_player}, used
-on the Frontend for Playback, so a separate packager was chosen.
-
-With FFmpeg in place as the encoder and analyzer, the Transcoding
-configuration it runs can be described.
+FFmpeg can also handle packaging. However, its output had
+compatibility issues with Shaka Player (the
+Frontend's Playback library), so a separate packager was chosen.
 
 \subsection{Transcoding}
 Transcoding decodes the source audio and re-encodes it into the target
 codecs and bitrates. Raw audio formats such as WAV are too large for
-Streaming, for example a 3-minute stereo 24-bit 44.1\,kHz recording is
+Streaming, for example, a 3-minute stereo 24-bit 44.1\,kHz recording is
 roughly 50\,MB\@. Lossless FLAC and lossy AAC/HE-AACv2 were selected as
 the output codecs, since HLS only allows a small set of audio
 codecs.~\parencite{apple_hls_specs_audio} The AAC encoder used is
-\texttt{libfdk\_aac}, chosen over the other AAC encoders shipped with
+\texttt{libfdk\_aac}, chosen over the other AAC encoders bundled with
 FFmpeg for its quality and licensing terms.
 
 The output configuration was chosen based on existing research:~\parencite{codec_evaluation_1, codec_evaluation_2,
@@ -104,107 +95,74 @@ Multiple bitrates support adaptive streaming. The AAC tiers use
 Constant Bitrate~(CBR), so the Frontend's Adaptive Bitrate logic has a
 stable per-tier bandwidth to pick from.
 
+Transcoding is done with one FFmpeg process per output tier in parallel,
+through a thread pool sized to the number of tiers. Threads are used
+rather than processes because FFmpeg itself is multi-threaded inside
+each subprocess, so the Python side only waits on the subprocess to
+finish.
+
 Transcoding needs a clean input with reasonable parameters. The Audio
 Preprocessing step described next ensures that each upload is valid
-and within the proper limits, and also captures the metadata of the result.
+and within the proper limits, and also captures the metadata of the
+result.
 
 \subsection{Audio Preprocessing}
 \label{subsec:audio_preprocessing}
-Before Transcoding, the upload is validated and normalized. After
-Transcoding, the loudness is measured. The sub-blocks below cover
-input validation, metadata extraction, the normalization filter chain,
-and the loudness measurement.
+Audio Preprocessing has two parts. Before Transcoding, the upload is
+validated and normalized. After Transcoding, the loudness is measured.
 
-\subsubsection*{Input validation}
-The upload passes through a chain of checks. The file-size and MIME checks
-run on the raw bytes. Other checks use values reported by FFprobe. Together
-they restrict the worst-case storage and Transcoding time of a single upload:
-\begin{itemize}
-    \item \textbf{MIME type}, inspected with
-    \texttt{python-magic}~\parencite{pythonmagic}, must be \texttt{audio/*}
-    and belong to an allow-list of supported subtypes.
-    \item \textbf{Codec}, reported by FFprobe, must belong to an allow-list
-    of stable codecs.
-    \item \textbf{File size}: up to 2\,GB, roughly a 2-hour 24-bit,
-    48\,kHz stereo WAV\@.
-    \item \textbf{Duration}: up to 7200\,s (2\,h).
-    \item \textbf{Sample rate}: 1\,Hz to 384\,kHz.
-    \item \textbf{Channel count}: 1 to 8.
-\end{itemize}
-The allow-lists are defined in \path{streaming/audio/config.py}.
+\subsubsection*{Input Validation}
+The upload passes through a chain of checks. The file-size and MIME
+checks run on the raw bytes. The rest read values from FFprobe: codec
+allow-list, duration, sample rate, and channel count. The exact
+limits and the allow-lists are listed in the
+\hyperref[app:audio_details]{Audio Processing Pipeline Details}
+appendix.
 
-\subsubsection*{Input metadata extraction}
+\subsubsection*{Input Metadata Extraction}
 FFprobe reads the source codec, sample rate, channel count, bit depth,
 duration, and bitrate. These values are reused by the input validation
 above. They also narrow which outputs the Transcoding step produces:
 FLAC is skipped for lossy sources, and AAC tiers whose target
 bitrate is above the source bitrate are dropped.
 
-\subsubsection*{Normalization and loudness}
-Three normalization filters run as a single FFmpeg \texttt{-af} chain
-applied inside every Transcoding subprocess. A separate loudness
-measurement then runs after Transcoding. The steps are:
+\subsubsection*{Normalization}
+Three normalization filters run as a part of the Transcoding command:
 \begin{itemize}
     \item \textbf{Channel normalization}. Sources with three or more
     channels are downmixed to stereo. Mono and stereo inputs are kept
     as-is.
-    \item \textbf{Sample rate normalization}. Each source is resampled to
-    the base of its rate family (44.1\,kHz or 48\,kHz). Files below
+    \item \textbf{Sample rate normalization}. Each source is resampled
+    to the base of its rate family (44.1\,kHz or 48\,kHz). Files below
     44.1\,kHz are kept as-is. Non-family rates default to 44.1\,kHz.
-    \item \textbf{Bit depth conversion}. All audio is converted to signed
-    16-bit samples, since \texttt{libfdk\_aac} does not accept higher
-    precision.
-    \item \textbf{Loudness measurement}. After Transcoding, FFmpeg's
-    \texttt{ebur128} filter produces an integrated value in Loudness Units
-    relative to Full Scale~(LUFS) and a true peak in dBTP\@. The
-    measurement runs on the FLAC output if it was produced, otherwise on
-    the first AAC output. Both values are stored on the Song and used by
-    the Frontend player to apply a consistent Playback gain.
+    \item \textbf{Bit depth conversion}. All audio is converted to
+    signed 16-bit samples, since \texttt{libfdk\_aac} does not accept
+    higher precision.
 \end{itemize}
 
+\subsubsection*{Loudness Measurement}
+After Transcoding, FFmpeg's \texttt{ebur128} filter produces an
+integrated value in Loudness Units relative to Full Scale~(LUFS) and
+a true peak in dBTP\@. The measurement runs on the FLAC output if it
+was produced, otherwise on the first AAC output. Both values are
+stored on the Song and used by the Frontend player to apply a
+consistent Playback gain.
+
 Once Transcoding and Packaging finish, the original upload and the
-intermediate transcoded MP4s are removed. Only the packaged segments,
-manifests, and the loudness values stored on the Song row survive.
+intermediate transcoded MP4s are removed, since they are not needed for Playback.
+If a pipeline step fails, the previously executed steps are rolled back in
+reverse order, clearing the per-run temporary directory and removing
+any output generated during the processing.
 
-The Backend code that runs all of these stages is described next.
-
-\subsection{Backend Pipeline}\label{subsec:backend_pipeline}
-The Backend code is under
-\path{src/backend/musikk/streaming/audio/}, the class layout is
-in \path{text/diagrams/AudioClassDiagram.png}.
-
-Pre-pipeline validation (the file-size, MIME, and FFprobe-based checks
-from the previous subsection) is defined in \texttt{validators.py} and runs before any
-audio processing is started. The pipeline itself, in \texttt{processing\_pipeline.py},
-holds a shared \texttt{ProcessingContext} which is used by
-\texttt{Step} instances, so it is easy to add new steps or change existing.
-The configured step chain runs \texttt{FFmpegStep},
-then \texttt{LoudnessMeasurementStep}, then \texttt{ShakaPackagerStep}.
-Each \texttt{Step} hands off to a CLI command wrapper:
-\texttt{FFmpegStep} calls \texttt{FFMPEGFull}, and
-\texttt{ShakaPackagerStep} calls \texttt{ShakaPackagerMPDAndM3U8}.
-Each step has a \texttt{rollback} method. If a step raises, the
-previously executed steps are rolled back in reverse order. The
-rollback clears the per-run temporary directory and removes any output
-already written to Django storage.
-
-\texttt{FFmpegStep} runs one FFmpeg subprocess per output tier in
-parallel via a \texttt{ThreadPoolExecutor} sized to the number of
-selected tiers. Threads are used rather than processes because FFmpeg
-itself is multi-threaded inside each subprocess, so the Python side
-only waits on the subprocess to finish.
-
-When this pipeline is started, and how its
-status reaches the Frontend, is covered in the Audio Upload section.
+When this pipeline is started, and how its status reaches the
+Frontend, is covered in the \hyperref[sec:audio_upload]{Audio Upload}
+section.
 
 \subsection{Frontend Playback}
-As mentioned in the \hyperref[sec:stack]{Stack} section, Shaka Player is used for Streaming on the Frontend.
-It is an open-source JavaScript player for DASH and HLS that reads the
-Streaming manifests, fetches segments over HTTP, and passes them into an
-HTML audio element, picking the audio tier that matches the available
-bandwidth. That audio element is owned by the
-\texttt{AudioPlayerController} described in the Playback and Device
-Handling section.
+As mentioned in the \hyperref[sec:stack]{Stack} section, Shaka Player
+handles DASH and HLS playback on the Frontend. The audio element it
+controls is owned by the \texttt{AudioPlayerController}, described in
+the Playback and Device Handling section.
 
 This concludes the audio pipeline. The next section covers the
 WebSocket layer.
@@ -218,80 +176,57 @@ connection lifecycle is in
 \path{text/diagrams/WebsocketLifecycle.png}, and the class layout in
 \path{text/diagrams/WebsocketsClassDiagram.png}.
 
-Two WS message-related terms are used throughout the text: \textit{Events} are messages sent
+Two WebSocket message-related terms are used throughout the text: \textit{Events} are messages sent
 from the server to the client and \textit{Actions} are messages sent from the client to the server.
 
 \subsection{Backend Handling}
-% say about multiplexing on a single connection
-All real-time features share a single connection at \path{/ws/user}.
-With one connection per feature, additional message ordering logic would
-need to be implemented: for example, a Playback Device switch and a Playback
-activation actions could arrive in any order and it would not be clear which one to process first.
-% TODO: probably cite
-In addition, each extra connection also adds memory and file-descriptor overhead
-on the server, can run into the browser's connection limit,
+All real-time features are multiplexed over a single connection at
+\path{/ws/user}. With one connection per feature, extra message
+ordering logic would need to be implemented. For example, a Playback
+Device switch and a Playback activation could arrive in any order, and
+it would not be clear which one to process first.
+In addition, each extra connection adds memory and file-descriptor
+overhead on the server, can run into the browser's connection limit~\parencite{browser_connection_limit},
 and needs its own reconnect handling on the Frontend.
 
-As discussed in \hyperref[sec:server_client_communication]{Server-Client Communication},
-WebSocket support is added via \texttt{django-channels}.
-The \texttt{BaseConsumer} class manages connections and is instantiated once per connection.
+As discussed in
+\hyperref[sec:server_client_communication]{Server-Client Communication},
+WebSocket support is added via \texttt{django-channels}. The
+\texttt{BaseConsumer} class manages connections and is instantiated
+once per connection.
 
-For broadcasts to multiple connected clients, django-channels provides
-groups. A group is a set of consumers instances (connections), and a message send
-to the group reaches every member.
+Two kinds of broadcast groups are used. The User's own group is used
+for private messages such as the Playback Device list, Notifications,
+and Liked Songs changes. All of the User's tabs join this group, so a
+private broadcast reaches every tab. Named topic groups are joined by
+several Users and used for shared messages: Chat messages, Collection
+Comments, and typing indicators.
 
-Two kinds of groups are used. The User's own group
-\texttt{user\_<uuid>}, which transmits ``private'' messages:
-Playback Device list, Notifications, Liked Songs change and other relevant events.
-A User with several tabs (devices) open uses one consumer per tab, and all of them
-are joined to the same \texttt{user\_<uuid>} group, hence a ``private''
-broadcast reaches every tab.
-Named topic groups (\texttt{topic.<prefix>.<id>}) can be joined by several different Users
-at once and are used for shared messages: Chat messages, Collection Comments,
-and typing indicators.
-
-Actions are handled by WSActionHandler subclasses.
-Each handler defines a maps of action names to the methods that run them.
-The consumer then dispatches every incoming action to the handler method registered for its name.
-% TODO: mb say that this could be improved eg with registry pattern because right now there is reverse coupling
-
-Events are sent through two helpers, \texttt{send\_ws\_event} for a
-group and \texttt{send\_ws\_event\_to\_channel} for a single channel,
-so any part of the Backend can emit them. DRF views, Celery tasks, and
-Django signal handlers can call these helpers directly or use the special Broadcaster
-classes introduced in % TODO: link to the playback section
-
-When the connection closes, each handler runs an
-\texttt{on\_disconnect} hook so per-feature state is released: joined
-topic groups are dropped, the registered Playback Device is cleared,
-and so on.
-
-A Playback event can also include an excluded device id, in
-which case the consumer skips delivery to the device with the specified id.
-This is useful, since the device that sends an update already is in the updated state
-and does not need a WS event with the new data from the server.
+A Playback event can include an excluded device id, in which case the
+consumer skips delivery to that device. This is useful because usually the
+device that sent the update already has the new state and does not
+need to receive its own event back.
 
 \subsection{Frontend Handling}
-Frontend opens a single connection to \path{/ws/user}.
-Authentication is implicit, the browser sends the session cookie along
+The Frontend opens a single connection to \path{/ws/user}.
+Authentication is implicit: the browser sends the session cookie along
 with the upgrade request. The WS-handling code is split into two
 classes, \texttt{WSClient} and \texttt{WebSocketManager}.
 
-Reconnect logic is implemented, so a tab that is put to the background
-or a brief network outage does not require a page refresh
-or manual actions from the user.
-Reconnects use exponential backoff with a 30\,s ceiling and random
-jitter. The jitter prevents many tabs from reconnecting at the same
-time after an outage.
+The client also implements reconnect logic, so a tab that is put to the
+background or a brief network outage does not require a page refresh
+or manual actions from the User. Reconnects use exponential backoff
+with a 30\,s ceiling and random jitter. The jitter prevents many tabs
+from reconnecting at the same time after an outage.
 
 \texttt{WSClient} wraps the native \texttt{WebSocket} interface.
-Most actions go through the \texttt{send} method, which queues
-them and flushes the queue when the connection is open.
-An action issued while the connection is down is therefore not lost, and the order
-of queued actions is preserved on flush. The exception is the periodic
-Playback position sync action, it is sent only if the connection
-is open. Otherwise, for example, stale seek actions would be replayed on reconnect,
-even if the Playback position has already moved and stabilized.
+Outgoing actions are queued and flushed when the connection is open.
+An action issued while the connection is down is therefore not lost,
+and the order of queued actions is preserved on flush. The exception
+is the periodic Playback position sync, which is sent only if the
+connection is open. Otherwise stale seek actions could be replayed
+on reconnect, even if the Playback position has already moved and
+stabilized.
 
 Named topic subscriptions are handled via the \texttt{WSClient} as well.
 Subscriptions are reference-counted: only the first topic
@@ -308,7 +243,7 @@ Frontend no longer needs the topic.
 refcount. \texttt{connect} returns the existing client and increments
 the counter. \texttt{disconnect} closes the connection only when the
 counter reaches zero. Without the refcount, one subscriber unmounting
-(including the React's StrictMode double-mount in development)
+(including React's StrictMode double-mount in development)
 would tear down the connection shared with the others, drop their
 topic subscriptions, and force a fresh handshake plus re-subscription
 on the next mount.
@@ -317,10 +252,11 @@ Feature code does not touch either class directly. Instead it uses
 hooks (e.g., \texttt{useChatWsEvents}) that subscribe to a topic and
 register listeners for the matching events.
 
-WebSocket connection is also used for Frontend cache invalidation.
-The tab which changes the data invalidates the affected React Query
-key on mutation success, and every other open tab does the same when
-the server event signifying that new data is available arrives.
+The WebSocket connection is also used for Frontend cache invalidation.
+The tab that changes the data invalidates the affected React Query
+key on mutation success. Every other open tab invalidates the same key
+when the server event for new data arrives. The sequence diagram is in
+\path{text/diagrams/WsCacheInvalidation.png}.
 
 
 \section{User Management}
@@ -337,9 +273,9 @@ A single \texttt{BaseUser} model covers every account, with a
 An Artist is not a separate subclass, only a role value, since there are currently
 no Artist-only fields (a separate database table is not needed).
 
-Each User is uniquely identified by their email. The
-\texttt{display\_name} is not unique and defaults to a random string,
-so a new account always has a usable name before the User picks one.
+The \texttt{display\_name} is not unique and defaults to a random
+string, so a new account always has a usable name before the User
+picks one.
 
 User-to-User relations are modelled by a single \texttt{UserFollow}
 table. Friendship is not a separate model. A Friend is inferred from a
@@ -362,26 +298,25 @@ reaches the owner of the account.
 
 A follow does more than insert a row. The POST handler is idempotent
 through \texttt{get\_or\_create}, so a double-click does not create a
-duplicate notification.
-
-A successful follow also creates a \texttt{FollowerNotification} that appears in the
-target's Notifications. Unfollow is a DELETE on the same path. It
-broadcasts \texttt{USER\_UNFOLLOWED} to both groups and removes the
-matching \texttt{FollowerNotification}, so the target's Notification window
+duplicate notification. A successful follow also creates a
+\texttt{FollowerNotification} that appears in the target's
+Notifications. Unfollow is a DELETE on the same path. It broadcasts
+\texttt{USER\_UNFOLLOWED} to both groups and removes the matching
+\texttt{FollowerNotification}, so the target's Notification window
 does not keep an invalid entry.
 
 Three list endpoints under \path{/users/<uuid>/} (\path{friends},
-\path{followers}, \path{followed}) are gated by the \texttt{IsSelfOrFriend}
-permission, so the connection lists are visible only to the owner or
-to one of their Friends (the social relations of a User are not
-considered public).
+\path{followers}, \path{followed}) are protected by the
+\texttt{IsSelfOrFriend} permission, so the connection lists are
+visible only to the owner or to one of their Friends. The social
+relations of a User are not considered public.
 
 \subsection{Frontend}
 \texttt{ProfilePage} covers both the own-profile and other-User views
 with one component, switching between an ``Edit Profile'' dialog and a
 ``Follow/Unfollow'' button based on whose UUID is in the route. The
 page layout is otherwise identical between the two views, so a split
-into two components would mostly mean keeping two copies in sync.
+into two components would mainly duplicate code and need to be kept in sync.
 
 
 \section{Account Creation and Authentication}
@@ -398,41 +333,33 @@ is in \path{text/diagrams/FrontendAuth.png}.
 The Backend does not implement its own authentication
 stack, since session handling, password validation, and email verification
 are security-sensitive and easy to get wrong.~\parencite{dont_write_your_own_auth}
-Instead authentication is built using \texttt{django-allauth} and REST endpoints
+Instead authentication is built using \texttt{django-allauth}~\parencite{django_allauth} and REST endpoints
 on top of allauth are provided by
 \texttt{dj-rest-auth}~\parencite{dj_rest_auth} (located in \path{/api/v1/auth/}).
 
-allauth is configured to identify Users by email, with
-\texttt{ACCOUNT\_LOGIN\_METHODS = ["email"]} and the username field
-disabled. Sign-up therefore takes only email, password, and a password
-confirmation. \texttt{BaseRegisterSerializer} adds a write-only
+allauth is configured to identify Users by email, and the username
+field is disabled. Sign-up therefore takes only email, password, and
+a password confirmation. \texttt{BaseRegisterSerializer} adds a write-only
 \texttt{is\_artist} boolean and sets the new User's \texttt{role} to
 ``Artist'' when the flag is true, so the role choice is set during
 sign-up rather than requiring a separate upgrade step.
 
-A custom \texttt{BaseAccountAdapter} class overrides the default authentication
-flow. \texttt{clean\_email} rejects an email that already exists
-case-insensitively, since the stock allauth check is case-sensitive
-and would let \texttt{user@x.com} and \texttt{User@X.com} register as
-separate accounts. RFC 5321 permits the local part of an address to be
-% TODO cite
-case-sensitive, but states that relying on it is a bad practice.
-In addition, \texttt{get\_email\_confirmation\_url} returns a Frontend URL instead
-of a predefined HTML template\@.
+A custom \texttt{BaseAccountAdapter} class overrides the default
+authentication flow. \texttt{clean\_email} rejects an email that
+already exists case-insensitively, since the stock allauth check is
+case-sensitive and would let \texttt{user@x.com} and
+\texttt{User@X.com} register as separate accounts, which RFC 5321
+advises against.~\parencite{rfc5321}
 
 Email verification is set to mandatory, i.e., a new account
 exists in the database immediately after registration, but
 login is blocked until the link in the verification email has been
 opened.
 
-Sessions use the \texttt{cached\_db} backend. Each session is written
-to the database and also kept in Redis, so lookups for currently active
-clients avoid a database query.
-
 \subsection{Frontend}
 Two axios clients are configured in
 \path{src/frontend/musikk/src/api/axiosConf.ts}. The split exists
-because the authenticated client defines a response processing step that
+because the authenticated client defines a response interceptor that
 triggers a global logout on 401, which would loop on the login request.
 Both clients share a request interceptor that copies the
 \texttt{csrftoken} cookie into the \texttt{X-CSRFToken} header on
@@ -443,14 +370,8 @@ The 401 handler on the authenticated client uses a shared
 directly. The reference is set inside an effect in
 \texttt{AuthProvider} and cleared on unmount. This keeps the axios
 module free of React imports and avoids a full-page redirect, which
-would remount the app and lose any operations that are currently being processed
-before the logout can finish.
-
-% TODO: move later to the improvements section along with otjer stuff
-%The Backend also exposes password reset and password change endpoints
-%under \path{/api/v1/auth/}, but the SPA does not currently expose UI
-%for either, so these flows are reachable only through direct API calls
-%today.
+would remount the app and lose any in-progress operations before the
+logout can finish.
 
 The next section covers the main objects Users interact with:
 Songs and Collections.
@@ -459,9 +380,10 @@ Songs and Collections.
 \section{Songs and Collections}\label{sec:songs_collections}
 This section covers the Song/Collection models and their Author relations.
 The Backend code is located under \path{src/backend/musikk/streaming}.
-The Frontend code is split across the \path{songs/} and \path{collections/}
-subdirectories under \path{src/frontend/musikk/src/features/}.
-The class diagram is in \path{text/diagrams/StreamingClassDiagram.png}.
+The Frontend code is split across the \path{songs/}
+and \path{collections/} subdirectories
+under \path{src/frontend/musikk/src/features/}.
+See \path{text/diagrams/StreamingClassDiagram.png} for the class diagram.
 
 The audio pipeline fields on Song and the Album upload flow are covered
 in the \hyperref[sec:audio_upload]{Audio Upload} section. Playback
@@ -469,27 +391,31 @@ Queue design is covered in \hyperref[sec:song_queue]{Song Queue} and
 Playback logic in \hyperref[sec:playback]{Playback and Device Handling}.
 
 \subsection{Data Model}
-\texttt{BaseSong} represents the literal Song object, i.e., the fields that make each
-song playable and identifiable: title, description, image, \texttt{draft}
-flag and the paths to the streaming manifests.
+\texttt{BaseSong} holds the fields that make each Song playable and
+identifiable: title, description, image, \texttt{draft} flag, and the
+paths to the streaming manifests.
 
-The app has only one Song container, the Collection class. It has four kinds,
-Playlist, Album, History, and Liked Songs, which are discriminated by a string field,
-the same pattern as the \texttt{role} field on \texttt{BaseUser}.
-This makes it possible to reuse one set of retrieve, list,
-and ordering operations, and only one Collection page component on the
-Frontend that is reused for all four kinds.
-% TODO: say why its fine for collections(the one model) and bad for notifications in the improvements section
+The app has only one Song container, the Collection class. It has
+four kinds, Playlist, Album, History, and Liked Songs, which are
+discriminated by a string field, the same pattern as the
+\texttt{role} field on \texttt{BaseUser}. This makes it possible to
+reuse one set of retrieve, list, and ordering operations, and only
+one Collection page component on the Frontend for all four kinds.
+All four kinds share the same fields and the same operations, so the
+single-model approach works well here. The same shape did not hold
+for Notifications, which are split into separate models in the
+Notifications section.
 
 \texttt{CollectionSong} pairs a \texttt{BaseSong} with a Collection at
 an integer \texttt{position}. It also serves as the public identifier
-of a Song for most of the API endpoints. E.g., \path{/songs/<uuid>} resolves to a
-\texttt{CollectionSong}, not a \texttt{BaseSong}. The reason is that
-most actions on a Song target its slot in a specific Collection, not
-the Song in the abstract. ``Remove from this Playlist'', ``jump to the Album',
-render play button state, etc.
-A URL that accepts \texttt{BaseSong} would have to either also include the
-Collection uuid in every call, or do a lookup to find the row.
+of a Song for most of the API endpoints. For example,
+\path{/songs/<uuid>} resolves to a \texttt{CollectionSong}, not a
+\texttt{BaseSong}. The reason is that most actions on a Song target
+its slot in a specific Collection, not the Song in the abstract.
+Examples include ``Remove from this Playlist'', ``Jump to the Album'',
+and rendering the play button state. A URL that accepts a
+\texttt{BaseSong} would have to either include the Collection UUID in
+every call as well, or do a lookup to find the row.
 
 Authorship is stored in two join tables, \texttt{SongCredit} and
 \texttt{CollectionCredit}. \texttt{SongCredit} restricts the
@@ -500,101 +426,71 @@ accepts any User, since Playlists can be created by regular Users as well.
 The endpoints are listed in
 \path{src/backend/musikk/streaming/api/v1/urls.py}.
 
-The Collection manager exposes the queries that filter on the type
-discriminator: \texttt{.playlists()}, \texttt{.albums()},
-\texttt{.histories()}, \texttt{.liked()}, plus \texttt{.public()} and
-\texttt{.published()}. List views such as User Library, Album by Song,
-and the Liked Collections view use these helpers, so the type filter is
-not repeated in each view.
+The Collection manager exposes per-kind query helpers, so the type
+filter is not repeated in each view that lists Collections.
 
-Liking a Song and adding a Song to a Playlist both create a
-\texttt{CollectionSong} row, however they are exposed as two separate
-endpoints, \path{/liked-songs/add-song/<uuid>} and
-\path{/collections/<uuid>/songs}. The liked-songs Collection is always
-the User's own, so the URL needs only the Song uuid. A Playlist add
-takes any of the User's Playlists in the URL and requires the User to
-own it. The split is mainly there to keep the Frontend cache handling simple.
-The like endpoint emits a dedicated \texttt{LIKED\_SONGS\_CHANGED}
-event, which invalidates a single Frontend query that holds the set
-of liked Song uuids. Every like button reads its state from that set,
-so one update re-renders every instance of button on the page.
-Routing the operation through the generic Playlist endpoint
-would leave like state as a per-row \texttt{is\_liked} flag, and the
-only invalidation signal would be the generic
-\texttt{COLLECTION\_CHANGED} event (this was the original design).
-The same CollectionSong shown in an Album view and the Playback queue
-would then have two stale flags until both queries were updated.
+Liking a Song uses a separate endpoint from the generic Playlist add,
+even though both create a \texttt{CollectionSong} row. This keeps
+Frontend cache handling simple. The like endpoint emits a separate
+\texttt{LIKED\_SONGS\_CHANGED} event that invalidates one query
+holding the set of liked Song UUIDs, so every like button on the page
+re-renders from a single signal. The earlier design routed likes
+through the generic Playlist endpoint, but it left the like state as
+a per-row \texttt{is\_liked} flag, refreshed only by the generic
+\texttt{COLLECTION\_CHANGED} event. As a result, the same Song shown
+in an Album view and the Playback Queue could stay out of sync.
 
 \subsection{Frontend}
-There are two main components which are reused throughout the application:
-\texttt{SongCard} and \texttt{CollectionCard}. Each takes the item to render plus an optional
-\texttt{onClick} callback, a \texttt{size} variant, and a custom class
-name, so that they can be cleanly added to any other component.
-% TODO introduce song container already here?
+Two components, \texttt{SongCard} and \texttt{CollectionCard}, are
+reused throughout the application. Both are written to be embeddable,
+so any other component can include them without extra setup.
 
 
 \section{Audio Upload/Album Creation}\label{sec:audio_upload}
 This section covers the design choices behind the Audio Upload.
 The end-to-end sequence is in
-\path{text/diagrams/AudioUploadFlow.png} and the Frontend component
-hierarchy in \path{text/diagrams/FrontendAudioUpload.png}. The
-Backend view \texttt{CollectionSongCreateView} is at
-\path{src/backend/musikk/streaming/api/v1/views/collections.py}. The
-Celery task \texttt{convert\_audio} is at
-\path{src/backend/musikk/streaming/audio/tasks.py}. The Frontend code
-is under \path{src/frontend/musikk/src/features/album-upload}.
+\path{text/diagrams/AudioUploadFlow.png},
+and the Frontend component hierarchy in
+\path{text/diagrams/FrontendAudioUpload.png}.
+The Backend view \texttt{CollectionSongCreateView} is at
+\path{src/backend/musikk/streaming/api/v1/views/collections.py}.
+The Celery task \texttt{convert\_audio} is at
+\path{src/backend/musikk/streaming/audio/tasks.py}.
+The Frontend code is under
+\path{src/frontend/musikk/src/features/album-upload}.
 
-Audio uploads are modeled as asynchronous jobs because transcoding
-a long file can take minutes. Holding the HTTP request open for that
-long would give Frontend no way to show progress and
-time out behind a reverse proxy. Hence, the view validates the file,
-writes it to a temporary path, creates the Song row with
-\texttt{draft=true}, enqueues a Celery task that does the
-heavy processing ``in the background'', and quickly returns
-\texttt{202 Accepted} with the new Song UUID\@.
-Frontend generates an \textit{operation id} per file and sends it in
-each Song upload request. The Celery task then includes the operation
-id in every WebSocket event it emits, so Frontend can update the
-right Song upload field even when several uploads from the same User
-run in parallel.
+Transcoding a long file can take minutes. The view therefore
+validates the file, writes it to a temporary path, creates the Song
+row with \texttt{draft=true}, enqueues a Celery task, and returns
+\texttt{202 Accepted} with the new Song UUID without waiting for the
+audio processing to finish. Otherwise the HTTP request would either
+time out behind the reverse proxy or block the Frontend from showing
+progress.
 
-The view writes the file to a temporary path instead of passing
-its bytes to the task. Celery serializes task arguments through
-Redis, which keeps every queued message in RAM. A long lossless
-file would therefore sit in the broker until the worker picks it
-up, and a few concurrent uploads could easily fill up broker's memory.
-The view passes only the path to the task, which both processes can
-reach.
+The Frontend generates an \textit{operation id} per upload and sends
+it in the request. The Celery task echoes the id in every WebSocket
+event it emits, so the Frontend can match events to uploads when
+several run in parallel.
 
-Both Frontend and Backend validate the audio file. The Frontend
-checks file size and MIME type before the request, to reject
-obviously invalid files early. The Backend runs the same checks in
-\texttt{validate\_audio}, plus duration, sample rate, channels, and
-codec, before enqueuing the task. The Frontend check is a UX
-shortcut, not a trust boundary. Any client can call the API
-directly, so the Backend check is the one that actually decides if
-the file is accepted.
+The view passes only the temporary path to the task, not the file
+bytes. This is because Celery serializes task arguments through Redis
+and keeps every queued message in RAM, so passing raw bytes would let
+a few concurrent uploads fill the broker's memory.
 
-A Song that is still being processed has no audio data yet, so it
-cannot be played. The Song is therefore created with
-\texttt{draft=true}, and the flag is cleared only after the Celery
-task writes the final audio fields, in one database transaction.
-Public list and retrieve endpoints filter on \texttt{draft=false},
-so a Song that is still processing, or that has failed, is invisible
-to every listing query. Without the flag, every public endpoint
-would need its own status check, and a ``half-built'' Song could leak
-into search results. The Album has the same flag, and the Artist
-publishes the Album (which sets the flag to false)
-with a separate PATCH once every Song is processed.
+A Song that is still processing has no audio data yet. It is
+therefore created with \texttt{draft=true}, and the flag is cleared
+only after the Celery task writes the final audio fields.
+Public list and retrieve endpoints filter on
+\texttt{draft=false}, so a half-built Song is not accessible on the Frontend.
+The Album has the same flag, and the Artist publishes the
+Album with a separate request once every Song is processed.
 
-Cleanup of the Song row is split from the Celery task. The task
-removes the files it created on failure, but leaves the row in
-place, because the Artist may retry a failed Song or leave the
-page mid-upload and come back. If the task deleted the row on
-failure, the Album the Artist is still editing would lose its
-Songs. A separate management command, \texttt{prune\_draft\_albums},
-removes Album rows that have stayed in draft longer than a
-configurable window, together with their Songs and segments (can be ran via cron).
+Data cleanup is split from the Celery task. The task removes the
+files it created on failure, but leaves the row in place, because
+the Artist may retry a failed Song or come back later. A separate
+management command, \texttt{prune\_draft\_albums}, removes Album
+rows that have stayed in draft past a configurable window, together
+with their Songs and segments, and is meant to be run from cron.
 
 This concludes the upload path. The next section covers the Song
 Queue, the structure the User selects Playback Items from.
@@ -608,31 +504,29 @@ the Frontend component hierarchy is in
 for adding a Collection and advancing is in
 \path{text/diagrams/SongQueue.png}.
 
-\subsection{Data structure}
-The Queue supports several frequent operations: insert at a random index,
-reorder, remove an item, pop from the
-front, pop several items up to a certain one, bulk append multiple items,
-and read the upcoming items in order.
-A straightforward doubly linked list in SQL from the first draft of the implementation
-did not work well for most of these. Every insert, reorder, or remove
-cascaded pointer updates, and reading items in order needed linear traversal
-rather than a single range scan. A decimal index approach was chosen based on
-online discussions on this topic~\parencite{llsql1,llsql2}.
-The current model stores each \texttt{QueueItem} with a
-\texttt{Decimal} position and inserts a new item at the midpoint
-between its neighbours. A single insertion is a single DB write and
-reads are a simple range query.
+\subsection{Data Structure}
+The Queue supports several frequent operations: insert at a random
+index, reorder, remove an item, pop from the front, pop several items
+up to a certain one, bulk append multiple items, and read the upcoming
+items in order. The first draft used a doubly linked list in SQL.
+However, this did not work well for most of these operations. Every
+insert, reorder, or remove cascaded pointer updates, and reading items
+in order needed a linear traversal rather than a single range scan. A
+decimal index approach was chosen instead, based on online discussions
+on this topic~\parencite{llsql1,llsql2}. The current model stores each
+\texttt{QueueItem} with a \texttt{Decimal} position and inserts a new
+item at the midpoint between its neighbours. A single insertion is one
+DB write, and reads are a simple range query.
 
 The trade-off is that the position value can run out of precision
 when the User keeps inserting at the same spot. The position column
 is \texttt{Decimal(24, 12)}, so it has 12 fractional digits. This is
 enough for about 30 midpoint inserts between the same two neighbours
-before no number is left to put between them. However, in practice, the User
-does not edit the Queue that deeply most of the time, so this limit is fine for now.
-Appends use a separate \texttt{next\_item\_position} counter
-instead. The counter grows by a fixed gap
-(\texttt{POSITION\_GAP = 1000}), so appended items never land on the
-same position and never use up the fractional digits.
+before no number is left to put between them. However, in practice,
+the User rarely edits the Queue this deeply, so this limit is fine
+for now. Appends use a separate \texttt{next\_item\_position} counter
+instead. The counter grows by a fixed gap, so appended items never
+land on the same position and never use up the fractional digits.
 
 \subsection{Queue and PlaybackContext}
 The Queue itself is split into two classes. \texttt{SongQueue} holds
@@ -644,34 +538,38 @@ then the Context. If no items are left, Playback stops. The split
 lets the User add items on top of a playing Collection, work through
 them, and then return to where the Collection was.
 
-\subsection{QueueSource and lazy filling}
-Bulk-appending a large Collection does not materialize all items up
-front. A \texttt{QueueSource} stores either a single Song or a
-Collection with a cursor, and the \texttt{\_fill} method converts
-Sources into Items in batches when the materialized item count drops
-below \texttt{REFILL\_THRESHOLD = 30}. Each fill creates up to
-\texttt{FILL\_BATCH = 20} items. This keeps the Queue table small
-even when the User queues an entire Album with hundreds of tracks,
-and it lets the Frontend show a stable window of upcoming items
-without paging through thousands of rows.
+\subsection{QueueSource and Lazy Filling}
+Appending a large Collection does not add all items immediately.
+A \texttt{QueueSource} stores either a single Song or a
+Collection with a cursor, and converts Sources into Items in batches
+when the number of Items in the Queue table drops below 30. Each
+fill creates up to 20 items. This keeps the Queue table small even
+when the User queues an entire Album with hundreds of tracks, and
+it lets the Frontend show a stable window of upcoming items without
+paging through thousands of rows.
 
-% TODO: linking sentence
+With the Queue covered, the next section turns to how Playback state
+is kept consistent across the User's tabs and Devices.
 
 
 \section{Playback and Device Handling}\label{sec:playback}
 This section covers how Playback state is kept in sync across a User's
-tabs and Devices. The Backend code is under
-\path{src/backend/musikk/streaming}, with WS action handlers in
-\path{src/backend/musikk/streaming/ws/action_handlers/playback.py} and
-the per-User state stored in Redis via \texttt{PlaybackManager}. The
-Frontend code is under
-\path{src/frontend/musikk/src/features/player} and
-\path{src/frontend/musikk/src/features/playback}. The Backend models
-are in \path{text/diagrams/PlaybackClassDiagram.png}, the runtime
-managers, controllers, and broadcasters in
-\path{text/diagrams/StreamingWsClassDiagram.png}, the Frontend
-component hierarchy in \path{text/diagrams/FrontendPlayback.png}, and
-the multi-tab sync sequence in \path{text/diagrams/PlaybackSync.png}.
+tabs and Devices.
+The Backend code is under \path{src/backend/musikk/streaming},
+with WS action handlers in
+\path{src/backend/musikk/streaming/ws/action_handlers/playback.py},
+and the per-User state stored in Redis via \texttt{PlaybackManager}.
+The Frontend code is under
+\path{src/frontend/musikk/src/features/player}
+and \path{src/frontend/musikk/src/features/playback}.
+The Backend models are in
+\path{text/diagrams/PlaybackClassDiagram.png}.
+The runtime managers, controllers, and broadcasters are in
+\path{text/diagrams/StreamingWsClassDiagram.png}.
+The Frontend component hierarchy is in
+\path{text/diagrams/FrontendPlayback.png},
+and the multi-tab sync sequence in
+\path{text/diagrams/PlaybackSync.png}.
 
 Playback is server-authoritative. The Backend keeps one
 \texttt{PlaybackState} object per User (covering all User connections)
@@ -685,20 +583,17 @@ the server could not order the events. Suppose tab A sends a seek to
 swap the order in which the two broadcasts reach a third tab, so its
 position would end at 30\,s even though 90\,s was the newer action. The
 server had no way to pick a winner. The server-authoritative model fixes
-this because every state change goes through one ordered point and gets
+this because every state change goes through a single ordered path and gets
 a fresh version number, described in the next subsection.
 
-\subsection{Shared state and version counter}
-\texttt{PlaybackState} has two fields. The first is
-\texttt{ActivePlayback}, the part of the state which
-has the actual Playback-related values. It holds
-the current Song UUID, the play instance UUID, an is-playing flag, and
-the position pair (Song position and the server time at which it was
-read). \texttt{ActivePlayback} is a separate object because it only
-exists while a Song is loaded (when nothing is playing, the field is
-\texttt{None}). The second field is a monotonically increasing
-\texttt{version} number kept on \texttt{PlaybackState} itself, so it
-survives across pauses and Song changes.
+\subsection{Shared State and Version Counter}
+\texttt{PlaybackState} holds two pieces: \texttt{ActivePlayback},
+which stores the actual Playback values, and a monotonically
+increasing \texttt{version} number. \texttt{ActivePlayback} is a
+separate object because it only exists while a Song is loaded (when
+nothing is playing, the field is \texttt{None}). The version number
+is kept on \texttt{PlaybackState} itself, so it survives across
+pauses and Song changes.
 
 The version increments on every ``real'' state change (seek, pause, etc., not clock sync).
 Every event sent to clients includes the current version.
@@ -718,17 +613,15 @@ put the same \texttt{CollectionSong} into the Queue more than once in a
 row. Without the UUID, resuming after a skip to the second occurrence
 would inherit the position saved for the first.
 
-\subsection{Position estimation on passive tabs}
+\subsection{Position Estimation on Passive Tabs}
 Exactly one Device is the active Playback Device at any time. Only the
 active tab loads the current Song into its HTML audio element. If every
 tab loaded the Song, the User would hear several streams at once.
 
-The audio element itself stays mounted on every tab, even when empty.
-The Web Audio API pipeline (covered later in this section) binds to
-this element. Building the pipeline needs a User gesture, so the
-Frontend builds it once on the first gesture (see the autoplay
-subsection below). Keeping the element mounted on every tab lets the
-same pipeline survive tab switches.
+The audio element stays mounted on every tab, even when empty. The
+Web Audio API pipeline (covered later in this section) binds to this
+element. Keeping it mounted on every tab lets the same pipeline
+survive tab switches without rebuilding.
 
 The active tab reads the current Song position directly from its audio
 element. Passive tabs do not have a Song loaded, but they still need
@@ -747,45 +640,41 @@ direct access to the server clock. Each broadcast includes the
 server's current timestamp, and the client compares it with its own
 local clock at receive time to learn how far the two clocks are
 apart. It then adds that gap to its local clock whenever it needs
-to estimate what the server clock reads now.
-% TODO: improvements section should mention network round-trip correction and stronger clock-sync schemes.
+to estimate what the server clock reads now. The limits of this
+simple clock-gap method are discussed in
+\hyperref[subsec:imp_clock]{Playback Synchronization} in the
+improvements chapter.
+
 The active tab updates the pair when its audio position diverges
 from its own estimate by more than 500\,ms, and on a 20\,s heartbeat
 otherwise. The heartbeat is needed because the drift check itself
 depends on the active tab's estimate of the server clock, which gets
 less accurate without fresh broadcasts.
 
-\subsection{Device activation}
+\subsection{Device Activation}
 The active Device id is tracked on the server alongside the Device
 list, in a separate Redis key from \texttt{PlaybackState}. The Backend
 never fills it automatically. A User can have several tabs and Devices
 open at once, and the Backend cannot tell which one the User currently
-uses. Another reason to avoid an auto-pick is the browser autoplay policy:
-the User click that sets the active Device also counts as the browser
-gesture needed to start audio on that tab (see the next subsection).
+uses. Another reason to avoid an auto-pick: the User click that sets the
+active Device also counts as the browser gesture needed to start
+audio on that tab (see Browser autoplay handling below).
 
-When no Device is active, every tab is passive. The first play action
-from the User sets the active Device id. The Frontend on the tab that
-issued the play checks whether an active Device exists, and if not it
-sends \texttt{device.set\_active} for its own Device id before the
-\texttt{playback.activate}. Skipping to the next or previous Song goes
-through the same play action path, so it sets the active Device the
-same way. The seek action does not go through the play action path on
-the Frontend, because the position slider is its own UI component.
-The Backend therefore picks the Device that sent the seek when no
-Device is active yet, so the next play does not need a separate
-\texttt{device.set\_active}.
+When no Device is active, every tab is passive. The first action
+that needs Playback sets the active Device. Play actions (including
+skip to the next or previous Song) send \texttt{device.set\_active}
+before the play action on the Frontend. The seek action takes a
+different path on the Frontend, so the Backend sets the active
+Device when it receives a seek with no Device active.
 
 A change of active Device is a \texttt{device.set\_active} WS action
 (initiated by the Device dropdown) followed by a broadcast of the new
-Device list. The Backend pauses Playback on the transition. Without
-the pause, the newly active tab would try to resume audio without a
-User gesture on that tab, which the browser would block
-(again, see the next subsection on autoplay).
+Device list. The Backend pauses Playback on the transition, so the
+newly active tab does not try to resume audio without a User gesture
+on that tab, which the browser would block.
 
-\subsection{Browser autoplay handling}
-% TODO: cite Chrome autoplay policy https://developer.chrome.com/blog/autoplay
-Browser autoplay policies add two constraints. First, browsers only
+\subsection{Browser Autoplay Handling}
+Browser autoplay policies~\parencite{chrome_autoplay} add two constraints. First, browsers only
 let the page create or resume an \texttt{AudioContext} (the Web Audio
 API starting point used by the pipeline in the next subsection) while
 the browser is still handling a User click or key press. The Frontend
@@ -800,7 +689,7 @@ browsers always allow, and the UI shows an Unmute control. The Unmute
 click is the gesture that lets the Frontend resume the
 \texttt{AudioContext} and switch the audio element back to unmuted.
 
-\subsection{Frontend playback control}
+\subsection{Frontend Playback Control}
 The Frontend Player is a class, \texttt{AudioPlayerController}, not a
 React hook. An earlier version of the Frontend used a hook (named
 \texttt{usePlayer}). In that version, each WebSocket handler held a
@@ -812,31 +701,33 @@ class through \texttt{useSyncExternalStore} and re-render on changes,
 while the WS handlers read the same field directly and always see the
 current value.
 
-The Playback needs per-Song loudness normalization, and the HTML
-\texttt{audio} element does not offer it. The Frontend therefore
+The Playback needs per-Song loudness normalization, which cannot be
+done via the HTML \texttt{audio} element. The Frontend therefore
 routes audio through a Web Audio API graph between the audio element
-and the speakers. The graph is owned by an \texttt{AudioContext}, the
-starting point for any Web Audio API work. It has four stages. The
-first gain stage applies the normalization, using the stored LUFS
-measurement of the Song. The second is the User's volume slider. The
-third adds short volume fades around play, pause, and seek, because
-abrupt cuts make audible clicks. A compressor at the end catches the
-peaks, because a loudness boost on a quiet Song can push the signal
-past the clipping point.
+and the speakers. An \texttt{AudioContext} is the starting point for
+any Web Audio API work, and all graph nodes are created through it.
+The first stage applies the normalization from the stored LUFS
+measurement of the Song. A compressor at the end of the chain catches
+peaks that the loudness boost can push past the clipping point.
+The other two stages are the User's volume slider, and short volume
+fades around play, pause, and seek, since abrupt cuts make audible
+clicks.
 
 With Playback covered, the next section turns to Publications:
 Posts, Collection Comments, Chat messages, and Replies.
 
 
-\section{Publications}
-This section is about Posts, Collection Comments, Chat messages, and
-Replies. The Backend code is under \path{src/backend/musikk/social},
-the Frontend code under
-\path{src/frontend/musikk/src/features/publications}. The class
-diagram is in \path{text/diagrams/SocialClassDiagram.png}, the
-Frontend component hierarchy in
-\path{text/diagrams/FrontendPublications.png}, and the Chat
-connection lifecycle in \path{text/diagrams/ChatLifecycle.png}.
+\section{Publications}\label{sec:publications}
+This section is about Posts, Collection Comments, Chat messages, and Replies.
+The Backend code is under \path{src/backend/musikk/social}.
+The Frontend code is under
+\path{src/frontend/musikk/src/features/publications}.
+The class diagram is in
+\path{text/diagrams/SocialClassDiagram.png}.
+The Frontend component hierarchy is in
+\path{text/diagrams/FrontendPublications.png},
+and the Chat connection lifecycle in
+\path{text/diagrams/ChatLifecycle.png}.
 
 All four kinds use the same Django model, \texttt{Publication}. The
 model stores the author, the text, an optional \texttt{parent}
@@ -845,38 +736,30 @@ to the object the Publication is written for. This object is a User
 for Posts, a Collection for Collection Comments, and a Chat for Chat
 messages. An optional attachment field can point to a Song or a
 Collection. The shared model was chosen because every kind has the
-same basic shape. A User writes some text. The text can be a Reply to
+same basic shape: a User writes some text, the text can be a Reply to
 another Publication, and it can have a Song or a Collection attached.
-This shared model has some downsides that are discussed later.
-% TODO: hyperref improvements section once written
+This shared model has some downsides that are discussed in
+\hyperref[subsec:imp_be_refactors]{Backend Refactors}.
 
 At first, the API was built the same way. One endpoint took the
-\texttt{created\_for} type and id, and then chose the right logic
-inside. This became hard once the rules for each kind started to be
-different. Collection Comments are only allowed on public, non-draft
-Albums or Playlists. Posts are only allowed on the User's own Feed.
-Chat messages are only allowed between Chat members. This needs two
-extra models, \texttt{Chat} and \texttt{ChatMember}, which do not fit
-into the shared row. The side effects are also different. A new
-Collection Comment sends an event on the
-\texttt{collection\_comments.<uuid>} topic. A new Chat message sends
-events on the \texttt{chat.<uuid>} topic and on the user group of
-every other Chat member. A new Post sends nothing, because the Feed
-list is reloaded by HTTP polling. Each kind also has its own
-Notification rules. A Reply creates a Reply Notification for the
-parent author, and a Chat message creates a Chat message Notification
-for every other Chat member. With one endpoint, every request had to
-check \texttt{created\_for\_type} right at the start to choose the
-permissions, the event, and the Notification.
+\texttt{created\_for} type and id, and chose the right logic inside.
+This became hard once the rules for each kind started to differ.
+Collection Comments are only allowed on public, non-draft Albums or
+Playlists. Posts are only allowed on the User's own Feed. Chat
+messages are only allowed between Chat members and need two extra
+models, \texttt{Chat} and \texttt{ChatMember}, which do not fit into
+the shared row. Per-kind logic for permissions, WebSocket events,
+and Notifications also differs, so every request to the shared
+endpoint had to start with a \texttt{created\_for\_type} switch.
 
-The API was therefore split into one endpoint per kind,
-\path{/feed/<user_uuid>/posts}, \path{/collections/<uuid>/comments},
-and \path{/users/<user_uuid>/chats/<chat_uuid>/messages}. Each view
-keeps the rules for its kind in one place, so this branching is no
-longer needed. A shared mixin, \texttt{PublicationsListCreateMixin},
-still holds the common create and list code. The per-kind views only
-override the permission checks, the \texttt{created\_for} lookup, and
-the post-create hook. Replies work the same way for all four kinds,
+The API was therefore split into one endpoint per kind:
+\path{/feed/<user_uuid>/posts},
+\path{/collections/<uuid>/comments},
+and \path{/users/<user_uuid>/chats/<chat_uuid>/messages}.
+Each view keeps the rules for its kind in one place,
+so this branching is no longer needed. A shared mixin still holds the common create and list
+code, and per-kind views override what differs between kinds.
+Replies work the same way for all four kinds,
 because a Reply has the same shape regardless of its root Publication.
 They are created through the same endpoint as the root, with the
 \texttt{parent} field set. They are read through one shared endpoint,
@@ -899,56 +782,53 @@ dropped. Song matches are returned as their Collection Song row from a
 public Album, so the Frontend can reuse the same Song card it uses
 elsewhere.
 
-As stated in \chapterref{ch:planning}, the Backend uses PostgreSQL with
-trigram matching, available to Django through
-\texttt{django.\-contrib.\-postgres.\-search}. This module has four
-trigram classes: \texttt{TrigramSimilarity},
-\texttt{TrigramWordSimilarity}, \texttt{TrigramStrictWordSimilarity},
-and \texttt{TrigramDistance}. \texttt{TrigramSimilarity} was chosen
-because it scores the whole field against the query, which fits the
-short labels searched here: Song titles, Collection titles, and User
-display names. The two word-level variants are meant for longer text
-where the query should match one word inside a larger field, for
-example a description or an article body. \texttt{TrigramDistance} is
-the same metric, only inverted for sorting, so the choice between the
-two is style, not behavior.
-
-The same module also exposes PostgreSQL full-text search through
-\texttt{SearchVector}, \texttt{SearchQuery}, and \texttt{SearchRank}.
-These work well for long text, however, they do not handle typos by default,
-which is what this UI needs.
+As stated in \chapterref{ch:planning}, the Backend uses PostgreSQL
+with trigram matching, available to Django through
+\texttt{django.\-contrib.\-postgres.\-search}.
+\texttt{TrigramSimilarity} was chosen because it scores the whole
+field against the query, which fits the short labels searched here:
+Song titles, Collection titles, and User display names. The
+word-level trigram variants in the same module are aimed at longer
+text, and do not work well with shorter values. The module also
+exposes PostgreSQL full-text search, which is a separate mechanism
+that matches whole words and their grammatical forms rather than
+character trigrams. However, full-text search does not handle typos
+by default, and this UI needs that.
 
 
 \section{Notifications}
-This section shows how Notifications are modelled, emitted, and
-delivered. The Backend code is under
-\path{src/backend/musikk/notifications}, the Frontend code under
-\path{src/frontend/musikk/src/features/notifications}. The class
-diagram is in \path{text/diagrams/NotificationsClassDiagram.png} and
-the Frontend component hierarchy in
+This section shows how Notifications are modelled, emitted, and delivered.
+The Backend code is under \path{src/backend/musikk/notifications}.
+The Frontend code is under
+\path{src/frontend/musikk/src/features/notifications}.
+The class diagram is in
+\path{text/diagrams/NotificationsClassDiagram.png},
+and the Frontend component hierarchy in
 \path{text/diagrams/FrontendNotifications.png}.
 
-There are three Notification kinds. The first is a Reply to a
-Publication the User authored. The second is a new Follower. The
-third is a new Chat message. The first design used one shared
-\texttt{Notification} base with three concrete subclasses through
-Django's multi-table inheritance. Each row held an \texttt{is\_read}
-boolean. This worked well at the start. Every kind had the same two
-operations, list and mark read, and one query covered all of them.
-However, the kinds soon gained more fields of their own, and the
-shared base no longer fit well. A Reply points to two Publications, a
-Follower to two Users, and a Chat message to a Chat together with the
-message and the receiver. The columns almost do not overlap. As a
-result, a shared row was mostly nulls, and every read needed an extra
-join into one of the concrete tables. In contrast to Publications,
-which still use one shared model with mostly-null rows, Notifications
-have been split into three separate models.
+There are three Notification kinds: a Reply to a Publication the User
+authored, a new Follower, and a new Chat message. The first design
+used one shared \texttt{Notification} base with three concrete
+subclasses through Django's multi-table inheritance. Each row held an
+\texttt{is\_read} boolean. This worked well at the start, since every
+kind had the same two operations, list and mark read, and one query
+covered all of them. However, the kinds soon gained more fields of
+their own, and the shared base no longer fit well. A Reply points to
+two Publications, a Follower to two Users, and a Chat message to a
+Chat together with the message and the receiver. The columns almost
+do not overlap. As a result, a shared row was mostly nulls, and every
+read needed an extra join into one of the concrete tables. In
+contrast to Publications, which still use one shared model with
+mostly-null rows, Notifications have been split into three separate
+models.
 
 Each kind is its own \texttt{BaseModel} subclass with its own
 Serializer and custom Manager. In comparison to other parts of the
 application, managers here are used to emit a
 \texttt{notifications.changed} WS event instead of the API views.
-% TODO: probalby also add to improvmenets section later
+This coupling between the data layer and the WebSocket layer is
+discussed further in \hyperref[subsec:imp_be_refactors]{Backend
+Refactors}.
 
 Read state was also made simpler. The per-row \texttt{is\_read}
 boolean was replaced by one \texttt{NotificationProfile.read\_at}
@@ -968,32 +848,79 @@ However, the differences between kinds are no longer hidden behind a
 common base.
 
 
-\section{Security}
-% TODO: cors not needed, explain why
-% xss, csrf, http headers
-% input validation (already was mostly explained)
-% local storage, http only cookies
+\section{Security}\label{sec:security}
+This section goes over the OWASP guidelines~\parencite{owasp_cheatsheets} the application
+addresses and the gaps that remain.
+
+\subsection{Transport and Origin}
+Caddy~\parencite{caddy} terminates TLS in production, and Django
+upgrades plain HTTP to HTTPS\@. Frontend, REST API, and the WebSocket
+endpoint share the same origin (covered in the Deployment section),
+so CORS headers and \texttt{django-cors-headers} are not needed.
+
+\subsection{Authentication and Session Management}
+The Backend follows the OWASP Authentication~\parencite{owasp_authentication} and Session Management~\parencite{owasp_session_management}
+cheat sheets through Django defaults, \texttt{django-allauth}, and
+DRF throttling. The only recommended control not implemented is
+account lockout after a fixed number of failed logins. The
+per-endpoint rate limit on login is the only protection.
+
+\subsection{XSS and CSRF}
+XSS is mostly mitigated, because the Frontend relies on React's
+default escaping~\parencite{react}, and no part of the code bypasses
+it (e.g., via \texttt{dangerouslySetInnerHTML}).
+
+Django's \texttt{CsrfViewMiddleware} provides token-based protection
+per the OWASP CSRF Prevention cheat sheet~\parencite{owasp_csrf}. Same-origin routing
+already blocks cross-origin forgery in the browser, so the middleware
+is kept as defense in depth.
+
+\subsection{Input Validation}
+Audio uploads follow the OWASP File Upload cheat sheet~\parencite{owasp_file_upload}, with the
+checks described in the Audio Processing and Streaming section. All
+database access goes through the Django ORM, so SQL injection is not
+a surface. The only gap left is that image uploads are accepted but
+not re-encoded.
+
+\subsection{WebSocket Security}
+The WebSocket setup (authentication on upgrade, Origin pinning,
+per-topic subscribe validation) is covered in the WebSocket
+Communication section and matches the OWASP WebSocket security
+guidance~\parencite{owasp_websocket}. The remaining gap is that action handlers have no
+per-connection rate limit.
+
+\subsection{HTTP Response Headers}
+The OWASP Secure Headers project~\parencite{owasp_secure_headers} recommends a small set of response
+headers. The current reverse proxy setup sets most of these, with
+three omitted.
+\texttt{Strict-Transport-Security} should be set only when the domain is
+stable, since a browser that caches the policy locks the site into
+HTTPS for the full \texttt{max-age}.
+\texttt{Content-Security-Policy} requires an SPA-aware policy setup.
+\texttt{Permissions-Policy} is low priority, since the application does not use the camera,
+microphone, or geolocation APIs.
 
 
 \section{Deployment}
-This section covers the production deployment setup. The Docker
-Compose file is at \path{docker-compose-prod.yml}. The Backend and
-Frontend Dockerfiles are at \path{src/backend/Dockerfile} and
-\path{src/frontend/Dockerfile}, and the Caddy configuration at
-\path{src/frontend/Caddyfile.prod}.
+This section covers the production deployment setup.
+The Docker Compose file is at \path{docker-compose-prod.yml}.
+The Backend and Frontend Dockerfiles are at
+\path{src/backend/Dockerfile} and \path{src/frontend/Dockerfile}.
+The Caddy configuration is at \path{src/frontend/Caddyfile.prod}.
 
 The Backend, the Postgres database, the Redis instance, and the
 Celery worker run as four containers under Docker Compose on a
-single Hetzner VPS\@. The Frontend is built into static files at
-image-build time and served by the same Backend container.
-Caddy~\parencite{caddy} is the reverse proxy in front of them.
-Mail is created by the Mailgun service via
-\texttt{django-anymail}, and the domain is managed at PorkBun.
+Hetzner-hosted server. Caddy is the reverse proxy in front of them.
+It was chosen mainly for its simple syntax and automatic DNS certificate setup.
+Email is sent through the Mailgun service via
+\texttt{django-anymail}, and the domain is managed at Porkbun.
 FFmpeg is built from source inside the container with
-\texttt{libfdk\_aac} enabled, since the prebuilt distributions ship
-without it and AAC encoding quality on the bundled native encoder is
-visibly worse. The resulting image is not published in a public registry, since the
-FFmpeg with libfdk\_aac binary cannot be redistributed due the
-licensing issues ~\parencite{ffmpeg_aac}.
+\texttt{libfdk\_aac} enabled, since the default FFmpeg builds do not
+include it~\parencite{ffmpeg_aac}. The resulting image is not
+published in a public registry, since the FFmpeg with
+\texttt{libfdk\_aac} binary cannot be redistributed due to
+licensing issues.~\parencite{vialicensing_aac}
 
-% TODO: add a citation for the AAC licensing summary once a clean source is in the bib
+
+With the application completely ready, user testing
+results and possible future improvements are discussed in the next chapter.

@@ -118,6 +118,13 @@ export function SearchWindow({ onItemSelect, songMode = "card" }: SearchWindowPr
             <div className="results-container min-h-[200px] flex-1 overflow-y-auto pt-4">
                 {error && <QueryErrorBox message="Search failed" onRetry={() => void refetch()} />}
 
+                {debouncedQuery.trim().length === 0 && !data && (
+                    <EmptyState
+                        variant="inline"
+                        message="Start typing to search songs, albums, artists, playlists, and users"
+                    />
+                )}
+
                 {isPlaceholderData && (
                     <div className="flex items-center justify-center py-2">
                         <Spinner />
