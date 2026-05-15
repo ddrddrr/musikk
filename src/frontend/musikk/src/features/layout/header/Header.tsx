@@ -2,6 +2,7 @@ import { SocialDropdown } from "@/features/layout/header/SocialDropdown.tsx";
 import { NotificationBox } from "@/features/notifications/NotificationBox";
 import { SearchBar } from "@/features/search/SearchBar.tsx";
 import { Button } from "@/features/ui/button";
+import { IconTooltip } from "@/features/ui/tooltip";
 import { UserAvatar } from "@/features/user/components/UserAvatar.tsx";
 import { useAuth } from "@/hooks/useAuth";
 import { Cog, Disc3, Upload, Users } from "lucide-react";
@@ -16,23 +17,29 @@ export const Header = memo(function Header() {
     return (
         <header className="grid grid-cols-5 items-center bg-brand p-4 text-brand-foreground">
             <div className="col-span-1 flex justify-start gap-4">
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-brand-foreground"
-                    onClick={() => void navigate("/")}
-                >
-                    <Disc3 />
-                </Button>
+                <IconTooltip label="Home">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label="Home"
+                        className="text-brand-foreground"
+                        onClick={() => void navigate("/")}
+                    >
+                        <Disc3 />
+                    </Button>
+                </IconTooltip>
                 <SocialDropdown />
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-brand-foreground"
-                    onClick={() => void navigate(`/users/${user?.uuid}/connections`)}
-                >
-                    <Users />
-                </Button>
+                <IconTooltip label="Social">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label="Social"
+                        className="text-brand-foreground"
+                        onClick={() => void navigate(`/users/${user?.uuid}/connections`)}
+                    >
+                        <Users />
+                    </Button>
+                </IconTooltip>
             </div>
 
             <div className="col-span-3 flex items-center justify-start gap-4">
@@ -47,23 +54,29 @@ export const Header = memo(function Header() {
             </div>
 
             <div className="col-span-1 flex items-center justify-end gap-4">
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="hover:bg-brand-hover"
-                    onClick={() => void navigate(`/users/${user?.uuid}`)}
-                >
-                    <UserAvatar src={user?.avatar} alt={user?.display_name} size="sm" />
-                </Button>
+                <IconTooltip label="Profile">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label="Profile"
+                        className="hover:bg-brand-hover"
+                        onClick={() => void navigate(`/users/${user?.uuid}`)}
+                    >
+                        <UserAvatar src={user?.avatar} alt={user?.display_name} size="sm" />
+                    </Button>
+                </IconTooltip>
                 <NotificationBox />
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-brand-foreground"
-                    onClick={() => void navigate("/settings")}
-                >
-                    <Cog />
-                </Button>
+                <IconTooltip label="Settings">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label="Settings"
+                        className="text-brand-foreground"
+                        onClick={() => void navigate("/settings")}
+                    >
+                        <Cog />
+                    </Button>
+                </IconTooltip>
 
                 {user?.is_artist && (
                     <Button

@@ -11,6 +11,7 @@ import { useQueueNext, useQueuePrev } from "@/features/song-queue/hooks/useQueue
 import { useNavigateToSongAlbum } from "@/features/songs/hooks/useNavigateToSongAlbum.ts";
 import { Button } from "@/features/ui/button";
 import { Slider } from "@/features/ui/slider";
+import { IconTooltip } from "@/features/ui/tooltip";
 import { AuthorLinks } from "@/features/user/components/AuthorLinks.tsx";
 import { formatDuration } from "@/utils/formatDuration.ts";
 import { ListMusic, SkipBack, SkipForward, Volume2, VolumeX } from "lucide-react";
@@ -142,13 +143,16 @@ export function PlayerBar({
                         />
                     </div>
 
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => setIsQueueOpen((prev: boolean) => !prev)}
-                    >
-                        <ListMusic />
-                    </Button>
+                    <IconTooltip label="Queue" side="top">
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            aria-label="Queue"
+                            onClick={() => setIsQueueOpen((prev: boolean) => !prev)}
+                        >
+                            <ListMusic />
+                        </Button>
+                    </IconTooltip>
 
                     <ChangeActiveDeviceDropdown />
                 </div>

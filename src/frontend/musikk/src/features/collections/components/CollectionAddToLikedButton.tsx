@@ -1,5 +1,6 @@
 import { getErrorDetail } from "@/api/errorUtils.ts";
 import { Button } from "@/features/ui/button.tsx";
+import { IconTooltip } from "@/features/ui/tooltip";
 import { userKeys } from "@/features/user/api/queryKeys.ts";
 import { useIsCollectionLiked } from "@/features/user/hooks/useUserLikes.ts";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -54,13 +55,16 @@ export function CollectionAddToLikedButton({
     }
 
     return (
-        <Button
-            variant={isLiked ? "brand" : "muted"}
-            size="icon"
-            onClick={() => handleClick(collection)}
-            className={sizeClass}
-        >
-            {isLiked ? <Check size={20} /> : <Plus size={20} />}
-        </Button>
+        <IconTooltip label={isLiked ? "Liked" : "Like"}>
+            <Button
+                variant={isLiked ? "brand" : "muted"}
+                size="icon"
+                aria-label={isLiked ? "Liked" : "Like"}
+                onClick={() => handleClick(collection)}
+                className={sizeClass}
+            >
+                {isLiked ? <Check size={20} /> : <Plus size={20} />}
+            </Button>
+        </IconTooltip>
     );
 }

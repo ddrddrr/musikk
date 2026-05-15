@@ -2,6 +2,7 @@ import { getErrorDetail } from "@/api/errorUtils.ts";
 import { addToLikedSongs, removeFromLikedSongs } from "@/features/collections/api/mutations.ts";
 import { CollectionSong } from "@/features/collections/types.ts";
 import { Button } from "@/features/ui/button.tsx";
+import { IconTooltip } from "@/features/ui/tooltip";
 import { userKeys } from "@/features/user/api/queryKeys.ts";
 import { useIsSongLiked } from "@/features/user/hooks/useUserLikes.ts";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -54,14 +55,17 @@ export function SongAddToLikedButton({ collectionSong, className = "", size = 40
     }
 
     return (
-        <Button
-            variant={isLiked ? "brand" : "muted"}
-            size="icon"
-            onClick={() => handleClick(collectionSong)}
-            style={{ width: size, height: size }}
-            className={className}
-        >
-            {isLiked ? <Check size={iconSize} /> : <Plus size={iconSize} />}
-        </Button>
+        <IconTooltip label={isLiked ? "Liked" : "Like"}>
+            <Button
+                variant={isLiked ? "brand" : "muted"}
+                size="icon"
+                aria-label={isLiked ? "Liked" : "Like"}
+                onClick={() => handleClick(collectionSong)}
+                style={{ width: size, height: size }}
+                className={className}
+            >
+                {isLiked ? <Check size={iconSize} /> : <Plus size={iconSize} />}
+            </Button>
+        </IconTooltip>
     );
 }

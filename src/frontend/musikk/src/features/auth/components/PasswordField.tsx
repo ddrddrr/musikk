@@ -1,6 +1,7 @@
 import { Button } from "@/features/ui/button";
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/features/ui/form.tsx";
 import { Input } from "@/features/ui/input.tsx";
+import { IconTooltip } from "@/features/ui/tooltip";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { useFormContext } from "react-hook-form";
@@ -33,19 +34,22 @@ export function PasswordField({
                                 {...field}
                                 className="flex-1 border-0 bg-transparent p-0 focus-visible:ring-0 focus-visible:ring-offset-0"
                             />
-                            <Button
-                                type="button"
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => setShowPassword(!showPassword)}
-                                className="size-8 shrink-0"
-                            >
-                                {showPassword ? (
-                                    <EyeOff className="size-5" />
-                                ) : (
-                                    <Eye className="size-5" />
-                                )}
-                            </Button>
+                            <IconTooltip label={showPassword ? "Hide" : "Show"}>
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    aria-label={showPassword ? "Hide password" : "Show password"}
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="size-8 shrink-0"
+                                >
+                                    {showPassword ? (
+                                        <EyeOff className="size-5" />
+                                    ) : (
+                                        <Eye className="size-5" />
+                                    )}
+                                </Button>
+                            </IconTooltip>
                         </div>
                     </FormControl>
                     <FormMessage className="font-medium" />

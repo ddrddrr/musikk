@@ -7,6 +7,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/features/ui/dropdown-menu.tsx";
+import { IconTooltip } from "@/features/ui/tooltip";
 import { cn } from "@/lib/utils.ts";
 import { BetweenHorizonalStart, EllipsisVertical, Play, Trash2 } from "lucide-react";
 import { SongAddToPlaylistSubmenu } from "./SongAddToPlaylistSubmenu.tsx";
@@ -32,16 +33,19 @@ export function SongMenuButton({
 
     return (
         <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    style={{ width: size, height: size }}
-                    className={cn("hover:text-accent-foreground", className)}
-                >
-                    <EllipsisVertical className={iconSize} />
-                </Button>
-            </DropdownMenuTrigger>
+            <IconTooltip label="More Actions">
+                <DropdownMenuTrigger asChild>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label="More Actions"
+                        style={{ width: size, height: size }}
+                        className={cn("hover:text-accent-foreground", className)}
+                    >
+                        <EllipsisVertical className={iconSize} />
+                    </Button>
+                </DropdownMenuTrigger>
+            </IconTooltip>
             <DropdownMenuContent className="w-48">
                 {showRemoveFromPlaylist && (
                     <DropdownMenuItem
