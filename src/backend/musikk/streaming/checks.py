@@ -11,7 +11,7 @@ REQUIRED_BINARIES = [
 ]
 
 
-@register(Tags.compatibility)
+@register(Tags.compatibility, deploy=True)
 def check_binary_dependencies(**kwargs) -> list[Error]:
     errors = []
     for name, path in REQUIRED_BINARIES:
