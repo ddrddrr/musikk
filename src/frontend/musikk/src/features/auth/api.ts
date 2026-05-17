@@ -7,7 +7,7 @@ export async function initCsrf(): Promise<void> {
 
 export async function login(email: string, password: string): Promise<void> {
     await initCsrf();
-    await api_client_public.post(AuthURLs.login, { email, password });
+    await api_client_public.post(AuthURLs.login, { email: email.toLowerCase(), password });
 }
 
 export async function logout(): Promise<void> {
@@ -28,7 +28,7 @@ export async function register(payload: registrationParams) {
     await api_client_public.post(AuthURLs.register, {
         password1,
         password2,
-        email,
+        email: email.toLowerCase(),
         is_artist,
     });
 }

@@ -14,7 +14,7 @@ class BaseAccountAdapter(DefaultAccountAdapter):
     # Duplicate emails have to be handled differently for every project,
     # hence this custom adapter (see https://github.com/Tivix/django-rest-auth/issues/243)
     def clean_email(self, email):
-        email = super().clean_email(email)
+        email = super().clean_email(email).lower()
         if get_user_model().objects.filter(email__iexact=email).exists():
             raise ValidationError(
                 "A user is already registered with this email address."
