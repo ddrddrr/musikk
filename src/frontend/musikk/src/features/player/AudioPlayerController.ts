@@ -150,12 +150,9 @@ export class AudioPlayerController {
         const isPlaying = next?.isPlaying ?? false;
         const playingChanged = wasPlaying !== isPlaying;
 
-        if (songChanged) {
+        if (songChanged || instanceChanged) {
             this.loadOrUnload();
             this.playOrPause();
-        } else if (instanceChanged) {
-            if (playingChanged) this.playOrPause();
-            this.seekAudioElement();
         } else if (playingChanged) {
             this.playOrPause();
         }
