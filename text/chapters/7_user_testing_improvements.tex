@@ -15,7 +15,10 @@ English-only. Accessibility is also only partial. For example,
 some clickable elements use \texttt{div} instead of
 \texttt{button}, and the custom controls have no Accessible Rich
 Internet Applications~(ARIA) roles or labels. There is also no
-Digital Rights Management~(DRM) mechanism.
+Digital Rights Management~(DRM) mechanism. iOS is also
+unsupported, since in iOS browsers Apple's native HLS player
+bypasses the Web Audio API used for the volume slider and
+mute.~\parencite{webkit_hls_webaudio}
 
 In addition, a few Backend features have no Frontend
 counterpart. The password reset and password change endpoints

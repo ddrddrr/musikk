@@ -32,7 +32,8 @@ function AuthenticatedApp() {
 
 export function App() {
     const isMobile = useIsMobile();
-    if (isMobile) {
+    const onEmailConfirmation = window.location.pathname.startsWith("/email-confirmation/");
+    if (isMobile && !onEmailConfirmation) {
         return <MobileBlock />;
     }
     return (

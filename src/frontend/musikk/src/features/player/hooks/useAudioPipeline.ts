@@ -173,6 +173,10 @@ function disposePipeline(ref: React.RefObject<AudioPipeline | null>) {
 
 // see https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API/Using_Web_Audio_API
 // on how to use the audio API (very cool!)
+// iOS uses Apple's native HLS player, which always bypasses the Web Audio API
+// (drives the volume slider and mute)
+// so this won't work for them
+// (mobile is excluded for now, so fine)
 export function useAudioPipeline({
     audioRef,
     song,
