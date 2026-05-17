@@ -21,7 +21,7 @@ export function AuthenticatedLayout() {
                     </div>
                 )}
             </div>
-            <Toaster />
+            <Toaster position="top-center" />
             <PlayerBox setIsQueueOpen={setIsQueueOpen} />
         </div>
     );
