@@ -19,7 +19,7 @@ export function SettingsPage() {
     const { preset, setPreset } = useContext(LoudnessPresetContext);
 
     return (
-        <div className="flex flex-1 flex-col items-center gap-8 bg-brand p-8">
+        <div className="flex flex-1 flex-col items-center gap-8 p-8">
             <BackButton />
             <h1 className="text-2xl font-bold">Settings</h1>
 
@@ -27,7 +27,7 @@ export function SettingsPage() {
                 <div className="flex items-center justify-between gap-4">
                     <div className="flex flex-col">
                         <span className="text-base font-medium">Keep songs at the same volume</span>
-                        <span className="text-xs text-brand-foreground">
+                        <span className="text-xs text-muted-foreground">
                             Songs can originally have different volume level. This makes them sound
                             the same, so you don't have to readjust the volume manually
                         </span>
