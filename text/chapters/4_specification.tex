@@ -4,7 +4,7 @@ In this chapter the general outline of the application is given via use cases an
 The individual requirements are constructed based on the ``MoSCoW'' criteria~\parencite{moscow}.
 ``Must Have'' requirements specify functionality without which the application cannot be considered finished.
 Those are the main features and technical aspects that must be implemented.
-``Should Have'' requirements mostly represent features that would greatly improve the user experience,
+``Should Have'' requirements mostly represent features that would significantly improve the user experience,
 but are not strictly needed for the application to be fully working.
 ``Could Have'' requirements are reserved for possible future ideas which most probably would not be
 implemented in the current scope of the thesis.
@@ -15,7 +15,6 @@ Below is the list of important terms that appear throughout the requirements sec
 \begin{itemize}
     \item \textbf{Anonymous User}: A User who is not yet registered in the system or has not logged in.
     \item \textbf{User}: An object containing information such as email, display name and other User parameters.
-    \item \textbf{User Profile}: A Frontend-only abstraction which shows Base User information.
     \item \textbf{Artist}: A User with additional privileges, for example, Song or Collection creation.
     \item \textbf{Follower/Followee}: A relationship between a User and another User where one subscribes to another.
     \item \textbf{Friend}: A Followee and Follower who are mutually subscribed to each other.
@@ -42,14 +41,14 @@ Below is the list of important terms that appear throughout the requirements sec
 \end{itemize}
 \clearpage
 
-%TODO: should user testing follow the usecases?
-
 
 \section{Use Cases}\label{sec:use_cases}
-While the requirements in the following sections list what the system must do,
-use cases show the same functionality from the actor's perspective.
-This can make further modeling simpler, since the minimal subset of actions
-any given User can take is defined explicitly.
+While the requirements in the following sections list what the system must
+do, use cases show the same functionality from the User's perspective. This
+makes further modelling simpler, since the minimal subset of actions any
+given User can take is defined explicitly. The same use cases also define
+tasks for the User Testing phase, where each task corresponds
+to one action from the use case diagrams (see \chapterref{ch:user_testing_improvements}).
 
 The use cases are split into six groups: Account and Identity, Social,
 Library and Content, Playback, Search, and Communication.
@@ -77,7 +76,7 @@ for example \path{text/diagrams/UseCasesAccount.png}.
     \item The system shall support a Publication system, including Replies, Comments on public Collections, and per-User and global Feeds.
     \item The system shall allow Users to follow and unfollow other Users.
     Mutual follows shall be treated as a Friend relation.
-    \item The system shall have a way to search Playback Items, Users, and Artists.
+    \item The system shall have a way to search Songs, Collections, Users, and Artists.
     \item The system shall display Friend Activity, that is, the Songs currently being played by the User's Friends.
 \end{itemize}
 
@@ -106,7 +105,7 @@ for example \path{text/diagrams/UseCasesAccount.png}.
     The system shall provide access to its contents only to authorized Users.
     The only exceptions shall be the ``Log In'' and ``Sign Up'' pages.
     \item
-    The system shall harden against common web threats~(CSRF, XSS, etc.) and follow defense in depth, so that stored content stays protected and misconfigured access does not expose data.
+    The system shall guard against common web threats~(CSRF, XSS, etc.) and follow defense in depth, so that stored content stays protected and misconfigured access does not expose data.
     \item
     The system shall store and transport sensitive User information safely.
     I.e., it should use safe transport protocols, such as HTTPS and WSS.

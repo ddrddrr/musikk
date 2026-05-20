@@ -1,10 +1,10 @@
-from pathlib import Path
 import tempfile
+from pathlib import Path
 
-from django.contrib import admin
 from django import forms
-
+from django.contrib import admin
 from utils.storage import delete_django_storage_dir
+
 from streaming.audio.processing_pipeline import AudioProcessingPipeline
 from streaming.audio.shaka_packager_conf.shaka_packager_wrapper import ManifestType
 from streaming.models.collections import Collection
@@ -19,11 +19,9 @@ class BaseSongAdminForm(forms.ModelForm):
         if not uploaded_file:
             return None
 
-        # Delete old content if updating an existing song
         if self.instance.pk and self.instance.content_path:
             delete_django_storage_dir(self.instance.content_path)
 
-        # Save uploaded file to temporary location
         with tempfile.NamedTemporaryFile(
             delete=False, suffix=Path(uploaded_file.name).suffix
         ) as tmp_file:
@@ -32,17 +30,14 @@ class BaseSongAdminForm(forms.ModelForm):
             tmp_file_path = tmp_file.name
 
         try:
-            # Generate storage directory path using the instance's UUID
             storage_dir = f"audio/{self.instance.uuid}"
 
-            # Run the audio processing pipeline
             result = AudioProcessingPipeline.run(
                 source=tmp_file_path, final_storage_dir=storage_dir
             )
 
             return result.song_repr
         finally:
-            # Clean up temporary file
             Path(tmp_file_path).unlink(missing_ok=True)
 
 

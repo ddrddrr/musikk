@@ -35,7 +35,7 @@ There are four main approaches used today: Basic Download, Progressive Download,
     only needs a small in-memory buffer and older data can be discarded once
     played.
     Adaptive Playback is also possible, but it is not standardized.
-    It requires custom preprocessing of the audio on the server and custom
+    It requires custom preprocessing of the audio on the server and
     client logic to choose between different quality versions during Playback.
 
     \item \textbf{Segmented HTTP Streaming}\label{it:streaming}\\
@@ -236,9 +236,10 @@ Based on the requirements listed in \chapterref{ch:specification}, at least thre
 would require server-to-client communication:
 \begin{itemize}
     \item \textbf{Playback state synchronization.}\\
-    Any Playback Device the User acts on has to send the change to the server, whether it is
-    a play, pause, seek, or Song switch, and the Active Playback Device also sends
-    periodic position updates to correct drift.
+    Whenever the User interacts with a Playback Device, the resulting state
+    change, such as pausing, seeking, or switching Songs, has to be sent to
+    the server. The Active Playback Device also sends periodic position
+    updates so that the server can correct drift on the User's other Devices.
     Even at a moderate rate, these events add up, and each one would otherwise need its own
     HTTP request.
     The server then forwards the new Playback state to the User's other Playback Devices to
@@ -255,7 +256,7 @@ would require server-to-client communication:
     without periodic polling from the client.
 \end{itemize}
 
-The initial implementation used SSE.
+The initial implementation used SSE\@.
 The read-path features in the list above~(Live Chat messages, Comments, typing indicators) are
 mostly server-to-client and would have been covered by a long-lived SSE stream for the receive
 path with ordinary HTTP requests for the send path.
@@ -267,12 +268,8 @@ that burst is a separate HTTP request.
 Even with a single User this adds extra lag, and with many Users active at the same time it creates
 significant load on the server.
 
-Additionally, WebSocket support is widely available in modern Python web frameworks,
-often built in with named groups and per-user broadcast.
-SSE has less standardized support and typically requires a separate Pub/Sub layer.
-
 For these reasons, WebSockets are used as the primary mechanism for real-time communication.
-The drawbacks listed above are accepted in exchange for a single two-way channel for everything and
+The drawbacks listed above are accepted in exchange for a single two-way communcation channel and
 lower integration cost with the chosen Backend framework.
 
 These choices define what the Backend and Frontend have to support, and the Backend is discussed next.
@@ -353,7 +350,7 @@ available for Python: FastAPI, Django, and Flask.
     and manual configuration to do the same thing.
     At the same time, Flask, like Django, is based on the synchronous WSGI interface~\parencite{pep3333_wsgi}.
     WebSocket support is typically added via additional tools, such as SocketIO~\parencite{socketio},
-    which couples the Frontend to a specific library instead of the standard WebSocket API.
+    which couples the Frontend to a specific library instead of the standard WebSocket API\@.
     As a result, Flask combines the disadvantages of the other two frameworks:
     it lacks Django's integrated ecosystem and
     does not provide FastAPI's modern asynchronous features.
@@ -382,8 +379,7 @@ Therefore, performance is not the primary factor in choosing a database.
 Instead, the choice is based on the available features and how well they are integrated
 with Django.
 In this application, two requirements are especially important: full-text search and
-UUID primary keys~(see \chapterref{ch:implementation} for details).
-For these requirements, PostgreSQL is the best option.
+UUID primary keys. For these requirements, PostgreSQL is the best option.
 
 First, PostgreSQL offers good full-text search support and additional tools for
 fuzzy matching, such as trigram indexes.~\parencite{postgres_fulltext}
@@ -398,10 +394,12 @@ type.~\parencite{postgres_uuid}
 This type stores UUIDs in a compact binary form and allows efficient indexing
 and comparison.
 \footnote{If using time-based UUID types, e.g., UUIDv7~\parencite{uuid_v7}}
-In many other databases UUIDs must instead be stored as plaintext~
-(e.g., \texttt{CHAR(36)}), which uses more space and is slower to index.
-Django's \texttt{UUIDField} maps directly to PostgreSQL's native type, so
-UUID-based identifiers can be used without extra configuration.
+Among the databases supported by Django, only PostgreSQL and MariaDB~10.7 or
+newer expose a native UUID type. On MySQL and SQLite, Django's
+\texttt{UUIDField} falls back to \texttt{CHAR(32)}.
+The native form reduces the storage size of the column~(16~bytes vs
+32~characters) and makes lookups cheaper, which matters for UUID
+primary keys that appear in nearly every index and join in this application.
 
 Lastly, with the database chosen, the Frontend application type,
 language, and framework had to be selected.
@@ -416,14 +414,14 @@ the server and sent to the browser to render,
 or around client-side rendering~(CSR), where most HTML is generated in the
 browser using JavaScript.
 A single-page application~(SPA) is an application that keeps a single HTML
-document loaded and updates the user interface dynamically on the client,
+document loaded and updates the user interface~(UI) dynamically on the client,
 usually relying on CSR, sometimes combined with SSR for the initial page load.
 
-In an SSR setup, frameworks such as Django generate most of the user interface
+In an SSR setup, frameworks such as Django generate most of the UI
 on the server and send complete HTML pages (or partial updates) to the browser,
 often only requiring small pieces of JavaScript for interaction.~\parencite{django_html}
 In contrast, an SPA typically fetches JSON or other data from the server and,
-based on it, renders and updates the user interface directly in the browser.~\parencite{spa}
+based on it, renders and updates the UI directly in the browser.~\parencite{spa}
 
 The research for the Frontend began by deciding which of these approaches to use.
 In this project, the application must maintain a lot of state directly in the
@@ -431,7 +429,7 @@ browser: the current Playback position, the Playback Queue, the volume level,
 the Chat state, and so on.
 These values change frequently and in small steps, sometimes several times per
 second, and require immediate feedback for the User.
-Moreover, the user interface must respond to events sent by
+Moreover, the UI must respond to events sent by
 the server over WebSockets, such as Playback updates or Chat messages.
 A purely server-rendered approach with full page reloads or round-trips for
 each small change would be unsuitable for this kind of real-time interactive
@@ -448,20 +446,16 @@ such as C~\parencite{clay_lib} or Rust~\parencite{yew_framework}.
 However, JavaScript remains the industry standard because it is still the only
 general-purpose language directly supported by browsers.
 This means that JavaScript is the only language the browser can run natively, without
-pre-processing~(e.g., compilation to WebAssembly).
-This simplifies the development, build, and deployment processes, and for this reason the
-client application is based on JavaScript.
-
-The project uses TypeScript~\parencite{typescript}, a typed superset of JavaScript
-that compiles to plain JavaScript. Its main benefit is build-time type checking,
-which catches many type-related errors before execution.
+pre-processing~(e.g., compilation to WebAssembly), this, in turn, simplifies the development, build,
+and deployment processes. And for this reason the
+client application is based on TypeScript~\parencite{typescript}, a typed superset of JavaScript.
 
 \subsection{Framework}
 Modern Frontend development is mostly based on libraries or frameworks
 such as React, Vue, or Angular.~\parencite{frameworkdata}
 For this project, React~\parencite{react} was chosen.
 
-React is a library for building user interfaces from reusable components.
+React is a library for building UIs from reusable components.
 Its core only handles rendering, so common needs such as routing, state
 management, data fetching, and UI components are added through well-established
 libraries instead of being written from scratch.
@@ -477,35 +471,36 @@ React is also widely adopted~\parencite{so_react}, so examples and
 solutions to common problems are easy to find.
 
 
-\section{Summary}
-The platform follows the Model-View-Controller architectural pattern~\parencite{mvc}
-and is organized into three layers:
+\section{Architecture}
+The platform uses a layered architecture. Each layer has a separate role
+and communicates with the other layers through specific interfaces.
 
 \begin{itemize}
-    \item \textbf{Model}\\
-    The Model layer represents and manipulates the application data.
-    In this project, it consists mainly of the Django models with entities such as Users,
-    Songs and Collections, together with the data processing logic, for example audio
-    conversion or data querying.
-    \item \textbf{View}\\
-    The View layer is what the User interacts with directly.
-    It presents the data from the Model layer and turns User actions into
-    requests that the rest of the system can process.
-    Here, the View is implemented as a single-page application in JavaScript using React.
-    It renders the interface, displays information such as Playback state or Friends' activity,
-    and sends User actions (for example, play/pause commands or Chat messages) to the Controller.
-    \item \textbf{Controller}\\
-    The Controller layer connects the View with the Model.
-    It receives HTTP and WebSocket requests from the Frontend, applies
-    cookie-based session authentication and access control, and then calls the appropriate
-    Model logic.
-    In this platform, the Controller corresponds to the Django REST API and WebSocket
-    endpoints.
+    \item \textbf{Data layer}\\
+    This layer stores and manages the application data. It includes the
+    Django models, the PostgreSQL database, and the files stored on disk,
+    such as uploaded audio files and generated audio segments.
+
+    \item \textbf{Application layer}\\
+    This layer contains the main server-side logic. It receives requests
+    from the client, checks permissions, works with the data layer, and
+    returns the needed results. In this project, it is implemented mainly
+    using the Django REST API, WebSocket consumers, and background workers.
+    The background workers are used for longer tasks, such as processing
+    uploaded audio files.
+
+    \item \textbf{Presentation layer}\\
+    This layer is responsible for the UI. It runs in the
+    browser and allows the User to interact with the platform. In this
+    project, it is implemented as a React single-page application. It
+    shows the current state of the application and sends User actions to
+    the server.
 \end{itemize}
 
-In other words, the Django models and database layer form the Model,
-the React single-page application acts as the View,
-and the Django-based REST and WebSocket endpoints act as the Controller that links them.
+In this architecture, the data layer stores the state of the platform,
+the application layer contains the server logic, and the presentation
+layer provides the interface for the User.
 
-The next chapter, \chapterref{ch:implementation}, describes the actual implementation of these
-parts and how they form the complete music streaming platform.
+The next chapter, \chapterref{ch:implementation}, describes how these
+layers are implemented and how they work together in the complete music
+streaming platform.
