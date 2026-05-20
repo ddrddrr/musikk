@@ -30,7 +30,7 @@ mpl.rcParams.update(
 #         outfile.write(replace_commas_in_quotes(line))
 
 
-data = pd.read_csv("survey_results.csv")
+data = pd.read_csv("music_consumption_survey_results.csv")
 data.drop("Timestamp", axis="columns", inplace=True)
 
 output_dir = "charts"
@@ -39,6 +39,28 @@ os.makedirs(output_dir, exist_ok=True)
 
 def wrap_text(text, width=40):
     return "\n".join(textwrap.wrap(str(text), width))
+
+
+FILENAME_SLUGS: dict[str, str] = {
+    "constumption method": "consumption_method",
+    "song amount month": "song_amount_month",
+    "listening regularity": "listening_regularity",
+    "song consistency": "song_consistency",
+    "new discovery freq": "new_discovery_freq",
+    "discovery methods": "discovery_methods",
+    "similar music taste": "similar_music_taste",
+    "connect with others": "connect_with_others",
+    "listen together method": "listen_together_method",
+    "listen together freq": "listen_together_freq",
+    "share freq": "share_freq",
+    "share method": "share_method",
+    "streaming platform": "streaming_platform",
+    "social features use": "social_features_use",
+}
+
+
+def slug_for(col: str) -> str:
+    return FILENAME_SLUGS.get(col, col.replace(" ", "_"))
 
 
 question_titles = {
@@ -107,7 +129,7 @@ def audio_consumption_method(d):
     )
 
     plt.savefig(
-        os.path.join(output_dir, "constumption_method.png"),
+        os.path.join(output_dir, f"{slug_for('constumption method')}.png"),
         bbox_inches="tight",
         dpi=300,
     )
@@ -164,7 +186,7 @@ def generate_charts(df):
             )
 
             plt.tight_layout()
-            plt.savefig(os.path.join(output_dir, f"{col}.png"), dpi=300)
+            plt.savefig(os.path.join(output_dir, f"{slug_for(col)}.png"), dpi=300)
             plt.close()
         elif series.nunique() < 20:
             counts = series.value_counts()
@@ -198,7 +220,7 @@ def generate_charts(df):
                 pad=30
             )
             plt.savefig(
-                os.path.join(output_dir, f"{col}.png"), bbox_inches="tight", dpi=300
+                os.path.join(output_dir, f"{slug_for(col)}.png"), bbox_inches="tight", dpi=300
             )
             plt.close()
 

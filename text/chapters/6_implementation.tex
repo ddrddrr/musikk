@@ -5,8 +5,10 @@ behind each feature. It focuses on what is not clear from the diagrams
 or the source code. The reader is expected to go through the diagrams
 and the code first, and then read the sections that explain
 non-obvious choices. Structure and naming that the diagrams or code
-already show are not repeated in the text. The high-level system
-overview is in \path{text/diagrams/HighLevelSystem.png}, the Backend
+already show are not repeated in the text.
+
+The high-level system
+overview can be found in \path{text/diagrams/HighLevelSystem.png}, the Backend
 and Frontend architectures in \path{text/diagrams/BackendSystem.png}
 and \path{text/diagrams/FrontendSystem.png}, and the top-level
 Frontend component hierarchy in
@@ -32,11 +34,6 @@ styled with Tailwind and shadcn/ui. Queries and mutations are managed via
 TanStack Query and HTTP calls go through axios. Forms use
 react-hook-form with zod validation, and Playback uses Shaka
 Player~\parencite{shaka_player} for DASH and HLS streaming.
-
-Deployment is a simple Docker Compose behind a Caddy
-reverse proxy on a Hetzner VPS, with Mailgun for mail services
-and Porkbun for the domain.\footnote{The deployed application is
-available at \url{https://musikk.stream}.}
 
 Full dependency lists are located in
 \path{src/backend/pyproject.toml} and
@@ -64,7 +61,7 @@ chunks paired with a manifest, produced by the Packaging step
 described next.
 
 \subsection{Packaging}
-Packaging cuts the transcoded audio into short fragmented MP4 segments
+Packaging splits the transcoded audio into short fragmented MP4 segments
 and generates a DASH manifest (\texttt{*.mpd}) and an HLS master
 playlist (\texttt{*.m3u8}) that point at them.~\parencite{packaging_def}
 The segments follow Common Media Application Format~(CMAF), so one set
@@ -232,12 +229,10 @@ Named topic subscriptions are handled via the \texttt{WSClient} as well.
 Subscriptions are reference-counted: only the first topic
 subscriber runs a \texttt{subscribe} action, and only the last
 unsubscriber runs the \texttt{unsubscribe} action. Both actions also bypass
-the queue. On reconnect, the on-open handler reads the refcount map and
-sends a \texttt{subscribe} for every topic in it. If subscribe also used
-the queue, the server would get the same subscribe twice. If unsubscribe
-used the queue, a subscribe and an unsubscribe sent while the connection
-was down would still reach the server on reconnect, even though the
-Frontend no longer needs the topic.
+the queue.
+This is because otherwise the reconnect logic could possibly send the same
+subscription request twice or send old subscribe/unsubscribe
+actions that would interfere with each other.
 
 \texttt{WebSocketManager} owns the single \texttt{WSClient} via a
 refcount. \texttt{connect} returns the existing client and increments
@@ -385,11 +380,6 @@ and \path{collections/} subdirectories
 under \path{src/frontend/musikk/src/features/}.
 See \path{text/diagrams/StreamingClassDiagram.png} for the class diagram.
 
-The audio pipeline fields on Song and the Album upload flow are covered
-in the \hyperref[sec:audio_upload]{Audio Upload} section. Playback
-Queue design is covered in \hyperref[sec:song_queue]{Song Queue} and
-Playback logic in \hyperref[sec:playback]{Playback and Device Handling}.
-
 \subsection{Data Model}
 \texttt{BaseSong} holds the fields that make each Song playable and
 identifiable: title, description, image, \texttt{draft} flag, and the
@@ -404,7 +394,7 @@ one Collection page component on the Frontend for all four kinds.
 All four kinds share the same fields and the same operations, so the
 single-model approach works well here. The same shape did not hold
 for Notifications, which are split into separate models in the
-Notifications section.
+\hyperref[sec:notifications]{Notifications section}.
 
 \texttt{CollectionSong} pairs a \texttt{BaseSong} with a Collection at
 an integer \texttt{position}. It also serves as the public identifier
@@ -508,7 +498,7 @@ for adding a Collection and advancing is in
 The Queue supports several frequent operations: insert at a random
 index, reorder, remove an item, pop from the front, pop several items
 up to a certain one, bulk append multiple items, and read the upcoming
-items in order. The first draft used a doubly linked list in SQL.
+items in order. The first draft used a doubly linked list in SQL\@.
 However, this did not work well for most of these operations. Every
 insert, reorder, or remove cascaded pointer updates, and reading items
 in order needed a linear traversal rather than a single range scan. A
@@ -796,7 +786,7 @@ character trigrams. However, full-text search does not handle typos
 by default, and this UI needs that.
 
 
-\section{Notifications}
+\section{Notifications}\label{sec:notifications}
 This section shows how Notifications are modelled, emitted, and delivered.
 The Backend code is under \path{src/backend/musikk/notifications}.
 The Frontend code is under

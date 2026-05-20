@@ -1,6 +1,79 @@
 \chapter{User Testing and Further Improvements}\label{ch:user_testing_improvements}
+This chapter presents the user testing survey, the parts of the system that were fixed
+based on the testing feedback and possible future improvements.
 
-% TODO: user testing outcomes
+
+\section{User Testing}
+After the platform was implemented, a short user testing survey was
+performed. The goal was to see how real users interact with the
+system, whether they are able to easily navigate and use the available features,
+and which parts of the interface are difficult to understand.
+
+\subsection{Methods}
+The survey was again created in Google Forms. It contained 10 tasks,
+which were based on the existing use cases. Together, these tasks
+covered the main features available to a typical user, such as
+registration, music playback, and social actions. The exact wording
+of the tasks is available in the survey form.
+
+After each task, the participant selected one of three outcomes:
+``Completed without help'', ``Completed but needed help or hints'', or
+``Failed / gave up''. The participant also rated the difficulty of the
+task from 1 (very easy) to 5 (very hard). An optional text field was
+included after each task, so participants could add comments.
+
+The form is available
+online,\footnote{\url{https://docs.google.com/forms/d/19hc0Pa-td0c6V1uaFZowmoxGE1ID0-wfhmEqBcgC0CY/}}
+and the raw answers are stored in \path{text/testing_survey_results.csv}.
+
+\subsection{Results}
+In total, 11 people took part in the survey. Most tasks were completed
+without help, and the average difficulty was close to 1.4 on the
+1 to 5 scale. This shows that the main user flows were generally easy
+to use.
+
+However, not all parts of the system were equally clear. Some tasks
+were less intuitive, and several comments pointed on concrete usability
+issues. These issues are described in the next subsection.
+
+\subsection{Discovered Issues}
+The list below describes the main issues found during testing. It also
+explains whether each issue was fixed after the survey.
+
+\begin{itemize}
+    \item Creating a new Post was not intuitive, because the action was
+    available only from the User profile, and the Posts menu itself did not
+    include a clear way to create a new Post. This was improved by
+    adding a button directly to the Posts menu. In addition, the User's
+    own Posts are now displayed there as well, which makes the flow
+    easier to discover.
+
+    \item Icon-only buttons across the app had no hover labels. Because
+    of this, participants had to click the buttons to understand what
+    they did. Tooltips were added to the header, player bar, Song and
+    Collection menus, Notifications, and the search window.
+
+    \item Email normalization was inconsistent. The Backend stored only the
+    domain part in lowercase, while the login endpoint compared the whole email in
+    lowercase. This made emails such as \path{User@example.com}
+    succeed in registration but fail at login. The
+    Backend now normalizes the whole address.
+
+    \item Toast pop-ups appeared at the bottom of the page and overlapped
+    the playback controls. They were moved to the top middle part of the
+    screen.
+
+    \item Two issues were left for future work. First, the Queue exit
+    mechanic was not obvious, because the Queue is currently opened and
+    closed by the same navigation button. Second, the volume slider and
+    audio normalization did not work in Safari.
+
+\end{itemize}
+
+Overall, the testing showed that the main flows work well, but it also
+revealed several usability gaps. Most of these issues were fixed after
+testing. The remaining problems, together with other possible future
+work, are described in the following section.
 
 
 \section{Further Improvements}\label{sec:improvements}
@@ -15,28 +88,23 @@ some clickable elements use \texttt{div} instead of
 \texttt{button}, and the custom controls have no Accessible Rich
 Internet Applications~(ARIA) roles or labels. There is also no
 Digital Rights Management~(DRM) mechanism. In addition,
-Web Audio API (audio normalization, volume controls) does not work in Safari.\footnote{Even though \texttt{caniuseit} lists Safari as a compatible browser for Web Audio API\parencite{caniuse_webaudio}}\parencite{webkit_hls_webaudio,shaka_safari_webaudio}
+Web Audio API (audio normalization, volume controls) does not work in Safari.\footnote{Even though \texttt{caniuse} lists Safari as a compatible browser for Web Audio API\parencite{caniuse_webaudio}}\parencite{webkit_hls_webaudio,shaka_safari_webaudio}
 
-In addition, a few Backend features have no Frontend
-counterpart. The password reset and password change endpoints
-exist under \path{/api/v1/auth/}, but the SPA has no UI for
-them. Similarly, the Queue view does not support drag-to-reorder,
+Some smaller issues also remain. The Queue view could use a clearer
+close or back action. In Safari, audio normalization and volume controls
+based on the Web Audio API did not work reliably during
+testing.\footnote{Even though \texttt{caniuse} lists Safari as a compatible
+browser for Web Audio API\parencite{caniuse_webaudio}}\parencite{webkit_hls_webaudio,shaka_safari_webaudio}
+
+Moreover, a few Backend features have no Frontend
+implementation. For example, there is no UI for the password
+reset and password change endpoints.
+Similarly, the Queue view does not support drag-to-reorder,
 even though the Backend has a reorder endpoint.
 
-Finally, production troubleshooting relies on reading the Daphne
-and Celery logs over SSH\@. There is no error reporter, no metrics
+Finally, production troubleshooting relies on reading the
+server logs over SSH\@. There is no error reporter, no metrics
 pipeline, and no structured log format.
-
-\subsection{Search and Recommendations}\label{subsec:imp_search}
-\hyperref[sec:search]{Search} ranks results only by how close the
-strings match, and does not use any signal from the User's
-listening history. A mix of trigram and full-text search, with a
-small re-ranker based on what the User has played, could improve
-the results.
-
-In addition, there is no Recommendations engine and the Backend
-endpoint that adds random Songs to the Queue currently returns
-\texttt{HTTP 501}.
 
 \subsection{Playback Synchronization}\label{subsec:imp_clock}
 The clock calculation method from

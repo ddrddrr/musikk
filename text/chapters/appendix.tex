@@ -1,4 +1,5 @@
-\appendix
+\label{ch:appendix}
+%TODO: write that this is an appendix?
 
 
 \chapter{Audio Processing Pipeline Details}\label{app:audio_details}
@@ -7,6 +8,7 @@ section of \chapterref{ch:implementation}. The main chapter names every
 stage briefly and lists the chosen parameters. The sections below give
 the fuller reasoning for each choice and a per-flag breakdown of every
 CLI command.
+
 
 \section{Streaming Protocols}
 DASH was considered first, because it works better in varying network
@@ -18,6 +20,7 @@ support.~\parencite{msecaniuse} Since iOS makes up about 15\% of all
 operating systems worldwide~\parencite{os_percentage}, HLS support had
 to be added as well.
 
+
 \section{Packaging}
 Two notes on CMAF packaging. First, packager tools rarely state in
 their output that the segments follow CMAF\@. This can be checked by
@@ -28,24 +31,27 @@ decoder setup, and a sequence of media segments (\texttt{*.m4s}),
 which store the audio data in short time intervals.
 
 In addition, fMP4 segments are required for streaming FLAC encoded
-(lossless) audio via HLS\@.~\parencite{apple_hls_specs_flac_container}
+audio via HLS\@.~\parencite{apple_hls_specs_flac_container}
+
 
 \section{Processing Tools}
 Three CLI tools are used in the processing pipeline: FFmpeg for
 Transcoding and audio analysis, FFprobe for reading audio metadata,
 and Shaka Packager for the Packaging step.
 
-FFmpeg supports all of the selected codecs, can be run from a script,
+FFmpeg is used because supports all of the selected codecs, can be run from a script,
 and converts audio at high speed because it is written in C and uses
 multiple threads. The pipeline uses it both as the transcoder and as
 the host for the filter chain applied during Audio Preprocessing.
 
-FFprobe comes with the FFmpeg project and reads metadata from audio
+FFprobe usually comes with the FFmpeg installation and reads metadata from audio
 files. The Audio Preprocessing pipeline uses it to read the source
 codec, sample rate, channel count, bit depth, duration, and bitrate of
 every upload before Transcoding.
 
+
 \section{Transcoding}
+
 \subsection{AAC Encoder Choice}
 FFmpeg comes with several AAC encoder implementations, only one of
 which is used here:
@@ -61,9 +67,7 @@ which is used here:
     \item \texttt{libfdk\_aac} is the second best codec in terms of
     quality and the one that was chosen. It also has license limits:
     any binaries, Docker images, and other distribution methods that
-    include it cannot be made public or freely sent to other devices.
-    However, it can be used free of charge in closed-source
-    projects.~\parencite{vialicensing_aac,spdx_aac,ffmpeg_aac}
+    include it cannot be made public or freely sent to other devices.~\parencite{vialicensing_aac,spdx_aac,ffmpeg_aac}
 \end{itemize}
 For FLAC, FFmpeg provides a single \texttt{flac} encoder, which is
 used directly.~\parencite{ffmpeg_flac}
@@ -88,14 +92,16 @@ could in principle be reached with constrained VBR tiers, but the
 fixed per-tier bitrate is simpler for the project scope.
 
 \subsection{Generation Loss}
-Transcoding a lossy source into AAC causes generation loss~\parencite{generation_loss}. Every
-lossy pass throws away some audio, so re-encoding what was already
+Transcoding a lossy source into AAC causes ``generation loss''~\parencite{generation_loss}.
+Every lossy pass throws away some audio, so re-encoding what was already
 lossy makes the loss worse. The pipeline still does the conversion
 because DASH and HLS need every representation in the same codec.
 With FLAC and AAC chosen as the output codecs, lossy uploads have to
 be re-encoded into AAC anyway.
 
+
 \section{Audio Preprocessing}
+
 \subsection{Input Validation Limits}
 The upload passes through a chain of validation checks. The
 file-size and MIME checks run on the raw bytes. The remaining checks
@@ -162,7 +168,7 @@ a different container, extra information in the manifest, and
 per-platform decoder support, none of which fit the project scope.~\parencite{itu_bs775}
 
 Mono inputs stay mono, since upmixing to stereo would not add
-information, only file size. Stereo inputs stay stereo. Sources with
+information, only file size (stereo inputs stay stereo). Sources with
 three or more channels are downmixed to stereo by adding
 \texttt{aresample=out\_chlayout=stereo} to the FFmpeg filter chain.
 
@@ -191,32 +197,40 @@ precision, but using the same filter chain for every tier keeps the
 Transcoding command the same across tiers.
 
 \subsection{Loudness Theory}
-Loudness normalization keeps the perceived volume steady across
-tracks~\parencite{audio_normalization}. Human hearing is not flat: equal-loudness contours described
-by ISO~226~\parencite{iso226} show that perceived loudness depends on both amplitude
+Loudness normalization keeps the perceived volume roughly similar across
+tracks~\parencite{audio_normalization}. Human hearing is not flat and
+ISO~226~\parencite{iso226} shows that perceived loudness depends on both amplitude
 and frequency, so two files with the same digital peak can sound
-very different. Without normalization, a playlist that mixes tracks
-from different masters would have the listener constantly reaching
-for the volume knob.
+very different. I.e., without normalization, a playlist that mixes tracks
+from different masters would have the listener constantly adjusting the volume, since they will
+sound differently in terms of loudness.
 
-ITU-R BS.1770~\parencite{itu_bs1770} is the standard algorithm for measuring loudness. It
-produces an integrated value in Loudness Units relative to Full
-Scale~(LUFS), using a frequency weighting (K-weighting) made to
-match how humans hear and a channel weighting model. EBU R128~\parencite{ebu_r128} turns
-the algorithm into a normalization recommendation, with a broadcast
-target of \(-23\)\,LUFS\@. Streaming services use higher targets
-because listening conditions differ from broadcast, for example
-Spotify at \(-14\)\,LUFS~\parencite{spotify_loudness} and Apple Music at \(-16\)\,LUFS\@.~\parencite{apple_music_loudness}
+ITU-R BS.1770~\parencite{itu_bs1770} is the standard algorithm for measuring
+loudness. It produces a value in Loudness Units relative to Full
+Scale~(LUFS). The EBU R128~\parencite{ebu_r128} standard gives normalization
+recommendations based on those values, with a broadcast target of
+\(-23\)\,LUFS\@. Streaming services use higher targets because listening
+conditions differ from broadcast, for example Spotify at
+\(-14\)\,LUFS~\parencite{spotify_loudness} and Apple Music at
+\(-16\)\,LUFS\@.~\parencite{apple_music_loudness}
 
+This application does not set a single fixed target. The Frontend has
+four presets, ``off'', ``quiet'' (\(-19\)\,LUFS), ``normal''
+(\(-14\)\,LUFS), and ``loud'' (\(-11\)\,LUFS), and applies relative gain on
+the Web Audio pipeline based on the per-Song LUFS value.
+The ``normal'' preset matches the Spotify target.
+
+% TODO: do we really need to explain dbfs?
 Two other units appear here. Decibels Full Scale~(dBFS) measure
 sample amplitude relative to the largest value the format can store,
-so 0\,dBFS is the largest sample and recorded peaks are usually
-negative. True peak in dBFS~(dBTP) measures the peak of the
-reconstructed analog waveform after digital-to-analog conversion,
-not the peak of the stored samples. The difference matters: a
-sequence of samples that are all below 0\,dBFS can still reconstruct
-to over 0\,dBFS, producing inter-sample peaks that clip on Playback.
-True-peak measurement uses an oversampled signal to catch this.
+so 0\,dBFS is the largest possible sample value and recorded peaks
+are usually negative. True peak in dBFS~(dBTP) measures the peak of
+the reconstructed analog waveform after digital-to-analog conversion,
+not just the peak of the stored samples.
+This means that even when all stored samples are below 0\,dBFS, the
+reconstructed waveform can rise above 0\,dBFS between samples. These
+are inter-sample peaks, and they can clip during playback producing audible distortions.
+True-peak measurement checks for them by using an oversampled signal.
 
 \subsection{Why Loudness Is Measured After Transcoding}
 FFmpeg's \texttt{ebur128} filter with \texttt{peak=true} produces
@@ -239,7 +253,9 @@ example, a six-channel source produces a summary line such as
 as a single per-track value. After downmix to stereo the list has
 at most two entries, and the wrapper records the maximum of the two.
 
+
 \section{Pipeline Invocations}
+
 \subsection{FFmpeg Transcoding Flags}
 The FFmpeg command for the AAC 160\,kbps tier on a stereo 44.1\,kHz
 source is:

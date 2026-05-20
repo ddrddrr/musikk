@@ -1,6 +1,6 @@
 import { WSClient } from "./client";
 
-// Refcounted singleton so React 19 StrictMode double-mounts and multiple
+// a singleton so for react strict mode double-mounts
 // consumers share a single WS connection instead of tearing it down.
 class WebSocketManager {
     private static client: WSClient | null = null;
