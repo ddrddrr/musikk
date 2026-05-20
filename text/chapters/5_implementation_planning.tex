@@ -71,8 +71,8 @@ before Playback can start, which makes the application less usable.
 Progressive Download improves startup time and seeking. However, adapting to network
 changes is not standardized and would require custom audio preprocessing on the server
 and custom client logic.
-Peer-to-Peer transfer was also excluded, since it would rely on Users' devices as sources of audio data,
-so Playback speed would depend on peer availability and location.
+Peer-to-Peer transfer was also excluded because it would rely on Users' devices as sources of audio data,
+making Playback speed dependent on peer availability and location.
 
 Segmented HTTP Streaming addresses these issues by defining adaptive Playback directly in
 the manifest and delivering the audio as small chunk files.
@@ -269,7 +269,7 @@ Even with a single User this adds extra lag, and with many Users active at the s
 significant load on the server.
 
 For these reasons, WebSockets are used as the primary mechanism for real-time communication.
-The drawbacks listed above are accepted in exchange for a single two-way communcation channel and
+The drawbacks listed above are accepted in exchange for a single two-way communication channel and
 lower integration cost with the chosen Backend framework.
 
 These choices define what the Backend and Frontend have to support, and the Backend is discussed next.
@@ -446,8 +446,8 @@ such as C~\parencite{clay_lib} or Rust~\parencite{yew_framework}.
 However, JavaScript remains the industry standard because it is still the only
 general-purpose language directly supported by browsers.
 This means that JavaScript is the only language the browser can run natively, without
-pre-processing~(e.g., compilation to WebAssembly), this, in turn, simplifies the development, build,
-and deployment processes. And for this reason the
+pre-processing~(e.g., compilation to WebAssembly). This simplifies the development, build,
+and deployment processes. For this reason the
 client application is based on TypeScript~\parencite{typescript}, a typed superset of JavaScript.
 
 \subsection{Framework}

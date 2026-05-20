@@ -1,6 +1,6 @@
 \chapter{Implementation}\label{ch:implementation}
 
-This chapter goes over the built application and explains the choices
+This chapter describes the implemented application and explains the choices
 behind each feature. It focuses on what is not clear from the diagrams
 or the source code. The reader is expected to go through the diagrams
 and the code first, and then read the sections that explain
@@ -63,7 +63,7 @@ described next.
 \subsection{Packaging}
 Packaging splits the transcoded audio into short fragmented MP4 segments
 and generates a DASH manifest (\texttt{*.mpd}) and an HLS master
-playlist (\texttt{*.m3u8}) that point at them.~\parencite{packaging_def}
+playlist (\texttt{*.m3u8}) that reference them.~\parencite{packaging_def}
 The segments follow Common Media Application Format~(CMAF), so one set
 of chunks works for both protocols.
 
