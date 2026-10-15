@@ -21,7 +21,7 @@ player_bar --> device_dropdown
 
 package "State (providers + hooks)" {
     [PlaybackProvider\n+ AudioPlayerController (Shaka + audio elem)\n+ usePlayer (autoplay, onEnded)\n+ useSubscribePlaybackEvents\n+ useCalculateSongPosMs / useTotalDuration\n+ useHandlePlay] as playback_provider
-    [DeviceListProvider\n+ useDeviceLifecycle (re-register on WS open)\n+ useHandleSwitchDevice] as device_list_provider
+    [DeviceListProvider\n+ useDeviceLifecycle (re-register on WS open)] as device_list_provider
     [LoudnessPresetProvider\n+ useAudioPipeline (WebAudio gain + loudness)] as loudness_provider
 }
 

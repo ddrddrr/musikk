@@ -1,8 +1,8 @@
+import { THIS_DEVICE, ThisDevice } from "@/features/playback/thisDevice.ts";
 import { useWSClient } from "@/hooks/useWSClient.ts";
 import { WSClient } from "@/ws/client.ts";
 import { useEffect } from "react";
 import { useRegisterDeviceAction } from "../ws/actionHooks.ts";
-import { ThisDevice, useCurrentDevice } from "./useCurrentDevice.ts";
 
 type DeviceAction = (device: ThisDevice) => void;
 
@@ -19,11 +19,7 @@ function attachReregisterOnOpen(
 
 export function useDeviceLifecycle() {
     const ws = useWSClient();
-    const device = useCurrentDevice();
     const registerDevice = useRegisterDeviceAction();
 
-    useEffect(
-        () => attachReregisterOnOpen(ws, device, registerDevice),
-        [ws, device, registerDevice],
-    );
+    useEffect(() => attachReregisterOnOpen(ws, THIS_DEVICE, registerDevice), [ws, registerDevice]);
 }

@@ -19,13 +19,14 @@ export function PlayerBox({
         song: playbackState?.collectionSong.song,
     });
 
-    const { handleLoadedMetadata, handleOnEnded, isMutedFallback, unmute } = usePlayer({
-        audioRef,
-        ensureAudioPipeline,
-        fadeIn,
-        fadeOut,
-        onDurationChange: setAudioElemDurationSec,
-    });
+    const { handleLoadedMetadata, handleOnEnded, handleAudioStateChange, isMutedFallback, unmute } =
+        usePlayer({
+            audioRef,
+            ensureAudioPipeline,
+            fadeIn,
+            fadeOut,
+            onDurationChange: setAudioElemDurationSec,
+        });
 
     if (queueError) {
         return (
@@ -56,6 +57,10 @@ export function PlayerBox({
                 ref={audioRef}
                 onLoadedMetadata={handleLoadedMetadata}
                 onEnded={handleOnEnded}
+                onPlay={handleAudioStateChange}
+                onPause={handleAudioStateChange}
+                onSeeked={handleAudioStateChange}
+                onPlaying={handleAudioStateChange}
                 className="hidden"
             />
         </div>

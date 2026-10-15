@@ -14,6 +14,5 @@ export interface LocalPlaybackState {
     isPlaying: boolean;
     positionMs: number;
     serverTsMs: number;
-    version: number;
-    playInstanceUuid: string;
+    currPlayItemUniqueId: string;
 }

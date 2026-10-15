@@ -1,5 +1,5 @@
 import {
-    PlaybackSeekPayload,
+    PlaybackSetPayload,
     PlaybackSnapshotPayload,
 } from "@/features/playback/ws/playbackPayload.ts";
 import { AudioPlayerController } from "@/features/player/AudioPlayerController.ts";
@@ -17,12 +17,12 @@ export function useSubscribePlaybackEvents(controller: AudioPlayerController): v
                 controller.applyServerSnapshot(payload);
             },
         );
-        const unsubSeek = ws.subscribe("playback.seek", (payload: PlaybackSeekPayload) => {
-            controller.applyServerSeek(payload);
+        const unsubSet = ws.subscribe("playback.set", (payload: PlaybackSetPayload) => {
+            controller.applyCommand(payload);
         });
         return () => {
             unsubSnapshot();
-            unsubSeek();
+            unsubSet();
         };
     }, [ws, controller]);
 }

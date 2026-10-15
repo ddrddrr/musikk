@@ -7,3 +7,12 @@ export function calculatePlaybackStatePosMs(state: LocalPlaybackState): number {
     const songProgressSinceSnapshotMs = getServerClockEstimateMs() - state.serverTsMs;
     return state.positionMs + songProgressSinceSnapshotMs;
 }
+
+// lets a state switch between playing and paused without the position jumping
+export function rebasePlaybackStateToNow(state: LocalPlaybackState): LocalPlaybackState {
+    return {
+        ...state,
+        positionMs: calculatePlaybackStatePosMs(state),
+        serverTsMs: getServerClockEstimateMs(),
+    };
+}

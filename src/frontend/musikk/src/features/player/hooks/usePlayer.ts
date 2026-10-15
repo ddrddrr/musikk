@@ -1,5 +1,8 @@
 import { PlayerControllerContext } from "@/features/playback/providers/playbackContext.ts";
-import { useSeekAction, useSyncAction } from "@/features/playback/ws/actionHooks.ts";
+import {
+    useActiveDeviceReportAction,
+    useSetPlaybackAction,
+} from "@/features/playback/ws/actionHooks.ts";
 import { useQueueNext } from "@/features/song-queue/hooks/useQueueAPI.ts";
 import { useContext, useEffect, useState } from "react";
 
@@ -14,6 +17,7 @@ interface UsePlayerOptions {
 interface UsePlayerReturn {
     handleLoadedMetadata: () => void;
     handleOnEnded: () => void;
+    handleAudioStateChange: () => void;
     isMutedFallback: boolean;
     unmute: () => Promise<void>;
 }
@@ -26,8 +30,8 @@ export function usePlayer({
     onDurationChange,
 }: UsePlayerOptions): UsePlayerReturn {
     const controller = useContext(PlayerControllerContext);
-    const sendSync = useSyncAction();
-    const sendSeek = useSeekAction();
+    const sendActiveDeviceReport = useActiveDeviceReportAction();
+    const sendSet = useSetPlaybackAction();
     const { mutate: nextMutate } = useQueueNext();
     const [isMutedFallback, setIsMutedFallback] = useState(false);
 
@@ -35,12 +39,12 @@ export function usePlayer({
         controller.setHandlers({
             fadeIn,
             fadeOut,
-            sendSync,
-            sendSeek,
+            sendActiveDeviceReport,
+            sendSet,
             onMutedFallbackChange: setIsMutedFallback,
             onSongEnd: () => nextMutate(),
         });
-    }, [controller, fadeIn, fadeOut, sendSync, sendSeek, nextMutate]);
+    }, [controller, fadeIn, fadeOut, sendActiveDeviceReport, sendSet, nextMutate]);
 
     useEffect(() => {
         const audio = audioRef.current;
@@ -59,6 +63,7 @@ export function usePlayer({
     return {
         handleLoadedMetadata,
         handleOnEnded: () => controller.handleEnded(),
+        handleAudioStateChange: () => controller.handleAudioStateChange(),
         isMutedFallback,
         unmute: () => controller.unmute(ensureAudioPipeline),
     };

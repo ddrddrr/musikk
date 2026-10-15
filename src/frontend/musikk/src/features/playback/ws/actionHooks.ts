@@ -1,4 +1,8 @@
-import { ThisDevice } from "@/features/playback/hooks/useCurrentDevice.ts";
+import { ThisDevice } from "@/features/playback/thisDevice.ts";
+import {
+    ActiveDeviceReportPayload,
+    PlaybackSetPayload,
+} from "@/features/playback/ws/playbackPayload.ts";
 import { useWSClient } from "@/hooks/useWSClient.ts";
 import { useCallback } from "react";
 
@@ -32,10 +36,10 @@ export function useRegisterDeviceAction() {
 export function useSetDeviceActiveAction() {
     const ws = useWSClient();
     const setDeviceActiveAction = useCallback(
-        (device: ThisDevice) =>
+        (deviceId: string) =>
             ws.send({
                 action: "device.set_active",
-                payload: { device_id: device.id },
+                payload: { device_id: deviceId },
             }),
         [ws],
     );
@@ -55,47 +59,20 @@ export function useSetDeviceVolumeAction() {
     return setDeviceVolumeAction;
 }
 
-export function usePlaybackActions() {
-    const ws = useWSClient();
-    const activatePlaybackAction = useCallback(
-        () =>
-            ws.send({
-                action: "playback.activate",
-                payload: {},
-            }),
-        [ws],
-    );
-    const stopPlaybackAction = useCallback(
-        () =>
-            ws.send({
-                action: "playback.stop",
-                payload: {},
-            }),
-        [ws],
-    );
-    return { activatePlaybackAction, stopPlaybackAction };
-}
-
-export function useSeekAction() {
+export function useSetPlaybackAction() {
     const ws = useWSClient();
     return useCallback(
-        (songPosMs: number, currentSongUuid: string | null) =>
-            ws.send({
-                action: "playback.seek",
-                payload: { song_pos_ms: songPosMs, current_song_uuid: currentSongUuid },
-            }),
+        (payload: PlaybackSetPayload) => ws.send({ action: "playback.set", payload }),
         [ws],
     );
 }
 
-export function useSyncAction() {
+export function useActiveDeviceReportAction() {
     const ws = useWSClient();
+    // a queued report would already be stale when the connection reopens
     return useCallback(
-        (songPosMs: number, currentSongUuid: string | null) =>
-            ws.sendIfOpen({
-                action: "playback.sync",
-                payload: { song_pos_ms: songPosMs, current_song_uuid: currentSongUuid },
-            }),
+        (payload: ActiveDeviceReportPayload) =>
+            ws.sendIfOpen({ action: "playback.active-device-report", payload }),
         [ws],
     );
 }

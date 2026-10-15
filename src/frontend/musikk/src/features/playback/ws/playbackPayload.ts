@@ -1,26 +1,31 @@
 import { CollectionSong } from "@/features/collections/types.ts";
 import { LocalPlaybackState } from "@/features/playback/types.ts";
 
-export interface ServerActivePlayback {
+export interface ServerPlaybackState {
     current_song_uuid: string;
-    play_instance_uuid: string;
+    curr_play_item_unique_id: string;
     is_playing: boolean;
     last_known_song_pos_ms: number;
-    last_known_at_server_ms: number;
+    last_known_song_pos_updated_at_server_ms: number;
 }
 
-export interface ServerPlaybackState {
-    active: ServerActivePlayback | null;
-    version: number;
-}
-
-export interface PlaybackSeekPayload {
+export interface PlaybackSnapshotPayload {
     server_ts_ms?: number;
     playback_state?: ServerPlaybackState | null;
+    current_song: CollectionSong | null;
 }
 
-export interface PlaybackSnapshotPayload extends PlaybackSeekPayload {
-    current_song: CollectionSong | null;
+// curr_play_item_unique_id is required together with song_pos_ms
+export interface PlaybackSetPayload {
+    is_playing?: boolean;
+    song_pos_ms?: number;
+    curr_play_item_unique_id?: string;
+}
+
+export interface ActiveDeviceReportPayload {
+    curr_play_item_unique_id: string;
+    is_playing: boolean;
+    song_pos_ms: number;
 }
 
 export function updatedLocalPlaybackWithServerSnapshot(
@@ -28,29 +33,6 @@ export function updatedLocalPlaybackWithServerSnapshot(
     payload: PlaybackSnapshotPayload,
 ): LocalPlaybackState | null {
     const next = buildLocalPlaybackState(payload.current_song, payload.playback_state);
-    if (!next) return null;
-    if (prev && next.version < prev.version) return prev;
-    return reuseIfUnchanged(prev, next);
-}
-
-export function updatedLocalPlaybackWithServerSeek(
-    prev: LocalPlaybackState | null,
-    payload: PlaybackSeekPayload,
-): LocalPlaybackState | null {
-    if (!prev) return prev;
-    const serverPlaybackState = payload.playback_state;
-    const active = serverPlaybackState?.active;
-    if (!serverPlaybackState || !active) return prev;
-    if (active.current_song_uuid !== prev.collectionSong.uuid) return prev;
-    if (serverPlaybackState.version < prev.version) return prev;
-    const next: LocalPlaybackState = {
-        ...prev,
-        isPlaying: active.is_playing,
-        positionMs: active.last_known_song_pos_ms,
-        serverTsMs: active.last_known_at_server_ms,
-        version: serverPlaybackState.version,
-        playInstanceUuid: active.play_instance_uuid,
-    };
     return reuseIfUnchanged(prev, next);
 }
 
@@ -58,16 +40,14 @@ function buildLocalPlaybackState(
     currentSong: CollectionSong | null,
     serverPlaybackState: ServerPlaybackState | null | undefined,
 ): LocalPlaybackState | null {
-    const active = serverPlaybackState?.active;
-    if (!currentSong || !serverPlaybackState || !active) return null;
-    if (active.current_song_uuid !== currentSong.uuid) return null;
+    if (!currentSong || !serverPlaybackState) return null;
+    if (serverPlaybackState.current_song_uuid !== currentSong.uuid) return null;
     return {
         collectionSong: currentSong,
-        isPlaying: active.is_playing,
-        positionMs: active.last_known_song_pos_ms,
-        serverTsMs: active.last_known_at_server_ms,
-        version: serverPlaybackState.version,
-        playInstanceUuid: active.play_instance_uuid,
+        isPlaying: serverPlaybackState.is_playing,
+        positionMs: serverPlaybackState.last_known_song_pos_ms,
+        serverTsMs: serverPlaybackState.last_known_song_pos_updated_at_server_ms,
+        currPlayItemUniqueId: serverPlaybackState.curr_play_item_unique_id,
     };
 }
 
@@ -82,8 +62,7 @@ function reuseIfUnchanged(
         prev.isPlaying === next.isPlaying &&
         prev.positionMs === next.positionMs &&
         prev.serverTsMs === next.serverTsMs &&
-        prev.version === next.version &&
-        prev.playInstanceUuid === next.playInstanceUuid
+        prev.currPlayItemUniqueId === next.currPlayItemUniqueId
     ) {
         return prev;
     }

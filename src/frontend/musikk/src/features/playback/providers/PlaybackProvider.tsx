@@ -1,10 +1,10 @@
-import { useCurrentDevice } from "@/features/playback/hooks/useCurrentDevice.ts";
 import { useDeviceList } from "@/features/playback/hooks/useDeviceList.ts";
 import { useTotalDuration } from "@/features/playback/hooks/useTotalDuration.ts";
 import {
     PlaybackContext,
     PlayerControllerContext,
 } from "@/features/playback/providers/playbackContext.ts";
+import { THIS_DEVICE } from "@/features/playback/thisDevice.ts";
 import { useSubscribePlaybackEvents } from "@/features/playback/ws/wsEvents.ts";
 import { AudioPlayerController } from "@/features/player/AudioPlayerController.ts";
 import { useQueue } from "@/features/song-queue/hooks/useQueueAPI.ts";
@@ -16,9 +16,8 @@ interface PlaybackProviderProps {
 
 export function PlaybackProvider({ children }: PlaybackProviderProps) {
     const { error: queueError, refetch: queueRefetch } = useQueue();
-    const device = useCurrentDevice();
     const { activeDevice } = useDeviceList();
-    const isThisDeviceActive = device.id === activeDevice?.id;
+    const isThisDeviceActive = THIS_DEVICE.id === activeDevice?.id;
 
     const [controller] = useState(() => new AudioPlayerController());
     // we can't just pass controller.subscribe

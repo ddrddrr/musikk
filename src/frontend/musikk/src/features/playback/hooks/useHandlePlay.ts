@@ -1,11 +1,8 @@
 import { Collection, CollectionSong } from "@/features/collections/types.ts";
-import { useCurrentDevice } from "@/features/playback/hooks/useCurrentDevice.ts";
-import { useDeviceList } from "@/features/playback/hooks/useDeviceList.ts";
-import { PlaybackContext } from "@/features/playback/providers/playbackContext.ts";
 import {
-    usePlaybackActions,
-    useSetDeviceActiveAction,
-} from "@/features/playback/ws/actionHooks.ts";
+    PlaybackContext,
+    PlayerControllerContext,
+} from "@/features/playback/providers/playbackContext.ts";
 import {
     usePlayCollection,
     usePlaySong,
@@ -16,11 +13,8 @@ import { useContext } from "react";
 
 export function useHandlePlay() {
     const { playbackState, isPlaybackActive } = useContext(PlaybackContext);
+    const controller = useContext(PlayerControllerContext);
     const playingCollectionSong = playbackState?.collectionSong;
-    const device = useCurrentDevice();
-    const { activeDevice } = useDeviceList();
-    const setDeviceActiveAction = useSetDeviceActiveAction();
-    const { activatePlaybackAction, stopPlaybackAction } = usePlaybackActions();
     const playSongMutation = usePlaySong();
     const playCollectionMutation = usePlayCollection();
     const { data: queue } = useQueue();
@@ -44,7 +38,7 @@ export function useHandlePlay() {
             return;
         }
 
-        activatePlaybackAction();
+        controller.playAfterSongChange();
         return;
     }
 
@@ -55,24 +49,13 @@ export function useHandlePlay() {
         newCollection?: Collection;
         newSong?: CollectionSong;
     } = {}) {
-        // TODO: probably remove this check
-        if (!device.id) return;
-
-        if (!activeDevice) {
-            setDeviceActiveAction(device);
-        }
-
         if (newCollection || newSong) {
             await playItem({ newCollection, newSong });
             return;
         }
 
         if (playingCollectionSong) {
-            if (isPlaybackActive) {
-                stopPlaybackAction();
-            } else {
-                activatePlaybackAction();
-            }
+            controller.setIsPlaying(!isPlaybackActive);
             return;
         }
 
@@ -84,11 +67,8 @@ export function useHandlePlay() {
             } catch {
                 return;
             }
-            activatePlaybackAction();
-            return;
+            controller.playAfterSongChange();
         }
-
-        stopPlaybackAction();
     }
 
     return handlePlay;

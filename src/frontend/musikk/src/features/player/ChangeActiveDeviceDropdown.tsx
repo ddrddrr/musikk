@@ -1,6 +1,6 @@
 import { EmptyState } from "@/features/common/EmptyState.tsx";
 import { useDeviceList } from "@/features/playback/hooks/useDeviceList.ts";
-import { useHandleSwitchDevice } from "@/features/playback/hooks/useHandleSwitchDevice.ts";
+import { useSetDeviceActiveAction } from "@/features/playback/ws/actionHooks.ts";
 import { Button } from "@/features/ui/button.tsx";
 import {
     DropdownMenu,
@@ -13,7 +13,7 @@ import { Computer } from "lucide-react";
 
 export function ChangeActiveDeviceDropdown() {
     const { deviceList } = useDeviceList();
-    const handleSwitchDevice = useHandleSwitchDevice();
+    const setDeviceActive = useSetDeviceActiveAction();
     return (
         <DropdownMenu>
             <IconTooltip label="Devices" side="top">
@@ -36,7 +36,7 @@ export function ChangeActiveDeviceDropdown() {
                         key={device.id}
                         onClick={() => {
                             if (!device.is_active) {
-                                handleSwitchDevice(device);
+                                setDeviceActive(device.id);
                             }
                         }}
                         className={device.is_active ? "bg-muted font-semibold" : ""}

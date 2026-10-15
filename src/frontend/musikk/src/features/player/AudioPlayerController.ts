@@ -1,13 +1,16 @@
-import { calculatePlaybackStatePosMs } from "@/features/playback/playbackPosition.ts";
+import {
+    calculatePlaybackStatePosMs,
+    rebasePlaybackStateToNow,
+} from "@/features/playback/playbackPosition.ts";
 import {
     getServerClockEstimateMs,
     setGlobalServerClockOffset,
 } from "@/features/playback/serverClock.ts";
 import { LocalPlaybackState } from "@/features/playback/types.ts";
 import {
-    PlaybackSeekPayload,
+    ActiveDeviceReportPayload,
+    PlaybackSetPayload,
     PlaybackSnapshotPayload,
-    updatedLocalPlaybackWithServerSeek,
     updatedLocalPlaybackWithServerSnapshot,
 } from "@/features/playback/ws/playbackPayload.ts";
 import { getUrlForSong } from "@/features/player/getUrlForSong.ts";
@@ -17,24 +20,33 @@ import { toast } from "sonner";
 
 // the min interval that would trigger the audio elem seek
 const SEEK_CHANGE_MIN_MS = 250;
-// the drift check in startSyncWithServerLoop is true only when the FE sees drift,
-// but FE figures out drift using its own local guess of "what time is it on the server right now"
-// if no ws events arrive for some time, that caclculation can become wrong,
-// and the check could stop noticing the clock drift
-// the heartbeat just says "every 20s, send BE the acutal audio position"
-// (didn't work properly without on long sessions)
-const SYNC_DRIFT_CHECK_INTERVAL_MS = 1000;
-const SYNC_DRIFT_THRESHOLD_MS = 500;
-const SYNC_HEARTBEAT_MS = 20000;
+// other tabs move the position forward with the clock, but the real audio can fall behind,
+// e.g. when the browser lags or the tab sleeps in the background,
+// so the active tab sends its real position regularly while it plays
+const REPORT_HEARTBEAT_MS = 10000;
+const PENDING_TIMEOUT_MS = 5000;
+const PENDING_SEEK_TOLERANCE_MS = 1000;
 
 export type PlaybackHandlers = {
     fadeIn: (durationMs?: number) => void;
     fadeOut: (durationMs?: number) => Promise<void>;
-    sendSync: (posMs: number, songUuid: string) => void;
-    sendSeek: (positionMs: number, songUuid: string) => void;
+    sendActiveDeviceReport: (payload: ActiveDeviceReportPayload) => void;
+    sendSet: (payload: PlaybackSetPayload) => void;
     onMutedFallbackChange: (v: boolean) => void;
     onSongEnd: () => void;
 };
+
+interface PendingIsPlaying {
+    isPlaying: boolean;
+    timeoutId: number;
+}
+
+interface PendingSeek {
+    targetMs: number;
+    releasedAtServerMs: number;
+    currPlayItemUniqueId: string;
+    timeoutId: number;
+}
 
 // this used to be handled with hooks (e.g. usePlayer)
 // but the WS handlers kept reading stale values
@@ -48,15 +60,24 @@ export type PlaybackHandlers = {
 // useSyncExternalStore,
 // react later tells the controller about changes, e.g.,
 // new isThisDeviceActive val by calling setIsThisDeviceActive
+
+// the active tab owns the play state and the position. It plays, pauses and seeks its audio
+// directly and reports what the audio did. The other tabs send their requests through the server
 export class AudioPlayerController {
     private player: shaka.Player | null = null;
     private audio: HTMLAudioElement | null = null;
     private isAudioReady = false;
-    // gates the sync loop while seekAudioElement() fades out, so the
-    // pre-seek audio.currentTime doesnt get sent back to the server
-    private seekInProgress = false;
 
+    // the active tab writes it from the audio element, because only the audio knows the real state.
+    // On the other tabs it is the last snapshot
     private playbackState: LocalPlaybackState | null = null;
+    // the active tab switches to it when it stops being active
+    private lastSnapshotState: LocalPlaybackState | null = null;
+    // what react reads: playbackState plus the pending values of a non-active tab.
+    // It is stored, so useSyncExternalStore gets the same object while nothing changed
+    private viewState: LocalPlaybackState | null = null;
+    private pendingIsPlaying: PendingIsPlaying | null = null;
+    private pendingSeek: PendingSeek | null = null;
     private isThisDeviceActive = false;
 
     // pub-sub here is not the same as the ws client, since useSyncExternalStore
@@ -69,7 +90,7 @@ export class AudioPlayerController {
     private loadGuard = createStaleAsyncOpGuard();
     private playOrPauseGuard = createStaleAsyncOpGuard();
     private seekGuard = createStaleAsyncOpGuard();
-    private syncIntervalId: number | null = null;
+    private heartbeatIntervalId: number | null = null;
 
     setHandlers(handlers: PlaybackHandlers): void {
         this.playbackHandlers = handlers;
@@ -81,7 +102,7 @@ export class AudioPlayerController {
         // catch up to whatever WS events arrived before the audio element was mounted
         this.loadOrUnload();
         this.playOrPause();
-        this.syncWithServer();
+        this.updateHeartbeat();
     }
 
     private initShakaPlayer(): void {
@@ -102,21 +123,19 @@ export class AudioPlayerController {
         this.loadGuard.markRunningOpStale();
         this.playOrPauseGuard.markRunningOpStale();
         this.seekGuard.markRunningOpStale();
-        if (this.syncIntervalId !== null) {
-            window.clearInterval(this.syncIntervalId);
-            this.syncIntervalId = null;
-        }
+        this.stopHeartbeat();
+        this.clearPendingIsPlaying();
+        this.clearPendingSeek();
         if (this.player) {
             void this.player.destroy();
             this.player = null;
         }
         this.audio = null;
         this.isAudioReady = false;
-        this.seekInProgress = false;
     }
 
     getPlaybackState(): LocalPlaybackState | null {
-        return this.playbackState;
+        return this.viewState;
     }
 
     // useSyncExternalStore calls this
@@ -136,60 +155,117 @@ export class AudioPlayerController {
 
     applyServerSnapshot(payload: PlaybackSnapshotPayload): void {
         if (payload.server_ts_ms !== undefined) setGlobalServerClockOffset(payload.server_ts_ms);
+        const next = updatedLocalPlaybackWithServerSnapshot(this.lastSnapshotState, payload);
+        this.lastSnapshotState = next;
+
         const prev = this.playbackState;
-        const next = updatedLocalPlaybackWithServerSnapshot(prev, payload);
-        // returning the prev ref when nothing changed lets useSyncExternalStore
-        // not re-render (it compares values using ===)
-        if (next === prev) return;
-        this.playbackState = next;
-        this.notify();
+        const playItemChanged = prev?.currPlayItemUniqueId !== next?.currPlayItemUniqueId;
+        // any other snapshot is an echo of this tab's own report
+        // or the paused state of a device switch away from this tab
+        if (this.isThisDeviceActive && !playItemChanged) return;
 
-        const songChanged = prev?.collectionSong.uuid !== next?.collectionSong.uuid;
-        const instanceChanged = prev?.playInstanceUuid !== next?.playInstanceUuid;
-        const wasPlaying = prev?.isPlaying ?? false;
-        const isPlaying = next?.isPlaying ?? false;
-        const playingChanged = wasPlaying !== isPlaying;
-
-        if (songChanged || instanceChanged) {
+        if (!this.isThisDeviceActive) this.dropSettledPending(next);
+        this.setPlaybackState(next);
+        if (playItemChanged) {
             this.loadOrUnload();
             this.playOrPause();
-        } else if (playingChanged) {
-            this.playOrPause();
         }
-        this.syncWithServer();
     }
 
-    applyServerSeek(payload: PlaybackSeekPayload): void {
-        if (payload.server_ts_ms !== undefined) setGlobalServerClockOffset(payload.server_ts_ms);
+    // the role is not checked: the server sends playback.set only to the active device,
+    // and react may tell the controller about a new role after the command arrives
+    applyCommand(command: PlaybackSetPayload): void {
         const prev = this.playbackState;
-        const next = updatedLocalPlaybackWithServerSeek(prev, payload);
-        if (next === prev) return;
-        this.playbackState = next;
-        this.notify();
-        this.seekAudioElement();
+        if (!prev) return;
+        const seekMs =
+            command.curr_play_item_unique_id === prev.currPlayItemUniqueId
+                ? command.song_pos_ms
+                : undefined;
+        const isPlaying = command.is_playing;
+        if (seekMs === undefined && isPlaying === undefined) return;
+
+        if (!this.isAudioReady) {
+            // loadSong starts from the stored values
+            const wanted = rebasePlaybackStateToNow(prev);
+            if (seekMs !== undefined) wanted.positionMs = seekMs;
+            if (isPlaying !== undefined) wanted.isPlaying = isPlaying;
+            this.setPlaybackState(wanted);
+            return;
+        }
+
+        if (seekMs !== undefined) {
+            this.setPlaybackState({
+                ...prev,
+                positionMs: seekMs,
+                serverTsMs: getServerClockEstimateMs(),
+            });
+            this.seekAudioElement(seekMs);
+        }
+        if (isPlaying === true) this.playAudio();
+        if (isPlaying === false) this.pauseAudio();
+    }
+
+    setIsPlaying(isPlaying: boolean): void {
+        if (this.isThisDeviceActive) {
+            this.applyCommand({ is_playing: isPlaying });
+            return;
+        }
+        this.setPendingIsPlaying(isPlaying);
+        // we do the ! assertions everywhere because the controller is created before
+        // the handlers and we can't realistically pass them in the constructor
+        this.playbackHandlers!.sendSet({ is_playing: isPlaying });
+    }
+
+    // sent through the server even on the active tab: the HTTP response can arrive before
+    // the snapshot with the new song, but the server forwards the command after that snapshot
+    playAfterSongChange(): void {
+        if (!this.isThisDeviceActive) this.setPendingIsPlaying(true);
+        this.playbackHandlers!.sendSet({ is_playing: true });
     }
 
     applyUserSeek(positionMs: number): void {
         const prev = this.playbackState;
         if (!prev) return;
-        this.playbackState = {
-            ...prev,
-            positionMs,
-            serverTsMs: getServerClockEstimateMs(),
+        const command = {
+            song_pos_ms: Math.round(positionMs),
+            curr_play_item_unique_id: prev.currPlayItemUniqueId,
         };
-        this.notify();
-        this.seekAudioElement();
-        // we do the ! assertions everywhere because the controller is created before
-        // the handlers and we can't realistically pass them in the constructor
-        this.playbackHandlers!.sendSeek(positionMs, prev.collectionSong.uuid);
+        if (this.isThisDeviceActive) {
+            this.applyCommand(command);
+            return;
+        }
+        this.setPendingSeek(positionMs, prev.currPlayItemUniqueId);
+        this.playbackHandlers!.sendSet(command);
     }
 
     setIsThisDeviceActive(active: boolean): void {
         if (this.isThisDeviceActive === active) return;
         this.isThisDeviceActive = active;
+        if (active) {
+            this.clearPendingIsPlaying();
+            this.clearPendingSeek();
+        } else {
+            // the paused snapshot of a device switch arrives while this tab is still active
+            this.playbackState = this.lastSnapshotState;
+        }
+        this.refreshView();
         this.loadOrUnload();
         this.playOrPause();
-        this.syncWithServer();
+        this.updateHeartbeat();
+    }
+
+    handleAudioStateChange(): void {
+        const audio = this.reportableAudio();
+        const prev = this.playbackState;
+        if (!audio || !prev) return;
+        // this tab ignores its own echoes, so it has to write the real audio state itself
+        this.setPlaybackState({
+            ...prev,
+            isPlaying: !audio.paused,
+            positionMs: audio.currentTime * 1000,
+            serverTsMs: getServerClockEstimateMs(),
+        });
+        this.reportAudioState(audio, prev.currPlayItemUniqueId);
     }
 
     handleEnded(): void {
@@ -240,86 +316,93 @@ export class AudioPlayerController {
     }
 
     private playOrPause(): void {
-        const audio = this.audio;
-        if (!audio || !this.isAudioReady || !this.playbackState) return;
-
-        const playOrPauseOpId = this.playOrPauseGuard.beginOp();
-        void (async () => {
-            if (this.isThisDeviceActive && this.playbackState?.isPlaying) {
-                void this.tryPlay();
-            } else {
-                await this.playbackHandlers!.fadeOut();
-                if (this.playOrPauseGuard.isOpStale(playOrPauseOpId)) return;
-                audio.pause();
-            }
-        })();
-    }
-
-    private seekAudioElement(): void {
-        const audio = this.audio;
-        if (!audio || !this.isAudioReady) return;
-        // on non-active devices there is no audio elem to seek
-        if (!this.isThisDeviceActive) return;
-        if (!this.playbackState) return;
-
-        const targetMs = calculatePlaybackStatePosMs(this.playbackState);
-        if (Math.abs(targetMs - audio.currentTime * 1000) <= SEEK_CHANGE_MIN_MS) return;
-
-        const seekOpId = this.seekGuard.beginOp();
-        this.seekInProgress = true;
-        void (async () => {
-            try {
-                await this.playbackHandlers!.fadeOut();
-                if (this.seekGuard.isOpStale(seekOpId)) return;
-                audio.currentTime = targetMs / 1000;
-                this.playbackHandlers!.fadeIn();
-            } finally {
-                // only clear if still the live op, because a newer seek may already set the flag
-                // i.e., there will be a new seek operation and seekInProgress should stay true
-                if (!this.seekGuard.isOpStale(seekOpId)) this.seekInProgress = false;
-            }
-        })();
-    }
-
-    // runs only on active device (and only when the playback is active)
-    // sends the current audio state (pos/song) to the server in an interval
-    private syncWithServer(): void {
-        const shouldRun =
-            this.isThisDeviceActive &&
-            this.playbackState?.isPlaying === true &&
-            this.audio !== null;
-        if (shouldRun && this.syncIntervalId === null) {
-            this.startSyncWithServerLoop();
-        } else if (!shouldRun && this.syncIntervalId !== null) {
-            window.clearInterval(this.syncIntervalId);
-            this.syncIntervalId = null;
+        if (!this.audio || !this.isAudioReady || !this.playbackState) return;
+        if (this.isThisDeviceActive && this.playbackState.isPlaying) {
+            this.playAudio();
+        } else {
+            this.pauseAudio();
         }
     }
 
-    private startSyncWithServerLoop(): void {
-        let lastSyncAtMs = 0;
-        this.syncIntervalId = window.setInterval(() => {
-            const audio = this.audio;
-            if (!audio || !this.isAudioReady) return;
-            // seekAudioElement() sets seekInProgress but only writes
-            // audio.currentTime after fadeOut finishes
-            // during that time the audio elem still holds the pre-seek position,
-            // so if we send a sync action it would send the old
-            // position to the server and "undo" the seek
-            if (this.seekInProgress) return;
-            const playbackState = this.playbackState;
-            if (!playbackState) return;
+    private playAudio(): void {
+        const audio = this.audio;
+        if (!audio) return;
+        this.playOrPauseGuard.beginOp();
+        // e.g. a pause is still fading out. play() would cut the sound for a moment
+        if (!audio.paused) {
+            this.playbackHandlers!.fadeIn();
+            return;
+        }
+        void this.tryPlay();
+    }
 
-            const audioMs = audio.currentTime * 1000;
-            const drift = Math.abs(audioMs - calculatePlaybackStatePosMs(playbackState));
-            if (drift > SYNC_DRIFT_THRESHOLD_MS || Date.now() - lastSyncAtMs >= SYNC_HEARTBEAT_MS) {
-                this.playbackHandlers!.sendSync(
-                    Math.round(audioMs),
-                    playbackState.collectionSong.uuid,
-                );
-                lastSyncAtMs = Date.now();
-            }
-        }, SYNC_DRIFT_CHECK_INTERVAL_MS);
+    private pauseAudio(): void {
+        const audio = this.audio;
+        if (!audio) return;
+        const pauseOpId = this.playOrPauseGuard.beginOp();
+        void (async () => {
+            await this.playbackHandlers!.fadeOut();
+            if (this.playOrPauseGuard.isOpStale(pauseOpId)) return;
+            audio.pause();
+        })();
+    }
+
+    private seekAudioElement(targetMs: number): void {
+        const audio = this.audio;
+        if (!audio || !this.isAudioReady) return;
+        if (Math.abs(targetMs - audio.currentTime * 1000) <= SEEK_CHANGE_MIN_MS) return;
+
+        const seekOpId = this.seekGuard.beginOp();
+        void (async () => {
+            await this.playbackHandlers!.fadeOut();
+            if (this.seekGuard.isOpStale(seekOpId)) return;
+            audio.currentTime = targetMs / 1000;
+            this.playbackHandlers!.fadeIn();
+        })();
+    }
+
+    // a load pauses the element, and the element fires pause right before ended.
+    // Neither of them is a real pause
+    private reportableAudio(): HTMLAudioElement | null {
+        const audio = this.audio;
+        if (!audio || !this.isThisDeviceActive || !this.isAudioReady || audio.ended) return null;
+        return audio;
+    }
+
+    private reportAudioState(audio: HTMLAudioElement, currPlayItemUniqueId: string): void {
+        this.playbackHandlers!.sendActiveDeviceReport({
+            curr_play_item_unique_id: currPlayItemUniqueId,
+            is_playing: !audio.paused,
+            song_pos_ms: Math.round(audio.currentTime * 1000),
+        });
+    }
+
+    private updateHeartbeat(): void {
+        const shouldRun = this.isThisDeviceActive && this.audio !== null;
+        if (!shouldRun) {
+            this.stopHeartbeat();
+            return;
+        }
+        if (this.heartbeatIntervalId !== null) return;
+        this.heartbeatIntervalId = window.setInterval(
+            () => this.sendHeartbeatReport(),
+            REPORT_HEARTBEAT_MS,
+        );
+    }
+
+    private stopHeartbeat(): void {
+        if (this.heartbeatIntervalId === null) return;
+        window.clearInterval(this.heartbeatIntervalId);
+        this.heartbeatIntervalId = null;
+    }
+
+    // does not write playbackState. It can run during the pause fade while the audio
+    // still plays, and would flip the button back
+    private sendHeartbeatReport(): void {
+        const audio = this.reportableAudio();
+        const state = this.playbackState;
+        if (!audio || !state || audio.paused) return;
+        this.reportAudioState(audio, state.currPlayItemUniqueId);
     }
 
     private async tryPlay(): Promise<void> {
@@ -372,8 +455,12 @@ export class AudioPlayerController {
             // BE always sets playback=false on any active-device transition,
             // so isPlaying=true here means the user explicitly hit play
             if (this.playbackState?.isPlaying && this.isThisDeviceActive) {
-                void this.tryPlay();
+                await this.tryPlay();
+                if (this.loadGuard.isOpStale(loadOpId)) return;
             }
+            // reported only after tryPlay, since before it the audio is still paused,
+            // and a failed play fires no event
+            this.handleAudioStateChange();
         } catch {
             if (this.loadGuard.isOpStale(loadOpId)) return;
             toast.error("Failed to load audio. Please try again.");
@@ -406,5 +493,87 @@ export class AudioPlayerController {
             audio.pause();
             audio.currentTime = 0;
         }
+    }
+
+    private setPlaybackState(next: LocalPlaybackState | null): void {
+        this.playbackState = next;
+        this.refreshView();
+    }
+
+    private refreshView(): void {
+        const base = this.playbackState;
+        const next = base && !this.isThisDeviceActive ? this.withPending(base) : base;
+        if (next === this.viewState) return;
+        this.viewState = next;
+        this.notify();
+    }
+
+    // covers the time until the active tab reports the request back.
+    // Without it, an older report could flip the button or move the slider back for a moment
+    private withPending(base: LocalPlaybackState): LocalPlaybackState {
+        let state = base;
+        const seek = this.pendingSeek;
+        if (seek) {
+            state = { ...state, positionMs: seek.targetMs, serverTsMs: seek.releasedAtServerMs };
+        }
+        const pending = this.pendingIsPlaying;
+        if (pending && pending.isPlaying !== state.isPlaying) {
+            state = { ...rebasePlaybackStateToNow(state), isPlaying: pending.isPlaying };
+        }
+        return state;
+    }
+
+    private dropSettledPending(snapshot: LocalPlaybackState | null): void {
+        const seek = this.pendingSeek;
+        if (seek && snapshot?.currPlayItemUniqueId !== seek.currPlayItemUniqueId) {
+            this.clearPendingSeek();
+        } else if (seek && snapshot) {
+            const shownMs = calculatePlaybackStatePosMs(this.withPending(snapshot));
+            const snapshotMs = calculatePlaybackStatePosMs(snapshot);
+            if (Math.abs(snapshotMs - shownMs) <= PENDING_SEEK_TOLERANCE_MS)
+                this.clearPendingSeek();
+        }
+
+        const pending = this.pendingIsPlaying;
+        if (pending && snapshot && pending.isPlaying === snapshot.isPlaying) {
+            this.clearPendingIsPlaying();
+        }
+    }
+
+    private setPendingIsPlaying(isPlaying: boolean): void {
+        this.clearPendingIsPlaying();
+        const timeoutId = window.setTimeout(() => {
+            this.pendingIsPlaying = null;
+            this.refreshView();
+        }, PENDING_TIMEOUT_MS);
+        this.pendingIsPlaying = { isPlaying, timeoutId };
+        this.refreshView();
+    }
+
+    private clearPendingIsPlaying(): void {
+        if (!this.pendingIsPlaying) return;
+        window.clearTimeout(this.pendingIsPlaying.timeoutId);
+        this.pendingIsPlaying = null;
+    }
+
+    private setPendingSeek(targetMs: number, currPlayItemUniqueId: string): void {
+        this.clearPendingSeek();
+        const timeoutId = window.setTimeout(() => {
+            this.pendingSeek = null;
+            this.refreshView();
+        }, PENDING_TIMEOUT_MS);
+        this.pendingSeek = {
+            targetMs,
+            releasedAtServerMs: getServerClockEstimateMs(),
+            currPlayItemUniqueId,
+            timeoutId,
+        };
+        this.refreshView();
+    }
+
+    private clearPendingSeek(): void {
+        if (!this.pendingSeek) return;
+        window.clearTimeout(this.pendingSeek.timeoutId);
+        this.pendingSeek = null;
     }
 }
