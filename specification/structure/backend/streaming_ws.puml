@@ -49,10 +49,10 @@ class Device <<TypedDict>> {
 
 class ActivePlayback <<dataclass>> {
     current_song_uuid: str
-    play_instance_uuid: str
+    curr_play_item_unique_id: str
     is_playing: bool
     last_known_song_pos_ms: int
-    last_known_at_server_ms: int
+    last_known_song_pos_updated_at_server_ms: int
     --
     calculate_song_pos_ms(): int
 }
@@ -114,7 +114,6 @@ together {
         add_collection_to_queue(c)
         remove_queue_item(item)
         reorder_queue(item, before?, after?)
-        move_context_to_queue(cs, before?, after?)
     }
 }
 

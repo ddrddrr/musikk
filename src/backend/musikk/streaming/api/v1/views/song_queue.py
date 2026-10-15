@@ -4,29 +4,29 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from streaming.api.v1.serializers.song_queue import PlayerStateSerializer
-from streaming.models import Collection, PlayerState, QueueItem, SongQueue
+from streaming.api.v1.serializers.song_queue import StoredPlaybackStateSerializer
+from streaming.models import Collection, PlaybackQueue, QueueItem, StoredPlaybackState
 from streaming.models.songs import CollectionSong
 from streaming.permissions import IsPublicOrCollectionAuthor
 from streaming.ws.player_controller import PlayerController
 
 
 class PlayerMixin(APIView):
-    def get_player(self, request: Request) -> PlayerState:
-        return request.user.streamingprofile.player
+    def get_stored_playback_state(self, request: Request) -> StoredPlaybackState:
+        return request.user.streamingprofile.stored_playback_state
 
-    def get_song_queue(self, request: Request) -> SongQueue:
-        return request.user.streamingprofile.player.queue
+    def get_playback_queue(self, request: Request) -> PlaybackQueue:
+        return request.user.streamingprofile.stored_playback_state.playback_queue
 
     def get_controller(self, request: Request) -> PlayerController:
         return PlayerController(user_uuid=str(request.user.uuid))
 
 
-class PlayerStateRetrieveView(PlayerMixin, RetrieveAPIView):
-    serializer_class = PlayerStateSerializer
+class StoredPlaybackStateRetrieveView(PlayerMixin, RetrieveAPIView):
+    serializer_class = StoredPlaybackStateSerializer
 
     def get_object(self):
-        return self.get_player(self.request)
+        return self.get_stored_playback_state(self.request)
 
 
 class QueueAddSongView(PlayerMixin):
@@ -83,7 +83,7 @@ class QueueRemoveItemView(PlayerMixin):
     def post(self, request, *args, **kwargs):
         item = get_object_or_404(QueueItem, uuid=kwargs["uuid"])
 
-        if self.get_song_queue(request) != item.queue:
+        if self.get_playback_queue(request) != item.queue:
             return Response(
                 status=status.HTTP_403_FORBIDDEN,
                 data={"error": "Item does not belong to this user's queue."},
@@ -105,7 +105,7 @@ class PlayerNextView(PlayerMixin):
 
         if node_uuid := kwargs.get("uuid"):
             item = get_object_or_404(QueueItem, uuid=node_uuid)
-            if item.queue != self.get_song_queue(request):
+            if item.queue != self.get_playback_queue(request):
                 return Response(
                     status=status.HTTP_403_FORBIDDEN,
                     data={"error": "Item does not belong to this user's queue."},
@@ -125,7 +125,7 @@ class PlayerPrevView(PlayerMixin):
 
 class QueueReorderView(PlayerMixin):
     def post(self, request, *args, **kwargs):
-        song_queue = self.get_song_queue(request)
+        playback_queue = self.get_playback_queue(request)
 
         item_uuid = request.data.get("item")
         before_uuid = request.data.get("before")
@@ -143,7 +143,7 @@ class QueueReorderView(PlayerMixin):
             )
 
         item = get_object_or_404(QueueItem, uuid=item_uuid)
-        if item.queue != song_queue:
+        if item.queue != playback_queue:
             return Response(
                 status=status.HTTP_403_FORBIDDEN,
                 data={"error": "Item does not belong to this user's queue."},
@@ -153,26 +153,4 @@ class QueueReorderView(PlayerMixin):
         after = get_object_or_404(QueueItem, uuid=after_uuid) if after_uuid else None
 
         self.get_controller(request).reorder_queue(item, before=before, after=after)
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-class MoveContextToQueueView(PlayerMixin):
-    def post(self, request, *args, **kwargs):
-        cs_uuid = request.data.get("collection_song")
-        before_uuid = request.data.get("before")
-        after_uuid = request.data.get("after")
-
-        if not cs_uuid:
-            return Response(
-                status=status.HTTP_400_BAD_REQUEST,
-                data={"error": "'collection_song' is required."},
-            )
-
-        collection_song = get_object_or_404(CollectionSong, uuid=cs_uuid)
-        before = get_object_or_404(QueueItem, uuid=before_uuid) if before_uuid else None
-        after = get_object_or_404(QueueItem, uuid=after_uuid) if after_uuid else None
-
-        self.get_controller(request).move_context_to_queue(
-            collection_song, before=before, after=after
-        )
         return Response(status=status.HTTP_204_NO_CONTENT)

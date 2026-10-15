@@ -2,16 +2,20 @@ from base.models import BaseModel
 from django.conf import settings
 from django.db import models, transaction
 
+from streaming.models.collection_cursor import CollectionCursor
 from streaming.models.collections import Collection, CollectionCredit, CollectionType
-from streaming.models.song_queue import PlaybackContext, PlayerState, SongQueue
+from streaming.models.playback_queue import PlaybackQueue
+from streaming.models.stored_playback_state import StoredPlaybackState
 
 
 class StreamingProfileManager(models.Manager):
     @transaction.atomic
     def create_for_user(self, user):
-        context = PlaybackContext.objects.create()
-        song_queue = SongQueue.objects.create()
-        player = PlayerState.objects.create(queue=song_queue, context=context)
+        collection_cursor = CollectionCursor.objects.create()
+        playback_queue = PlaybackQueue.objects.create()
+        stored_playback_state = StoredPlaybackState.objects.create(
+            playback_queue=playback_queue, collection_cursor=collection_cursor
+        )
 
         history = Collection.objects.create(
             type=CollectionType.HISTORY,
@@ -28,7 +32,7 @@ class StreamingProfileManager(models.Manager):
         CollectionCredit.objects.create(collection=history, author=user)
         CollectionCredit.objects.create(collection=liked_songs, author=user)
 
-        return self.create(user=user, player=player)
+        return self.create(user=user, stored_playback_state=stored_playback_state)
 
 
 class StreamingProfile(BaseModel):
@@ -36,8 +40,8 @@ class StreamingProfile(BaseModel):
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
     )
-    player = models.OneToOneField(
-        "streaming.PlayerState",
+    stored_playback_state = models.OneToOneField(
+        "streaming.StoredPlaybackState",
         on_delete=models.CASCADE,
     )
     liked_collections = models.ManyToManyField(

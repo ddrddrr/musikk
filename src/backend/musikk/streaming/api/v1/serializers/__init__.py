@@ -8,10 +8,10 @@ from streaming.api.v1.serializers.collections import (
     CollectionSerializerDetailed as CollectionSerializerDetailed,
 )
 from streaming.api.v1.serializers.song_queue import (
-    PlayerStateSerializer as PlayerStateSerializer,
+    QueueItemSerializer as QueueItemSerializer,
 )
 from streaming.api.v1.serializers.song_queue import (
-    QueueItemSerializer as QueueItemSerializer,
+    StoredPlaybackStateSerializer as StoredPlaybackStateSerializer,
 )
 from streaming.api.v1.serializers.songs import (
     BaseSongCreateSerializer as BaseSongCreateSerializer,

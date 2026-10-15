@@ -26,9 +26,6 @@ from streaming.api.v1.views.connections import (
     FriendsLatestListenedView as FriendsLatestListenedView,
 )
 from streaming.api.v1.views.song_queue import (
-    MoveContextToQueueView as MoveContextToQueueView,
-)
-from streaming.api.v1.views.song_queue import (
     PlayerClearView as PlayerClearView,
 )
 from streaming.api.v1.views.song_queue import (
@@ -47,9 +44,6 @@ from streaming.api.v1.views.song_queue import (
     PlayerPrevView as PlayerPrevView,
 )
 from streaming.api.v1.views.song_queue import (
-    PlayerStateRetrieveView as PlayerStateRetrieveView,
-)
-from streaming.api.v1.views.song_queue import (
     QueueAddCollectionView as QueueAddCollectionView,
 )
 from streaming.api.v1.views.song_queue import (
@@ -63,6 +57,9 @@ from streaming.api.v1.views.song_queue import (
 )
 from streaming.api.v1.views.song_queue import (
     QueueReorderView as QueueReorderView,
+)
+from streaming.api.v1.views.song_queue import (
+    StoredPlaybackStateRetrieveView as StoredPlaybackStateRetrieveView,
 )
 from streaming.api.v1.views.songs import (
     CollectionSongRetrieveView as CollectionSongRetrieveView,

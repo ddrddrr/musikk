@@ -28,6 +28,23 @@ class TestDeviceManager(TestCase):
 
         self.assertFalse(self.manager.set_active_device(device_id="d1"))
 
+    def test_get_active_device_channel_returns_channel_of_active_device(self):
+        device = json.dumps({"channel_name": "chA", "name": "n", "volume": 50})
+        self.mock_redis.get.side_effect = [b"d1", device.encode()]
+
+        self.assertEqual(self.manager.get_active_device_channel(), "chA")
+        self.mock_redis.get.assert_called_with(self.manager._device_key("d1"))
+
+    def test_get_active_device_channel_returns_none_without_active_device(self):
+        self.mock_redis.get.return_value = None
+
+        self.assertIsNone(self.manager.get_active_device_channel())
+
+    def test_get_active_device_channel_returns_none_when_device_entry_is_gone(self):
+        self.mock_redis.get.side_effect = [b"d1", None]
+
+        self.assertIsNone(self.manager.get_active_device_channel())
+
     def test_clear_device_returns_true_when_was_active(self):
         owned = json.dumps({"channel_name": "chA", "name": "n", "volume": 50})
         self.mock_redis.get.side_effect = [owned.encode(), b"d1"]

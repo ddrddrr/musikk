@@ -2,120 +2,146 @@ from collections.abc import Callable
 
 from websockets.action_handler import WSActionHandler
 
+from streaming.audio.config import MAX_DURATION_SECONDS
 from streaming.managers.device_manager import DeviceManager
-from streaming.managers.playback_manager import ActivePlayback, PlaybackManager
-from streaming.ws.playback_controller import PlaybackController
+from streaming.models.stored_playback_state import locked_stored_playback_state
 from streaming.ws.state_broadcasters.device import DeviceStateBroadcaster
+from streaming.ws.state_broadcasters.playback import PlaybackStateBroadcaster
 
 
 class PlaybackWSActionHandler(WSActionHandler):
     """Handles playback-related ws actions.
 
-    There are three types of places we need to sync:
-    - Active client: the one tab producing audio (1/user).
-      Its `audio.currentTime` is the actual value of the audio time position.
-    - Passive clients: other tabs that just render curr audio time which the server sends (no audio element).
-    - Server: holds shared `PlaybackState` per user.
+    Only the active device, the one tab that plays the audio, knows the real play
+    state and position. So between track changes it is the only one that writes
+    them. It sends a report each time its audio plays, pauses or seeks,
+    and in heartbeat intervals.
+    The server stores the report and sends it to all tabs as a snapshot.
 
-    `PlaybackState` doesn't store only the song timestamp ("the song is at 2000 ms"), since
-    it would be already stale when one of the passive clients picks it up, so the state
-    holds two values:
-    - `last_known_song_pos_ms` - the song was at x ms inside the track
-    - `last_known_at_server_ms` - at server time t
-    Any reader caculates the current position by taking the elapsed server
-    time since t (i.e. `curr server time - t`) and adding it to x
-    (that gives the song time the active client should be at right now).
-    Clients don't have `curr server time` directly, so each ws playback broadcast
-    carries a server timestamp which clients use to sync their clocks.
+    A tab that wants to play, pause or seek sends a set command. The server does
+    not store the command. It forwards it to the active device, which applies it
+    to its audio and then reports the result.
 
-    Passive clients assume audio advances 1ms per 1ms of the clock, but
-    the active player's `audio.currentTime` can drift away from that, e.g.,
-    the browser lags for a brief moment or the tab gets put to background/woken up.
-    After a few minutes those small gaps pile up and passive tabs' progress bars could run visibly ahead/behind of
-    where the song actually is.
-    So the active client periodically reports its real `audio.currentTime` via `sync`, and the server
-    overwrites the stored pair with fresh values.
+    The stored position is a pair of `last_known_song_pos_ms` and
+    `last_known_song_pos_updated_at_server_ms`, because a plain position would
+    already be old when a tab reads it. A reader adds the server time passed since
+    `last_known_song_pos_updated_at_server_ms` to get the current position. Each
+    snapshot carries the server time, so tabs can estimate the server clock.
     """
 
     def __init__(self, consumer):
         super().__init__(consumer)
-        self.manager = PlaybackManager(user_uuid=consumer.user_uuid)
-        self.playback_controller = PlaybackController(user_uuid=consumer.user_uuid)
+        self.device_manager = DeviceManager(user_uuid=consumer.user_uuid)
         self.device_broadcaster = DeviceStateBroadcaster(user_uuid=consumer.user_uuid)
+        self.playback_state_broadcaster = PlaybackStateBroadcaster(
+            user_uuid=consumer.user_uuid
+        )
 
     def get_actions(self) -> dict[str, Callable]:
         return {
-            "playback.activate": self.handle_activate,
-            "playback.stop": self.handle_stop,
-            "playback.seek": self.handle_seek,
-            "playback.sync": self.handle_sync_server_to_active,
+            "playback.set": self.handle_set,
+            "playback.active-device-report": self.handle_active_device_report,
         }
 
-    def handle_activate(self, payload: dict):
-        self.playback_controller.activate(self._current_song_uuid())
+    def handle_set(self, payload: dict):
+        command = self._parse_set_command(payload)
+        if not command:
+            return
+        with locked_stored_playback_state(
+            self.consumer.user_uuid
+        ) as stored_playback_state:
+            if not stored_playback_state.has_curr_play_item():
+                return
+            # a tab that has not seen the latest track change may seek in the old song
+            if "song_pos_ms" in command and command["curr_play_item_unique_id"] != str(
+                stored_playback_state.curr_play_item_unique_id
+            ):
+                return
 
-    def handle_stop(self, payload: dict):
-        self.playback_controller.stop()
+            channel_name = self._resolve_active_device_channel()
+            if channel_name is None:
+                return
+            self.playback_state_broadcaster.send_set_command_to_channel(
+                self.consumer.channel_layer, channel_name, command
+            )
 
-    def handle_seek(self, payload: dict):
+    def handle_active_device_report(self, payload: dict):
+        device_id = self.consumer.device_id
+        if not device_id or device_id != self.device_manager.get_active_device_id():
+            return
+
+        curr_play_item_unique_id = self._parse_curr_play_item_unique_id(payload)
+        is_playing = self._parse_is_playing(payload)
         song_pos_ms = self._parse_song_pos_ms(payload)
-        if song_pos_ms is None:
-            return
-        if self._active_synced_with_fe(payload) is None:
-            return
-
-        self._auto_activate_if_no_active_device()
-
-        self.playback_controller.seek(song_pos_ms)
-
-    def handle_sync_server_to_active(self, payload: dict):
-        song_pos_ms = self._parse_song_pos_ms(payload)
-        if song_pos_ms is None:
-            return
-        prev_active = self._active_synced_with_fe(payload)
-        if prev_active is None:
+        if (
+            curr_play_item_unique_id is None
+            or is_playing is None
+            or song_pos_ms is None
+        ):
             return
 
-        self.playback_controller.sync(song_pos_ms, prev_active)
+        with locked_stored_playback_state(
+            self.consumer.user_uuid
+        ) as stored_playback_state:
+            if stored_playback_state.apply_play_report(
+                curr_play_item_unique_id, is_playing, song_pos_ms
+            ):
+                self.playback_state_broadcaster.broadcast_snapshot(
+                    stored_playback_state
+                )
 
-    def _active_synced_with_fe(self, payload: dict) -> ActivePlayback | None:
-        """Returns the stored active playback iff the FE-reported uuid matches the stored one.
+    def _resolve_active_device_channel(self) -> str | None:
+        """Returns the channel name of the active device (which should apply a change).
 
-        Multiple consumers per user (multi-tab/multi-browser) race on the same
-        per-user playback state. If a tab acts on a song the user has since
-        moved past, drop the action — the next snapshot will resync that tab.
+        If no device plays the audio, the sender becomes the active device.
         """
-        state = self.manager.get_playback_state()
-        if not state or state.active is None:
-            return None
-        if payload.get("current_song_uuid") != state.active.current_song_uuid:
-            return None
-        return state.active
+        channel_name = self.device_manager.get_active_device_channel()
+        if channel_name is not None:
+            return channel_name
 
-    def _auto_activate_if_no_active_device(self):
-        # we can seek on a device that isn't active yet
-        # (and there's no other active device)
         device_id = self.consumer.device_id
         if not device_id:
-            return
-        device_manager = DeviceManager(user_uuid=self.consumer.user_uuid)
-        if device_manager.get_active_device_id() is not None:
-            return
-        device_manager.set_active_device(device_id)
-        self.device_broadcaster.broadcast_devices()
-
-    def _current_song_uuid(self) -> str | None:
-        user = self.consumer.user
-        if user is None:
             return None
-        player = user.streamingprofile.player
-        player.refresh_from_db(fields=["current_collection_song"])
-        current = player.current_collection_song
-        return str(current.uuid) if current else None
+        self.device_manager.set_active_device(device_id)
+        self.device_broadcaster.broadcast_devices()
+        return self.consumer.channel_name
+
+    @classmethod
+    def _parse_set_command(cls, payload: dict) -> dict:
+        """Rebuilds the `set` command with valid values.
+
+        An aux device can send a malformed/invalid `set` command, hence we
+        revalidate and rebuild, so it can be properly applied on the active device.
+        """
+        command = {}
+        is_playing = cls._parse_is_playing(payload)
+        if is_playing is not None:
+            command["is_playing"] = is_playing
+
+        song_pos_ms = cls._parse_song_pos_ms(payload)
+        curr_play_item_unique_id = cls._parse_curr_play_item_unique_id(payload)
+        if song_pos_ms is not None and curr_play_item_unique_id is not None:
+            command["song_pos_ms"] = song_pos_ms
+            command["curr_play_item_unique_id"] = curr_play_item_unique_id
+        return command
+
+    @staticmethod
+    def _parse_is_playing(payload: dict) -> bool | None:
+        value = payload.get("is_playing")
+        return value if isinstance(value, bool) else None
+
+    @staticmethod
+    def _parse_curr_play_item_unique_id(payload: dict) -> str | None:
+        value = payload.get("curr_play_item_unique_id")
+        return value if isinstance(value, str) else None
 
     @staticmethod
     def _parse_song_pos_ms(payload: dict) -> int | None:
         value = payload.get("song_pos_ms")
-        if not isinstance(value, (int, float)) or value < 0:
+        if not isinstance(value, (int, float)):
+            return None
+        # a client can send any number, even Infinity, but no real position
+        # is past the end of the longest song that can be uploaded
+        if not 0 <= value <= MAX_DURATION_SECONDS * 1000:
             return None
         return int(value)

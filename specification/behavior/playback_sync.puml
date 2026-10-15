@@ -20,7 +20,7 @@ note over active_tab, passive_tabs
 Only the active tab owns an HTMLAudioElement
 and decodes audio. Passive tabs render position
 from ActivePlayback fields
-(last_known_song_pos_ms, last_known_at_server_ms)
+(last_known_song_pos_ms, last_known_song_pos_updated_at_server_ms)
 plus elapsed time relative to server_ts_ms.
 end note
 
@@ -28,7 +28,7 @@ end note
 note over active_tab : audio playing
 active_tab -> backend : ws action "playback.sync"\n{ song_pos_ms, current_song_uuid }
 backend -> backend : drop if FE current_song_uuid is stale
-backend -> redis : update ActivePlayback\n(last_known_song_pos_ms,\nlast_known_at_server_ms)
+backend -> redis : update ActivePlayback\n(last_known_song_pos_ms,\nlast_known_song_pos_updated_at_server_ms)
 
 == Snapshot broadcast ==
 backend -->> active_tab : broadcast ws event "playback.snapshot"\n(includes server_ts_ms)

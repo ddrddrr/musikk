@@ -1,10 +1,15 @@
 import factory
-
 from base.tests.factories import BaseModelFactory
-from streaming.models import BaseSong, Collection, SongQueue
-from streaming.models.song_queue import PlaybackContext, PlayerState
-from streaming.models.songs import CollectionSong, SongCredit
 from users.tests.factories import ArtistFactory
+
+from streaming.models import (
+    BaseSong,
+    Collection,
+    CollectionCursor,
+    PlaybackQueue,
+    StoredPlaybackState,
+)
+from streaming.models.songs import CollectionSong, SongCredit
 
 fake = factory.Faker
 
@@ -61,19 +66,25 @@ class CollectionSongFactory(BaseModelFactory):
     collection = factory.SubFactory(CollectionFactory)
 
 
-class PlaybackContextFactory(BaseModelFactory):
+class CollectionCursorFactory(BaseModelFactory):
     class Meta:
-        model = PlaybackContext
+        model = CollectionCursor
 
 
-class SongQueueFactory(BaseModelFactory):
+class PlaybackQueueFactory(BaseModelFactory):
     class Meta:
-        model = SongQueue
+        model = PlaybackQueue
 
 
-class PlayerStateFactory(BaseModelFactory):
+class StoredPlaybackStateFactory(BaseModelFactory):
     class Meta:
-        model = PlayerState
+        model = StoredPlaybackState
 
-    queue = factory.SubFactory(SongQueueFactory)
-    context = factory.SubFactory(PlaybackContextFactory)
+    playback_queue = factory.SubFactory(PlaybackQueueFactory)
+    collection_cursor = factory.SubFactory(CollectionCursorFactory)
+
+
+def make_collection(n_songs: int = 5) -> tuple[Collection, list[CollectionSong]]:
+    songs = BaseSongFactory.create_batch(n_songs)
+    collection = CollectionFactory(songs=songs)
+    return collection, list(collection.collectionsongs.order_by("position"))

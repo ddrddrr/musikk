@@ -50,6 +50,21 @@ class DeviceManager:
         raw = r.get(self._active_device_key())
         return try_decode(raw) if raw else None
 
+    def get_active_device_channel(self) -> str | None:
+        """Returns the channel name of the device that plays the audio, so commands can be sent to it."""
+        active_device_id = self.get_active_device_id()
+        if active_device_id is None:
+            return None
+
+        r = get_default_redis_conn()
+        raw_device = r.get(self._device_key(active_device_id))
+        if not raw_device:
+            return None
+        try:
+            return json.loads(raw_device).get("channel_name")
+        except Exception:
+            return None
+
     def get_devices(self) -> list[Device]:
         r = get_default_redis_conn()
 

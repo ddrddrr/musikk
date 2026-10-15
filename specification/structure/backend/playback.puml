@@ -38,7 +38,6 @@ class PlayerState <<DjangoModel>> {
     advance(): CollectionSong | None
     choose_queue_song(item)
     choose_context_song(cs)
-    move_from_context_to_queue(cs, position: Decimal)
     prev(): CollectionSong | None
     clear()
     is_empty(): bool
@@ -69,10 +68,8 @@ class QueueSource <<DjangoModel>> {
 
 class PlaybackContext <<DjangoModel>> {
     cursor: int
-    skip_indices: list[int]
     --
     advance(): CollectionSong | None
-    skip(position)
     setup(collection, start_position=-1)
     window(limit=50): list[CollectionSong]
 }

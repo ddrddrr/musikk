@@ -5,28 +5,26 @@ from rest_framework.views import APIView
 from users.api.v1.serializers import BaseUserSerializer
 
 from streaming.api.v1.serializers import CollectionSongRetrieveSerializer
-from streaming.managers.playback_manager import PlaybackManager
 from streaming.models import SongCredit
 
 
 class FriendsLatestListenedView(APIView):
     def get(self, request, *args, **kwargs):
         friends_qs = self.request.user.friends.select_related(
-            "streamingprofile__player__current_collection_song__song",
+            "streamingprofile__stored_playback_state__current_collection_song__song",
         ).prefetch_related(
             Prefetch(
-                "streamingprofile__player__current_collection_song__song__credits",
+                "streamingprofile__stored_playback_state__current_collection_song__song__credits",
                 queryset=SongCredit.objects.select_related("author"),
             ),
         )
 
         friends_latest_listened = []
         for f in friends_qs:
-            if not PlaybackManager(user_uuid=f.uuid).is_playing():
+            stored_playback_state = f.streamingprofile.stored_playback_state
+            if not stored_playback_state.is_playing():
                 continue
-            current = f.streamingprofile.player.current_collection_song
-            if current is None:
-                continue
+            current = stored_playback_state.current_collection_song
             friends_latest_listened.append(
                 {
                     "user": BaseUserSerializer(f, context={"request": request}).data,

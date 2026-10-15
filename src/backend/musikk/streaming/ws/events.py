@@ -3,7 +3,7 @@ from enum import StrEnum
 
 class ServerEvent(StrEnum):
     DEVICE_LIST = "device.list"
-    PLAYBACK_SEEK = "playback.seek"
+    PLAYBACK_SET = "playback.set"
     PLAYBACK_SNAPSHOT = "playback.snapshot"
     QUEUE_CHANGED = "queue.changed"
     # TODO: rename to collection open changed

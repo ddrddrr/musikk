@@ -7,7 +7,7 @@ from streaming.models import StreamingProfile
 
 class StreamingProfileGetSerializer(BaseModelSerializer):
     user = serializers.UUIDField(source="user.uuid", read_only=True)
-    player = serializers.UUIDField(source="player.uuid", read_only=True)
+    player = serializers.UUIDField(source="stored_playback_state.uuid", read_only=True)
     liked_collections = serializers.SerializerMethodField(read_only=True)
     history = serializers.SerializerMethodField(read_only=True)
     liked_songs = serializers.SerializerMethodField(read_only=True)

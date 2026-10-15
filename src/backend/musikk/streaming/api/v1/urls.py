@@ -19,18 +19,17 @@ from streaming.api.v1.views.profile import (
     StreamingProfileRetrieveView,
 )
 from streaming.api.v1.views.song_queue import (
-    MoveContextToQueueView,
     PlayerClearView,
     PlayerNextView,
     PlayerPlayCollectionView,
     PlayerPlaySongView,
     PlayerPrevView,
-    PlayerStateRetrieveView,
     QueueAddCollectionView,
     QueueAddSongView,
     QueueAppendRandomSongsView,
     QueueRemoveItemView,
     QueueReorderView,
+    StoredPlaybackStateRetrieveView,
 )
 from streaming.api.v1.views.songs import (
     CollectionSongRetrieveView,
@@ -95,7 +94,11 @@ collection_urls = [
 ]
 
 song_queue_urls = [
-    path("song-queue", PlayerStateRetrieveView.as_view(), name="song-queue-retrieve"),
+    path(
+        "song-queue",
+        StoredPlaybackStateRetrieveView.as_view(),
+        name="song-queue-retrieve",
+    ),
     path(
         "song-queue/add-song/<uuid:uuid>",
         QueueAddSongView.as_view(),
@@ -146,11 +149,6 @@ song_queue_urls = [
         "song-queue/reorder",
         QueueReorderView.as_view(),
         name="song-queue-reorder",
-    ),
-    path(
-        "song-queue/move-to-queue",
-        MoveContextToQueueView.as_view(),
-        name="song-queue-move-to-queue",
     ),
 ]
 
