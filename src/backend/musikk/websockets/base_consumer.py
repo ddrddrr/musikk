@@ -2,13 +2,13 @@ from logging import getLogger
 
 from asgiref.sync import async_to_sync as atos
 from channels.generic.websocket import JsonWebsocketConsumer
-from social.ws import TypingWSActionHandler
-from streaming.ws.action_handlers.device import DeviceWSActionHandler
-from streaming.ws.action_handlers.playback import PlaybackWSActionHandler
+from social.ws import TypingWSActionService
+from streaming.ws.action_services.device import DeviceWSActionService
+from streaming.ws.action_services.playback import PlaybackWSActionService
 
-from websockets.action_handler import WSAction, WSActionHandler
+from websockets.action_service import WSAction, WSActionService
 from websockets.event_helpers import user_group
-from websockets.topics import TopicWSActionHandler
+from websockets.topics import TopicWSActionService
 
 logger = getLogger(__name__)
 
@@ -32,11 +32,11 @@ class BaseConsumer(JsonWebsocketConsumer):
           - { "event": "chat.message", "payload": { "messages": [...] } }
     """
 
-    action_handler_classes: list[type[WSActionHandler]] = [
-        DeviceWSActionHandler,
-        PlaybackWSActionHandler,
-        TopicWSActionHandler,
-        TypingWSActionHandler,
+    action_service_classes: list[type[WSActionService]] = [
+        DeviceWSActionService,
+        PlaybackWSActionService,
+        TopicWSActionService,
+        TypingWSActionService,
     ]
 
     def __init__(self, *args, **kwargs):
@@ -45,12 +45,12 @@ class BaseConsumer(JsonWebsocketConsumer):
         self.user_uuid = None
         self.group_name = None
         self.device_id: str | None = None
-        # this was defined in TopicWSActionHandler, but lifted here because TypingWSActionHandler (and mb others in the future)
+        # this was defined in TopicWSActionService, but lifted here because TypingWSActionService (and mb others in the future)
         # use it as an auth cache instead of re-hitting the DB (in case of typing stuff would be expensive)
         # this is not very good since it mixes subscription state with implicit auth state
         # probably rewrite in the future, but fine for now
         self.subscribed_topics: set[str] = set()
-        self._handlers: list[WSActionHandler] = []
+        self._action_services: list[WSActionService] = []
         self._action_map: dict[str, WSAction] = {}
 
     def connect(self):
@@ -70,14 +70,14 @@ class BaseConsumer(JsonWebsocketConsumer):
 
         self.accept()
 
-        self._handlers = [cls(self) for cls in self.action_handler_classes]
-        for handler in self._handlers:
-            actions = handler.get_actions()
+        self._action_services = [cls(self) for cls in self.action_service_classes]
+        for service in self._action_services:
+            actions = service.get_actions()
             # each action key should be owned by exactly one handler
             # probably rewrite in the future, this shouldn't be enforced on the consumer...
             if not self._action_map.keys().isdisjoint(actions.keys()):
                 raise ValueError(
-                    f"{handler.__class__.__name__} actions already registered "
+                    f"{service.__class__.__name__} actions already registered "
                 )
             self._action_map.update(actions)
 
@@ -87,8 +87,8 @@ class BaseConsumer(JsonWebsocketConsumer):
         if self.group_name:
             atos(self.channel_layer.group_discard)(self.group_name, self.channel_name)
 
-        for handler in self._handlers:
-            handler.on_disconnect()
+        for service in self._action_services:
+            service.on_disconnect()
 
     def receive_json(self, content, **kwargs):
         logger.debug(f"Received WS event: {content}")

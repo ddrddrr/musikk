@@ -4,7 +4,7 @@ from enum import StrEnum
 from asgiref.sync import async_to_sync as atos
 from streaming.models import Collection
 from users.models import BaseUser
-from websockets.action_handler import WSAction, WSActionHandler
+from websockets.action_service import WSAction, WSActionService
 from websockets.serializers import TopicSerializer
 from websockets.topics import topic_group, topic_validator
 
@@ -28,7 +28,7 @@ def validate_collection_comments(user: BaseUser, topic_id: str) -> bool:
     return Collection.objects.filter(uuid=topic_id, private=False, draft=False).exists()
 
 
-class TypingWSActionHandler(WSActionHandler):
+class TypingWSActionService(WSActionService):
     # minimum gap between typing sends
     MIN_INTERVAL = 2  # sec
     PREFIX_TO_EVENT: dict[str, str] = {

@@ -14,7 +14,7 @@ box "Backend" #F8EFE5
 participant "ASGI server" as backend_entry
 participant "AuthMiddlewareStack" as auth_middleware
 participant "BaseConsumer" as consumer
-participant "WSActionHandlers" as handler_chain
+participant "WSActionServices" as handler_chain
 queue "Redis\n(Channels layer)" as redis
 collections "Other consumers\n(other tabs / users\nin the same topic group)" as other_consumers
 participant "Producer\n(view, manager,\ncelery task, ...)" as producer
@@ -35,7 +35,7 @@ backend_entry -> auth_middleware : resolve user
 auth_middleware -> consumer : connect()
 alt authenticated
   consumer -> redis : group_add("user_<uuid>")
-  consumer -> consumer : initialise user action handlers
+  consumer -> consumer : initialise user action services
   consumer --> frontend : accept
   frontend -> user : WS open\n(ready for actions/events)
 else anonymous
@@ -49,7 +49,7 @@ note over other_consumers : already joined\n"topic.chat.<uuid>"\nvia the same fl
 user -> frontend : open chat
 frontend -> consumer : ws action "subscribe"\n{ topic: "chat.<uuid>" }
 consumer -> handler_chain : dispatch via action_map
-handler_chain -> handler_chain : TopicWSActionHandler\nvalidates prefix + topic_id
+handler_chain -> handler_chain : TopicWSActionService\nvalidates prefix + topic_id
 handler_chain -> redis : group_add("topic.chat.<uuid>")
 note over consumer, other_consumers
 Many consumers (different tabs, different users)
@@ -60,7 +60,7 @@ end note
 user -> frontend : audio playing
 frontend -> consumer : ws action "playback.sync"\n{ song_pos_ms, current_song_uuid }
 consumer -> handler_chain : dispatch via action_map
-handler_chain -> handler_chain : PlaybackWSActionHandler\nupdates PlayerState
+handler_chain -> handler_chain : PlaybackWSActionService\nupdates PlayerState
 
 == Server event example ==
 producer -> redis : channel_layer.group_send(\n  "topic.chat.<uuid>",\n  ws_event "chat.message")

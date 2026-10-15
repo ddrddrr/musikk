@@ -35,7 +35,7 @@ tab_b -> channels : ws action "subscribe"\n{ topic: "chat.<uuid>" }
 == Typing ==
 user_a -> tab_a1 : keystroke in ChatMessageForm
 tab_a1 -> channels : ws action "typing"\n{ topic: "chat.<uuid>" }
-note right of channels : backend restricts to 1 send per 2s\n(TypingWSActionHandler._last_sent)
+note right of channels : backend restricts to 1 send per 2s\n(TypingWSActionService._last_sent)
 channels -->> tab_b : ws event "chat.typing"\n{ user_uuid, display_name }
 tab_b -> user_b : show TypingIndicator\n(TTL 5s, decays locally)
 

@@ -1,4 +1,4 @@
-from websockets.action_handler import WSAction, WSActionHandler
+from websockets.action_service import WSAction, WSActionService
 
 from streaming.managers.device_manager import DeviceManager
 from streaming.models.stored_playback_state import locked_stored_playback_state
@@ -12,7 +12,7 @@ from streaming.ws.state_broadcasters.device import DeviceStateBroadcaster
 from streaming.ws.state_broadcasters.playback import PlaybackStateBroadcaster
 
 
-class DeviceWSActionHandler(WSActionHandler):
+class DeviceWSActionService(WSActionService):
     def __init__(self, consumer):
         super().__init__(consumer)
         self.device_id: str | None = None

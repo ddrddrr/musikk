@@ -2,19 +2,19 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 from django.test import TestCase
 from rest_framework import serializers
-from social.ws import TypingWSActionHandler
+from social.ws import TypingWSActionService
 from streaming.models import StoredPlaybackState
 from streaming.tests.factories import CollectionSongFactory
-from streaming.ws.action_handlers.device import DeviceWSActionHandler
-from streaming.ws.action_handlers.playback import PlaybackWSActionHandler
+from streaming.ws.action_services.device import DeviceWSActionService
+from streaming.ws.action_services.playback import PlaybackWSActionService
 from streaming.ws.events import ServerEvent
 from streaming.ws.state_broadcasters.device import DeviceStateBroadcaster
 from streaming.ws.state_broadcasters.playback import PlaybackStateBroadcaster
 from users.tests.factories import BaseUserFactory
 
-from websockets.action_handler import WSAction, WSActionHandler
+from websockets.action_service import WSAction, WSActionService
 from websockets.base_consumer import BaseConsumer
-from websockets.topics import TOPIC_VALIDATORS, TopicWSActionHandler
+from websockets.topics import TOPIC_VALIDATORS, TopicWSActionService
 
 PLAY_ITEM_UNIQUE_ID = "11111111-1111-1111-1111-111111111111"
 OLD_PLAY_ITEM_UNIQUE_ID = "22222222-2222-2222-2222-222222222222"
@@ -61,7 +61,7 @@ class TestBaseConsumer(TestCase):
     def setUp(self):
         self.consumer = _make_consumer(self.user)
 
-    @patch("streaming.ws.action_handlers.device.DeviceManager")
+    @patch("streaming.ws.action_services.device.DeviceManager")
     def test_connect_authenticated_user(self, mock_device):
         self.consumer.connect()
 
@@ -103,7 +103,7 @@ class TestBaseConsumer(TestCase):
 
         consumer.accept.assert_not_called()
 
-    @patch("streaming.ws.action_handlers.device.DeviceManager")
+    @patch("streaming.ws.action_services.device.DeviceManager")
     def test_connect_group_add_failure_returns_early(self, _mock_device):
         self.consumer.channel_layer.group_add = AsyncMock(
             side_effect=Exception("redis down")
@@ -114,13 +114,13 @@ class TestBaseConsumer(TestCase):
         self.consumer.accept.assert_not_called()
         self.assertEqual(self.consumer._action_map, {})
 
-    @patch("streaming.ws.action_handlers.device.DeviceManager")
+    @patch("streaming.ws.action_services.device.DeviceManager")
     def test_connect_raises_on_action_collision(self, _mock_device):
-        class DuplicateHandler(WSActionHandler):
+        class DuplicateService(WSActionService):
             def get_actions(self):
                 return {"device.register": _action(Mock())}
 
-        self.consumer.action_handler_classes = [DeviceWSActionHandler, DuplicateHandler]
+        self.consumer.action_service_classes = [DeviceWSActionService, DuplicateService]
 
         with self.assertRaises(ValueError):
             self.consumer.connect()
@@ -228,8 +228,8 @@ class TestBaseConsumer(TestCase):
         handler_fn.assert_not_called()
         self.consumer.send_json.assert_not_called()
 
-    @patch("streaming.ws.action_handlers.device.DeviceManager")
-    def test_disconnect_discards_group_and_calls_handlers(self, _mock_device):
+    @patch("streaming.ws.action_services.device.DeviceManager")
+    def test_disconnect_discards_group_and_calls_services(self, _mock_device):
         self.consumer.connect()
         self.consumer.channel_layer.group_discard.reset_mock()
 
@@ -241,7 +241,7 @@ class TestBaseConsumer(TestCase):
 
     def test_disconnect_without_group_name_skips_discard(self):
         self.consumer.group_name = None
-        self.consumer._handlers = []
+        self.consumer._action_services = []
 
         self.consumer.disconnect(close_code=1000)
 
@@ -301,7 +301,7 @@ class TestBaseConsumer(TestCase):
         )
 
 
-class TestDeviceWSActionHandler(TestCase):
+class TestDeviceWSActionService(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -345,17 +345,17 @@ class TestDeviceWSActionHandler(TestCase):
         self.addCleanup(self.broadcast_devices_patcher.stop)
         self.addCleanup(self.pause_patcher.stop)
 
-    @patch("streaming.ws.action_handlers.device.DeviceManager")
+    @patch("streaming.ws.action_services.device.DeviceManager")
     def test_register_calls_manager(self, mock_manager_cls):
-        handler = DeviceWSActionHandler(self.consumer)
-        handler.handle_register({"device_id": "device1", "name": "My Device"})
+        service = DeviceWSActionService(self.consumer)
+        service.handle_register({"device_id": "device1", "name": "My Device"})
 
         mock_manager_cls.return_value.register_device.assert_called_once_with(
             device_id="device1",
             channel_name=self.consumer.channel_name,
             name="My Device",
         )
-        self.assertEqual(handler.device_id, "device1")
+        self.assertEqual(service.device_id, "device1")
         self.assertEqual(self.consumer.device_id, "device1")
         # the group broadcast catches up the joining channel on the device list
         # since it is already in the user group; the playback snapshot is delivered
@@ -368,13 +368,13 @@ class TestDeviceWSActionHandler(TestCase):
         )
         self.mock_broadcast_state.assert_not_called()
 
-    @patch("streaming.ws.action_handlers.device.DeviceManager")
+    @patch("streaming.ws.action_services.device.DeviceManager")
     def test_register_forwards_valid_volume(self, mock_manager_cls):
         # FE owns the durable per-device volume in localStorage; without this
         # forwarding, register would re-hydrate Redis at DEFAULT_VOLUME and
         # subsequent device.list broadcasts would clobber the FE state
-        handler = DeviceWSActionHandler(self.consumer)
-        handler.handle_register(
+        service = DeviceWSActionService(self.consumer)
+        service.handle_register(
             {"device_id": "device1", "name": "My Device", "volume": 42}
         )
 
@@ -385,7 +385,7 @@ class TestDeviceWSActionHandler(TestCase):
             volume=42,
         )
 
-    @patch("streaming.ws.action_handlers.device.DeviceManager")
+    @patch("streaming.ws.action_services.device.DeviceManager")
     def test_set_active_changed_pauses_playback(self, mock_manager_cls):
         mock_manager = mock_manager_cls.return_value
         mock_manager.set_active_device.return_value = True
@@ -396,8 +396,8 @@ class TestDeviceWSActionHandler(TestCase):
         parent.attach_mock(self.mock_broadcast_state, "broadcast_state")
         parent.attach_mock(self.mock_broadcast_devices, "broadcast_devices")
 
-        handler = DeviceWSActionHandler(self.consumer)
-        handler.handle_set_active({"device_id": "device1"})
+        service = DeviceWSActionService(self.consumer)
+        service.handle_set_active({"device_id": "device1"})
 
         mock_manager.set_active_device.assert_called_once_with(device_id="device1")
         self.mock_pause.assert_called_once_with()
@@ -427,13 +427,13 @@ class TestDeviceWSActionHandler(TestCase):
             ],
         )
 
-    @patch("streaming.ws.action_handlers.device.DeviceManager")
+    @patch("streaming.ws.action_services.device.DeviceManager")
     def test_set_active_no_change_does_not_pause_playback(self, mock_manager_cls):
         mock_manager = mock_manager_cls.return_value
         mock_manager.set_active_device.return_value = False
 
-        handler = DeviceWSActionHandler(self.consumer)
-        handler.handle_set_active({"device_id": "device1"})
+        service = DeviceWSActionService(self.consumer)
+        service.handle_set_active({"device_id": "device1"})
 
         mock_manager.set_active_device.assert_called_once_with(device_id="device1")
         self.mock_pause.assert_not_called()
@@ -442,7 +442,7 @@ class TestDeviceWSActionHandler(TestCase):
         self.mock_broadcast_state.assert_not_called()
         self.mock_broadcast_devices.assert_called_once_with()
 
-    @patch("streaming.ws.action_handlers.device.DeviceManager")
+    @patch("streaming.ws.action_services.device.DeviceManager")
     def test_disconnect_clears_active_device_and_pauses_playback(
         self, mock_manager_cls
     ):
@@ -455,9 +455,9 @@ class TestDeviceWSActionHandler(TestCase):
         parent.attach_mock(self.mock_broadcast_state, "broadcast_state")
         parent.attach_mock(self.mock_broadcast_devices, "broadcast_devices")
 
-        handler = DeviceWSActionHandler(self.consumer)
-        handler.device_id = "device1"
-        handler.on_disconnect()
+        service = DeviceWSActionService(self.consumer)
+        service.device_id = "device1"
+        service.on_disconnect()
 
         mock_manager.clear_device.assert_called_once_with(
             device_id="device1", channel_name=self.consumer.channel_name
@@ -487,16 +487,16 @@ class TestDeviceWSActionHandler(TestCase):
             ],
         )
 
-    @patch("streaming.ws.action_handlers.device.DeviceManager")
+    @patch("streaming.ws.action_services.device.DeviceManager")
     def test_disconnect_clears_non_active_device_does_not_pause_playback(
         self, mock_manager_cls
     ):
         mock_manager = mock_manager_cls.return_value
         mock_manager.clear_device.return_value = False
 
-        handler = DeviceWSActionHandler(self.consumer)
-        handler.device_id = "device1"
-        handler.on_disconnect()
+        service = DeviceWSActionService(self.consumer)
+        service.device_id = "device1"
+        service.on_disconnect()
 
         mock_manager.clear_device.assert_called_once_with(
             device_id="device1", channel_name=self.consumer.channel_name
@@ -506,10 +506,10 @@ class TestDeviceWSActionHandler(TestCase):
         self.mock_broadcast_state.assert_not_called()
         self.mock_broadcast_devices.assert_called_once_with()
 
-    @patch("streaming.ws.action_handlers.device.DeviceManager")
+    @patch("streaming.ws.action_services.device.DeviceManager")
     def test_disconnect_without_device_id_is_noop(self, mock_manager_cls):
-        handler = DeviceWSActionHandler(self.consumer)
-        handler.on_disconnect()
+        service = DeviceWSActionService(self.consumer)
+        service.on_disconnect()
 
         mock_manager_cls.return_value.clear_device.assert_not_called()
         self.mock_pause.assert_not_called()
@@ -517,7 +517,7 @@ class TestDeviceWSActionHandler(TestCase):
         self.mock_broadcast_devices.assert_not_called()
 
 
-class TestPlaybackWSActionHandler(TestCase):
+class TestPlaybackWSActionService(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -547,7 +547,7 @@ class TestPlaybackWSActionHandler(TestCase):
             StoredPlaybackState, "apply_play_report", return_value=True
         )
         self.device_manager_patcher = patch(
-            "streaming.ws.action_handlers.playback.DeviceManager"
+            "streaming.ws.action_services.playback.DeviceManager"
         )
         self.broadcast_state_patcher = patch.object(
             PlaybackStateBroadcaster, "broadcast_snapshot"
@@ -576,8 +576,8 @@ class TestPlaybackWSActionHandler(TestCase):
         )
 
     def test_set_forwards_command_to_active_device(self):
-        handler = PlaybackWSActionHandler(self.consumer)
-        handler.handle_set(
+        service = PlaybackWSActionService(self.consumer)
+        service.handle_set(
             {
                 "is_playing": False,
                 "song_pos_ms": 5000,
@@ -599,8 +599,8 @@ class TestPlaybackWSActionHandler(TestCase):
         self.mock_device_manager.set_active_device.assert_not_called()
 
     def test_set_forwards_play_state_without_seek(self):
-        handler = PlaybackWSActionHandler(self.consumer)
-        handler.handle_set({"is_playing": True})
+        service = PlaybackWSActionService(self.consumer)
+        service.handle_set({"is_playing": True})
 
         self._assert_command_sent("active_channel", {"is_playing": True})
 
@@ -608,8 +608,8 @@ class TestPlaybackWSActionHandler(TestCase):
         self.stored_playback_state.curr_play_item_unique_id = None
         self.stored_playback_state.save()
 
-        handler = PlaybackWSActionHandler(self.consumer)
-        handler.handle_set({"is_playing": True})
+        service = PlaybackWSActionService(self.consumer)
+        service.handle_set({"is_playing": True})
 
         self.consumer.channel_layer.send.assert_not_called()
 
@@ -617,8 +617,8 @@ class TestPlaybackWSActionHandler(TestCase):
         # the tab has not seen the latest track change yet
         self.mock_device_manager.get_active_device_channel.return_value = None
 
-        handler = PlaybackWSActionHandler(self.consumer)
-        handler.handle_set(
+        service = PlaybackWSActionService(self.consumer)
+        service.handle_set(
             {
                 "is_playing": True,
                 "song_pos_ms": 5000,
@@ -634,8 +634,8 @@ class TestPlaybackWSActionHandler(TestCase):
     def test_set_auto_activates_sender_when_no_device_is_active(self):
         self.mock_device_manager.get_active_device_channel.return_value = None
 
-        handler = PlaybackWSActionHandler(self.consumer)
-        handler.handle_set(
+        service = PlaybackWSActionService(self.consumer)
+        service.handle_set(
             {"song_pos_ms": 5000, "curr_play_item_unique_id": PLAY_ITEM_UNIQUE_ID}
         )
 
@@ -654,16 +654,16 @@ class TestPlaybackWSActionHandler(TestCase):
         self.mock_device_manager.get_active_device_channel.return_value = None
         self.consumer.device_id = None
 
-        handler = PlaybackWSActionHandler(self.consumer)
-        handler.handle_set({"is_playing": True})
+        service = PlaybackWSActionService(self.consumer)
+        service.handle_set({"is_playing": True})
 
         self.mock_device_manager.set_active_device.assert_not_called()
         self.mock_broadcast_devices.assert_not_called()
         self.consumer.channel_layer.send.assert_not_called()
 
     def test_report_from_active_device_is_stored_and_broadcast(self):
-        handler = PlaybackWSActionHandler(self.consumer)
-        handler.handle_active_device_report(
+        service = PlaybackWSActionService(self.consumer)
+        service.handle_active_device_report(
             {
                 "curr_play_item_unique_id": PLAY_ITEM_UNIQUE_ID,
                 "is_playing": False,
@@ -679,8 +679,8 @@ class TestPlaybackWSActionHandler(TestCase):
     def test_report_from_device_that_is_not_active_is_dropped(self):
         self.mock_device_manager.get_active_device_id.return_value = "other_device"
 
-        handler = PlaybackWSActionHandler(self.consumer)
-        handler.handle_active_device_report(
+        service = PlaybackWSActionService(self.consumer)
+        service.handle_active_device_report(
             {
                 "curr_play_item_unique_id": PLAY_ITEM_UNIQUE_ID,
                 "is_playing": False,
@@ -697,8 +697,8 @@ class TestPlaybackWSActionHandler(TestCase):
         self.consumer.device_id = None
         self.mock_device_manager.get_active_device_id.return_value = None
 
-        handler = PlaybackWSActionHandler(self.consumer)
-        handler.handle_active_device_report(
+        service = PlaybackWSActionService(self.consumer)
+        service.handle_active_device_report(
             {
                 "curr_play_item_unique_id": PLAY_ITEM_UNIQUE_ID,
                 "is_playing": False,
@@ -712,8 +712,8 @@ class TestPlaybackWSActionHandler(TestCase):
     def test_report_with_stale_play_item_is_dropped(self):
         self.mock_apply_play_report.return_value = False
 
-        handler = PlaybackWSActionHandler(self.consumer)
-        handler.handle_active_device_report(
+        service = PlaybackWSActionService(self.consumer)
+        service.handle_active_device_report(
             {
                 "curr_play_item_unique_id": OLD_PLAY_ITEM_UNIQUE_ID,
                 "is_playing": False,
@@ -724,7 +724,7 @@ class TestPlaybackWSActionHandler(TestCase):
         self.mock_broadcast_state.assert_not_called()
 
 
-class TestTopicWSActionHandler(TestCase):
+class TestTopicWSActionService(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -750,8 +750,8 @@ class TestTopicWSActionHandler(TestCase):
     def test_subscribe_happy_path(self):
         self._register_validator("chat")
 
-        handler = TopicWSActionHandler(self.consumer)
-        handler.handle_subscribe({"topic": ("chat", TOPIC_ID)})
+        service = TopicWSActionService(self.consumer)
+        service.handle_subscribe({"topic": ("chat", TOPIC_ID)})
 
         TOPIC_VALIDATORS["chat"].assert_called_once_with(self.user, TOPIC_ID)
         self.consumer.channel_layer.group_add.assert_called_once_with(
@@ -760,16 +760,16 @@ class TestTopicWSActionHandler(TestCase):
         self.assertIn(CHAT_GROUP, self.consumer.subscribed_topics)
 
     def test_subscribe_unknown_prefix(self):
-        handler = TopicWSActionHandler(self.consumer)
-        handler.handle_subscribe({"topic": ("unknown", TOPIC_ID)})
+        service = TopicWSActionService(self.consumer)
+        service.handle_subscribe({"topic": ("unknown", TOPIC_ID)})
 
         self.consumer.send_error.assert_called_once_with("Unknown topic type: unknown")
 
     def test_subscribe_validator_denies(self):
         self._register_validator("chat", return_value=False)
 
-        handler = TopicWSActionHandler(self.consumer)
-        handler.handle_subscribe({"topic": ("chat", TOPIC_ID)})
+        service = TopicWSActionService(self.consumer)
+        service.handle_subscribe({"topic": ("chat", TOPIC_ID)})
 
         self.consumer.send_error.assert_called_once_with(
             f"Not authorized for chat.{TOPIC_ID}"
@@ -780,11 +780,11 @@ class TestTopicWSActionHandler(TestCase):
     def test_unsubscribe_subscribed_group(self):
         self._register_validator("chat")
 
-        handler = TopicWSActionHandler(self.consumer)
-        handler.handle_subscribe({"topic": ("chat", TOPIC_ID)})
+        service = TopicWSActionService(self.consumer)
+        service.handle_subscribe({"topic": ("chat", TOPIC_ID)})
         self.consumer.channel_layer.group_add.reset_mock()
 
-        handler.handle_unsubscribe({"topic": ("chat", TOPIC_ID)})
+        service.handle_unsubscribe({"topic": ("chat", TOPIC_ID)})
 
         self.consumer.channel_layer.group_discard.assert_called_once_with(
             CHAT_GROUP, "test_channel"
@@ -794,8 +794,8 @@ class TestTopicWSActionHandler(TestCase):
     def test_unsubscribe_non_subscribed_group_is_noop(self):
         self._register_validator("chat")
 
-        handler = TopicWSActionHandler(self.consumer)
-        handler.handle_unsubscribe({"topic": ("chat", TOPIC_ID)})
+        service = TopicWSActionService(self.consumer)
+        service.handle_unsubscribe({"topic": ("chat", TOPIC_ID)})
 
         self.consumer.channel_layer.group_discard.assert_not_called()
 
@@ -803,12 +803,12 @@ class TestTopicWSActionHandler(TestCase):
         self._register_validator("chat")
         self._register_validator("collection_comments")
 
-        handler = TopicWSActionHandler(self.consumer)
-        handler.handle_subscribe({"topic": ("chat", TOPIC_ID)})
-        handler.handle_subscribe({"topic": ("collection_comments", OTHER_TOPIC_ID)})
+        service = TopicWSActionService(self.consumer)
+        service.handle_subscribe({"topic": ("chat", TOPIC_ID)})
+        service.handle_subscribe({"topic": ("collection_comments", OTHER_TOPIC_ID)})
         self.consumer.channel_layer.group_discard.reset_mock()
 
-        handler.on_disconnect()
+        service.on_disconnect()
 
         discard_calls = self.consumer.channel_layer.group_discard.call_args_list
         discarded_groups = {call[0][0] for call in discard_calls}
@@ -819,7 +819,7 @@ class TestTopicWSActionHandler(TestCase):
         self.assertEqual(self.consumer.subscribed_topics, set())
 
 
-class TestTypingWSActionHandler(TestCase):
+class TestTypingWSActionService(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -834,9 +834,9 @@ class TestTypingWSActionHandler(TestCase):
         self.consumer.subscribed_topics = {CHAT_GROUP}
 
     def test_typing_broadcasts_when_subscribed(self):
-        handler = TypingWSActionHandler(self.consumer)
+        service = TypingWSActionService(self.consumer)
 
-        handler.handle_typing({"topic": ("chat", TOPIC_ID)})
+        service.handle_typing({"topic": ("chat", TOPIC_ID)})
 
         self.consumer.channel_layer.group_send.assert_called_once_with(
             CHAT_GROUP,
@@ -852,38 +852,38 @@ class TestTypingWSActionHandler(TestCase):
 
     def test_typing_dropped_when_not_subscribed(self):
         self.consumer.subscribed_topics = set()
-        handler = TypingWSActionHandler(self.consumer)
+        service = TypingWSActionService(self.consumer)
 
-        handler.handle_typing({"topic": ("chat", TOPIC_ID)})
+        service.handle_typing({"topic": ("chat", TOPIC_ID)})
 
         self.consumer.channel_layer.group_send.assert_not_called()
 
     def test_typing_dropped_for_prefix_without_registered_event(self):
         self.consumer.subscribed_topics = {f"topic.unknown.{OTHER_TOPIC_ID}"}
-        handler = TypingWSActionHandler(self.consumer)
+        service = TypingWSActionService(self.consumer)
 
-        handler.handle_typing({"topic": ("unknown", OTHER_TOPIC_ID)})
+        service.handle_typing({"topic": ("unknown", OTHER_TOPIC_ID)})
 
         self.consumer.channel_layer.group_send.assert_not_called()
 
     @patch("social.ws.time.monotonic")
     def test_typing_throttled_within_min_interval(self, mock_monotonic):
         mock_monotonic.return_value = 100.0
-        handler = TypingWSActionHandler(self.consumer)
+        service = TypingWSActionService(self.consumer)
 
-        handler.handle_typing({"topic": ("chat", TOPIC_ID)})
-        mock_monotonic.return_value = 100.0 + TypingWSActionHandler.MIN_INTERVAL - 0.5
-        handler.handle_typing({"topic": ("chat", TOPIC_ID)})
+        service.handle_typing({"topic": ("chat", TOPIC_ID)})
+        mock_monotonic.return_value = 100.0 + TypingWSActionService.MIN_INTERVAL - 0.5
+        service.handle_typing({"topic": ("chat", TOPIC_ID)})
 
         self.consumer.channel_layer.group_send.assert_called_once()
 
     @patch("social.ws.time.monotonic")
     def test_typing_accepted_after_min_interval(self, mock_monotonic):
         mock_monotonic.return_value = 100.0
-        handler = TypingWSActionHandler(self.consumer)
+        service = TypingWSActionService(self.consumer)
 
-        handler.handle_typing({"topic": ("chat", TOPIC_ID)})
-        mock_monotonic.return_value = 100.0 + TypingWSActionHandler.MIN_INTERVAL + 0.1
-        handler.handle_typing({"topic": ("chat", TOPIC_ID)})
+        service.handle_typing({"topic": ("chat", TOPIC_ID)})
+        mock_monotonic.return_value = 100.0 + TypingWSActionService.MIN_INTERVAL + 0.1
+        service.handle_typing({"topic": ("chat", TOPIC_ID)})
 
         self.assertEqual(self.consumer.channel_layer.group_send.call_count, 2)

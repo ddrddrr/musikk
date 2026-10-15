@@ -3,7 +3,7 @@ from collections.abc import Callable
 from asgiref.sync import async_to_sync as atos
 from users.models import BaseUser
 
-from websockets.action_handler import WSAction, WSActionHandler
+from websockets.action_service import WSAction, WSActionService
 from websockets.serializers import TopicSerializer
 
 type TopicValidator = Callable[[BaseUser, str], bool]
@@ -23,7 +23,7 @@ def topic_group(prefix: str, topic_id: str) -> str:
     return f"topic.{prefix}.{topic_id}"
 
 
-class TopicWSActionHandler(WSActionHandler):
+class TopicWSActionService(WSActionService):
     """Generic pub/sub over Channels groups.
 
     Flow:

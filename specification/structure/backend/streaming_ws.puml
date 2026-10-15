@@ -4,7 +4,7 @@
 
 note as n1
 The streaming app's ws  layer that
-`DeviceWSActionHandler` and `PlaybackWSActionHandler` delegate to
+`DeviceWSActionService` and `PlaybackWSActionService` delegate to
 (see structure/backend/websockets.puml).
 
 - Managers handle state: `DeviceManager` keeps the
@@ -36,8 +36,8 @@ into one box for readability
 end note
 
 together {
-    class DeviceWSActionHandler <<external>>
-    class PlaybackWSActionHandler <<external>>
+    class DeviceWSActionService <<external>>
+    class PlaybackWSActionService <<external>>
 }
 
 class Device <<TypedDict>> {
@@ -140,15 +140,15 @@ PlaybackManager ..> PlaybackState : reads/writes Redis
 PlaybackState *-- "0..1" ActivePlayback
 
 ' WS entry points -> streaming layer
-DeviceWSActionHandler ..> DeviceManager
-DeviceWSActionHandler ..> PlaybackController
-DeviceWSActionHandler ..> DeviceStateBroadcaster
-DeviceWSActionHandler ..> PlayerStateBroadcaster
+DeviceWSActionService ..> DeviceManager
+DeviceWSActionService ..> PlaybackController
+DeviceWSActionService ..> DeviceStateBroadcaster
+DeviceWSActionService ..> PlayerStateBroadcaster
 
-PlaybackWSActionHandler ..> PlaybackManager
-PlaybackWSActionHandler ..> PlaybackController
-PlaybackWSActionHandler ..> DeviceManager
-PlaybackWSActionHandler ..> DeviceStateBroadcaster
+PlaybackWSActionService ..> PlaybackManager
+PlaybackWSActionService ..> PlaybackController
+PlaybackWSActionService ..> DeviceManager
+PlaybackWSActionService ..> DeviceStateBroadcaster
 
 ' Controllers
 PlaybackController ..> PlaybackManager

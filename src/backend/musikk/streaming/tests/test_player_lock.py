@@ -12,7 +12,7 @@ from utils.clock import now_server_ms
 from streaming.models import StoredPlaybackState
 from streaming.models.stored_playback_state import locked_stored_playback_state
 from streaming.tests.factories import CollectionSongFactory
-from streaming.ws.action_handlers.playback import PlaybackWSActionHandler
+from streaming.ws.action_services.playback import PlaybackWSActionService
 from streaming.ws.player_controller import PlayerController
 from streaming.ws.state_broadcasters.playback import PlaybackStateBroadcaster
 
@@ -110,7 +110,7 @@ class TestStoredPlaybackStateLock(TransactionTestCase):
             PlaybackStateBroadcaster, "broadcast_queue_changed"
         )
         self.device_manager_patcher = patch(
-            "streaming.ws.action_handlers.playback.DeviceManager"
+            "streaming.ws.action_services.playback.DeviceManager"
         )
         self.broadcast_snapshot_patcher.start()
         self.broadcast_queue_changed_patcher.start()
@@ -171,7 +171,7 @@ class TestStoredPlaybackStateLock(TransactionTestCase):
         consumer = Mock()
         consumer.user_uuid = self.user_uuid
         consumer.device_id = ACTIVE_DEVICE_ID
-        PlaybackWSActionHandler(consumer).handle_active_device_report(
+        PlaybackWSActionService(consumer).handle_active_device_report(
             {
                 "curr_play_item_unique_id": curr_play_item_unique_id,
                 "is_playing": True,

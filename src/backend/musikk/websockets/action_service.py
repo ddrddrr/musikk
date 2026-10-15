@@ -22,7 +22,7 @@ class WSAction(TypedDict):
     on_invalid: Literal["error", "drop"]
 
 
-class WSActionHandler(ABC):
+class WSActionService(ABC):
     def __init__(self, consumer: BaseConsumer) -> None:
         self.consumer = consumer
 
@@ -30,7 +30,7 @@ class WSActionHandler(ABC):
     def get_actions(self) -> dict[str, WSAction]:
         pass
 
-    # not the best to couple the ws consumer's on_disconnect to action handlers
+    # not the best to couple the ws consumer's on_disconnect to action services
     # TODO: should be probably moved to a separate disconnect handler
     def on_disconnect(self) -> None:
         pass
