@@ -33,7 +33,6 @@ export const QueueURLs = {
     clearQueue: `/song-queue/clear`,
     appendRandom: `/song-queue/append-random`,
     reorder: `/song-queue/reorder`,
-    moveToQueue: `/song-queue/move-to-queue`,
 };
 export const NotificationURLs = {
     notificationsSetRead: `/notifications`,

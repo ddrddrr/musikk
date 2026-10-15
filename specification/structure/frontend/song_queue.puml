@@ -15,7 +15,7 @@ queue_row_actions --> queue_play_button
 
 package "State (hooks)" {
     [useQueue / useQueueClear] as queue_api_hooks
-    [usePlaySong / usePlayCollection /\nuseAddSong / useAddCollection /\nuseMoveToQueue / useQueueNext / useQueuePrev] as queue_mutations
+    [usePlaySong / usePlayCollection /\nuseAddSong / useAddCollection /\nuseQueueNext / useQueuePrev] as queue_mutations
     [useQueuePlayHandler\n(per-row skipTo)] as queue_play_handler
     [useQueueWsEvents\n(global, via useWebSocketListeners)] as queue_ws_events
 }
