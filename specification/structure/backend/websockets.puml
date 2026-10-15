@@ -32,7 +32,7 @@ class BaseConsumer <<sync_consumer>> {
 abstract class WSActionHandler <<abstract>> {
     consumer: BaseConsumer
     --
-    {abstract} get_actions(): dict[str, Callable]
+    {abstract} get_actions(): dict[str, WSAction]
     on_disconnect()
 }
 

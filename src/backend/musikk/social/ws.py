@@ -1,12 +1,12 @@
 import time
-from collections.abc import Callable
 from enum import StrEnum
 
 from asgiref.sync import async_to_sync as atos
 from streaming.models import Collection
 from users.models import BaseUser
-from websockets.action_handler import WSActionHandler
-from websockets.topics import parse_topic, topic_group, topic_validator
+from websockets.action_handler import WSAction, WSActionHandler
+from websockets.serializers import TopicSerializer
+from websockets.topics import topic_group, topic_validator
 
 from social.models.chat import ChatMember
 
@@ -43,15 +43,17 @@ class TypingWSActionHandler(WSActionHandler):
         # (e.g., multiple sends from diff tabs/a ton of connections per-user), but fine for now
         self._last_sent: dict[str, float] = {}
 
-    def get_actions(self) -> dict[str, Callable]:
-        return {"typing": self.handle_typing}
+    def get_actions(self) -> dict[str, WSAction]:
+        return {
+            "typing": {
+                "handler": self.handle_typing,
+                "serializer": TopicSerializer,
+                "on_invalid": "drop",
+            }
+        }
 
     def handle_typing(self, payload: dict):
-        parsed = parse_topic(payload.get("topic", ""))
-        if not parsed:
-            return
-
-        prefix, topic_id = parsed
+        prefix, topic_id = payload["topic"]
         group = topic_group(prefix, topic_id)
         # check that the user is actually in the chat/comments
         if group not in self.consumer.subscribed_topics:

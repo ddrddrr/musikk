@@ -1,4 +1,3 @@
-from collections.abc import Callable
 from logging import getLogger
 
 from asgiref.sync import async_to_sync as atos
@@ -7,7 +6,7 @@ from social.ws import TypingWSActionHandler
 from streaming.ws.action_handlers.device import DeviceWSActionHandler
 from streaming.ws.action_handlers.playback import PlaybackWSActionHandler
 
-from websockets.action_handler import WSActionHandler
+from websockets.action_handler import WSAction, WSActionHandler
 from websockets.event_helpers import user_group
 from websockets.topics import TopicWSActionHandler
 
@@ -52,7 +51,7 @@ class BaseConsumer(JsonWebsocketConsumer):
         # probably rewrite in the future, but fine for now
         self.subscribed_topics: set[str] = set()
         self._handlers: list[WSActionHandler] = []
-        self._action_map: dict[str, Callable] = {}
+        self._action_map: dict[str, WSAction] = {}
 
     def connect(self):
         user = self.scope.get("user")
@@ -94,18 +93,35 @@ class BaseConsumer(JsonWebsocketConsumer):
     def receive_json(self, content, **kwargs):
         logger.debug(f"Received WS event: {content}")
 
-        action = content.get("action")
-        if not action:
+        if not isinstance(content, dict):
+            self.send_error("Expected a JSON object")
+            return
+
+        action_name = content.get("action")
+        if not action_name:
             self.send_error("Missing 'action' field")
             return
 
-        payload = content.get("payload") or {}
-        handler = self._action_map.get(action)
-        if not handler:
-            self.send_error(f"Unknown action: {action}")
+        action = (
+            self._action_map.get(action_name) if isinstance(action_name, str) else None
+        )
+        if not action:
+            self.send_error(f"Unknown action: {action_name}")
             return
 
-        handler(payload)
+        serializer = action["serializer"](data=content.get("payload", {}))
+        if not serializer.is_valid():
+            if action["on_invalid"] == "error":
+                self.send_error(
+                    f"Invalid {action_name} payload: {_join_errors(serializer.errors)}"
+                )
+            else:
+                logger.debug(
+                    f"Dropped invalid {action_name} payload: {serializer.errors}"
+                )
+            return
+
+        action["handler"](serializer.validated_data)
 
     def ws_event(self, event):
         """
@@ -137,3 +153,8 @@ class BaseConsumer(JsonWebsocketConsumer):
 
     def send_error(self, message: str):
         self.send_json({"event": "error", "payload": {"message": message}})
+
+
+def _join_errors(errors: dict[str, list[str]]) -> str:
+    parts = [f"{field}: {' '.join(messages)}" for field, messages in errors.items()]
+    return " ".join(parts)

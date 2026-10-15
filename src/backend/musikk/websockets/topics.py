@@ -3,7 +3,8 @@ from collections.abc import Callable
 from asgiref.sync import async_to_sync as atos
 from users.models import BaseUser
 
-from websockets.action_handler import WSActionHandler
+from websockets.action_handler import WSAction, WSActionHandler
+from websockets.serializers import TopicSerializer
 
 type TopicValidator = Callable[[BaseUser, str], bool]
 
@@ -22,13 +23,6 @@ def topic_group(prefix: str, topic_id: str) -> str:
     return f"topic.{prefix}.{topic_id}"
 
 
-def parse_topic(topic: str) -> tuple[str, str] | None:
-    prefix, _, topic_id = topic.partition(".")
-    if not prefix or not topic_id:
-        return None
-    return prefix, topic_id
-
-
 class TopicWSActionHandler(WSActionHandler):
     """Generic pub/sub over Channels groups.
 
@@ -43,10 +37,18 @@ class TopicWSActionHandler(WSActionHandler):
       4. On disconnect every joined group is dropped to avoid leaks.
     """
 
-    def get_actions(self) -> dict[str, Callable]:
+    def get_actions(self) -> dict[str, WSAction]:
         return {
-            "subscribe": self.handle_subscribe,
-            "unsubscribe": self.handle_unsubscribe,
+            "subscribe": {
+                "handler": self.handle_subscribe,
+                "serializer": TopicSerializer,
+                "on_invalid": "error",
+            },
+            "unsubscribe": {
+                "handler": self.handle_unsubscribe,
+                "serializer": TopicSerializer,
+                "on_invalid": "drop",
+            },
         }
 
     def on_disconnect(self):
@@ -57,12 +59,7 @@ class TopicWSActionHandler(WSActionHandler):
         self.consumer.subscribed_topics.clear()
 
     def handle_subscribe(self, payload: dict):
-        parsed = parse_topic(payload.get("topic", ""))
-        if not parsed:
-            self.consumer.send_error("Invalid topic format, expected 'type.id'")
-            return
-
-        prefix, topic_id = parsed
+        prefix, topic_id = payload["topic"]
         validator = TOPIC_VALIDATORS.get(prefix)
         if not validator:
             self.consumer.send_error(f"Unknown topic type: {prefix}")
@@ -77,11 +74,7 @@ class TopicWSActionHandler(WSActionHandler):
         self.consumer.subscribed_topics.add(group)
 
     def handle_unsubscribe(self, payload: dict):
-        parsed = parse_topic(payload.get("topic", ""))
-        if not parsed:
-            return
-
-        group = topic_group(*parsed)
+        group = topic_group(*payload["topic"])
         if group in self.consumer.subscribed_topics:
             atos(self.consumer.channel_layer.group_discard)(
                 group, self.consumer.channel_name

@@ -1,8 +1,8 @@
 from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 from django.test import TestCase
+from rest_framework import serializers
 from social.ws import TypingWSActionHandler
-from streaming.audio.config import MAX_DURATION_SECONDS
 from streaming.models import StoredPlaybackState
 from streaming.tests.factories import CollectionSongFactory
 from streaming.ws.action_handlers.device import DeviceWSActionHandler
@@ -12,12 +12,27 @@ from streaming.ws.state_broadcasters.device import DeviceStateBroadcaster
 from streaming.ws.state_broadcasters.playback import PlaybackStateBroadcaster
 from users.tests.factories import BaseUserFactory
 
-from websockets.action_handler import WSActionHandler
+from websockets.action_handler import WSAction, WSActionHandler
 from websockets.base_consumer import BaseConsumer
 from websockets.topics import TOPIC_VALIDATORS, TopicWSActionHandler
 
 PLAY_ITEM_UNIQUE_ID = "11111111-1111-1111-1111-111111111111"
 OLD_PLAY_ITEM_UNIQUE_ID = "22222222-2222-2222-2222-222222222222"
+TOPIC_ID = "3f2b8c1e-9a4d-4e6f-8b7a-1c2d3e4f5a6b"
+OTHER_TOPIC_ID = "7d6c5b4a-3e2f-4a1b-9c8d-0e1f2a3b4c5d"
+CHAT_GROUP = f"topic.chat.{TOPIC_ID}"
+
+
+class _PayloadSerializer(serializers.Serializer):
+    key = serializers.CharField(required=False)
+
+
+def _action(handler, on_invalid="error") -> WSAction:
+    return {
+        "handler": handler,
+        "serializer": _PayloadSerializer,
+        "on_invalid": on_invalid,
+    }
 
 
 def _make_consumer(user):
@@ -63,16 +78,19 @@ class TestBaseConsumer(TestCase):
         mock_device.assert_called_once_with(user_uuid=str(self.user.uuid))
 
         self.assertEqual(
-            set(self.consumer._action_map.keys()),
             {
-                "device.register",
-                "device.set_active",
-                "device.set_volume",
-                "playback.set",
-                "playback.active-device-report",
-                "subscribe",
-                "unsubscribe",
-                "typing",
+                name: action["on_invalid"]
+                for name, action in self.consumer._action_map.items()
+            },
+            {
+                "device.register": "error",
+                "device.set_active": "error",
+                "device.set_volume": "error",
+                "playback.set": "drop",
+                "playback.active-device-report": "drop",
+                "subscribe": "error",
+                "unsubscribe": "drop",
+                "typing": "drop",
             },
         )
 
@@ -100,7 +118,7 @@ class TestBaseConsumer(TestCase):
     def test_connect_raises_on_action_collision(self, _mock_device):
         class DuplicateHandler(WSActionHandler):
             def get_actions(self):
-                return {"device.register": lambda p: None}
+                return {"device.register": _action(Mock())}
 
         self.consumer.action_handler_classes = [DeviceWSActionHandler, DuplicateHandler]
 
@@ -130,24 +148,85 @@ class TestBaseConsumer(TestCase):
             }
         )
 
-    def test_receive_json_dispatches_to_handler(self):
+    def test_receive_json_message_that_is_not_an_object(self):
+        self.consumer.receive_json(["test.action"])
+
+        self.consumer.send_json.assert_called_once_with(
+            {"event": "error", "payload": {"message": "Expected a JSON object"}}
+        )
+
+    def test_receive_json_action_that_is_not_a_string(self):
+        self.consumer._action_map = {}
+
+        self.consumer.receive_json({"action": ["test.action"]})
+
+        self.consumer.send_json.assert_called_once_with(
+            {
+                "event": "error",
+                "payload": {"message": "Unknown action: ['test.action']"},
+            }
+        )
+
+    def test_receive_json_passes_validated_data_to_handler(self):
         handler_fn = Mock()
-        self.consumer._action_map = {"test.action": handler_fn}
+        self.consumer._action_map = {"test.action": _action(handler_fn)}
 
         self.consumer.receive_json(
-            {"action": "test.action", "payload": {"key": "value"}}
+            {"action": "test.action", "payload": {"key": "value", "unknown": 1}}
         )
 
         handler_fn.assert_called_once_with({"key": "value"})
         self.consumer.send_json.assert_not_called()
 
-    def test_receive_json_dispatches_with_empty_payload(self):
+    def test_receive_json_validates_missing_payload_as_empty(self):
         handler_fn = Mock()
-        self.consumer._action_map = {"test.action": handler_fn}
+        self.consumer._action_map = {"test.action": _action(handler_fn)}
 
         self.consumer.receive_json({"action": "test.action"})
 
         handler_fn.assert_called_once_with({})
+
+    def test_receive_json_invalid_payload_sends_error(self):
+        handler_fn = Mock()
+        self.consumer._action_map = {"test.action": _action(handler_fn, "error")}
+
+        self.consumer.receive_json({"action": "test.action", "payload": {"key": ""}})
+
+        handler_fn.assert_not_called()
+        self.consumer.send_json.assert_called_once_with(
+            {
+                "event": "error",
+                "payload": {
+                    "message": "Invalid test.action payload: key: This field may not be blank."
+                },
+            }
+        )
+
+    def test_receive_json_payload_that_is_not_an_object_sends_error(self):
+        handler_fn = Mock()
+        self.consumer._action_map = {"test.action": _action(handler_fn, "error")}
+
+        self.consumer.receive_json({"action": "test.action", "payload": ["value"]})
+
+        handler_fn.assert_not_called()
+        self.consumer.send_json.assert_called_once_with(
+            {
+                "event": "error",
+                "payload": {
+                    "message": "Invalid test.action payload: non_field_errors: "
+                    "Invalid data. Expected a dictionary, but got list."
+                },
+            }
+        )
+
+    def test_receive_json_invalid_payload_is_dropped(self):
+        handler_fn = Mock()
+        self.consumer._action_map = {"test.action": _action(handler_fn, "drop")}
+
+        self.consumer.receive_json({"action": "test.action", "payload": {"key": ""}})
+
+        handler_fn.assert_not_called()
+        self.consumer.send_json.assert_not_called()
 
     @patch("streaming.ws.action_handlers.device.DeviceManager")
     def test_disconnect_discards_group_and_calls_handlers(self, _mock_device):
@@ -290,19 +369,6 @@ class TestDeviceWSActionHandler(TestCase):
         self.mock_broadcast_state.assert_not_called()
 
     @patch("streaming.ws.action_handlers.device.DeviceManager")
-    def test_register_missing_device_id(self, mock_manager_cls):
-        handler = DeviceWSActionHandler(self.consumer)
-        handler.handle_register({"name": "My Device"})
-
-        self.consumer.send_error.assert_called_once_with(
-            "`device_id` and `name` are required for device.register"
-        )
-        mock_manager_cls.return_value.register_device.assert_not_called()
-        self.mock_broadcast_state.assert_not_called()
-        self.mock_send_state.assert_not_called()
-        self.mock_broadcast_devices.assert_not_called()
-
-    @patch("streaming.ws.action_handlers.device.DeviceManager")
     def test_register_forwards_valid_volume(self, mock_manager_cls):
         # FE owns the durable per-device volume in localStorage; without this
         # forwarding, register would re-hydrate Redis at DEFAULT_VOLUME and
@@ -318,37 +384,6 @@ class TestDeviceWSActionHandler(TestCase):
             name="My Device",
             volume=42,
         )
-
-    @patch("streaming.ws.action_handlers.device.DeviceManager")
-    def test_register_drops_invalid_volume(self, mock_manager_cls):
-        # invalid volume must not block registration; manager applies its own default
-        handler = DeviceWSActionHandler(self.consumer)
-        handler.handle_register(
-            {"device_id": "device1", "name": "My Device", "volume": 150}
-        )
-        handler.handle_register(
-            {"device_id": "device1", "name": "My Device", "volume": "loud"}
-        )
-        handler.handle_register(
-            {"device_id": "device1", "name": "My Device", "volume": -1}
-        )
-
-        for call in mock_manager_cls.return_value.register_device.call_args_list:
-            self.assertNotIn("volume", call.kwargs)
-        self.consumer.send_error.assert_not_called()
-
-    @patch("streaming.ws.action_handlers.device.DeviceManager")
-    def test_register_missing_name(self, mock_manager_cls):
-        handler = DeviceWSActionHandler(self.consumer)
-        handler.handle_register({"device_id": "device1"})
-
-        self.consumer.send_error.assert_called_once_with(
-            "`device_id` and `name` are required for device.register"
-        )
-        mock_manager_cls.return_value.register_device.assert_not_called()
-        self.mock_broadcast_state.assert_not_called()
-        self.mock_send_state.assert_not_called()
-        self.mock_broadcast_devices.assert_not_called()
 
     @patch("streaming.ws.action_handlers.device.DeviceManager")
     def test_set_active_changed_pauses_playback(self, mock_manager_cls):
@@ -406,18 +441,6 @@ class TestDeviceWSActionHandler(TestCase):
         # care about the device touch); no snapshot
         self.mock_broadcast_state.assert_not_called()
         self.mock_broadcast_devices.assert_called_once_with()
-
-    @patch("streaming.ws.action_handlers.device.DeviceManager")
-    def test_set_active_missing_device_id(self, mock_manager_cls):
-        handler = DeviceWSActionHandler(self.consumer)
-        handler.handle_set_active({})
-
-        self.consumer.send_error.assert_called_once_with(
-            "`device_id` is required for device.set_active"
-        )
-        mock_manager_cls.return_value.set_active_device.assert_not_called()
-        self.mock_broadcast_state.assert_not_called()
-        self.mock_broadcast_devices.assert_not_called()
 
     @patch("streaming.ws.action_handlers.device.DeviceManager")
     def test_disconnect_clears_active_device_and_pauses_playback(
@@ -552,14 +575,13 @@ class TestPlaybackWSActionHandler(TestCase):
             {"type": "ws_event", "event": ServerEvent.PLAYBACK_SET, "payload": payload},
         )
 
-    def test_set_forwards_only_known_fields_to_active_device(self):
+    def test_set_forwards_command_to_active_device(self):
         handler = PlaybackWSActionHandler(self.consumer)
         handler.handle_set(
             {
                 "is_playing": False,
                 "song_pos_ms": 5000,
                 "curr_play_item_unique_id": PLAY_ITEM_UNIQUE_ID,
-                "volume": 10,
             }
         )
 
@@ -576,34 +598,11 @@ class TestPlaybackWSActionHandler(TestCase):
         self.mock_broadcast_state.assert_not_called()
         self.mock_device_manager.set_active_device.assert_not_called()
 
-    def test_set_forwards_play_state_without_play_item(self):
+    def test_set_forwards_play_state_without_seek(self):
         handler = PlaybackWSActionHandler(self.consumer)
-        handler.handle_set(
-            {"is_playing": True, "curr_play_item_unique_id": PLAY_ITEM_UNIQUE_ID}
-        )
+        handler.handle_set({"is_playing": True})
 
         self._assert_command_sent("active_channel", {"is_playing": True})
-
-    def test_set_with_no_valid_field_is_dropped(self):
-        # no active device and a sender with a device id would normally
-        # auto-activate, so this also proves that parsing runs first
-        self.mock_device_manager.get_active_device_channel.return_value = None
-
-        handler = PlaybackWSActionHandler(self.consumer)
-        handler.handle_set({})
-        handler.handle_set({"is_playing": "yes"})
-        handler.handle_set(
-            {"song_pos_ms": -1, "curr_play_item_unique_id": PLAY_ITEM_UNIQUE_ID}
-        )
-        handler.handle_set(
-            {"song_pos_ms": "wat", "curr_play_item_unique_id": PLAY_ITEM_UNIQUE_ID}
-        )
-        handler.handle_set({"song_pos_ms": 5000})
-        handler.handle_set({"song_pos_ms": 5000, "curr_play_item_unique_id": 1})
-
-        self.consumer.send_error.assert_not_called()
-        self.consumer.channel_layer.send.assert_not_called()
-        self.mock_device_manager.set_active_device.assert_not_called()
 
     def test_set_is_dropped_when_no_playback_is_stored(self):
         self.stored_playback_state.curr_play_item_unique_id = None
@@ -724,48 +723,6 @@ class TestPlaybackWSActionHandler(TestCase):
 
         self.mock_broadcast_state.assert_not_called()
 
-    def test_report_with_a_missing_or_invalid_field_is_dropped(self):
-        handler = PlaybackWSActionHandler(self.consumer)
-        handler.handle_active_device_report({"is_playing": False, "song_pos_ms": 1})
-        handler.handle_active_device_report(
-            {"curr_play_item_unique_id": PLAY_ITEM_UNIQUE_ID, "song_pos_ms": 1}
-        )
-        handler.handle_active_device_report(
-            {"curr_play_item_unique_id": PLAY_ITEM_UNIQUE_ID, "is_playing": False}
-        )
-        handler.handle_active_device_report(
-            {
-                "curr_play_item_unique_id": PLAY_ITEM_UNIQUE_ID,
-                "is_playing": 0,
-                "song_pos_ms": 1,
-            }
-        )
-        handler.handle_active_device_report(
-            {
-                "curr_play_item_unique_id": PLAY_ITEM_UNIQUE_ID,
-                "is_playing": False,
-                "song_pos_ms": -1,
-            }
-        )
-
-        self.consumer.send_error.assert_not_called()
-        self.mock_apply_play_report.assert_not_called()
-        self.mock_broadcast_state.assert_not_called()
-
-    def test_report_with_a_position_above_the_maximum_is_dropped(self):
-        # no real position is past the end of the longest song that can be uploaded
-        handler = PlaybackWSActionHandler(self.consumer)
-        handler.handle_active_device_report(
-            {
-                "curr_play_item_unique_id": PLAY_ITEM_UNIQUE_ID,
-                "is_playing": False,
-                "song_pos_ms": MAX_DURATION_SECONDS * 1000 + 1,
-            }
-        )
-
-        self.mock_apply_play_report.assert_not_called()
-        self.mock_broadcast_state.assert_not_called()
-
 
 class TestTopicWSActionHandler(TestCase):
     @classmethod
@@ -794,42 +751,17 @@ class TestTopicWSActionHandler(TestCase):
         self._register_validator("chat")
 
         handler = TopicWSActionHandler(self.consumer)
-        handler.handle_subscribe({"topic": "chat.abc-123"})
+        handler.handle_subscribe({"topic": ("chat", TOPIC_ID)})
 
-        TOPIC_VALIDATORS["chat"].assert_called_once_with(self.user, "abc-123")
+        TOPIC_VALIDATORS["chat"].assert_called_once_with(self.user, TOPIC_ID)
         self.consumer.channel_layer.group_add.assert_called_once_with(
-            "topic.chat.abc-123", "test_channel"
+            CHAT_GROUP, "test_channel"
         )
-        self.assertIn("topic.chat.abc-123", self.consumer.subscribed_topics)
-
-    def test_subscribe_invalid_topic_format(self):
-        handler = TopicWSActionHandler(self.consumer)
-        handler.handle_subscribe({"topic": "invalid"})
-
-        self.consumer.send_error.assert_called_once_with(
-            "Invalid topic format, expected 'type.id'"
-        )
-        self.consumer.channel_layer.group_add.assert_not_called()
-
-    def test_subscribe_empty_topic(self):
-        handler = TopicWSActionHandler(self.consumer)
-        handler.handle_subscribe({"topic": ""})
-
-        self.consumer.send_error.assert_called_once_with(
-            "Invalid topic format, expected 'type.id'"
-        )
-
-    def test_subscribe_missing_topic_key(self):
-        handler = TopicWSActionHandler(self.consumer)
-        handler.handle_subscribe({})
-
-        self.consumer.send_error.assert_called_once_with(
-            "Invalid topic format, expected 'type.id'"
-        )
+        self.assertIn(CHAT_GROUP, self.consumer.subscribed_topics)
 
     def test_subscribe_unknown_prefix(self):
         handler = TopicWSActionHandler(self.consumer)
-        handler.handle_subscribe({"topic": "unknown.abc-123"})
+        handler.handle_subscribe({"topic": ("unknown", TOPIC_ID)})
 
         self.consumer.send_error.assert_called_once_with("Unknown topic type: unknown")
 
@@ -837,10 +769,10 @@ class TestTopicWSActionHandler(TestCase):
         self._register_validator("chat", return_value=False)
 
         handler = TopicWSActionHandler(self.consumer)
-        handler.handle_subscribe({"topic": "chat.abc-123"})
+        handler.handle_subscribe({"topic": ("chat", TOPIC_ID)})
 
         self.consumer.send_error.assert_called_once_with(
-            "Not authorized for chat.abc-123"
+            f"Not authorized for chat.{TOPIC_ID}"
         )
         self.consumer.channel_layer.group_add.assert_not_called()
         self.assertEqual(self.consumer.subscribed_topics, set())
@@ -849,27 +781,21 @@ class TestTopicWSActionHandler(TestCase):
         self._register_validator("chat")
 
         handler = TopicWSActionHandler(self.consumer)
-        handler.handle_subscribe({"topic": "chat.abc-123"})
+        handler.handle_subscribe({"topic": ("chat", TOPIC_ID)})
         self.consumer.channel_layer.group_add.reset_mock()
 
-        handler.handle_unsubscribe({"topic": "chat.abc-123"})
+        handler.handle_unsubscribe({"topic": ("chat", TOPIC_ID)})
 
         self.consumer.channel_layer.group_discard.assert_called_once_with(
-            "topic.chat.abc-123", "test_channel"
+            CHAT_GROUP, "test_channel"
         )
-        self.assertNotIn("topic.chat.abc-123", self.consumer.subscribed_topics)
+        self.assertNotIn(CHAT_GROUP, self.consumer.subscribed_topics)
 
     def test_unsubscribe_non_subscribed_group_is_noop(self):
         self._register_validator("chat")
 
         handler = TopicWSActionHandler(self.consumer)
-        handler.handle_unsubscribe({"topic": "chat.abc-123"})
-
-        self.consumer.channel_layer.group_discard.assert_not_called()
-
-    def test_unsubscribe_invalid_topic_is_noop(self):
-        handler = TopicWSActionHandler(self.consumer)
-        handler.handle_unsubscribe({"topic": "invalid"})
+        handler.handle_unsubscribe({"topic": ("chat", TOPIC_ID)})
 
         self.consumer.channel_layer.group_discard.assert_not_called()
 
@@ -878,8 +804,8 @@ class TestTopicWSActionHandler(TestCase):
         self._register_validator("collection_comments")
 
         handler = TopicWSActionHandler(self.consumer)
-        handler.handle_subscribe({"topic": "chat.abc-123"})
-        handler.handle_subscribe({"topic": "collection_comments.xyz-456"})
+        handler.handle_subscribe({"topic": ("chat", TOPIC_ID)})
+        handler.handle_subscribe({"topic": ("collection_comments", OTHER_TOPIC_ID)})
         self.consumer.channel_layer.group_discard.reset_mock()
 
         handler.on_disconnect()
@@ -888,7 +814,7 @@ class TestTopicWSActionHandler(TestCase):
         discarded_groups = {call[0][0] for call in discard_calls}
         self.assertEqual(
             discarded_groups,
-            {"topic.chat.abc-123", "topic.collection_comments.xyz-456"},
+            {CHAT_GROUP, f"topic.collection_comments.{OTHER_TOPIC_ID}"},
         )
         self.assertEqual(self.consumer.subscribed_topics, set())
 
@@ -905,15 +831,15 @@ class TestTypingWSActionHandler(TestCase):
         self.consumer.channel_name = "test_channel"
         self.consumer.channel_layer = MagicMock()
         self.consumer.channel_layer.group_send = AsyncMock()
-        self.consumer.subscribed_topics = {"topic.chat.abc-123"}
+        self.consumer.subscribed_topics = {CHAT_GROUP}
 
     def test_typing_broadcasts_when_subscribed(self):
         handler = TypingWSActionHandler(self.consumer)
 
-        handler.handle_typing({"topic": "chat.abc-123"})
+        handler.handle_typing({"topic": ("chat", TOPIC_ID)})
 
         self.consumer.channel_layer.group_send.assert_called_once_with(
-            "topic.chat.abc-123",
+            CHAT_GROUP,
             {
                 "type": "ws_event",
                 "event": "chat.typing",
@@ -928,23 +854,15 @@ class TestTypingWSActionHandler(TestCase):
         self.consumer.subscribed_topics = set()
         handler = TypingWSActionHandler(self.consumer)
 
-        handler.handle_typing({"topic": "chat.abc-123"})
+        handler.handle_typing({"topic": ("chat", TOPIC_ID)})
 
         self.consumer.channel_layer.group_send.assert_not_called()
 
     def test_typing_dropped_for_prefix_without_registered_event(self):
-        self.consumer.subscribed_topics = {"topic.unknown.xyz-456"}
+        self.consumer.subscribed_topics = {f"topic.unknown.{OTHER_TOPIC_ID}"}
         handler = TypingWSActionHandler(self.consumer)
 
-        handler.handle_typing({"topic": "unknown.xyz-456"})
-
-        self.consumer.channel_layer.group_send.assert_not_called()
-
-    def test_typing_dropped_for_invalid_topic(self):
-        handler = TypingWSActionHandler(self.consumer)
-
-        handler.handle_typing({"topic": "invalid"})
-        handler.handle_typing({})
+        handler.handle_typing({"topic": ("unknown", OTHER_TOPIC_ID)})
 
         self.consumer.channel_layer.group_send.assert_not_called()
 
@@ -953,9 +871,9 @@ class TestTypingWSActionHandler(TestCase):
         mock_monotonic.return_value = 100.0
         handler = TypingWSActionHandler(self.consumer)
 
-        handler.handle_typing({"topic": "chat.abc-123"})
+        handler.handle_typing({"topic": ("chat", TOPIC_ID)})
         mock_monotonic.return_value = 100.0 + TypingWSActionHandler.MIN_INTERVAL - 0.5
-        handler.handle_typing({"topic": "chat.abc-123"})
+        handler.handle_typing({"topic": ("chat", TOPIC_ID)})
 
         self.consumer.channel_layer.group_send.assert_called_once()
 
@@ -964,8 +882,8 @@ class TestTypingWSActionHandler(TestCase):
         mock_monotonic.return_value = 100.0
         handler = TypingWSActionHandler(self.consumer)
 
-        handler.handle_typing({"topic": "chat.abc-123"})
+        handler.handle_typing({"topic": ("chat", TOPIC_ID)})
         mock_monotonic.return_value = 100.0 + TypingWSActionHandler.MIN_INTERVAL + 0.1
-        handler.handle_typing({"topic": "chat.abc-123"})
+        handler.handle_typing({"topic": ("chat", TOPIC_ID)})
 
         self.assertEqual(self.consumer.channel_layer.group_send.call_count, 2)

@@ -1,10 +1,13 @@
-from collections.abc import Callable
-
-from websockets.action_handler import WSActionHandler
+from websockets.action_handler import WSAction, WSActionHandler
 
 from streaming.managers.device_manager import DeviceManager
 from streaming.models.stored_playback_state import locked_stored_playback_state
 from streaming.ws.player_controller import PlayerController
+from streaming.ws.serializers import (
+    DeviceRegisterSerializer,
+    DeviceSetActiveSerializer,
+    DeviceSetVolumeSerializer,
+)
 from streaming.ws.state_broadcasters.device import DeviceStateBroadcaster
 from streaming.ws.state_broadcasters.playback import PlaybackStateBroadcaster
 
@@ -20,11 +23,23 @@ class DeviceWSActionHandler(WSActionHandler):
             user_uuid=consumer.user_uuid
         )
 
-    def get_actions(self) -> dict[str, Callable]:
+    def get_actions(self) -> dict[str, WSAction]:
         return {
-            "device.register": self.handle_register,
-            "device.set_active": self.handle_set_active,
-            "device.set_volume": self.handle_set_volume,
+            "device.register": {
+                "handler": self.handle_register,
+                "serializer": DeviceRegisterSerializer,
+                "on_invalid": "error",
+            },
+            "device.set_active": {
+                "handler": self.handle_set_active,
+                "serializer": DeviceSetActiveSerializer,
+                "on_invalid": "error",
+            },
+            "device.set_volume": {
+                "handler": self.handle_set_volume,
+                "serializer": DeviceSetVolumeSerializer,
+                "on_invalid": "error",
+            },
         }
 
     # on_disconnect will be called when the ws connection is aborted, i.e,
@@ -43,26 +58,10 @@ class DeviceWSActionHandler(WSActionHandler):
         self.device_broadcaster.broadcast_devices()
 
     def handle_register(self, payload: dict):
-        device_id = payload.get("device_id")
-        device_name = payload.get("name")
-        if not device_id or not device_name:
-            self.consumer.send_error(
-                "`device_id` and `name` are required for device.register"
-            )
-            return
-
-        register_kwargs = {
-            "device_id": device_id,
-            "channel_name": self.consumer.channel_name,
-            "name": device_name,
-        }
-        volume = payload.get("volume")
-        if isinstance(volume, int) and 0 <= volume <= 100:
-            register_kwargs["volume"] = volume
-
+        device_id = payload["device_id"]
         self.device_id = device_id
         self.consumer.device_id = device_id
-        self.manager.register_device(**register_kwargs)
+        self.manager.register_device(channel_name=self.consumer.channel_name, **payload)
         self.device_broadcaster.broadcast_devices()
 
         # the playback snapshot is not broadcast on every register since it doesn't change
@@ -77,29 +76,14 @@ class DeviceWSActionHandler(WSActionHandler):
             )
 
     def handle_set_active(self, payload: dict):
-        device_id = payload.get("device_id")
-        if not device_id:
-            self.consumer.send_error("`device_id` is required for device.set_active")
-            return
-
         # stop the playback and only then broadcast new devices
-        changed = self.manager.set_active_device(device_id=device_id)
+        changed = self.manager.set_active_device(device_id=payload["device_id"])
         if changed:
             self.player_controller.pause()
         self.device_broadcaster.broadcast_devices()
 
     def handle_set_volume(self, payload: dict):
-        device_id = payload.get("device_id")
-        volume = payload.get("volume")
-        if not device_id or volume is None:
-            self.consumer.send_error(
-                "`device_id` and `volume` are required for device.set_volume"
-            )
-            return
-
-        if not isinstance(volume, int) or not (0 <= volume <= 100):
-            self.consumer.send_error("`volume` must be an integer between 0 and 100")
-            return
-
-        self.manager.set_device_volume(device_id=device_id, volume=volume)
+        self.manager.set_device_volume(
+            device_id=payload["device_id"], volume=payload["volume"]
+        )
         self.device_broadcaster.broadcast_devices()
