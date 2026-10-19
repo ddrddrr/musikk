@@ -13,6 +13,7 @@ export interface PlaybackSnapshotPayload {
     server_ts_ms?: number;
     playback_state?: ServerPlaybackState | null;
     current_song: CollectionSong | null;
+    active_device_id: string | null;
 }
 
 // curr_play_item_unique_id is required together with song_pos_ms

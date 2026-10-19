@@ -2,7 +2,7 @@ import {
     PlaybackSetPayload,
     PlaybackSnapshotPayload,
 } from "@/features/playback/ws/playbackPayload.ts";
-import { AudioPlayerController } from "@/features/player/AudioPlayerController.ts";
+import { AudioPlayerController } from "@/features/player/controller/AudioPlayerController.ts";
 import { useWSClient } from "@/hooks/useWSClient.ts";
 import { useEffect } from "react";
 

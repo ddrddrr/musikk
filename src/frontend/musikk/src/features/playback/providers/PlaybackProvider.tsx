@@ -1,14 +1,12 @@
-import { useDeviceList } from "@/features/playback/hooks/useDeviceList.ts";
-import { useTotalDuration } from "@/features/playback/hooks/useTotalDuration.ts";
 import {
     PlaybackContext,
     PlayerControllerContext,
 } from "@/features/playback/providers/playbackContext.ts";
 import { THIS_DEVICE } from "@/features/playback/thisDevice.ts";
 import { useSubscribePlaybackEvents } from "@/features/playback/ws/wsEvents.ts";
-import { AudioPlayerController } from "@/features/player/AudioPlayerController.ts";
+import { AudioPlayerController } from "@/features/player/controller/AudioPlayerController.ts";
 import { useQueue } from "@/features/song-queue/hooks/useQueueAPI.ts";
-import { ReactNode, useCallback, useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { ReactNode, useCallback, useMemo, useState, useSyncExternalStore } from "react";
 
 interface PlaybackProviderProps {
     children: ReactNode;
@@ -16,31 +14,25 @@ interface PlaybackProviderProps {
 
 export function PlaybackProvider({ children }: PlaybackProviderProps) {
     const { error: queueError, refetch: queueRefetch } = useQueue();
-    const { activeDevice } = useDeviceList();
-    const isThisDeviceActive = THIS_DEVICE.id === activeDevice?.id;
 
-    const [controller] = useState(() => new AudioPlayerController());
+    const [controller] = useState(() => new AudioPlayerController(THIS_DEVICE.id));
     // we can't just pass controller.subscribe
     // because in JS when someone does func = classInstance.method; func()
     // func doesn't have a reference to "this"........
     // useCallback is needed because useSyncExternalStore re-subscribes
     // whenever the subscribe func identity changes, and a fresh arrow on every
     // render would make it tear down + re-create the sub each time
+    const subscribe = useCallback((cb: () => void) => controller.subscribe(cb), [controller]);
     const playbackState = useSyncExternalStore(
-        useCallback((cb) => controller.subscribe(cb), [controller]),
+        subscribe,
         useCallback(() => controller.getPlaybackState(), [controller]),
+    );
+    const isThisDeviceActive = useSyncExternalStore(
+        subscribe,
+        useCallback(() => controller.getIsThisDeviceActive(), [controller]),
     );
 
     useSubscribePlaybackEvents(controller);
-
-    useEffect(() => {
-        controller.setIsThisDeviceActive(isThisDeviceActive);
-    }, [controller, isThisDeviceActive]);
-
-    const { totalDuration, setAudioElemDurationSec } = useTotalDuration({
-        isThisDeviceActive,
-        songDurationMs: playbackState?.collectionSong.song.duration_ms,
-    });
 
     const isPlaybackActive = playbackState?.isPlaying ?? false;
     const contextValue = useMemo(
@@ -50,18 +42,8 @@ export function PlaybackProvider({ children }: PlaybackProviderProps) {
             playbackState,
             queueError: queueError ?? null,
             queueRefetch: () => void queueRefetch(),
-            totalDuration,
-            setAudioElemDurationSec,
         }),
-        [
-            isThisDeviceActive,
-            isPlaybackActive,
-            playbackState,
-            queueError,
-            queueRefetch,
-            totalDuration,
-            setAudioElemDurationSec,
-        ],
+        [isThisDeviceActive, isPlaybackActive, playbackState, queueError, queueRefetch],
     );
 
     return (

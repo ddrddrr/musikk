@@ -20,7 +20,17 @@ player_bar --> play_button
 player_bar --> device_dropdown
 
 package "State (providers + hooks)" {
-    [PlaybackProvider\n+ AudioPlayerController (Shaka + audio elem)\n+ usePlayer (autoplay, onEnded)\n+ useSubscribePlaybackEvents\n+ useCalculateSongPosMs / useTotalDuration\n+ useHandlePlay] as playback_provider
+    component "PlaybackProvider\n+ usePlayer (autoplay, onEnded)\n+ useSubscribePlaybackEvents\n+ useCalculateSongPosMs\n+ useHandlePlay" as playback_provider {
+        [AudioPlayerController] as controller
+        [ActivePlayback] as active_playback
+        [RemotePlayback] as remote_playback
+        [LocalAudioOutput\n(Shaka + audio elem)] as audio_output
+
+        controller --> active_playback : this tab plays
+        controller --> remote_playback : another tab plays
+        active_playback --> audio_output : load / play / pause / seek
+        remote_playback --> audio_output : unload
+    }
     [DeviceListProvider\n+ useDeviceLifecycle (re-register on WS open)] as device_list_provider
     [LoudnessPresetProvider\n+ useAudioPipeline (WebAudio gain + loudness)] as loudness_provider
 }
@@ -28,20 +38,22 @@ package "State (providers + hooks)" {
 player_box ..> loudness_provider : uses
 player_box ..> playback_provider : uses
 player_bar ..> playback_provider : reads pos/dur,\napplyUserSeek
-play_button ..> playback_provider : activate playback
+play_button ..> playback_provider : play / pause
 device_dropdown ..> device_list_provider : reads / switch device
 loudness_selector ..> loudness_provider : reads / writes
-playback_provider ..> loudness_provider : invokes fade/sync callbacks
+audio_output ..> loudness_provider : fade in / out
 
 cloud "Backend\n(media / signed URLs)" as backend
 queue "WSClient\nuser group" as ws
 
-playback_provider ...> backend : GET *.mpd / *.m3u8\nGET *.m4s segments
+audio_output ...> backend : GET *.mpd / *.m3u8\nGET *.m4s segments
 
 device_list_provider ..> ws : device.register
-playback_provider ..> ws : device.set_active / set_volume\nplayback.activate / stop\nplayback.seek / sync
+playback_provider ..> ws : playback.set\nplayback.active-device-report
+device_dropdown ...> ws : device.set_active
+player_bar ...> ws : device.set_volume
 
-device_list_provider <.right. ws : device.list
-playback_provider <.... ws : playback.snapshot\nplayback.seek
+ws ..> device_list_provider : device.list
+playback_provider <.... ws : playback.snapshot (with active device)\nplayback.set
 
 @enduml

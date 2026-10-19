@@ -93,19 +93,22 @@ function buildAudioPipeline(audio: HTMLAudioElement): AudioPipeline {
     return { ctx, source, loudnessGain, volumeGain, gainEnvelope: gainEnvelope, compressor };
 }
 
-function rampToUserVolume(volumeGain: GainNode, ctx: AudioContext, value: number) {
-    const target = Math.max(0, Math.min(1, value));
+function rampGain(gainNode: GainNode, ctx: AudioContext, target: number) {
     const now = ctx.currentTime;
     // https://developer.mozilla.org/en-US/docs/Web/API/AudioParam
     // we need to remove scheduled events as when we move the volume slider there is a ton
     // of events scheduled every "slide tick" and without cancellation they would unexpectadly
     // override each other
-    volumeGain.gain.cancelScheduledValues(now);
+    gainNode.gain.cancelScheduledValues(now);
     // then we set the curr value from which we are going to ramp
-    volumeGain.gain.setValueAtTime(volumeGain.gain.value, now);
+    gainNode.gain.setValueAtTime(gainNode.gain.value, now);
     // we dont use linearRampToValueAtTime/exponentialRampToValueAtTime because
     // we don't know the "end time" of when the user will finish moving the slider
-    volumeGain.gain.setTargetAtTime(target, now, VOLUME_RAMP_TIME_CONSTANT);
+    gainNode.gain.setTargetAtTime(target, now, VOLUME_RAMP_TIME_CONSTANT);
+}
+
+function rampToUserVolume(volumeGain: GainNode, ctx: AudioContext, value: number) {
+    rampGain(volumeGain, ctx, Math.max(0, Math.min(1, value)));
 }
 
 function rampGainEnvelope(
@@ -134,15 +137,18 @@ function applyLoudnessSettings(
     if (pipeline.ctx.state === "suspended") {
         void pipeline.ctx.resume();
     }
+    // ramp here, because the new song gain is in process while the old song still fades out,
+    // without this it would click
     if (preset === "off" || song?.loudness_lufs == null) {
-        pipeline.loudnessGain.gain.value = 1;
+        rampGain(pipeline.loudnessGain, pipeline.ctx, 1);
         pipeline.compressor.threshold.value = 0;
         pipeline.compressor.ratio.value = 1;
         return;
     }
     const gainDb = computeGainDb(song, LOUDNESS_TARGETS[preset]);
     // audio api's gain is linear, so we convert from dB
-    pipeline.loudnessGain.gain.value = Math.pow(10, gainDb / 20);
+    // prolly factor out to a method
+    rampGain(pipeline.loudnessGain, pipeline.ctx, Math.pow(10, gainDb / 20));
     applyCompressor(pipeline.compressor, preset);
 }
 

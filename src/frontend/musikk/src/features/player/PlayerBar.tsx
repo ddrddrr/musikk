@@ -29,7 +29,7 @@ export function PlayerBar({
     onUnmute,
     setUserVolume,
 }: PlayerBarProps) {
-    const { playbackState, totalDuration } = useContext(PlaybackContext);
+    const { playbackState } = useContext(PlaybackContext);
     const controller = useContext(PlayerControllerContext);
     const playingCollectionSong = playbackState?.collectionSong;
     const { volume, setVolume, handleVolumeCommit, handleMuteToggle } = useVolume({
@@ -54,6 +54,9 @@ export function PlayerBar({
     );
 
     const playingSong = playingCollectionSong?.song;
+    // be has 0 as duration when ffprobe fails to find out the real one
+    const durationMs = playingSong?.duration_ms ?? 0;
+    const hasDuration = durationMs > 0;
 
     return (
         <div className="flex h-20 items-center border-t border-foreground bg-card px-4 py-2">
@@ -85,16 +88,20 @@ export function PlayerBar({
                     {playingCollectionSong && (
                         <div className="flex max-w-[350px] min-w-0 basis-1/2 items-center gap-1">
                             <span className="text-right text-xs">{formatDuration(displayMs)}</span>
-                            <Slider
-                                value={[displayMs / 1000]}
-                                min={0}
-                                max={totalDuration || 100}
-                                step={1}
-                                onValueChange={handleSeek}
-                                onValueCommit={handleSeekCommit}
-                                className="flex-1 cursor-pointer"
-                            />
-                            <span className="text-xs">{formatDuration(totalDuration * 1000)}</span>
+                            {hasDuration && (
+                                <>
+                                    <Slider
+                                        value={[displayMs / 1000]}
+                                        min={0}
+                                        max={durationMs / 1000}
+                                        step={1}
+                                        onValueChange={handleSeek}
+                                        onValueCommit={handleSeekCommit}
+                                        className="flex-1 cursor-pointer"
+                                    />
+                                    <span className="text-xs">{formatDuration(durationMs)}</span>
+                                </>
+                            )}
                         </div>
                     )}
 

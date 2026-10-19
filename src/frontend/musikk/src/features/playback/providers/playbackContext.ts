@@ -1,6 +1,6 @@
 import { LocalPlaybackState } from "@/features/playback/types.ts";
-import { AudioPlayerController } from "@/features/player/AudioPlayerController.ts";
-import { createContext, Dispatch, SetStateAction } from "react";
+import { AudioPlayerController } from "@/features/player/controller/AudioPlayerController.ts";
+import { createContext } from "react";
 
 export interface PlaybackContextProps {
     isThisDeviceActive: boolean;
@@ -8,8 +8,6 @@ export interface PlaybackContextProps {
     playbackState: LocalPlaybackState | null;
     queueError: Error | null;
     queueRefetch: () => void;
-    totalDuration: number;
-    setAudioElemDurationSec: Dispatch<SetStateAction<number>>;
 }
 
 export const PlaybackContext = createContext<PlaybackContextProps>(null!);

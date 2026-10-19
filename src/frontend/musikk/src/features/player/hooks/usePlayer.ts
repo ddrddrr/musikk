@@ -11,11 +11,9 @@ interface UsePlayerOptions {
     ensureAudioPipeline: () => void;
     fadeIn: (durationMs?: number) => void;
     fadeOut: (durationMs?: number) => Promise<void>;
-    onDurationChange?: (duration: number) => void;
 }
 
 interface UsePlayerReturn {
-    handleLoadedMetadata: () => void;
     handleOnEnded: () => void;
     handleAudioStateChange: () => void;
     isMutedFallback: boolean;
@@ -27,7 +25,6 @@ export function usePlayer({
     ensureAudioPipeline,
     fadeIn,
     fadeOut,
-    onDurationChange,
 }: UsePlayerOptions): UsePlayerReturn {
     const controller = useContext(PlayerControllerContext);
     const sendActiveDeviceReport = useActiveDeviceReportAction();
@@ -37,31 +34,20 @@ export function usePlayer({
 
     useEffect(() => {
         controller.setHandlers({
-            fadeIn,
-            fadeOut,
             sendActiveDeviceReport,
             sendSet,
-            onMutedFallbackChange: setIsMutedFallback,
             onSongEnd: () => nextMutate(),
         });
-    }, [controller, fadeIn, fadeOut, sendActiveDeviceReport, sendSet, nextMutate]);
+    }, [controller, sendActiveDeviceReport, sendSet, nextMutate]);
 
     useEffect(() => {
         const audio = audioRef.current;
         if (!audio) return;
-        controller.init(audio);
+        controller.init(audio, { fadeIn, fadeOut, onMutedFallbackChange: setIsMutedFallback });
         return () => controller.destroy();
-    }, [audioRef, controller]);
-
-    function handleLoadedMetadata() {
-        const audio = audioRef.current;
-        if (audio) {
-            onDurationChange?.(audio.duration);
-        }
-    }
+    }, [audioRef, controller, fadeIn, fadeOut]);
 
     return {
-        handleLoadedMetadata,
         handleOnEnded: () => controller.handleEnded(),
         handleAudioStateChange: () => controller.handleAudioStateChange(),
         isMutedFallback,
