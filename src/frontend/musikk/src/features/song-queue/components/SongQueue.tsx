@@ -1,10 +1,8 @@
-import { getErrorDetail } from "@/api/errorUtils.ts";
 import { EmptyState } from "@/features/common/EmptyState.tsx";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { usePlayback } from "@/features/playback/hooks/usePlayback.ts";
-import { removeItem, useQueueClear } from "@/features/song-queue/api/mutations.ts";
+import { useQueueClear, useQueueRemoveItem } from "@/features/song-queue/api/mutations.ts";
 import { useQueue } from "@/features/song-queue/api/queries.ts";
-import { queueKeys } from "@/features/song-queue/api/queryKeys.ts";
 import { SongQueuePlayButton } from "@/features/song-queue/components/SongQueueContainerPlayButton.tsx";
 import { DefaultSongActions } from "@/features/songs/components/DefaultSongActions.tsx";
 import { SongContainer } from "@/features/songs/components/SongContainer.tsx";
@@ -13,22 +11,11 @@ import { SongDisplay } from "@/features/songs/components/SongDisplay.tsx";
 import { Button } from "@/features/ui/button.tsx";
 import { ScrollArea } from "@/features/ui/scroll-area.tsx";
 import { Spinner } from "@/features/ui/spinner";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Trash2 } from "lucide-react";
-import { toast } from "sonner";
 
 export function SongQueue() {
-    const queryClient = useQueryClient();
     const clearMutation = useQueueClear();
-    const removeItemMutation = useMutation({
-        mutationFn: removeItem,
-        onSuccess: () => {
-            void queryClient.invalidateQueries({ queryKey: queueKeys.base });
-        },
-        onError: (error: Error) => {
-            toast.error(getErrorDetail(error, "Failed to remove song from queue"));
-        },
-    });
+    const removeItemMutation = useQueueRemoveItem();
     const { data: queue, error, isPending, refetch } = useQueue();
     const { playbackState } = usePlayback();
 

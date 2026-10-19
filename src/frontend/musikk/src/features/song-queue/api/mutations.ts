@@ -25,7 +25,7 @@ async function next() {
     await api_client.post(QueueURLs.next);
 }
 
-export async function skipTo(itemUUID: string) {
+async function skipTo(itemUUID: string) {
     await api_client.post(QueueURLs.skipTo(itemUUID));
 }
 
@@ -33,7 +33,7 @@ async function prev() {
     await api_client.post(QueueURLs.prev);
 }
 
-export async function removeItem(itemUUID: string) {
+async function removeItem(itemUUID: string) {
     await api_client.post(QueueURLs.removeItem(itemUUID));
 }
 
@@ -63,6 +63,14 @@ export function useQueueNext() {
 
 export function useQueuePrev() {
     return useQueueMutation(prev, "Failed to go to previous");
+}
+
+export function useQueueSkipTo() {
+    return useQueueMutation(skipTo, "Failed to play queue item");
+}
+
+export function useQueueRemoveItem() {
+    return useQueueMutation(removeItem, "Failed to remove song from queue");
 }
 
 export function useQueueClear() {
