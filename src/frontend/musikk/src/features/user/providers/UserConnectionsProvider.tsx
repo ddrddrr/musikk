@@ -34,22 +34,13 @@ export function UserConnectionsProvider({ children }: UserConnectionsProviderPro
 
     const contextValue = useMemo(
         () => ({
-            friends: friendsPending ? [] : friends,
-            followers: followersPending ? [] : followers,
-            followed: followedPending ? [] : followed,
+            friends: friends ?? [],
+            followers: followers ?? [],
+            followed: followed ?? [],
             error,
             isLoading,
         }),
-        [
-            friends,
-            friendsPending,
-            followers,
-            followersPending,
-            followed,
-            followedPending,
-            error,
-            isLoading,
-        ],
+        [friends, followers, followed, error, isLoading],
     );
 
     return (

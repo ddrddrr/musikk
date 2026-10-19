@@ -6,7 +6,7 @@ import { songKeys } from "@/features/songs/api/queryKeys.ts";
 import { useQuery } from "@tanstack/react-query";
 
 export async function albumBySongRetrieve(songUUID: UUID): Promise<Collection> {
-    const res = await api_client.get(SongURLs.albumBySong(songUUID));
+    const res = await api_client.get<Collection>(SongURLs.albumBySong(songUUID));
     return res.data;
 }
 

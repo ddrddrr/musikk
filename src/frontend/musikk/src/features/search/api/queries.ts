@@ -12,20 +12,16 @@ interface PerformSearchResponse {
 }
 
 export async function performSearch(query: string): Promise<PerformSearchResponse> {
-    const res = await api_client.get(SearchURLs.searchMain, { params: { q: query } });
-    const data = res.data;
+    const res = await api_client.get<PerformSearchResponse>(SearchURLs.searchMain, {
+        params: { q: query },
+    });
+    const { songs, playlists, albums, users, artists } = res.data;
 
     return {
-        songs: data.songs.map((song: CollectionSong) => ({
-            ...song,
-            kind: "collectionSong" as const,
-        })),
-        playlists: data.playlists.map((playlist: Collection) => ({
-            ...playlist,
-            kind: "collection" as const,
-        })),
-        albums: data.albums.map((album: Collection) => ({ ...album, kind: "collection" as const })),
-        users: data.users.map((user: BaseUser) => ({ ...user, kind: "user" as const })),
-        artists: data.artists.map((artist: BaseUser) => ({ ...artist, kind: "user" as const })),
+        songs: songs.map((song) => ({ ...song, kind: "collectionSong" as const })),
+        playlists: playlists.map((playlist) => ({ ...playlist, kind: "collection" as const })),
+        albums: albums.map((album) => ({ ...album, kind: "collection" as const })),
+        users: users.map((user) => ({ ...user, kind: "user" as const })),
+        artists: artists.map((artist) => ({ ...artist, kind: "user" as const })),
     };
 }

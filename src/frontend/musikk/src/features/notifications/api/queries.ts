@@ -15,7 +15,7 @@ export interface NotificationListParams {
 }
 
 export async function fetchNotificationList(): Promise<NotificationListParams> {
-    const res = await api_client.get(NotificationURLs.notificationsList);
+    const res = await api_client.get<NotificationListParams>(NotificationURLs.notificationsList);
     return res.data;
 }
 

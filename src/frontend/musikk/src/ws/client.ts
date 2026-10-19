@@ -1,14 +1,14 @@
 interface ServerEvent {
-    event: string;
-    payload: any;
+    event?: unknown;
+    payload?: unknown;
 }
 
 interface UserAction {
     action: string;
-    payload: any;
+    payload: unknown;
 }
 
-type MessageHandler = (payload: any) => void;
+type MessageHandler = (payload: unknown) => void;
 
 const RECONNECT_BASE_DELAY_MS = 500;
 const RECONNECT_MAX_DELAY_MS = 30000;
@@ -70,18 +70,18 @@ export class WSClient {
             this.flush();
         };
 
-        socket.onmessage = (e) => {
+        socket.onmessage = (e: MessageEvent<string>) => {
             if (this.ws !== socket) return;
-            let data: ServerEvent;
+            let data: ServerEvent | null;
             try {
-                data = JSON.parse(e.data);
+                data = JSON.parse(e.data) as ServerEvent | null;
             } catch {
                 console.debug("WS Invalid JSON payload:", e.data);
                 return;
             }
 
             const eventType = data?.event;
-            if (!eventType) {
+            if (typeof eventType !== "string" || !eventType) {
                 console.debug("WS Received message without event type:", data);
                 return;
             }
@@ -242,18 +242,19 @@ export class WSClient {
 
     // returns a func that should be called in useEffect, since we need to clear
     // the listener list eventually, otherwise there'll be a memory leak
-    subscribe(event: string, handler: MessageHandler): () => void {
+    subscribe<T>(event: string, handler: (payload: T) => void): () => void {
         let listeners = this.listeners.get(event);
         if (!listeners) {
             listeners = new Set();
             this.listeners.set(event, listeners);
         }
-        listeners.add(handler);
+        const messageHandler = handler as MessageHandler;
+        listeners.add(messageHandler);
 
         console.debug(`WS Subscribed to event '${event}'`);
 
         return () => {
-            listeners?.delete(handler);
+            listeners?.delete(messageHandler);
             if (listeners && listeners.size === 0) {
                 this.listeners.delete(event);
                 console.debug(`WS Unsubscribed from event '${event}'`);

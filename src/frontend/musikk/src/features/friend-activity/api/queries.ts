@@ -10,7 +10,7 @@ export function useFriendsListeningQuery() {
     return useQuery<UserSong[]>({
         queryKey: friendActivityKeys.listening(userUUID),
         queryFn: async () => {
-            const res = await api_client.get(FriendActivityURLs.listeningToList);
+            const res = await api_client.get<UserSong[]>(FriendActivityURLs.listeningToList);
             return res.data;
         },
         refetchInterval: 10_000, // 10s

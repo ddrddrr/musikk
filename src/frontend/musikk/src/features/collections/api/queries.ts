@@ -31,12 +31,16 @@ interface FetchUserLibraryParams {
 }
 
 export async function fetchUserLibrary(userUUID: UUID): Promise<FetchUserLibraryParams> {
-    const response = await api_client.get(CollectionURLs.userLibrary(userUUID));
+    const response = await api_client.get<FetchUserLibraryParams>(
+        CollectionURLs.userLibrary(userUUID),
+    );
     return response.data;
 }
 
 export async function fetchCollectionDetailed(collectionUUID: string): Promise<CollectionDetailed> {
-    const response = await api_client.get(CollectionURLs.collectionDetail(collectionUUID));
+    const response = await api_client.get<CollectionDetailed>(
+        CollectionURLs.collectionDetail(collectionUUID),
+    );
     return response.data;
 }
 

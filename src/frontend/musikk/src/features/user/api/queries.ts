@@ -4,14 +4,30 @@ import { UserURLs } from "@/features/user/api/endpoints.ts";
 import { userKeys } from "@/features/user/api/queryKeys.ts";
 import { BaseUser } from "@/features/user/types.ts";
 import { skipToken, useQuery } from "@tanstack/react-query";
-import axios from "axios";
+import { isAxiosError } from "axios";
+
+interface MeResponse {
+    me: BaseUser;
+}
+
+interface FriendsResponse {
+    friends: BaseUser[];
+}
+
+interface FollowersResponse {
+    followers: BaseUser[];
+}
+
+interface FollowedResponse {
+    followed: BaseUser[];
+}
 
 export async function fetchMe(): Promise<BaseUser | null> {
     try {
-        const res = await api_client_public.get(UserURLs.me);
+        const res = await api_client_public.get<MeResponse>(UserURLs.me);
         return res.data.me;
     } catch (err) {
-        if (axios.isAxiosError(err) && err.response?.status === 401) {
+        if (isAxiosError(err) && err.response?.status === 401) {
             return null;
         }
         throw err;
@@ -19,22 +35,22 @@ export async function fetchMe(): Promise<BaseUser | null> {
 }
 
 export async function fetchUser(userUUID: UUID): Promise<BaseUser> {
-    const res = await api_client.get(UserURLs.userRetrieve(userUUID));
+    const res = await api_client.get<BaseUser>(UserURLs.userRetrieve(userUUID));
     return res.data;
 }
 
-async function fetchUserFriends(userUUID: UUID) {
-    const res = await api_client.get(UserURLs.userFriends(userUUID));
+async function fetchUserFriends(userUUID: UUID): Promise<BaseUser[]> {
+    const res = await api_client.get<FriendsResponse>(UserURLs.userFriends(userUUID));
     return res.data.friends;
 }
 
-async function fetchUserFollowers(userUUID: UUID) {
-    const res = await api_client.get(UserURLs.userFollowers(userUUID));
+async function fetchUserFollowers(userUUID: UUID): Promise<BaseUser[]> {
+    const res = await api_client.get<FollowersResponse>(UserURLs.userFollowers(userUUID));
     return res.data.followers;
 }
 
-async function fetchUserFollowed(userUUID: UUID) {
-    const res = await api_client.get(UserURLs.userFollowed(userUUID));
+async function fetchUserFollowed(userUUID: UUID): Promise<BaseUser[]> {
+    const res = await api_client.get<FollowedResponse>(UserURLs.userFollowed(userUUID));
     return res.data.followed;
 }
 

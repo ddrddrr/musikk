@@ -5,7 +5,8 @@ import { SongQueue } from "@/features/song-queue/types.ts";
 import { useQuery } from "@tanstack/react-query";
 
 async function getSongQueue(): Promise<SongQueue> {
-    return (await api_client.get(QueueURLs.queue)).data;
+    const res = await api_client.get<SongQueue>(QueueURLs.queue);
+    return res.data;
 }
 
 export function useQueue() {
