@@ -55,7 +55,7 @@ export function AlbumSongUploadSection({ albumUUID, onComplete }: AlbumSongUploa
     const processSongs = useCallback(
         async (data: AlbumSongUploadFormValues) => {
             const jobs: SongUploadJob[] = data.songs.map((song) => ({
-                operationID: song.operationID || crypto.randomUUID(),
+                operationID: song.operationID,
                 data: {
                     title: song.title,
                     audio: song.audio,
@@ -63,12 +63,6 @@ export function AlbumSongUploadSection({ albumUUID, onComplete }: AlbumSongUploa
                     uuid: song.uuid,
                 },
             }));
-
-            jobs.forEach((job, i) => {
-                if (!data.songs[i].operationID) {
-                    form.setValue(`songs.${i}.operationID`, job.operationID);
-                }
-            });
 
             const songUUIDByOperationID = await uploadSongs(albumUUID, jobs);
             songUUIDByOperationID.forEach((songUUID, operationID) => {

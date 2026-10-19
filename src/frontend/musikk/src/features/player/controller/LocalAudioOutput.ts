@@ -38,10 +38,6 @@ export class LocalAudioOutput {
     private playOrPauseGuard = createStaleAsyncOpGuard();
     private seekGuard = createStaleAsyncOpGuard();
 
-    get isAttached(): boolean {
-        return this.attached !== null;
-    }
-
     get isReady(): boolean {
         return this.isAudioReady;
     }

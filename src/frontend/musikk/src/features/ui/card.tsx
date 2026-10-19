@@ -8,8 +8,6 @@ const cardVariants = cva("flex flex-col rounded-sm", {
         variant: {
             default: "bg-card text-card-foreground border shadow-sm",
             panel: "bg-muted border-2 border-foreground overflow-hidden",
-            flat: "bg-card text-card-foreground border-none shadow-none",
-            elevated: "bg-card text-card-foreground border shadow-lg",
         },
         spacing: {
             sm: "gap-4 py-3",

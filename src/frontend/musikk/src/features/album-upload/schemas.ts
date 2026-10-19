@@ -24,7 +24,7 @@ function isAllowedAudio(f: File): boolean {
 }
 
 export const SongSchema = z.object({
-    operationID: z.uuid().optional(),
+    operationID: z.uuid(),
     title: z.string().min(1),
     audio: z
         .instanceof(File)

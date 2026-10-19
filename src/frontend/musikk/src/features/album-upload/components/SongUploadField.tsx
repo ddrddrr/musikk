@@ -24,15 +24,6 @@ export function SongUploadField({ songIndex }: SongUploadProps) {
 
             <ImageField name={`songs.${songIndex}.image`} />
             <AudioField name={`songs.${songIndex}.audio`} />
-
-            <FormField
-                name={`songs.${songIndex}.operationID`}
-                render={({ field }) => <input type="hidden" {...field} />}
-            />
-            <FormField
-                name={`songs.${songIndex}.uuid`}
-                render={({ field }) => <input type="hidden" {...field} />}
-            />
         </div>
     );
 }

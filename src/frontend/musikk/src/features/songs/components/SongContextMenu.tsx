@@ -13,36 +13,17 @@ import { JSX } from "react";
 interface SongContextMenuProps {
     children: JSX.Element | JSX.Element[];
     song: CollectionSong;
-    renderRemoveFromPlaylist?: boolean;
     onRemoveFromQueue?: () => void;
 }
 
-export function SongContextMenu({
-    children,
-    song,
-    renderRemoveFromPlaylist = false,
-    onRemoveFromQueue,
-}: SongContextMenuProps) {
-    const { removeSongMutation, onPlay, addSongMutation } = useSongActions(song);
+export function SongContextMenu({ children, song, onRemoveFromQueue }: SongContextMenuProps) {
+    const { onPlay, addSongMutation } = useSongActions(song);
 
     return (
         <ContextMenu>
             <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
             <ContextMenuPortal>
                 <ContextMenuContent panel="card" className="w-48">
-                    {renderRemoveFromPlaylist && (
-                        <ContextMenuItem
-                            onSelect={() =>
-                                removeSongMutation.mutate({
-                                    collectionUUID: song.collection,
-                                    songCollectionSongUUID: song.uuid,
-                                })
-                            }
-                        >
-                            <Trash2 className="mr-2 size-4" />
-                            Remove from playlist
-                        </ContextMenuItem>
-                    )}
                     {onRemoveFromQueue && (
                         <ContextMenuItem onSelect={onRemoveFromQueue}>
                             <Trash2 className="mr-2 size-4" />
