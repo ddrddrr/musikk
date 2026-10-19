@@ -6,8 +6,6 @@ export interface PlaybackContextProps {
     isThisDeviceActive: boolean;
     isPlaybackActive: boolean;
     playbackState: LocalPlaybackState | null;
-    queueError: Error | null;
-    queueRefetch: () => void;
 }
 
 export const PlaybackContext = createContext<PlaybackContextProps>(null!);

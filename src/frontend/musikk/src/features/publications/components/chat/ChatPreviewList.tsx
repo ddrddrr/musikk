@@ -3,17 +3,17 @@ import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { ChatNewGroupForm } from "@/features/publications/components/chat/ChatNewGroupForm.tsx";
 import { ChatPreview } from "@/features/publications/components/chat/ChatPreview.tsx";
 import { ChatStartDirectList } from "@/features/publications/components/chat/ChatStartDirectList.tsx";
-import { useUserChatsContext } from "@/features/publications/hooks/useUserChats.ts";
+import { useMyChats } from "@/features/publications/hooks/useMyChats.ts";
 import { Button } from "@/features/ui/button.tsx";
 import { Spinner } from "@/features/ui/spinner";
 import { Plus } from "lucide-react";
 import { useState } from "react";
 
 export function ChatPreviewList() {
-    const { chats, isLoading, error, refetch } = useUserChatsContext();
+    const { chats, isPending, error, refetch } = useMyChats();
     const [showNewGroupForm, setShowNewGroupForm] = useState(false);
 
-    if (isLoading) {
+    if (isPending) {
         return (
             <div className="flex min-h-[400px] items-center justify-center">
                 <Spinner className="size-8" />
@@ -31,7 +31,7 @@ export function ChatPreviewList() {
     }
 
     if (error) {
-        return <QueryErrorBox message="Failed to load chats" onRetry={refetch} />;
+        return <QueryErrorBox message="Failed to load chats" onRetry={() => void refetch()} />;
     }
 
     return (
@@ -45,8 +45,8 @@ export function ChatPreviewList() {
             </div>
 
             <div className="flex flex-col gap-1">
-                {chats?.length === 0 && <EmptyState message="No chats yet" />}
-                {chats?.map((chat) => (
+                {chats.length === 0 && <EmptyState message="No chats yet" />}
+                {chats.map((chat) => (
                     <ChatPreview key={chat.uuid} chat={chat} />
                 ))}
             </div>

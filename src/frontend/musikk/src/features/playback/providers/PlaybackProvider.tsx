@@ -5,7 +5,6 @@ import {
 import { THIS_DEVICE } from "@/features/playback/thisDevice.ts";
 import { useSubscribePlaybackEvents } from "@/features/playback/ws/wsEvents.ts";
 import { AudioPlayerController } from "@/features/player/controller/AudioPlayerController.ts";
-import { useQueue } from "@/features/song-queue/api/queries.ts";
 import { ReactNode, useCallback, useMemo, useState, useSyncExternalStore } from "react";
 
 interface PlaybackProviderProps {
@@ -13,8 +12,6 @@ interface PlaybackProviderProps {
 }
 
 export function PlaybackProvider({ children }: PlaybackProviderProps) {
-    const { error: queueError, refetch: queueRefetch } = useQueue();
-
     const [controller] = useState(() => new AudioPlayerController(THIS_DEVICE.id));
     // we can't just pass controller.subscribe
     // because in JS when someone does func = classInstance.method; func()
@@ -40,10 +37,8 @@ export function PlaybackProvider({ children }: PlaybackProviderProps) {
             isThisDeviceActive,
             isPlaybackActive,
             playbackState,
-            queueError: queueError ?? null,
-            queueRefetch: () => void queueRefetch(),
         }),
-        [isThisDeviceActive, isPlaybackActive, playbackState, queueError, queueRefetch],
+        [isThisDeviceActive, isPlaybackActive, playbackState],
     );
 
     return (

@@ -2,25 +2,22 @@ import { getErrorDetail } from "@/api/errorUtils.ts";
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
 import { EmptyState } from "@/features/common/EmptyState.tsx";
 import { useCreateChat } from "@/features/publications/api/mutations.ts";
-import { useUserChatsContext } from "@/features/publications/hooks/useUserChats.ts";
+import { useMyChats } from "@/features/publications/hooks/useMyChats.ts";
 import { UserCard } from "@/features/user/components/UserCard.tsx";
-import { UserConnectionsContext } from "@/features/user/providers/userConnectionsContext.tsx";
+import { useMyConnections } from "@/features/user/hooks/useMyConnections.ts";
 import { BaseUser } from "@/features/user/types.ts";
-import { useContext, useMemo } from "react";
+import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 export function ChatStartDirectList() {
     const userUUID = useUserUUID();
     const navigate = useNavigate();
-    const { friends } = useContext(UserConnectionsContext);
-    const { chats } = useUserChatsContext();
+    const { friends } = useMyConnections();
+    const { chats } = useMyChats();
     const createChatMutation = useCreateChat();
 
     const friendsWithoutDirectChat = useMemo(() => {
-        // TODO add a hook for chats so we dont check for null here?
-        if (!friends || !chats) return [];
-
         const directChatMemberUUIDs = new Set(
             chats
                 .filter((chat) => chat.is_direct)
@@ -50,11 +47,11 @@ export function ChatStartDirectList() {
         );
     };
 
-    if (!friends || friends.length === 0) {
+    if (friends.length === 0) {
         return <EmptyState message="No friends to chat with yet" />;
     }
 
-    if (!friendsWithoutDirectChat || friendsWithoutDirectChat.length === 0) {
+    if (friendsWithoutDirectChat.length === 0) {
         return <EmptyState message="You have chats with all your friends" />;
     }
 

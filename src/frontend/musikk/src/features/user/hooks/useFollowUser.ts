@@ -1,10 +1,9 @@
 import { getErrorDetail } from "@/api/errorUtils.ts";
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
 import { useFollowUserMutation, useUnfollowUserMutation } from "@/features/user/api/mutations.ts";
+import { useUserFollowedQuery } from "@/features/user/api/queries.ts";
 import { userKeys } from "@/features/user/api/queryKeys.ts";
-import { UserConnectionsContext } from "@/features/user/providers/userConnectionsContext.tsx";
 import { useQueryClient } from "@tanstack/react-query";
-import { useContext } from "react";
 import { toast } from "sonner";
 
 export function useFollowUser(userUUID: string | undefined) {
@@ -12,9 +11,9 @@ export function useFollowUser(userUUID: string | undefined) {
     const myUUID = useUserUUID();
     const followMutation = useFollowUserMutation();
     const unfollowMutation = useUnfollowUserMutation();
-    const { followed } = useContext(UserConnectionsContext);
+    const { data: followed } = useUserFollowedQuery(myUUID);
 
-    const isFollowing = userUUID ? followed.some((u) => u.uuid === userUUID) : false;
+    const isFollowing = !!userUUID && !!followed?.some((u) => u.uuid === userUUID);
 
     const toggleFollow = async () => {
         if (!userUUID) return;

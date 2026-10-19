@@ -13,10 +13,9 @@ import {
 } from "@/features/ui/form.tsx";
 import { Input } from "@/features/ui/input.tsx";
 import { UserAvatar } from "@/features/user/components/UserAvatar.tsx";
-import { UserConnectionsContext } from "@/features/user/providers/userConnectionsContext.tsx";
+import { useMyConnections } from "@/features/user/hooks/useMyConnections.ts";
 import { cn } from "@/lib/utils.ts";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useContext } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -34,7 +33,7 @@ interface ChatNewGroupFormProps {
 
 export function ChatNewGroupForm({ onSuccess, onCancel }: ChatNewGroupFormProps) {
     const userUUID = useUserUUID();
-    const { friends } = useContext(UserConnectionsContext);
+    const { friends } = useMyConnections();
     const createChatMutation = useCreateChat();
 
     const form = useForm<ChatNewGroupFormData>({
@@ -76,7 +75,7 @@ export function ChatNewGroupForm({ onSuccess, onCancel }: ChatNewGroupFormProps)
         );
     };
 
-    if (!friends || friends.length === 0) {
+    if (friends.length === 0) {
         return (
             <div className="flex flex-col items-center gap-4">
                 <EmptyState message="No friends to create a group with yet" />

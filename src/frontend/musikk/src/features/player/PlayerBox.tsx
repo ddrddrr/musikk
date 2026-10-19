@@ -3,6 +3,7 @@ import { PlaybackContext } from "@/features/playback/providers/playbackContext.t
 import { useAudioPipeline } from "@/features/player/hooks/useAudioPipeline.ts";
 import { usePlayer } from "@/features/player/hooks/usePlayer.ts";
 import { PlayerBar } from "@/features/player/PlayerBar.tsx";
+import { useQueue } from "@/features/song-queue/api/queries.ts";
 import React, { useContext, useRef } from "react";
 
 export function PlayerBox({
@@ -11,7 +12,8 @@ export function PlayerBox({
     setIsQueueOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
     const audioRef = useRef<HTMLAudioElement>(null);
-    const { queueError, queueRefetch, playbackState } = useContext(PlaybackContext);
+    const { playbackState } = useContext(PlaybackContext);
+    const { error: queueError, refetch: queueRefetch } = useQueue();
 
     const { ensureAudioPipeline, setUserVolume, fadeIn, fadeOut } = useAudioPipeline({
         audioRef,
@@ -31,7 +33,10 @@ export function PlayerBox({
         <div className="sticky right-0 bottom-0 left-0 z-10 border-t border-foreground bg-card">
             {hasQueueError && (
                 <div className="p-4">
-                    <QueryErrorBox message="Failed to load playback queue" onRetry={queueRefetch} />
+                    <QueryErrorBox
+                        message="Failed to load playback queue"
+                        onRetry={() => void queueRefetch()}
+                    />
                 </div>
             )}
             {!hasQueueError && (
