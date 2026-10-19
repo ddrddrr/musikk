@@ -27,11 +27,6 @@ class PlayerController:
                 return
             self._broadcast_song_change(stored_playback_state)
 
-    def pause(self) -> None:
-        with locked_stored_playback_state(self.user_uuid) as stored_playback_state:
-            stored_playback_state.pause_at_estimated_position()
-            self._playback_state_broadcaster.broadcast_snapshot(stored_playback_state)
-
     def clear(self) -> None:
         with locked_stored_playback_state(self.user_uuid) as stored_playback_state:
             stored_playback_state.clear()

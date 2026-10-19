@@ -183,16 +183,25 @@ class StoredPlaybackState(BaseModel):
         self.save()
         return True
 
+    def apply_set_command(
+        self, is_playing: bool | None = None, song_pos_ms: int | None = None
+    ) -> None:
+        if not self.has_curr_play_item():
+            return
+        if is_playing is None:
+            is_playing = self.is_playing()
+        if song_pos_ms is None:
+            song_pos_ms = self.calculate_song_pos_ms()
+        self.last_known_is_playing = is_playing
+        self.last_known_song_pos_ms = song_pos_ms
+        self.last_known_song_pos_updated_at_server_ms = now_server_ms()
+        self.save()
+
     def pause_at_estimated_position(self) -> None:
         """Used when the active device changes or disconnects,
         since there are no normal reports from the device anymore.
         """
-        if not self.has_curr_play_item():
-            return
-        self.last_known_song_pos_ms = self.calculate_song_pos_ms()
-        self.last_known_is_playing = False
-        self.last_known_song_pos_updated_at_server_ms = now_server_ms()
-        self.save()
+        self.apply_set_command(is_playing=False)
 
     # TODO: not sure yet when to add to history - on switch to or on switch from
     def _transition_to(self, song: CollectionSong | None) -> None:

@@ -2,7 +2,7 @@ import threading
 import time
 from collections.abc import Callable
 from functools import partial
-from unittest.mock import Mock, patch
+from unittest.mock import AsyncMock, Mock, patch
 
 from django.db import connection, connections
 from django.test import TransactionTestCase
@@ -12,13 +12,16 @@ from utils.clock import now_server_ms
 from streaming.models import StoredPlaybackState
 from streaming.models.stored_playback_state import locked_stored_playback_state
 from streaming.tests.factories import CollectionSongFactory
+from streaming.ws.action_services.device import DeviceWSActionService
 from streaming.ws.action_services.playback import PlaybackWSActionService
 from streaming.ws.player_controller import PlayerController
+from streaming.ws.state_broadcasters.device import DeviceStateBroadcaster
 from streaming.ws.state_broadcasters.playback import PlaybackStateBroadcaster
 
 TIMEOUT_S = 5
 OLD_PLAY_ITEM_UNIQUE_ID = "22222222-2222-2222-2222-222222222222"
 ACTIVE_DEVICE_ID = "active-device"
+NEW_DEVICE_ID = "new-device"
 
 
 def _play_state(stored_playback_state: StoredPlaybackState) -> dict:
@@ -73,6 +76,31 @@ class SnapshotRecorder:
             self.release_first_snapshot.wait(TIMEOUT_S)
 
 
+class BlockingDeviceSwitch:
+    """Stands in for the active device in Redis.
+
+    `set_active_device` waits until the test releases it, and only then changes
+    the active device. So a test can stop a device switch before the change.
+    """
+
+    def __init__(self, active_device_id: str):
+        self.active_device_id = active_device_id
+        self.started = threading.Event()
+        self.release = threading.Event()
+
+    def get_active_device_id(self) -> str:
+        return self.active_device_id
+
+    def get_active_device_channel(self) -> str:
+        return f"{self.active_device_id}-channel"
+
+    def set_active_device(self, device_id: str) -> bool:
+        self.started.set()
+        self.release.wait(TIMEOUT_S)
+        self.active_device_id = device_id
+        return True
+
+
 class TestStoredPlaybackStateLock(TransactionTestCase):
     """
     Runs two callers on two threads at the same time, as an HTTP request and a
@@ -114,11 +142,23 @@ class TestStoredPlaybackStateLock(TransactionTestCase):
         )
         self.broadcast_snapshot_patcher.start()
         self.broadcast_queue_changed_patcher.start()
-        mock_device_manager = self.device_manager_patcher.start().return_value
-        mock_device_manager.get_active_device_id.return_value = ACTIVE_DEVICE_ID
+        self.mock_device_manager = self.device_manager_patcher.start().return_value
+        self.mock_device_manager.get_active_device_id.return_value = ACTIVE_DEVICE_ID
+        # the device service and the playback service see the same devices
+        self.device_service_manager_patcher = patch(
+            "streaming.ws.action_services.device.DeviceManager",
+            return_value=self.mock_device_manager,
+        )
+        self.broadcast_devices_patcher = patch.object(
+            DeviceStateBroadcaster, "broadcast_devices"
+        )
+        self.device_service_manager_patcher.start()
+        self.broadcast_devices_patcher.start()
         self.addCleanup(self.broadcast_snapshot_patcher.stop)
         self.addCleanup(self.broadcast_queue_changed_patcher.stop)
         self.addCleanup(self.device_manager_patcher.stop)
+        self.addCleanup(self.device_service_manager_patcher.stop)
+        self.addCleanup(self.broadcast_devices_patcher.stop)
 
     def _load_stored_playback_state(self) -> StoredPlaybackState:
         return StoredPlaybackState.objects.get(streamingprofile__user=self.user)
@@ -178,6 +218,53 @@ class TestStoredPlaybackStateLock(TransactionTestCase):
                 "song_pos_ms": 20_000,
             }
         )
+
+    def _start_blocked_device_switch(
+        self,
+    ) -> tuple[DatabaseThread, BlockingDeviceSwitch]:
+        """Starts `device.set_active` for a new device and waits until it is stopped.
+
+        At that point the switch holds the row lock, but the old device is still
+        the active one.
+        """
+        device_switch = BlockingDeviceSwitch(active_device_id=ACTIVE_DEVICE_ID)
+        self.mock_device_manager.get_active_device_id.side_effect = (
+            device_switch.get_active_device_id
+        )
+        self.mock_device_manager.get_active_device_channel.side_effect = (
+            device_switch.get_active_device_channel
+        )
+        self.mock_device_manager.set_active_device.side_effect = (
+            device_switch.set_active_device
+        )
+        self.recorder.release_first_snapshot.set()
+
+        consumer = Mock()
+        consumer.user_uuid = self.user_uuid
+        thread = self._start_thread(
+            partial(
+                DeviceWSActionService(consumer).handle_set_active,
+                {"device_id": NEW_DEVICE_ID},
+            )
+        )
+        self.addCleanup(device_switch.release.set)
+        self.assertTrue(device_switch.started.wait(TIMEOUT_S))
+        return thread, device_switch
+
+    def _send_play_command(self, sent_commands: list[tuple[str, int]]) -> None:
+        """Sends `playback.set` and records each forwarded command.
+
+        It records the channel and how many snapshots went out before the command.
+        """
+        consumer = Mock()
+        consumer.user_uuid = self.user_uuid
+        consumer.device_id = "sender-device"
+        consumer.channel_layer.send = AsyncMock(
+            side_effect=lambda channel_name, _message: sent_commands.append(
+                (channel_name, len(self.recorder.snapshots))
+            )
+        )
+        PlaybackWSActionService(consumer).handle_set({"is_playing": True})
 
     def test_second_caller_waits_and_then_reads_what_the_first_one_committed(self):
         holds_lock = threading.Event()
@@ -241,3 +328,35 @@ class TestStoredPlaybackStateLock(TransactionTestCase):
             self.recorder.snapshots[-1],
             _play_state(self._load_stored_playback_state()),
         )
+
+    def test_command_during_a_device_switch_waits_for_the_new_device_snapshot(self):
+        # the user picks another device on one tab while another tab presses play
+        switch, device_switch = self._start_blocked_device_switch()
+        sent_commands: list[tuple[str, int]] = []
+
+        command = self._start_thread(partial(self._send_play_command, sent_commands))
+        self._wait_for_a_query_blocked_by_a_lock()
+
+        device_switch.release.set()
+        self._finish(switch, command)
+
+        # the paused snapshot went out first, so the new device already knows
+        # that it is active when the command reaches it
+        self.assertEqual(sent_commands, [(f"{NEW_DEVICE_ID}-channel", 1)])
+        self.assertFalse(self.recorder.snapshots[0]["is_playing"])
+
+    def test_report_from_the_old_device_during_a_device_switch_is_dropped(self):
+        # the old active tab sent a heartbeat report just as the user picked
+        # another device
+        switch, device_switch = self._start_blocked_device_switch()
+
+        report = self._start_thread(partial(self._send_report, OLD_PLAY_ITEM_UNIQUE_ID))
+        self._wait_for_a_query_blocked_by_a_lock()
+
+        device_switch.release.set()
+        self._finish(switch, report)
+
+        stored_playback_state = self._load_stored_playback_state()
+        self.assertFalse(stored_playback_state.is_playing())
+        # the report was dropped, so the paused snapshot is the only one
+        self.assertEqual(self.recorder.snapshots, [_play_state(stored_playback_state)])

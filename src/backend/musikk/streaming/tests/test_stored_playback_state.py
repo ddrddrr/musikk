@@ -568,6 +568,74 @@ class TestApplyPlayReport(PlayStateTestCase):
         self.assertEqual(self._stored_play_state(), self._play_state())
 
 
+class TestApplySetCommand(PlayStateTestCase):
+    def test_play_state_only_keeps_the_estimated_position(self):
+        self._set_prev(last_known_is_playing=True)
+
+        self._load_stored_playback_state().apply_set_command(is_playing=False)
+
+        self.assertEqual(
+            self._stored_play_state(),
+            self._play_state(
+                last_known_is_playing=False,
+                last_known_song_pos_ms=14_000,
+                last_known_song_pos_updated_at_server_ms=NOW_SERVER_MS,
+            ),
+        )
+
+    def test_position_only_keeps_the_play_state(self):
+        self._set_prev(last_known_is_playing=False)
+
+        self._load_stored_playback_state().apply_set_command(song_pos_ms=42_500)
+
+        self.assertEqual(
+            self._stored_play_state(),
+            self._play_state(
+                last_known_is_playing=False,
+                last_known_song_pos_ms=42_500,
+                last_known_song_pos_updated_at_server_ms=NOW_SERVER_MS,
+            ),
+        )
+
+    def test_play_state_and_position_replace_both(self):
+        self._set_prev(last_known_is_playing=False)
+
+        self._load_stored_playback_state().apply_set_command(
+            is_playing=True, song_pos_ms=42_500
+        )
+
+        self.assertEqual(
+            self._stored_play_state(),
+            self._play_state(
+                last_known_is_playing=True,
+                last_known_song_pos_ms=42_500,
+                last_known_song_pos_updated_at_server_ms=NOW_SERVER_MS,
+            ),
+        )
+
+    def test_position_only_past_the_song_end_stays_paused(self):
+        # the row still says "playing", but it reads as paused, so a seek must
+        # not start the song again
+        long_ago_ms = NOW_SERVER_MS - SONG_DURATION_MS - PLAYING_PAST_END_MARGIN_MS
+        self._set_prev(last_known_song_pos_updated_at_server_ms=long_ago_ms)
+
+        self._load_stored_playback_state().apply_set_command(song_pos_ms=42_500)
+
+        self.assertEqual(
+            self._stored_play_state(),
+            self._play_state(
+                last_known_is_playing=False,
+                last_known_song_pos_ms=42_500,
+                last_known_song_pos_updated_at_server_ms=NOW_SERVER_MS,
+            ),
+        )
+
+    def test_command_is_dropped_when_nothing_is_stored(self):
+        self._load_stored_playback_state().apply_set_command(is_playing=True)
+
+        self.assertEqual(self._stored_play_state(), EMPTY_PLAY_STATE)
+
+
 class TestPauseAtEstimatedPosition(PlayStateTestCase):
     def test_pause_moves_a_playing_position_forward_by_the_time_passed(self):
         self._set_prev(last_known_is_playing=True)

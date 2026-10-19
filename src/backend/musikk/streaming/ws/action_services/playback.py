@@ -1,7 +1,10 @@
 from websockets.action_service import WSAction, WSActionService
 
 from streaming.managers.device_manager import DeviceManager
-from streaming.models.stored_playback_state import locked_stored_playback_state
+from streaming.models.stored_playback_state import (
+    StoredPlaybackState,
+    locked_stored_playback_state,
+)
 from streaming.ws.serializers import ActiveDeviceReportSerializer, PlaybackSetSerializer
 from streaming.ws.state_broadcasters.device import DeviceStateBroadcaster
 from streaming.ws.state_broadcasters.playback import PlaybackStateBroadcaster
@@ -19,6 +22,12 @@ class PlaybackWSActionService(WSActionService):
     A tab that wants to play, pause or seek sends a set command. The server does
     not store the command. It forwards it to the active device, which applies it
     to its audio and then reports the result.
+
+    If no device is active, no tab plays the audio, so there is nobody to forward
+    the command to. Then the sender becomes the active device and the server
+    stores the command itself, as it already does when it pauses on a device
+    switch. One snapshot then tells the sender both that it is active and what
+    to play.
 
     The stored position is a pair of `last_known_song_pos_ms` and
     `last_known_song_pos_updated_at_server_ms`, because a plain position would
@@ -61,8 +70,9 @@ class PlaybackWSActionService(WSActionService):
             ):
                 return
 
-            channel_name = self._resolve_active_device_channel()
+            channel_name = self.device_manager.get_active_device_channel()
             if channel_name is None:
+                self._activate_sender_with_command(stored_playback_state, payload)
                 return
             self.playback_state_broadcaster.send_set_command_to_channel(
                 self.consumer.channel_layer, channel_name, payload
@@ -70,12 +80,16 @@ class PlaybackWSActionService(WSActionService):
 
     def handle_active_device_report(self, payload: dict):
         device_id = self.consumer.device_id
-        if not device_id or device_id != self.device_manager.get_active_device_id():
+        if not device_id:
             return
 
         with locked_stored_playback_state(
             self.consumer.user_uuid
         ) as stored_playback_state:
+            # read under the row lock, so a report that the old device sent during
+            # a device switch is dropped and not stored after the pause
+            if device_id != self.device_manager.get_active_device_id():
+                return
             if stored_playback_state.apply_play_report(
                 payload["curr_play_item_unique_id"],
                 payload["is_playing"],
@@ -85,18 +99,16 @@ class PlaybackWSActionService(WSActionService):
                     stored_playback_state
                 )
 
-    def _resolve_active_device_channel(self) -> str | None:
-        """Returns the channel name of the active device (which should apply a change).
-
-        If no device plays the audio, the sender becomes the active device.
-        """
-        channel_name = self.device_manager.get_active_device_channel()
-        if channel_name is not None:
-            return channel_name
-
+    def _activate_sender_with_command(
+        self, stored_playback_state: StoredPlaybackState, payload: dict
+    ) -> None:
         device_id = self.consumer.device_id
         if not device_id:
-            return None
+            return
         self.device_manager.set_active_device(device_id)
+        stored_playback_state.apply_set_command(
+            is_playing=payload.get("is_playing"),
+            song_pos_ms=payload.get("song_pos_ms"),
+        )
+        self.playback_state_broadcaster.broadcast_snapshot(stored_playback_state)
         self.device_broadcaster.broadcast_devices()
-        return self.consumer.channel_name

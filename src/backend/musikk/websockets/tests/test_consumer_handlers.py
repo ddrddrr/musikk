@@ -415,8 +415,8 @@ class TestDeviceWSActionService(TestCase):
                 "broadcast_devices",
             }
         ]
-        # the new active device must get the paused snapshot before device.list
-        # tells it that it is active, otherwise it would start playing
+        # the snapshot that makes the new device active must already be paused,
+        # otherwise the new device would start playing
         self.assertEqual(
             ordered,
             [
@@ -631,25 +631,62 @@ class TestPlaybackWSActionService(TestCase):
         # claim the active device for the stale tab
         self.mock_device_manager.set_active_device.assert_not_called()
 
-    def test_set_auto_activates_sender_when_no_device_is_active(self):
+    @patch.object(StoredPlaybackState, "apply_set_command")
+    def test_set_with_no_active_device_activates_sender_and_stores_command(
+        self, mock_apply_set_command
+    ):
         self.mock_device_manager.get_active_device_channel.return_value = None
+
+        parent = Mock()
+        parent.attach_mock(self.mock_device_manager, "device")
+        parent.attach_mock(mock_apply_set_command, "apply_set_command")
+        parent.attach_mock(self.mock_broadcast_state, "broadcast_state")
+        parent.attach_mock(self.mock_broadcast_devices, "broadcast_devices")
 
         service = PlaybackWSActionService(self.consumer)
         service.handle_set(
-            {"song_pos_ms": 5000, "curr_play_item_unique_id": PLAY_ITEM_UNIQUE_ID}
+            {
+                "is_playing": True,
+                "song_pos_ms": 5000,
+                "curr_play_item_unique_id": PLAY_ITEM_UNIQUE_ID,
+            }
         )
 
         self.mock_device_manager.set_active_device.assert_called_once_with(
             "sender_device"
         )
+        mock_apply_set_command.assert_called_once_with(
+            is_playing=True, song_pos_ms=5000
+        )
+        self.mock_broadcast_state.assert_called_once_with(self.stored_playback_state)
         self.mock_broadcast_devices.assert_called_once_with()
-        self._assert_command_sent(
-            "sender_channel",
-            {"song_pos_ms": 5000, "curr_play_item_unique_id": PLAY_ITEM_UNIQUE_ID},
+        # nobody plays the audio yet, so there is nobody to apply a command
+        self.consumer.channel_layer.send.assert_not_called()
+
+        ordered = [
+            c[0]
+            for c in parent.mock_calls
+            if c[0]
+            in {
+                "device.set_active_device",
+                "apply_set_command",
+                "broadcast_state",
+                "broadcast_devices",
+            }
+        ]
+        self.assertEqual(
+            ordered,
+            [
+                "device.set_active_device",
+                "apply_set_command",
+                "broadcast_state",
+                "broadcast_devices",
+            ],
         )
 
+    @patch.object(StoredPlaybackState, "apply_set_command")
     def test_set_is_dropped_when_no_device_is_active_and_sender_has_no_device_id(
-        self,
+        self, mock_apply_set_command
     ):
         self.mock_device_manager.get_active_device_channel.return_value = None
         self.consumer.device_id = None
@@ -658,6 +695,8 @@ class TestPlaybackWSActionService(TestCase):
         service.handle_set({"is_playing": True})
 
         self.mock_device_manager.set_active_device.assert_not_called()
+        mock_apply_set_command.assert_not_called()
+        self.mock_broadcast_state.assert_not_called()
         self.mock_broadcast_devices.assert_not_called()
         self.consumer.channel_layer.send.assert_not_called()
 

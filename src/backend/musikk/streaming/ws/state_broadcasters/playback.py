@@ -7,6 +7,7 @@ from websockets.event_helpers import (
 )
 
 from streaming.api.v1.serializers.songs import CollectionSongRetrieveSerializer
+from streaming.managers.device_manager import DeviceManager
 from streaming.models import StoredPlaybackState
 from streaming.ws.events import ServerEvent
 
@@ -17,6 +18,7 @@ class PlaybackStateBroadcaster:
     def __init__(self, user_uuid: str):
         self.user_uuid = user_uuid
         self._user = User.objects.filter(uuid=user_uuid).first()
+        self._device_manager = DeviceManager(user_uuid=user_uuid)
 
     def broadcast_snapshot(self, stored_playback_state: StoredPlaybackState) -> None:
         """Sends the play state of `stored_playback_state` to all tabs of the user."""
@@ -54,10 +56,16 @@ class PlaybackStateBroadcaster:
         )
 
     def _build_snapshot(self, stored_playback_state: StoredPlaybackState) -> dict:
+        """Builds the play state together with the id of the active device.
+
+        A tab takes its role and the play state from the same message. If they
+        came in two messages, the tab would depend on the order in which they arrive.
+        """
         return {
             "current_song": self._serialize_current_song(stored_playback_state),
             "server_ts_ms": now_server_ms(),
             "playback_state": self._serialize_playback_state(stored_playback_state),
+            "active_device_id": self._device_manager.get_active_device_id(),
         }
 
     @staticmethod

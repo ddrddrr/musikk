@@ -1,8 +1,10 @@
 from websockets.action_service import WSAction, WSActionService
 
 from streaming.managers.device_manager import DeviceManager
-from streaming.models.stored_playback_state import locked_stored_playback_state
-from streaming.ws.player_controller import PlayerController
+from streaming.models.stored_playback_state import (
+    StoredPlaybackState,
+    locked_stored_playback_state,
+)
 from streaming.ws.serializers import (
     DeviceRegisterSerializer,
     DeviceSetActiveSerializer,
@@ -17,7 +19,6 @@ class DeviceWSActionService(WSActionService):
         super().__init__(consumer)
         self.device_id: str | None = None
         self.manager = DeviceManager(user_uuid=consumer.user_uuid)
-        self.player_controller = PlayerController(user_uuid=consumer.user_uuid)
         self.device_broadcaster = DeviceStateBroadcaster(user_uuid=consumer.user_uuid)
         self.playback_state_broadcaster = PlaybackStateBroadcaster(
             user_uuid=consumer.user_uuid
@@ -47,14 +48,16 @@ class DeviceWSActionService(WSActionService):
     def on_disconnect(self):
         if not self.device_id:
             return
-        was_active = self.manager.clear_device(
-            device_id=self.device_id,
-            channel_name=self.consumer.channel_name,
-        )
-        if was_active:
-            # if the active device disconnected, stop playback so the next
-            # device the user picks doesn't autoplay
-            self.player_controller.pause()
+        with locked_stored_playback_state(
+            self.consumer.user_uuid
+        ) as stored_playback_state:
+            was_active = self.manager.clear_device(
+                device_id=self.device_id,
+                channel_name=self.consumer.channel_name,
+            )
+            if was_active:
+                # stop playback so the next device doesn't autoplay
+                self._pause(stored_playback_state)
         self.device_broadcaster.broadcast_devices()
 
     def handle_register(self, payload: dict):
@@ -76,10 +79,12 @@ class DeviceWSActionService(WSActionService):
             )
 
     def handle_set_active(self, payload: dict):
-        # stop the playback and only then broadcast new devices
-        changed = self.manager.set_active_device(device_id=payload["device_id"])
-        if changed:
-            self.player_controller.pause()
+        with locked_stored_playback_state(
+            self.consumer.user_uuid
+        ) as stored_playback_state:
+            if self.manager.set_active_device(device_id=payload["device_id"]):
+                self._pause(stored_playback_state)
+        # stop the playback before broadcasting device list
         self.device_broadcaster.broadcast_devices()
 
     def handle_set_volume(self, payload: dict):
@@ -87,3 +92,7 @@ class DeviceWSActionService(WSActionService):
             device_id=payload["device_id"], volume=payload["volume"]
         )
         self.device_broadcaster.broadcast_devices()
+
+    def _pause(self, stored_playback_state: StoredPlaybackState) -> None:
+        stored_playback_state.pause_at_estimated_position()
+        self.playback_state_broadcaster.broadcast_snapshot(stored_playback_state)

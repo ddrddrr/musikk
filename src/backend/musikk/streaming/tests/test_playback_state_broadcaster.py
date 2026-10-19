@@ -9,6 +9,8 @@ from streaming.tests.factories import CollectionSongFactory
 from streaming.ws.events import ServerEvent
 from streaming.ws.state_broadcasters.playback import PlaybackStateBroadcaster
 
+ACTIVE_DEVICE_ID = "active-device"
+
 
 class TestPlaybackStateBroadcaster(TestCase):
     """
@@ -35,14 +37,20 @@ class TestPlaybackStateBroadcaster(TestCase):
             return_value=1_700_000_000_000,
         )
         self.channel_layer_patcher = patch("websockets.event_helpers.get_channel_layer")
+        self.device_manager_patcher = patch(
+            "streaming.ws.state_broadcasters.playback.DeviceManager"
+        )
         self.mock_now_server_ms = self.now_server_ms_patcher.start()
         self.mock_channel_layer = MagicMock()
         self.mock_channel_layer.group_send = AsyncMock()
         self.mock_channel_layer.send = AsyncMock()
         self.channel_layer_patcher.start().return_value = self.mock_channel_layer
+        self.mock_device_manager = self.device_manager_patcher.start().return_value
+        self.mock_device_manager.get_active_device_id.return_value = ACTIVE_DEVICE_ID
 
         self.addCleanup(self.now_server_ms_patcher.stop)
         self.addCleanup(self.channel_layer_patcher.stop)
+        self.addCleanup(self.device_manager_patcher.stop)
 
     def _set_playing_song(self, curr_play_item_unique_id: str, song_pos_ms: int):
         self.stored_playback_state.current_collection_song = self.collection_song
@@ -70,7 +78,7 @@ class TestPlaybackStateBroadcaster(TestCase):
         payload = message["payload"]
         self.assertEqual(
             set(payload.keys()),
-            {"current_song", "server_ts_ms", "playback_state"},
+            {"current_song", "server_ts_ms", "playback_state", "active_device_id"},
         )
         self.assertIsNotNone(payload["current_song"])
         self.assertEqual(
@@ -88,6 +96,7 @@ class TestPlaybackStateBroadcaster(TestCase):
                 "last_known_song_pos_updated_at_server_ms": 1_700_000_000_000,
             },
         )
+        self.assertEqual(payload["active_device_id"], ACTIVE_DEVICE_ID)
 
     def test_broadcast_snapshot_message_is_msgpack_serializable(self):
         """
@@ -108,15 +117,25 @@ class TestPlaybackStateBroadcaster(TestCase):
         _, message = args
         msgpack.packb(message)
 
-    def test_broadcast_snapshot_without_current_song_returns_null(self):
+    def test_broadcast_snapshot_without_current_song_or_active_device_sends_nulls(
+        self,
+    ):
+        self.mock_device_manager.get_active_device_id.return_value = None
+
         PlaybackStateBroadcaster(user_uuid=str(self.user.uuid)).broadcast_snapshot(
             self.stored_playback_state
         )
 
         args, _ = self.mock_channel_layer.group_send.call_args
-        payload = args[1]["payload"]
-        self.assertIsNone(payload["current_song"])
-        self.assertIsNone(payload["playback_state"])
+        self.assertEqual(
+            args[1]["payload"],
+            {
+                "current_song": None,
+                "server_ts_ms": 1_700_000_000_000,
+                "playback_state": None,
+                "active_device_id": None,
+            },
+        )
 
     def test_send_set_command_to_channel_sends_to_that_channel_only(self):
         channel_layer = MagicMock()
