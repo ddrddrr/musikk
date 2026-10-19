@@ -61,6 +61,6 @@ class MeUpdateSerializer(BaseMeSerializer):
         fields = ["display_name", "bio", "avatar"]
         extra_kwargs = {
             "display_name": {"required": False},
-            "bio": {"required": False},
+            "bio": {"required": False, "allow_blank": True},
             "avatar": {"required": False, "allow_null": True},
         }

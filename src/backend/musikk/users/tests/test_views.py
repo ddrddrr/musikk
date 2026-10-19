@@ -1,8 +1,10 @@
+from unittest.mock import patch
+
 from django.test import TestCase
 from django.urls import reverse
 from rest_framework.test import APIRequestFactory, force_authenticate
 
-from users.api.v1.views import FollowedView, FollowersView, FriendsView
+from users.api.v1.views import FollowedView, FollowersView, FriendsView, MeView
 from users.models import UserFollow
 from users.tests.factories import BaseUserFactory
 
@@ -55,3 +57,22 @@ class TestConnectionListViews(TestCase):
         self.assertEqual(
             uuids, {str(self.friend.uuid), str(self.one_way_follower.uuid)}
         )
+
+
+@patch("users.api.v1.views.send_ws_event")
+class TestMeUpdateView(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.factory = APIRequestFactory()
+
+    def test_patch_clears_the_bio(self, _mock_ws):
+        me = BaseUserFactory(bio="Old bio")
+        request = self.factory.patch(reverse("api:me"), {"bio": ""}, format="multipart")
+        force_authenticate(request, user=me)
+
+        response = MeView.as_view()(request)
+
+        self.assertEqual(response.status_code, 200)
+        me.refresh_from_db()
+        self.assertEqual(me.bio, "")
