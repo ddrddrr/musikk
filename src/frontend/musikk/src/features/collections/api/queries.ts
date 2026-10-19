@@ -47,7 +47,7 @@ export async function fetchUserLibrary(userUUID: UUID): Promise<UserLibraryRespo
     return response.data;
 }
 
-export async function fetchCollectionDetailed(collectionUUID: string): Promise<CollectionDetailed> {
+async function fetchCollectionDetailed(collectionUUID: string): Promise<CollectionDetailed> {
     const response = await api_client.get<CollectionDetailed>(
         CollectionURLs.collectionDetail(collectionUUID),
     );

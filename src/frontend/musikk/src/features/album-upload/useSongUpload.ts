@@ -7,7 +7,7 @@ import { useSongUploadEvent } from "@/features/album-upload/wsEvents.ts";
 import { useCallback, useReducer } from "react";
 import { toast } from "sonner";
 
-export interface SongUploadData {
+interface SongUploadData {
     title: string;
     audio: File;
     image?: File;

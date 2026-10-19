@@ -10,7 +10,7 @@ export type SongUploadStatus =
     | "ready"
     | "failed";
 
-export interface SongUploadInfo {
+interface SongUploadInfo {
     status: SongUploadStatus;
     songUUID?: UUID;
     detail?: string;

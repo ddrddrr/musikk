@@ -1,7 +1,7 @@
 import { CollectionSong } from "@/features/collections/types.ts";
 import { LocalPlaybackState } from "@/features/playback/types.ts";
 
-export interface ServerPlaybackState {
+interface ServerPlaybackState {
     current_song_uuid: string;
     curr_play_item_unique_id: string;
     is_playing: boolean;

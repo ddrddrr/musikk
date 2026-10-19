@@ -1,7 +1,7 @@
 import { api_client_public } from "@/api/axiosConf.ts";
 import { AuthURLs } from "@/features/auth/api/endpoints.ts";
 
-export async function initCsrf(): Promise<void> {
+async function initCsrf(): Promise<void> {
     await api_client_public.get(AuthURLs.csrf);
 }
 

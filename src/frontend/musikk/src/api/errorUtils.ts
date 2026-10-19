@@ -1,13 +1,7 @@
 import { isAxiosError } from "axios";
 import type { FieldPath, FieldValues, UseFormReturn } from "react-hook-form";
 
-export type ServerErrors = Record<string, string[]>;
-
-export interface ServerErrorBody {
-    detail?: string;
-    code?: string;
-    errors?: ServerErrors;
-}
+type ServerErrors = Record<string, string[]>;
 
 // DRF emits errors not tied to a specific input under "non_field_errors"
 // we normalize them wiht this key so the form layer has one key to route to root.serverError
@@ -45,7 +39,7 @@ export function getErrorDetail(
     return defaultMessage;
 }
 
-export function getErrorCode(error: unknown): string | undefined {
+function getErrorCode(error: unknown): string | undefined {
     const data = getResponseData(error);
     if (data && typeof data === "object") {
         const code = (data as Record<string, unknown>).code;
@@ -54,7 +48,7 @@ export function getErrorCode(error: unknown): string | undefined {
     return undefined;
 }
 
-export function getServerErrors(error: unknown): ServerErrors | undefined {
+function getServerErrors(error: unknown): ServerErrors | undefined {
     const data = getResponseData(error);
     if (!data || typeof data !== "object") return undefined;
     const obj = data as Record<string, unknown>;

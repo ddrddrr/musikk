@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export function publicationSchema(label: string, maxLength: number) {
+function publicationSchema(label: string, maxLength: number) {
     return z.object({
         content: z.string().min(1, `${label} cannot be empty`).max(maxLength),
     });

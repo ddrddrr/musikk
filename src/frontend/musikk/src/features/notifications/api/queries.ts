@@ -14,7 +14,7 @@ export interface NotificationListResponse {
     chat_messages: ChatMessageNotification[];
 }
 
-export async function fetchNotificationList(): Promise<NotificationListResponse> {
+async function fetchNotificationList(): Promise<NotificationListResponse> {
     const res = await api_client.get<NotificationListResponse>(NotificationURLs.notificationsList);
     return res.data;
 }

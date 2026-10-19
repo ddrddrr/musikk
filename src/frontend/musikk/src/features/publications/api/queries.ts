@@ -77,7 +77,7 @@ export function useCollectionComments(collectionUUID: UUID) {
     });
 }
 
-export async function fetchPublicationChildren(pubUUID: UUID): Promise<Publication[]> {
+async function fetchPublicationChildren(pubUUID: UUID): Promise<Publication[]> {
     const res = await api_client.get<{ children: Publication[] }>(
         PublicationURLs.publicationChildren(pubUUID),
     );

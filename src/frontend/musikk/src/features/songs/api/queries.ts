@@ -19,9 +19,7 @@ interface CollectionMembershipResponse {
     collections: CollectionMembership[];
 }
 
-export async function collectionMemberships(
-    collectionSongUUID: UUID,
-): Promise<CollectionMembership[]> {
+async function collectionMemberships(collectionSongUUID: UUID): Promise<CollectionMembership[]> {
     const res = await api_client.get<CollectionMembershipResponse>(
         SongURLs.collectionMemberships(collectionSongUUID),
     );

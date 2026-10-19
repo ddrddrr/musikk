@@ -19,5 +19,3 @@ export const createStaleAsyncOpGuard = () => {
         },
     };
 };
-
-export type StaleAsyncOpGuard = ReturnType<typeof createStaleAsyncOpGuard>;

@@ -104,7 +104,7 @@ export function useRemoveSongFromCollection() {
     });
 }
 
-export interface AddToLikedSongsParams {
+interface AddToLikedSongsParams {
     collectionSongUUID: UUID;
 }
 
@@ -180,7 +180,7 @@ export function useCreateCollection() {
     });
 }
 
-export interface UpdateCollectionInput {
+interface UpdateCollectionInput {
     title?: string;
     description?: string;
     image?: File;
