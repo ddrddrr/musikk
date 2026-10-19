@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import * as z from "zod";
 
 import { setFormServerErrors } from "@/api/errorUtils.ts";
@@ -19,9 +19,15 @@ const loginSchema = z.object({
 });
 type LoginFormValues = z.infer<typeof loginSchema>;
 
+interface LoginLocationState {
+    from?: { pathname: string };
+}
+
 export function LoginForm() {
     const { login } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation();
+    const redirectTo = (location.state as LoginLocationState | null)?.from?.pathname ?? "/";
     const [loading, setLoading] = useState(false);
 
     const form = useForm<LoginFormValues>({
@@ -33,7 +39,7 @@ export function LoginForm() {
         setLoading(true);
         try {
             await login(values.email, values.password);
-            void navigate("/");
+            void navigate(redirectTo);
         } catch (error) {
             setFormServerErrors(form, error);
         } finally {
