@@ -1,10 +1,8 @@
 import { useLikeCollection, useUnlikeCollection } from "@/features/collections/api/mutations.ts";
 import { Collection } from "@/features/collections/types.ts";
+import { LikeToggleButton } from "@/features/common/LikeToggleButton.tsx";
 import { ActionButtonSize } from "@/features/common/types.ts";
-import { Button } from "@/features/ui/button.tsx";
-import { IconTooltip } from "@/features/ui/tooltip";
 import { useIsCollectionLiked } from "@/features/user/hooks/useUserLikes.ts";
-import { Check, Plus } from "lucide-react";
 
 interface CollectionAddToLikedButtonProps {
     collection: Collection;
@@ -15,25 +13,14 @@ export function CollectionAddToLikedButton({ collection, size }: CollectionAddTo
     const isLiked = useIsCollectionLiked(collection.uuid);
     const likeCollectionMutation = useLikeCollection();
     const unlikeCollectionMutation = useUnlikeCollection();
-
-    function handleClick(collection: Collection) {
-        if (isLiked) {
-            unlikeCollectionMutation.mutate({ collectionUUID: collection.uuid });
-            return;
-        }
-        likeCollectionMutation.mutate({ collectionUUID: collection.uuid });
-    }
+    const variables = { collectionUUID: collection.uuid };
 
     return (
-        <IconTooltip label={isLiked ? "Liked" : "Like"}>
-            <Button
-                variant={isLiked ? "brand" : "muted"}
-                size={`icon-${size}`}
-                aria-label={isLiked ? "Liked" : "Like"}
-                onClick={() => handleClick(collection)}
-            >
-                {isLiked ? <Check /> : <Plus />}
-            </Button>
-        </IconTooltip>
+        <LikeToggleButton
+            isLiked={isLiked}
+            size={size}
+            onLike={() => likeCollectionMutation.mutate(variables)}
+            onUnlike={() => unlikeCollectionMutation.mutate(variables)}
+        />
     );
 }
