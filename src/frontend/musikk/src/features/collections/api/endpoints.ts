@@ -4,7 +4,6 @@ export const CollectionURLs = {
     collectionCreate: `/collections`,
     collectionList: `/collections`,
     userLibrary: (userUUID: UUID) => `/users/${userUUID}/library`,
-    collectionRetrieve: (collectionUUID: UUID) => `/collections/${collectionUUID}`,
     collectionDetail: (collectionUUID: UUID) => `/collections/detail/${collectionUUID}`,
     collectionAddToLiked: (collectionUUID: UUID) => `/collections/${collectionUUID}/like`,
     collectionSongCreate: (collectionUUID: UUID) => `/collections/${collectionUUID}/songs`,

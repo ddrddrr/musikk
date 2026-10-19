@@ -40,11 +40,6 @@ export async function fetchCollectionDetailed(collectionUUID: string): Promise<C
     return response.data;
 }
 
-export async function fetchCollectionBasic(collectionUUID: UUID) {
-    const res = await api_client.get(CollectionURLs.collectionRetrieve(collectionUUID));
-    return res.data;
-}
-
 export function useCollectionDetailQuery(collectionUUID: UUID) {
     return useQuery({
         queryKey: collectionKeys.detail(collectionUUID),

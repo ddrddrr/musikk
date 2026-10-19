@@ -16,7 +16,6 @@ export const AuthURLs = {
 };
 export const SongURLs = {
     songList: `/songs`,
-    songRetrieve: (songUUID: UUID) => `/songs/${songUUID}`,
     albumBySong: (songUUID: UUID) => `/songs/${songUUID}/album`,
     collectionMemberships: (collectionSongUUID: UUID) => `/songs/${collectionSongUUID}/collections`,
 };
@@ -31,18 +30,14 @@ export const QueueURLs = {
     prev: `/song-queue/shift-head-backwards`,
     removeItem: (itemUUID: UUID) => `/song-queue/remove-node/${itemUUID}`,
     clearQueue: `/song-queue/clear`,
-    appendRandom: `/song-queue/append-random`,
-    reorder: `/song-queue/reorder`,
 };
 export const NotificationURLs = {
     notificationsSetRead: `/notifications`,
     notificationsList: `/notifications`,
-    notificationsDelete: (notificationUUID: UUID) => `/notifications/${notificationUUID}`,
 };
 export const SearchURLs = {
     searchMain: `/search`,
 };
 export const FriendActivityURLs = {
     listeningToList: `/friend-activity/active-songs`,
-    latestAddedList: `/friend-activity/latest-added`,
 };

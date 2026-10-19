@@ -1,11 +1,9 @@
 import { api_client } from "@/api/axiosConf.ts";
-import { getErrorDetail } from "@/api/errorUtils.ts";
 import { UUID } from "@/api/types.ts";
 import { publicationKeys } from "@/features/publications/api/queryKeys.ts";
 import { ChatURLs, PublicationURLs } from "@/features/publications/api/urls.ts";
 import { AttachmentType, Chat, Publication } from "@/features/publications/types.ts";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
 
 interface PublicationPayload {
     content: string;
@@ -178,31 +176,6 @@ export function useCreateChatMessage() {
             void queryClient.invalidateQueries({
                 queryKey: publicationKeys.userChats(variables.userUUID),
             });
-        },
-    });
-}
-
-interface AddChatMembersParams {
-    userUUID: UUID;
-    chatUUID: UUID;
-    participants: UUID[];
-}
-
-export function useAddChatMembers() {
-    const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: async ({ userUUID, chatUUID, participants }: AddChatMembersParams) => {
-            await api_client.post(ChatURLs.chatMembers(userUUID, chatUUID), {
-                participants,
-            });
-        },
-        onSuccess: (_data, variables) => {
-            void queryClient.invalidateQueries({
-                queryKey: publicationKeys.chatDetail(variables.chatUUID),
-            });
-        },
-        onError: (error) => {
-            toast.error(getErrorDetail(error, "Failed to add members"));
         },
     });
 }

@@ -36,19 +36,3 @@ export async function removeItem(itemUUID: string) {
 export async function clearQueue() {
     await api_client.post(QueueURLs.clearQueue);
 }
-
-export async function appendRandom() {
-    await api_client.post(QueueURLs.appendRandom);
-}
-
-export async function reorderItem(
-    itemUUID: string,
-    beforeUUID: string | null,
-    afterUUID: string | null,
-) {
-    await api_client.post(QueueURLs.reorder, {
-        item: itemUUID,
-        before: beforeUUID,
-        after: afterUUID,
-    });
-}
