@@ -16,7 +16,7 @@ export function PlayerPlayButton() {
             variant="brand"
             size="icon"
             aria-label={isPlaybackActive ? "Pause" : "Play"}
-            onClick={() => handlePlay()}
+            onClick={() => void handlePlay()}
             className="rounded-sm"
         >
             {renderPlayPauseIcon()}

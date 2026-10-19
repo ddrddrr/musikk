@@ -38,9 +38,7 @@ export function useNewMessagesIndicator(
         const container = containerRef.current;
         if (!container) return;
 
-        if (distanceFromBottom(container) >= NEAR_BOTTOM_THRESHOLD) {
-            setHasNewMessages(true);
-        }
+        setHasNewMessages(distanceFromBottom(container) >= NEAR_BOTTOM_THRESHOLD);
     }, [messages, containerRef]);
 
     const scrollToBottom = useCallback(() => {

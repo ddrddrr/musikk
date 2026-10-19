@@ -20,7 +20,7 @@ export function SettingsPage() {
                         <span className="text-base font-medium">Keep songs at the same volume</span>
                         <span className="text-xs text-muted-foreground">
                             Songs can originally have different volume level. This makes them sound
-                            the same, so you don't have to readjust the volume manually
+                            the same, so you don&apos;t have to readjust the volume manually
                         </span>
                     </div>
                     <LoudnessPresetSelector value={preset} onChange={setPreset} />
@@ -39,7 +39,7 @@ export function SettingsPage() {
                 />
 
                 <Button
-                    onClick={logout}
+                    onClick={() => void logout()}
                     variant="ghost"
                     size="lg"
                     className="border-2 border-foreground text-lg"

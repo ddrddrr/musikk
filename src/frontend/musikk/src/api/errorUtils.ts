@@ -14,7 +14,7 @@ export interface ServerErrorBody {
 const FORM_LEVEL_ERROR_KEY = "non_field";
 
 function getResponseData(error: unknown): unknown {
-    if (isAxiosError(error)) {
+    if (isAxiosError<unknown>(error)) {
         const data = error.response?.data;
         if (data && typeof data === "object") return data;
     }

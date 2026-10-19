@@ -93,7 +93,10 @@ export function ChatNewGroupForm({ onSuccess, onCancel }: ChatNewGroupFormProps)
             <h2 className="mb-4 text-xl font-bold">Create Group Chat</h2>
 
             <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
+                <form
+                    onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
+                    className="flex flex-col gap-4"
+                >
                     <FormField
                         name="title"
                         render={({ field }) => (

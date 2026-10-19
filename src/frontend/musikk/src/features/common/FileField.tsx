@@ -25,8 +25,7 @@ export function FileField({
             control={control}
             name={name}
             render={({ field }) => {
-                const { value, onChange, ...rest } = field;
-                const file = value as File | undefined;
+                const file = field.value as File | undefined;
 
                 return (
                     <FormItem className={cn("min-w-0", className)}>
@@ -49,8 +48,11 @@ export function FileField({
                                         type="file"
                                         accept={accept}
                                         className="hidden"
-                                        {...rest}
-                                        onChange={(e) => onChange(e.target.files?.[0])}
+                                        name={field.name}
+                                        ref={field.ref}
+                                        onBlur={field.onBlur}
+                                        disabled={field.disabled}
+                                        onChange={(e) => field.onChange(e.target.files?.[0])}
                                     />
                                 </label>
                             </div>

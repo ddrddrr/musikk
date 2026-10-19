@@ -80,7 +80,7 @@ export function UserCard({ user, size = "md", onClick }: UserCardProps) {
             </ContextMenuTrigger>
             {user.uuid !== myUuid && (
                 <ContextMenuContent panel="card" className="w-48">
-                    <ContextMenuItem onSelect={toggleFollow}>
+                    <ContextMenuItem onSelect={() => void toggleFollow()}>
                         <MoreHorizontal className="mr-2 size-4" />
                         {isFollowing ? "Unfollow" : "Follow"}
                     </ContextMenuItem>

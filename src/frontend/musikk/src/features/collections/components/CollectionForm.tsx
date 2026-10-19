@@ -11,7 +11,7 @@ import {
 } from "@/features/ui/form.tsx";
 import { Input } from "@/features/ui/input.tsx";
 import { Switch } from "@/features/ui/switch.tsx";
-import { UseFormReturn } from "react-hook-form";
+import type { UseFormReturn } from "react-hook-form";
 
 type CollectionFormProps = {
     form: UseFormReturn<CollectionCreationFormValues>;
@@ -32,7 +32,10 @@ export function CollectionForm({
 }: CollectionFormProps) {
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
+            <form
+                onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
+                className="flex flex-col gap-4"
+            >
                 <FormField
                     name="title"
                     render={({ field }) => (

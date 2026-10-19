@@ -11,9 +11,9 @@ export function useCollectionPlayHandler(collection: Collection) {
 
     const onClick = useCallback(() => {
         if (isThisCollectionChosen) {
-            handlePlay();
+            void handlePlay();
         } else {
-            handlePlay({ newCollection: collection });
+            void handlePlay({ newCollection: collection });
         }
     }, [isThisCollectionChosen, collection, handlePlay]);
 

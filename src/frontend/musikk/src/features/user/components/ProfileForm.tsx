@@ -94,7 +94,10 @@ export function ProfileForm() {
                 </div>
 
                 <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-5">
+                    <form
+                        onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
+                        className="flex flex-col gap-5"
+                    >
                         <FormField
                             control={form.control}
                             name="display_name"

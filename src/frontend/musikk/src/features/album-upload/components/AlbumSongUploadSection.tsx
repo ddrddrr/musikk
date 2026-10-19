@@ -106,7 +106,7 @@ export function AlbumSongUploadSection({ albumUUID, onComplete }: AlbumSongUploa
                         <Button
                             type="button"
                             variant="outline"
-                            onClick={form.handleSubmit(processSongs)}
+                            onClick={(e) => void form.handleSubmit(processSongs)(e)}
                         >
                             Upload Songs
                         </Button>

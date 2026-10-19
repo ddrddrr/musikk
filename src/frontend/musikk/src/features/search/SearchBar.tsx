@@ -3,7 +3,7 @@ import { SearchWindow } from "@/features/search/SearchWindow.tsx";
 import { Button } from "@/features/ui/button.tsx";
 import { Popover, PopoverContent, PopoverTrigger } from "@/features/ui/popover.tsx";
 import { Search } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useLocation } from "react-router-dom";
 
 interface SearchBarProps {
@@ -19,12 +19,14 @@ export function SearchBar({
 }: SearchBarProps) {
     const [open, setOpen] = useState(false);
     const location = useLocation();
+    const [prevLocation, setPrevLocation] = useState(location);
 
     // we could do an onClick event instead, but this is better I think, since
     // cards own their navigation internally
-    useEffect(() => {
+    if (location !== prevLocation) {
+        setPrevLocation(location);
         setOpen(false);
-    }, [location]);
+    }
 
     const handleSelect = (item: AttachmentObj) => {
         if (!onItemSelect) return;

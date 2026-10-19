@@ -74,7 +74,7 @@ function UserProfile({ uuid }: { uuid: UUID }) {
                 {!isOwnProfile && (
                     <Button
                         variant={isFollowing ? "outline" : "brand"}
-                        onClick={toggleFollow}
+                        onClick={() => void toggleFollow()}
                         disabled={isFollowLoading}
                     >
                         {isFollowLoading ? <Spinner /> : isFollowing ? "Following" : "Follow"}

@@ -53,7 +53,10 @@ export function LoginForm() {
     return (
         <CardContent>
             <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-6">
+                <form
+                    onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
+                    className="flex flex-col gap-6"
+                >
                     <EmailField />
                     <PasswordField name={"password"} />
 

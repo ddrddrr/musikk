@@ -9,10 +9,9 @@ export function useSongPlayHandler(collectionSong: CollectionSong) {
     const isThisChosen = collectionSong.uuid === playbackState?.collectionSong.uuid;
     const onClick = () => {
         if (isThisChosen) {
-            // TODO: unify to proper calls with () => void or smth ...
-            handlePlay();
+            void handlePlay();
         } else {
-            handlePlay({ newSong: collectionSong });
+            void handlePlay({ newSong: collectionSong });
         }
     };
 

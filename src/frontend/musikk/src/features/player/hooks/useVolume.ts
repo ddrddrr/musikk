@@ -14,6 +14,8 @@ export function useVolume({ setUserVolume }: UseVolumeOptions) {
     const setDeviceVolume = useSetDeviceVolumeAction();
     const [volume, setVolume] = useState(() => readDeviceVolume() ?? 100);
     const volumeBeforeMute = useRef(volume || 100);
+    const remoteVolume = activeDevice?.volume;
+    const [prevRemoteVolume, setPrevRemoteVolume] = useState<number | undefined>(undefined);
 
     // local changes
     useEffect(() => {
@@ -22,12 +24,12 @@ export function useVolume({ setUserVolume }: UseVolumeOptions) {
     }, [volume, setUserVolume]);
 
     // when we get vol from ws
-    useEffect(() => {
-        if (!activeDevice) return;
-        if (activeDevice.volume !== volume) {
-            setVolume(activeDevice.volume);
+    if (remoteVolume !== prevRemoteVolume) {
+        setPrevRemoteVolume(remoteVolume);
+        if (remoteVolume !== undefined) {
+            setVolume(remoteVolume);
         }
-    }, [activeDevice?.volume]);
+    }
 
     const handleVolumeCommit = useCallback(
         (value: SliderValue) => {

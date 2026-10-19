@@ -1,6 +1,7 @@
 import { authRef } from "@/api/authRef.ts";
 import { BaseAPIURL } from "@/api/endpoints.ts";
-import axios, { InternalAxiosRequestConfig } from "axios";
+import type { InternalAxiosRequestConfig } from "axios";
+import axios, { isAxiosError } from "axios";
 import Cookies from "js-cookie";
 
 // TODO: for err notifications do smth like this:
@@ -32,8 +33,8 @@ api_client.interceptors.request.use(attachCsrf);
 
 api_client.interceptors.response.use(
     (res) => res,
-    (err) => {
-        const status = err?.response?.status;
+    (error: unknown) => {
+        const status = isAxiosError(error) ? error.response?.status : undefined;
         // can't just do
         // window.location.href = "/login";
         // since we need to clear remaining state/queries/etc.
@@ -41,6 +42,6 @@ api_client.interceptors.response.use(
         if (status === 401 && authRef.logout) {
             void authRef.logout();
         }
-        return Promise.reject(err);
+        throw error;
     },
 );
