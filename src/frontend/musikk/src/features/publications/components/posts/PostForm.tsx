@@ -1,17 +1,8 @@
-import { setFormServerErrors } from "@/api/errorUtils.ts";
 import { UUID } from "@/api/types.ts";
-import { useCreatePost } from "@/features/publications/api/mutations.ts";
-import { AttachmentPicker } from "@/features/publications/components/AttachmentPicker.tsx";
-import { useAttachment } from "@/features/publications/hooks/useAttachment.ts";
+import { PublicationDraft, useCreatePost } from "@/features/publications/api/mutations.ts";
+import { PublicationForm } from "@/features/publications/components/PublicationForm.tsx";
 import { postSchema } from "@/features/publications/schemas.ts";
 import { Publication } from "@/features/publications/types.ts";
-import { Button } from "@/features/ui/button.tsx";
-import { Textarea } from "@/features/ui/textarea.tsx";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import z from "zod";
-
-type PostFormData = z.infer<typeof postSchema>;
 
 interface PostFormProps {
     feedUserUUID: UUID;
@@ -21,62 +12,27 @@ interface PostFormProps {
 }
 
 export function PostForm({ feedUserUUID, replyTo, setReplyTo, onSuccess }: PostFormProps) {
-    const form = useForm<PostFormData>({
-        resolver: zodResolver(postSchema),
-    });
-    const {
-        register,
-        handleSubmit,
-        formState: { errors },
-        reset,
-    } = form;
-    const serverErrorMessage = errors.root?.serverError?.message;
-
-    const { attachedObj, setAttachedObj, getAttachmentData, clearAttachment } = useAttachment();
     const createPostMutation = useCreatePost();
 
-    const submitHandler = (formData: PostFormData) => {
-        const { attachmentType, attachmentUUID } = getAttachmentData();
+    const submit = (draft: PublicationDraft) =>
+        createPostMutation.mutateAsync({
+            ...draft,
+            userUUID: replyTo ? replyTo.created_for.uuid : feedUserUUID,
+            parentUUID: replyTo?.uuid,
+        });
 
-        createPostMutation.mutate(
-            {
-                userUUID: replyTo ? replyTo.created_for.uuid : feedUserUUID,
-                content: formData.content,
-                parentUUID: replyTo?.uuid,
-                attachmentType,
-                attachmentUUID,
-            },
-            {
-                onSuccess: () => {
-                    reset();
-                    setReplyTo?.(undefined);
-                    clearAttachment();
-                    onSuccess?.();
-                },
-                onError: (error) => {
-                    setFormServerErrors(form, error);
-                },
-            },
-        );
+    const handleSuccess = () => {
+        setReplyTo?.(undefined);
+        onSuccess?.();
     };
 
     return (
-        <form onSubmit={handleSubmit(submitHandler)} className="flex flex-col gap-3">
-            <Textarea {...register("content")} />
-            {errors.content && <p className="text-xs text-destructive">{errors.content.message}</p>}
-
-            <AttachmentPicker attachedObj={attachedObj} onAttach={setAttachedObj} />
-
-            {serverErrorMessage && <p className="text-xs text-destructive">{serverErrorMessage}</p>}
-
-            <Button
-                type="submit"
-                variant="brand"
-                className="rounded-sm px-4 py-2"
-                disabled={createPostMutation.isPending}
-            >
-                {createPostMutation.isPending ? "Posting..." : "Submit"}
-            </Button>
-        </form>
+        <PublicationForm
+            schema={postSchema}
+            submitLabel="Submit"
+            pendingLabel="Posting..."
+            submit={submit}
+            onSuccess={handleSuccess}
+        />
     );
 }

@@ -1,25 +1,22 @@
-import { UUID } from "@/api/types.ts";
-import { AttachmentObj, AttachmentType } from "@/features/publications/types.ts";
+import { AttachmentObj, AttachmentRef } from "@/features/publications/types.ts";
 import { useState } from "react";
 
 export function useAttachment() {
     const [attachedObj, setAttachedObj] = useState<AttachmentObj | undefined>(undefined);
 
-    const getAttachmentData = ():
-        | { attachmentType: AttachmentType; attachmentUUID: UUID }
-        | { attachmentType: undefined; attachmentUUID: undefined } => {
+    const getAttachment = (): AttachmentRef | undefined => {
         if (!attachedObj) {
-            return { attachmentType: undefined, attachmentUUID: undefined };
+            return undefined;
         }
 
-        const attachmentUUID = attachedObj.uuid;
+        const uuid = attachedObj.uuid;
         switch (attachedObj.kind) {
             case "collection":
-                return { attachmentType: "collection", attachmentUUID };
+                return { type: "collection", uuid };
             case "collectionSong":
-                return { attachmentType: "song", attachmentUUID };
+                return { type: "song", uuid };
             case "user":
-                return { attachmentType: "user", attachmentUUID };
+                return { type: "user", uuid };
             default:
                 throw new Error(`Unsupported attachment: ${String(attachedObj.kind)}`);
         }
@@ -30,7 +27,7 @@ export function useAttachment() {
     return {
         attachedObj,
         setAttachedObj,
-        getAttachmentData,
+        getAttachment,
         clearAttachment,
     };
 }

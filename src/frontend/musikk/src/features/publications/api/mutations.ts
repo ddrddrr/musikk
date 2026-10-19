@@ -2,13 +2,37 @@ import { api_client } from "@/api/axiosConf.ts";
 import { UUID } from "@/api/types.ts";
 import { ChatURLs, PublicationURLs } from "@/features/publications/api/endpoints.ts";
 import { publicationKeys } from "@/features/publications/api/queryKeys.ts";
-import { AttachmentType, Chat, Publication } from "@/features/publications/types.ts";
+import { AttachmentRef, Chat, Publication } from "@/features/publications/types.ts";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface PublicationPayload {
     content: string;
-    attachment?: { type: AttachmentType; uuid: UUID };
+    attachment?: AttachmentRef;
     parent_uuid?: UUID;
+}
+
+export interface PublicationDraft {
+    content: string;
+    attachment?: AttachmentRef;
+}
+
+interface PublicationInput extends PublicationDraft {
+    parentUUID?: UUID;
+}
+
+function buildPublicationPayload({
+    content,
+    attachment,
+    parentUUID,
+}: PublicationInput): PublicationPayload {
+    const payload: PublicationPayload = { content };
+    if (attachment) {
+        payload.attachment = attachment;
+    }
+    if (parentUUID) {
+        payload.parent_uuid = parentUUID;
+    }
+    return payload;
 }
 
 async function createPublication(url: string, payload: PublicationPayload): Promise<Publication> {
@@ -16,35 +40,18 @@ async function createPublication(url: string, payload: PublicationPayload): Prom
     return response.data;
 }
 
-interface CreatePostParams {
+interface CreatePostParams extends PublicationInput {
     userUUID: UUID;
-    content: string;
-    attachmentType?: AttachmentType;
-    attachmentUUID?: UUID;
-    parentUUID?: UUID;
 }
 
 export function useCreatePost() {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: async ({
-            userUUID,
-            content,
-            attachmentType,
-            attachmentUUID,
-            parentUUID,
-        }: CreatePostParams) => {
-            const payload: PublicationPayload = { content };
-
-            if (attachmentType && attachmentUUID) {
-                payload.attachment = { type: attachmentType, uuid: attachmentUUID };
-            }
-
-            if (parentUUID) {
-                payload.parent_uuid = parentUUID;
-            }
-
-            await createPublication(PublicationURLs.feedPosts(userUUID), payload);
+        mutationFn: async ({ userUUID, ...input }: CreatePostParams) => {
+            await createPublication(
+                PublicationURLs.feedPosts(userUUID),
+                buildPublicationPayload(input),
+            );
         },
         onSuccess: (_data, variables) => {
             void queryClient.invalidateQueries({
@@ -62,35 +69,18 @@ export function useCreatePost() {
     });
 }
 
-interface CreateCollectionCommentParams {
+interface CreateCollectionCommentParams extends PublicationInput {
     collectionUUID: UUID;
-    content: string;
-    parentUUID?: UUID;
-    attachmentType?: AttachmentType;
-    attachmentUUID?: UUID;
 }
 
 export function useCreateCollectionComment() {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: async ({
-            collectionUUID,
-            content,
-            parentUUID,
-            attachmentType,
-            attachmentUUID,
-        }: CreateCollectionCommentParams) => {
-            const payload: PublicationPayload = { content };
-
-            if (attachmentType && attachmentUUID) {
-                payload.attachment = { type: attachmentType, uuid: attachmentUUID };
-            }
-
-            if (parentUUID) {
-                payload.parent_uuid = parentUUID;
-            }
-
-            await createPublication(PublicationURLs.collectionComments(collectionUUID), payload);
+        mutationFn: async ({ collectionUUID, ...input }: CreateCollectionCommentParams) => {
+            await createPublication(
+                PublicationURLs.collectionComments(collectionUUID),
+                buildPublicationPayload(input),
+            );
         },
         onSuccess: (_data, variables) => {
             void queryClient.invalidateQueries({
@@ -143,31 +133,19 @@ export function useCreateChat() {
     });
 }
 
-interface CreateChatMessageParams {
+interface CreateChatMessageParams extends PublicationDraft {
     userUUID: UUID;
     chatUUID: UUID;
-    content: string;
-    attachmentType?: AttachmentType;
-    attachmentUUID?: UUID;
 }
 
 export function useCreateChatMessage() {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: async ({
-            userUUID,
-            chatUUID,
-            content,
-            attachmentType,
-            attachmentUUID,
-        }: CreateChatMessageParams) => {
-            const payload: PublicationPayload = { content };
-
-            if (attachmentType && attachmentUUID) {
-                payload.attachment = { type: attachmentType, uuid: attachmentUUID };
-            }
-
-            await createPublication(ChatURLs.chatMessages(userUUID, chatUUID), payload);
+        mutationFn: async ({ userUUID, chatUUID, ...draft }: CreateChatMessageParams) => {
+            await createPublication(
+                ChatURLs.chatMessages(userUUID, chatUUID),
+                buildPublicationPayload(draft),
+            );
         },
         onSuccess: (_data, variables) => {
             void queryClient.invalidateQueries({

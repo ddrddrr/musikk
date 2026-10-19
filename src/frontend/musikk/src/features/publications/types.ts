@@ -18,6 +18,11 @@ export type Attachment =
 export type AttachmentType = Attachment["type"];
 export type AttachmentObj = Attachment["obj"];
 
+export interface AttachmentRef {
+    type: AttachmentType;
+    uuid: UUID;
+}
+
 export interface Publication extends BaseModel {
     author: BaseUser;
     root_author_uuid: UUID;
