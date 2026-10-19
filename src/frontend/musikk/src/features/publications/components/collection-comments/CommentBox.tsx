@@ -13,7 +13,7 @@ import { useNewMessagesIndicator } from "@/features/publications/hooks/useNewMes
 import { useScrollAnchor } from "@/features/publications/hooks/useScrollAnchor.ts";
 import { useTypingIndicator } from "@/features/publications/hooks/useTypingIndicator.ts";
 import { Publication } from "@/features/publications/types.ts";
-import { memo, useRef, useState } from "react";
+import { useRef, useState } from "react";
 
 const NO_COMMENTS: Publication[] = [];
 
@@ -22,7 +22,7 @@ interface CommentBoxProps {
 }
 // TODO: add proper infinite scroll, read about https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API
 
-export const CommentBox = memo(function CommentBox({ collectionUUID }: CommentBoxProps) {
+export function CommentBox({ collectionUUID }: CommentBoxProps) {
     useCollectionCommentsWsEvents(collectionUUID);
     const { typers, notifyTyping } = useTypingIndicator(
         `collection_comments.${collectionUUID}`,
@@ -85,4 +85,4 @@ export const CommentBox = memo(function CommentBox({ collectionUUID }: CommentBo
             </div>
         </div>
     );
-});
+}

@@ -4,7 +4,6 @@ import { useAddCollection } from "@/features/song-queue/api/mutations.ts";
 import { Button } from "@/features/ui/button.tsx";
 import { IconTooltip } from "@/features/ui/tooltip";
 import { BetweenHorizonalStart } from "lucide-react";
-import { memo } from "react";
 import { toast } from "sonner";
 
 interface CollectionAddToQueueButtonProps {
@@ -12,10 +11,7 @@ interface CollectionAddToQueueButtonProps {
     size: ActionButtonSize;
 }
 
-export const CollectionAddToQueueButton = memo(function CollectionAddToQueueButton({
-    collection,
-    size,
-}: CollectionAddToQueueButtonProps) {
+export function CollectionAddToQueueButton({ collection, size }: CollectionAddToQueueButtonProps) {
     const addCollectionMutation = useAddCollection();
 
     return (
@@ -35,4 +31,4 @@ export const CollectionAddToQueueButton = memo(function CollectionAddToQueueButt
             </Button>
         </IconTooltip>
     );
-});
+}

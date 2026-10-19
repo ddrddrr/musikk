@@ -15,7 +15,6 @@ import { IconTooltip } from "@/features/ui/tooltip";
 import { AuthorLinks } from "@/features/user/components/AuthorLinks.tsx";
 import { cn } from "@/lib/utils.ts";
 import { EllipsisVertical, Trash2 } from "lucide-react";
-import { memo } from "react";
 
 interface SongCollectionHeaderProps {
     collection: CollectionDetailed;
@@ -54,7 +53,7 @@ function PlaylistMenuDropdown({
     );
 }
 
-export const CollectionHeader = memo(function SongCollectionHeader({
+export function CollectionHeader({
     collection,
     showComments,
     toggleComments,
@@ -137,4 +136,4 @@ export const CollectionHeader = memo(function SongCollectionHeader({
             </div>
         </>
     );
-});
+}

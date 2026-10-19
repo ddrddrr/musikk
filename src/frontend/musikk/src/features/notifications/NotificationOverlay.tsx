@@ -6,7 +6,6 @@ import {
     IFollowerNotification,
     IReplyNotification,
 } from "@/features/notifications/types.ts";
-import { memo } from "react";
 
 interface NotificationOverlayProps {
     notifications: NotificationListParams;
@@ -26,9 +25,7 @@ function replyTarget(notification: IReplyNotification): string {
 }
 
 // TODO: rewrite as different sections? replies, friend stuff, new music etc?
-export const NotificationOverlay = memo(function NotificationOverlay({
-    notifications,
-}: NotificationOverlayProps) {
+export function NotificationOverlay({ notifications }: NotificationOverlayProps) {
     const { replies = [], followers = [], chat_messages = [] } = notifications;
     const allNotifications: TaggedNotification[] = [
         ...replies.map((n) => ({ ...n, _type: "reply" as const })),
@@ -46,7 +43,7 @@ export const NotificationOverlay = memo(function NotificationOverlay({
             ))}
         </div>
     );
-});
+}
 
 function NotificationItem({ notification }: { notification: TaggedNotification }) {
     const common = { isRead: notification.is_read, dateAdded: notification.date_added };
