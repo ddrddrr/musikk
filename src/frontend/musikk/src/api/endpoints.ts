@@ -40,7 +40,7 @@ export const NotificationURLs = {
     notificationsDelete: (notificationUUID: UUID) => `/notifications/${notificationUUID}`,
 };
 export const SearchURLs = {
-    searchMain: (query: string) => `/search?q=${query}`,
+    searchMain: `/search`,
 };
 export const FriendActivityURLs = {
     listeningToList: `/friend-activity/active-songs`,
