@@ -6,12 +6,10 @@ import {
     DropdownMenuTrigger,
 } from "@/features/ui/dropdown-menu.tsx";
 import { IconTooltip } from "@/features/ui/tooltip";
-import { useAuth } from "@/hooks/useAuth";
 import { MessageSquareText } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 export function SocialDropdown() {
-    const { user } = useAuth();
     const navigate = useNavigate();
 
     return (
@@ -30,9 +28,7 @@ export function SocialDropdown() {
             </IconTooltip>
             <DropdownMenuContent>
                 <DropdownMenuItem onSelect={() => void navigate("/feed")}>Posts</DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => void navigate(`/users/${user?.uuid}/chats`)}>
-                    Chats
-                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => void navigate("/chats")}>Chats</DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
     );

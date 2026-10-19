@@ -19,7 +19,7 @@ export function ChatPreview({ chat }: ChatPreviewProps) {
 
     return (
         <button
-            onClick={() => void navigate(`/users/${userUUID}/chats/${chat.uuid}`)}
+            onClick={() => void navigate(`/chats/${chat.uuid}`)}
             className={cn(
                 "w-full rounded-sm border-2 border-foreground p-3 text-left transition-colors",
                 chat.is_read ? "bg-card hover:bg-muted" : "bg-card font-bold hover:bg-muted",

@@ -7,7 +7,6 @@ import {
 } from "@/features/notifications/types.ts";
 import { Button } from "@/features/ui/button.tsx";
 import { PopoverClose } from "@/features/ui/popover.tsx";
-import { useAuth } from "@/hooks/useAuth.ts";
 import { cn } from "@/lib/utils.ts";
 import { formatDateTime } from "@/utils/formatDate.ts";
 import { memo } from "react";
@@ -21,7 +20,6 @@ export const NotificationOverlay = memo(function NotificationOverlay({
     notifications,
 }: NotificationOverlayProps) {
     const navigate = useNavigate();
-    const { user } = useAuth();
 
     function handleNavigateReplyClick(notification: IReplyNotification) {
         if (notification.reply_publication.created_for.type === "feed") {
@@ -38,8 +36,7 @@ export const NotificationOverlay = memo(function NotificationOverlay({
     }
 
     function handleNavigateChatClick(notification: IChatMessageNotification) {
-        if (!user) return;
-        void navigate(`/users/${user.uuid}/chats/${notification.chat_uuid}`);
+        void navigate(`/chats/${notification.chat_uuid}`);
     }
 
     const { replies = [], followers = [], chat_messages = [] } = notifications;

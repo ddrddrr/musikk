@@ -41,7 +41,7 @@ export function ChatStartDirectList() {
             },
             {
                 onSuccess: (chat) => {
-                    void navigate(`/users/${userUUID}/chats/${chat.uuid}`);
+                    void navigate(`/chats/${chat.uuid}`);
                 },
                 onError: (error) => {
                     toast.error(getErrorDetail(error, "Failed to create a chat"));

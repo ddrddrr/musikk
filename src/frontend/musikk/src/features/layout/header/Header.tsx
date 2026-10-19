@@ -35,7 +35,7 @@ export const Header = memo(function Header() {
                         size="icon"
                         aria-label="Social"
                         className="text-brand-foreground"
-                        onClick={() => void navigate(`/users/${user?.uuid}/connections`)}
+                        onClick={() => void navigate("/connections")}
                     >
                         <Users />
                     </Button>
