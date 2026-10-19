@@ -12,7 +12,7 @@ import { Input } from "@/features/ui/input";
 
 import { CollectionCard } from "@/features/collections/components/CollectionCard.tsx";
 import { Collection } from "@/features/collections/types.ts";
-import { SearchItem } from "@/features/search/types.ts";
+import { AttachmentObj } from "@/features/publications/types.ts";
 import { SongCard } from "@/features/songs/components/SongCard.tsx";
 import { SongContainer } from "@/features/songs/components/SongContainer.tsx";
 import { UserCard } from "@/features/user/components/UserCard.tsx";
@@ -21,7 +21,7 @@ import { BaseUser } from "@/features/user/types.ts";
 const QUERY_TIMEOUT = 300; // ms
 
 interface SearchWindowProps {
-    onItemSelect?: (obj: SearchItem) => void;
+    onItemSelect?: (obj: AttachmentObj) => void;
     songMode?: "container" | "card";
 }
 

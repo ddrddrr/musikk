@@ -1,7 +1,6 @@
 import { useInfiniteFlat } from "@/api/hooks.ts";
 import { UUID } from "@/api/types.ts";
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
-import { Collection, CollectionSong } from "@/features/collections/types.ts";
 import { EmptyState } from "@/features/common/EmptyState.tsx";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { useChatAttachments } from "@/features/publications/api/queries.ts";
@@ -12,7 +11,6 @@ import { Attachment } from "@/features/publications/types.ts";
 import { Button } from "@/features/ui/button.tsx";
 import { ScrollArea } from "@/features/ui/scroll-area.tsx";
 import { Spinner } from "@/features/ui/spinner";
-import { BaseUser } from "@/features/user/types.ts";
 
 type ChatAttachmentsListProps = {
     chatUUID: UUID;
@@ -79,10 +77,10 @@ export function ChatAttachmentsList({ chatUUID }: ChatAttachmentsListProps) {
 function ChatAttachmentItem({ attachment }: { attachment: Attachment }) {
     switch (attachment.type) {
         case "song":
-            return <SongAttachmentRow song={attachment.obj as CollectionSong} />;
+            return <SongAttachmentRow song={attachment.obj} />;
         case "collection":
-            return <CollectionAttachmentRow collection={attachment.obj as Collection} />;
+            return <CollectionAttachmentRow collection={attachment.obj} />;
         case "user":
-            return <UserAttachmentRow user={attachment.obj as BaseUser} />;
+            return <UserAttachmentRow user={attachment.obj} />;
     }
 }

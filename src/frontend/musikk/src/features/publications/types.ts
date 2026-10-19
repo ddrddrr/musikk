@@ -3,8 +3,6 @@ import { Collection, CollectionSong } from "@/features/collections/types.ts";
 import { BaseModel } from "@/features/common/types.ts";
 import { BaseUser } from "@/features/user/types.ts";
 
-export type AttachmentType = "collection" | "song" | "user";
-export type AttachmentObj = Collection | CollectionSong | BaseUser;
 export type PublicationForType = "collection" | "feed" | "chat";
 export type FeedConnection = "friends" | "followed" | "mine";
 
@@ -13,10 +11,12 @@ export interface PublicationForObject {
     uuid: UUID;
 }
 
-export interface Attachment {
-    type: AttachmentType;
-    obj: AttachmentObj;
-}
+export type Attachment =
+    | { type: "collection"; obj: Collection }
+    | { type: "song"; obj: CollectionSong }
+    | { type: "user"; obj: BaseUser };
+export type AttachmentType = Attachment["type"];
+export type AttachmentObj = Attachment["obj"];
 
 export interface Publication extends BaseModel {
     author: BaseUser;
