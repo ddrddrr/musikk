@@ -47,7 +47,7 @@ export function CollectionContainer({ collectionUUID }: CollectionContainerProps
     }, [navigate, showComments, collectionUUID]);
 
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-    const deleteMutation = useDeletePlaylist();
+    const { deletePlaylist, isDeleting } = useDeletePlaylist();
 
     if (isPending)
         return (
@@ -146,8 +146,8 @@ export function CollectionContainer({ collectionUUID }: CollectionContainerProps
                     open={deleteDialogOpen}
                     onOpenChange={setDeleteDialogOpen}
                     playlistTitle={collection.title}
-                    onConfirm={() => deleteMutation.mutate({ collectionUUID: collection.uuid })}
-                    isDeleting={deleteMutation.isPending}
+                    onConfirm={() => deletePlaylist(collection.uuid)}
+                    isDeleting={isDeleting}
                 />
             )}
         </div>

@@ -1,12 +1,9 @@
-import { getErrorDetail } from "@/api/errorUtils.ts";
 import { UUID } from "@/api/types.ts";
-import { updateCollection } from "@/features/collections/api/mutations.ts";
+import { useUpdateCollection } from "@/features/collections/api/mutations.ts";
 import { Collection } from "@/features/collections/types.ts";
 import { BackButton } from "@/features/common/BackButton.tsx";
-import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
 import { AlbumSongUploadSection } from "../album-upload/components/AlbumSongUploadSection.tsx";
 import { CollectionForm } from "../collections/components/CollectionForm.tsx";
 import { useCollectionCreation } from "../collections/hooks/useCollectionCreation.ts";
@@ -22,15 +19,18 @@ export function AlbumUploadPage() {
         },
     });
 
-    const publishAlbumMutation = useMutation({
-        mutationFn: (uuid: UUID) => updateCollection(uuid, { draft: false }),
-        onSuccess: (collection) => {
-            navigate(`/collection/${collection.uuid}/`);
-        },
-        onError: (error) => {
-            toast.error(getErrorDetail(error, "Failed to create album"));
-        },
-    });
+    const updateCollectionMutation = useUpdateCollection();
+
+    const publishAlbum = (collectionUUID: UUID) => {
+        updateCollectionMutation.mutate(
+            { collectionUUID, input: { draft: false } },
+            {
+                onSuccess: (collection) => {
+                    void navigate(`/collection/${collection.uuid}/`);
+                },
+            },
+        );
+    };
 
     return (
         <div className="flex-1 overflow-y-auto bg-brand p-4">
@@ -65,7 +65,7 @@ export function AlbumUploadPage() {
                             </p>
                             <AlbumSongUploadSection
                                 albumUUID={albumUUID}
-                                onComplete={() => publishAlbumMutation.mutate(albumUUID)}
+                                onComplete={() => publishAlbum(albumUUID)}
                             />
                         </>
                     )}

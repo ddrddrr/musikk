@@ -1,30 +1,78 @@
 import { api_client } from "@/api/axiosConf.ts";
+import { getErrorDetail } from "@/api/errorUtils.ts";
 import { UUID } from "@/api/types.ts";
 import { CollectionURLs } from "@/features/collections/api/endpoints.ts";
+import { collectionKeys } from "@/features/collections/api/queryKeys.ts";
 import { Collection } from "@/features/collections/types.ts";
+import { songKeys } from "@/features/songs/api/queryKeys.ts";
+import { userKeys } from "@/features/user/api/queryKeys.ts";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 interface ICollectionAddToLikedParams {
     collectionUUID: UUID;
 }
 
-export async function collectionAddToLiked({
+async function collectionAddToLiked({
     collectionUUID,
 }: ICollectionAddToLikedParams): Promise<void> {
     await api_client.post(CollectionURLs.collectionAddToLiked(collectionUUID));
 }
 
-export async function collectionRemoveFromLiked({
+async function collectionRemoveFromLiked({
     collectionUUID,
 }: ICollectionAddToLikedParams): Promise<void> {
     await api_client.delete(CollectionURLs.collectionAddToLiked(collectionUUID));
+}
+
+export function useLikeCollection() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: collectionAddToLiked,
+        onSuccess: () => {
+            void queryClient.invalidateQueries({ queryKey: userKeys.likedCollections });
+            toast.success("Added to liked collections");
+        },
+        onError: (error) => {
+            toast.error(getErrorDetail(error, "Failed to add collection to liked"));
+        },
+    });
+}
+
+export function useUnlikeCollection() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: collectionRemoveFromLiked,
+        onSuccess: () => {
+            void queryClient.invalidateQueries({ queryKey: userKeys.likedCollections });
+            toast.success("Removed from liked collections");
+        },
+        onError: (error) => {
+            toast.error(getErrorDetail(error, "Failed to remove collection from liked"));
+        },
+    });
 }
 
 interface ICollectionDeleteParams {
     collectionUUID: UUID;
 }
 
-export async function deleteCollection({ collectionUUID }: ICollectionDeleteParams): Promise<void> {
+async function deleteCollection({ collectionUUID }: ICollectionDeleteParams): Promise<void> {
     await api_client.delete(CollectionURLs.collectionDelete(collectionUUID));
+}
+
+export function useDeleteCollection() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: deleteCollection,
+        onSuccess: () => {
+            void queryClient.invalidateQueries({ queryKey: ["userLibrary"] });
+            void queryClient.invalidateQueries({ queryKey: ["openCollection"] });
+        },
+        onError: (error) => {
+            toast.error(getErrorDetail(error, "Failed to delete playlist"));
+        },
+    });
 }
 
 interface ICollectionRemoveSongParams {
@@ -32,7 +80,7 @@ interface ICollectionRemoveSongParams {
     songCollectionSongUUID: UUID;
 }
 
-export async function collectionRemoveSong({
+async function collectionRemoveSong({
     collectionUUID,
     songCollectionSongUUID,
 }: ICollectionRemoveSongParams) {
@@ -41,16 +89,61 @@ export async function collectionRemoveSong({
     );
 }
 
+export function useRemoveSongFromCollection() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: collectionRemoveSong,
+        onSuccess: (_data, variables) => {
+            void queryClient.invalidateQueries({
+                queryKey: collectionKeys.detail(variables.collectionUUID),
+            });
+            void queryClient.invalidateQueries({ queryKey: songKeys.userCollectionsBase });
+            toast.success("Removed from playlist");
+        },
+        onError: (error) => {
+            toast.error(getErrorDetail(error, "Failed to remove song from playlist"));
+        },
+    });
+}
+
 export interface IAddToLikedSongsParams {
     collectionSongUUID: UUID;
 }
 
-export async function addToLikedSongs({ collectionSongUUID }: IAddToLikedSongsParams) {
+async function addToLikedSongs({ collectionSongUUID }: IAddToLikedSongsParams) {
     await api_client.post(CollectionURLs.likedSongsAddSong(collectionSongUUID));
 }
 
-export async function removeFromLikedSongs({ collectionSongUUID }: IAddToLikedSongsParams) {
+async function removeFromLikedSongs({ collectionSongUUID }: IAddToLikedSongsParams) {
     await api_client.delete(CollectionURLs.likedSongsAddSong(collectionSongUUID));
+}
+
+export function useLikeSong() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: addToLikedSongs,
+        onSuccess: () => {
+            void queryClient.invalidateQueries({ queryKey: userKeys.likedSongs });
+            toast.success("Added to liked songs");
+        },
+        onError: (error) => {
+            toast.error(getErrorDetail(error, "Failed to like song"));
+        },
+    });
+}
+
+export function useUnlikeSong() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: removeFromLikedSongs,
+        onSuccess: () => {
+            void queryClient.invalidateQueries({ queryKey: userKeys.likedSongs });
+            toast.success("Removed from liked songs");
+        },
+        onError: (error) => {
+            toast.error(getErrorDetail(error, "Failed to remove from liked songs"));
+        },
+    });
 }
 
 interface CreateCollectionInput {
@@ -80,6 +173,15 @@ export async function createCollection(input: CreateCollectionInput): Promise<Co
     return res.data;
 }
 
+export function useCreateCollection() {
+    return useMutation({
+        mutationFn: createCollection,
+        onError: (error) => {
+            toast.error(getErrorDetail(error, "Failed to create collection"));
+        },
+    });
+}
+
 export interface UpdateCollectionInput {
     title?: string;
     description?: string;
@@ -87,10 +189,15 @@ export interface UpdateCollectionInput {
     draft?: boolean;
 }
 
-export async function updateCollection(
-    collectionUUID: UUID,
-    input: UpdateCollectionInput,
-): Promise<Collection> {
+interface UpdateCollectionParams {
+    collectionUUID: UUID;
+    input: UpdateCollectionInput;
+}
+
+async function updateCollection({
+    collectionUUID,
+    input,
+}: UpdateCollectionParams): Promise<Collection> {
     const formData = new FormData();
 
     if (input.title !== undefined) formData.append("title", input.title);
@@ -105,12 +212,27 @@ export async function updateCollection(
     return res.data;
 }
 
+export function useUpdateCollection() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: updateCollection,
+        onSuccess: (collection) => {
+            void queryClient.invalidateQueries({
+                queryKey: collectionKeys.detail(collection.uuid),
+            });
+        },
+        onError: (error) => {
+            toast.error(getErrorDetail(error, "Failed to update collection"));
+        },
+    });
+}
+
 interface CollectionSongPayload {
     collectionUUID: UUID;
     songUUID: UUID;
 }
 
-export async function createCollectionSong(payload: CollectionSongPayload) {
+async function createCollectionSong(payload: CollectionSongPayload) {
     const formData = new FormData();
     formData.append("song_uuid", payload.songUUID);
     const res = await api_client.post<{ song_uuid: UUID; collection_song_uuid: UUID }>(
@@ -118,4 +240,21 @@ export async function createCollectionSong(payload: CollectionSongPayload) {
         formData,
     );
     return res.data;
+}
+
+export function useAddSongToCollection() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: createCollectionSong,
+        onSuccess: (_data, variables) => {
+            void queryClient.invalidateQueries({
+                queryKey: collectionKeys.detail(variables.collectionUUID),
+            });
+            void queryClient.invalidateQueries({ queryKey: songKeys.userCollectionsBase });
+            toast.success("Added to playlist");
+        },
+        onError: (error) => {
+            toast.error(getErrorDetail(error, "Failed to add song to playlist"));
+        },
+    });
 }

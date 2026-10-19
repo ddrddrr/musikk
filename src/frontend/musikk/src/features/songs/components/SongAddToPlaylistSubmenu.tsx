@@ -1,12 +1,10 @@
-import { getErrorDetail } from "@/api/errorUtils.ts";
 import {
-    collectionRemoveSong,
-    createCollectionSong,
+    useAddSongToCollection,
+    useRemoveSongFromCollection,
 } from "@/features/collections/api/mutations.ts";
 import { CollectionSong } from "@/features/collections/types.ts";
 import { EmptyState } from "@/features/common/EmptyState.tsx";
 import { useCollectionMemberships } from "@/features/songs/api/queries.ts";
-import { songKeys } from "@/features/songs/api/queryKeys.ts";
 import {
     DropdownMenuItem,
     DropdownMenuSub,
@@ -14,47 +12,20 @@ import {
     DropdownMenuSubTrigger,
 } from "@/features/ui/dropdown-menu.tsx";
 import { useUserLibrary } from "@/features/user/hooks/useUserLibrary.ts";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Check, ListPlus, Plus } from "lucide-react";
-import { toast } from "sonner";
 
 interface SongAddToPlaylistSubmenuProps {
     collectionSong: CollectionSong;
 }
 
 export function SongAddToPlaylistSubmenu({ collectionSong }: SongAddToPlaylistSubmenuProps) {
-    const queryClient = useQueryClient();
     const { data: library } = useUserLibrary();
     const created_collections = library?.created_collections;
 
     const { data: collectionEntries = [] } = useCollectionMemberships(collectionSong.uuid);
 
-    const invalidateUserCollections = () =>
-        queryClient.invalidateQueries({
-            queryKey: songKeys.userCollections(collectionSong.uuid),
-        });
-
-    const createCollectionSongMutation = useMutation({
-        mutationFn: createCollectionSong,
-        onSuccess: () => {
-            void invalidateUserCollections();
-            toast.success("Added successfully");
-        },
-        onError: (error) => {
-            toast.error(getErrorDetail(error, "Failed to add song to playlist"));
-        },
-    });
-
-    const removeCollectionSongMutation = useMutation({
-        mutationFn: collectionRemoveSong,
-        onSuccess: () => {
-            void invalidateUserCollections();
-            toast.success("Removed successfully");
-        },
-        onError: (error) => {
-            toast.error(getErrorDetail(error, "Failed to remove song from playlist"));
-        },
-    });
+    const addSongMutation = useAddSongToCollection();
+    const removeSongMutation = useRemoveSongFromCollection();
 
     // albums are immutable
     const playlists =
@@ -63,13 +34,13 @@ export function SongAddToPlaylistSubmenu({ collectionSong }: SongAddToPlaylistSu
     const handleCollectionClick = (collectionUUID: string) => {
         const existing = collectionEntries.find((e) => e.collection_uuid === collectionUUID);
         if (existing) {
-            removeCollectionSongMutation.mutate({
+            removeSongMutation.mutate({
                 collectionUUID,
                 songCollectionSongUUID: existing.collection_song_uuid,
             });
             return;
         }
-        createCollectionSongMutation.mutate({
+        addSongMutation.mutate({
             collectionUUID,
             songUUID: collectionSong.song.uuid,
         });

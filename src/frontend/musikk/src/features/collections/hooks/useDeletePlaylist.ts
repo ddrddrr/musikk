@@ -1,23 +1,23 @@
-import { getErrorDetail } from "@/api/errorUtils.ts";
-import { deleteCollection } from "@/features/collections/api/mutations.ts";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { UUID } from "@/api/types.ts";
+import { useDeleteCollection } from "@/features/collections/api/mutations.ts";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 export function useDeletePlaylist() {
     const navigate = useNavigate();
-    const queryClient = useQueryClient();
+    const deleteCollectionMutation = useDeleteCollection();
 
-    return useMutation({
-        mutationFn: deleteCollection,
-        onSuccess: () => {
-            toast.success("Playlist deleted");
-            void queryClient.invalidateQueries({ queryKey: ["userLibrary"] });
-            void queryClient.invalidateQueries({ queryKey: ["openCollection"] });
-            void navigate("/");
-        },
-        onError: (error) => {
-            toast.error(getErrorDetail(error, "Failed to delete playlist"));
-        },
-    });
+    const deletePlaylist = (collectionUUID: UUID) => {
+        deleteCollectionMutation.mutate(
+            { collectionUUID },
+            {
+                onSuccess: () => {
+                    toast.success("Playlist deleted");
+                    void navigate("/");
+                },
+            },
+        );
+    };
+
+    return { deletePlaylist, isDeleting: deleteCollectionMutation.isPending };
 }
