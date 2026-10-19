@@ -1,21 +1,15 @@
 import { UUID } from "@/api/types.ts";
 import { EmptyState } from "@/features/common/EmptyState.tsx";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
+import { useGlobalFeedPosts } from "@/features/publications/api/queries.ts";
 import { LoadNewerButton } from "@/features/publications/components/LoadNewerButton.tsx";
 import { LoadOlderButton } from "@/features/publications/components/LoadOlderButton.tsx";
 import { PostTree } from "@/features/publications/components/posts/PostTree.tsx";
-import { Publication } from "@/features/publications/types.ts";
-
 import { TabsContent } from "@/features/ui/tabs.tsx";
 
-export type PostTabContentProps = {
+type PostTabContentProps = {
     label: string;
-    posts: Publication[] | undefined;
-    error: Error | null;
-    refetch: () => void;
-    hasNextPage: boolean;
-    isFetchingNextPage: boolean;
-    fetchNextPage: () => Promise<unknown> | void;
+    query: ReturnType<typeof useGlobalFeedPosts>;
     hasNewPosts: boolean;
     onLoadNewer: () => void;
     feedUserUUID: UUID;
@@ -23,16 +17,13 @@ export type PostTabContentProps = {
 
 export function PostTabContent({
     label,
-    posts,
-    error,
-    refetch,
-    hasNextPage,
-    isFetchingNextPage,
-    fetchNextPage,
+    query,
     hasNewPosts,
     onLoadNewer,
     feedUserUUID,
 }: PostTabContentProps) {
+    const { data: posts, error, refetch, hasNextPage, isFetchingNextPage, fetchNextPage } = query;
+
     return (
         <TabsContent value={label}>
             <div className="flex flex-col gap-6">

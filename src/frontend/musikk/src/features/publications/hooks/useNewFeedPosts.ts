@@ -2,7 +2,7 @@ import { PaginatedRes, UUID } from "@/api/types.ts";
 import { PublicationURLs } from "@/features/publications/api/endpoints.ts";
 import { fetchPublicationPage } from "@/features/publications/api/queries.ts";
 import { publicationKeys } from "@/features/publications/api/queryKeys.ts";
-import { Publication } from "@/features/publications/types.ts";
+import { FeedConnection, Publication } from "@/features/publications/types.ts";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
 
@@ -16,17 +16,26 @@ function hasNewerPost(
     return !!currentNewestUUID && !!latestUUID && latestUUID !== currentNewestUUID;
 }
 
-export function useNewGlobalFeedPosts(currentNewestUUID: string | undefined) {
+export function useNewGlobalFeedPosts(
+    connection: FeedConnection | undefined,
+    currentNewestUUID: string | undefined,
+) {
     const queryClient = useQueryClient();
     const { data } = useQuery({
-        queryKey: publicationKeys.globalFeedPoll(),
-        queryFn: () => fetchPublicationPage(PublicationURLs.globalFeedPosts(), 1, 0),
+        queryKey: publicationKeys.globalFeedPoll(connection),
+        queryFn: () =>
+            fetchPublicationPage(
+                PublicationURLs.globalFeedPosts(),
+                1,
+                0,
+                connection ? { connection } : undefined,
+            ),
         refetchInterval: NEW_POSTS_POLL_INTERVAL_MS,
     });
 
     const refresh = useCallback(() => {
-        void queryClient.invalidateQueries({ queryKey: publicationKeys.globalFeeds() });
-    }, [queryClient]);
+        void queryClient.invalidateQueries({ queryKey: publicationKeys.globalFeed(connection) });
+    }, [queryClient, connection]);
 
     return { hasNewPosts: hasNewerPost(data, currentNewestUUID), refresh };
 }
