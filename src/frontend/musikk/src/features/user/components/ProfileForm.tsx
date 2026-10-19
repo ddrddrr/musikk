@@ -17,16 +17,38 @@ import { useMeUpdateMutation } from "@/features/user/api/mutations.ts";
 import { ProfileFormSchema, ProfileFormValues } from "@/features/user/types.ts";
 import { cn } from "@/lib/utils.ts";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { MutationStatus } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 
-type SubmitStatus = "idle" | "submitting" | "success" | "error";
+const BORDER_CLASS_BY_STATUS: Record<MutationStatus, string> = {
+    idle: "border-border",
+    pending: "border-border",
+    success: "border-success",
+    error: "border-destructive",
+};
+
+const MESSAGE_CLASS_BY_STATUS: Record<MutationStatus, string> = {
+    idle: "text-muted-foreground",
+    pending: "text-muted-foreground",
+    success: "text-foreground",
+    error: "text-destructive",
+};
+
+function statusMessage(status: MutationStatus, error: Error | null): string | null {
+    switch (status) {
+        case "idle":
+            return null;
+        case "pending":
+            return "Saving...";
+        case "success":
+            return "Profile updated successfully";
+        case "error":
+            return getErrorDetail(error, "Profile update failed");
+    }
+}
 
 export function ProfileForm() {
     const { user } = useAuth();
-
-    const [submitStatus, setSubmitStatus] = useState<SubmitStatus>("idle");
-    const [message, setMessage] = useState<string | null>(null);
 
     const form = useForm<ProfileFormValues>({
         resolver: zodResolver(ProfileFormSchema),
@@ -38,47 +60,27 @@ export function ProfileForm() {
     });
 
     const mutation = useMeUpdateMutation();
-
-    // TODO: rewrite so that this is consistent across forms...
-    const borderClass =
-        submitStatus === "success"
-            ? "border-success"
-            : submitStatus === "error"
-              ? "border-destructive"
-              : "border-border";
-
-    const messageClass =
-        submitStatus === "success"
-            ? "text-foreground"
-            : submitStatus === "error"
-              ? "text-destructive"
-              : "text-muted-foreground";
+    const message = statusMessage(mutation.status, mutation.error);
 
     const onSubmit = (values: ProfileFormValues) => {
-        setSubmitStatus("submitting");
-        setMessage("Saving...");
-
-        mutation.mutate(
-            { ...values },
-            {
-                onError: (error) => {
-                    setSubmitStatus("error");
-                    setMessage(getErrorDetail(error, "Profile update failed"));
-                },
-                onSuccess: () => {
-                    setSubmitStatus("success");
-                    setMessage("Profile updated successfully");
-                },
-            },
-        );
+        mutation.mutate(values);
     };
 
     if (!user) return null;
 
     return (
         <div className="p-4">
-            <div className={cn("mx-auto max-w-xl rounded-sm border-2 bg-card p-6", borderClass)}>
-                {message && <div className={cn("mb-4 text-sm", messageClass)}>{message}</div>}
+            <div
+                className={cn(
+                    "mx-auto max-w-xl rounded-sm border-2 bg-card p-6",
+                    BORDER_CLASS_BY_STATUS[mutation.status],
+                )}
+            >
+                {message && (
+                    <div className={cn("mb-4 text-sm", MESSAGE_CLASS_BY_STATUS[mutation.status])}>
+                        {message}
+                    </div>
+                )}
 
                 <div className="mb-6 flex items-center gap-4">
                     <Avatar className="size-12 rounded-sm">
@@ -132,12 +134,8 @@ export function ProfileForm() {
                         <ImageField name="avatar" />
 
                         <div className="border-t pt-2">
-                            <Button
-                                type="submit"
-                                disabled={submitStatus === "submitting"}
-                                className="w-full"
-                            >
-                                {submitStatus === "submitting" ? "Sending…" : "Save Changes"}
+                            <Button type="submit" disabled={mutation.isPending} className="w-full">
+                                {mutation.isPending ? "Sending…" : "Save Changes"}
                             </Button>
                         </div>
                     </form>

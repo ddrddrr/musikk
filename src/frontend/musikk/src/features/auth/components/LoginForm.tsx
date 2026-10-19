@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { useLocation, useNavigate } from "react-router-dom";
 import * as z from "zod";
@@ -28,23 +28,25 @@ export function LoginForm() {
     const navigate = useNavigate();
     const location = useLocation();
     const redirectTo = (location.state as LoginLocationState | null)?.from?.pathname ?? "/";
-    const [loading, setLoading] = useState(false);
 
     const form = useForm<LoginFormValues>({
         resolver: zodResolver(loginSchema),
     });
     const serverErrorMessage = form.formState.errors.root?.serverError?.message;
 
-    const onSubmit = async (values: LoginFormValues) => {
-        setLoading(true);
-        try {
-            await login(values.email, values.password);
+    const { mutate, isPending } = useMutation({
+        mutationFn: (values: LoginFormValues) => login(values.email, values.password),
+        onSuccess() {
             void navigate(redirectTo);
-        } catch (error) {
+        },
+        onError(error) {
             setFormServerErrors(form, error);
-        } finally {
-            setLoading(false);
-        }
+        },
+    });
+
+    const onSubmit = (values: LoginFormValues) => {
+        form.clearErrors("root");
+        mutate(values);
     };
 
     return (
@@ -59,9 +61,9 @@ export function LoginForm() {
                         variant="brand"
                         size="lg"
                         className="w-full"
-                        disabled={loading}
+                        disabled={isPending}
                     >
-                        {loading ? <Spinner /> : "Login"}
+                        {isPending ? <Spinner /> : "Login"}
                     </Button>
 
                     {serverErrorMessage && (

@@ -156,7 +156,7 @@ interface CreateCollectionInput {
     draft?: boolean;
 }
 
-export async function createCollection(input: CreateCollectionInput): Promise<Collection> {
+async function createCollection(input: CreateCollectionInput): Promise<Collection> {
     const formData = new FormData();
 
     formData.append("title", input.title);
