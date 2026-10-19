@@ -1,9 +1,18 @@
 import { UUID } from "@/api/types.ts";
 import { BaseModel } from "@/features/common/types.ts";
 import { Song } from "@/features/songs/types.ts";
-import { BaseUser } from "@/features/user/types.ts";
+import { BaseUser, ConnectionType } from "@/features/user/types.ts";
 
 export type CollectionType = "playlist" | "album" | "history" | "liked";
+
+export interface CollectionListParams {
+    type?: CollectionType;
+    connection?: ConnectionType;
+    author?: string;
+    limit?: number;
+    offset?: number;
+}
+
 export interface Collection extends BaseModel {
     kind?: "collection";
     uuid: UUID;

@@ -2,17 +2,12 @@ import { api_client } from "@/api/axiosConf.ts";
 import { PaginatedRes, UUID } from "@/api/types.ts";
 import { CollectionURLs } from "@/features/collections/api/endpoints.ts";
 import { collectionKeys } from "@/features/collections/api/queryKeys.ts";
-import { Collection, CollectionDetailed, CollectionType } from "@/features/collections/types.ts";
-import { ConnectionType } from "@/features/user/types.ts";
+import {
+    Collection,
+    CollectionDetailed,
+    CollectionListParams,
+} from "@/features/collections/types.ts";
 import { useQuery } from "@tanstack/react-query";
-
-export interface CollectionListParams {
-    type?: CollectionType;
-    connection?: ConnectionType;
-    author?: string;
-    limit?: number;
-    offset?: number;
-}
 
 export async function fetchCollections(
     params?: CollectionListParams,
@@ -21,6 +16,21 @@ export async function fetchCollections(
         params,
     });
     return res.data;
+}
+
+const LATEST_COLLECTIONS_STALE_TIME_MS = 30_000;
+
+function collectionResults(data: PaginatedRes<Collection>): Collection[] {
+    return data.results;
+}
+
+export function useLatestCollections(params: CollectionListParams) {
+    return useQuery({
+        queryKey: collectionKeys.latest(params),
+        queryFn: () => fetchCollections(params),
+        select: collectionResults,
+        staleTime: LATEST_COLLECTIONS_STALE_TIME_MS,
+    });
 }
 
 interface FetchUserLibraryParams {
