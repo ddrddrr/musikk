@@ -16,7 +16,7 @@ export function AuthenticatedLayout() {
                     <Outlet />
                 </div>
                 {isQueueOpen && (
-                    <div className="absolute inset-0 border-t border-foreground bg-card">
+                    <div className="absolute inset-0 z-20 border-t border-foreground bg-card">
                         <SongQueue />
                     </div>
                 )}

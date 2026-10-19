@@ -1,4 +1,5 @@
 import { UUID } from "@/api/types.ts";
+import { CenteredSpinner } from "@/features/common/CenteredSpinner.tsx";
 import { EmptyState } from "@/features/common/EmptyState.tsx";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { useGlobalFeedPosts } from "@/features/publications/api/queries.ts";
@@ -22,7 +23,15 @@ export function PostTabContent({
     onLoadNewer,
     feedUserUUID,
 }: PostTabContentProps) {
-    const { data: posts, error, refetch, hasNextPage, isFetchingNextPage, fetchNextPage } = query;
+    const {
+        data: posts,
+        error,
+        refetch,
+        isPending,
+        hasNextPage,
+        isFetchingNextPage,
+        fetchNextPage,
+    } = query;
 
     return (
         <TabsContent value={label}>
@@ -37,7 +46,8 @@ export function PostTabContent({
                     posts?.map((post) => (
                         <PostTree key={post.uuid} publication={post} feedUserUUID={feedUserUUID} />
                     ))}
-                {!error && !posts?.length && <EmptyState message="No posts yet" />}
+                {isPending && <CenteredSpinner />}
+                {!isPending && !error && !posts?.length && <EmptyState message="No posts yet" />}
                 <div className="flex justify-center py-4">
                     <LoadOlderButton
                         hasNextPage={hasNextPage}
