@@ -57,8 +57,6 @@ export function ChatNewGroupForm({ onSuccess, onCancel }: ChatNewGroupFormProps)
     };
 
     const onSubmit = (data: ChatNewGroupFormData) => {
-        if (!userUUID) return;
-
         createChatMutation.mutate(
             {
                 userUUID,

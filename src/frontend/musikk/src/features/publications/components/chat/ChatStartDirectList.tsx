@@ -31,7 +31,7 @@ export function ChatStartDirectList() {
     }, [friends, chats]);
 
     const handleFriendClick = (friend: BaseUser) => {
-        if (!userUUID || createChatMutation.isPending) return;
+        if (createChatMutation.isPending) return;
 
         createChatMutation.mutate(
             {

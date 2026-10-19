@@ -36,8 +36,6 @@ export function ChatMessageForm({ chat, onTyping }: ChatMessageFormProps) {
     const createChatMessageMutation = useCreateChatMessage();
 
     const submitHandler = (data: ChatMessageFormData) => {
-        if (!userUUID) return;
-
         const { attachmentType, attachmentUUID } = getAttachmentData();
 
         createChatMessageMutation.mutate(

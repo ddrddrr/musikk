@@ -83,7 +83,7 @@ export function UserCard({ user, size = "medium", onClick }: UserCardProps) {
                     </CardContent>
                 </Card>
             </ContextMenuTrigger>
-            {!!myUuid && user.uuid !== myUuid && (
+            {user.uuid !== myUuid && (
                 <ContextMenuContent panel="card" className="w-48">
                     <ContextMenuItem onSelect={toggleFollow}>
                         <MoreHorizontal className="mr-2 size-4" />
