@@ -1,19 +1,16 @@
 import { Collection, CollectionSong } from "@/features/collections/types.ts";
-import {
-    PlaybackContext,
-    PlayerControllerContext,
-} from "@/features/playback/providers/playbackContext.ts";
+import { usePlayback } from "@/features/playback/hooks/usePlayback.ts";
+import { usePlayerController } from "@/features/playback/hooks/usePlayerController.ts";
 import {
     usePlayCollection,
     usePlaySong,
     useQueueNext,
 } from "@/features/song-queue/api/mutations.ts";
 import { useQueue } from "@/features/song-queue/api/queries.ts";
-import { useContext } from "react";
 
 export function useHandlePlay() {
-    const { playbackState, isPlaybackActive } = useContext(PlaybackContext);
-    const controller = useContext(PlayerControllerContext);
+    const { playbackState, isPlaybackActive } = usePlayback();
+    const controller = usePlayerController();
     const playingCollectionSong = playbackState?.collectionSong;
     const playSongMutation = usePlaySong();
     const playCollectionMutation = usePlayCollection();

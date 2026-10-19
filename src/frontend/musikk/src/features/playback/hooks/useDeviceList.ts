@@ -3,7 +3,7 @@ import { useContext } from "react";
 
 export function useDeviceList() {
     const context = useContext(DeviceListContext);
-    if (context === undefined) {
+    if (!context) {
         throw new Error("useDeviceList must be used within a DeviceListProvider");
     }
     return context;

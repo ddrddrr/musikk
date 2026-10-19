@@ -7,11 +7,11 @@ import * as z from "zod";
 import { setFormServerErrors } from "@/api/errorUtils.ts";
 import { EmailField } from "@/features/auth/components/EmailField.tsx";
 import { PasswordField } from "@/features/auth/components/PasswordField.tsx";
+import { useAuth } from "@/features/auth/hooks/useAuth.ts";
 import { Button } from "@/features/ui/button.tsx";
 import { CardContent } from "@/features/ui/card.tsx";
 import { Form } from "@/features/ui/form.tsx";
 import { Spinner } from "@/features/ui/spinner";
-import { useAuth } from "@/hooks/useAuth.ts";
 
 const loginSchema = z.object({
     email: z.string().min(5, "Email is required."),

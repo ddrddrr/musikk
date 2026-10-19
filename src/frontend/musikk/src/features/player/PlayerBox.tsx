@@ -1,10 +1,10 @@
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
-import { PlaybackContext } from "@/features/playback/providers/playbackContext.ts";
+import { usePlayback } from "@/features/playback/hooks/usePlayback.ts";
 import { useAudioPipeline } from "@/features/player/hooks/useAudioPipeline.ts";
 import { usePlayer } from "@/features/player/hooks/usePlayer.ts";
 import { PlayerBar } from "@/features/player/PlayerBar.tsx";
 import { useQueue } from "@/features/song-queue/api/queries.ts";
-import React, { useContext, useRef } from "react";
+import React, { useRef } from "react";
 
 export function PlayerBox({
     setIsQueueOpen,
@@ -12,7 +12,7 @@ export function PlayerBox({
     setIsQueueOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
     const audioRef = useRef<HTMLAudioElement>(null);
-    const { playbackState } = useContext(PlaybackContext);
+    const { playbackState } = usePlayback();
     const { error: queueError, refetch: queueRefetch } = useQueue();
 
     const { ensureAudioPipeline, setUserVolume, fadeIn, fadeOut } = useAudioPipeline({

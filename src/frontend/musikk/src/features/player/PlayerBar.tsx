@@ -1,9 +1,7 @@
 import { MediaThumbnail } from "@/features/common/MediaThumbnail.tsx";
 import { useCalculateSongPosMs } from "@/features/playback/hooks/useCalculateSongPosMs.ts";
-import {
-    PlaybackContext,
-    PlayerControllerContext,
-} from "@/features/playback/providers/playbackContext.ts";
+import { usePlayback } from "@/features/playback/hooks/usePlayback.ts";
+import { usePlayerController } from "@/features/playback/hooks/usePlayerController.ts";
 import { ChangeActiveDeviceDropdown } from "@/features/player/ChangeActiveDeviceDropdown.tsx";
 import { useVolume } from "@/features/player/hooks/useVolume.ts";
 import { PlayerPlayButton } from "@/features/player/PlayerPlayButton.tsx";
@@ -15,7 +13,7 @@ import { IconTooltip } from "@/features/ui/tooltip";
 import { AuthorLinks } from "@/features/user/components/AuthorLinks.tsx";
 import { formatDuration } from "@/utils/formatDuration.ts";
 import { ListMusic, SkipBack, SkipForward, Volume2, VolumeX } from "lucide-react";
-import React, { useCallback, useContext, useState } from "react";
+import React, { useCallback, useState } from "react";
 
 interface PlayerBarProps {
     setIsQueueOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -29,8 +27,8 @@ export function PlayerBar({
     onUnmute,
     setUserVolume,
 }: PlayerBarProps) {
-    const { playbackState } = useContext(PlaybackContext);
-    const controller = useContext(PlayerControllerContext);
+    const { playbackState } = usePlayback();
+    const controller = usePlayerController();
     const playingCollectionSong = playbackState?.collectionSong;
     const { volume, setVolume, handleVolumeCommit, handleMuteToggle } = useVolume({
         setUserVolume,

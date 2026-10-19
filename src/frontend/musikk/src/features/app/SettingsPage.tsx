@@ -1,6 +1,7 @@
+import { useAuth } from "@/features/auth/hooks/useAuth.ts";
 import { BackButton } from "@/features/common/BackButton.tsx";
+import { useLoudnessPreset } from "@/features/player/hooks/useLoudnessPreset.ts";
 import { LoudnessPresetSelector } from "@/features/player/LoudnessPresetSelector.tsx";
-import { LoudnessPresetContext } from "@/features/player/providers/loudnessPresetContext.ts";
 import { Button } from "@/features/ui/button";
 import {
     Dialog,
@@ -11,12 +12,10 @@ import {
     DialogTrigger,
 } from "@/features/ui/dialog.tsx";
 import { ProfileForm } from "@/features/user/components/ProfileForm.tsx";
-import { useAuth } from "@/hooks/useAuth.ts";
-import { useContext } from "react";
 
 export function SettingsPage() {
     const { logout } = useAuth();
-    const { preset, setPreset } = useContext(LoudnessPresetContext);
+    const { preset, setPreset } = useLoudnessPreset();
 
     return (
         <div className="flex flex-1 flex-col items-center gap-8 p-8">

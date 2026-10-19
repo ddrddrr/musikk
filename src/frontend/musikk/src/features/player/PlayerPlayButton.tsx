@@ -1,11 +1,10 @@
 import { useHandlePlay } from "@/features/playback/hooks/useHandlePlay.ts";
-import { PlaybackContext } from "@/features/playback/providers/playbackContext.ts";
+import { usePlayback } from "@/features/playback/hooks/usePlayback.ts";
 import { Button } from "@/features/ui/button.tsx";
 import { Pause, Play } from "lucide-react";
-import { useContext } from "react";
 
 export function PlayerPlayButton() {
-    const { isPlaybackActive } = useContext(PlaybackContext);
+    const { isPlaybackActive } = usePlayback();
     const handlePlay = useHandlePlay();
 
     const renderPlayPauseIcon = () => {

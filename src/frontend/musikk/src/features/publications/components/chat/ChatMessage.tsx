@@ -1,7 +1,7 @@
+import { useAuth } from "@/features/auth/hooks/useAuth.ts";
 import { PostAttachment } from "@/features/publications/components/posts/PostAttachment.tsx";
 import { PostHeader } from "@/features/publications/components/posts/PostHeader.tsx";
 import { Publication } from "@/features/publications/types.ts";
-import { useAuth } from "@/hooks/useAuth.ts";
 import { cn } from "@/lib/utils.ts";
 import { formatDateTime } from "@/utils/formatDate.ts";
 

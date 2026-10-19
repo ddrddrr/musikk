@@ -1,10 +1,10 @@
+import { useAuth } from "@/features/auth/hooks/useAuth.ts";
 import { SocialDropdown } from "@/features/layout/header/SocialDropdown.tsx";
 import { NotificationBox } from "@/features/notifications/NotificationBox";
 import { SearchBar } from "@/features/search/SearchBar.tsx";
 import { Button } from "@/features/ui/button";
 import { IconTooltip } from "@/features/ui/tooltip";
 import { UserAvatar } from "@/features/user/components/UserAvatar.tsx";
-import { useAuth } from "@/hooks/useAuth";
 import { Cog, Disc3, Upload, Users } from "lucide-react";
 import { memo } from "react";
 import { useNavigate } from "react-router-dom";

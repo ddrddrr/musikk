@@ -8,6 +8,6 @@ export interface PlaybackContextProps {
     playbackState: LocalPlaybackState | null;
 }
 
-export const PlaybackContext = createContext<PlaybackContextProps>(null!);
+export const PlaybackContext = createContext<PlaybackContextProps | null>(null);
 
-export const PlayerControllerContext = createContext<AudioPlayerController>(null!);
+export const PlayerControllerContext = createContext<AudioPlayerController | null>(null);

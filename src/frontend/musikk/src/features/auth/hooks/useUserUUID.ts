@@ -1,10 +1,9 @@
-import { AuthContext } from "@/features/auth/providers/AuthContext.tsx";
-import { useContext } from "react";
+import { useAuth } from "@/features/auth/hooks/useAuth.ts";
 
 export function useUserUUID(): string {
-    const auth = useContext(AuthContext);
-    if (!auth?.user?.uuid) {
+    const { user } = useAuth();
+    if (!user?.uuid) {
         throw new Error("User is not authenticated");
     }
-    return auth.user.uuid;
+    return user.uuid;
 }

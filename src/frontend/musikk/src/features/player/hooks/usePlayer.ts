@@ -1,10 +1,10 @@
-import { PlayerControllerContext } from "@/features/playback/providers/playbackContext.ts";
+import { usePlayerController } from "@/features/playback/hooks/usePlayerController.ts";
 import {
     useActiveDeviceReportAction,
     useSetPlaybackAction,
 } from "@/features/playback/ws/actionHooks.ts";
 import { useQueueNext } from "@/features/song-queue/api/mutations.ts";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 interface UsePlayerOptions {
     audioRef: React.RefObject<HTMLAudioElement | null>;
@@ -26,7 +26,7 @@ export function usePlayer({
     fadeIn,
     fadeOut,
 }: UsePlayerOptions): UsePlayerReturn {
-    const controller = useContext(PlayerControllerContext);
+    const controller = usePlayerController();
     const sendActiveDeviceReport = useActiveDeviceReportAction();
     const sendSet = useSetPlaybackAction();
     const { mutate: nextMutate } = useQueueNext();

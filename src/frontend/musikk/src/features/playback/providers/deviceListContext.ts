@@ -5,4 +5,4 @@ interface DeviceListContextProps {
     deviceList: IPlaybackDevice[];
     activeDevice: IPlaybackDevice | null;
 }
-export const DeviceListContext = createContext<DeviceListContextProps | undefined>(undefined);
+export const DeviceListContext = createContext<DeviceListContextProps | null>(null);

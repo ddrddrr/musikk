@@ -1,10 +1,8 @@
-import { PlaybackContext } from "@/features/playback/providers/playbackContext.ts";
-import {
-    LoudnessPresetContext,
-    type LoudnessPreset,
-} from "@/features/player/providers/loudnessPresetContext.ts";
+import { usePlayback } from "@/features/playback/hooks/usePlayback.ts";
+import { useLoudnessPreset } from "@/features/player/hooks/useLoudnessPreset.ts";
+import { type LoudnessPreset } from "@/features/player/providers/loudnessPresetContext.ts";
 import { Song } from "@/features/songs/types.ts";
-import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 const LOUDNESS_TARGETS: Record<Exclude<LoudnessPreset, "off">, number> = {
     quiet: -19, // LUFS
@@ -187,8 +185,8 @@ export function useAudioPipeline({
     audioRef,
     song,
 }: UseAudioPipelineOptions): UseAudioPipelineReturn {
-    const { isThisDeviceActive } = useContext(PlaybackContext);
-    const { preset } = useContext(LoudnessPresetContext);
+    const { isThisDeviceActive } = usePlayback();
+    const { preset } = useLoudnessPreset();
     const pipelineRef = useRef<AudioPipeline | null>(null);
     // drives a re-render after the gesture-bound build, so the settings effect re-fires
     // and replaces the browser-default DynamicsCompressor with the configured values

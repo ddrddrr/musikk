@@ -7,7 +7,4 @@ export interface LoudnessPresetContextProps {
     setPreset: (preset: LoudnessPreset) => void;
 }
 
-export const LoudnessPresetContext = createContext<LoudnessPresetContextProps>({
-    preset: "normal",
-    setPreset: () => {},
-});
+export const LoudnessPresetContext = createContext<LoudnessPresetContextProps | null>(null);

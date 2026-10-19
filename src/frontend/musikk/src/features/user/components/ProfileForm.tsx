@@ -1,4 +1,5 @@
 import { getErrorDetail } from "@/api/errorUtils.ts";
+import { useAuth } from "@/features/auth/hooks/useAuth.ts";
 import { ImageField } from "@/features/common/ImageField.tsx";
 import { Avatar, AvatarImage } from "@/features/ui/avatar.tsx";
 import { Button } from "@/features/ui/button.tsx";
@@ -14,7 +15,6 @@ import { Input } from "@/features/ui/input.tsx";
 import { Textarea } from "@/features/ui/textarea.tsx";
 import { useMeUpdateMutation } from "@/features/user/api/mutations.ts";
 import { ProfileFormSchema, ProfileFormValues } from "@/features/user/types.ts";
-import { useAuth } from "@/hooks/useAuth.ts";
 import { cn } from "@/lib/utils.ts";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";

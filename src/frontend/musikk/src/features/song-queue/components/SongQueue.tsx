@@ -2,7 +2,7 @@ import { getErrorDetail } from "@/api/errorUtils.ts";
 import { CollectionSong } from "@/features/collections/types.ts";
 import { EmptyState } from "@/features/common/EmptyState.tsx";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
-import { PlaybackContext } from "@/features/playback/providers/playbackContext.ts";
+import { usePlayback } from "@/features/playback/hooks/usePlayback.ts";
 import { removeItem, useQueueClear } from "@/features/song-queue/api/mutations.ts";
 import { useQueue } from "@/features/song-queue/api/queries.ts";
 import { queueKeys } from "@/features/song-queue/api/queryKeys.ts";
@@ -22,7 +22,6 @@ import { Spinner } from "@/features/ui/spinner";
 import { cn } from "@/lib/utils.ts";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Trash2 } from "lucide-react";
-import { useContext } from "react";
 import { toast } from "sonner";
 
 function SongQueueActions({
@@ -80,7 +79,7 @@ export function SongQueue() {
         },
     });
     const { data: queue, error, isPending, refetch } = useQueue();
-    const { playbackState } = useContext(PlaybackContext);
+    const { playbackState } = usePlayback();
 
     if (error) {
         return <QueryErrorBox message="Failed to load queue" onRetry={() => void refetch()} />;

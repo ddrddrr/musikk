@@ -1,10 +1,9 @@
 import { CollectionSong } from "@/features/collections/types.ts";
 import { useHandlePlay } from "@/features/playback/hooks/useHandlePlay.ts";
-import { PlaybackContext } from "@/features/playback/providers/playbackContext.ts";
-import { useContext } from "react";
+import { usePlayback } from "@/features/playback/hooks/usePlayback.ts";
 
 export function useSongPlayHandler(collectionSong: CollectionSong) {
-    const { isPlaybackActive, playbackState } = useContext(PlaybackContext);
+    const { isPlaybackActive, playbackState } = usePlayback();
     const handlePlay = useHandlePlay();
 
     const isThisChosen = collectionSong.uuid === playbackState?.collectionSong.uuid;
