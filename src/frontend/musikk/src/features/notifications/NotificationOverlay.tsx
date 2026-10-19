@@ -1,22 +1,22 @@
 import { EmptyState } from "@/features/common/EmptyState.tsx";
-import { NotificationListParams } from "@/features/notifications/api/queries.ts";
+import { NotificationListResponse } from "@/features/notifications/api/queries.ts";
 import { NotificationCard } from "@/features/notifications/NotificationCard.tsx";
 import {
-    IChatMessageNotification,
-    IFollowerNotification,
-    IReplyNotification,
+    ChatMessageNotification,
+    FollowerNotification,
+    ReplyNotification,
 } from "@/features/notifications/types.ts";
 
 interface NotificationOverlayProps {
-    notifications: NotificationListParams;
+    notifications: NotificationListResponse;
 }
 
 type TaggedNotification =
-    | (IReplyNotification & { _type: "reply" })
-    | (IFollowerNotification & { _type: "follower" })
-    | (IChatMessageNotification & { _type: "chat_message" });
+    | (ReplyNotification & { _type: "reply" })
+    | (FollowerNotification & { _type: "follower" })
+    | (ChatMessageNotification & { _type: "chat_message" });
 
-function replyTarget(notification: IReplyNotification): string {
+function replyTarget(notification: ReplyNotification): string {
     const { created_for, root_author_uuid } = notification.reply_publication;
     if (created_for.type === "feed") {
         return `/users/${root_author_uuid}`;

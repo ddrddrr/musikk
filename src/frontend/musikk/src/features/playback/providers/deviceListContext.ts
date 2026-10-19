@@ -1,8 +1,8 @@
-import { IPlaybackDevice } from "@/features/playback/types.ts";
+import { PlaybackDevice } from "@/features/playback/types.ts";
 import { createContext } from "react";
 
 interface DeviceListContextProps {
-    deviceList: IPlaybackDevice[];
-    activeDevice: IPlaybackDevice | null;
+    deviceList: PlaybackDevice[];
+    activeDevice: PlaybackDevice | null;
 }
 export const DeviceListContext = createContext<DeviceListContextProps | null>(null);

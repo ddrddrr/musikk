@@ -1,11 +1,10 @@
-import { URL } from "@/api/types.ts";
 import { BaseModel } from "@/features/common/types.ts";
 import { z } from "zod";
 
 export interface BaseUser extends BaseModel {
     kind?: "user";
     display_name: string;
-    avatar: URL;
+    avatar: string;
     bio: string;
     is_artist: boolean;
 }

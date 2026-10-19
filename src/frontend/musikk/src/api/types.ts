@@ -1,5 +1,4 @@
 export type UUID = string;
-export type URL = string;
 
 export interface PaginatedRes<T> {
     count: number;

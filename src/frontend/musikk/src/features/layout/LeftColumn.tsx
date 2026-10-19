@@ -1,5 +1,5 @@
 import { CollectionCard } from "@/features/collections/components/CollectionCard.tsx";
-import { ColletionCreateButton } from "@/features/collections/components/ColletionCreateButton.tsx";
+import { CollectionCreateButton } from "@/features/collections/components/CollectionCreateButton.tsx";
 import { EmptyState } from "@/features/common/EmptyState.tsx";
 import { useUserLibrary } from "@/features/user/hooks/useUserLibrary.ts";
 import { useMemo } from "react";
@@ -17,7 +17,7 @@ export function LeftColumn() {
         <div className="flex w-1/5 flex-col overflow-y-auto bg-brand p-4 pb-40">
             <div className="mb-4 flex items-center justify-center gap-3">
                 <h2 className="text-xl font-bold text-brand-foreground">Your stuff</h2>
-                <ColletionCreateButton />
+                <CollectionCreateButton />
             </div>
             {collections.length === 0 && (
                 <div className="flex flex-1 items-center justify-center">

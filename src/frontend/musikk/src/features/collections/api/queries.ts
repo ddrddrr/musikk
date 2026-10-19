@@ -33,15 +33,15 @@ export function useLatestCollections(params: CollectionListParams) {
     });
 }
 
-interface FetchUserLibraryParams {
+interface UserLibraryResponse {
     history: Collection;
     liked_songs: Collection;
     created_collections: Collection[];
     liked_collections: Collection[];
 }
 
-export async function fetchUserLibrary(userUUID: UUID): Promise<FetchUserLibraryParams> {
-    const response = await api_client.get<FetchUserLibraryParams>(
+export async function fetchUserLibrary(userUUID: UUID): Promise<UserLibraryResponse> {
+    const response = await api_client.get<UserLibraryResponse>(
         CollectionURLs.userLibrary(userUUID),
     );
     return response.data;

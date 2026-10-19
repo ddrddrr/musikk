@@ -9,19 +9,17 @@ import { userKeys } from "@/features/user/api/queryKeys.ts";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-interface ICollectionAddToLikedParams {
+interface CollectionAddToLikedParams {
     collectionUUID: UUID;
 }
 
-async function collectionAddToLiked({
-    collectionUUID,
-}: ICollectionAddToLikedParams): Promise<void> {
+async function collectionAddToLiked({ collectionUUID }: CollectionAddToLikedParams): Promise<void> {
     await api_client.post(CollectionURLs.collectionAddToLiked(collectionUUID));
 }
 
 async function collectionRemoveFromLiked({
     collectionUUID,
-}: ICollectionAddToLikedParams): Promise<void> {
+}: CollectionAddToLikedParams): Promise<void> {
     await api_client.delete(CollectionURLs.collectionAddToLiked(collectionUUID));
 }
 
@@ -53,11 +51,11 @@ export function useUnlikeCollection() {
     });
 }
 
-interface ICollectionDeleteParams {
+interface CollectionDeleteParams {
     collectionUUID: UUID;
 }
 
-async function deleteCollection({ collectionUUID }: ICollectionDeleteParams): Promise<void> {
+async function deleteCollection({ collectionUUID }: CollectionDeleteParams): Promise<void> {
     await api_client.delete(CollectionURLs.collectionDelete(collectionUUID));
 }
 
@@ -75,7 +73,7 @@ export function useDeleteCollection() {
     });
 }
 
-interface ICollectionRemoveSongParams {
+interface CollectionRemoveSongParams {
     collectionUUID: UUID;
     songCollectionSongUUID: UUID;
 }
@@ -83,7 +81,7 @@ interface ICollectionRemoveSongParams {
 async function collectionRemoveSong({
     collectionUUID,
     songCollectionSongUUID,
-}: ICollectionRemoveSongParams) {
+}: CollectionRemoveSongParams) {
     await api_client.delete(
         CollectionURLs.collectionRemoveSong(collectionUUID, songCollectionSongUUID),
     );
@@ -106,15 +104,15 @@ export function useRemoveSongFromCollection() {
     });
 }
 
-export interface IAddToLikedSongsParams {
+export interface AddToLikedSongsParams {
     collectionSongUUID: UUID;
 }
 
-async function addToLikedSongs({ collectionSongUUID }: IAddToLikedSongsParams) {
+async function addToLikedSongs({ collectionSongUUID }: AddToLikedSongsParams) {
     await api_client.post(CollectionURLs.likedSongsAddSong(collectionSongUUID));
 }
 
-async function removeFromLikedSongs({ collectionSongUUID }: IAddToLikedSongsParams) {
+async function removeFromLikedSongs({ collectionSongUUID }: AddToLikedSongsParams) {
     await api_client.delete(CollectionURLs.likedSongsAddSong(collectionSongUUID));
 }
 

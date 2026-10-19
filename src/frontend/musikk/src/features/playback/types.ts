@@ -1,6 +1,6 @@
 import { CollectionSong } from "@/features/collections/types.ts";
 
-export interface IPlaybackDevice {
+export interface PlaybackDevice {
     id: string;
     name: string;
     is_active: boolean;

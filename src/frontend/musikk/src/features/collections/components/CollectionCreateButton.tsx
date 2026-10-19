@@ -3,7 +3,7 @@ import { Plus } from "lucide-react";
 import { useState } from "react";
 import { PlaylistCreateDialog } from "./PlaylistCreateDialog.tsx";
 
-export function ColletionCreateButton() {
+export function CollectionCreateButton() {
     const [open, setOpen] = useState(false);
 
     return (
