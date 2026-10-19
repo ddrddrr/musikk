@@ -1,54 +1,41 @@
 import { CollectionSong } from "@/features/collections/types.ts";
+import { ActionButtonSize } from "@/features/common/types.ts";
 import { SongAddToLikedButton } from "@/features/songs/components/SongAddToLikedButton.tsx";
 import { SongAddToQueueButton } from "@/features/songs/components/SongAddToQueueButton.tsx";
 import { SongMenuButton } from "@/features/songs/components/SongMenuButton.tsx";
 import { SongPlayButton } from "@/features/songs/components/SongPlayButton.tsx";
 import { cn } from "@/lib/utils.ts";
+import { ReactNode } from "react";
 
-export const songButtonProps = {
-    compact: { size: 28, padding: "p-1", gap: "gap-1", iconSize: "text-lg" },
-    normal: { size: 40, padding: "p-2", gap: "gap-2", iconSize: "text-xl" },
-} as const;
+const GAP_BY_SIZE: Record<ActionButtonSize, string> = { sm: "gap-1", md: "gap-2" };
 
 type DefaultSongActionsProps = {
     collectionSong: CollectionSong;
-    size?: "compact" | "normal";
+    size?: ActionButtonSize;
+    playButton?: ReactNode;
     showRemoveFromPlaylist?: boolean;
     showAddToLiked?: boolean;
+    onRemoveFromQueue?: () => void;
 };
 
 export function DefaultSongActions({
     collectionSong,
-    size = "normal",
+    size = "md",
+    playButton,
     showRemoveFromPlaylist = false,
     showAddToLiked = true,
+    onRemoveFromQueue,
 }: DefaultSongActionsProps) {
-    const btn = songButtonProps[size];
     return (
-        <div className={cn("flex items-center", btn.gap)}>
-            <SongPlayButton
-                collectionSong={collectionSong}
-                size={btn.size}
-                className={btn.padding}
-            />
-            {showAddToLiked && (
-                <SongAddToLikedButton
-                    collectionSong={collectionSong}
-                    size={btn.size}
-                    className={btn.padding}
-                />
-            )}
-            <SongAddToQueueButton
-                collectionSong={collectionSong}
-                size={btn.size}
-                className={btn.padding}
-            />
+        <div className={cn("flex items-center", GAP_BY_SIZE[size])}>
+            {playButton ?? <SongPlayButton collectionSong={collectionSong} size={size} />}
+            {showAddToLiked && <SongAddToLikedButton collectionSong={collectionSong} size={size} />}
+            <SongAddToQueueButton collectionSong={collectionSong} size={size} />
             <SongMenuButton
                 collectionSong={collectionSong}
-                size={btn.size}
-                className={btn.padding}
-                iconSize={btn.iconSize}
+                size={size}
                 showRemoveFromPlaylist={showRemoveFromPlaylist}
+                onRemoveFromQueue={onRemoveFromQueue}
             />
         </div>
     );

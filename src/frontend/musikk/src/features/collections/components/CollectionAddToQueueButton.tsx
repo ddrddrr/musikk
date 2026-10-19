@@ -1,4 +1,5 @@
 import { CollectionDetailed } from "@/features/collections/types.ts";
+import { ActionButtonSize } from "@/features/common/types.ts";
 import { useAddCollection } from "@/features/song-queue/api/mutations.ts";
 import { Button } from "@/features/ui/button.tsx";
 import { IconTooltip } from "@/features/ui/tooltip";
@@ -8,12 +9,12 @@ import { toast } from "sonner";
 
 interface CollectionAddToQueueButtonProps {
     collection: CollectionDetailed;
-    showComments: boolean;
+    size: ActionButtonSize;
 }
 
 export const CollectionAddToQueueButton = memo(function CollectionAddToQueueButton({
     collection,
-    showComments,
+    size,
 }: CollectionAddToQueueButtonProps) {
     const addCollectionMutation = useAddCollection();
 
@@ -21,7 +22,7 @@ export const CollectionAddToQueueButton = memo(function CollectionAddToQueueButt
         <IconTooltip label="Queue">
             <Button
                 variant="muted"
-                size="icon"
+                size={`icon-${size}`}
                 aria-label="Add to queue"
                 onClick={() =>
                     addCollectionMutation.mutate(collection.uuid, {
@@ -29,9 +30,8 @@ export const CollectionAddToQueueButton = memo(function CollectionAddToQueueButt
                     })
                 }
                 disabled={addCollectionMutation.isPending}
-                className={showComments ? "size-8" : "size-12"}
             >
-                <BetweenHorizonalStart size={20} />
+                <BetweenHorizonalStart />
             </Button>
         </IconTooltip>
     );

@@ -8,7 +8,7 @@ import { formatDuration } from "@/utils/formatDuration.ts";
 import { cva } from "class-variance-authority";
 import { type ReactNode } from "react";
 
-type SongContainerSize = "compact" | "normal";
+type SongContainerSize = "sm" | "md";
 type SongContainerVariant = "inline" | "stacked";
 
 type SongContainerProps = {
@@ -26,63 +26,63 @@ const containerVariants = cva(
     {
         variants: {
             size: {
-                compact: "p-3 gap-2",
-                normal: "p-4 gap-4",
+                sm: "p-3 gap-2",
+                md: "p-4 gap-4",
             },
             variant: {
                 inline: "flex items-center justify-between",
                 stacked: "flex flex-col",
             },
         },
-        defaultVariants: { size: "normal", variant: "inline" },
+        defaultVariants: { size: "md", variant: "inline" },
     },
 );
 
 const imageVariants = cva("", {
     variants: {
         size: {
-            compact: "size-8",
-            normal: "size-10",
+            sm: "size-8",
+            md: "size-10",
         },
     },
-    defaultVariants: { size: "normal" },
+    defaultVariants: { size: "md" },
 });
 
 const titleVariants = cva("truncate font-bold text-foreground", {
     variants: {
         size: {
-            compact: "text-xs",
-            normal: "text-sm",
+            sm: "text-xs",
+            md: "text-sm",
         },
     },
-    defaultVariants: { size: "normal" },
+    defaultVariants: { size: "md" },
 });
 
 const authorsVariants = cva("truncate text-muted-foreground", {
     variants: {
         size: {
-            compact: "text-[10px]",
-            normal: "text-xs",
+            sm: "text-[10px]",
+            md: "text-xs",
         },
     },
-    defaultVariants: { size: "normal" },
+    defaultVariants: { size: "md" },
 });
 
 const durationVariants = cva("tabular-nums text-muted-foreground", {
     variants: {
         size: {
-            compact: "text-[10px]",
-            normal: "text-xs",
+            sm: "text-[10px]",
+            md: "text-xs",
         },
     },
-    defaultVariants: { size: "normal" },
+    defaultVariants: { size: "md" },
 });
 
-const gapClass = { compact: "gap-2", normal: "gap-4" } as const;
+const gapClass = { sm: "gap-2", md: "gap-4" } as const;
 
 export function SongContainer({
     collectionSong,
-    size = "normal",
+    size = "md",
     variant = "inline",
     className,
     showImage = true,

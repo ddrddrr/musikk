@@ -22,26 +22,26 @@ type SongCardProps = {
 const songCardWidthVariants = cva("", {
     variants: {
         size: {
-            small: "w-25",
-            medium: "w-35",
-            big: "w-60",
+            sm: "w-25",
+            md: "w-35",
+            lg: "w-60",
         },
     },
-    defaultVariants: { size: "medium" },
+    defaultVariants: { size: "md" },
 });
 
 const songCardImageVariants = cva("w-full", {
     variants: {
         size: {
-            small: "h-20",
-            medium: "h-35",
-            big: "h-60",
+            sm: "h-20",
+            md: "h-35",
+            lg: "h-60",
         },
     },
-    defaultVariants: { size: "medium" },
+    defaultVariants: { size: "md" },
 });
 
-export function SongCard({ collectionSong, size = "medium", onClick = undefined }: SongCardProps) {
+export function SongCard({ collectionSong, size = "md", onClick = undefined }: SongCardProps) {
     const navigateToAlbum = useNavigateToSongAlbum();
     const { uuid, title, authors, image } = collectionSong.song;
 

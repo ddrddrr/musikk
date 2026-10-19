@@ -1,4 +1,5 @@
 import { CollectionSong } from "@/features/collections/types.ts";
+import { ActionButtonSize } from "@/features/common/types.ts";
 import { useAddSong } from "@/features/song-queue/api/mutations.ts";
 import { Button } from "@/features/ui/button.tsx";
 import { IconTooltip } from "@/features/ui/tooltip";
@@ -7,23 +8,17 @@ import { toast } from "sonner";
 
 interface SongAddToQueueButtonProps {
     collectionSong: CollectionSong;
-    size?: number;
-    className?: string;
+    size?: ActionButtonSize;
 }
 
-export function SongAddToQueueButton({
-    collectionSong,
-    size = 40,
-    className = "",
-}: SongAddToQueueButtonProps) {
+export function SongAddToQueueButton({ collectionSong, size = "md" }: SongAddToQueueButtonProps) {
     const addSongMutation = useAddSong();
-    const iconSize = Math.floor(size * 0.6);
 
     return (
         <IconTooltip label="Queue">
             <Button
                 variant="muted"
-                size="icon"
+                size={`icon-${size}`}
                 aria-label="Add to queue"
                 onClick={() =>
                     addSongMutation.mutate(collectionSong.uuid, {
@@ -31,10 +26,8 @@ export function SongAddToQueueButton({
                     })
                 }
                 disabled={addSongMutation.isPending}
-                style={{ width: size, height: size }}
-                className={className}
             >
-                <BetweenHorizonalStart size={iconSize} />
+                <BetweenHorizonalStart />
             </Button>
         </IconTooltip>
     );

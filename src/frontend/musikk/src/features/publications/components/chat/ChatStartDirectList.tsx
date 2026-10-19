@@ -63,7 +63,7 @@ export function ChatStartDirectList() {
                     <UserCard
                         key={friend.uuid}
                         user={friend}
-                        size="small"
+                        size="sm"
                         onClick={handleFriendClick}
                     />
                 ))}

@@ -1,4 +1,5 @@
 import { CollectionSong } from "@/features/collections/types.ts";
+import { ActionButtonSize } from "@/features/common/types.ts";
 import { useSongActions } from "@/features/songs/hooks/useSongActions.ts";
 import { Button } from "@/features/ui/button";
 import {
@@ -8,24 +9,19 @@ import {
     DropdownMenuTrigger,
 } from "@/features/ui/dropdown-menu.tsx";
 import { IconTooltip } from "@/features/ui/tooltip";
-import { cn } from "@/lib/utils.ts";
 import { BetweenHorizonalStart, EllipsisVertical, Play, Trash2 } from "lucide-react";
 import { SongAddToPlaylistSubmenu } from "./SongAddToPlaylistSubmenu.tsx";
 
 interface SongMenuButtonProps {
     collectionSong: CollectionSong;
-    size: number;
-    className?: string;
-    iconSize: string;
+    size?: ActionButtonSize;
     showRemoveFromPlaylist?: boolean;
     onRemoveFromQueue?: () => void;
 }
 
 export function SongMenuButton({
     collectionSong,
-    size,
-    className,
-    iconSize,
+    size = "md",
     showRemoveFromPlaylist = false,
     onRemoveFromQueue,
 }: SongMenuButtonProps) {
@@ -37,12 +33,11 @@ export function SongMenuButton({
                 <DropdownMenuTrigger asChild>
                     <Button
                         variant="ghost"
-                        size="icon"
+                        size={`icon-${size}`}
                         aria-label="More Actions"
-                        style={{ width: size, height: size }}
-                        className={cn("hover:text-accent-foreground", className)}
+                        className="hover:text-accent-foreground"
                     >
-                        <EllipsisVertical className={iconSize} />
+                        <EllipsisVertical />
                     </Button>
                 </DropdownMenuTrigger>
             </IconTooltip>

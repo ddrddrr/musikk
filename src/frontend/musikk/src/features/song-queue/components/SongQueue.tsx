@@ -1,5 +1,4 @@
 import { getErrorDetail } from "@/api/errorUtils.ts";
-import { CollectionSong } from "@/features/collections/types.ts";
 import { EmptyState } from "@/features/common/EmptyState.tsx";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { usePlayback } from "@/features/playback/hooks/usePlayback.ts";
@@ -7,64 +6,16 @@ import { removeItem, useQueueClear } from "@/features/song-queue/api/mutations.t
 import { useQueue } from "@/features/song-queue/api/queries.ts";
 import { queueKeys } from "@/features/song-queue/api/queryKeys.ts";
 import { SongQueuePlayButton } from "@/features/song-queue/components/SongQueueContainerPlayButton.tsx";
-import { QueueItem } from "@/features/song-queue/types.ts";
-import { songButtonProps } from "@/features/songs/components/DefaultSongActions.tsx";
-import { SongAddToLikedButton } from "@/features/songs/components/SongAddToLikedButton.tsx";
-import { SongAddToQueueButton } from "@/features/songs/components/SongAddToQueueButton.tsx";
+import { DefaultSongActions } from "@/features/songs/components/DefaultSongActions.tsx";
 import { SongContainer } from "@/features/songs/components/SongContainer.tsx";
 import { SongContextMenu } from "@/features/songs/components/SongContextMenu.tsx";
 import { SongDisplay } from "@/features/songs/components/SongDisplay.tsx";
-import { SongMenuButton } from "@/features/songs/components/SongMenuButton.tsx";
-import { SongPlayButton } from "@/features/songs/components/SongPlayButton.tsx";
 import { Button } from "@/features/ui/button.tsx";
 import { ScrollArea } from "@/features/ui/scroll-area.tsx";
 import { Spinner } from "@/features/ui/spinner";
-import { cn } from "@/lib/utils.ts";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
-
-function SongQueueActions({
-    collectionSong,
-    item,
-    onRemoveFromQueue,
-}: {
-    collectionSong: CollectionSong;
-    item?: QueueItem;
-    onRemoveFromQueue?: () => void;
-}) {
-    const btn = songButtonProps.normal;
-    return (
-        <div className={cn("flex items-center", btn.gap)}>
-            {item ? (
-                <SongQueuePlayButton item={item} size={btn.size} className={btn.padding} />
-            ) : (
-                <SongPlayButton
-                    collectionSong={collectionSong}
-                    size={btn.size}
-                    className={btn.padding}
-                />
-            )}
-            <SongAddToLikedButton
-                collectionSong={collectionSong}
-                size={btn.size}
-                className={btn.padding}
-            />
-            <SongAddToQueueButton
-                collectionSong={collectionSong}
-                size={btn.size}
-                className={btn.padding}
-            />
-            <SongMenuButton
-                collectionSong={collectionSong}
-                size={btn.size}
-                className={btn.padding}
-                iconSize={btn.iconSize}
-                onRemoveFromQueue={onRemoveFromQueue}
-            />
-        </div>
-    );
-}
 
 export function SongQueue() {
     const queryClient = useQueryClient();
@@ -122,9 +73,9 @@ export function SongQueue() {
                                         <SongContainer
                                             collectionSong={item.collection_song}
                                             actions={
-                                                <SongQueueActions
+                                                <DefaultSongActions
                                                     collectionSong={item.collection_song}
-                                                    item={item}
+                                                    playButton={<SongQueuePlayButton item={item} />}
                                                     onRemoveFromQueue={() =>
                                                         removeItemMutation.mutate(item.uuid)
                                                     }
@@ -146,7 +97,7 @@ export function SongQueue() {
                                         <SongContextMenu song={cs}>
                                             <SongContainer
                                                 collectionSong={cs}
-                                                actions={<SongQueueActions collectionSong={cs} />}
+                                                actions={<DefaultSongActions collectionSong={cs} />}
                                             />
                                         </SongContextMenu>
                                     </li>

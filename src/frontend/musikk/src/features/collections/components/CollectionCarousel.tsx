@@ -41,7 +41,7 @@ export function CollectionCarousel({ collections, title }: CollectionsCarouselPr
                                 >
                                     <CollectionCard
                                         collection={collection}
-                                        size="medium"
+                                        size="md"
                                         className="w-full"
                                     />
                                 </CarouselItem>

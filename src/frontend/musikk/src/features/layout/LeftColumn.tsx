@@ -41,7 +41,7 @@ export function LeftColumn() {
                 <ul className="flex flex-col items-center gap-6" role="list">
                     {collections.map((collection) => (
                         <li key={collection.uuid}>
-                            <CollectionCard collection={collection} size="big" />
+                            <CollectionCard collection={collection} size="lg" />
                         </li>
                     ))}
                 </ul>

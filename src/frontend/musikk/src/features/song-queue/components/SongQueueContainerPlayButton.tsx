@@ -1,28 +1,20 @@
+import { ActionButtonSize } from "@/features/common/types.ts";
 import { useQueuePlayHandler } from "@/features/song-queue/hooks/useQueuePlayHandler.ts";
 import { QueueItem } from "@/features/song-queue/types.ts";
 import { Button } from "@/features/ui/button.tsx";
-import { cn } from "@/lib/utils.ts";
 import { Play } from "lucide-react";
 
 interface SongQueuePlayButtonProps {
     item: QueueItem;
-    className?: string;
-    size?: number;
+    size?: ActionButtonSize;
 }
 
-export function SongQueuePlayButton({ item, className = "", size = 20 }: SongQueuePlayButtonProps) {
+export function SongQueuePlayButton({ item, size = "md" }: SongQueuePlayButtonProps) {
     const { onClick } = useQueuePlayHandler(item);
-    const iconSize = Math.floor(size * 0.6);
 
     return (
-        <Button
-            variant="brand"
-            size="icon"
-            style={{ width: size, height: size }}
-            onClick={onClick}
-            className={cn("flex items-center justify-center p-0", className)}
-        >
-            <Play size={iconSize} />
+        <Button variant="brand" size={`icon-${size}`} onClick={onClick}>
+            <Play />
         </Button>
     );
 }

@@ -3,6 +3,7 @@ import { CollectionAddToQueueButton } from "@/features/collections/components/Co
 import { CollectionPlayButton } from "@/features/collections/components/CollectionPlayButton.tsx";
 import { CollectionDetailed } from "@/features/collections/types.ts";
 import { MediaThumbnail } from "@/features/common/MediaThumbnail.tsx";
+import { ActionButtonSize } from "@/features/common/types.ts";
 import { Button } from "@/features/ui/button.tsx";
 import {
     DropdownMenu,
@@ -28,23 +29,18 @@ interface SongCollectionHeaderProps {
 }
 
 function PlaylistMenuDropdown({
-    showComments,
+    size,
     onDeleteClick,
 }: {
-    showComments: boolean;
+    size: ActionButtonSize;
     onDeleteClick?: () => void;
 }) {
     return (
         <DropdownMenu>
             <IconTooltip label="More Actions">
                 <DropdownMenuTrigger asChild>
-                    <Button
-                        variant="muted"
-                        size="icon"
-                        aria-label="More Actions"
-                        className={showComments ? "size-8" : "size-12"}
-                    >
-                        <EllipsisVertical size={20} />
+                    <Button variant="muted" size={`icon-${size}`} aria-label="More Actions">
+                        <EllipsisVertical />
                     </Button>
                 </DropdownMenuTrigger>
             </IconTooltip>
@@ -68,6 +64,20 @@ export const CollectionHeader = memo(function SongCollectionHeader({
     isAuthorPlaylist,
     onDeleteClick,
 }: SongCollectionHeaderProps) {
+    const buttonSize = showComments ? "sm" : "md";
+    const actionButtons = (
+        <>
+            {songsCount > 0 && <CollectionPlayButton collection={collection} size={buttonSize} />}
+            {renderAddToLikedButton && (
+                <CollectionAddToLikedButton collection={collection} size={buttonSize} />
+            )}
+            <CollectionAddToQueueButton collection={collection} size={buttonSize} />
+            {isAuthorPlaylist && (
+                <PlaylistMenuDropdown size={buttonSize} onDeleteClick={onDeleteClick} />
+            )}
+        </>
+    );
+
     return (
         <>
             <div className="flex items-center gap-4 rounded-sm border-2 border-foreground bg-card p-6">
@@ -84,30 +94,7 @@ export const CollectionHeader = memo(function SongCollectionHeader({
                     {showComments ? (
                         <div className="mb-2">
                             <p className="truncate text-sm font-bold">{collection.title}</p>
-                            <div className="mt-2 flex gap-3">
-                                {songsCount > 0 && (
-                                    <CollectionPlayButton
-                                        collection={collection}
-                                        showComments={showComments}
-                                    />
-                                )}
-                                {renderAddToLikedButton && (
-                                    <CollectionAddToLikedButton
-                                        collection={collection}
-                                        showComments={showComments}
-                                    />
-                                )}
-                                <CollectionAddToQueueButton
-                                    collection={collection}
-                                    showComments={showComments}
-                                />
-                                {isAuthorPlaylist && (
-                                    <PlaylistMenuDropdown
-                                        showComments={showComments}
-                                        onDeleteClick={onDeleteClick}
-                                    />
-                                )}
-                            </div>
+                            <div className="mt-2 flex gap-3">{actionButtons}</div>
                         </div>
                     ) : (
                         <div className="flex items-center justify-between">
@@ -123,30 +110,7 @@ export const CollectionHeader = memo(function SongCollectionHeader({
                                     </p>
                                 )}
                             </div>
-                            <div className="ml-2 flex flex-shrink-0 gap-2">
-                                {songsCount > 0 && (
-                                    <CollectionPlayButton
-                                        collection={collection}
-                                        showComments={showComments}
-                                    />
-                                )}
-                                {renderAddToLikedButton && (
-                                    <CollectionAddToLikedButton
-                                        collection={collection}
-                                        showComments={showComments}
-                                    />
-                                )}
-                                <CollectionAddToQueueButton
-                                    collection={collection}
-                                    showComments={showComments}
-                                />
-                                {isAuthorPlaylist && (
-                                    <PlaylistMenuDropdown
-                                        showComments={showComments}
-                                        onDeleteClick={onDeleteClick}
-                                    />
-                                )}
-                            </div>
+                            <div className="ml-2 flex flex-shrink-0 gap-2">{actionButtons}</div>
                         </div>
                     )}
                 </div>

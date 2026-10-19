@@ -23,23 +23,17 @@ type CollectionCardProps = {
 const collectionCardWidthVariants = cva("", {
     variants: {
         size: {
-            small: "w-25",
-            medium: "w-35",
-            big: "w-60",
+            sm: "w-25",
+            md: "w-35",
+            lg: "w-60",
         },
     },
-    defaultVariants: { size: "medium" },
+    defaultVariants: { size: "md" },
 });
-
-const spacingBySize: Record<CardSize, "sm" | "md" | "lg"> = {
-    small: "sm",
-    medium: "md",
-    big: "lg",
-};
 
 export function CollectionCard({
     collection,
-    size = "medium",
+    size = "md",
     className,
     onClick = undefined,
 }: CollectionCardProps) {
@@ -50,7 +44,7 @@ export function CollectionCard({
             <Card
                 key={uuid}
                 variant="panel"
-                spacing={spacingBySize[size]}
+                spacing={size}
                 className={cn(
                     collectionCardWidthVariants({ size }),
                     "relative py-0 transition-all duration-200",

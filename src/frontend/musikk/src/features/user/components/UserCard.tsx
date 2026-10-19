@@ -23,12 +23,12 @@ type UserCardProps = {
 const userCardWidthVariants = cva("", {
     variants: {
         size: {
-            small: "w-24",
-            medium: "w-40",
-            big: "w-44",
+            sm: "w-24",
+            md: "w-40",
+            lg: "w-44",
         },
     },
-    defaultVariants: { size: "medium" },
+    defaultVariants: { size: "md" },
 });
 
 const userCardPaddingVariants = cva(
@@ -36,16 +36,16 @@ const userCardPaddingVariants = cva(
     {
         variants: {
             size: {
-                small: "py-2 px-1",
-                medium: "py-2 px-2",
-                big: "py-3 px-3",
+                sm: "py-2 px-1",
+                md: "py-2 px-2",
+                lg: "py-3 px-3",
             },
         },
-        defaultVariants: { size: "medium" },
+        defaultVariants: { size: "md" },
     },
 );
 
-export function UserCard({ user, size = "medium", onClick }: UserCardProps) {
+export function UserCard({ user, size = "md", onClick }: UserCardProps) {
     const myUuid = useUserUUID();
     const { isFollowing, toggleFollow } = useFollowUser(user.uuid);
 

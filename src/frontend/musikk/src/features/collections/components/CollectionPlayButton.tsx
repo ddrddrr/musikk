@@ -1,27 +1,20 @@
 import { useCollectionPlayHandler } from "@/features/collections/hooks/useCollectionPlayHandler.ts";
 import { CollectionDetailed } from "@/features/collections/types.ts";
+import { ActionButtonSize } from "@/features/common/types.ts";
 import { Button } from "@/features/ui/button.tsx";
 import { Pause, Play } from "lucide-react";
 
-interface SongCollectionPlayButtonProps {
+interface CollectionPlayButtonProps {
     collection: CollectionDetailed;
-    showComments: boolean;
+    size: ActionButtonSize;
 }
 
-export function CollectionPlayButton({ collection, showComments }: SongCollectionPlayButtonProps) {
+export function CollectionPlayButton({ collection, size }: CollectionPlayButtonProps) {
     const { isThisCollectionPlaying, onClick } = useCollectionPlayHandler(collection);
 
-    const renderPlayPauseIcon = () => {
-        return isThisCollectionPlaying ? <Pause size={20} /> : <Play size={20} />;
-    };
     return (
-        <Button
-            variant="brand"
-            size="icon"
-            onClick={onClick}
-            className={showComments ? "size-8" : "size-12"}
-        >
-            {renderPlayPauseIcon()}
+        <Button variant="brand" size={`icon-${size}`} onClick={onClick}>
+            {isThisCollectionPlaying ? <Pause /> : <Play />}
         </Button>
     );
 }

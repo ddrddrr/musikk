@@ -53,7 +53,7 @@ export function SearchWindow({ onItemSelect, songMode = "card" }: SearchWindowPr
                             <SongContainer
                                 key={song.uuid}
                                 collectionSong={song}
-                                size="compact"
+                                size="sm"
                                 className={onItemSelect ? "cursor-pointer" : undefined}
                             />
                         ) : (
@@ -61,7 +61,7 @@ export function SearchWindow({ onItemSelect, songMode = "card" }: SearchWindowPr
                                 key={song.uuid}
                                 collectionSong={song}
                                 onClick={onItemSelect}
-                                size={"small"}
+                                size="sm"
                             />
                         );
                     })}
@@ -81,7 +81,7 @@ export function SearchWindow({ onItemSelect, songMode = "card" }: SearchWindowPr
                         <CollectionCard
                             key={collection.uuid}
                             collection={collection}
-                            size="small"
+                            size="sm"
                             onClick={onItemSelect}
                         />
                     ))}
@@ -98,7 +98,7 @@ export function SearchWindow({ onItemSelect, songMode = "card" }: SearchWindowPr
                 <h3 className="mb-2 text-sm font-semibold">{label}</h3>
                 <div className="grid grid-cols-2 gap-2">
                     {items.map((user) => (
-                        <UserCard key={user.uuid} user={user} size="small" onClick={onItemSelect} />
+                        <UserCard key={user.uuid} user={user} size="sm" onClick={onItemSelect} />
                     ))}
                 </div>
             </div>

@@ -40,12 +40,12 @@ export function ListeningFeed() {
                                 <div className="mt-2">
                                     <SongContainer
                                         collectionSong={song}
-                                        size="compact"
+                                        size="sm"
                                         showImage={false}
                                         actions={
                                             <DefaultSongActions
                                                 collectionSong={song}
-                                                size="compact"
+                                                size="sm"
                                                 showAddToLiked={false}
                                             />
                                         }

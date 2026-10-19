@@ -8,10 +8,7 @@ import { BackButton } from "@/features/common/BackButton.tsx";
 import { EmptyState } from "@/features/common/EmptyState.tsx";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { CommentBox } from "@/features/publications/components/collection-comments/CommentBox.tsx";
-import {
-    DefaultSongActions,
-    songButtonProps,
-} from "@/features/songs/components/DefaultSongActions.tsx";
+import { DefaultSongActions } from "@/features/songs/components/DefaultSongActions.tsx";
 import { SongContainer } from "@/features/songs/components/SongContainer.tsx";
 import { SongMenuButton } from "@/features/songs/components/SongMenuButton.tsx";
 import { Spinner } from "@/features/ui/spinner";
@@ -72,8 +69,7 @@ export function CollectionContainer({ collectionUUID }: CollectionContainerProps
         !!currUserUUID && collection?.authors.map((a) => a.uuid).includes(currUserUUID);
     const isAuthorPlaylist = removeFromPlaylistCtxBtn && collection.type === "playlist";
 
-    const songSize = showComments ? "compact" : "normal";
-    const btn = songButtonProps[songSize];
+    const songSize = showComments ? "sm" : "md";
 
     return (
         <div className="mx-auto max-w-7xl p-4">
@@ -101,15 +97,11 @@ export function CollectionContainer({ collectionUUID }: CollectionContainerProps
                             <ul className="flex flex-col gap-2">
                                 {songs.map((collectionSong, index) => {
                                     const songActions = showComments ? (
-                                        <div className={cn("flex items-center", btn.gap)}>
-                                            <SongMenuButton
-                                                collectionSong={collectionSong}
-                                                size={btn.size}
-                                                className={btn.padding}
-                                                iconSize={btn.iconSize}
-                                                showRemoveFromPlaylist={removeFromPlaylistCtxBtn}
-                                            />
-                                        </div>
+                                        <SongMenuButton
+                                            collectionSong={collectionSong}
+                                            size="sm"
+                                            showRemoveFromPlaylist={removeFromPlaylistCtxBtn}
+                                        />
                                     ) : (
                                         <DefaultSongActions
                                             collectionSong={collectionSong}

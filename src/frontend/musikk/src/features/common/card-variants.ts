@@ -1,36 +1,36 @@
 import { cva } from "class-variance-authority";
 
-export type CardSize = "small" | "medium" | "big";
+export type CardSize = "sm" | "md" | "lg";
 
 export const cardTitleVariants = cva("truncate font-bold", {
     variants: {
         size: {
-            small: "text-sm",
-            medium: "text-base",
-            big: "text-xl",
+            sm: "text-sm",
+            md: "text-base",
+            lg: "text-xl",
         },
     },
-    defaultVariants: { size: "medium" },
+    defaultVariants: { size: "md" },
 });
 
 export const cardSubtitleVariants = cva("truncate text-muted-foreground", {
     variants: {
         size: {
-            small: "text-xs",
-            medium: "text-sm",
-            big: "text-base",
+            sm: "text-xs",
+            md: "text-sm",
+            lg: "text-base",
         },
     },
-    defaultVariants: { size: "medium" },
+    defaultVariants: { size: "md" },
 });
 
 export const cardPaddingVariants = cva("border-t-2 border-foreground bg-muted", {
     variants: {
         size: {
-            small: "p-1",
-            medium: "p-2",
-            big: "p-3",
+            sm: "p-1",
+            md: "p-2",
+            lg: "p-3",
         },
     },
-    defaultVariants: { size: "medium" },
+    defaultVariants: { size: "md" },
 });
