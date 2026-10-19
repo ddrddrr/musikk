@@ -1,4 +1,4 @@
-import { PaginatedRes } from "./types";
+import { PaginatedRes } from "@/api/types.ts";
 
 export function getOffsetFromNextUrl(lastPage: PaginatedRes<unknown>): number | undefined {
     if (!lastPage.next) return undefined;

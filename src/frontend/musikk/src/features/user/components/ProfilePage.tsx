@@ -5,7 +5,7 @@ import { CenteredSpinner } from "@/features/common/CenteredSpinner.tsx";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { UserFeed } from "@/features/publications/components/posts/UserFeed.tsx";
 import { Button } from "@/features/ui/button.tsx";
-import { Spinner } from "@/features/ui/spinner";
+import { Spinner } from "@/features/ui/spinner.tsx";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/features/ui/tabs.tsx";
 import { fetchUser } from "@/features/user/api/queries.ts";
 import { userKeys } from "@/features/user/api/queryKeys.ts";

@@ -11,7 +11,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/features/ui/dropdown-menu.tsx";
-import { IconTooltip } from "@/features/ui/tooltip";
+import { IconTooltip } from "@/features/ui/tooltip.tsx";
 import { AuthorLinks } from "@/features/user/components/AuthorLinks.tsx";
 import { cn } from "@/lib/utils.ts";
 import { EllipsisVertical, Trash2 } from "lucide-react";

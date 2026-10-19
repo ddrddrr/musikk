@@ -1,6 +1,6 @@
 import { BackButton } from "@/features/common/BackButton.tsx";
+import { ChatBox } from "@/features/publications/components/chat/ChatBox.tsx";
 import { useParams } from "react-router-dom";
-import { ChatBox } from "./ChatBox";
 
 export function ChatBoxRouteHandler() {
     const { chatUUID } = useParams<{ chatUUID: string }>();

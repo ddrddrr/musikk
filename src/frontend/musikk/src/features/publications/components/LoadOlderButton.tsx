@@ -1,5 +1,5 @@
 import { Button } from "@/features/ui/button.tsx";
-import { Spinner } from "@/features/ui/spinner";
+import { Spinner } from "@/features/ui/spinner.tsx";
 
 type LoadOlderButtonProps = {
     hasNextPage: boolean;

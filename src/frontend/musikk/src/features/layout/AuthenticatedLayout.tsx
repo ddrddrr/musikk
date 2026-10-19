@@ -1,7 +1,7 @@
 import { Header } from "@/features/layout/header/Header.tsx";
 import { PlayerBox } from "@/features/player/PlayerBox.tsx";
 import { SongQueue } from "@/features/song-queue/components/SongQueue.tsx";
-import { Toaster } from "@/features/ui/sonner";
+import { Toaster } from "@/features/ui/sonner.tsx";
 import { useState } from "react";
 import { Outlet } from "react-router-dom";
 

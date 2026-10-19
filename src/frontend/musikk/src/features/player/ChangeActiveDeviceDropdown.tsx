@@ -8,7 +8,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/features/ui/dropdown-menu.tsx";
-import { IconTooltip } from "@/features/ui/tooltip";
+import { IconTooltip } from "@/features/ui/tooltip.tsx";
 import { Computer } from "lucide-react";
 
 export function ChangeActiveDeviceDropdown() {

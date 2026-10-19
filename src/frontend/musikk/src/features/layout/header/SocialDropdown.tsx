@@ -1,11 +1,11 @@
-import { Button } from "@/features/ui/button";
+import { Button } from "@/features/ui/button.tsx";
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/features/ui/dropdown-menu.tsx";
-import { IconTooltip } from "@/features/ui/tooltip";
+import { IconTooltip } from "@/features/ui/tooltip.tsx";
 import { MessageSquareText } from "lucide-react";
 import { Link } from "react-router-dom";
 

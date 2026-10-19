@@ -1,5 +1,5 @@
 import { LoginForm } from "@/features/auth/components/LoginForm.tsx";
-import { Card, CardHeader, CardTitle } from "@/features/ui/card";
+import { Card, CardHeader, CardTitle } from "@/features/ui/card.tsx";
 
 export function LoginPage() {
     return (

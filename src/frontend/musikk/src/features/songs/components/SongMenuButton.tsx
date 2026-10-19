@@ -1,16 +1,16 @@
 import { CollectionSong } from "@/features/collections/types.ts";
 import { ActionButtonSize } from "@/features/common/types.ts";
+import { SongAddToPlaylistSubmenu } from "@/features/songs/components/SongAddToPlaylistSubmenu.tsx";
 import { useSongMenuItems } from "@/features/songs/hooks/useSongMenuItems.ts";
-import { Button } from "@/features/ui/button";
+import { Button } from "@/features/ui/button.tsx";
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/features/ui/dropdown-menu.tsx";
-import { IconTooltip } from "@/features/ui/tooltip";
+import { IconTooltip } from "@/features/ui/tooltip.tsx";
 import { EllipsisVertical } from "lucide-react";
-import { SongAddToPlaylistSubmenu } from "./SongAddToPlaylistSubmenu.tsx";
 
 interface SongMenuButtonProps {
     collectionSong: CollectionSong;

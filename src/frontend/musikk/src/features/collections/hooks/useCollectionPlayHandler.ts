@@ -1,4 +1,4 @@
-import { Collection } from "@/features/collections/types";
+import { Collection } from "@/features/collections/types.ts";
 import { useHandlePlay } from "@/features/playback/hooks/useHandlePlay.ts";
 import { usePlayback } from "@/features/playback/hooks/usePlayback.ts";
 import { useCallback } from "react";

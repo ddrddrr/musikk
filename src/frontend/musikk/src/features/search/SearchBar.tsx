@@ -1,10 +1,10 @@
-import { AttachmentObj } from "@/features/publications/types";
-import { SearchWindow } from "@/features/search/SearchWindow";
-import { Popover, PopoverContent, PopoverTrigger } from "@/features/ui/popover";
+import { AttachmentObj } from "@/features/publications/types.ts";
+import { SearchWindow } from "@/features/search/SearchWindow.tsx";
+import { Button } from "@/features/ui/button.tsx";
+import { Popover, PopoverContent, PopoverTrigger } from "@/features/ui/popover.tsx";
 import { Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { Button } from "../ui/button";
 
 interface SearchBarProps {
     onItemSelect?: (obj: AttachmentObj) => void;

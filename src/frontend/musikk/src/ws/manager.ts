@@ -1,4 +1,4 @@
-import { WSClient } from "./client";
+import { WSClient } from "@/ws/client.ts";
 
 // a singleton so for react strict mode double-mounts
 // consumers share a single WS connection instead of tearing it down.

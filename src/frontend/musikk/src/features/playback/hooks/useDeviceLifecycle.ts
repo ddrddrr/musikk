@@ -1,8 +1,8 @@
 import { THIS_DEVICE, ThisDevice } from "@/features/playback/thisDevice.ts";
+import { useRegisterDeviceAction } from "@/features/playback/ws/actionHooks.ts";
 import { useWSClient } from "@/hooks/useWSClient.ts";
 import { WSClient } from "@/ws/client.ts";
 import { useEffect } from "react";
-import { useRegisterDeviceAction } from "../ws/actionHooks.ts";
 
 type DeviceAction = (device: ThisDevice) => void;
 

@@ -1,3 +1,4 @@
+import { CollectionCreationFormValues } from "@/features/collections/hooks/useCollectionCreation.ts";
 import { ImageField } from "@/features/common/ImageField.tsx";
 import { Button } from "@/features/ui/button.tsx";
 import {
@@ -11,7 +12,6 @@ import {
 import { Input } from "@/features/ui/input.tsx";
 import { Switch } from "@/features/ui/switch.tsx";
 import { UseFormReturn } from "react-hook-form";
-import { CollectionCreationFormValues } from "../hooks/useCollectionCreation.ts";
 
 type CollectionFormProps = {
     form: UseFormReturn<CollectionCreationFormValues>;

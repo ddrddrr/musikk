@@ -10,7 +10,7 @@ import { MediaThumbnail } from "@/features/common/MediaThumbnail.tsx";
 import { StretchedLink } from "@/features/common/StretchedLink.tsx";
 import { Card, CardContent } from "@/features/ui/card.tsx";
 import { AuthorLinks } from "@/features/user/components/AuthorLinks.tsx";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils.ts";
 import { cva } from "class-variance-authority";
 
 type CollectionCardProps = {

@@ -1,6 +1,6 @@
 import { type LoudnessPreset } from "@/features/player/providers/loudnessPresetContext.ts";
-import { Button } from "@/features/ui/button";
-import { cn } from "@/lib/utils";
+import { Button } from "@/features/ui/button.tsx";
+import { cn } from "@/lib/utils.ts";
 
 // TODO: move? kinda a player concern but from now on used only in settings
 interface LoudnessPresetSelectorProps {

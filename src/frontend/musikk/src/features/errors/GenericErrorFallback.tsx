@@ -1,4 +1,4 @@
-import { Button } from "@/features/ui/button";
+import { Button } from "@/features/ui/button.tsx";
 
 export function GenericErrorFallback() {
     return (

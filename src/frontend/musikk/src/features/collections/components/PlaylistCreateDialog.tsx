@@ -1,8 +1,8 @@
+import { CollectionForm } from "@/features/collections/components/CollectionForm.tsx";
+import { useCollectionCreation } from "@/features/collections/hooks/useCollectionCreation.ts";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/features/ui/dialog.tsx";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { useCollectionCreation } from "../hooks/useCollectionCreation.ts";
-import { CollectionForm } from "./CollectionForm.tsx";
 
 type PlaylistCreateDialogProps = {
     open: boolean;

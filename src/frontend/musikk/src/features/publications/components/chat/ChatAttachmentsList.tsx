@@ -9,7 +9,7 @@ import { UserAttachmentRow } from "@/features/publications/components/chat/UserA
 import { Attachment } from "@/features/publications/types.ts";
 import { Button } from "@/features/ui/button.tsx";
 import { ScrollArea } from "@/features/ui/scroll-area.tsx";
-import { Spinner } from "@/features/ui/spinner";
+import { Spinner } from "@/features/ui/spinner.tsx";
 
 type ChatAttachmentsListProps = {
     chatUUID: UUID;

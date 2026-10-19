@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils.ts";
 import { Music } from "lucide-react";
 import { type ReactNode } from "react";
 

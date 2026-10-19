@@ -1,6 +1,6 @@
-import { Spinner } from "@/features/ui/spinner";
+import { SongUploadStatus } from "@/features/album-upload/types.ts";
+import { Spinner } from "@/features/ui/spinner.tsx";
 import { cn } from "@/lib/utils.ts";
-import { SongUploadStatus } from "../types.ts";
 
 function inProgressLabel(status: SongUploadStatus) {
     if (status === "pending") return "waiting";

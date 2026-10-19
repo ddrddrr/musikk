@@ -1,4 +1,4 @@
-import { FileField, FileFieldProps } from "./FileField";
+import { FileField, FileFieldProps } from "@/features/common/FileField.tsx";
 
 type SimpleFieldProps = Omit<FileFieldProps, "accept" | "label">;
 

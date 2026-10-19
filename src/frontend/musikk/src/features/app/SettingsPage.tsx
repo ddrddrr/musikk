@@ -2,7 +2,7 @@ import { useAuth } from "@/features/auth/hooks/useAuth.ts";
 import { BackButton } from "@/features/common/BackButton.tsx";
 import { useLoudnessPreset } from "@/features/player/hooks/useLoudnessPreset.ts";
 import { LoudnessPresetSelector } from "@/features/player/LoudnessPresetSelector.tsx";
-import { Button } from "@/features/ui/button";
+import { Button } from "@/features/ui/button.tsx";
 import { EditProfileDialog } from "@/features/user/components/EditProfileDialog.tsx";
 
 export function SettingsPage() {

@@ -1,5 +1,5 @@
 import { SignUpForm } from "@/features/auth/components/SignupForm.tsx";
-import { Card, CardHeader, CardTitle } from "@/features/ui/card";
+import { Card, CardHeader, CardTitle } from "@/features/ui/card.tsx";
 
 export function SignUpPage() {
     return (

@@ -1,12 +1,12 @@
 import { UUID } from "@/api/types.ts";
+import { AlbumSongUploadSection } from "@/features/album-upload/components/AlbumSongUploadSection.tsx";
 import { useUpdateCollection } from "@/features/collections/api/mutations.ts";
+import { CollectionForm } from "@/features/collections/components/CollectionForm.tsx";
+import { useCollectionCreation } from "@/features/collections/hooks/useCollectionCreation.ts";
 import { Collection } from "@/features/collections/types.ts";
 import { BackButton } from "@/features/common/BackButton.tsx";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { AlbumSongUploadSection } from "../album-upload/components/AlbumSongUploadSection.tsx";
-import { CollectionForm } from "../collections/components/CollectionForm.tsx";
-import { useCollectionCreation } from "../collections/hooks/useCollectionCreation.ts";
 
 export function AlbumUploadPage() {
     const navigate = useNavigate();

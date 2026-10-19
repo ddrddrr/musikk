@@ -1,9 +1,9 @@
 import { useAuth } from "@/features/auth/hooks/useAuth.ts";
 import { SocialDropdown } from "@/features/layout/header/SocialDropdown.tsx";
-import { NotificationBox } from "@/features/notifications/NotificationBox";
+import { NotificationBox } from "@/features/notifications/NotificationBox.tsx";
 import { SearchBar } from "@/features/search/SearchBar.tsx";
-import { Button } from "@/features/ui/button";
-import { IconTooltip } from "@/features/ui/tooltip";
+import { Button } from "@/features/ui/button.tsx";
+import { IconTooltip } from "@/features/ui/tooltip.tsx";
 import { UserAvatar } from "@/features/user/components/UserAvatar.tsx";
 import { Cog, Disc3, Upload, Users } from "lucide-react";
 import { memo } from "react";

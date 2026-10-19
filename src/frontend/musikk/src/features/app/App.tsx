@@ -1,5 +1,6 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 
+import { AlbumUploadPage } from "@/features/app/AlbumUploadPage.tsx";
 import { HomePage } from "@/features/app/HomePage.tsx";
 import { LoginPage } from "@/features/app/LoginPage.tsx";
 import { MobileBlock } from "@/features/app/MobileBlock.tsx";
@@ -10,12 +11,11 @@ import { EmailVerificationPage } from "@/features/auth/components/EmailVerificat
 import { RequireAuth } from "@/features/auth/components/RequireAuth.tsx";
 import { AuthProvider } from "@/features/auth/providers/AuthProvider.tsx";
 import { AuthenticatedLayout } from "@/features/layout/AuthenticatedLayout.tsx";
+import { DeviceListProvider } from "@/features/playback/providers/DeviceListProvider.tsx";
+import { PlaybackProvider } from "@/features/playback/providers/PlaybackProvider.tsx";
 import { LoudnessPresetProvider } from "@/features/player/providers/LoudnessPresetProvider.tsx";
 import { useIsMobile } from "@/hooks/useIsMobile.ts";
-import { WebSocketProvider } from "@/providers/WebSocketProvider";
-import { DeviceListProvider } from "../playback/providers/DeviceListProvider";
-import { PlaybackProvider } from "../playback/providers/PlaybackProvider";
-import { AlbumUploadPage } from "./AlbumUploadPage.tsx";
+import { WebSocketProvider } from "@/providers/WebSocketProvider.tsx";
 
 function AuthenticatedApp() {
     useWebSocketListeners();

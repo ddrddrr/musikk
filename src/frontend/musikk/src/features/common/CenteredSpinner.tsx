@@ -1,4 +1,4 @@
-import { Spinner } from "@/features/ui/spinner";
+import { Spinner } from "@/features/ui/spinner.tsx";
 import { cn } from "@/lib/utils.ts";
 
 export function CenteredSpinner({ className }: { className?: string }) {

@@ -1,11 +1,11 @@
 import { getErrorDetail } from "@/api/errorUtils.ts";
 import type { UUID } from "@/api/types.ts";
 import { uploadCollectionSong } from "@/features/album-upload/api/mutations.ts";
+import type { SongUploadState } from "@/features/album-upload/types.ts";
 import type { UploadEventPayload } from "@/features/album-upload/wsEvents.ts";
 import { useSongUploadEvent } from "@/features/album-upload/wsEvents.ts";
 import { useCallback, useReducer } from "react";
 import { toast } from "sonner";
-import type { SongUploadState } from "./types.ts";
 
 export interface SongUploadData {
     title: string;

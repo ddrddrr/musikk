@@ -1,4 +1,4 @@
-import { AudioField } from "@/features/common/AudioField";
+import { AudioField } from "@/features/common/AudioField.tsx";
 import { ImageField } from "@/features/common/ImageField.tsx";
 import { FormControl, FormField, FormItem, FormLabel } from "@/features/ui/form.tsx";
 import { Input } from "@/features/ui/input.tsx";

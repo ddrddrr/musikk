@@ -1,4 +1,4 @@
-import { DeviceListContext } from "@/features/playback/providers/deviceListContext";
+import { DeviceListContext } from "@/features/playback/providers/deviceListContext.ts";
 import { useContext } from "react";
 
 export function useDeviceList() {

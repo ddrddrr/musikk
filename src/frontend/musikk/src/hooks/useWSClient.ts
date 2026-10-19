@@ -1,5 +1,5 @@
-import { WSContext } from "@/providers/websocketContext";
-import { WSClient } from "@/ws/client";
+import { WSContext } from "@/providers/websocketContext.ts";
+import { WSClient } from "@/ws/client.ts";
 import { useContext } from "react";
 
 export function useWSClient(): WSClient {

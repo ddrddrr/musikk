@@ -1,8 +1,8 @@
 import type { UUID } from "@/api/types.ts";
-import { SongUploadField } from "./SongUploadField.tsx";
-import type { SongUploadState, SongUploadStatus } from "../types.ts";
+import { SongUploadField } from "@/features/album-upload/components/SongUploadField.tsx";
+import { SongUploadStatusBadge } from "@/features/album-upload/components/SongUploadStatusBadge.tsx";
+import type { SongUploadState, SongUploadStatus } from "@/features/album-upload/types.ts";
 import { Button } from "@/features/ui/button.tsx";
-import { SongUploadStatusBadge } from "./SongUploadStatusBadge.tsx";
 
 export function SongUploadCard(props: {
     index: number;

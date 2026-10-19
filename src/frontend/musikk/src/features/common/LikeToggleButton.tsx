@@ -1,6 +1,6 @@
 import { ActionButtonSize } from "@/features/common/types.ts";
 import { Button } from "@/features/ui/button.tsx";
-import { IconTooltip } from "@/features/ui/tooltip";
+import { IconTooltip } from "@/features/ui/tooltip.tsx";
 import { Check, Plus } from "lucide-react";
 
 interface LikeToggleButtonProps {

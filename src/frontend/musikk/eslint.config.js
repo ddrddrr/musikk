@@ -91,6 +91,27 @@ export default tseslint.config(
                     caughtErrorsIgnorePattern: "^_",
                 },
             ],
+            "import/extensions": ["error", "always", { ignorePackages: true }],
+            "no-restricted-imports": [
+                "error",
+                {
+                    patterns: [
+                        {
+                            regex: "^\\.\\.?/",
+                            message: "Use the @/ alias instead of a relative import.",
+                        },
+                    ],
+                },
+            ],
+        },
+    },
+
+    // shadcn generates these files, so they keep its import style
+    {
+        files: ["src/features/ui/**"],
+        rules: {
+            "import/extensions": "off",
+            "no-restricted-imports": "off",
         },
     },
 

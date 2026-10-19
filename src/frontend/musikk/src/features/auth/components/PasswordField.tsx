@@ -1,7 +1,7 @@
-import { Button } from "@/features/ui/button";
+import { Button } from "@/features/ui/button.tsx";
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/features/ui/form.tsx";
 import { Input } from "@/features/ui/input.tsx";
-import { IconTooltip } from "@/features/ui/tooltip";
+import { IconTooltip } from "@/features/ui/tooltip.tsx";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { useFormContext } from "react-hook-form";

@@ -1,13 +1,13 @@
 import { UUID } from "@/api/types.ts";
+import { SongUploadCard } from "@/features/album-upload/components/SongUploadCard.tsx";
+import { SongSchema } from "@/features/album-upload/schemas.ts";
+import { useSongUpload, type SongUploadJob } from "@/features/album-upload/useSongUpload.ts";
 import { Button } from "@/features/ui/button.tsx";
 import { Form } from "@/features/ui/form.tsx";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCallback } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import z from "zod";
-import { SongSchema } from "../schemas.ts";
-import { useSongUpload, type SongUploadJob } from "../useSongUpload.ts";
-import { SongUploadCard } from "./SongUploadCard.tsx";
 
 const AlbumSongUploadSchema = z.object({
     songs: z.array(SongSchema).min(1, "At least one song is required"),

@@ -1,5 +1,5 @@
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/features/ui/form";
-import { Input } from "@/features/ui/input";
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/features/ui/form.tsx";
+import { Input } from "@/features/ui/input.tsx";
 import { cn } from "@/lib/utils.ts";
 import { useFormContext } from "react-hook-form";
 

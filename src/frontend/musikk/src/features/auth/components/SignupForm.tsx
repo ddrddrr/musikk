@@ -11,7 +11,7 @@ import { FormServerError } from "@/features/common/FormServerError.tsx";
 import { Button } from "@/features/ui/button.tsx";
 import { CardContent } from "@/features/ui/card.tsx";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/features/ui/form.tsx";
-import { Spinner } from "@/features/ui/spinner";
+import { Spinner } from "@/features/ui/spinner.tsx";
 import { Switch } from "@/features/ui/switch.tsx";
 import { cn } from "@/lib/utils.ts";
 

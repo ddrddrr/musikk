@@ -1,7 +1,7 @@
+import { PlaylistCreateDialog } from "@/features/collections/components/PlaylistCreateDialog.tsx";
 import { Button } from "@/features/ui/button.tsx";
 import { Plus } from "lucide-react";
 import { useState } from "react";
-import { PlaylistCreateDialog } from "./PlaylistCreateDialog.tsx";
 
 export function CollectionCreateButton() {
     const [open, setOpen] = useState(false);

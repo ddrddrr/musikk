@@ -1,4 +1,4 @@
-import { getWebPlayerLabel } from "@/utils/getWebPlayerLabel";
+import { getWebPlayerLabel } from "@/utils/getWebPlayerLabel.ts";
 
 export interface ThisDevice {
     id: string;

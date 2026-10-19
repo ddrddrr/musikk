@@ -4,8 +4,8 @@ import { useNotificationsQuery } from "@/features/notifications/api/queries.ts";
 import { NotificationOverlay } from "@/features/notifications/NotificationOverlay.tsx";
 import { Button } from "@/features/ui/button.tsx";
 import { Popover, PopoverContent, PopoverTrigger } from "@/features/ui/popover.tsx";
-import { Spinner } from "@/features/ui/spinner";
-import { IconTooltip } from "@/features/ui/tooltip";
+import { Spinner } from "@/features/ui/spinner.tsx";
+import { IconTooltip } from "@/features/ui/tooltip.tsx";
 import { Sparkle } from "lucide-react";
 import { useMemo } from "react";
 

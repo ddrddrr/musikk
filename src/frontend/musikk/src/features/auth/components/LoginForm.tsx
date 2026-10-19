@@ -12,7 +12,7 @@ import { FormServerError } from "@/features/common/FormServerError.tsx";
 import { Button } from "@/features/ui/button.tsx";
 import { CardContent } from "@/features/ui/card.tsx";
 import { Form } from "@/features/ui/form.tsx";
-import { Spinner } from "@/features/ui/spinner";
+import { Spinner } from "@/features/ui/spinner.tsx";
 
 const loginSchema = z.object({
     email: z.string().min(5, "Email is required."),
