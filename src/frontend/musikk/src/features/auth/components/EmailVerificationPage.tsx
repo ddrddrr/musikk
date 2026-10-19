@@ -1,65 +1,49 @@
-import { verifyEmail } from "@/features/auth/api.ts";
+import { useVerifyEmailQuery } from "@/features/auth/api.ts";
 import { Button } from "@/features/ui/button.tsx";
 import { Card, CardContent, CardHeader, CardTitle } from "@/features/ui/card.tsx";
 import { cn } from "@/lib/utils.ts";
 import { AlertCircle, CheckCircle2, Loader2, XCircle } from "lucide-react";
-import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 type VerificationStatus = "loading" | "success" | "error" | "invalid";
 
+const STATUS_MESSAGES: Record<VerificationStatus, string> = {
+    loading: "Verifying your email address...",
+    success: "Email confirmed successfully! You can now log in to your account.",
+    error: "Failed to confirm email. The link may have expired or is invalid. Please try again or contact support.",
+    invalid: "Invalid confirmation key.",
+};
+
 export function EmailVerificationPage() {
     const { confirmationKey } = useParams<{ confirmationKey: string }>();
     const navigate = useNavigate();
-    const [status, setStatus] = useState<VerificationStatus>("loading");
-    const [message, setMessage] = useState<string>("");
+    const { isPending, isError } = useVerifyEmailQuery(confirmationKey);
 
-    useEffect(() => {
-        if (!confirmationKey) {
-            setStatus("invalid");
-            setMessage("Invalid confirmation key.");
-            return;
-        }
-
-        const runConfirmation = async () => {
-            setStatus("loading");
-            setMessage("Verifying your email address...");
-            try {
-                await verifyEmail(confirmationKey);
-                setStatus("success");
-                setMessage("Email confirmed successfully! You can now log in to your account.");
-            } catch (error) {
-                console.error("Email confirmation failed", error);
-                setStatus("error");
-                setMessage(
-                    "Failed to confirm email. The link may have expired or is invalid. Please try again or contact support.",
-                );
-            }
-        };
-
-        void runConfirmation();
-    }, [confirmationKey]);
+    let status: VerificationStatus;
+    if (!confirmationKey) {
+        status = "invalid";
+    } else if (isPending) {
+        status = "loading";
+    } else if (isError) {
+        status = "error";
+    } else {
+        status = "success";
+    }
 
     const getIcon = () => {
         switch (status) {
             case "loading":
-                return <Loader2 className="size-16 animate-spin text-red-600" />;
+                return <Loader2 className="size-16 animate-spin text-brand" />;
             case "success":
-                return <CheckCircle2 className="size-16 text-green-600" />;
+                return <CheckCircle2 className="size-16 text-success" />;
             case "error":
-                return <XCircle className="size-16 text-red-600" />;
+                return <XCircle className="size-16 text-destructive" />;
             case "invalid":
-                return <AlertCircle className="size-16 text-red-600" />;
+                return <AlertCircle className="size-16 text-destructive" />;
         }
     };
 
-    const getStatusColor = () => {
-        switch (status) {
-            case "error":
-            case "invalid":
-                return "text-red-700";
-        }
-    };
+    const isFailed = status === "error" || status === "invalid";
 
     return (
         <div className="flex min-h-screen items-center justify-center bg-background p-4">
@@ -72,7 +56,9 @@ export function EmailVerificationPage() {
                 <CardContent className="pt-8 pb-6">
                     <div className="flex flex-col items-center gap-6 text-center">
                         {getIcon()}
-                        <p className={cn("text-lg", getStatusColor())}>{message}</p>
+                        <p className={cn("text-lg", isFailed && "text-destructive")}>
+                            {STATUS_MESSAGES[status]}
+                        </p>
                         {status === "success" && (
                             <Button
                                 variant="brand"
@@ -83,7 +69,7 @@ export function EmailVerificationPage() {
                                 Go to Login
                             </Button>
                         )}
-                        {(status === "error" || status === "invalid") && (
+                        {isFailed && (
                             <Button
                                 variant="brand"
                                 size="lg"
