@@ -18,11 +18,12 @@ export function useUserWsEvents() {
     const client = useQueryClient();
 
     useEffect(() => {
-        const unsubUpdated = ws.subscribe("user.updated", (_payload: UserUpdatedPayload) => {
+        const unsubUpdated = ws.subscribe("user.updated", (payload: UserUpdatedPayload) => {
             // TODO: set the data instead of invalidating
             // not sure yet whether we want to show the update of the profile to other users that
             // have it open
-            void client.invalidateQueries({ queryKey: userKeys.base });
+            void client.invalidateQueries({ queryKey: userKeys.me });
+            void client.invalidateQueries({ queryKey: userKeys.detail(payload.user.uuid) });
         });
 
         const unsubFollowed = ws.subscribe("user.followed", (payload: UserFollowPayload) => {
