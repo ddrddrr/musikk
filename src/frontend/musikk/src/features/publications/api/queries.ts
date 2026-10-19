@@ -4,7 +4,7 @@ import { PaginatedRes, UUID } from "@/api/types.ts";
 import { ChatURLs, PublicationURLs } from "@/features/publications/api/endpoints.ts";
 import { publicationKeys } from "@/features/publications/api/queryKeys.ts";
 import { Attachment, Chat, FeedConnection, Publication } from "@/features/publications/types.ts";
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { InfiniteData, useInfiniteQuery, useQuery } from "@tanstack/react-query";
 
 export async function fetchPublicationPage(
     url: string,
@@ -25,10 +25,20 @@ const offsetPagination = {
     getNextPageParam: getOffsetFromNextUrl,
 };
 
+// the API returns each list newest first
+function newestFirst<T>(data: InfiniteData<PaginatedRes<T>>): T[] {
+    return data.pages.flatMap((page) => page.results);
+}
+
+function oldestFirst<T>(data: InfiniteData<PaginatedRes<T>>): T[] {
+    return newestFirst(data).reverse();
+}
+
 export function useGlobalFeedPosts(connection?: FeedConnection) {
     return useInfiniteQuery({
         ...offsetPagination,
         queryKey: publicationKeys.globalFeed(connection),
+        select: newestFirst<Publication>,
         queryFn: ({ pageParam }) =>
             fetchPublicationPage(
                 PublicationURLs.globalFeedPosts(),
@@ -43,6 +53,7 @@ export function useFeedPosts(userUUID: UUID) {
     return useInfiniteQuery({
         ...offsetPagination,
         queryKey: publicationKeys.feed(userUUID),
+        select: newestFirst<Publication>,
         queryFn: ({ pageParam }) =>
             fetchPublicationPage(
                 PublicationURLs.feedPosts(userUUID),
@@ -56,6 +67,7 @@ export function useCollectionComments(collectionUUID: UUID) {
     return useInfiniteQuery({
         ...offsetPagination,
         queryKey: publicationKeys.collectionComments(collectionUUID),
+        select: oldestFirst<Publication>,
         queryFn: ({ pageParam }) =>
             fetchPublicationPage(
                 PublicationURLs.collectionComments(collectionUUID),
@@ -97,6 +109,7 @@ export function useChatMessages(userUUID: UUID, chatUUID: UUID) {
     return useInfiniteQuery({
         ...offsetPagination,
         queryKey: publicationKeys.chatMessages(userUUID, chatUUID),
+        select: oldestFirst<Publication>,
         queryFn: ({ pageParam }) =>
             fetchPublicationPage(
                 ChatURLs.chatMessages(userUUID, chatUUID),
@@ -122,6 +135,7 @@ export function useChatAttachments(userUUID: UUID, chatUUID: UUID) {
     return useInfiniteQuery({
         ...offsetPagination,
         queryKey: publicationKeys.chatAttachments(userUUID, chatUUID),
+        select: newestFirst<Attachment>,
         queryFn: async ({ pageParam }) => {
             const res = await api_client.get<PaginatedRes<Attachment>>(
                 ChatURLs.chatAttachments(userUUID, chatUUID),

@@ -1,4 +1,3 @@
-import { useInfiniteFlat } from "@/api/hooks.ts";
 import { UUID } from "@/api/types.ts";
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
 import { EmptyState } from "@/features/common/EmptyState.tsx";
@@ -18,15 +17,17 @@ type ChatAttachmentsListProps = {
 
 export function ChatAttachmentsList({ chatUUID }: ChatAttachmentsListProps) {
     const userUUID = useUserUUID();
-    const query = useChatAttachments(userUUID, chatUUID);
     const {
-        itemsFlat: attachments,
+        data: attachments,
+        isPending,
+        error,
+        refetch,
         hasNextPage,
         isFetchingNextPage,
         fetchNextPage,
-    } = useInfiniteFlat(query, false);
+    } = useChatAttachments(userUUID, chatUUID);
 
-    if (query.isPending) {
+    if (isPending) {
         return (
             <div className="flex justify-center py-4">
                 <Spinner className="size-6" />
@@ -34,12 +35,9 @@ export function ChatAttachmentsList({ chatUUID }: ChatAttachmentsListProps) {
         );
     }
 
-    if (query.error) {
+    if (error) {
         return (
-            <QueryErrorBox
-                message="Failed to load attachments"
-                onRetry={() => void query.refetch()}
-            />
+            <QueryErrorBox message="Failed to load attachments" onRetry={() => void refetch()} />
         );
     }
 

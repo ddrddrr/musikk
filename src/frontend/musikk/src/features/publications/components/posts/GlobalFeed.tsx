@@ -1,8 +1,8 @@
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
+import { useGlobalFeedPosts } from "@/features/publications/api/queries.ts";
 import { PostCreateButton } from "@/features/publications/components/posts/PostCreateButton.tsx";
 import { PostTabContent } from "@/features/publications/components/posts/PostTabContent.tsx";
 import { useNewGlobalFeedPosts } from "@/features/publications/hooks/useNewFeedPosts.ts";
-import { useGlobalFeedPostsFlat } from "@/features/publications/hooks/usePublicationsInfiniteFlat.ts";
 import { Tabs, TabsList, TabsTrigger } from "@/features/ui/tabs.tsx";
 import { useState } from "react";
 
@@ -10,12 +10,12 @@ export function GlobalFeed() {
     const [tab, setTab] = useState("mine");
     const userUUID = useUserUUID();
 
-    const queryFriends = useGlobalFeedPostsFlat(false, "friends");
-    const queryFollowed = useGlobalFeedPostsFlat(false, "followed");
-    const queryMine = useGlobalFeedPostsFlat(false, "mine");
-    const queryAll = useGlobalFeedPostsFlat(false);
+    const queryFriends = useGlobalFeedPosts("friends");
+    const queryFollowed = useGlobalFeedPosts("followed");
+    const queryMine = useGlobalFeedPosts("mine");
+    const queryAll = useGlobalFeedPosts();
 
-    const { hasNewPosts, refresh } = useNewGlobalFeedPosts(queryAll.publicationsFlat?.[0]?.uuid);
+    const { hasNewPosts, refresh } = useNewGlobalFeedPosts(queryAll.data?.[0]?.uuid);
 
     const sharedProps = { hasNewPosts, onLoadNewer: refresh, feedUserUUID: userUUID };
 
@@ -33,7 +33,7 @@ export function GlobalFeed() {
             <div className="mx-auto w-full max-w-2xl p-6">
                 <PostTabContent
                     label="random"
-                    posts={queryAll.publicationsFlat}
+                    posts={queryAll.data}
                     error={queryAll.error}
                     refetch={queryAll.refetch}
                     hasNextPage={queryAll.hasNextPage}
@@ -43,7 +43,7 @@ export function GlobalFeed() {
                 />
                 <PostTabContent
                     label="friends"
-                    posts={queryFriends.publicationsFlat}
+                    posts={queryFriends.data}
                     error={queryFriends.error}
                     refetch={queryFriends.refetch}
                     hasNextPage={queryFriends.hasNextPage}
@@ -53,7 +53,7 @@ export function GlobalFeed() {
                 />
                 <PostTabContent
                     label="followed"
-                    posts={queryFollowed.publicationsFlat}
+                    posts={queryFollowed.data}
                     error={queryFollowed.error}
                     refetch={queryFollowed.refetch}
                     hasNextPage={queryFollowed.hasNextPage}
@@ -63,7 +63,7 @@ export function GlobalFeed() {
                 />
                 <PostTabContent
                     label="mine"
-                    posts={queryMine.publicationsFlat}
+                    posts={queryMine.data}
                     error={queryMine.error}
                     refetch={queryMine.refetch}
                     hasNextPage={queryMine.hasNextPage}

@@ -1,7 +1,7 @@
 import { UUID } from "@/api/types.ts";
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
-import { useChatDetail } from "@/features/publications/api/queries.ts";
+import { useChatDetail, useChatMessages } from "@/features/publications/api/queries.ts";
 import { ChatHeader } from "@/features/publications/components/chat/ChatHeader.tsx";
 import { ChatMessageForm } from "@/features/publications/components/chat/ChatMessageForm.tsx";
 import { ChatMessageList } from "@/features/publications/components/chat/ChatMessageList.tsx";
@@ -11,11 +11,13 @@ import { TypingIndicator } from "@/features/publications/components/TypingIndica
 import { useAutoScrollToBottom } from "@/features/publications/hooks/useAutoScrollToBottom.ts";
 import { useChatWsEvents } from "@/features/publications/hooks/useChatWsEvents.ts";
 import { useNewMessagesIndicator } from "@/features/publications/hooks/useNewMessagesIndicator.ts";
-import { useChatMessagesFlat } from "@/features/publications/hooks/usePublicationsInfiniteFlat.ts";
 import { useScrollAnchor } from "@/features/publications/hooks/useScrollAnchor.ts";
 import { useTypingIndicator } from "@/features/publications/hooks/useTypingIndicator.ts";
+import { Publication } from "@/features/publications/types.ts";
 import { Spinner } from "@/features/ui/spinner";
 import { useRef } from "react";
+
+const NO_MESSAGES: Publication[] = [];
 
 interface ChatBoxProps {
     chatUUID: UUID;
@@ -33,15 +35,14 @@ export function ChatBox({ chatUUID }: ChatBoxProps) {
     } = useChatDetail(userUUID, chatUUID);
 
     const {
-        data: messages,
+        data: messages = NO_MESSAGES,
         error: messagesError,
         isPending: isMessagesPending,
         hasNextPage,
         isFetchingNextPage,
         fetchNextPage,
-        publicationsFlat,
         refetch: refetchMessages,
-    } = useChatMessagesFlat(userUUID, chatUUID);
+    } = useChatMessages(userUUID, chatUUID);
 
     const { typers, notifyTyping } = useTypingIndicator(`chat.${chatUUID}`, "chat.typing");
 
@@ -52,7 +53,7 @@ export function ChatBox({ chatUUID }: ChatBoxProps) {
     const { hasNewMessages, scrollToBottom } = useNewMessagesIndicator(
         messagesContainerRef,
         messagesEndRef,
-        publicationsFlat,
+        messages,
     );
 
     if (isChatPending || isMessagesPending) {
@@ -92,7 +93,7 @@ export function ChatBox({ chatUUID }: ChatBoxProps) {
                             fetchNextPage={fetchNextPage}
                         />
                     </div>
-                    <ChatMessageList messages={publicationsFlat} />
+                    <ChatMessageList messages={messages} />
                     <div ref={messagesEndRef} />
                 </div>
                 <NewMessagesIndicator visible={hasNewMessages} onClick={scrollToBottom} />

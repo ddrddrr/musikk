@@ -1,19 +1,25 @@
 import { UUID } from "@/api/types.ts";
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
 import { EmptyState } from "@/features/common/EmptyState.tsx";
+import { useFeedPosts } from "@/features/publications/api/queries.ts";
 import { LoadNewerButton } from "@/features/publications/components/LoadNewerButton.tsx";
 import { LoadOlderButton } from "@/features/publications/components/LoadOlderButton.tsx";
 import { PostForm } from "@/features/publications/components/posts/PostForm.tsx";
 import { PostTree } from "@/features/publications/components/posts/PostTree.tsx";
 import { useNewFeedPosts } from "@/features/publications/hooks/useNewFeedPosts.ts";
-import { useFeedPostsFlat } from "@/features/publications/hooks/usePublicationsInfiniteFlat.ts";
 import { Card, CardContent } from "@/features/ui/card.tsx";
 
 export function UserFeed({ userUUID }: { userUUID: UUID }) {
-    const { error, isPending, publicationsFlat, hasNextPage, isFetchingNextPage, fetchNextPage } =
-        useFeedPostsFlat(userUUID, false);
+    const {
+        error,
+        isPending,
+        data: posts,
+        hasNextPage,
+        isFetchingNextPage,
+        fetchNextPage,
+    } = useFeedPosts(userUUID);
     const currUserUUID = useUserUUID();
-    const { hasNewPosts, refresh } = useNewFeedPosts(userUUID, publicationsFlat?.[0]?.uuid);
+    const { hasNewPosts, refresh } = useNewFeedPosts(userUUID, posts?.[0]?.uuid);
 
     if (error) {
         return <div className="text-center text-destructive">Failed to load posts.</div>;
@@ -34,8 +40,8 @@ export function UserFeed({ userUUID }: { userUUID: UUID }) {
             <div className="flex justify-center py-4">
                 <LoadNewerButton hasNewerPosts={hasNewPosts} onLoadNewer={refresh} />
             </div>
-            {!publicationsFlat?.length && <EmptyState message="No posts yet" />}
-            {publicationsFlat?.map((post) => (
+            {!posts?.length && <EmptyState message="No posts yet" />}
+            {posts?.map((post) => (
                 <PostTree key={post.uuid} publication={post} feedUserUUID={userUUID} />
             ))}
             <div className="flex justify-center py-4">
