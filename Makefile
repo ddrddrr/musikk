@@ -1,4 +1,4 @@
-.PHONY: setup setup-ffmpeg setup-shaka check check-ffmpeg check-shaka clean run-local-full run-local-full-down run-local-full-seed run-local-full-clear diagrams text
+.PHONY: setup setup-ffmpeg setup-shaka check check-ffmpeg check-shaka clean run-local-full run-local-full-down run-local-full-seed run-local-full-clear run-local-dev run-local-dev-seed run-local-dev-clear diagrams text
 
 UNAME := $(shell uname -s)
 ARCH := $(shell uname -m)
@@ -66,6 +66,28 @@ run-local-full-seed:
 
 run-local-full-clear:
 	docker compose --env-file .env.prod -f docker-compose-prod.yml exec server uv run python manage.py clearmodels
+
+# needs the variables from .env in the shell, e.g. through direnv.
+# The servers run in the background of one shell, where they may ignore Ctrl+C,
+# so the trap stops the whole process group
+run-local-dev:
+	docker compose -f docker-compose-local.yml up -d
+	@until docker compose -f docker-compose-local.yml exec -T database sh -c 'pg_isready -q -h localhost -U "$$POSTGRES_USER"'; do \
+		echo "Waiting for postgres..."; \
+		sleep 1; \
+	done
+	uv run --directory src/backend/musikk python manage.py migrate
+	@trap 'trap - INT TERM; kill 0' INT TERM; \
+	uv run --directory src/backend/musikk python manage.py runserver $${DJANGO_PORT:-8005} & \
+	uv run --directory src/backend/musikk celery -A musikk worker -l INFO & \
+	npm --prefix src/frontend/musikk run dev & \
+	wait
+
+run-local-dev-seed:
+	uv run --directory src/backend/musikk python manage.py initmodels
+
+run-local-dev-clear:
+	uv run --directory src/backend/musikk python manage.py clearmodels
 
 diagrams:
 	plantuml -tpng --output-dir $(abspath text/diagrams) --exclude "**/_style.puml" "specification/**.puml"

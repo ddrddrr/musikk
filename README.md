@@ -132,6 +132,10 @@ Steps:
 
 5. **Open** `http://localhost:5175`.
 
+After step 1, `make run-local-dev` does steps 2 to 4 in one terminal. It starts Postgres and Redis, runs `migrate`,
+and starts the backend, the Celery worker and the frontend. Ctrl+C stops all three. It needs the variables from `.env`
+in the shell, for example through [direnv](#direnv), and the packages from `uv sync` and `npm install`.
+
 ## Native binaries
 
 For audio uploads to work, FFmpeg and Shaka Packager must be installed and the env vars
@@ -215,9 +219,16 @@ The data can be cleared afterwards with the `clearmodels` command.
 Run them against the dev backend:
 
 ```
+make run-local-dev-seed
+make run-local-dev-clear
+```
+
+These need Postgres to run, for example through `make run-local-dev`. To pass options such as `--skip-audio`, run the
+command directly:
+
+```
 cd src/backend/musikk
-uv run python manage.py initmodels
-uv run python manage.py clearmodels
+uv run python manage.py initmodels --skip-audio
 ```
 
 Or against the running compose stack:
