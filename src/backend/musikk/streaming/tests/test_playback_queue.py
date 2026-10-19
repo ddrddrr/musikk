@@ -168,61 +168,6 @@ class TestQueueWindow(TestCase):
         assert len(window) == 3
 
 
-class TestReorder(TestCase):
-    def test_reorder_between_two_items(self):
-        queue = PlaybackQueue.objects.create()
-        s1, s2, s3 = CollectionSongFactory.create_batch(3)
-
-        i1 = queue.insert_song(s1, position=Decimal("1000"))
-        i2 = queue.insert_song(s2, position=Decimal("2000"))
-        i3 = queue.insert_song(s3, position=Decimal("3000"))
-
-        queue.reorder(i3, before=i1, after=i2)
-
-        i3.refresh_from_db()
-        assert i3.position == Decimal("1500")
-
-    def test_reorder_to_top(self):
-        queue = PlaybackQueue.objects.create()
-        s1, s2 = CollectionSongFactory.create_batch(2)
-
-        i1 = queue.insert_song(s1, position=Decimal("1000"))
-        i2 = queue.insert_song(s2, position=Decimal("2000"))
-
-        queue.reorder(i2, after=i1)
-
-        i2.refresh_from_db()
-        assert i2.position == i1.position - POSITION_GAP
-
-    def test_reorder_to_bottom(self):
-        queue = PlaybackQueue.objects.create()
-        s1, s2 = CollectionSongFactory.create_batch(2)
-
-        i1 = queue.insert_song(s1, position=Decimal("1000"))
-        i2 = queue.insert_song(s2, position=Decimal("2000"))
-
-        queue.reorder(i1, before=i2)
-
-        i1.refresh_from_db()
-        assert i1.position == i2.position + POSITION_GAP
-
-    def test_reorder_to_bottom_allows_subsequent_append(self):
-        queue = PlaybackQueue.objects.create()
-        s1, s2, s3 = CollectionSongFactory.create_batch(3)
-
-        i1 = queue.insert_song(s1, position=Decimal("1000"))
-        i2 = queue.insert_song(s2, position=Decimal("2000"))
-
-        queue.reorder(i1, before=i2)
-        i1.refresh_from_db()
-
-        queue.append_song(s3)
-        items = list(QueueItem.objects.filter(queue=queue).order_by("position"))
-
-        assert items[-1].collection_song == s3
-        assert items[-1].position > i1.position
-
-
 class TestRefill(TestCase):
     def test_refill_does_not_exceed_batch_size(self):
         songs = BaseSongFactory.create_batch(FILL_BATCH + 20)

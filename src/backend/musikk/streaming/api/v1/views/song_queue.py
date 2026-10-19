@@ -121,36 +121,3 @@ class PlayerPrevView(PlayerMixin):
     def post(self, request, *args, **kwargs):
         self.get_controller(request).prev()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-class QueueReorderView(PlayerMixin):
-    def post(self, request, *args, **kwargs):
-        playback_queue = self.get_playback_queue(request)
-
-        item_uuid = request.data.get("item")
-        before_uuid = request.data.get("before")
-        after_uuid = request.data.get("after")
-
-        if not item_uuid:
-            return Response(
-                status=status.HTTP_400_BAD_REQUEST,
-                data={"error": "'item' is required."},
-            )
-        if not before_uuid and not after_uuid:
-            return Response(
-                status=status.HTTP_400_BAD_REQUEST,
-                data={"error": "At least one of 'before' or 'after' is required."},
-            )
-
-        item = get_object_or_404(QueueItem, uuid=item_uuid)
-        if item.queue != playback_queue:
-            return Response(
-                status=status.HTTP_403_FORBIDDEN,
-                data={"error": "Item does not belong to this user's queue."},
-            )
-
-        before = get_object_or_404(QueueItem, uuid=before_uuid) if before_uuid else None
-        after = get_object_or_404(QueueItem, uuid=after_uuid) if after_uuid else None
-
-        self.get_controller(request).reorder_queue(item, before=before, after=after)
-        return Response(status=status.HTTP_204_NO_CONTENT)

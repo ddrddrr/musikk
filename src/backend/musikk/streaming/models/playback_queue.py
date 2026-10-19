@@ -55,9 +55,10 @@ class QueueSource(BaseModel):
 class QueueItem(BaseModel):
     """An entry in a `PlaybackQueue`.
 
-    `position` is a decimal with high precision, so a new item
-    can be placed between two neighbours by taking the midpoint,
-    without the need to renumber other items.
+    `position` sets the order of the items. An append takes
+    `next_item_position`, which then grows by `POSITION_GAP`, and
+    `push_front` takes the first position minus `POSITION_GAP`.
+    So adding an item never moves the other items.
     Sort order and the `(queue, position)` index both use it, so callers
     should set positions through `PlaybackQueue`, not by hand.
     """
@@ -86,8 +87,6 @@ REFILL_THRESHOLD = 30
 FILL_BATCH = 20
 
 
-# TODO: with the curr precision of the position on repeated inserts in the same position we can
-# eventually reach the situation where the positions will become equal due to the lack of precision
 class PlaybackQueue(BaseModel):
     """Items the user added on top of the current `CollectionCursor`.
 
@@ -96,7 +95,7 @@ class PlaybackQueue(BaseModel):
     to the context when the queue is empty.
 
     There are two kinds of rows. `QueueItem` rows are the real,
-    ordered entries used by `pop_first`, `window`, and `reorder`.
+    ordered entries used by `pop_first` and `window`.
     `QueueSource` rows are kept in storage and not yet expanded;
     `_fill` turns them into items when the item count drops below
     `REFILL_THRESHOLD`, adding at most `FILL_BATCH` per cycle.
@@ -192,26 +191,6 @@ class PlaybackQueue(BaseModel):
             .order_by("position")
             .select_related("collection_song", "collection_song__song")[:cap]
         )
-
-    def reorder(
-        self,
-        item: QueueItem,
-        before: QueueItem | None = None,
-        after: QueueItem | None = None,
-    ) -> None:
-        with transaction.atomic():
-            if before and after:
-                item.position = (before.position + after.position) / 2
-            elif before:
-                item.position = before.position + POSITION_GAP
-            elif after:
-                item.position = after.position - POSITION_GAP
-
-            item.save()
-
-            if item.position >= self.next_item_position:
-                self.next_item_position = item.position + POSITION_GAP
-                self.save()
 
     def _fill(self, n: int = FILL_BATCH) -> None:
         if QueueItem.objects.filter(queue=self).count() >= REFILL_THRESHOLD:

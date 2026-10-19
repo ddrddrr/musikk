@@ -26,7 +26,7 @@ class TestPlaybackStateBroadcaster(TestCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.user = BaseUserFactory.create()
-        cls.collection_song = CollectionSongFactory.create()
+        cls.collection_song = CollectionSongFactory.create(song__duration_ms=180_000)
 
     def setUp(self):
         self.stored_playback_state = StoredPlaybackState.objects.get(
@@ -36,11 +36,17 @@ class TestPlaybackStateBroadcaster(TestCase):
             "streaming.ws.state_broadcasters.playback.now_server_ms",
             return_value=1_700_000_000_000,
         )
+        # `is_playing()` in the snapshot reads the clock in the model module
+        self.model_now_server_ms_patcher = patch(
+            "streaming.models.stored_playback_state.now_server_ms",
+            return_value=1_700_000_000_000,
+        )
         self.channel_layer_patcher = patch("websockets.event_helpers.get_channel_layer")
         self.device_manager_patcher = patch(
             "streaming.ws.state_broadcasters.playback.DeviceManager"
         )
         self.mock_now_server_ms = self.now_server_ms_patcher.start()
+        self.model_now_server_ms_patcher.start()
         self.mock_channel_layer = MagicMock()
         self.mock_channel_layer.group_send = AsyncMock()
         self.mock_channel_layer.send = AsyncMock()
@@ -49,6 +55,7 @@ class TestPlaybackStateBroadcaster(TestCase):
         self.mock_device_manager.get_active_device_id.return_value = ACTIVE_DEVICE_ID
 
         self.addCleanup(self.now_server_ms_patcher.stop)
+        self.addCleanup(self.model_now_server_ms_patcher.stop)
         self.addCleanup(self.channel_layer_patcher.stop)
         self.addCleanup(self.device_manager_patcher.stop)
 
@@ -106,7 +113,7 @@ class TestPlaybackStateBroadcaster(TestCase):
         so the snapshot must be coerced before transport.
         """
         self._set_playing_song("33333333-3333-3333-3333-333333333333", 0)
-        # a loaded row holds UUID instances, like the row from locked_player
+        # a loaded row holds UUID instances, like the row from locked_stored_playback_state
         self.stored_playback_state.refresh_from_db()
 
         PlaybackStateBroadcaster(user_uuid=str(self.user.uuid)).broadcast_snapshot(

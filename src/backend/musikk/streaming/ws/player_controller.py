@@ -8,8 +8,9 @@ from streaming.ws.state_broadcasters.playback import PlaybackStateBroadcaster
 
 class PlayerController:
     """
-    Centralizes the "global" player actions.
-    E.g., on every player `play_song` command we need to clear the playback position and broadcast queue player change.
+    Runs the player actions for one user.
+    Each action takes the row lock on the stored playback state, calls the model to make the change,
+    and tells the user's tabs about it.
     """
 
     def __init__(self, user_uuid: str):
@@ -66,18 +67,6 @@ class PlayerController:
     def remove_queue_item(self, item: QueueItem) -> None:
         with locked_stored_playback_state(self.user_uuid) as stored_playback_state:
             stored_playback_state.playback_queue.remove(item)
-            self._sync_queue_state()
-
-    def reorder_queue(
-        self,
-        item: QueueItem,
-        before: QueueItem | None = None,
-        after: QueueItem | None = None,
-    ) -> None:
-        with locked_stored_playback_state(self.user_uuid) as stored_playback_state:
-            stored_playback_state.playback_queue.reorder(
-                item, before=before, after=after
-            )
             self._sync_queue_state()
 
     def _broadcast_song_change(

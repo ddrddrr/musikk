@@ -28,7 +28,6 @@ from streaming.api.v1.views.song_queue import (
     QueueAddSongView,
     QueueAppendRandomSongsView,
     QueueRemoveItemView,
-    QueueReorderView,
     StoredPlaybackStateRetrieveView,
 )
 from streaming.api.v1.views.songs import (
@@ -144,11 +143,6 @@ song_queue_urls = [
         "song-queue/shift-head/<uuid:uuid>",
         PlayerNextView.as_view(),
         name="song-queue-shift-head-to",
-    ),
-    path(
-        "song-queue/reorder",
-        QueueReorderView.as_view(),
-        name="song-queue-reorder",
     ),
 ]
 

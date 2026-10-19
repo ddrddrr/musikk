@@ -56,9 +56,6 @@ from streaming.api.v1.views.song_queue import (
     QueueRemoveItemView as QueueRemoveItemView,
 )
 from streaming.api.v1.views.song_queue import (
-    QueueReorderView as QueueReorderView,
-)
-from streaming.api.v1.views.song_queue import (
     StoredPlaybackStateRetrieveView as StoredPlaybackStateRetrieveView,
 )
 from streaming.api.v1.views.songs import (
