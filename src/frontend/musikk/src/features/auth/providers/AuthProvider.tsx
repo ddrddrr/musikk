@@ -47,7 +47,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }
         queryClient.clear();
         Cookies.remove("csrftoken");
-        Cookies.remove("sessionid");
         void navigate("/login");
     }, [queryClient, navigate]);
 
