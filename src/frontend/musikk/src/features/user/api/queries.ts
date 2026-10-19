@@ -34,7 +34,7 @@ export async function fetchMe(): Promise<BaseUser | null> {
     }
 }
 
-export async function fetchUser(userUUID: UUID): Promise<BaseUser> {
+async function fetchUser(userUUID: UUID): Promise<BaseUser> {
     const res = await api_client.get<BaseUser>(UserURLs.userRetrieve(userUUID));
     return res.data;
 }
@@ -52,6 +52,13 @@ async function fetchUserFollowers(userUUID: UUID): Promise<BaseUser[]> {
 async function fetchUserFollowed(userUUID: UUID): Promise<BaseUser[]> {
     const res = await api_client.get<FollowedResponse>(UserURLs.userFollowed(userUUID));
     return res.data.followed;
+}
+
+export function useUserDetailQuery(userUUID: UUID) {
+    return useQuery({
+        queryKey: userKeys.detail(userUUID),
+        queryFn: () => fetchUser(userUUID),
+    });
 }
 
 export function useUserFriendsQuery(userUUID: UUID | undefined) {

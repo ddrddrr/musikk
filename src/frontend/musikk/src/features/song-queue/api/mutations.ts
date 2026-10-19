@@ -6,39 +6,39 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 async function addSong(songUUID: string) {
-    await api_client.post(QueueURLs.addSong(songUUID));
+    await api_client.post<void>(QueueURLs.addSong(songUUID));
 }
 
 async function addCollection(collectionUUID: string) {
-    await api_client.post(QueueURLs.addCollection(collectionUUID));
+    await api_client.post<void>(QueueURLs.addCollection(collectionUUID));
 }
 
 async function playSong(songUUID: string) {
-    await api_client.post(QueueURLs.playSong(songUUID));
+    await api_client.post<void>(QueueURLs.playSong(songUUID));
 }
 
 async function playCollection(collectionUUID: string) {
-    await api_client.post(QueueURLs.playCollection(collectionUUID));
+    await api_client.post<void>(QueueURLs.playCollection(collectionUUID));
 }
 
 async function next() {
-    await api_client.post(QueueURLs.next);
+    await api_client.post<void>(QueueURLs.next);
 }
 
 async function skipTo(itemUUID: string) {
-    await api_client.post(QueueURLs.skipTo(itemUUID));
+    await api_client.post<void>(QueueURLs.skipTo(itemUUID));
 }
 
 async function prev() {
-    await api_client.post(QueueURLs.prev);
+    await api_client.post<void>(QueueURLs.prev);
 }
 
 async function removeItem(itemUUID: string) {
-    await api_client.post(QueueURLs.removeItem(itemUUID));
+    await api_client.post<void>(QueueURLs.removeItem(itemUUID));
 }
 
 async function clearQueue() {
-    await api_client.post(QueueURLs.clearQueue);
+    await api_client.post<void>(QueueURLs.clearQueue);
 }
 
 function useQueueMutation<T = void>(

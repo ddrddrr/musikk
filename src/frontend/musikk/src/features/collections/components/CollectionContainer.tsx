@@ -14,15 +14,14 @@ import { SongContainer } from "@/features/songs/components/SongContainer.tsx";
 import { SongMenuButton } from "@/features/songs/components/SongMenuButton.tsx";
 import { useUserLibrary } from "@/features/user/hooks/useUserLibrary.ts";
 import { cn } from "@/lib/utils.ts";
-import { useCallback, useState } from "react";
-import { useMatch, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { useMatch } from "react-router-dom";
 
 interface CollectionContainerProps {
     collectionUUID: UUID;
 }
 
 export function CollectionContainer({ collectionUUID }: CollectionContainerProps) {
-    const navigate = useNavigate();
     const currUserUUID = useUserUUID();
     const { data: library } = useUserLibrary();
     const { liked_songs, history, created_collections } = library ?? {};
@@ -35,13 +34,9 @@ export function CollectionContainer({ collectionUUID }: CollectionContainerProps
         refetch,
     } = useCollectionDetailQuery(collectionUUID);
 
-    const toggleComments = useCallback(() => {
-        void navigate(
-            isCommentsRoute
-                ? `/collection/${collectionUUID}`
-                : `/collection/${collectionUUID}/comments`,
-        );
-    }, [navigate, isCommentsRoute, collectionUUID]);
+    const commentsToggleTo = isCommentsRoute
+        ? `/collection/${collectionUUID}`
+        : `/collection/${collectionUUID}/comments`;
 
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const { deletePlaylist, isDeleting } = useDeletePlaylist();
@@ -74,7 +69,7 @@ export function CollectionContainer({ collectionUUID }: CollectionContainerProps
                     <div className="flex flex-col gap-4">
                         <CollectionHeader
                             collection={collection}
-                            toggleComments={toggleComments}
+                            commentsToggleTo={commentsToggleTo}
                             songsCount={songs.length}
                             renderAddToLikedButton={
                                 notPersonalCollection && !isUserCreatedCollection

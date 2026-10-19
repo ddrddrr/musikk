@@ -15,11 +15,12 @@ import { IconTooltip } from "@/features/ui/tooltip.tsx";
 import { AuthorLinks } from "@/features/user/components/AuthorLinks.tsx";
 import { cn } from "@/lib/utils.ts";
 import { EllipsisVertical, Trash2 } from "lucide-react";
+import { Link } from "react-router-dom";
 
 interface SongCollectionHeaderProps {
     collection: CollectionDetailed;
     showComments: boolean;
-    toggleComments: () => void;
+    commentsToggleTo: string;
     songsCount: number;
     renderAddToLikedButton: boolean;
     renderCommentsButton: boolean;
@@ -56,7 +57,7 @@ function PlaylistMenuDropdown({
 export function CollectionHeader({
     collection,
     showComments,
-    toggleComments,
+    commentsToggleTo,
     songsCount,
     renderAddToLikedButton,
     renderCommentsButton,
@@ -125,12 +126,10 @@ export function CollectionHeader({
                     Songs • {songsCount}
                 </h3>
                 {renderCommentsButton && (
-                    <Button
-                        onClick={toggleComments}
-                        variant="accent"
-                        size={showComments ? "sm" : "lg"}
-                    >
-                        {showComments ? "Hide Comments" : "Show Comments"}
+                    <Button variant="accent" size={showComments ? "sm" : "lg"} asChild>
+                        <Link to={commentsToggleTo}>
+                            {showComments ? "Hide Comments" : "Show Comments"}
+                        </Link>
                     </Button>
                 )}
             </div>

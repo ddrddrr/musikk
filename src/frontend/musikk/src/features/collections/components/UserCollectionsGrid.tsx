@@ -1,12 +1,10 @@
 import { UUID } from "@/api/types.ts";
-import { fetchCollections } from "@/features/collections/api/queries.ts";
-import { collectionKeys } from "@/features/collections/api/queryKeys.ts";
+import { useCollectionsByAuthorQuery } from "@/features/collections/api/queries.ts";
 import { CollectionCard } from "@/features/collections/components/CollectionCard.tsx";
 import type { CollectionType } from "@/features/collections/types.ts";
 import { CenteredSpinner } from "@/features/common/CenteredSpinner.tsx";
 import { EmptyState } from "@/features/common/EmptyState.tsx";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
-import { useQuery } from "@tanstack/react-query";
 
 type UserCollectionsGridProps = {
     userUUID: UUID;
@@ -14,10 +12,7 @@ type UserCollectionsGridProps = {
 };
 
 export function UserCollectionsGrid({ userUUID, type }: UserCollectionsGridProps) {
-    const { data, error, isPending, refetch } = useQuery({
-        queryKey: collectionKeys.byAuthor(userUUID, type),
-        queryFn: () => fetchCollections({ author: userUUID, type }),
-    });
+    const { data, error, isPending, refetch } = useCollectionsByAuthorQuery(userUUID, type);
 
     if (isPending) {
         return <CenteredSpinner />;

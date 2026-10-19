@@ -14,13 +14,13 @@ interface CollectionAddToLikedParams {
 }
 
 async function collectionAddToLiked({ collectionUUID }: CollectionAddToLikedParams): Promise<void> {
-    await api_client.post(CollectionURLs.collectionAddToLiked(collectionUUID));
+    await api_client.post<void>(CollectionURLs.collectionAddToLiked(collectionUUID));
 }
 
 async function collectionRemoveFromLiked({
     collectionUUID,
 }: CollectionAddToLikedParams): Promise<void> {
-    await api_client.delete(CollectionURLs.collectionAddToLiked(collectionUUID));
+    await api_client.delete<void>(CollectionURLs.collectionAddToLiked(collectionUUID));
 }
 
 export function useLikeCollection() {
@@ -56,7 +56,7 @@ interface CollectionDeleteParams {
 }
 
 async function deleteCollection({ collectionUUID }: CollectionDeleteParams): Promise<void> {
-    await api_client.delete(CollectionURLs.collectionDelete(collectionUUID));
+    await api_client.delete<void>(CollectionURLs.collectionDelete(collectionUUID));
 }
 
 export function useDeleteCollection() {
@@ -82,7 +82,7 @@ async function collectionRemoveSong({
     collectionUUID,
     songCollectionSongUUID,
 }: CollectionRemoveSongParams) {
-    await api_client.delete(
+    await api_client.delete<void>(
         CollectionURLs.collectionRemoveSong(collectionUUID, songCollectionSongUUID),
     );
 }
@@ -109,11 +109,11 @@ interface AddToLikedSongsParams {
 }
 
 async function addToLikedSongs({ collectionSongUUID }: AddToLikedSongsParams) {
-    await api_client.post(CollectionURLs.likedSongsAddSong(collectionSongUUID));
+    await api_client.post<void>(CollectionURLs.likedSongsAddSong(collectionSongUUID));
 }
 
 async function removeFromLikedSongs({ collectionSongUUID }: AddToLikedSongsParams) {
-    await api_client.delete(CollectionURLs.likedSongsAddSong(collectionSongUUID));
+    await api_client.delete<void>(CollectionURLs.likedSongsAddSong(collectionSongUUID));
 }
 
 export function useLikeSong() {

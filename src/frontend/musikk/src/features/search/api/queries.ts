@@ -1,7 +1,9 @@
 import { api_client } from "@/api/axiosConf.ts";
 import { Collection, CollectionSong } from "@/features/collections/types.ts";
 import { SearchURLs } from "@/features/search/api/endpoints.ts";
+import { searchKeys } from "@/features/search/api/queryKeys.ts";
 import { BaseUser } from "@/features/user/types.ts";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
 interface PerformSearchResponse {
     songs: CollectionSong[];
@@ -11,7 +13,7 @@ interface PerformSearchResponse {
     artists: BaseUser[];
 }
 
-export async function performSearch(query: string): Promise<PerformSearchResponse> {
+async function performSearch(query: string): Promise<PerformSearchResponse> {
     const res = await api_client.get<PerformSearchResponse>(SearchURLs.searchMain, {
         params: { q: query },
     });
@@ -24,4 +26,13 @@ export async function performSearch(query: string): Promise<PerformSearchRespons
         users: users.map((user) => ({ ...user, kind: "user" as const })),
         artists: artists.map((artist) => ({ ...artist, kind: "user" as const })),
     };
+}
+
+export function useSearchResults(query: string) {
+    return useQuery({
+        queryKey: searchKeys.result(query),
+        queryFn: () => performSearch(query),
+        enabled: !!query.trim(),
+        placeholderData: keepPreviousData,
+    });
 }

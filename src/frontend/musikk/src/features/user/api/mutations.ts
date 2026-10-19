@@ -37,7 +37,7 @@ export function useMeUpdateMutation() {
 export function useFollowUserMutation() {
     return useMutation({
         mutationFn: async (userUUID: UUID) => {
-            await api_client.post(UserURLs.followUser(userUUID));
+            await api_client.post<void>(UserURLs.followUser(userUUID));
         },
     });
 }
@@ -45,7 +45,7 @@ export function useFollowUserMutation() {
 export function useUnfollowUserMutation() {
     return useMutation({
         mutationFn: async (userUUID: UUID) => {
-            await api_client.delete(UserURLs.unfollowUser(userUUID));
+            await api_client.delete<void>(UserURLs.unfollowUser(userUUID));
         },
     });
 }

@@ -6,12 +6,11 @@ import {
     Collection,
     CollectionDetailed,
     CollectionListParams,
+    CollectionType,
 } from "@/features/collections/types.ts";
 import { useQuery } from "@tanstack/react-query";
 
-export async function fetchCollections(
-    params?: CollectionListParams,
-): Promise<PaginatedRes<Collection>> {
+async function fetchCollections(params?: CollectionListParams): Promise<PaginatedRes<Collection>> {
     const res = await api_client.get<PaginatedRes<Collection>>(CollectionURLs.collectionList, {
         params,
     });
@@ -30,6 +29,13 @@ export function useLatestCollections(params: CollectionListParams) {
         queryFn: () => fetchCollections(params),
         select: collectionResults,
         staleTime: LATEST_COLLECTIONS_STALE_TIME_MS,
+    });
+}
+
+export function useCollectionsByAuthorQuery(authorUUID: UUID, type: CollectionType) {
+    return useQuery({
+        queryKey: collectionKeys.byAuthor(authorUUID, type),
+        queryFn: () => fetchCollections({ author: authorUUID, type }),
     });
 }
 

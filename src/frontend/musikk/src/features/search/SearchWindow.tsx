@@ -1,4 +1,3 @@
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { useDebounce } from "use-debounce";
 
@@ -6,8 +5,7 @@ import { EmptyState } from "@/features/common/EmptyState.tsx";
 import { Spinner } from "@/features/ui/spinner.tsx";
 
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
-import { performSearch } from "@/features/search/api/queries.ts";
-import { searchKeys } from "@/features/search/api/queryKeys.ts";
+import { useSearchResults } from "@/features/search/api/queries.ts";
 import { Input } from "@/features/ui/input.tsx";
 
 import { CollectionCard } from "@/features/collections/components/CollectionCard.tsx";
@@ -29,12 +27,7 @@ export function SearchWindow({ onItemSelect, songMode = "card" }: SearchWindowPr
     const [query, setQuery] = useState("");
     const [debouncedQuery] = useDebounce(query, QUERY_TIMEOUT);
 
-    const { isSuccess, error, data, refetch, isPlaceholderData } = useQuery({
-        queryKey: searchKeys.result(debouncedQuery),
-        queryFn: () => performSearch(debouncedQuery),
-        enabled: !!debouncedQuery.trim(),
-        placeholderData: keepPreviousData,
-    });
+    const { isSuccess, error, data, refetch, isPlaceholderData } = useSearchResults(debouncedQuery);
 
     const shouldShowResults = debouncedQuery.trim().length > 0 && isSuccess;
 

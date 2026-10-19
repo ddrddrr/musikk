@@ -7,12 +7,10 @@ import { UserFeed } from "@/features/publications/components/posts/UserFeed.tsx"
 import { Button } from "@/features/ui/button.tsx";
 import { Spinner } from "@/features/ui/spinner.tsx";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/features/ui/tabs.tsx";
-import { fetchUser } from "@/features/user/api/queries.ts";
-import { userKeys } from "@/features/user/api/queryKeys.ts";
+import { useUserDetailQuery } from "@/features/user/api/queries.ts";
 import { EditProfileDialog } from "@/features/user/components/EditProfileDialog.tsx";
 import { UserAvatar } from "@/features/user/components/UserAvatar.tsx";
 import { useFollowUser } from "@/features/user/hooks/useFollowUser.ts";
-import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 
 export function ProfilePage() {
@@ -27,15 +25,7 @@ function UserProfile({ uuid }: { uuid: UUID }) {
     const { isFollowing, toggleFollow, isLoading: isFollowLoading } = useFollowUser(uuid);
 
     // TODO: dont fetch if current?
-    const {
-        isLoading,
-        isError,
-        data: user,
-        refetch,
-    } = useQuery({
-        queryKey: userKeys.detail(uuid),
-        queryFn: () => fetchUser(uuid),
-    });
+    const { isLoading, isError, data: user, refetch } = useUserDetailQuery(uuid);
 
     const isOwnProfile = currUserUUID === uuid;
 

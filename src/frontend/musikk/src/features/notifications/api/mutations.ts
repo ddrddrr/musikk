@@ -6,7 +6,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 async function setNotificationsRead() {
-    await api_client.patch(NotificationURLs.notificationsSetRead);
+    await api_client.patch<void>(NotificationURLs.notificationsSetRead);
 }
 
 export function useSetNotificationsRead() {
