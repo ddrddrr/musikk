@@ -15,6 +15,7 @@ import { useNewMessagesIndicator } from "@/features/publications/hooks/useNewMes
 import { useScrollAnchor } from "@/features/publications/hooks/useScrollAnchor.ts";
 import { useTypingIndicator } from "@/features/publications/hooks/useTypingIndicator.ts";
 import { Publication } from "@/features/publications/types.ts";
+import { chatTopic } from "@/ws/topics.ts";
 import { useRef } from "react";
 
 const NO_MESSAGES: Publication[] = [];
@@ -44,7 +45,7 @@ export function ChatBox({ chatUUID }: ChatBoxProps) {
         refetch: refetchMessages,
     } = useChatMessages(userUUID, chatUUID);
 
-    const { typers, notifyTyping } = useTypingIndicator(`chat.${chatUUID}`, "chat.typing");
+    const { typers, notifyTyping } = useTypingIndicator(chatTopic(chatUUID), "chat.typing");
 
     const messagesContainerRef = useRef<HTMLDivElement>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);

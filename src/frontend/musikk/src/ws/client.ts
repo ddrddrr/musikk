@@ -196,17 +196,6 @@ export class WSClient {
         }
     }
 
-    // used e.g. by subscribeTopic
-    // because we need create the sub immediatelly and increment the sub count
-    // otherwise we can re-subscribe if there are a lot of pending messages
-    // and another sub request comes in
-    // (checks that there are no subs since the sub req is queued -> queues again)
-    private sendNow(action: UserAction) {
-        const ws = this.ws;
-        if (ws?.readyState !== WebSocket.OPEN) return;
-        ws.send(JSON.stringify(action));
-    }
-
     onOpen(handler: () => void): () => void {
         this.openHandlers.add(handler);
         if (this.isOpen()) {
@@ -221,19 +210,21 @@ export class WSClient {
         };
     }
 
+    // topic requests skip the pending queue: onopen subscribes to every topic in
+    // topicSubscriptions, so a queued request would send the same subscribe twice
     subscribeTopic(topic: string): () => void {
         const count = this.topicSubscriptions.get(topic) ?? 0;
         this.topicSubscriptions.set(topic, count + 1);
 
         if (count === 0) {
-            this.sendNow({ action: "subscribe", payload: { topic } });
+            this.sendIfOpen({ action: "subscribe", payload: { topic } });
         }
 
         return () => {
             const current = this.topicSubscriptions.get(topic) ?? 0;
             if (current <= 1) {
                 this.topicSubscriptions.delete(topic);
-                this.sendNow({ action: "unsubscribe", payload: { topic } });
+                this.sendIfOpen({ action: "unsubscribe", payload: { topic } });
             } else {
                 this.topicSubscriptions.set(topic, current - 1);
             }

@@ -1,5 +1,6 @@
 import { publicationKeys } from "@/features/publications/api/queryKeys.ts";
 import { useWSClient } from "@/hooks/useWSClient.ts";
+import { collectionCommentsTopic } from "@/ws/topics.ts";
 import { useTopicSubscription } from "@/ws/useTopicSubscription.ts";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
@@ -12,7 +13,7 @@ export function useCollectionCommentsWsEvents(collectionUUID: string) {
     const ws = useWSClient();
     const client = useQueryClient();
 
-    useTopicSubscription(`collection_comments.${collectionUUID}`);
+    useTopicSubscription(collectionCommentsTopic(collectionUUID));
 
     useEffect(() => {
         return ws.subscribe("collection.comments.changed", (payload: CollectionCommentsPayload) => {

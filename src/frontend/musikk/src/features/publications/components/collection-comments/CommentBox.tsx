@@ -13,6 +13,7 @@ import { useNewMessagesIndicator } from "@/features/publications/hooks/useNewMes
 import { useScrollAnchor } from "@/features/publications/hooks/useScrollAnchor.ts";
 import { useTypingIndicator } from "@/features/publications/hooks/useTypingIndicator.ts";
 import { Publication } from "@/features/publications/types.ts";
+import { collectionCommentsTopic } from "@/ws/topics.ts";
 import { useRef, useState } from "react";
 
 const NO_COMMENTS: Publication[] = [];
@@ -25,7 +26,7 @@ interface CommentBoxProps {
 export function CommentBox({ collectionUUID }: CommentBoxProps) {
     useCollectionCommentsWsEvents(collectionUUID);
     const { typers, notifyTyping } = useTypingIndicator(
-        `collection_comments.${collectionUUID}`,
+        collectionCommentsTopic(collectionUUID),
         "collection_comments.typing",
     );
     const [replyTo, setReplyTo] = useState<Publication | undefined>(undefined);
