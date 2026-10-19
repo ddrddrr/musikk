@@ -1,4 +1,5 @@
 import { usePlayback } from "@/features/playback/hooks/usePlayback.ts";
+import { readDeviceVolume } from "@/features/player/deviceVolumeStorage.ts";
 import { useLoudnessPreset } from "@/features/player/hooks/useLoudnessPreset.ts";
 import { type LoudnessPreset } from "@/features/player/providers/loudnessPresetContext.ts";
 import { Song } from "@/features/songs/types.ts";
@@ -15,7 +16,6 @@ const TRUE_PEAK_CEILING = -1; // dBTP
 // see https://developer.mozilla.org/en-US/docs/Web/API/GainNode for why ramps are needed
 const VOLUME_RAMP_TIME_CONSTANT = 0.05; // should be good enough...
 const DEFAULT_FADE_MS = 125;
-const VOLUME_STORAGE_KEY = "deviceVolume";
 
 interface UseAudioPipelineOptions {
     audioRef: React.RefObject<HTMLAudioElement | null>;
@@ -74,9 +74,9 @@ function buildAudioPipeline(audio: HTMLAudioElement): AudioPipeline {
 
     const volumeGain = ctx.createGain();
     // get from localStorage so an unmute on first gesture doesn't briefly play at 100%
-    const saved = localStorage.getItem(VOLUME_STORAGE_KEY);
-    if (saved !== null) {
-        volumeGain.gain.value = Math.max(0, Math.min(1, Number(saved) / 100));
+    const savedVolume = readDeviceVolume();
+    if (savedVolume !== undefined) {
+        volumeGain.gain.value = savedVolume / 100;
     }
 
     const gainEnvelope = ctx.createGain();

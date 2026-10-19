@@ -3,6 +3,7 @@ import {
     ActiveDeviceReportPayload,
     PlaybackSetPayload,
 } from "@/features/playback/ws/playbackPayload.ts";
+import { readDeviceVolume } from "@/features/player/deviceVolumeStorage.ts";
 import { useWSClient } from "@/hooks/useWSClient.ts";
 import { useCallback } from "react";
 
@@ -18,12 +19,9 @@ export function useRegisterDeviceAction() {
                 name: string;
                 volume?: number;
             } = { device_id: device.id, name: device.name };
-            const saved = localStorage.getItem("deviceVolume");
-            if (saved !== null) {
-                const parsed = Number(saved);
-                if (Number.isInteger(parsed) && parsed >= 0 && parsed <= 100) {
-                    payload.volume = parsed;
-                }
+            const savedVolume = readDeviceVolume();
+            if (savedVolume !== undefined) {
+                payload.volume = savedVolume;
             }
             ws.send({ action: "device.register", payload });
         },

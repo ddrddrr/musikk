@@ -1,6 +1,11 @@
 import { createContext } from "react";
 
-export type LoudnessPreset = "off" | "quiet" | "normal" | "loud";
+export const LOUDNESS_PRESETS = ["off", "quiet", "normal", "loud"] as const;
+export type LoudnessPreset = (typeof LOUDNESS_PRESETS)[number];
+
+export function isLoudnessPreset(value: string | null): value is LoudnessPreset {
+    return LOUDNESS_PRESETS.some((preset) => preset === value);
+}
 
 export interface LoudnessPresetContextProps {
     preset: LoudnessPreset;
