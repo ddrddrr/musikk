@@ -1,7 +1,8 @@
 import { UUID } from "@/api/types.ts";
 
 export const songKeys = {
-    userCollectionsBase: ["songUserCollections"] as const,
-    userCollections: (collectionSongUUID: UUID) =>
-        [...songKeys.userCollectionsBase, collectionSongUUID] as const,
+    base: ["songs"] as const,
+    collectionMemberships: () => [...songKeys.base, "collection-memberships"] as const,
+    collectionMembership: (collectionSongUUID: UUID) =>
+        [...songKeys.collectionMemberships(), collectionSongUUID] as const,
 };

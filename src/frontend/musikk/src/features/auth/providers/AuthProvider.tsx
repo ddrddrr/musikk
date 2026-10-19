@@ -23,7 +23,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         refetch,
         error,
     } = useQuery<BaseUser | null>({
-        queryKey: userKeys.me,
+        queryKey: userKeys.me(),
         queryFn: fetchMe,
         retry: false,
         staleTime: 30 * 60 * 1000, // 30 minutes

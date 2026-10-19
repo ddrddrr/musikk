@@ -1,14 +1,25 @@
 import { UUID } from "@/api/types.ts";
+import { FeedConnection } from "@/features/publications/types.ts";
 
 export const publicationKeys = {
-    globalFeed: () => ["global-feed"] as const,
-    feed: (userUUID: UUID) => ["feed", userUUID, "comments"] as const,
+    base: ["publications"] as const,
+    globalFeeds: () => [...publicationKeys.base, "global-feed"] as const,
+    globalFeed: (connection?: FeedConnection) =>
+        [...publicationKeys.globalFeeds(), connection ?? "all"] as const,
+    globalFeedPoll: (connection?: FeedConnection) =>
+        [...publicationKeys.globalFeed(connection), "poll"] as const,
+    feed: (userUUID: UUID) => [...publicationKeys.base, "feed", userUUID] as const,
+    feedPoll: (userUUID: UUID) => [...publicationKeys.feed(userUUID), "poll"] as const,
     collectionComments: (collectionUUID: UUID) =>
-        ["collection", collectionUUID, "comments"] as const,
-    childrenRoot: () => ["publication-children"] as const,
-    children: (pubUUID: UUID) => ["publication-children", pubUUID] as const,
-    userChats: (userUUID: UUID) => ["user-chats", userUUID] as const,
-    chatDetail: (chatUUID: UUID) => ["chat-detail", chatUUID] as const,
-    chatMessages: (chatUUID: UUID) => ["chat-messages", chatUUID] as const,
-    chatAttachments: (chatUUID: UUID) => ["chat-attachments", chatUUID] as const,
+        [...publicationKeys.base, "collection-comments", collectionUUID] as const,
+    allChildren: () => [...publicationKeys.base, "children"] as const,
+    children: (pubUUID: UUID) => [...publicationKeys.allChildren(), pubUUID] as const,
+    chats: () => [...publicationKeys.base, "chats"] as const,
+    userChats: (userUUID: UUID) => [...publicationKeys.chats(), userUUID] as const,
+    chatDetail: (userUUID: UUID, chatUUID: UUID) =>
+        [...publicationKeys.base, "chat-detail", userUUID, chatUUID] as const,
+    chatMessages: (userUUID: UUID, chatUUID: UUID) =>
+        [...publicationKeys.base, "chat-messages", userUUID, chatUUID] as const,
+    chatAttachments: (userUUID: UUID, chatUUID: UUID) =>
+        [...publicationKeys.base, "chat-attachments", userUUID, chatUUID] as const,
 };

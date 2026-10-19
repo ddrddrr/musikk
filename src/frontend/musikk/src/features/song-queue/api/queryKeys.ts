@@ -1,3 +1,3 @@
 export const queueKeys = {
-    base: ["queue"] as const,
+    base: ["song-queue"] as const,
 };

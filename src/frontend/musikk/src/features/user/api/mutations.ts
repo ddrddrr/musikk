@@ -28,7 +28,7 @@ export function useMeUpdateMutation() {
             return res.data;
         },
         onSuccess: ({ user }) => {
-            void queryClient.invalidateQueries({ queryKey: userKeys.me });
+            void queryClient.invalidateQueries({ queryKey: userKeys.me() });
             void queryClient.invalidateQueries({ queryKey: userKeys.detail(user.uuid) });
         },
     });

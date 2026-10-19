@@ -51,11 +51,11 @@ export function useCreatePost() {
                 queryKey: publicationKeys.feed(variables.userUUID),
             });
             void queryClient.invalidateQueries({
-                queryKey: publicationKeys.globalFeed(),
+                queryKey: publicationKeys.globalFeeds(),
             });
             if (variables.parentUUID) {
                 void queryClient.invalidateQueries({
-                    queryKey: publicationKeys.childrenRoot(),
+                    queryKey: publicationKeys.allChildren(),
                 });
             }
         },
@@ -171,7 +171,7 @@ export function useCreateChatMessage() {
         },
         onSuccess: (_data, variables) => {
             void queryClient.invalidateQueries({
-                queryKey: publicationKeys.chatMessages(variables.chatUUID),
+                queryKey: publicationKeys.chatMessages(variables.userUUID, variables.chatUUID),
             });
             void queryClient.invalidateQueries({
                 queryKey: publicationKeys.userChats(variables.userUUID),

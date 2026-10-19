@@ -3,7 +3,7 @@ import { getOffsetFromNextUrl } from "@/api/hooks.ts";
 import { PaginatedRes, UUID } from "@/api/types.ts";
 import { ChatURLs, PublicationURLs } from "@/features/publications/api/endpoints.ts";
 import { publicationKeys } from "@/features/publications/api/queryKeys.ts";
-import { Attachment, Chat, Publication } from "@/features/publications/types.ts";
+import { Attachment, Chat, FeedConnection, Publication } from "@/features/publications/types.ts";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 
 export async function fetchPublicationPage(
@@ -18,42 +18,51 @@ export async function fetchPublicationPage(
     return res.data;
 }
 
-function usePublicationListInfinite(
-    url: string,
-    queryKey: unknown[],
-    additionalParams?: Record<string, string>,
-    limit = 10,
-) {
+const PUBLICATION_PAGE_SIZE = 10;
+
+const offsetPagination = {
+    initialPageParam: 0,
+    getNextPageParam: getOffsetFromNextUrl,
+};
+
+export function useGlobalFeedPosts(connection?: FeedConnection) {
     return useInfiniteQuery({
-        queryKey: [...queryKey, url, "infinite", limit, additionalParams],
-        initialPageParam: 0,
-        queryFn: ({ pageParam }) => fetchPublicationPage(url, limit, pageParam, additionalParams),
-        getNextPageParam: getOffsetFromNextUrl,
+        ...offsetPagination,
+        queryKey: publicationKeys.globalFeed(connection),
+        queryFn: ({ pageParam }) =>
+            fetchPublicationPage(
+                PublicationURLs.globalFeedPosts(),
+                PUBLICATION_PAGE_SIZE,
+                pageParam,
+                connection ? { connection } : undefined,
+            ),
     });
 }
 
-export function useGlobalFeedPosts(connection?: "friends" | "followed" | "mine") {
-    const params = connection ? { connection } : undefined;
-    return usePublicationListInfinite(
-        PublicationURLs.globalFeedPosts(),
-        [...publicationKeys.globalFeed()],
-        params,
-    );
-}
-
-export function useFeedPosts(userUUID: UUID, connection?: "friends" | "followed" | "mine") {
-    const params = connection ? { connection } : undefined;
-    return usePublicationListInfinite(
-        PublicationURLs.feedPosts(userUUID),
-        [...publicationKeys.feed(userUUID)],
-        params,
-    );
+export function useFeedPosts(userUUID: UUID) {
+    return useInfiniteQuery({
+        ...offsetPagination,
+        queryKey: publicationKeys.feed(userUUID),
+        queryFn: ({ pageParam }) =>
+            fetchPublicationPage(
+                PublicationURLs.feedPosts(userUUID),
+                PUBLICATION_PAGE_SIZE,
+                pageParam,
+            ),
+    });
 }
 
 export function useCollectionComments(collectionUUID: UUID) {
-    return usePublicationListInfinite(PublicationURLs.collectionComments(collectionUUID), [
-        ...publicationKeys.collectionComments(collectionUUID),
-    ]);
+    return useInfiniteQuery({
+        ...offsetPagination,
+        queryKey: publicationKeys.collectionComments(collectionUUID),
+        queryFn: ({ pageParam }) =>
+            fetchPublicationPage(
+                PublicationURLs.collectionComments(collectionUUID),
+                PUBLICATION_PAGE_SIZE,
+                pageParam,
+            ),
+    });
 }
 
 export async function fetchPublicationChildren(pubUUID: UUID): Promise<Publication[]> {
@@ -85,9 +94,16 @@ export function useUserChats(userUUID: UUID) {
 }
 
 export function useChatMessages(userUUID: UUID, chatUUID: UUID) {
-    return usePublicationListInfinite(ChatURLs.chatMessages(userUUID, chatUUID), [
-        ...publicationKeys.chatMessages(chatUUID),
-    ]);
+    return useInfiniteQuery({
+        ...offsetPagination,
+        queryKey: publicationKeys.chatMessages(userUUID, chatUUID),
+        queryFn: ({ pageParam }) =>
+            fetchPublicationPage(
+                ChatURLs.chatMessages(userUUID, chatUUID),
+                PUBLICATION_PAGE_SIZE,
+                pageParam,
+            ),
+    });
 }
 
 async function fetchChatDetail(userUUID: UUID, chatUUID: UUID): Promise<Chat> {
@@ -98,21 +114,20 @@ async function fetchChatDetail(userUUID: UUID, chatUUID: UUID): Promise<Chat> {
 export function useChatDetail(userUUID: UUID, chatUUID: UUID) {
     return useQuery<Chat>({
         queryFn: () => fetchChatDetail(userUUID, chatUUID),
-        queryKey: publicationKeys.chatDetail(chatUUID),
+        queryKey: publicationKeys.chatDetail(userUUID, chatUUID),
     });
 }
 
 export function useChatAttachments(userUUID: UUID, chatUUID: UUID) {
     return useInfiniteQuery({
-        queryKey: [...publicationKeys.chatAttachments(chatUUID), "infinite"],
-        initialPageParam: 0,
+        ...offsetPagination,
+        queryKey: publicationKeys.chatAttachments(userUUID, chatUUID),
         queryFn: async ({ pageParam }) => {
             const res = await api_client.get<PaginatedRes<Attachment>>(
                 ChatURLs.chatAttachments(userUUID, chatUUID),
-                { params: { limit: 10, offset: pageParam } },
+                { params: { limit: PUBLICATION_PAGE_SIZE, offset: pageParam } },
             );
             return res.data;
         },
-        getNextPageParam: getOffsetFromNextUrl,
     });
 }

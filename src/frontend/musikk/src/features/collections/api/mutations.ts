@@ -30,7 +30,7 @@ export function useLikeCollection() {
     return useMutation({
         mutationFn: collectionAddToLiked,
         onSuccess: () => {
-            void queryClient.invalidateQueries({ queryKey: userKeys.likedCollections });
+            void queryClient.invalidateQueries({ queryKey: userKeys.likedCollections() });
             toast.success("Added to liked collections");
         },
         onError: (error) => {
@@ -44,7 +44,7 @@ export function useUnlikeCollection() {
     return useMutation({
         mutationFn: collectionRemoveFromLiked,
         onSuccess: () => {
-            void queryClient.invalidateQueries({ queryKey: userKeys.likedCollections });
+            void queryClient.invalidateQueries({ queryKey: userKeys.likedCollections() });
             toast.success("Removed from liked collections");
         },
         onError: (error) => {
@@ -66,8 +66,8 @@ export function useDeleteCollection() {
     return useMutation({
         mutationFn: deleteCollection,
         onSuccess: () => {
-            void queryClient.invalidateQueries({ queryKey: ["userLibrary"] });
-            void queryClient.invalidateQueries({ queryKey: ["openCollection"] });
+            void queryClient.invalidateQueries({ queryKey: userKeys.libraries() });
+            void queryClient.invalidateQueries({ queryKey: collectionKeys.details() });
         },
         onError: (error) => {
             toast.error(getErrorDetail(error, "Failed to delete playlist"));
@@ -97,7 +97,7 @@ export function useRemoveSongFromCollection() {
             void queryClient.invalidateQueries({
                 queryKey: collectionKeys.detail(variables.collectionUUID),
             });
-            void queryClient.invalidateQueries({ queryKey: songKeys.userCollectionsBase });
+            void queryClient.invalidateQueries({ queryKey: songKeys.collectionMemberships() });
             toast.success("Removed from playlist");
         },
         onError: (error) => {
@@ -123,7 +123,7 @@ export function useLikeSong() {
     return useMutation({
         mutationFn: addToLikedSongs,
         onSuccess: () => {
-            void queryClient.invalidateQueries({ queryKey: userKeys.likedSongs });
+            void queryClient.invalidateQueries({ queryKey: userKeys.likedSongs() });
             toast.success("Added to liked songs");
         },
         onError: (error) => {
@@ -137,7 +137,7 @@ export function useUnlikeSong() {
     return useMutation({
         mutationFn: removeFromLikedSongs,
         onSuccess: () => {
-            void queryClient.invalidateQueries({ queryKey: userKeys.likedSongs });
+            void queryClient.invalidateQueries({ queryKey: userKeys.likedSongs() });
             toast.success("Removed from liked songs");
         },
         onError: (error) => {
@@ -250,7 +250,7 @@ export function useAddSongToCollection() {
             void queryClient.invalidateQueries({
                 queryKey: collectionKeys.detail(variables.collectionUUID),
             });
-            void queryClient.invalidateQueries({ queryKey: songKeys.userCollectionsBase });
+            void queryClient.invalidateQueries({ queryKey: songKeys.collectionMemberships() });
             toast.success("Added to playlist");
         },
         onError: (error) => {

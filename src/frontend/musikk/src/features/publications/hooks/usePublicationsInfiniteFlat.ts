@@ -6,22 +6,16 @@ import {
     useFeedPosts,
     useGlobalFeedPosts,
 } from "@/features/publications/api/queries.ts";
+import { FeedConnection } from "@/features/publications/types.ts";
 
-export function useGlobalFeedPostsFlat(
-    reverse = true,
-    connection?: "friends" | "followed" | "mine",
-) {
+export function useGlobalFeedPostsFlat(reverse = true, connection?: FeedConnection) {
     const query = useGlobalFeedPosts(connection);
     const result = useInfiniteFlat(query, reverse);
     return { ...result, publicationsFlat: result.itemsFlat };
 }
 
-export function useFeedPostsFlat(
-    userUUID: UUID,
-    reverse = true,
-    connection?: "friends" | "followed" | "mine",
-) {
-    const query = useFeedPosts(userUUID, connection);
+export function useFeedPostsFlat(userUUID: UUID, reverse = true) {
+    const query = useFeedPosts(userUUID);
     const result = useInfiniteFlat(query, reverse);
     return { ...result, publicationsFlat: result.itemsFlat };
 }

@@ -1,3 +1,4 @@
+import { collectionKeys } from "@/features/collections/api/queryKeys.ts";
 import { useWSClient } from "@/hooks/useWSClient.ts";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
@@ -8,7 +9,7 @@ export function useCollectionWsEvents() {
 
     useEffect(() => {
         const unsubCollection = ws.subscribe("collection.changed", () => {
-            void client.invalidateQueries({ queryKey: ["openCollection"] });
+            void client.invalidateQueries({ queryKey: collectionKeys.details() });
         });
 
         return () => {

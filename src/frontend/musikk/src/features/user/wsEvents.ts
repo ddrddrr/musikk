@@ -22,7 +22,7 @@ export function useUserWsEvents() {
             // TODO: set the data instead of invalidating
             // not sure yet whether we want to show the update of the profile to other users that
             // have it open
-            void client.invalidateQueries({ queryKey: userKeys.me });
+            void client.invalidateQueries({ queryKey: userKeys.me() });
             void client.invalidateQueries({ queryKey: userKeys.detail(payload.user.uuid) });
         });
 
@@ -43,15 +43,15 @@ export function useUserWsEvents() {
         });
 
         const unsubLikedSongs = ws.subscribe("user.liked_songs.changed", () => {
-            void client.invalidateQueries({ queryKey: userKeys.likedSongs });
+            void client.invalidateQueries({ queryKey: userKeys.likedSongs() });
         });
 
         const unsubLikedCollections = ws.subscribe("user.liked_collections.changed", () => {
-            void client.invalidateQueries({ queryKey: userKeys.likedCollections });
+            void client.invalidateQueries({ queryKey: userKeys.likedCollections() });
         });
 
         const unsubLibrary = ws.subscribe("user.library.changed", () => {
-            void client.invalidateQueries({ queryKey: ["userLibrary"] });
+            void client.invalidateQueries({ queryKey: userKeys.libraries() });
         });
 
         return () => {

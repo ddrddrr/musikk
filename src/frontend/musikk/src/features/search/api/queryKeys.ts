@@ -1,3 +1,4 @@
 export const searchKeys = {
-    result: (query: string) => ["search", query] as const,
+    base: ["search"] as const,
+    result: (query: string) => [...searchKeys.base, query] as const,
 };

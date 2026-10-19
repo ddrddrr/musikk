@@ -1,3 +1,4 @@
+import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
 import { publicationKeys } from "@/features/publications/api/queryKeys.ts";
 import { useWSClient } from "@/hooks/useWSClient.ts";
 import { useQueryClient } from "@tanstack/react-query";
@@ -10,16 +11,17 @@ type ChatMessagesPayload = {
 export function useUserChatsWsEvents() {
     const ws = useWSClient();
     const client = useQueryClient();
+    const userUUID = useUserUUID();
 
     useEffect(() => {
         return ws.subscribe("chat.messages.changed", (payload: ChatMessagesPayload) => {
             void client.invalidateQueries({
-                queryKey: publicationKeys.chatMessages(payload.chat_uuid),
+                queryKey: publicationKeys.chatMessages(userUUID, payload.chat_uuid),
             });
             void client.invalidateQueries({
-                queryKey: publicationKeys.chatAttachments(payload.chat_uuid),
+                queryKey: publicationKeys.chatAttachments(userUUID, payload.chat_uuid),
             });
-            void client.invalidateQueries({ queryKey: ["user-chats"] });
+            void client.invalidateQueries({ queryKey: publicationKeys.userChats(userUUID) });
         });
-    }, [ws, client]);
+    }, [ws, client, userUUID]);
 }

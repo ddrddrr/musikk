@@ -16,14 +16,14 @@ async function fetchLikedCollectionUUIDs(): Promise<Set<UUID>> {
 
 export function useLikedSongUUIDs() {
     return useQuery({
-        queryKey: userKeys.likedSongs,
+        queryKey: userKeys.likedSongs(),
         queryFn: fetchLikedSongUUIDs,
     });
 }
 
 export function useLikedCollectionUUIDs() {
     return useQuery({
-        queryKey: userKeys.likedCollections,
+        queryKey: userKeys.likedCollections(),
         queryFn: fetchLikedCollectionUUIDs,
     });
 }

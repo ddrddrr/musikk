@@ -30,7 +30,7 @@ export async function collectionMemberships(
 
 export function useCollectionMemberships(collectionSongUUID: UUID) {
     return useQuery({
-        queryKey: songKeys.userCollections(collectionSongUUID),
+        queryKey: songKeys.collectionMembership(collectionSongUUID),
         queryFn: () => collectionMemberships(collectionSongUUID),
     });
 }
