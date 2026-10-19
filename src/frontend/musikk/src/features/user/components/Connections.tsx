@@ -4,11 +4,9 @@ import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/features/ui/tabs.tsx";
 import { UserCard } from "@/features/user/components/UserCard.tsx";
 import { useMyConnections } from "@/features/user/hooks/useMyConnections.ts";
-import { useState } from "react";
 
 export function Connections() {
     const { friends, followed, followers, error, isPending } = useMyConnections();
-    const [tab, setTab] = useState("friends");
 
     if (error) {
         return <QueryErrorBox message="Failed to load connections" />;
@@ -19,7 +17,7 @@ export function Connections() {
     }
 
     return (
-        <Tabs value={tab} onValueChange={setTab} className="flex flex-col">
+        <Tabs defaultValue="friends" className="flex flex-col">
             <div className="flex items-center gap-2 border-b border-border px-6 py-4">
                 <TabsList className="rounded-sm">
                     <TabsTrigger value="friends">Friends</TabsTrigger>

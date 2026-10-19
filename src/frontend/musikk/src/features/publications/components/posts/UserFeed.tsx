@@ -1,6 +1,8 @@
 import { UUID } from "@/api/types.ts";
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
+import { CenteredSpinner } from "@/features/common/CenteredSpinner.tsx";
 import { EmptyState } from "@/features/common/EmptyState.tsx";
+import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { useFeedPosts } from "@/features/publications/api/queries.ts";
 import { LoadNewerButton } from "@/features/publications/components/LoadNewerButton.tsx";
 import { LoadOlderButton } from "@/features/publications/components/LoadOlderButton.tsx";
@@ -13,6 +15,7 @@ export function UserFeed({ userUUID }: { userUUID: UUID }) {
     const {
         error,
         isPending,
+        refetch,
         data: posts,
         hasNextPage,
         isFetchingNextPage,
@@ -22,10 +25,10 @@ export function UserFeed({ userUUID }: { userUUID: UUID }) {
     const { hasNewPosts, refresh } = useNewFeedPosts(userUUID, posts?.[0]?.uuid);
 
     if (error) {
-        return <div className="text-center text-destructive">Failed to load posts.</div>;
+        return <QueryErrorBox message="Failed to load posts" onRetry={() => void refetch()} />;
     }
 
-    if (isPending) return null;
+    if (isPending) return <CenteredSpinner />;
 
     return (
         <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">

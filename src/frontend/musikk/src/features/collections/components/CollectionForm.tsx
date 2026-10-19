@@ -9,6 +9,7 @@ import {
     FormMessage,
 } from "@/features/ui/form.tsx";
 import { Input } from "@/features/ui/input.tsx";
+import { Switch } from "@/features/ui/switch.tsx";
 import { UseFormReturn } from "react-hook-form";
 import { CollectionCreationFormValues } from "../hooks/useCollectionCreation.ts";
 
@@ -69,10 +70,9 @@ export function CollectionForm({
                             <FormLabel>Visibility</FormLabel>
                             <div className="flex items-center gap-2 pt-2">
                                 <FormControl>
-                                    <input
-                                        type="checkbox"
+                                    <Switch
                                         checked={!!field.value}
-                                        onChange={(e) => field.onChange(e.target.checked)}
+                                        onCheckedChange={field.onChange}
                                     />
                                 </FormControl>
                                 <div className="text-sm">Private</div>

@@ -1,3 +1,4 @@
+import { UUID } from "@/api/types.ts";
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
 import { UserCollectionsGrid } from "@/features/collections/components/UserCollectionsGrid.tsx";
 import { CenteredSpinner } from "@/features/common/CenteredSpinner.tsx";
@@ -12,13 +13,17 @@ import { EditProfileDialog } from "@/features/user/components/EditProfileDialog.
 import { UserAvatar } from "@/features/user/components/UserAvatar.tsx";
 import { useFollowUser } from "@/features/user/hooks/useFollowUser.ts";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
 import { useParams } from "react-router-dom";
 
 export function ProfilePage() {
     const { uuid } = useParams<{ uuid: string }>();
+    if (!uuid) return null;
+
+    return <UserProfile key={uuid} uuid={uuid} />;
+}
+
+function UserProfile({ uuid }: { uuid: UUID }) {
     const currUserUUID = useUserUUID();
-    const [tab, setTab] = useState("posts");
     const { isFollowing, toggleFollow, isLoading: isFollowLoading } = useFollowUser(uuid);
 
     // TODO: dont fetch if current?
@@ -28,9 +33,8 @@ export function ProfilePage() {
         data: user,
         refetch,
     } = useQuery({
-        queryKey: userKeys.detail(uuid!),
-        queryFn: () => fetchUser(uuid!),
-        enabled: !!uuid,
+        queryKey: userKeys.detail(uuid),
+        queryFn: () => fetchUser(uuid),
     });
 
     const isOwnProfile = currUserUUID === uuid;
@@ -43,7 +47,7 @@ export function ProfilePage() {
         return <QueryErrorBox message="Failed to load profile" onRetry={() => void refetch()} />;
     }
 
-    if (!user || !uuid) {
+    if (!user) {
         return null;
     }
 
@@ -77,7 +81,7 @@ export function ProfilePage() {
                     </Button>
                 )}
             </div>
-            <Tabs value={tab} onValueChange={setTab} className="mt-8 flex w-full flex-col">
+            <Tabs defaultValue="posts" className="mt-8 flex w-full flex-col">
                 <div className="border-b border-border px-6 py-4">
                     <TabsList className="rounded-sm">
                         <TabsTrigger value="posts">Posts</TabsTrigger>

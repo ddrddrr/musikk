@@ -1,20 +1,17 @@
-import { setNotificationsRead } from "@/features/notifications/api/mutations.ts";
+import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
+import { useSetNotificationsRead } from "@/features/notifications/api/mutations.ts";
 import { useNotificationsQuery } from "@/features/notifications/api/queries.ts";
-import { notificationKeys } from "@/features/notifications/api/queryKeys.ts";
 import { NotificationOverlay } from "@/features/notifications/NotificationOverlay.tsx";
 import { Button } from "@/features/ui/button.tsx";
 import { Popover, PopoverContent, PopoverTrigger } from "@/features/ui/popover.tsx";
 import { Spinner } from "@/features/ui/spinner";
 import { IconTooltip } from "@/features/ui/tooltip";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Sparkle } from "lucide-react";
 import { useMemo } from "react";
 
 export function NotificationBox() {
-    const client = useQueryClient();
-
-    const { isPending, error, data } = useNotificationsQuery();
-    const setNotificationsReadMutation = useMutation({ mutationFn: setNotificationsRead });
+    const { isPending, error, data, refetch } = useNotificationsQuery();
+    const setNotificationsReadMutation = useSetNotificationsRead();
 
     const unreadCount = useMemo(() => {
         if (!data) return 0;
@@ -27,23 +24,30 @@ export function NotificationBox() {
         );
     }, [data]);
 
-    async function handleOpenChange(open: boolean) {
+    function handleOpenChange(open: boolean) {
         if (!open && unreadCount > 0) {
-            await setNotificationsReadMutation.mutateAsync();
-            void client.invalidateQueries({ queryKey: notificationKeys.base });
+            setNotificationsReadMutation.mutate();
         }
     }
 
-    if (isPending)
-        return (
-            <div className="flex items-center justify-center p-4">
-                <Spinner />
-            </div>
-        );
-    if (error)
-        return (
-            <div className="p-4 text-center text-sm text-destructive">Error: {error.message}</div>
-        );
+    function renderContent() {
+        if (error) {
+            return (
+                <QueryErrorBox
+                    message="Failed to load notifications"
+                    onRetry={() => void refetch()}
+                />
+            );
+        }
+        if (isPending) {
+            return (
+                <div className="flex items-center justify-center p-4">
+                    <Spinner />
+                </div>
+            );
+        }
+        return <NotificationOverlay notifications={data} />;
+    }
 
     return (
         <Popover onOpenChange={handleOpenChange}>
@@ -59,16 +63,14 @@ export function NotificationBox() {
                             <Sparkle className="size-5" />
                         </Button>
                         {unreadCount > 0 && (
-                            <span className="absolute -top-1 -right-1 rounded-full bg-amber-200 px-1.5 py-0.5 text-xs font-bold text-foreground">
+                            <span className="absolute -top-1 -right-1 rounded-full bg-highlight px-1.5 py-0.5 text-xs font-bold text-foreground">
                                 {unreadCount}
                             </span>
                         )}
                     </div>
                 </PopoverTrigger>
             </IconTooltip>
-            <PopoverContent className="w-96 p-0">
-                <NotificationOverlay notifications={data} />
-            </PopoverContent>
+            <PopoverContent className="w-96 p-0">{renderContent()}</PopoverContent>
         </Popover>
     );
 }

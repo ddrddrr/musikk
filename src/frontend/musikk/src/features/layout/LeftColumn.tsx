@@ -6,22 +6,12 @@ import { useMemo } from "react";
 
 export function LeftColumn() {
     const { data } = useUserLibrary();
-    const { liked_songs, history, created_collections, liked_collections } = data ?? {};
 
     const collections = useMemo(() => {
-        const created = Array.isArray(created_collections) ? created_collections : [];
-        const liked = Array.isArray(liked_collections) ? liked_collections : [];
-        let all = [...created, ...liked];
-
-        if (history != null) {
-            all = [history, ...all];
-        }
-        if (liked_songs != null) {
-            all = [liked_songs, ...all];
-        }
-
-        return all;
-    }, [liked_songs, history, created_collections, liked_collections]);
+        if (!data) return [];
+        const { liked_songs, history, created_collections, liked_collections } = data;
+        return [liked_songs, history, ...created_collections, ...liked_collections];
+    }, [data]);
 
     return (
         <div className="flex w-1/5 flex-col overflow-y-auto bg-brand p-4 pb-40">

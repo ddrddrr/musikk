@@ -26,7 +26,7 @@ export function CollectionContainer({ collectionUUID }: CollectionContainerProps
     const currUserUUID = useUserUUID();
     const { data: library } = useUserLibrary();
     const { liked_songs, history, created_collections } = library ?? {};
-    let showComments = !!useMatch("/collection/:uuid/comments");
+    const isCommentsRoute = !!useMatch("/collection/:uuid/comments");
 
     const {
         isPending,
@@ -37,11 +37,11 @@ export function CollectionContainer({ collectionUUID }: CollectionContainerProps
 
     const toggleComments = useCallback(() => {
         void navigate(
-            showComments
+            isCommentsRoute
                 ? `/collection/${collectionUUID}`
                 : `/collection/${collectionUUID}/comments`,
         );
-    }, [navigate, showComments, collectionUUID]);
+    }, [navigate, isCommentsRoute, collectionUUID]);
 
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const { deletePlaylist, isDeleting } = useDeletePlaylist();
@@ -59,7 +59,7 @@ export function CollectionContainer({ collectionUUID }: CollectionContainerProps
         ?.map((c) => c.uuid)
         .includes(collection?.uuid);
 
-    showComments = showComments && notPersonalCollection && !collection?.private;
+    const showComments = isCommentsRoute && notPersonalCollection && !collection.private;
     const removeFromPlaylistCtxBtn =
         !!currUserUUID && collection?.authors.map((a) => a.uuid).includes(currUserUUID);
     const isAuthorPlaylist = removeFromPlaylistCtxBtn && collection.type === "playlist";
@@ -90,7 +90,7 @@ export function CollectionContainer({ collectionUUID }: CollectionContainerProps
                         )}
                         {songs.length > 0 && (
                             <ul className="flex flex-col gap-2">
-                                {songs.map((collectionSong, index) => {
+                                {songs.map((collectionSong) => {
                                     const songActions = showComments ? (
                                         <SongMenuButton
                                             collectionSong={collectionSong}
@@ -106,7 +106,7 @@ export function CollectionContainer({ collectionUUID }: CollectionContainerProps
                                     );
 
                                     return (
-                                        <li key={`${collectionSong.uuid}-${index}`}>
+                                        <li key={collectionSong.uuid}>
                                             <SongContainer
                                                 collectionSong={collectionSong}
                                                 size={songSize}
