@@ -3,7 +3,7 @@ import {
     useActiveDeviceReportAction,
     useSetPlaybackAction,
 } from "@/features/playback/ws/actionHooks.ts";
-import { useQueueNext } from "@/features/song-queue/hooks/useQueueAPI.ts";
+import { useQueueNext } from "@/features/song-queue/api/mutations.ts";
 import { useContext, useEffect, useState } from "react";
 
 interface UsePlayerOptions {

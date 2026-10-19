@@ -1,7 +1,7 @@
 import { getErrorDetail } from "@/api/errorUtils.ts";
-import { QueueItem } from "@/features/song-queue/api/types.ts";
-import { skipTo } from "@/features/song-queue/mutations.ts";
-import { queueKeys } from "@/features/song-queue/queryKeys.ts";
+import { skipTo } from "@/features/song-queue/api/mutations.ts";
+import { queueKeys } from "@/features/song-queue/api/queryKeys.ts";
+import { QueueItem } from "@/features/song-queue/types.ts";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
 import { toast } from "sonner";

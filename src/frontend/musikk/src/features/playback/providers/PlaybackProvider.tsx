@@ -5,7 +5,7 @@ import {
 import { THIS_DEVICE } from "@/features/playback/thisDevice.ts";
 import { useSubscribePlaybackEvents } from "@/features/playback/ws/wsEvents.ts";
 import { AudioPlayerController } from "@/features/player/controller/AudioPlayerController.ts";
-import { useQueue } from "@/features/song-queue/hooks/useQueueAPI.ts";
+import { useQueue } from "@/features/song-queue/api/queries.ts";
 import { ReactNode, useCallback, useMemo, useState, useSyncExternalStore } from "react";
 
 interface PlaybackProviderProps {

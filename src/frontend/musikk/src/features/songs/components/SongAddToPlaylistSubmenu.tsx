@@ -5,8 +5,8 @@ import {
 } from "@/features/collections/api/mutations.ts";
 import { CollectionSong } from "@/features/collections/types.ts";
 import { EmptyState } from "@/features/common/EmptyState.tsx";
-import { useCollectionMemberships } from "@/features/songs/queries.ts";
-import { songKeys } from "@/features/songs/queryKeys.ts";
+import { useCollectionMemberships } from "@/features/songs/api/queries.ts";
+import { songKeys } from "@/features/songs/api/queryKeys.ts";
 import {
     DropdownMenuItem,
     DropdownMenuSub,

@@ -1,4 +1,4 @@
-import { notificationKeys } from "@/features/notifications/queryKeys.ts";
+import { notificationKeys } from "@/features/notifications/api/queryKeys.ts";
 import { useWSClient } from "@/hooks/useWSClient.ts";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";

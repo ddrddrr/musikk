@@ -1,6 +1,6 @@
 import { EmptyState } from "@/features/common/EmptyState.tsx";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
-import { useFriendsListeningQuery } from "@/features/friend-activity/queries.ts";
+import { useFriendsListeningQuery } from "@/features/friend-activity/api/queries.ts";
 import { DefaultSongActions } from "@/features/songs/components/DefaultSongActions.tsx";
 import { SongContainer } from "@/features/songs/components/SongContainer.tsx";
 import { ScrollArea } from "@/features/ui/scroll-area.tsx";

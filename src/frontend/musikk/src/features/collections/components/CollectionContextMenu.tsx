@@ -1,6 +1,6 @@
 import { useCollectionPlayHandler } from "@/features/collections/hooks/useCollectionPlayHandler.ts";
 import { Collection } from "@/features/collections/types.ts";
-import { useAddCollection } from "@/features/song-queue/hooks/useQueueAPI.ts";
+import { useAddCollection } from "@/features/song-queue/api/mutations.ts";
 import {
     ContextMenu,
     ContextMenuContent,

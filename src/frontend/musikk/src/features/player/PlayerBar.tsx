@@ -7,7 +7,7 @@ import {
 import { ChangeActiveDeviceDropdown } from "@/features/player/ChangeActiveDeviceDropdown.tsx";
 import { useVolume } from "@/features/player/hooks/useVolume.ts";
 import { PlayerPlayButton } from "@/features/player/PlayerPlayButton.tsx";
-import { useQueueNext, useQueuePrev } from "@/features/song-queue/hooks/useQueueAPI.ts";
+import { useQueueNext, useQueuePrev } from "@/features/song-queue/api/mutations.ts";
 import { useNavigateToSongAlbum } from "@/features/songs/hooks/useNavigateToSongAlbum.ts";
 import { Button } from "@/features/ui/button";
 import { Slider } from "@/features/ui/slider";

@@ -1,7 +1,7 @@
 import { api_client } from "@/api/axiosConf.ts";
 import { UUID } from "@/api/types.ts";
+import { ChatURLs, PublicationURLs } from "@/features/publications/api/endpoints.ts";
 import { publicationKeys } from "@/features/publications/api/queryKeys.ts";
-import { ChatURLs, PublicationURLs } from "@/features/publications/api/urls.ts";
 import { AttachmentType, Chat, Publication } from "@/features/publications/types.ts";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 

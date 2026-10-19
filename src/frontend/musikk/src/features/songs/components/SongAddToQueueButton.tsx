@@ -1,5 +1,5 @@
 import { CollectionSong } from "@/features/collections/types.ts";
-import { useAddSong } from "@/features/song-queue/hooks/useQueueAPI.ts";
+import { useAddSong } from "@/features/song-queue/api/mutations.ts";
 import { Button } from "@/features/ui/button.tsx";
 import { IconTooltip } from "@/features/ui/tooltip";
 import { BetweenHorizonalStart } from "lucide-react";

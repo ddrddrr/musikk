@@ -1,4 +1,4 @@
-import { queueKeys } from "@/features/song-queue/queryKeys.ts";
+import { queueKeys } from "@/features/song-queue/api/queryKeys.ts";
 import { useWSClient } from "@/hooks/useWSClient.ts";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";

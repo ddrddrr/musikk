@@ -1,7 +1,7 @@
-import { setNotificationsRead } from "@/features/notifications/mutations.ts";
+import { setNotificationsRead } from "@/features/notifications/api/mutations.ts";
+import { useNotificationsQuery } from "@/features/notifications/api/queries.ts";
+import { notificationKeys } from "@/features/notifications/api/queryKeys.ts";
 import { NotificationOverlay } from "@/features/notifications/NotificationOverlay.tsx";
-import { useNotificationsQuery } from "@/features/notifications/queries.ts";
-import { notificationKeys } from "@/features/notifications/queryKeys.ts";
 import { Button } from "@/features/ui/button.tsx";
 import { Popover, PopoverContent, PopoverTrigger } from "@/features/ui/popover.tsx";
 import { Spinner } from "@/features/ui/spinner";

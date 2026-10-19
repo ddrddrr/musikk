@@ -1,6 +1,6 @@
 import { api_client } from "@/api/axiosConf.ts";
-import { NotificationURLs } from "@/api/endpoints.ts";
-import { notificationKeys } from "@/features/notifications/queryKeys.ts";
+import { NotificationURLs } from "@/features/notifications/api/endpoints.ts";
+import { notificationKeys } from "@/features/notifications/api/queryKeys.ts";
 import {
     IChatMessageNotification,
     IFollowerNotification,

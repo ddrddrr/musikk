@@ -1,5 +1,5 @@
 import { authRef } from "@/api/authRef.ts";
-import { login as loginAPI, logout as logoutAPI } from "@/features/auth/api.ts";
+import { login as loginAPI, logout as logoutAPI } from "@/features/auth/api/mutations.ts";
 import { AuthContext } from "@/features/auth/providers/AuthContext.tsx";
 import { fetchMe } from "@/features/user/api/queries.ts";
 import { userKeys } from "@/features/user/api/queryKeys.ts";

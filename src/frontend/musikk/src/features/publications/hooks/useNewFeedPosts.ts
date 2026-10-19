@@ -1,7 +1,7 @@
 import { UUID } from "@/api/types.ts";
+import { PublicationURLs } from "@/features/publications/api/endpoints.ts";
 import { fetchPublicationPage } from "@/features/publications/api/queries.ts";
 import { publicationKeys } from "@/features/publications/api/queryKeys.ts";
-import { PublicationURLs } from "@/features/publications/api/urls.ts";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
 

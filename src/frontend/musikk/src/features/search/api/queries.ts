@@ -1,6 +1,6 @@
 import { api_client } from "@/api/axiosConf.ts";
-import { SearchURLs } from "@/api/endpoints.ts";
 import { Collection, CollectionSong } from "@/features/collections/types.ts";
+import { SearchURLs } from "@/features/search/api/endpoints.ts";
 import { BaseUser } from "@/features/user/types.ts";
 
 interface PerformSearchResponse {

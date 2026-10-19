@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 
 import { setFormServerErrors } from "@/api/errorUtils.ts";
-import { register } from "@/features/auth/api.ts";
+import { register } from "@/features/auth/api/mutations.ts";
 import { EmailField } from "@/features/auth/components/EmailField.tsx";
 import { PasswordField } from "@/features/auth/components/PasswordField.tsx";
 import { Button } from "@/features/ui/button.tsx";

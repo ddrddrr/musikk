@@ -1,8 +1,8 @@
 import { api_client } from "@/api/axiosConf.ts";
 import { getOffsetFromNextUrl } from "@/api/hooks.ts";
 import { PaginatedRes, UUID } from "@/api/types.ts";
+import { ChatURLs, PublicationURLs } from "@/features/publications/api/endpoints.ts";
 import { publicationKeys } from "@/features/publications/api/queryKeys.ts";
-import { ChatURLs, PublicationURLs } from "@/features/publications/api/urls.ts";
 import { Attachment, Chat, Publication } from "@/features/publications/types.ts";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 

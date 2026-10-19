@@ -1,5 +1,5 @@
-import { QueueItem } from "@/features/song-queue/api/types.ts";
 import { useQueuePlayHandler } from "@/features/song-queue/hooks/useQueuePlayHandler.ts";
+import { QueueItem } from "@/features/song-queue/types.ts";
 import { Button } from "@/features/ui/button.tsx";
 import { cn } from "@/lib/utils.ts";
 import { Play } from "lucide-react";

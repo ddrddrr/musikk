@@ -1,8 +1,8 @@
 import { api_client } from "@/api/axiosConf.ts";
-import { SongURLs } from "@/api/endpoints.ts";
 import { UUID } from "@/api/types.ts";
 import { Collection } from "@/features/collections/types.ts";
-import { songKeys } from "@/features/songs/queryKeys.ts";
+import { SongURLs } from "@/features/songs/api/endpoints.ts";
+import { songKeys } from "@/features/songs/api/queryKeys.ts";
 import { useQuery } from "@tanstack/react-query";
 
 export async function albumBySongRetrieve(songUUID: UUID): Promise<Collection> {

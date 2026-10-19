@@ -6,9 +6,9 @@ import {
 import {
     usePlayCollection,
     usePlaySong,
-    useQueue,
     useQueueNext,
-} from "@/features/song-queue/hooks/useQueueAPI.ts";
+} from "@/features/song-queue/api/mutations.ts";
+import { useQueue } from "@/features/song-queue/api/queries.ts";
 import { useContext } from "react";
 
 export function useHandlePlay() {

@@ -1,5 +1,5 @@
 import { EmptyState } from "@/features/common/EmptyState.tsx";
-import { NotificationListParams } from "@/features/notifications/queries.ts";
+import { NotificationListParams } from "@/features/notifications/api/queries.ts";
 import {
     IChatMessageNotification,
     IFollowerNotification,

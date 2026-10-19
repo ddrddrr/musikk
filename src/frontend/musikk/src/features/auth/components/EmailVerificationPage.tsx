@@ -1,4 +1,4 @@
-import { useVerifyEmailQuery } from "@/features/auth/api.ts";
+import { useVerifyEmailQuery } from "@/features/auth/api/queries.ts";
 import { Button } from "@/features/ui/button.tsx";
 import { Card, CardContent, CardHeader, CardTitle } from "@/features/ui/card.tsx";
 import { cn } from "@/lib/utils.ts";

@@ -2,7 +2,7 @@ import { getErrorDetail } from "@/api/errorUtils.ts";
 import { collectionRemoveSong } from "@/features/collections/api/mutations.ts";
 import { collectionKeys } from "@/features/collections/api/queryKeys.ts";
 import { CollectionSong } from "@/features/collections/types.ts";
-import { useAddSong } from "@/features/song-queue/hooks/useQueueAPI.ts";
+import { useAddSong } from "@/features/song-queue/api/mutations.ts";
 import { useSongPlayHandler } from "@/features/songs/hooks/useSongPlayHandler.ts";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
