@@ -1,6 +1,6 @@
 import { BaseUser } from "@/features/user/types.ts";
 import { cn } from "@/lib/utils.ts";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 type AuthorLinksProps = {
     authors: BaseUser[];
@@ -8,22 +8,17 @@ type AuthorLinksProps = {
 };
 
 export function AuthorLinks({ authors, className }: AuthorLinksProps) {
-    const navigate = useNavigate();
-
     return (
         <span className={cn("block truncate", className)}>
             {authors.map((author, index) => (
                 <span key={author.uuid}>
-                    <span
-                        role="link"
-                        className="cursor-pointer hover:underline"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            void navigate(`/users/${author.uuid}`);
-                        }}
+                    <Link
+                        to={`/users/${author.uuid}`}
+                        className="relative z-10 hover:underline"
+                        onClick={(e) => e.stopPropagation()}
                     >
                         {author.display_name}
-                    </span>
+                    </Link>
                     {index < authors.length - 1 && ", "}
                 </span>
             ))}

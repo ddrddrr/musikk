@@ -6,6 +6,7 @@ import {
     cardTitleVariants,
 } from "@/features/common/card-variants.ts";
 import { MediaThumbnail } from "@/features/common/MediaThumbnail.tsx";
+import { StretchedLink } from "@/features/common/StretchedLink.tsx";
 import { SongContextMenu } from "@/features/songs/components/SongContextMenu.tsx";
 import { useNavigateToSongAlbum } from "@/features/songs/hooks/useNavigateToSongAlbum.ts";
 import { Card, CardContent } from "@/features/ui/card.tsx";
@@ -44,23 +45,22 @@ export function SongCard({ collectionSong, size = "medium", onClick = undefined 
     const navigateToAlbum = useNavigateToSongAlbum();
     const { uuid, title, authors, image } = collectionSong.song;
 
-    function handleClick(s: CollectionSong) {
+    function handleClick() {
         if (onClick) {
-            onClick(s);
+            onClick(collectionSong);
             return;
         }
-        void navigateToAlbum(s.uuid);
+        void navigateToAlbum(collectionSong.uuid);
     }
 
     return (
         <SongContextMenu song={collectionSong}>
             <Card
-                onClick={() => void handleClick(collectionSong)}
                 key={uuid}
                 variant="panel"
                 className={songCardWidthVariants({
                     size,
-                    className: "cursor-pointer py-0 transition-all duration-200",
+                    className: "relative py-0 transition-all duration-200",
                 })}
             >
                 <CardContent className="p-0">
@@ -71,7 +71,9 @@ export function SongCard({ collectionSong, size = "medium", onClick = undefined 
                     />
                     <div className={cardPaddingVariants({ size })}>
                         <AuthorLinks authors={authors} className={cardSubtitleVariants({ size })} />
-                        <p className={cardTitleVariants({ size })}>{title}</p>
+                        <p className={cardTitleVariants({ size })}>
+                            <StretchedLink onClick={handleClick}>{title}</StretchedLink>
+                        </p>
                     </div>
                 </CardContent>
             </Card>

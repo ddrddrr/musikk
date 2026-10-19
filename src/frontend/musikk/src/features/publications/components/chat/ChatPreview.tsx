@@ -4,7 +4,7 @@ import { Chat } from "@/features/publications/types.ts";
 import { UserAvatar } from "@/features/user/components/UserAvatar.tsx";
 import { cn } from "@/lib/utils.ts";
 import { formatDateTime } from "@/utils/formatDate.ts";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 interface ChatPreviewProps {
     chat: Chat;
@@ -12,16 +12,15 @@ interface ChatPreviewProps {
 
 export function ChatPreview({ chat }: ChatPreviewProps) {
     const userUUID = useUserUUID();
-    const navigate = useNavigate();
     const { chatImg, chatImgAlt } = useChatImage(chat);
 
     const lastMessageTime = chat.last_message ? formatDateTime(chat.last_message.date_added) : null;
 
     return (
-        <button
-            onClick={() => void navigate(`/chats/${chat.uuid}`)}
+        <Link
+            to={`/chats/${chat.uuid}`}
             className={cn(
-                "w-full rounded-sm border-2 border-foreground p-3 text-left transition-colors",
+                "block w-full rounded-sm border-2 border-foreground p-3 text-left transition-colors",
                 chat.is_read ? "bg-card hover:bg-muted" : "bg-card font-bold hover:bg-muted",
             )}
         >
@@ -55,6 +54,6 @@ export function ChatPreview({ chat }: ChatPreviewProps) {
                     )}
                 </div>
             </div>
-        </button>
+        </Link>
     );
 }

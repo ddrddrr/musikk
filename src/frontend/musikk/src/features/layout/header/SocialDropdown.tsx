@@ -7,11 +7,9 @@ import {
 } from "@/features/ui/dropdown-menu.tsx";
 import { IconTooltip } from "@/features/ui/tooltip";
 import { MessageSquareText } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 export function SocialDropdown() {
-    const navigate = useNavigate();
-
     return (
         <DropdownMenu>
             <IconTooltip label="Messages">
@@ -27,8 +25,12 @@ export function SocialDropdown() {
                 </DropdownMenuTrigger>
             </IconTooltip>
             <DropdownMenuContent>
-                <DropdownMenuItem onSelect={() => void navigate("/feed")}>Posts</DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => void navigate("/chats")}>Chats</DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                    <Link to="/feed">Posts</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                    <Link to="/chats">Chats</Link>
+                </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
     );

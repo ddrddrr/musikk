@@ -3,7 +3,7 @@ import { Button } from "@/features/ui/button.tsx";
 import { Card, CardContent, CardHeader, CardTitle } from "@/features/ui/card.tsx";
 import { cn } from "@/lib/utils.ts";
 import { AlertCircle, CheckCircle2, Loader2, XCircle } from "lucide-react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 
 type VerificationStatus = "loading" | "success" | "error" | "invalid";
 
@@ -16,7 +16,6 @@ const STATUS_MESSAGES: Record<VerificationStatus, string> = {
 
 export function EmailVerificationPage() {
     const { confirmationKey } = useParams<{ confirmationKey: string }>();
-    const navigate = useNavigate();
     const { isPending, isError } = useVerifyEmailQuery(confirmationKey);
 
     let status: VerificationStatus;
@@ -60,23 +59,13 @@ export function EmailVerificationPage() {
                             {STATUS_MESSAGES[status]}
                         </p>
                         {status === "success" && (
-                            <Button
-                                variant="brand"
-                                size="lg"
-                                className="w-full"
-                                onClick={() => void navigate("/login")}
-                            >
-                                Go to Login
+                            <Button variant="brand" size="lg" className="w-full" asChild>
+                                <Link to="/login">Go to Login</Link>
                             </Button>
                         )}
                         {isFailed && (
-                            <Button
-                                variant="brand"
-                                size="lg"
-                                className="w-full"
-                                onClick={() => void navigate("/signup")}
-                            >
-                                Back to Sign Up
+                            <Button variant="brand" size="lg" className="w-full" asChild>
+                                <Link to="/signup">Back to Sign Up</Link>
                             </Button>
                         )}
                     </div>

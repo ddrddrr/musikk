@@ -7,11 +7,11 @@ import {
     cardTitleVariants,
 } from "@/features/common/card-variants.ts";
 import { MediaThumbnail } from "@/features/common/MediaThumbnail.tsx";
+import { StretchedLink } from "@/features/common/StretchedLink.tsx";
 import { Card, CardContent } from "@/features/ui/card.tsx";
 import { AuthorLinks } from "@/features/user/components/AuthorLinks.tsx";
 import { cn } from "@/lib/utils";
 import { cva } from "class-variance-authority";
-import { useNavigate } from "react-router-dom";
 
 type CollectionCardProps = {
     collection: Collection;
@@ -43,27 +43,17 @@ export function CollectionCard({
     className,
     onClick = undefined,
 }: CollectionCardProps) {
-    const navigate = useNavigate();
     const { uuid, title, image, authors } = collection;
-
-    function handleOnClick(collection: Collection) {
-        if (onClick) {
-            onClick(collection);
-        } else {
-            void navigate(`/collection/${collection.uuid}/`);
-        }
-    }
 
     return (
         <CollectionContextMenu collection={collection}>
             <Card
-                onClick={() => handleOnClick(collection)}
                 key={uuid}
                 variant="panel"
                 spacing={spacingBySize[size]}
                 className={cn(
                     collectionCardWidthVariants({ size }),
-                    "cursor-pointer py-0 transition-all duration-200",
+                    "relative py-0 transition-all duration-200",
                     className,
                 )}
             >
@@ -71,7 +61,14 @@ export function CollectionCard({
                     <MediaThumbnail src={image} alt={title} className="aspect-square w-full" />
                     <div className={cardPaddingVariants({ size })}>
                         <AuthorLinks authors={authors} className={cardSubtitleVariants({ size })} />
-                        <p className={cardTitleVariants({ size })}>{title}</p>
+                        <p className={cardTitleVariants({ size })}>
+                            <StretchedLink
+                                to={`/collection/${uuid}/`}
+                                onClick={onClick && (() => onClick(collection))}
+                            >
+                                {title}
+                            </StretchedLink>
+                        </p>
                     </div>
                 </CardContent>
             </Card>

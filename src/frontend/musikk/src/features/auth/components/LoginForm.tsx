@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import * as z from "zod";
 
 import { setFormServerErrors } from "@/api/errorUtils.ts";
@@ -76,13 +76,12 @@ export function LoginForm() {
                         <p className="text-foreground">
                             Don&#39;t have an account?
                             <Button
-                                type="button"
-                                onClick={() => void navigate("/signup")}
                                 variant="link"
                                 size="sm"
                                 className="ml-1 text-brand hover:text-brand-hover"
+                                asChild
                             >
-                                Sign up
+                                <Link to="/signup">Sign up</Link>
                             </Button>
                         </p>
                     </div>

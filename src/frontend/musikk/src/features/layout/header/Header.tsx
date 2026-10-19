@@ -7,10 +7,9 @@ import { IconTooltip } from "@/features/ui/tooltip";
 import { UserAvatar } from "@/features/user/components/UserAvatar.tsx";
 import { Cog, Disc3, Upload, Users } from "lucide-react";
 import { memo } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 export const Header = memo(function Header() {
-    const navigate = useNavigate();
     const { user } = useAuth();
 
     // using grid here is easier than flexbox due to buttons aligment and spacing issues
@@ -23,9 +22,11 @@ export const Header = memo(function Header() {
                         size="icon"
                         aria-label="Home"
                         className="text-brand-foreground"
-                        onClick={() => void navigate("/")}
+                        asChild
                     >
-                        <Disc3 />
+                        <Link to="/">
+                            <Disc3 />
+                        </Link>
                     </Button>
                 </IconTooltip>
                 <SocialDropdown />
@@ -35,21 +36,19 @@ export const Header = memo(function Header() {
                         size="icon"
                         aria-label="Social"
                         className="text-brand-foreground"
-                        onClick={() => void navigate("/connections")}
+                        asChild
                     >
-                        <Users />
+                        <Link to="/connections">
+                            <Users />
+                        </Link>
                     </Button>
                 </IconTooltip>
             </div>
 
             <div className="col-span-3 flex items-center justify-start gap-4">
-                <button
-                    type="button"
-                    className="cursor-pointer text-xl font-bold"
-                    onClick={() => void navigate("/")}
-                >
+                <Link to="/" className="text-xl font-bold">
                     Musikk
-                </button>
+                </Link>
                 <SearchBar />
             </div>
 
@@ -60,9 +59,11 @@ export const Header = memo(function Header() {
                         size="icon"
                         aria-label="Profile"
                         className="hover:bg-brand-hover"
-                        onClick={() => void navigate(`/users/${user?.uuid}`)}
+                        asChild
                     >
-                        <UserAvatar src={user?.avatar} alt={user?.display_name} size="sm" />
+                        <Link to={`/users/${user?.uuid}`}>
+                            <UserAvatar src={user?.avatar} alt={user?.display_name} size="sm" />
+                        </Link>
                     </Button>
                 </IconTooltip>
                 <NotificationBox />
@@ -72,9 +73,11 @@ export const Header = memo(function Header() {
                         size="icon"
                         aria-label="Settings"
                         className="text-brand-foreground"
-                        onClick={() => void navigate("/settings")}
+                        asChild
                     >
-                        <Cog />
+                        <Link to="/settings">
+                            <Cog />
+                        </Link>
                     </Button>
                 </IconTooltip>
 
@@ -83,10 +86,12 @@ export const Header = memo(function Header() {
                         variant="outline"
                         size="sm"
                         className="border-brand-foreground bg-transparent text-brand-foreground hover:bg-brand-hover"
-                        onClick={() => void navigate("/upload")}
+                        asChild
                     >
-                        <Upload className="mr-1 size-4" />
-                        Upload
+                        <Link to="/upload">
+                            <Upload className="mr-1 size-4" />
+                            Upload
+                        </Link>
                     </Button>
                 )}
             </div>

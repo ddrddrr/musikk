@@ -1,6 +1,7 @@
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
 import { type CardSize, cardTitleVariants } from "@/features/common/card-variants.ts";
 import { MediaThumbnail } from "@/features/common/MediaThumbnail.tsx";
+import { StretchedLink } from "@/features/common/StretchedLink.tsx";
 import { Card, CardContent } from "@/features/ui/card.tsx";
 import {
     ContextMenu,
@@ -12,7 +13,6 @@ import { useFollowUser } from "@/features/user/hooks/useFollowUser.ts";
 import { BaseUser } from "@/features/user/types.ts";
 import { cva } from "class-variance-authority";
 import { MoreHorizontal, Smile } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 
 type UserCardProps = {
     user: BaseUser;
@@ -46,27 +46,17 @@ const userCardPaddingVariants = cva(
 );
 
 export function UserCard({ user, size = "medium", onClick }: UserCardProps) {
-    const navigate = useNavigate();
     const myUuid = useUserUUID();
     const { isFollowing, toggleFollow } = useFollowUser(user.uuid);
 
     const { avatar, display_name } = user;
 
-    function handleOnClick(u: BaseUser) {
-        if (onClick) {
-            onClick(u);
-        } else {
-            void navigate(`/users/${u.uuid}`);
-        }
-    }
-
     return (
         <ContextMenu>
             <ContextMenuTrigger asChild>
                 <Card
-                    onClick={() => handleOnClick(user)}
                     variant="panel"
-                    className={userCardWidthVariants({ size, className: "cursor-pointer py-0" })}
+                    className={userCardWidthVariants({ size, className: "relative py-0" })}
                 >
                     <CardContent className="flex flex-col p-0">
                         <MediaThumbnail
@@ -77,7 +67,12 @@ export function UserCard({ user, size = "medium", onClick }: UserCardProps) {
                         />
                         <div className={userCardPaddingVariants({ size })}>
                             <p className={cardTitleVariants({ size, className: "w-full" })}>
-                                {display_name}
+                                <StretchedLink
+                                    to={`/users/${user.uuid}`}
+                                    onClick={onClick && (() => onClick(user))}
+                                >
+                                    {display_name}
+                                </StretchedLink>
                             </p>
                         </div>
                     </CardContent>

@@ -1,44 +1,29 @@
 import { EmptyState } from "@/features/common/EmptyState.tsx";
 import { NotificationListParams } from "@/features/notifications/api/queries.ts";
-import {
-    IChatMessageNotification,
-    IFollowerNotification,
-    IReplyNotification,
-} from "@/features/notifications/types.ts";
+import { IReplyNotification } from "@/features/notifications/types.ts";
 import { Button } from "@/features/ui/button.tsx";
 import { PopoverClose } from "@/features/ui/popover.tsx";
 import { cn } from "@/lib/utils.ts";
 import { formatDateTime } from "@/utils/formatDate.ts";
 import { memo } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 interface NotificationOverlayProps {
     notifications: NotificationListParams;
 }
+
+function replyTarget(notification: IReplyNotification): string {
+    const { created_for, root_author_uuid } = notification.reply_publication;
+    if (created_for.type === "feed") {
+        return `/users/${root_author_uuid}`;
+    }
+    return `/collection/${created_for.uuid}/comments`;
+}
+
 // TODO: rewrite as different sections? replies, friend stuff, new music etc?
 export const NotificationOverlay = memo(function NotificationOverlay({
     notifications,
 }: NotificationOverlayProps) {
-    const navigate = useNavigate();
-
-    function handleNavigateReplyClick(notification: IReplyNotification) {
-        if (notification.reply_publication.created_for.type === "feed") {
-            void navigate(`/users/${notification.reply_publication.root_author_uuid}`);
-        } else {
-            void navigate(
-                `/collection/${notification.reply_publication.created_for.uuid}/comments`,
-            );
-        }
-    }
-
-    function handleNavigateFollowerClick(notification: IFollowerNotification) {
-        void navigate(`/users/${notification.sender.uuid}`);
-    }
-
-    function handleNavigateChatClick(notification: IChatMessageNotification) {
-        void navigate(`/chats/${notification.chat_uuid}`);
-    }
-
     const { replies = [], followers = [], chat_messages = [] } = notifications;
     const allNotifications = [
         ...replies.map((n) => ({ ...n, _type: "reply" as const })),
@@ -80,9 +65,9 @@ export const NotificationOverlay = memo(function NotificationOverlay({
                                     <Button
                                         variant="brand"
                                         className="rounded-sm px-3 py-1 text-xs"
-                                        onClick={() => handleNavigateReplyClick(notification)}
+                                        asChild
                                     >
-                                        Open
+                                        <Link to={replyTarget(notification)}>Open</Link>
                                     </Button>
                                 </PopoverClose>
                             </div>
@@ -101,12 +86,10 @@ export const NotificationOverlay = memo(function NotificationOverlay({
                                     {formatDateTime(notification.date_added)}
                                 </span>
                                 <PopoverClose asChild>
-                                    <Button
-                                        variant="brand"
-                                        className="px-3 py-1 text-xs"
-                                        onClick={() => handleNavigateFollowerClick(notification)}
-                                    >
-                                        View Profile
+                                    <Button variant="brand" className="px-3 py-1 text-xs" asChild>
+                                        <Link to={`/users/${notification.sender.uuid}`}>
+                                            View Profile
+                                        </Link>
                                     </Button>
                                 </PopoverClose>
                             </div>
@@ -129,9 +112,11 @@ export const NotificationOverlay = memo(function NotificationOverlay({
                                     <Button
                                         variant="brand"
                                         className="rounded-sm px-3 py-1 text-xs"
-                                        onClick={() => handleNavigateChatClick(notification)}
+                                        asChild
                                     >
-                                        Open chat
+                                        <Link to={`/chats/${notification.chat_uuid}`}>
+                                            Open chat
+                                        </Link>
                                     </Button>
                                 </PopoverClose>
                             </div>
