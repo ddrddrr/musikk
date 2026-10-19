@@ -44,14 +44,16 @@ export class WSClient {
         }
 
         console.debug(`WS connecting to ${this.url}`);
-        this.ws = new WebSocket(this.url);
+        const socket = new WebSocket(this.url);
+        this.ws = socket;
 
-        this.ws.onopen = () => {
+        socket.onopen = () => {
+            if (this.ws !== socket) return;
             console.debug("WS conn established");
             this.currReconnects = 0;
 
             for (const topic of this.topicSubscriptions.keys()) {
-                this.ws?.send(JSON.stringify({ action: "subscribe", payload: { topic } }));
+                socket.send(JSON.stringify({ action: "subscribe", payload: { topic } }));
             }
 
             for (const handler of this.openHandlers) {
@@ -68,7 +70,8 @@ export class WSClient {
             this.flush();
         };
 
-        this.ws.onmessage = (e) => {
+        socket.onmessage = (e) => {
+            if (this.ws !== socket) return;
             let data: ServerEvent;
             try {
                 data = JSON.parse(e.data);
@@ -99,11 +102,13 @@ export class WSClient {
             }
         };
 
-        this.ws.onerror = (e) => {
+        socket.onerror = (e) => {
+            if (this.ws !== socket) return;
             console.error("WS Connection error", e);
         };
 
-        this.ws.onclose = (event) => {
+        socket.onclose = (event) => {
+            if (this.ws !== socket) return;
             const reason = event.reason || "No reason provided";
             console.debug(`WS Connection closed (code: ${event.code}, reason: ${reason})`);
             this.ws = null;
