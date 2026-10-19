@@ -13,7 +13,7 @@ export function SongQueuePlayButton({ item, size = "md" }: SongQueuePlayButtonPr
     const { onClick } = useQueuePlayHandler(item);
 
     return (
-        <Button variant="brand" size={`icon-${size}`} onClick={onClick}>
+        <Button variant="brand" size={`icon-${size}`} aria-label="Play" onClick={onClick}>
             <Play />
         </Button>
     );

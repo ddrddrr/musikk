@@ -13,7 +13,12 @@ export function CollectionPlayButton({ collection, size }: CollectionPlayButtonP
     const { isThisCollectionPlaying, onClick } = useCollectionPlayHandler(collection);
 
     return (
-        <Button variant="brand" size={`icon-${size}`} onClick={onClick}>
+        <Button
+            variant="brand"
+            size={`icon-${size}`}
+            aria-label={isThisCollectionPlaying ? "Pause" : "Play"}
+            onClick={onClick}
+        >
             {isThisCollectionPlaying ? <Pause /> : <Play />}
         </Button>
     );

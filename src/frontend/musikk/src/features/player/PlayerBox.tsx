@@ -57,6 +57,7 @@ export function PlayerBox({
                 this way, when this device later becomes active, audio can start without
                 waiting for another gesture to satisfy the autoplay policy
             */}
+            {/* eslint-disable-next-line jsx-a11y/media-has-caption -- songs have no caption files */}
             <audio
                 ref={audioRef}
                 onEnded={handleOnEnded}

@@ -8,7 +8,12 @@ export function CollectionCreateButton() {
 
     return (
         <>
-            <Button variant={"outline"} className={"p-2"} onClick={() => setOpen(true)}>
+            <Button
+                variant="outline"
+                className="p-2"
+                aria-label="Create playlist"
+                onClick={() => setOpen(true)}
+            >
                 <Plus size={20} />
             </Button>
             <PlaylistCreateDialog open={open} onOpenChange={setOpen} />

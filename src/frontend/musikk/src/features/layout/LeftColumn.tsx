@@ -28,6 +28,7 @@ export function LeftColumn() {
                 </div>
             )}
             {collections.length > 0 && (
+                // eslint-disable-next-line jsx-a11y/no-redundant-roles -- Safari VoiceOver drops the list role when list-style is none
                 <ul className="flex flex-col items-center gap-6" role="list">
                     {collections.map((collection) => (
                         <li key={collection.uuid}>

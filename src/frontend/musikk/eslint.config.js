@@ -65,8 +65,7 @@ export default tseslint.config(
 
     ...reactHooksRecommended,
 
-    // TODO: enable sometime later
-    // jsxA11y.flatConfigs.recommended,
+    jsxA11y.flatConfigs.recommended,
 
     {
         plugins: { import: importPlugin },

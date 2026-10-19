@@ -104,11 +104,21 @@ export function PlayerBar({
                     )}
 
                     <div className="flex items-center gap-1">
-                        <Button onClick={() => prevMutation.mutate()} variant="ghost" size="icon">
+                        <Button
+                            onClick={() => prevMutation.mutate()}
+                            variant="ghost"
+                            size="icon"
+                            aria-label="Previous"
+                        >
                             <SkipBack className="size-5" strokeWidth="2" />
                         </Button>
                         <PlayerPlayButton />
-                        <Button onClick={() => nextMutation.mutate()} variant="ghost" size="icon">
+                        <Button
+                            onClick={() => nextMutation.mutate()}
+                            variant="ghost"
+                            size="icon"
+                            aria-label="Next"
+                        >
                             <SkipForward className="size-5" strokeWidth="2" />
                         </Button>
                         {isMutedFallback && (
@@ -131,6 +141,7 @@ export function PlayerBar({
                         <Button
                             variant="ghost"
                             size="icon"
+                            aria-label={volume === 0 ? "Unmute" : "Mute"}
                             onClick={handleMuteToggle}
                             className="shrink-0"
                         >

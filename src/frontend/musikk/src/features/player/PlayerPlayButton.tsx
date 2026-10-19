@@ -12,7 +12,13 @@ export function PlayerPlayButton() {
     };
 
     return (
-        <Button variant="brand" size="icon" onClick={() => handlePlay()} className="rounded-sm">
+        <Button
+            variant="brand"
+            size="icon"
+            aria-label={isPlaybackActive ? "Pause" : "Play"}
+            onClick={() => handlePlay()}
+            className="rounded-sm"
+        >
             {renderPlayPauseIcon()}
         </Button>
     );

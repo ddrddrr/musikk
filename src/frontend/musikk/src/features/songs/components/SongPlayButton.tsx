@@ -13,7 +13,12 @@ export function SongPlayButton({ collectionSong, size = "md" }: SongPlayButtonPr
     const { isThisPlaying, onClick } = useSongPlayHandler(collectionSong);
 
     return (
-        <Button variant="brand" size={`icon-${size}`} onClick={onClick}>
+        <Button
+            variant="brand"
+            size={`icon-${size}`}
+            aria-label={isThisPlaying ? "Pause" : "Play"}
+            onClick={onClick}
+        >
             {isThisPlaying ? <Pause /> : <Play />}
         </Button>
     );
