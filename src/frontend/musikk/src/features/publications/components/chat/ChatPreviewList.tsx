@@ -1,3 +1,4 @@
+import { CenteredSpinner } from "@/features/common/CenteredSpinner.tsx";
 import { EmptyState } from "@/features/common/EmptyState.tsx";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { ChatNewGroupForm } from "@/features/publications/components/chat/ChatNewGroupForm.tsx";
@@ -5,7 +6,6 @@ import { ChatPreview } from "@/features/publications/components/chat/ChatPreview
 import { ChatStartDirectList } from "@/features/publications/components/chat/ChatStartDirectList.tsx";
 import { useMyChats } from "@/features/publications/hooks/useMyChats.ts";
 import { Button } from "@/features/ui/button.tsx";
-import { Spinner } from "@/features/ui/spinner";
 import { Plus } from "lucide-react";
 import { useState } from "react";
 
@@ -14,11 +14,7 @@ export function ChatPreviewList() {
     const [showNewGroupForm, setShowNewGroupForm] = useState(false);
 
     if (isPending) {
-        return (
-            <div className="flex min-h-[400px] items-center justify-center">
-                <Spinner className="size-8" />
-            </div>
-        );
+        return <CenteredSpinner className="min-h-[400px]" />;
     }
 
     if (showNewGroupForm) {

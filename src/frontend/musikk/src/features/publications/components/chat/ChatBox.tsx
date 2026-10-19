@@ -1,5 +1,6 @@
 import { UUID } from "@/api/types.ts";
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
+import { CenteredSpinner } from "@/features/common/CenteredSpinner.tsx";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { useChatDetail, useChatMessages } from "@/features/publications/api/queries.ts";
 import { ChatHeader } from "@/features/publications/components/chat/ChatHeader.tsx";
@@ -14,7 +15,6 @@ import { useNewMessagesIndicator } from "@/features/publications/hooks/useNewMes
 import { useScrollAnchor } from "@/features/publications/hooks/useScrollAnchor.ts";
 import { useTypingIndicator } from "@/features/publications/hooks/useTypingIndicator.ts";
 import { Publication } from "@/features/publications/types.ts";
-import { Spinner } from "@/features/ui/spinner";
 import { useRef } from "react";
 
 const NO_MESSAGES: Publication[] = [];
@@ -57,11 +57,7 @@ export function ChatBox({ chatUUID }: ChatBoxProps) {
     );
 
     if (isChatPending || isMessagesPending) {
-        return (
-            <div className="flex min-h-[400px] items-center justify-center">
-                <Spinner className="size-8" />
-            </div>
-        );
+        return <CenteredSpinner className="min-h-[400px]" />;
     }
 
     if (chatError) {

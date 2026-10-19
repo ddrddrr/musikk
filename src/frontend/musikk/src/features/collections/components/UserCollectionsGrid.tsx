@@ -3,9 +3,9 @@ import { fetchCollections } from "@/features/collections/api/queries.ts";
 import { collectionKeys } from "@/features/collections/api/queryKeys.ts";
 import { CollectionCard } from "@/features/collections/components/CollectionCard.tsx";
 import type { CollectionType } from "@/features/collections/types.ts";
+import { CenteredSpinner } from "@/features/common/CenteredSpinner.tsx";
 import { EmptyState } from "@/features/common/EmptyState.tsx";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
-import { Spinner } from "@/features/ui/spinner";
 import { useQuery } from "@tanstack/react-query";
 
 type UserCollectionsGridProps = {
@@ -20,11 +20,7 @@ export function UserCollectionsGrid({ userUUID, type }: UserCollectionsGridProps
     });
 
     if (isPending) {
-        return (
-            <div className="flex items-center justify-center p-8">
-                <Spinner className="size-8" />
-            </div>
-        );
+        return <CenteredSpinner />;
     }
 
     if (error) {

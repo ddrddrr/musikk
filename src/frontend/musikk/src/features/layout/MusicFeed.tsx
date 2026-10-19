@@ -3,8 +3,8 @@ import { fetchCollections } from "@/features/collections/api/queries";
 import { collectionKeys } from "@/features/collections/api/queryKeys.ts";
 import { CollectionCarousel } from "@/features/collections/components/CollectionCarousel.tsx";
 import { Collection } from "@/features/collections/types";
+import { CenteredSpinner } from "@/features/common/CenteredSpinner.tsx";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
-import { Spinner } from "@/features/ui/spinner";
 import { useQueries, useQueryClient } from "@tanstack/react-query";
 
 export function MusicFeed() {
@@ -48,12 +48,7 @@ export function MusicFeed() {
         followedCollections.isError ||
         friendsCollections.isError;
 
-    if (isLoading)
-        return (
-            <div className="flex items-center justify-center p-8">
-                <Spinner className="size-8" />
-            </div>
-        );
+    if (isLoading) return <CenteredSpinner />;
     if (isError)
         return (
             <QueryErrorBox

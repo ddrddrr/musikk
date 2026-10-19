@@ -8,6 +8,7 @@ import { setFormServerErrors } from "@/api/errorUtils.ts";
 import { EmailField } from "@/features/auth/components/EmailField.tsx";
 import { PasswordField } from "@/features/auth/components/PasswordField.tsx";
 import { useAuth } from "@/features/auth/hooks/useAuth.ts";
+import { FormServerError } from "@/features/common/FormServerError.tsx";
 import { Button } from "@/features/ui/button.tsx";
 import { CardContent } from "@/features/ui/card.tsx";
 import { Form } from "@/features/ui/form.tsx";
@@ -66,11 +67,7 @@ export function LoginForm() {
                         {isPending ? <Spinner /> : "Login"}
                     </Button>
 
-                    {serverErrorMessage && (
-                        <div className="rounded-sm border-2 border-destructive bg-destructive p-4 text-destructive-foreground">
-                            <p className="font-medium">{serverErrorMessage}</p>
-                        </div>
-                    )}
+                    <FormServerError message={serverErrorMessage} />
 
                     <div className="text-center">
                         <p className="text-foreground">

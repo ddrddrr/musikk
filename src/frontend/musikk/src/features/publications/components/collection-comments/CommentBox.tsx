@@ -1,4 +1,5 @@
 import { UUID } from "@/api/types.ts";
+import { CenteredSpinner } from "@/features/common/CenteredSpinner.tsx";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { useCollectionComments } from "@/features/publications/api/queries.ts";
 import { CommentForm } from "@/features/publications/components/collection-comments/CommentForm.tsx";
@@ -12,7 +13,6 @@ import { useNewMessagesIndicator } from "@/features/publications/hooks/useNewMes
 import { useScrollAnchor } from "@/features/publications/hooks/useScrollAnchor.ts";
 import { useTypingIndicator } from "@/features/publications/hooks/useTypingIndicator.ts";
 import { Publication } from "@/features/publications/types.ts";
-import { Spinner } from "@/features/ui/spinner";
 import { memo, useRef, useState } from "react";
 
 const NO_COMMENTS: Publication[] = [];
@@ -49,11 +49,7 @@ export const CommentBox = memo(function CommentBox({ collectionUUID }: CommentBo
     );
 
     if (isPending) {
-        return (
-            <div className="flex min-h-[400px] items-center justify-center">
-                <Spinner className="size-8" />
-            </div>
-        );
+        return <CenteredSpinner className="min-h-[400px]" />;
     }
 
     if (error) {

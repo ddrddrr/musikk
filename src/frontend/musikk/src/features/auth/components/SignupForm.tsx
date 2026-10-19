@@ -7,6 +7,7 @@ import { setFormServerErrors } from "@/api/errorUtils.ts";
 import { register } from "@/features/auth/api/mutations.ts";
 import { EmailField } from "@/features/auth/components/EmailField.tsx";
 import { PasswordField } from "@/features/auth/components/PasswordField.tsx";
+import { FormServerError } from "@/features/common/FormServerError.tsx";
 import { Button } from "@/features/ui/button.tsx";
 import { CardContent } from "@/features/ui/card.tsx";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/features/ui/form.tsx";
@@ -89,16 +90,7 @@ export function SignUpForm() {
                     >
                         {isPending ? <Spinner /> : "Sign Up"}
                     </Button>
-                    {serverErrorMessage && (
-                        <div
-                            className={cn(
-                                "rounded-sm border-2 p-4 font-medium",
-                                "border-destructive bg-destructive text-destructive-foreground",
-                            )}
-                        >
-                            {serverErrorMessage}
-                        </div>
-                    )}
+                    <FormServerError message={serverErrorMessage} />
                     {isSuccess && (
                         <div
                             className={cn(

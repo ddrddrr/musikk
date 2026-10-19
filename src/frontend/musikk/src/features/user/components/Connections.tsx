@@ -1,6 +1,6 @@
+import { CenteredSpinner } from "@/features/common/CenteredSpinner.tsx";
 import { EmptyState } from "@/features/common/EmptyState.tsx";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
-import { Spinner } from "@/features/ui/spinner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/features/ui/tabs.tsx";
 import { UserCard } from "@/features/user/components/UserCard.tsx";
 import { useMyConnections } from "@/features/user/hooks/useMyConnections.ts";
@@ -15,11 +15,7 @@ export function Connections() {
     }
 
     if (isPending) {
-        return (
-            <div className="flex items-center justify-center p-8">
-                <Spinner className="size-8" />
-            </div>
-        );
+        return <CenteredSpinner />;
     }
 
     return (

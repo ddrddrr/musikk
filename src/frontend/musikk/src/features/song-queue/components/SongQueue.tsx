@@ -1,3 +1,4 @@
+import { CenteredSpinner } from "@/features/common/CenteredSpinner.tsx";
 import { EmptyState } from "@/features/common/EmptyState.tsx";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { usePlayback } from "@/features/playback/hooks/usePlayback.ts";
@@ -10,7 +11,6 @@ import { SongContextMenu } from "@/features/songs/components/SongContextMenu.tsx
 import { SongDisplay } from "@/features/songs/components/SongDisplay.tsx";
 import { Button } from "@/features/ui/button.tsx";
 import { ScrollArea } from "@/features/ui/scroll-area.tsx";
-import { Spinner } from "@/features/ui/spinner";
 import { Trash2 } from "lucide-react";
 
 export function SongQueue() {
@@ -24,11 +24,7 @@ export function SongQueue() {
     }
 
     if (isPending) {
-        return (
-            <div className="flex h-full items-center justify-center">
-                <Spinner className="size-8" />
-            </div>
-        );
+        return <CenteredSpinner className="h-full" />;
     }
 
     const items = queue?.items ?? [];

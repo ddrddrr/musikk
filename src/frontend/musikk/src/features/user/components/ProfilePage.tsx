@@ -1,21 +1,14 @@
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
 import { UserCollectionsGrid } from "@/features/collections/components/UserCollectionsGrid.tsx";
+import { CenteredSpinner } from "@/features/common/CenteredSpinner.tsx";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { UserFeed } from "@/features/publications/components/posts/UserFeed.tsx";
 import { Button } from "@/features/ui/button.tsx";
-import {
-    Dialog,
-    DialogClose,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/features/ui/dialog.tsx";
 import { Spinner } from "@/features/ui/spinner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/features/ui/tabs.tsx";
 import { fetchUser } from "@/features/user/api/queries.ts";
 import { userKeys } from "@/features/user/api/queryKeys.ts";
-import { ProfileForm } from "@/features/user/components/ProfileForm.tsx";
+import { EditProfileDialog } from "@/features/user/components/EditProfileDialog.tsx";
 import { UserAvatar } from "@/features/user/components/UserAvatar.tsx";
 import { useFollowUser } from "@/features/user/hooks/useFollowUser.ts";
 import { useQuery } from "@tanstack/react-query";
@@ -43,11 +36,7 @@ export function ProfilePage() {
     const isOwnProfile = currUserUUID === uuid;
 
     if (isLoading) {
-        return (
-            <div className="flex items-center justify-center p-8">
-                <Spinner className="size-8" />
-            </div>
-        );
+        return <CenteredSpinner />;
     }
 
     if (isError) {
@@ -76,19 +65,7 @@ export function ProfilePage() {
             )}
             <div className="mt-4 flex gap-2">
                 {isOwnProfile && (
-                    <Dialog>
-                        <DialogTrigger asChild>
-                            <Button variant="outline">Edit Profile</Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                            <DialogHeader>
-                                <DialogTitle>Edit Profile</DialogTitle>
-                                <DialogClose />
-                            </DialogHeader>
-
-                            <ProfileForm />
-                        </DialogContent>
-                    </Dialog>
+                    <EditProfileDialog trigger={<Button variant="outline">Edit Profile</Button>} />
                 )}
                 {!isOwnProfile && (
                     <Button

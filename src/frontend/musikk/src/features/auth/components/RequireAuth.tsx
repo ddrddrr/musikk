@@ -1,5 +1,5 @@
 import { useAuth } from "@/features/auth/hooks/useAuth.ts";
-import { Spinner } from "@/features/ui/spinner";
+import { CenteredSpinner } from "@/features/common/CenteredSpinner.tsx";
 import { ReactNode } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 
@@ -12,11 +12,7 @@ export function RequireAuth({ children }: RequireAuthProps) {
     const { isAuthenticated, isLoading } = useAuth();
 
     if (isLoading) {
-        return (
-            <div className="flex min-h-screen items-center justify-center">
-                <Spinner className="size-8" />
-            </div>
-        );
+        return <CenteredSpinner className="min-h-screen" />;
     }
 
     if (!isAuthenticated) {

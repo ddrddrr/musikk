@@ -3,15 +3,7 @@ import { BackButton } from "@/features/common/BackButton.tsx";
 import { useLoudnessPreset } from "@/features/player/hooks/useLoudnessPreset.ts";
 import { LoudnessPresetSelector } from "@/features/player/LoudnessPresetSelector.tsx";
 import { Button } from "@/features/ui/button";
-import {
-    Dialog,
-    DialogClose,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/features/ui/dialog.tsx";
-import { ProfileForm } from "@/features/user/components/ProfileForm.tsx";
+import { EditProfileDialog } from "@/features/user/components/EditProfileDialog.tsx";
 
 export function SettingsPage() {
     const { logout } = useAuth();
@@ -34,8 +26,8 @@ export function SettingsPage() {
                     <LoudnessPresetSelector value={preset} onChange={setPreset} />
                 </div>
 
-                <Dialog>
-                    <DialogTrigger asChild>
+                <EditProfileDialog
+                    trigger={
                         <Button
                             variant="ghost"
                             size="lg"
@@ -43,15 +35,8 @@ export function SettingsPage() {
                         >
                             Edit profile
                         </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                        <DialogHeader>
-                            <DialogTitle>Edit Profile</DialogTitle>
-                            <DialogClose />
-                        </DialogHeader>
-                        <ProfileForm />
-                    </DialogContent>
-                </Dialog>
+                    }
+                />
 
                 <Button
                     onClick={logout}

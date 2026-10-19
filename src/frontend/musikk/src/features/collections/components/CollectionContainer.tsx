@@ -5,13 +5,13 @@ import { CollectionHeader } from "@/features/collections/components/CollectionHe
 import { DeletePlaylistDialog } from "@/features/collections/components/DeletePlaylistDialog.tsx";
 import { useDeletePlaylist } from "@/features/collections/hooks/useDeletePlaylist.ts";
 import { BackButton } from "@/features/common/BackButton.tsx";
+import { CenteredSpinner } from "@/features/common/CenteredSpinner.tsx";
 import { EmptyState } from "@/features/common/EmptyState.tsx";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { CommentBox } from "@/features/publications/components/collection-comments/CommentBox.tsx";
 import { DefaultSongActions } from "@/features/songs/components/DefaultSongActions.tsx";
 import { SongContainer } from "@/features/songs/components/SongContainer.tsx";
 import { SongMenuButton } from "@/features/songs/components/SongMenuButton.tsx";
-import { Spinner } from "@/features/ui/spinner";
 import { useUserLibrary } from "@/features/user/hooks/useUserLibrary.ts";
 import { cn } from "@/lib/utils.ts";
 import { useCallback, useState } from "react";
@@ -46,12 +46,7 @@ export function CollectionContainer({ collectionUUID }: CollectionContainerProps
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const { deletePlaylist, isDeleting } = useDeletePlaylist();
 
-    if (isPending)
-        return (
-            <div className="flex min-h-[400px] items-center justify-center">
-                <Spinner className="size-8" />
-            </div>
-        );
+    if (isPending) return <CenteredSpinner className="min-h-[400px]" />;
 
     if (error)
         return <QueryErrorBox message="Failed to load collection" onRetry={() => void refetch()} />;
