@@ -98,13 +98,17 @@ export class LocalAudioOutput {
             toast.error(detail?.message ?? "An audio streaming error occurred.");
         });
         this.attached = { audio, player, handlers };
-        this.applyUserVolume();
         // the graph does not work in Safari (https://bugs.webkit.org/show_bug.cgi?id=180696,
         // https://github.com/shaka-project/shaka-player/issues/3616), and once a graph exists,
         // Safari also ignores audio.volume (https://bugs.webkit.org/show_bug.cgi?id=244667).
         // So Safari gets only the volume, with no normalization and no fades
-        if (isWebKit) return;
-        this.stopListeningForGesture = listenForFirstGesture(() => this.buildGraph(audio));
+        if (!isWebKit) {
+            this.graph = AudioGraph.existingFor(audio);
+            if (!this.graph) {
+                this.stopListeningForGesture = listenForFirstGesture(() => this.buildGraph(audio));
+            }
+        }
+        this.applyUserVolume();
     }
 
     tearDownPlayer(): void {
@@ -268,8 +272,11 @@ export class LocalAudioOutput {
         return { opId, attached };
     }
 
+    // the volume moves from the element into the graph in one step,
+    // so a song that already plays does not get louder for a moment
     private buildGraph(audio: HTMLAudioElement): void {
-        this.graph = AudioGraph.forElement(audio);
+        this.graph = AudioGraph.forElement(audio, this.volumeGain());
+        audio.volume = 1;
         this.applyLoudness();
     }
 
@@ -282,9 +289,18 @@ export class LocalAudioOutput {
         return computeGainDb(this.songLoudness);
     }
 
-    // a squared curve, because with a linear one the lower half of the slider sounds too loud
+    // without a graph (Safari, or before the first gesture) the element sets the volume
     private applyUserVolume(): void {
-        if (this.attached) this.attached.audio.volume = this.userVolume ** 2;
+        if (this.graph) {
+            this.graph.setVolume(this.volumeGain());
+        } else if (this.attached) {
+            this.attached.audio.volume = this.volumeGain();
+        }
+    }
+
+    // a squared curve, because with a linear one the lower half of the slider sounds too loud
+    private volumeGain(): number {
+        return this.userVolume ** 2;
     }
 
     private seekToStartPoint(audio: HTMLAudioElement, positionMs: number): void {
