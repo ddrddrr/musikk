@@ -14,7 +14,11 @@ from django.core.asgi import get_asgi_application
 
 django_asgi_app = get_asgi_application()
 
+from streaming.managers.device_manager import DeviceManager  # noqa: E402
 from websockets.urls import websocket_urlpatterns  # noqa: E402
+
+# only one server process uses this Redis, so no device can still be connected when it starts
+DeviceManager.clear_all_devices()
 
 application = ProtocolTypeRouter(
     {

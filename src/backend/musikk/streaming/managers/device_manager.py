@@ -18,6 +18,23 @@ class DeviceManager:
     def __init__(self, user_uuid: str):
         self._device_key_base = f"user:{user_uuid}"
 
+    @classmethod
+    def clear_all_devices(cls) -> None:
+        """
+        Deletes the devices of all users. A server that stops does not run `disconnect()`, so without this the devices
+        of its connections would stay in Redis forever.
+
+        The active device ids are kept. An open tab registers again with the same id when it reconnects, so it stays
+        the active device. If the active tab does not come back, its entry is gone, and the next play or pause command
+        makes the tab that sent it the active device.
+        """
+        r = get_default_redis_conn()
+        any_user = cls(user_uuid="*")
+        for pattern in (any_user._device_key("*"), any_user._devices_set_key()):
+            keys = list(r.scan_iter(match=pattern))
+            if keys:
+                r.delete(*keys)
+
     def _device_key(self, device_id: str) -> str:
         return self._device_key_base + f":device:{device_id}"
 

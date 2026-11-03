@@ -1,5 +1,5 @@
 import json
-from unittest.mock import patch
+from unittest.mock import call, patch
 
 from django.test import TestCase
 
@@ -72,3 +72,29 @@ class TestDeviceManager(TestCase):
         self.assertFalse(self.manager.clear_device("d1", channel_name="chA"))
         self.mock_redis.delete.assert_not_called()
         self.mock_redis.srem.assert_not_called()
+
+    def test_clear_all_devices_deletes_entries_and_sets_but_keeps_active_device(self):
+        keys_by_pattern = {
+            "user:*:device:*": [b"user:u1:device:d1", b"user:u2:device:d2"],
+            "user:*:devices": [b"user:u1:devices", b"user:u2:devices"],
+        }
+        self.mock_redis.scan_iter.side_effect = lambda match: iter(
+            keys_by_pattern[match]
+        )
+
+        DeviceManager.clear_all_devices()
+
+        self.assertEqual(
+            self.mock_redis.delete.call_args_list,
+            [
+                call(b"user:u1:device:d1", b"user:u2:device:d2"),
+                call(b"user:u1:devices", b"user:u2:devices"),
+            ],
+        )
+
+    def test_clear_all_devices_skips_delete_without_devices(self):
+        self.mock_redis.scan_iter.return_value = iter([])
+
+        DeviceManager.clear_all_devices()
+
+        self.mock_redis.delete.assert_not_called()
