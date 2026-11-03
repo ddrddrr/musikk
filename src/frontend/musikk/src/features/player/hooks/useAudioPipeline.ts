@@ -30,15 +30,13 @@ interface AudioPipeline {
 }
 
 // boosting a quiet track can push its peaks above 0 dBFS (clipping),
-// so we cap gainDb at the headroom we have left before TRUE_PEAK_CEILING
+// so we cap gainDb at the headroom we have left before TRUE_PEAK_CEILING.
+// Without a known peak we cannot tell how much boost is safe, so such a song is only turned down
 function computeGainDb(song: Song): number {
     if (song.loudness_lufs == null) return 0;
-    let gainDb = LOUDNESS_TARGET - song.loudness_lufs;
-    if (song.true_peak_dbtp != null) {
-        const maxGain = TRUE_PEAK_CEILING - song.true_peak_dbtp;
-        gainDb = Math.min(gainDb, maxGain);
-    }
-    return gainDb;
+    const gainDb = LOUDNESS_TARGET - song.loudness_lufs;
+    if (song.true_peak_dbtp == null) return Math.min(gainDb, 0);
+    return Math.min(gainDb, TRUE_PEAK_CEILING - song.true_peak_dbtp);
 }
 
 function buildAudioPipeline(audio: HTMLAudioElement): AudioPipeline {
