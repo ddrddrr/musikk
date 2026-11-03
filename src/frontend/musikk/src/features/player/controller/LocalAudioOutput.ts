@@ -1,3 +1,4 @@
+import { isWebKit } from "@/features/player/browserEngine.ts";
 import { AudioGraph } from "@/features/player/controller/AudioGraph.ts";
 import { Song } from "@/features/songs/types.ts";
 import { createStaleAsyncOpGuard } from "@/lib/staleAsyncOpGuard.ts";
@@ -98,6 +99,11 @@ export class LocalAudioOutput {
         });
         this.attached = { audio, player, handlers };
         this.applyUserVolume();
+        // the graph does not work in Safari (https://bugs.webkit.org/show_bug.cgi?id=180696,
+        // https://github.com/shaka-project/shaka-player/issues/3616), and once a graph exists,
+        // Safari also ignores audio.volume (https://bugs.webkit.org/show_bug.cgi?id=244667).
+        // So Safari gets only the volume, with no normalization and no fades
+        if (isWebKit) return;
         this.stopListeningForGesture = listenForFirstGesture(() => this.buildGraph(audio));
     }
 
