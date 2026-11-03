@@ -1,4 +1,4 @@
-.PHONY: setup setup-ffmpeg setup-shaka check check-ffmpeg check-shaka clean run-local-full run-local-full-down run-local-full-seed run-local-full-clear run-local-dev run-local-dev-seed run-local-dev-clear diagrams text
+.PHONY: help setup-tools setup-ffmpeg setup-shaka check-tools check-ffmpeg check-shaka clean-tools run-local-docker run-local-docker-down run-local-docker-seed run-local-docker-clear run-local-dev run-local-dev-seed run-local-dev-clear diagrams text
 
 UNAME := $(shell uname -s)
 ARCH := $(shell uname -m)
@@ -16,11 +16,18 @@ endif
 
 SHAKA_URL := https://github.com/shaka-project/shaka-packager/releases/download/$(SHAKA_VERSION)/$(SHAKA_BINARY)
 
-setup: setup-ffmpeg setup-shaka
+.DEFAULT_GOAL := help
 
-setup-ffmpeg:
+help: ## Show this list of commands
+	@awk 'BEGIN {FS = ":.*## "} /^[a-zA-Z0-9_-]+:.*## / {printf "  %-24s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+	@echo
+	@echo 'The seed commands pass ARGS on to initmodels, e.g. make run-local-dev-seed ARGS="--generate-audio"'
+
+setup-tools: setup-ffmpeg setup-shaka ## Install ffmpeg and shaka-packager into .tools
+
+setup-ffmpeg: ## Build ffmpeg into .tools
 	@if [ -x "$(LOCAL_BINARY_DIR_PREFIX)/bin/ffmpeg" ]; then \
-		echo "ffmpeg already installed at $(LOCAL_BINARY_DIR_PREFIX)/bin/ffmpeg, run 'make clean' to rebuild"; \
+		echo "ffmpeg already installed at $(LOCAL_BINARY_DIR_PREFIX)/bin/ffmpeg, run 'make clean-tools' to rebuild"; \
 		exit 0; \
 	fi; \
 	if command -v ffmpeg >/dev/null 2>&1; then \
@@ -29,9 +36,9 @@ setup-ffmpeg:
 	fi; \
 	bash $(FFMPEG_SCRIPT)
 
-setup-shaka:
+setup-shaka: ## Download shaka-packager into .tools
 	@if [ -x "$(LOCAL_BINARY_DIR_PREFIX)/bin/packager" ]; then \
-		echo "shaka-packager already installed at $(LOCAL_BINARY_DIR_PREFIX)/bin/packager, run 'make clean' to rebuild"; \
+		echo "shaka-packager already installed at $(LOCAL_BINARY_DIR_PREFIX)/bin/packager, run 'make clean-tools' to rebuild"; \
 		exit 0; \
 	fi; \
 	if command -v packager >/dev/null 2>&1; then \
@@ -43,34 +50,34 @@ setup-shaka:
 	chmod +x $(LOCAL_BINARY_DIR_PREFIX)/bin/packager; \
 	echo "shaka-packager $(SHAKA_VERSION) installed to $(LOCAL_BINARY_DIR_PREFIX)/bin/packager"
 
-check: check-ffmpeg check-shaka
+check-tools: check-ffmpeg check-shaka ## Print the ffmpeg and shaka-packager versions
 
-check-ffmpeg:
+check-ffmpeg: ## Print the ffmpeg and ffprobe versions
 	@$(LOCAL_BINARY_DIR_PREFIX)/bin/ffmpeg -version | head -1
 	@$(LOCAL_BINARY_DIR_PREFIX)/bin/ffprobe -version | head -1
 
-check-shaka:
+check-shaka: ## Print the shaka-packager version
 	@$(LOCAL_BINARY_DIR_PREFIX)/bin/packager --version
 
-clean:
+clean-tools: ## Delete the ffmpeg and shaka-packager binaries in .tools
 	rm -rf $(LOCAL_BINARY_DIR_PREFIX)
 
-run-local-full:
+run-local-docker: ## Build and start the whole app in Docker
 	docker compose --env-file .env.prod -f docker-compose-prod.yml up --build
 
-run-local-full-down:
+run-local-docker-down: ## Stop the whole app in Docker
 	docker compose --env-file .env.prod -f docker-compose-prod.yml down
 
-run-local-full-seed:
-	docker compose --env-file .env.prod -f docker-compose-prod.yml exec server uv run python manage.py initmodels
+run-local-docker-seed: ## Fill the Docker database with sample data
+	docker compose --env-file .env.prod -f docker-compose-prod.yml exec server uv run python manage.py initmodels $(ARGS)
 
-run-local-full-clear:
+run-local-docker-clear: ## Delete the sample data from the Docker database
 	docker compose --env-file .env.prod -f docker-compose-prod.yml exec server uv run python manage.py clearmodels
 
 # needs the variables from .env in the shell, e.g. through direnv.
 # The servers run in the background of one shell, where they may ignore Ctrl+C,
 # so the trap stops the whole process group
-run-local-dev:
+run-local-dev: ## Start Postgres and Redis in Docker, run the backend, Celery and frontend locally
 	docker compose -f docker-compose-local.yml up -d
 	@until docker compose -f docker-compose-local.yml exec -T database sh -c 'pg_isready -q -h localhost -U "$$POSTGRES_USER"'; do \
 		echo "Waiting for postgres..."; \
@@ -83,15 +90,15 @@ run-local-dev:
 	npm --prefix src/frontend/musikk run dev & \
 	wait
 
-run-local-dev-seed:
-	uv run --directory src/backend/musikk python manage.py initmodels
+run-local-dev-seed: ## Fill the local database with sample data
+	uv run --directory src/backend/musikk python manage.py initmodels $(ARGS)
 
-run-local-dev-clear:
+run-local-dev-clear: ## Delete the sample data from the local database
 	uv run --directory src/backend/musikk python manage.py clearmodels
 
-diagrams:
+diagrams: ## Render the PlantUML diagrams into text/diagrams
 	plantuml -tpng --output-dir $(abspath text/diagrams) --exclude "**/_style.puml" "specification/**.puml"
 
-text:
+text: ## Build the thesis PDF into text/out
 	mkdir -p text/out
 	cd text && uv run --no-project --python 3.13 -- latexmk -pdf -outdir=out thesis.tex

@@ -60,7 +60,7 @@ Requirements: Docker + Docker Compose. Runs anywhere Docker can run `linux/amd64
 2. **Run it**
 
    ```
-   make run-local-full
+   make run-local-docker
    ```
 
    Equivalent to: `docker compose --env-file .env.prod -f docker-compose-prod.yml up --build`.
@@ -74,7 +74,7 @@ Requirements: Docker + Docker Compose. Runs anywhere Docker can run `linux/amd64
 4. **Tear down**
 
    ```
-   make run-local-full-down
+   make run-local-docker-down
    ```
 
    Add `-v` (`docker compose -f docker-compose-prod.yml down -v`) to also wipe volumes.
@@ -147,11 +147,11 @@ This section only matters in dev mode, the Docker images ship their own copies.
 ### Automated install
 
 ```
-make setup
+make setup-tools
 ```
 
 This builds FFmpeg from source and downloads Shaka Packager into `.tools/bin/`
-(project-local). Re-running is a no-op if the binaries are already there; use `make clean`
+(project-local). Re-running is a no-op if the binaries are already there; use `make clean-tools`
 to rebuild.
 
 The default `.env.local.example` already points `FFMPEG_BIN`, `FFPROBE_BIN`, and
@@ -161,15 +161,15 @@ Only MacOS and Debian-based Linuxes are supported, since FFmpeg is built from so
 the script uses Homebrew on macOS and `apt-get`on Linux, in addition Makefile downloads
 `packager-osx-arm64` or `packager-linux-x64`.
 If you already have compatible FFmpeg/Shaka binaries installed system-wide, you can reuse them by
-pointing the env vars at them instead of running `make setup`.
+pointing the env vars at them instead of running `make setup-tools`.
 
 Other useful targets:
 
 - `make setup-ffmpeg` / `make setup-shaka` — install just one of them
-- `make check` — print versions of the installed binaries
-- `make clean` — remove `.tools/`
+- `make check-tools` — print versions of the installed binaries
+- `make clean-tools` — remove `.tools/`
 
-On other platforms `make setup` doesn't work directly, but you can still run the dev backend,
+On other platforms `make setup-tools` doesn't work directly, but you can still run the dev backend,
 install the binaries manually and point the env vars at them.
 
 ## direnv
@@ -234,8 +234,8 @@ uv run python manage.py initmodels --skip-audio
 Or against the running compose stack:
 
 ```
-make run-local-full-seed
-make run-local-full-clear
+make run-local-docker-seed
+make run-local-docker-clear
 ```
 
 ## License
