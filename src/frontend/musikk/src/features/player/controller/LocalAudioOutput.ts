@@ -1,3 +1,5 @@
+import { AudioGraph } from "@/features/player/controller/AudioGraph.ts";
+import { Song } from "@/features/songs/types.ts";
 import { createStaleAsyncOpGuard } from "@/lib/staleAsyncOpGuard.ts";
 import shaka from "shaka-player";
 import { toast } from "sonner";
@@ -5,9 +7,12 @@ import { toast } from "sonner";
 // the min interval that would trigger the audio elem seek
 const SEEK_CHANGE_MIN_MS = 250;
 
+const LOUDNESS_TARGET = -14; // LUFS
+const TRUE_PEAK_CEILING = -1; // dBTP
+
+export type SongLoudness = Pick<Song, "loudness_lufs" | "true_peak_dbtp">;
+
 export interface AudioOutputHandlers {
-    fadeIn: (durationMs?: number) => void;
-    fadeOut: (durationMs?: number) => Promise<void>;
     onMutedFallbackChange: (isMuted: boolean) => void;
 }
 
@@ -27,18 +32,50 @@ interface SourceChange {
     attached: AttachedAudio;
 }
 
+// boosting a quiet track can push its peaks above 0 dBFS (clipping),
+// so we cap gainDb at the headroom we have left before TRUE_PEAK_CEILING.
+// Without a known peak we cannot tell how much boost is safe, so such a song is only turned down
+function computeGainDb({ loudness_lufs, true_peak_dbtp }: SongLoudness): number {
+    if (loudness_lufs == null) return 0;
+    const gainDb = LOUDNESS_TARGET - loudness_lufs;
+    if (true_peak_dbtp == null) return Math.min(gainDb, 0);
+    return Math.min(gainDb, TRUE_PEAK_CEILING - true_peak_dbtp);
+}
+
+// we capture the user's first interaction anywhere on the page and build the graph
+// synchronously inside it. The graph is built even on a tab that does not play, so that
+// audio can start without another gesture when this tab becomes the active device
+function listenForFirstGesture(onGesture: () => void): () => void {
+    const handler = () => {
+        stopListening();
+        onGesture();
+    };
+    const stopListening = () => {
+        document.removeEventListener("pointerdown", handler, true);
+        document.removeEventListener("keydown", handler, true);
+    };
+    document.addEventListener("pointerdown", handler, true);
+    document.addEventListener("keydown", handler, true);
+    return stopListening;
+}
+
 // plays songs through Shaka and the audio element.
 // It knows nothing about modes, WS messages or the playback state
 export class LocalAudioOutput {
     private attached: AttachedAudio | null = null;
+    // null until the first user gesture
+    private graph: AudioGraph | null = null;
+    private stopListeningForGesture: (() => void) | null = null;
     private isAudioReady = false;
     private hasAudioLoadFailed = false;
-    // kept here, because the volume can be set before the audio element is attached
+    // kept here, because they can be set before the audio element or the graph exists
     private userVolume = 1;
+    private songLoudness: SongLoudness | null = null;
+    private isNormalizationEnabled = true;
 
     private loadGuard = createStaleAsyncOpGuard();
-    private playOrPauseGuard = createStaleAsyncOpGuard();
-    private seekGuard = createStaleAsyncOpGuard();
+    // play, pause and seek fade the same envelope, so a newer one of them cancels an older one
+    private fadeGuard = createStaleAsyncOpGuard();
 
     get isReady(): boolean {
         return this.isAudioReady;
@@ -61,14 +98,17 @@ export class LocalAudioOutput {
         });
         this.attached = { audio, player, handlers };
         this.applyUserVolume();
+        this.stopListeningForGesture = listenForFirstGesture(() => this.buildGraph(audio));
     }
 
     tearDownPlayer(): void {
+        this.stopListeningForGesture?.();
+        this.stopListeningForGesture = null;
         this.loadGuard.markRunningOpStale();
-        this.playOrPauseGuard.markRunningOpStale();
-        this.seekGuard.markRunningOpStale();
+        this.fadeGuard.markRunningOpStale();
         if (this.attached) void this.attached.player.destroy();
         this.attached = null;
+        this.graph = null;
         this.isAudioReady = false;
         this.hasAudioLoadFailed = false;
     }
@@ -80,10 +120,17 @@ export class LocalAudioOutput {
     // Resolves to true when the load finished and no newer load or unload replaced it.
     // It resolves only after the play attempt, since before it the audio is still paused,
     // and a failed play fires no event
-    async load(url: string, getStartPoint: () => AudioPlayState | null): Promise<boolean> {
+    async load(
+        url: string,
+        loudness: SongLoudness,
+        getStartPoint: () => AudioPlayState | null,
+    ): Promise<boolean> {
         const change = await this.stopForSourceChange();
         if (!change) return false;
         const { opId, attached } = change;
+        // only now, because the old song must not change its loudness while it fades out
+        this.songLoudness = loudness;
+        this.applyLoudness();
         try {
             await attached.player.attach(attached.audio);
             if (this.loadGuard.isOpStale(opId)) return false;
@@ -129,10 +176,10 @@ export class LocalAudioOutput {
     play(): void {
         const attached = this.attached;
         if (!attached) return;
-        this.playOrPauseGuard.beginOp();
+        this.fadeGuard.beginOp();
         // e.g. a pause is still fading out. play() would cut the sound for a moment
         if (!attached.audio.paused) {
-            attached.handlers.fadeIn();
+            this.graph?.fadeIn();
             return;
         }
         void this.tryPlay(attached);
@@ -141,10 +188,10 @@ export class LocalAudioOutput {
     pause(): void {
         const attached = this.attached;
         if (!attached) return;
-        const pauseOpId = this.playOrPauseGuard.beginOp();
+        const pauseOpId = this.fadeGuard.beginOp();
         void (async () => {
-            await attached.handlers.fadeOut();
-            if (this.playOrPauseGuard.isOpStale(pauseOpId)) return;
+            await this.graph?.fadeOut();
+            if (this.fadeGuard.isOpStale(pauseOpId)) return;
             attached.audio.pause();
         })();
     }
@@ -152,33 +199,35 @@ export class LocalAudioOutput {
     seek(targetMs: number): void {
         const attached = this.attached;
         if (!attached || !this.isAudioReady) return;
-        const { audio, handlers } = attached;
+        const { audio } = attached;
         if (Math.abs(targetMs - audio.currentTime * 1000) <= SEEK_CHANGE_MIN_MS) return;
 
-        const seekOpId = this.seekGuard.beginOp();
+        const seekOpId = this.fadeGuard.beginOp();
         void (async () => {
-            await handlers.fadeOut();
-            if (this.seekGuard.isOpStale(seekOpId)) return;
+            await this.graph?.fadeOut();
+            if (this.fadeGuard.isOpStale(seekOpId)) return;
             audio.currentTime = targetMs / 1000;
-            handlers.fadeIn();
+            this.graph?.fadeIn();
         })();
     }
 
-    async unmute(ensureAudioPipeline: () => void): Promise<void> {
+    unmute(): void {
         const attached = this.attached;
         if (!attached) return;
-        // unmute click is the user gesture that lets us go over the autoplay policy
-        // and build the AudioContext
-        ensureAudioPipeline();
-        await attached.handlers.fadeOut(0);
+        this.graph?.silence();
         attached.audio.muted = false;
-        attached.handlers.fadeIn();
+        this.graph?.fadeIn();
         attached.handlers.onMutedFallbackChange(false);
     }
 
     setUserVolume(value: number): void {
         this.userVolume = Math.max(0, Math.min(1, value));
         this.applyUserVolume();
+    }
+
+    setLoudnessNormalization(isEnabled: boolean): void {
+        this.isNormalizationEnabled = isEnabled;
+        this.applyLoudness();
     }
 
     markEnded(): void {
@@ -202,13 +251,29 @@ export class LocalAudioOutput {
         const attached = this.attached;
         if (!attached) return null;
         const opId = this.loadGuard.beginOp();
+        // a pause or seek that still waits for its fade must not touch the element anymore
+        this.fadeGuard.markRunningOpStale();
         this.isAudioReady = false;
         this.hasAudioLoadFailed = false;
 
-        await attached.handlers.fadeOut();
+        await this.graph?.fadeOut();
         if (this.loadGuard.isOpStale(opId)) return null;
         attached.audio.pause();
         return { opId, attached };
+    }
+
+    private buildGraph(audio: HTMLAudioElement): void {
+        this.graph = AudioGraph.forElement(audio);
+        this.applyLoudness();
+    }
+
+    private applyLoudness(): void {
+        this.graph?.setLoudness(this.normalizationGainDb());
+    }
+
+    private normalizationGainDb(): number {
+        if (!this.isNormalizationEnabled || !this.songLoudness) return 0;
+        return computeGainDb(this.songLoudness);
     }
 
     // a squared curve, because with a linear one the lower half of the slider sounds too loud
@@ -225,13 +290,13 @@ export class LocalAudioOutput {
 
     private async tryPlay({ audio, handlers }: AttachedAudio): Promise<void> {
         try {
-            await handlers.fadeOut(0);
+            this.graph?.silence();
             // the element can still be muted from an earlier fallback, and a muted play
             // always succeeds. The user may have clicked on the page since, so try with sound first
             audio.muted = false;
             await audio.play();
             handlers.onMutedFallbackChange(false);
-            handlers.fadeIn();
+            this.graph?.fadeIn();
         } catch (err) {
             if (err instanceof DOMException && err.name === "AbortError") return;
             // if the user opens the app on a completely new device (non-active yet)

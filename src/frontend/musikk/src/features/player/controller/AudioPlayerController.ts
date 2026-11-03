@@ -158,8 +158,12 @@ export class AudioPlayerController {
         this.output.setUserVolume(value);
     }
 
-    unmute(ensureAudioPipeline: () => void): Promise<void> {
-        return this.output.unmute(ensureAudioPipeline);
+    setLoudnessNormalization(isEnabled: boolean): void {
+        this.output.setLoudnessNormalization(isEnabled);
+    }
+
+    unmute(): void {
+        this.output.unmute();
     }
 
     private refreshView(): void {

@@ -18,7 +18,7 @@ import React, { useCallback, useState } from "react";
 interface PlayerBarProps {
     setIsQueueOpen: React.Dispatch<React.SetStateAction<boolean>>;
     isMutedFallback: boolean;
-    onUnmute: () => Promise<void>;
+    onUnmute: () => void;
 }
 export function PlayerBar({ setIsQueueOpen, isMutedFallback, onUnmute }: PlayerBarProps) {
     const { playbackState } = usePlayback();
@@ -118,7 +118,7 @@ export function PlayerBar({ setIsQueueOpen, isMutedFallback, onUnmute }: PlayerB
                             // available when playback started
                             // the unmute click is the fallback builds the AudioContext
                             <Button
-                                onClick={() => void onUnmute()}
+                                onClick={onUnmute}
                                 variant="ghost"
                                 size="icon"
                                 title="Tap to unmute on this device"

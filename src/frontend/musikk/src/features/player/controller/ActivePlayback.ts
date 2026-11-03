@@ -5,7 +5,11 @@ import {
 import { getServerClockEstimateMs } from "@/features/playback/serverClock.ts";
 import { LocalPlaybackState } from "@/features/playback/types.ts";
 import { PlaybackSetPayload } from "@/features/playback/ws/playbackPayload.ts";
-import { AudioPlayState, LocalAudioOutput } from "@/features/player/controller/LocalAudioOutput.ts";
+import {
+    AudioPlayState,
+    LocalAudioOutput,
+    SongLoudness,
+} from "@/features/player/controller/LocalAudioOutput.ts";
 import { PlaybackHost, PlaybackMode } from "@/features/player/controller/PlaybackMode.ts";
 import { getUrlForSong } from "@/features/player/getUrlForSong.ts";
 
@@ -143,16 +147,17 @@ export class ActivePlayback implements PlaybackMode {
     }
 
     private loadCurrentSong(): void {
-        const url = this.audioState ? getUrlForSong(this.audioState.collectionSong) : undefined;
-        if (url) {
-            void this.loadAndReport(url);
+        const collectionSong = this.audioState?.collectionSong;
+        const url = collectionSong ? getUrlForSong(collectionSong) : undefined;
+        if (collectionSong && url) {
+            void this.loadAndReport(url, collectionSong.song);
         } else {
             void this.output.unload();
         }
     }
 
-    private async loadAndReport(url: string): Promise<void> {
-        const isLoaded = await this.output.load(url, () => this.readStartPoint());
+    private async loadAndReport(url: string, loudness: SongLoudness): Promise<void> {
+        const isLoaded = await this.output.load(url, loudness, () => this.readStartPoint());
         if (isLoaded) this.onAudioStateChange();
     }
 

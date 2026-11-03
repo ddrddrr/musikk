@@ -1,6 +1,4 @@
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
-import { usePlayback } from "@/features/playback/hooks/usePlayback.ts";
-import { useAudioPipeline } from "@/features/player/hooks/useAudioPipeline.ts";
 import { usePlayer } from "@/features/player/hooks/usePlayer.ts";
 import { PlayerBar } from "@/features/player/PlayerBar.tsx";
 import { useQueue } from "@/features/song-queue/api/queries.ts";
@@ -12,19 +10,10 @@ export function PlayerBox({
     setIsQueueOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
     const audioRef = useRef<HTMLAudioElement>(null);
-    const { playbackState } = usePlayback();
     const { error: queueError, refetch: queueRefetch } = useQueue();
-
-    const { ensureAudioPipeline, fadeIn, fadeOut } = useAudioPipeline({
-        audioRef,
-        song: playbackState?.collectionSong.song,
-    });
 
     const { handleOnEnded, handleAudioStateChange, isMutedFallback, unmute } = usePlayer({
         audioRef,
-        ensureAudioPipeline,
-        fadeIn,
-        fadeOut,
     });
 
     const hasQueueError = queueError !== null;
@@ -49,10 +38,10 @@ export function PlayerBox({
 
             {/*
                 the audio elem is mounted even on non-active devices, because
-                useAudioPipeline binds to it via createMediaElementSource
+                the audio graph binds to it via createMediaElementSource
                 (1x/per elem, we can't unmount/remount cheaply)
                 and the controller keeps the element from init
-                the pipeline gets built on the first user gesture anywhere on the page
+                the graph gets built on the first user gesture anywhere on the page
                 this way, when this device later becomes active, audio can start without
                 waiting for another gesture to satisfy the autoplay policy
             */}

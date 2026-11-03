@@ -3,30 +3,24 @@ import {
     useActiveDeviceReportAction,
     useSetPlaybackAction,
 } from "@/features/playback/ws/actionHooks.ts";
+import { useLoudnessNormalization } from "@/features/player/hooks/useLoudnessNormalization.ts";
 import { useQueueNext } from "@/features/song-queue/api/mutations.ts";
 import { useEffect, useState } from "react";
 
 interface UsePlayerOptions {
     audioRef: React.RefObject<HTMLAudioElement | null>;
-    ensureAudioPipeline: () => void;
-    fadeIn: (durationMs?: number) => void;
-    fadeOut: (durationMs?: number) => Promise<void>;
 }
 
 interface UsePlayerReturn {
     handleOnEnded: () => void;
     handleAudioStateChange: () => void;
     isMutedFallback: boolean;
-    unmute: () => Promise<void>;
+    unmute: () => void;
 }
 
-export function usePlayer({
-    audioRef,
-    ensureAudioPipeline,
-    fadeIn,
-    fadeOut,
-}: UsePlayerOptions): UsePlayerReturn {
+export function usePlayer({ audioRef }: UsePlayerOptions): UsePlayerReturn {
     const controller = usePlayerController();
+    const { isEnabled: isNormalizationEnabled } = useLoudnessNormalization();
     const sendActiveDeviceReport = useActiveDeviceReportAction();
     const sendSet = useSetPlaybackAction();
     const { mutate: nextMutate } = useQueueNext();
@@ -41,16 +35,20 @@ export function usePlayer({
     }, [controller, sendActiveDeviceReport, sendSet, nextMutate]);
 
     useEffect(() => {
+        controller.setLoudnessNormalization(isNormalizationEnabled);
+    }, [controller, isNormalizationEnabled]);
+
+    useEffect(() => {
         const audio = audioRef.current;
         if (!audio) return;
-        controller.init(audio, { fadeIn, fadeOut, onMutedFallbackChange: setIsMutedFallback });
+        controller.init(audio, { onMutedFallbackChange: setIsMutedFallback });
         return () => controller.destroy();
-    }, [audioRef, controller, fadeIn, fadeOut]);
+    }, [audioRef, controller]);
 
     return {
         handleOnEnded: () => controller.handleEnded(),
         handleAudioStateChange: () => controller.handleAudioStateChange(),
         isMutedFallback,
-        unmute: () => controller.unmute(ensureAudioPipeline),
+        unmute: () => controller.unmute(),
     };
 }
