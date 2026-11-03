@@ -33,9 +33,9 @@ interface SourceChange {
     attached: AttachedAudio;
 }
 
-// boosting a quiet track can push its peaks above 0 dBFS (clipping),
-// so we cap gainDb at the headroom we have left before TRUE_PEAK_CEILING.
-// Without a known peak we cannot tell how much boost is safe, so such a song is only turned down
+// boosting a quiet track can push its loudness above 0 dBFS (clip),
+// so we restrict gain at the headroom before TRUE_PEAK_CEILING
+// without a recorded peak we cannot tell how much we can boost, so only turn down
 function computeGainDb({ loudness_lufs, true_peak_dbtp }: SongLoudness): number {
     if (loudness_lufs == null) return 0;
     const gainDb = LOUDNESS_TARGET - loudness_lufs;
@@ -43,9 +43,14 @@ function computeGainDb({ loudness_lufs, true_peak_dbtp }: SongLoudness): number 
     return Math.min(gainDb, TRUE_PEAK_CEILING - true_peak_dbtp);
 }
 
-// we capture the user's first interaction anywhere on the page and build the graph
-// synchronously inside it. The graph is built even on a tab that does not play, so that
+function dbToGain(gainDb: number): number {
+    return 10 ** (gainDb / 20);
+}
+
+// we capture the user's first interaction and only then build the audio graph
+// the graph is also built on a tab that does not play, so that
 // audio can start without another gesture when this tab becomes the active device
+// e.g., if the active device made another device active and then pressed play
 function listenForFirstGesture(onGesture: () => void): () => void {
     const handler = () => {
         stopListening();
@@ -70,18 +75,17 @@ function waitForEvent(target: EventTarget, type: string): Promise<void> {
 // It knows nothing about modes, WS messages or the playback state
 export class LocalAudioOutput {
     private attached: AttachedAudio | null = null;
-    // null until the first user gesture
     private graph: AudioGraph | null = null;
     private stopListeningForGesture: (() => void) | null = null;
     private isAudioReady = false;
     private hasAudioLoadFailed = false;
-    // kept here, because they can be set before the audio element or the graph exists
     private userVolume = 1;
     private songLoudness: SongLoudness | null = null;
     private isNormalizationEnabled = true;
 
     private loadGuard = createStaleAsyncOpGuard();
-    // play, pause and seek fade the same envelope, so a newer one of them cancels an older one
+    // play, pause and seek use the same fade gain, so the newest one is always applied
+    // (and an older one stops after its wait)
     private fadeGuard = createStaleAsyncOpGuard();
 
     get isReady(): boolean {
@@ -104,17 +108,17 @@ export class LocalAudioOutput {
             toast.error(detail?.message ?? "An audio streaming error occurred.");
         });
         this.attached = { audio, player, handlers };
-        // the graph does not work in Safari (https://bugs.webkit.org/show_bug.cgi?id=180696,
-        // https://github.com/shaka-project/shaka-player/issues/3616), and once a graph exists,
-        // Safari also ignores audio.volume (https://bugs.webkit.org/show_bug.cgi?id=244667).
-        // So Safari gets only the volume, with no normalization and no fades
+        // the audio graph does not work in Safari https://bugs.webkit.org/show_bug.cgi?id=180696,
+        // https://github.com/shaka-project/shaka-player/issues/3616,
+        // and once a graph exists, Safari also ignores audio.volume https://bugs.webkit.org/show_bug.cgi?id=244667
+        // so Safari gets only the volume controls, with no normalization and no fades
         if (!isWebKit) {
-            this.graph = AudioGraph.existingFor(audio);
+            this.graph = AudioGraph.existsForElement(audio);
             if (!this.graph) {
                 this.stopListeningForGesture = listenForFirstGesture(() => this.buildGraph(audio));
             }
         }
-        this.applyUserVolume();
+        this.applyLevel();
     }
 
     tearDownPlayer(): void {
@@ -146,7 +150,7 @@ export class LocalAudioOutput {
         const { opId, attached } = change;
         // only now, because the old song must not change its loudness while it fades out
         this.songLoudness = loudness;
-        this.applyLoudness();
+        this.applyLevel();
         try {
             await attached.player.attach(attached.audio);
             if (this.loadGuard.isOpStale(opId)) return false;
@@ -195,7 +199,7 @@ export class LocalAudioOutput {
         // e.g. a pause is still fading out. play() would cut the sound for a moment.
         // A seek can also still be waiting for its sound, so this fade in waits for sound too
         if (!attached.audio.paused) {
-            void this.fadeInOnceSoundFlows(this.fadeGuard.beginOp());
+            void this.fadeInAfterSoundPlays(this.fadeGuard.beginOp());
             return;
         }
         void this.tryPlay(attached);
@@ -226,10 +230,9 @@ export class LocalAudioOutput {
             audio.currentTime = targetMs / 1000;
             // a paused element stays silent, and the next play fades it in
             if (audio.paused) return;
-            // until seeked the analyser can still see sound from the old position
             await seeked;
             if (this.fadeGuard.isOpStale(seekOpId)) return;
-            await this.fadeInOnceSoundFlows(seekOpId);
+            await this.fadeInAfterSoundPlays(seekOpId);
         })();
     }
 
@@ -244,12 +247,12 @@ export class LocalAudioOutput {
 
     setUserVolume(value: number): void {
         this.userVolume = Math.max(0, Math.min(1, value));
-        this.applyUserVolume();
+        this.applyLevel();
     }
 
     setLoudnessNormalization(isEnabled: boolean): void {
         this.isNormalizationEnabled = isEnabled;
-        this.applyLoudness();
+        this.applyLevel();
     }
 
     markEnded(): void {
@@ -284,16 +287,23 @@ export class LocalAudioOutput {
         return { opId, attached };
     }
 
-    // the volume moves from the element into the graph in one step,
-    // so a song that already plays does not get louder for a moment
+    // the graph starts at the element's volume, because audio.volume becomes 1 at the same moment.
+    // Otherwise a song that already plays would jump to full volume. Then the level moves smoothly
+    // to include the normalization
     private buildGraph(audio: HTMLAudioElement): void {
-        this.graph = AudioGraph.forElement(audio, this.volumeGain());
+        this.graph = AudioGraph.createForElement(audio, this.volumeGain());
         audio.volume = 1;
-        this.applyLoudness();
+        this.applyLevel();
     }
 
-    private applyLoudness(): void {
-        this.graph?.setLoudness(this.normalizationGainDb());
+    // without an audio graph (safari, or before the first gesture) the element sets the volume,
+    // and there is no normalization
+    private applyLevel(): void {
+        if (this.graph) {
+            this.graph.setLevel(this.volumeGain() * dbToGain(this.normalizationGainDb()));
+        } else if (this.attached) {
+            this.attached.audio.volume = this.volumeGain();
+        }
     }
 
     private normalizationGainDb(): number {
@@ -301,16 +311,7 @@ export class LocalAudioOutput {
         return computeGainDb(this.songLoudness);
     }
 
-    // without a graph (Safari, or before the first gesture) the element sets the volume
-    private applyUserVolume(): void {
-        if (this.graph) {
-            this.graph.setVolume(this.volumeGain());
-        } else if (this.attached) {
-            this.attached.audio.volume = this.volumeGain();
-        }
-    }
-
-    // a squared curve, because with a linear one the lower half of the slider sounds too loud
+    // squared, since this better approximates the real way we percieve loudness
     private volumeGain(): number {
         return this.userVolume ** 2;
     }
@@ -322,10 +323,10 @@ export class LocalAudioOutput {
         audio.currentTime = resumeAt;
     }
 
-    private async fadeInOnceSoundFlows(fadeOpId: number): Promise<void> {
+    private async fadeInAfterSoundPlays(fadeOpId: number): Promise<void> {
         const graph = this.graph;
         if (!graph) return;
-        await graph.waitForSound();
+        await graph.waitForActiveAudio();
         if (this.fadeGuard.isOpStale(fadeOpId)) return;
         graph.fadeIn();
     }
@@ -334,13 +335,10 @@ export class LocalAudioOutput {
         const fadeOpId = this.fadeGuard.beginOp();
         try {
             this.graph?.silence();
-            // the element can still be muted from an earlier fallback, and a muted play
-            // always succeeds. The user may have clicked on the page since, so try with sound first
             audio.muted = false;
             await audio.play();
             handlers.onMutedFallbackChange(false);
-            // not awaited, so that load() still resolves as soon as play() does
-            void this.fadeInOnceSoundFlows(fadeOpId);
+            void this.fadeInAfterSoundPlays(fadeOpId);
         } catch (err) {
             if (err instanceof DOMException && err.name === "AbortError") return;
             // if the user opens the app on a completely new device (non-active yet)
@@ -355,8 +353,7 @@ export class LocalAudioOutput {
                 try {
                     await audio.play();
                     handlers.onMutedFallbackChange(true);
-                    // dont fadeIn here since audio is muted, and unmute() does the
-                    // anti-pop fade for audio.muted=false
+                    // dont fadeIn here since audio is muted, and unmute() does the fade
                     return;
                 } catch {
                     audio.muted = false;
