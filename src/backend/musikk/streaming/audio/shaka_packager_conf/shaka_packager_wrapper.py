@@ -1,15 +1,14 @@
 import logging
 import tempfile
+from dataclasses import dataclass
 from enum import StrEnum
 from pathlib import Path
-from dataclasses import dataclass
 
 from django.conf import settings
-
 from utils.cmd import run_shell_command
 from utils.storage import (
-    local_dir_to_django_storage,
     delete_django_storage_dir,
+    local_dir_to_django_storage,
 )
 
 logger = logging.getLogger(__name__)
@@ -104,7 +103,10 @@ class ShakaPackagerWrapper:
         self.do_cleanup = do_cleanup
 
     def package_audio_files(
-        self, local_input_paths: list[Path], storage_dir: str | Path
+        self,
+        local_input_paths: list[Path],
+        storage_dir: str | Path,
+        timeout: float | None = None,
     ) -> SongRepresentation:
         """
         Packages multiple audio files into DASH (MPD) and HLS (M3U8) manifests using shaka-packager.
@@ -112,6 +114,7 @@ class ShakaPackagerWrapper:
         Args:
             local_input_paths: list of local filesystem paths to converted audio files.
             storage_dir: storage prefix/directory where output files will be uploaded (e.g. 'audio/song123')
+            timeout: seconds for the packager subprocess, None means no limit
 
         Returns:
             SongRepresentation with content_path set to storage_dir and manifests mapping.
@@ -125,7 +128,7 @@ class ShakaPackagerWrapper:
                     file_paths=local_input_paths, tmpdir=tmpdir
                 )
 
-                run_shell_command(cmd)
+                run_shell_command(cmd, timeout=timeout)
                 orig_to_transferred_path_map = local_dir_to_django_storage(
                     local_dir=tmpdir, storage_prefix=storage_dir
                 )

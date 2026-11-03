@@ -2,29 +2,24 @@
 MAX_FILE_SIZE = 2 * (1024**3)
 
 MAX_DURATION_SECONDS = 7200  # 2h
+
 # 48khz * 8, realistically we don't want to handle anything more
 # in order not to load the system on FFmpeg conversions
 MAX_SAMPLE_RATE = 384_000
 MAX_CHANNELS = 8  # dolby 7.1 surround
 
 # not adding .ape,.mka and other less popular formats
-# since don't want to research their stability and quirks
-ALLOWED_FILE_TYPES = {
+# since don't want to research their stability and quirks.
+ALLOWED_DEMUXERS = (
     "wav",
-    "vnd.wav",
-    "x-wav",
     "flac",
-    "alac",
-    "m4a",
-    "aiff",
-    "aif",
-    "mpeg",
+    "mov",
     "mp3",
     "ogg",
-    "opus",
+    "aiff",
     "aac",
-    "mp4",
-}
+)  # mov includes mp4/m4a, ogg includes both opus and vorbis
+FORMAT_WHITELIST_ARGS = ["-format_whitelist", ",".join(ALLOWED_DEMUXERS)]
 
 # run `ffmpeg -codecs | grep '^ .\{2\}A'` for the codecs list
 ALLOWED_LOSSY_CODECS = {"mp3", "vorbis", "opus", "aac"}

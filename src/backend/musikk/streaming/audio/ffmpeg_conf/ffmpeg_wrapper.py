@@ -1,6 +1,5 @@
 import logging
 from concurrent.futures import ThreadPoolExecutor
-from enum import StrEnum
 from pathlib import Path
 
 from streaming.audio.config import DEFAULT_LOSSY_BITRATE, is_lossy_codec
@@ -20,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 class FFMPEGWrapper:
     """
-    Runs FFmpeg converters in parallel via ThreadPoolExecutor and writes output
+    Runs multiple FFmpeg converters via ThreadPoolExecutor and writes output
     to a local directory. Converters run as threads, each spawning an FFmpeg subprocess.
     Threads are used, since the parallelization is handled by FFmpeg itself.
     """
@@ -37,6 +36,7 @@ class FFMPEGWrapper:
         output_dir: str | Path,
         audio_info: AudioStreamInfo,
         filters: list[str] | None = None,
+        timeout: float | None = None,
     ) -> list[str]:
         """
         Transcodes audio into formats defined by the configured converters.
@@ -48,6 +48,7 @@ class FFMPEGWrapper:
             output_dir: Local directory where converted files are written.
             audio_info: AudioStreamInfo for tier selection and normalization.
             filters: FFmpeg audio filter strings to apply (normalization, etc.).
+            timeout: Seconds for each FFmpeg subprocess, None means no limit.
 
         Returns:
             List of local file paths for each converted output.
@@ -63,6 +64,7 @@ class FFMPEGWrapper:
                     file_path=file_path,
                     storage_dir=Path(output_dir),
                     filters=filters,
+                    timeout=timeout,
                 )
                 for converter in converters
             ]
@@ -76,8 +78,11 @@ class FFMPEGWrapper:
         Lossy-to-AAC is accepted because DASH/HLS packaging
         requires a consistent codec across all representations (even though it leads to generation loss :(
         """
+        converters = [
+            c.for_channels(audio_info.channels) for c in self.audio_converters
+        ]
         if not is_lossy_codec(audio_info.codec_name):
-            return self.audio_converters
+            return converters
 
         source_kbps = (
             audio_info.bit_rate // 1000
@@ -85,15 +90,16 @@ class FFMPEGWrapper:
             else DEFAULT_LOSSY_BITRATE
         )
 
+        lossy_converters = [c for c in converters if not c.lossless]
         selected = []
-        for c in self.audio_converters:
-            if c.lossless:
-                continue
+        for c in lossy_converters:
             if c.bitrate is not None and c.bitrate > source_kbps:
                 continue
             selected.append(c)
 
-        return selected
+        if selected or not lossy_converters:
+            return selected
+        return [min(lossy_converters, key=lambda c: c.bitrate or 0)]
 
 
 FFMPEGFlacOnly = FFMPEGWrapper(audio_converters=[FLAC_CONVERTER])

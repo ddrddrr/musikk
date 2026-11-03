@@ -250,6 +250,11 @@ AUTH_USER_MODEL = "users.BaseUser"
 UPLOAD_TMP_DIR = config(
     "UPLOAD_TMP_DIR", default=os.path.join(tempfile.gettempdir(), "musikk_uploads")
 )
+# on the same volume as the track folders under UPLOAD_TMP_DIR/songs,
+# so the upload view can move a file there instead of copying it
+FILE_UPLOAD_TEMP_DIR = os.path.join(UPLOAD_TMP_DIR, "incoming")
+# every uploaded file goes to disk, even a small one, so it has a path the upload view can move
+FILE_UPLOAD_HANDLERS = ["django.core.files.uploadhandler.TemporaryFileUploadHandler"]
 MEDIA_ROOT = config("MEDIA_ROOT", default=os.path.join(ROOT_DIR, "media"))
 # Relative to MEDIA_ROOT
 AUDIO_CONTENT_PATH = config("AUDIO_CONTENT_PATH", default="audio")
@@ -296,11 +301,15 @@ MAX_PATH_LENGTH = os.pathconf("/", "PC_PATH_MAX")
 # See detailed info about options here https://gist.github.com/fjsj/da41321ac96cf28a96235cb20e7236f6
 
 CELERY_TASK_ALWAYS_EAGER = config("CELERY_TASK_ALWAYS_EAGER", cast=bool, default=True)
+# autodiscover_tasks finds only `<app>.tasks`, and the audio tasks live one package deeper
+CELERY_IMPORTS = ["streaming.audio.tasks"]
 CELERY_BROKER_URL = config(
     "CELERY_BROKER_URL",
     default=f"redis://:{REDIS_PASSWORD}@{REDIS_HOST}:{REDIS_PORT}/2",
 )
-CELERY_BROKER_TRANSPORT_OPTIONS = {"visibility_timeout": 700}
+# must stay above the longest task time limit (the audio task, see streaming/audio/tasks.py),
+# otherwise Redis hands the message of a task that is still running to a second worker
+CELERY_BROKER_TRANSPORT_OPTIONS = {"visibility_timeout": 3600}  # s
 # CELERY_RESULT_BACKEND = config("CELERY_RESULT_BACKEND", default="")
 # this is setup, so the task is always finished (even if fails)
 CELERY_TASK_ACKS_LATE = config("CELERY_TASK_ACKS_LATE", cast=bool, default=True)
@@ -323,3 +332,10 @@ CELERY_TASK_SOFT_TIME_LIMIT = config(
     "CELERY_TASK_SOFT_TIME_LIMIT", cast=int, default=540
 )
 CELERY_TASK_TIME_LIMIT = config("CELERY_TASK_TIME_LIMIT", cast=int, default=600)
+# the worker runs beat too (`-B` in start-celery-worker.sh), there is one worker
+CELERY_BEAT_SCHEDULE = {
+    "cleanup-uploads": {
+        "task": "streaming.audio.tasks.cleanup_uploads",
+        "schedule": 60 * 60,  # s
+    },
+}

@@ -1,13 +1,21 @@
 from base.models import BaseModel
 from django.conf import settings
-from django.db import models
+from django.db import models, transaction
 from users.models import UserRole
-from utils.paths import deafult_image_path, delete_dir_for_file
+from utils.paths import deafult_image_path
+from utils.storage import delete_django_storage_dir
+
+
+class SongStatus(models.TextChoices):
+    QUEUED = "queued", "Queued"
+    PROCESSING = "processing", "Processing"
+    READY = "ready", "Ready"
+    FAILED = "failed", "Failed"
 
 
 class BaseSongQuerySet(models.QuerySet):
     def published(self):
-        return self.filter(draft=False)
+        return self.filter(status=SongStatus.READY)
 
 
 BaseSongManager = models.Manager.from_queryset(BaseSongQuerySet)
@@ -17,7 +25,10 @@ class BaseSong(BaseModel):
     title = models.CharField(max_length=128)
     description = models.TextField(max_length=512, blank=True, default="")
     image = models.ImageField(upload_to=deafult_image_path, null=True, blank=True)
-    draft = models.BooleanField(default=False)
+    status = models.CharField(
+        max_length=16, choices=SongStatus.choices, default=SongStatus.READY
+    )
+    status_detail = models.TextField(blank=True, default="")
 
     authors = models.ManyToManyField(
         "users.BaseUser",
@@ -54,9 +65,17 @@ class BaseSong(BaseModel):
     objects = BaseSongManager()
 
     def delete(self, using=None, keep_parents=False):
-        if self.mpd:
-            delete_dir_for_file(self.mpd)
-        return super().delete(using, keep_parents)
+        """
+        Removes the packaged audio together with the row. The files go only
+        after the commit, so a rolled back delete keeps a playable song.
+        """
+        content_path = self.content_path
+        result = super().delete(using, keep_parents)
+        if content_path:
+            transaction.on_commit(
+                lambda: delete_django_storage_dir(content_path), using=using
+            )
+        return result
 
     def is_available(self) -> bool:
         return bool(self.mpd)
@@ -97,9 +116,20 @@ class CollectionSong(BaseModel):
     position = models.IntegerField(
         default=None, null=True, help_text="The position of the song in the collection."
     )
+    operation_id = models.UUIDField(
+        null=True,
+        blank=True,
+        help_text="Client key of the album upload, so a repeated request finds the same row.",
+    )
 
     class Meta:
         ordering = ("position",)
+        constraints = [
+            models.UniqueConstraint(
+                fields=["collection", "operation_id"],
+                name="unique_collection_operation_id",
+            )
+        ]
 
     def save(self, *args, **kwargs):
         if self.position is None and self.collection:

@@ -1,10 +1,18 @@
+import json
 import tempfile
 from pathlib import Path
 
+from django.conf import settings
 from django.test import TestCase
+from utils.cmd import run_shell_command
 
 from streaming.audio.config import DEFAULT_LOSSY_BITRATE
-from streaming.audio.ffmpeg_conf.ffmpeg_wrapper import FFMPEGFlacOnly, FFMPEGFull
+from streaming.audio.ffmpeg_conf.converters import AACHEv2_CONVERTER
+from streaming.audio.ffmpeg_conf.ffmpeg_wrapper import (
+    FFMPEGFlacOnly,
+    FFMPEGFull,
+    FFMPEGWrapper,
+)
 from streaming.audio.probes import AudioStreamInfo, get_audio_metadata
 
 
@@ -65,8 +73,61 @@ class TestFFMPEGConversion(TestCase):
                 )
 
 
+def _aac_profile(path: str) -> str:
+    result = run_shell_command(
+        [
+            settings.FFPROBE_BIN,
+            "-v",
+            "error",
+            "-select_streams",
+            "a",
+            "-show_entries",
+            "stream=profile",
+            "-of",
+            "json",
+            path,
+        ]
+    )
+    return json.loads(result.stdout)["streams"][0]["profile"]
+
+
+class TestHEAACProfile(TestCase):
+    formats_dir = Path(__file__).parent / "data" / "formats"
+    wrapper = FFMPEGWrapper(audio_converters=[AACHEv2_CONVERTER])
+
+    def _convert(self, source: Path, output_dir: str) -> str:
+        info = get_audio_metadata(source)
+        [output] = self.wrapper.convert_audio(
+            file_path=source, output_dir=output_dir, audio_info=info
+        )
+        return output
+
+    def test_stereo_source_is_encoded_as_he_aac_v2(self):
+        with tempfile.TemporaryDirectory() as output_dir:
+            output = self._convert(self.formats_dir / "sample.flac", output_dir)
+            self.assertEqual(_aac_profile(output), "HE-AACv2")
+
+    def test_mono_source_is_encoded_as_he_aac(self):
+        with tempfile.TemporaryDirectory() as output_dir:
+            output = self._convert(self.formats_dir / "mono.wav", output_dir)
+            self.assertEqual(_aac_profile(output), "HE-AAC")
+
+
 # TODO: add tests with lossy files (MP3/Opus)
 class TestConverterSelection(TestCase):
+    def test_stereo_source_keeps_he_aac_v2(self):
+        selected = FFMPEGFull._select_converters(_make_info(channels=2))
+        self.assertIn(AACHEv2_CONVERTER, selected)
+        self.assertNotIn(AACHEv2_CONVERTER.mono_variant, selected)
+
+    def test_mono_source_swaps_he_aac_v2_for_mono_variant(self):
+        for codec_name in ("pcm_s16le", "aac"):
+            with self.subTest(codec_name=codec_name):
+                info = _make_info(channels=1, codec_name=codec_name, bit_rate=96_000)
+                selected = FFMPEGFull._select_converters(info)
+                self.assertIn(AACHEv2_CONVERTER.mono_variant, selected)
+                self.assertNotIn(AACHEv2_CONVERTER, selected)
+
     def test_lossless_source_returns_all_converters(self):
         info = _make_info(codec_name="pcm_s16le")
         selected = FFMPEGFull._select_converters(info)
@@ -91,6 +152,15 @@ class TestConverterSelection(TestCase):
         for c in selected:
             if c.bitrate is not None:
                 self.assertLessEqual(c.bitrate, DEFAULT_LOSSY_BITRATE)
+
+    def test_lossy_below_lowest_tier_keeps_lowest_tier(self):
+        for channels, converter in (
+            (2, AACHEv2_CONVERTER),
+            (1, AACHEv2_CONVERTER.mono_variant),
+        ):
+            with self.subTest(channels=channels):
+                info = _make_info(codec_name="aac", bit_rate=16_000, channels=channels)
+                self.assertEqual(FFMPEGFull._select_converters(info), [converter])
 
     def test_lossy_very_low_bitrate_returns_lowest_tier_only(self):
         info = _make_info(codec_name="aac", bit_rate=24_000)

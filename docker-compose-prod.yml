@@ -114,7 +114,7 @@ volumes:
   django_media:
   # mounted at /var rather than /tmp because the volume persists across
   # container restarts and /tmp can be cleared by OS whenever
-  # (we remove temporary files manually via a scheduled task later)
+  # (the hourly `cleanup_uploads` Celery task removes leftover files)
   upload_tmp:
 
 networks:

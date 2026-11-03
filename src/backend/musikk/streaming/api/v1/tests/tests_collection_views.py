@@ -1,7 +1,11 @@
 import io
-from unittest.mock import MagicMock, patch
+import os
+import shutil
+import tempfile
+import uuid
+from unittest.mock import patch
 
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 from faker import Faker
 from rest_framework import status
@@ -13,16 +17,22 @@ from streaming.api.v1.views.collections import (
     AlbumBySongView,
     CollectionAddLikedView,
     CollectionListCreateView,
-    CollectionRemoveSong,
+    CollectionRemoveSongView,
     CollectionRetrieveUpdateView,
     CollectionRetrieveView,
-    CollectionSongCreateView,
+    CollectionSongListCreateView,
     UserLibraryView,
 )
 from streaming.audio.probes import AudioStreamInfo
+from streaming.audio.upload_files import (
+    create_upload_dirs,
+    find_source_file,
+    incoming_dir,
+    songs_dir,
+)
 from streaming.models import Collection
 from streaming.models.collections import CollectionCredit, CollectionType
-from streaming.models.songs import BaseSong, CollectionSong
+from streaming.models.songs import BaseSong, CollectionSong, SongStatus
 from streaming.tests.factories import BaseSongFactory, CollectionFactory
 
 fake = Faker()
@@ -157,7 +167,7 @@ class TestCollectionRetrieveUpdateView(TestCase):
     def setUp(self):
         self.factory = APIRequestFactory()
         self.artist = BaseUserFactory()
-        self.songs = BaseSongFactory.create_batch(3, draft=False)
+        self.songs = BaseSongFactory.create_batch(3)
 
     def test_retrieve_collection_with_songs(self):
         collection = CollectionFactory(private=False, songs=self.songs)
@@ -213,13 +223,15 @@ class TestCollectionRemoveSong(TestCase):
             "api:collection-remove-song",
             kwargs={
                 "collection_uuid": collection.uuid,
-                "song_uuid": collection_song.uuid,
+                "collection_song_uuid": collection_song.uuid,
             },
         )
         request = self.factory.delete(url)
         force_authenticate(request, user=self.artist)
-        response = CollectionRemoveSong.as_view()(
-            request, collection_uuid=collection.uuid, song_uuid=collection_song.uuid
+        response = CollectionRemoveSongView.as_view()(
+            request,
+            collection_uuid=collection.uuid,
+            collection_song_uuid=collection_song.uuid,
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -237,13 +249,15 @@ class TestCollectionRemoveSong(TestCase):
             "api:collection-remove-song",
             kwargs={
                 "collection_uuid": collection.uuid,
-                "song_uuid": collection_song.uuid,
+                "collection_song_uuid": collection_song.uuid,
             },
         )
         request = self.factory.delete(url)
         force_authenticate(request, user=self.artist)
-        response = CollectionRemoveSong.as_view()(
-            request, collection_uuid=collection.uuid, song_uuid=collection_song.uuid
+        response = CollectionRemoveSongView.as_view()(
+            request,
+            collection_uuid=collection.uuid,
+            collection_song_uuid=collection_song.uuid,
         )
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -306,7 +320,7 @@ class TestCollectionDeleteView(TestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
-class TestCollectionSongCreateView(TestCase):
+class TestCollectionSongListCreateView(TestCase):
     def setUp(self):
         self.factory = APIRequestFactory()
         self.artist = BaseUserFactory()
@@ -319,12 +333,12 @@ class TestCollectionSongCreateView(TestCase):
         )
 
         url = reverse(
-            "api:collection-song-create",
+            "api:collection-song-list-create",
             kwargs={"collection_uuid": target_collection.uuid},
         )
         request = self.factory.post(url, {"song_uuid": str(song.uuid)}, format="json")
         force_authenticate(request, user=self.artist)
-        response = CollectionSongCreateView.as_view()(
+        response = CollectionSongListCreateView.as_view()(
             request, collection_uuid=target_collection.uuid
         )
 
@@ -337,14 +351,51 @@ class TestCollectionSongCreateView(TestCase):
         )
 
 
-class TestCollectionSongCreateViewAlbumUpload(TestCase):
+def _audio_info() -> AudioStreamInfo:
+    return AudioStreamInfo(
+        duration_seconds=180.0,
+        sample_rate=44100,
+        channels=2,
+        codec_name="mp3",
+        bit_depth=None,
+        bit_rate=320000,
+    )
+
+
+class UploadTmpDirMixin:
+    """Points the upload folders at a fresh temp dir, so tests can check what is left."""
+
     def setUp(self):
+        super().setUp()
+        self.upload_tmp = tempfile.mkdtemp()
+        self.upload_override = override_settings(
+            UPLOAD_TMP_DIR=self.upload_tmp,
+            FILE_UPLOAD_TEMP_DIR=os.path.join(self.upload_tmp, "incoming"),
+        )
+        self.upload_override.enable()
+        create_upload_dirs()
+
+    def tearDown(self):
+        self.upload_override.disable()
+        shutil.rmtree(self.upload_tmp, ignore_errors=True)
+        super().tearDown()
+
+    def assert_no_upload_files_left(self):
+        self.assertEqual(list(songs_dir().iterdir()), [])
+        self.assertEqual(list(incoming_dir().iterdir()), [])
+
+
+@patch("streaming.api.v1.views.collections.validate_audio", return_value=_audio_info())
+@patch("streaming.audio.tasks.convert_audio.apply_async")
+class TestAlbumTrackUpload(UploadTmpDirMixin, TestCase):
+    def setUp(self):
+        super().setUp()
         self.factory = APIRequestFactory()
         self.artist = ArtistFactory()
-        self.collection = CollectionFactory(private=False, type="album", songs=[])
-        CollectionCredit.objects.create(collection=self.collection, author=self.artist)
+        self.album = CollectionFactory(type="album", draft=True, songs__songs_count=0)
+        CollectionCredit.objects.create(collection=self.album, author=self.artist)
 
-    def _upload_payload(self, **overrides):
+    def _payload(self, **overrides):
         audio_file = io.BytesIO(b"fake audio content")
         audio_file.name = "test_song.mp3"
         payload = {
@@ -352,60 +403,290 @@ class TestCollectionSongCreateViewAlbumUpload(TestCase):
             "description": fake.text(max_nb_chars=100),
             "audio": audio_file,
             "authors": [str(self.artist.uuid)],
-            "operation_id": "op-test-123",
+            "operation_id": str(uuid.uuid4()),
+            "position": 0,
         }
         payload.update(overrides)
         return payload
 
-    @patch("streaming.api.v1.views.collections.validate_audio")
-    @patch("streaming.api.v1.views.collections.convert_audio.apply_async")
-    def test_album_song_create_with_multiple_authors(self, mock_convert, mock_validate):
-        mock_validate.return_value = AudioStreamInfo(
-            duration_seconds=180.0,
-            sample_rate=44100,
-            channels=2,
-            codec_name="mp3",
-            bit_depth=None,
-            bit_rate=320000,
-        )
-        mock_convert.return_value = MagicMock(id="task-id-456")
-
-        other_artist = ArtistFactory()
+    def _upload(self, payload):
         url = reverse(
-            "api:collection-song-create",
-            kwargs={"collection_uuid": self.collection.uuid},
+            "api:collection-song-list-create",
+            kwargs={"collection_uuid": self.album.uuid},
         )
-        payload = self._upload_payload(
-            authors=[str(self.artist.uuid), str(other_artist.uuid)]
-        )
-
         request = self.factory.post(url, payload, format="multipart")
         force_authenticate(request, user=self.artist)
-        response = CollectionSongCreateView.as_view()(
-            request, collection_uuid=self.collection.uuid
-        )
+        with self.captureOnCommitCallbacks(execute=True):
+            response = CollectionSongListCreateView.as_view()(
+                request, collection_uuid=self.album.uuid
+            )
+        request.close()
+        return response
+
+    def test_upload_creates_queued_song_and_enqueues_once(
+        self, mock_convert, mock_validate
+    ):
+        response = self._upload(self._payload())
 
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
+        self.assertEqual(response.data["status"], SongStatus.QUEUED)
+        song = BaseSong.objects.get(uuid=response.data["song_uuid"])
+        self.assertEqual(song.status, SongStatus.QUEUED)
+        mock_convert.assert_called_once()
+        self.assertEqual(
+            mock_convert.call_args.kwargs["kwargs"]["song_uuid"], str(song.uuid)
+        )
+        source = find_source_file(song.uuid)
+        self.assertIsNotNone(source)
+        self.assertEqual(source.suffix, ".mp3")
 
+    def test_upload_to_published_album_returns_400(self, mock_convert, mock_validate):
+        Collection.objects.filter(pk=self.album.pk).update(draft=False)
+
+        response = self._upload(self._payload())
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertFalse(BaseSong.objects.exists())
+        mock_validate.assert_not_called()
+        self.assert_no_upload_files_left()
+
+    def test_upload_with_multiple_authors(self, mock_convert, mock_validate):
+        other_artist = ArtistFactory()
+        payload = self._payload(authors=[str(self.artist.uuid), str(other_artist.uuid)])
+
+        response = self._upload(payload)
+
+        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
         song = BaseSong.objects.get(uuid=response.data["song_uuid"])
         self.assertEqual(song.credits.count(), 2)
 
-    @patch("streaming.api.v1.views.collections.validate_audio")
-    def test_album_song_create_validation_failure(self, mock_validate):
-        mock_validate.side_effect = ValidationError("Invalid audio format")
+    def test_same_operation_id_twice_returns_same_row_and_enqueues_once(
+        self, mock_convert, mock_validate
+    ):
+        operation_id = str(uuid.uuid4())
 
-        url = reverse(
-            "api:collection-song-create",
-            kwargs={"collection_uuid": self.collection.uuid},
+        first = self._upload(self._payload(operation_id=operation_id))
+        second = self._upload(self._payload(operation_id=operation_id))
+
+        self.assertEqual(first.status_code, status.HTTP_202_ACCEPTED)
+        self.assertEqual(second.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            first.data["collection_song_uuid"], second.data["collection_song_uuid"]
         )
-        request = self.factory.post(url, self._upload_payload(), format="multipart")
-        force_authenticate(request, user=self.artist)
-        response = CollectionSongCreateView.as_view()(
-            request, collection_uuid=self.collection.uuid
+        self.assertEqual(
+            CollectionSong.objects.filter(collection=self.album).count(), 1
         )
+        mock_convert.assert_called_once()
+        self.assertEqual(len(list(songs_dir().iterdir())), 1)
+        self.assertEqual(list(incoming_dir().iterdir()), [])
+
+    def test_given_position_is_stored(self, mock_convert, mock_validate):
+        response = self._upload(self._payload(position=5))
+
+        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
+        collection_song = CollectionSong.objects.get(
+            uuid=response.data["collection_song_uuid"]
+        )
+        self.assertEqual(collection_song.position, 5)
+
+    def test_invalid_operation_id_or_position_returns_400(
+        self, mock_convert, mock_validate
+    ):
+        for overrides in (
+            {"operation_id": "op-test-123"},
+            {"position": -1},
+            {"position": "first"},
+        ):
+            with self.subTest(**overrides):
+                response = self._upload(self._payload(**overrides))
+                self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        mock_validate.assert_not_called()
+        self.assert_no_upload_files_left()
+
+    def test_audio_sent_as_text_returns_400(self, mock_convert, mock_validate):
+        response = self._upload(self._payload(audio="not a file"))
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        mock_validate.assert_called_once()
+
+    def test_serializer_error_leaves_no_files(self, mock_convert, mock_validate):
+        payload = self._payload()
+        del payload["title"]
+
+        response = self._upload(payload)
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertFalse(BaseSong.objects.exists())
+        mock_validate.assert_not_called()
+        self.assert_no_upload_files_left()
+
+    def test_audio_validation_error_leaves_no_files(self, mock_convert, mock_validate):
+        mock_validate.side_effect = ValidationError("Invalid audio format")
+
+        response = self._upload(self._payload())
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertFalse(BaseSong.objects.exists())
+        mock_convert.assert_not_called()
+        self.assert_no_upload_files_left()
+
+    def test_parallel_request_with_same_key_returns_the_winner(
+        self, mock_convert, mock_validate
+    ):
+        operation_id = uuid.uuid4()
+        winner = CollectionSong.objects.create(
+            collection=self.album,
+            song=BaseSongFactory(status=SongStatus.QUEUED),
+            operation_id=operation_id,
+            position=0,
+        )
+
+        with patch(
+            "streaming.api.v1.views.collections._find_album_song",
+            side_effect=[None, winner],
+        ):
+            response = self._upload(self._payload(operation_id=str(operation_id)))
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["collection_song_uuid"], str(winner.uuid))
+        self.assertEqual(BaseSong.objects.count(), 1)
+        mock_convert.assert_not_called()
+        self.assert_no_upload_files_left()
+
+    def test_enqueue_error_marks_song_failed(self, mock_convert, mock_validate):
+        mock_convert.side_effect = ConnectionError("broker is down")
+
+        response = self._upload(self._payload())
+
+        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
+        song = BaseSong.objects.get(uuid=response.data["song_uuid"])
+        self.assertEqual(song.status, SongStatus.FAILED)
+        self.assertNotEqual(song.status_detail, "")
+        self.assert_no_upload_files_left()
+
+
+class TestAlbumTrackList(TestCase):
+    def setUp(self):
+        self.factory = APIRequestFactory()
+        self.author = ArtistFactory()
+        self.outsider = ArtistFactory()
+
+    def _get(self, collection, user):
+        url = reverse(
+            "api:collection-song-list-create",
+            kwargs={"collection_uuid": collection.uuid},
+        )
+        request = self.factory.get(url)
+        force_authenticate(request, user=user)
+        return CollectionSongListCreateView.as_view()(
+            request, collection_uuid=collection.uuid
+        )
+
+    def test_author_sees_every_track_in_position_order(self):
+        album = CollectionFactory(type="album", draft=True, songs__songs_count=0)
+        CollectionCredit.objects.create(collection=album, author=self.author)
+        statuses = [SongStatus.FAILED, SongStatus.READY, SongStatus.QUEUED]
+        for position, song_status in reversed(list(enumerate(statuses))):
+            CollectionSong.objects.create(
+                collection=album,
+                song=BaseSongFactory(status=song_status),
+                position=position,
+                operation_id=uuid.uuid4(),
+            )
+
+        response = self._get(album, self.author)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual([t["position"] for t in response.data], [0, 1, 2])
+        self.assertEqual([t["status"] for t in response.data], statuses)
+        self.assertEqual(
+            set(response.data[0]),
+            {
+                "collection_song_uuid",
+                "song_uuid",
+                "title",
+                "position",
+                "status",
+                "status_detail",
+                "operation_id",
+            },
+        )
+
+    def test_non_author_gets_403(self):
+        album = CollectionFactory(type="album", draft=True, songs=[])
+        CollectionCredit.objects.create(collection=album, author=self.author)
+
+        response = self._get(album, self.outsider)
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_playlist_gets_404(self):
+        playlist = CollectionFactory(type="playlist", songs=[])
+        CollectionCredit.objects.create(collection=playlist, author=self.author)
+
+        response = self._get(playlist, self.author)
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+
+class TestRemoveAlbumTrack(TestCase):
+    def setUp(self):
+        self.factory = APIRequestFactory()
+        self.author = ArtistFactory()
+
+    def _collection(self, **kwargs):
+        collection = CollectionFactory(songs__songs_count=0, **kwargs)
+        CollectionCredit.objects.create(collection=collection, author=self.author)
+        return collection
+
+    def _remove(self, collection_song):
+        kwargs = {
+            "collection_uuid": collection_song.collection.uuid,
+            "collection_song_uuid": collection_song.uuid,
+        }
+        url = reverse("api:collection-remove-song", kwargs=kwargs)
+        request = self.factory.delete(url)
+        force_authenticate(request, user=self.author)
+        with self.captureOnCommitCallbacks(execute=True):
+            return CollectionRemoveSongView.as_view()(request, **kwargs)
+
+    @patch("streaming.models.songs.delete_django_storage_dir")
+    def test_draft_album_track_removes_song_and_its_files(self, mock_delete_storage):
+        album = self._collection(type="album", draft=True)
+        song = BaseSongFactory(content_path="audio/some-song")
+        collection_song = CollectionSong.objects.create(collection=album, song=song)
+
+        response = self._remove(collection_song)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertFalse(BaseSong.objects.filter(uuid=song.uuid).exists())
+        self.assertFalse(
+            CollectionSong.objects.filter(uuid=collection_song.uuid).exists()
+        )
+        mock_delete_storage.assert_called_once_with("audio/some-song")
+
+    @patch("streaming.models.songs.delete_django_storage_dir")
+    def test_playlist_entry_removes_only_the_link(self, mock_delete_storage):
+        playlist = self._collection(type="playlist")
+        song = BaseSongFactory(content_path="audio/other-artist-song")
+        collection_song = CollectionSong.objects.create(collection=playlist, song=song)
+
+        response = self._remove(collection_song)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(BaseSong.objects.filter(uuid=song.uuid).exists())
+        self.assertFalse(
+            CollectionSong.objects.filter(uuid=collection_song.uuid).exists()
+        )
+        mock_delete_storage.assert_not_called()
+
+    def test_published_album_track_keeps_the_song(self):
+        album = self._collection(type="album", draft=False)
+        song = BaseSongFactory()
+        collection_song = CollectionSong.objects.create(collection=album, song=song)
+
+        self._remove(collection_song)
+
+        self.assertTrue(BaseSong.objects.filter(uuid=song.uuid).exists())
 
 
 class TestCollectionDraftOnCreate(TestCase):
@@ -455,7 +736,7 @@ class TestCollectionPublishViaPatch(TestCase):
         return CollectionRetrieveUpdateView.as_view()(request, uuid=album.uuid)
 
     def test_publish_succeeds_when_all_songs_processed(self):
-        songs = BaseSongFactory.create_batch(2, draft=False)
+        songs = BaseSongFactory.create_batch(2)
         album = self._draft_album(songs)
 
         with patch("streaming.api.v1.views.collections.send_ws_event") as mock_ws:
@@ -468,8 +749,8 @@ class TestCollectionPublishViaPatch(TestCase):
 
     def test_publish_rejected_when_song_still_processing(self):
         songs = [
-            BaseSongFactory(draft=False),
-            BaseSongFactory(draft=True),
+            BaseSongFactory(),
+            BaseSongFactory(status=SongStatus.PROCESSING),
         ]
         album = self._draft_album(songs)
 
@@ -482,7 +763,7 @@ class TestCollectionPublishViaPatch(TestCase):
         self.assertTrue(album.draft)
 
     def test_non_author_cannot_patch(self):
-        songs = BaseSongFactory.create_batch(1, draft=False)
+        songs = BaseSongFactory.create_batch(1)
         album = self._draft_album(songs)
 
         response = self._patch(album, self.outsider, {"draft": "false"})
@@ -492,7 +773,7 @@ class TestCollectionPublishViaPatch(TestCase):
         self.assertTrue(album.draft)
 
     def test_patch_other_fields_does_not_trigger_publish_check(self):
-        songs = [BaseSongFactory(draft=True)]
+        songs = [BaseSongFactory(status=SongStatus.PROCESSING)]
         album = self._draft_album(songs)
 
         response = self._patch(album, self.author, {"title": "renamed while draft"})
@@ -578,44 +859,3 @@ class TestDraftVisibility(TestCase):
             force_authenticate(request, user=user)
             response = AlbumBySongView.as_view()(request, uuid=cs.uuid)
             self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-
-    @patch("streaming.api.v1.views.collections.validate_audio")
-    @patch("streaming.api.v1.views.collections.convert_audio.apply_async")
-    def test_author_can_upload_song_to_draft(self, mock_convert, mock_validate):
-        mock_validate.return_value = AudioStreamInfo(
-            duration_seconds=180.0,
-            sample_rate=44100,
-            channels=2,
-            codec_name="mp3",
-            bit_depth=None,
-            bit_rate=320000,
-        )
-        mock_convert.return_value = MagicMock(id="task-id-456")
-        album = self._make_draft_album()
-
-        audio_file = io.BytesIO(b"fake audio content")
-        audio_file.name = "test_song.mp3"
-        payload = {
-            "title": fake.word(),
-            "description": fake.text(max_nb_chars=100),
-            "audio": audio_file,
-            "authors": [str(self.author.uuid)],
-            "operation_id": "op-test-123",
-        }
-
-        url = reverse(
-            "api:collection-song-create",
-            kwargs={"collection_uuid": album.uuid},
-        )
-        request = self.factory.post(url, payload, format="multipart")
-        force_authenticate(request, user=self.author)
-        response = CollectionSongCreateView.as_view()(
-            request, collection_uuid=album.uuid
-        )
-
-        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
-        self.assertTrue(
-            CollectionSong.objects.filter(
-                collection=album, song__uuid=response.data["song_uuid"]
-            ).exists()
-        )

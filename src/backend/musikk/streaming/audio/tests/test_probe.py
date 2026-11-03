@@ -1,4 +1,6 @@
 import json
+import shutil
+import subprocess
 import tempfile
 from pathlib import Path
 from unittest.mock import MagicMock, patch
@@ -12,12 +14,17 @@ from streaming.audio.config import (
     MAX_FILE_SIZE,
     MAX_SAMPLE_RATE,
 )
+from streaming.audio.exceptions import ProcessingTimeoutError
 from streaming.audio.probes import (
     AudioStreamInfo,
     get_audio_loudness,
     get_audio_metadata,
 )
-from streaming.audio.validators import _validate_audio_properties, _validate_size_type
+from streaming.audio.validators import (
+    _validate_audio_properties,
+    _validate_size,
+    validate_audio,
+)
 
 
 def _ffprobe_output(
@@ -119,6 +126,11 @@ class ValidateAudioPropertiesTests(TestCase):
     def test_valid_properties_passes(self):
         _validate_audio_properties(_make_info())
 
+    def test_missing_duration_raises(self):
+        with self.assertRaises(ValidationError) as ctx:
+            _validate_audio_properties(_make_info(duration_seconds=0.0))
+        self.assertIn("duration", str(ctx.exception.detail).lower())
+
     def test_duration_exceeds_limit(self):
         info = _make_info(duration_seconds=MAX_DURATION_SECONDS + 1)
         with self.assertRaises(ValidationError) as ctx:
@@ -174,50 +186,60 @@ class ValidateAudioPropertiesTests(TestCase):
             _validate_audio_properties(_make_info(codec_name=codec))
 
 
-class ValidateSizeTypeTests(TestCase):
-    @patch("streaming.audio.validators.magic.from_buffer", return_value="audio/wav")
-    def test_valid_bytes(self, _mock_magic):
-        data = b"\x00" * 1024
-        _validate_size_type(data)
-
-    @patch("streaming.audio.validators.magic.from_buffer", return_value="audio/wav")
-    def test_valid_path(self, _mock_magic):
-        with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as f:
+class ValidateSizeTests(TestCase):
+    def test_valid_path(self):
+        with tempfile.NamedTemporaryFile(suffix=".wav") as f:
             f.write(b"\x00" * 1024)
             f.flush()
-            _validate_size_type(Path(f.name))
+            _validate_size(Path(f.name))
 
-    def test_empty_bytes_raises(self):
-        with self.assertRaises(ValidationError) as ctx:
-            _validate_size_type(b"")
+    def test_empty_file_raises(self):
+        with tempfile.NamedTemporaryFile(suffix=".wav") as f:
+            with self.assertRaises(ValidationError) as ctx:
+                _validate_size(f.name)
         self.assertIn("size", str(ctx.exception.detail).lower())
 
-    @patch("streaming.audio.validators.magic.from_buffer", return_value="audio/wav")
-    def test_oversized_bytes_raises(self, _mock_magic):
-        with self.assertRaises(ValidationError) as ctx:
-            _validate_size_type(b"\x00" * (MAX_FILE_SIZE + 1))
+    def test_oversized_file_raises(self):
+        with tempfile.NamedTemporaryFile(suffix=".wav") as f:
+            f.truncate(MAX_FILE_SIZE + 1)
+            with self.assertRaises(ValidationError) as ctx:
+                _validate_size(f.name)
         self.assertIn("too large", str(ctx.exception.detail).lower())
 
-    @patch("streaming.audio.validators.magic.from_buffer", return_value="video/mp4")
-    def test_non_audio_mime_raises(self, _mock_magic):
-        with self.assertRaises(ValidationError) as ctx:
-            _validate_size_type(b"\x00" * 1024)
-        self.assertIn("wrong mime", str(ctx.exception.detail).lower())
 
-    @patch(
-        "streaming.audio.validators.magic.from_buffer", return_value="audio/x-ms-wma"
-    )
-    def test_unsupported_audio_subtype_raises(self, _mock_magic):
-        with self.assertRaises(ValidationError) as ctx:
-            _validate_size_type(b"\x00" * 1024)
-        self.assertIn("unsupported audio format", str(ctx.exception.detail).lower())
+class ValidateAudioFormatTests(TestCase):
+    formats_dir = Path(__file__).parent / "data" / "formats"
 
-    @patch("streaming.audio.validators.magic.from_buffer", return_value="audio/flac")
-    def test_allowed_subtypes_pass(self, _mock_magic):
-        data = b"\x00" * 1024
-        for subtype in ("wav", "flac", "mpeg", "ogg", "opus", "aac", "mp4"):
-            _mock_magic.return_value = f"audio/{subtype}"
-            _validate_size_type(data)
+    def test_accepted_formats_pass(self):
+        files = {
+            "sample.aiff": "pcm_s16be",
+            "sample_aac.m4a": "aac",
+            "sample_alac.m4a": "alac",
+            "sample.aac": "aac",
+            "sample_audio_only.mp4": "aac",
+            "sample.flac": "flac",
+            "sample_opus.ogg": "opus",
+            "sample_vorbis.ogg": "vorbis",
+            "mono.wav": "pcm_s16le",
+        }
+        for name, codec in files.items():
+            with self.subTest(name=name):
+                info = validate_audio(self.formats_dir / name)
+                self.assertEqual(info.codec_name, codec)
+
+    def test_hls_playlist_is_rejected(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            segment = Path(tmpdir) / "segment.aac"
+            shutil.copy(self.formats_dir / "sample.aac", segment)
+            playlist = Path(tmpdir) / "upload.m3u8"
+            playlist.write_text(
+                "#EXTM3U\n#EXT-X-TARGETDURATION:1\n#EXTINF:1,\n"
+                f"{segment.name}\n#EXT-X-ENDLIST\n"
+            )
+
+            with self.assertRaises(ValidationError) as ctx:
+                validate_audio(playlist)
+        self.assertIn("malformed", str(ctx.exception.detail).lower())
 
 
 def _ebur128_stderr(lufs="-14.7", peaks="-1.1 -1.1"):
@@ -233,6 +255,12 @@ def _ebur128_stderr(lufs="-14.7", peaks="-1.1 -1.1"):
 
 
 class LoudnessMeasurementTests(TestCase):
+    @patch("streaming.audio.probes.run_shell_command")
+    def test_timeout_raises_processing_timeout(self, mock_cmd):
+        mock_cmd.side_effect = subprocess.TimeoutExpired(cmd="ffmpeg", timeout=1)
+        with self.assertRaises(ProcessingTimeoutError):
+            get_audio_loudness("/fake/path.wav", timeout=1)
+
     @patch("streaming.audio.probes.run_shell_command")
     def test_stereo(self, mock_cmd):
         mock_cmd.return_value = MagicMock(stderr=_ebur128_stderr())

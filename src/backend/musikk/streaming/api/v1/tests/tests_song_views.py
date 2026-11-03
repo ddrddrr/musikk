@@ -21,7 +21,7 @@ class TestCollectionSongRetrieveView(TestCase):
         self.other_user = BaseUserFactory()
 
     def test_retrieve_song_from_public_collection(self):
-        song = BaseSongFactory(draft=False)
+        song = BaseSongFactory()
         collection = CollectionFactory(private=False, songs=[song])
         CollectionCredit.objects.create(collection=collection, author=self.other_user)
         collection_song = CollectionSong.objects.get(collection=collection, song=song)
@@ -47,7 +47,7 @@ class TestCollectionSongRetrieveView(TestCase):
         )
 
     def test_retrieve_song_from_private_collection_as_non_author(self):
-        song = BaseSongFactory(draft=False)
+        song = BaseSongFactory()
         collection = CollectionFactory(private=True, songs=[song])
         CollectionCredit.objects.create(collection=collection, author=self.other_user)
         collection_song = CollectionSong.objects.get(collection=collection, song=song)
@@ -62,7 +62,7 @@ class TestCollectionSongRetrieveView(TestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_retrieve_song_from_private_collection_as_author(self):
-        song = BaseSongFactory(draft=False)
+        song = BaseSongFactory()
         collection = CollectionFactory(private=True, songs=[song])
         CollectionCredit.objects.create(collection=collection, author=self.user)
         collection_song = CollectionSong.objects.get(collection=collection, song=song)
@@ -84,7 +84,7 @@ class TestSongAddLikedView(TestCase):
         self.user = BaseUserFactory()
 
     def test_add_song_to_liked(self):
-        song = BaseSongFactory(draft=False)
+        song = BaseSongFactory()
         collection = CollectionFactory(private=False, songs=[song])
         other_user = BaseUserFactory()
         CollectionCredit.objects.create(collection=collection, author=other_user)
@@ -103,7 +103,7 @@ class TestSongAddLikedView(TestCase):
         )
 
     def test_add_song_from_private_collection_fails(self):
-        song = BaseSongFactory(draft=False)
+        song = BaseSongFactory()
         collection = CollectionFactory(private=True, songs=[song])
         other_user = BaseUserFactory()
         CollectionCredit.objects.create(collection=collection, author=other_user)

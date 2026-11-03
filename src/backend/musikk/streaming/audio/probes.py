@@ -8,11 +8,14 @@ from django.conf import settings
 from rest_framework.exceptions import ValidationError
 from utils.cmd import run_shell_command
 
-from streaming.audio.exceptions import AudioProcessingPipelineError
+from streaming.audio.config import FORMAT_WHITELIST_ARGS
+from streaming.audio.exceptions import (
+    AudioProcessingPipelineError,
+    ProcessingTimeoutError,
+)
 
 # TODO: check if enough
 FFPROBE_TIMEOUT = 30  # sec
-LOUDNESS_CHECK_TIMEOUT = 120  # sec
 
 
 @dataclass
@@ -32,6 +35,9 @@ def get_audio_metadata(path: str | Path) -> AudioStreamInfo:
     FFprobe flags:
          - `-v error`
             suppress info/warning noise, only show errors
+         - `-format_whitelist <demuxers>`
+            open the file only with an allowed demuxer, so a playlist or an
+            unsupported container is rejected before FFprobe reads it
          - `-select_streams a`
             select only audio streams (ignore video/subtitle/data)
          - `-show_entries stream=...`
@@ -68,6 +74,7 @@ def get_audio_metadata(path: str | Path) -> AudioStreamInfo:
         settings.FFPROBE_BIN,
         "-v",
         "error",
+        *FORMAT_WHITELIST_ARGS,
         "-select_streams",
         "a",
         "-show_entries",
@@ -110,13 +117,17 @@ def get_audio_metadata(path: str | Path) -> AudioStreamInfo:
     )
 
 
-def get_audio_loudness(path: str | Path) -> tuple[float | None, float | None]:
+def get_audio_loudness(
+    path: str | Path, timeout: float | None = None
+) -> tuple[float | None, float | None]:
     """
     Measure audio loudness (LUFS, ITU-R BS.1770) and true peak (dBTP)
     using FFmpeg's ebur128 filter.
     See https://ffmpeg.org/ffmpeg-filters.html#toc-ebur128-1 for more details.
 
     FFmpeg flags:
+        - `-format_whitelist <demuxers>`
+           open the input only with an allowed demuxer
         - `-i`
            input file
         - `-filter:a ebur128=peak=true`
@@ -143,6 +154,7 @@ def get_audio_loudness(path: str | Path) -> tuple[float | None, float | None]:
     """
     cmd = [
         settings.FFMPEG_BIN,
+        *FORMAT_WHITELIST_ARGS,
         "-i",
         str(path),
         "-filter:a",
@@ -152,8 +164,12 @@ def get_audio_loudness(path: str | Path) -> tuple[float | None, float | None]:
         "-",
     ]
     try:
-        result = run_shell_command(cmd, timeout=LOUDNESS_CHECK_TIMEOUT)
-    except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as exc:
+        result = run_shell_command(cmd, timeout=timeout)
+    except subprocess.TimeoutExpired as exc:
+        raise ProcessingTimeoutError(
+            f"FFmpeg ebur128 measurement timed out for {path}"
+        ) from exc
+    except subprocess.CalledProcessError as exc:
         raise AudioProcessingPipelineError(
             f"FFmpeg ebur128 measurement failed for {path}"
         ) from exc

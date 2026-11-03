@@ -4,11 +4,9 @@ from rest_framework import status
 from rest_framework.generics import RetrieveAPIView, get_object_or_404
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from users.permissions import IsArtist
 from websockets.event_helpers import send_ws_event, user_group
 
 from streaming.api.v1.serializers.songs import CollectionSongRetrieveSerializer
-from streaming.managers.upload_manager import UploadManager
 from streaming.models.profile import StreamingProfile
 from streaming.models.songs import CollectionSong
 from streaming.permissions import IsPublicOrCollectionAuthor
@@ -58,19 +56,6 @@ class SongAddLikedView(APIView):
         send_ws_event(group, ServerEvent.COLLECTION_CHANGED)
         send_ws_event(group, ServerEvent.LIKED_SONGS_CHANGED)
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-class SongUploadStatusView(APIView):
-    permission_classes = [IsArtist]
-
-    # TODO: rewrite with operation id!
-    def get(self, request, song_uuid: str):
-        return Response(
-            {
-                "uuid": song_uuid,
-                "status": UploadManager(song_uuid).get_status() or "unknown",
-            }
-        )
 
 
 class SongUserCollections(APIView):

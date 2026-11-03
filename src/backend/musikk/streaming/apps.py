@@ -7,4 +7,7 @@ class StreamingConfig(AppConfig):
 
     def ready(self):
         from streaming import checks  # noqa: F401
+        from streaming.audio.upload_files import create_upload_dirs
         from streaming.models import signals  # noqa: F401
+
+        create_upload_dirs()

@@ -7,10 +7,10 @@ from streaming.api.v1.views.collections import (
     AlbumBySongView,
     CollectionAddLikedView,
     CollectionListCreateView,
-    CollectionRemoveSong,
+    CollectionRemoveSongView,
     CollectionRetrieveUpdateView,
     CollectionRetrieveView,
-    CollectionSongCreateView,
+    CollectionSongListCreateView,
     UserLibraryView,
 )
 from streaming.api.v1.views.profile import (
@@ -61,13 +61,13 @@ collection_urls = [
     ),
     path(
         "collections/<uuid:collection_uuid>/songs",
-        CollectionSongCreateView.as_view(),
-        name="collection-song-create",
+        CollectionSongListCreateView.as_view(),
+        name="collection-song-list-create",
     ),
     # TODO: make a single path and route by http methods as usual
     path(
-        "collections/<uuid:collection_uuid>/songs/<uuid:song_uuid>/remove",
-        CollectionRemoveSong.as_view(),
+        "collections/<uuid:collection_uuid>/songs/<uuid:collection_song_uuid>/remove",
+        CollectionRemoveSongView.as_view(),
         name="collection-remove-song",
     ),
     path(

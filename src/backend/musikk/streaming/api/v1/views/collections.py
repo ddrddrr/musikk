@@ -1,9 +1,7 @@
-import dataclasses
-import tempfile
-from pathlib import Path
+from functools import partial
+from uuid import UUID, uuid7
 
-from django.conf import settings
-from django.db import transaction
+from django.db import IntegrityError, transaction
 from musikk.pagination import BaseLimitOffsetPagination
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
@@ -27,9 +25,13 @@ from streaming.api.v1.serializers.collections import (
     CollectionUpdateSerializer,
     collection_optimizations,
 )
-from streaming.audio.tasks import convert_audio
+from streaming.api.v1.serializers.songs import (
+    AlbumTrackSerializer,
+    AlbumTrackUploadSerializer,
+)
+from streaming.audio.tasks import create_song_conversion_task
+from streaming.audio.upload_files import delete_track_dir, move_upload_to_track_dir
 from streaming.audio.validators import validate_audio
-from streaming.managers.upload_manager import UploadManager
 from streaming.models.collections import Collection, CollectionType
 from streaming.models.songs import BaseSong, CollectionSong
 from streaming.permissions import (
@@ -217,18 +219,25 @@ class CollectionAddLikedView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class CollectionRemoveSong(APIView):
+class CollectionRemoveSongView(APIView):
     permission_classes = [IsCollecitonAuthor]
 
     def delete(self, *args, **kwargs):
         collection_song = get_object_or_404(
-            CollectionSong,
+            CollectionSong.objects.select_related("collection", "song"),
             collection__uuid=kwargs["collection_uuid"],
-            uuid=kwargs["song_uuid"],
+            uuid=kwargs["collection_song_uuid"],
         )
         self.check_object_permissions(self.request, collection_song)
 
-        collection_song.delete()
+        collection = collection_song.collection
+        if collection.type == CollectionType.ALBUM and collection.draft:
+            # album not finalized yet, so we delete the actual song files
+            collection_song.song.delete()
+        else:
+            # otherwise we just "unlink" the song from the collection
+            collection_song.delete()
+
         send_ws_event(
             user_group(self.request.user.uuid),
             ServerEvent.COLLECTION_CHANGED,
@@ -238,9 +247,22 @@ class CollectionRemoveSong(APIView):
         )
 
 
-class CollectionSongCreateView(APIView):
+class CollectionSongListCreateView(APIView):
     permission_classes = [IsCollecitonAuthor]
     parser_classes = [MultiPartParser, FormParser, JSONParser]
+
+    def get(self, request, *args, **kwargs):
+        album = get_object_or_404(
+            Collection, uuid=kwargs["collection_uuid"], type=CollectionType.ALBUM
+        )
+        self.check_object_permissions(request, album)
+
+        tracks = (
+            CollectionSong.objects.filter(collection=album)
+            .select_related("song")
+            .order_by("position")
+        )
+        return Response(AlbumTrackSerializer(tracks, many=True).data)
 
     def post(self, request, *args, **kwargs):
         collection = get_object_or_404(Collection, uuid=kwargs["collection_uuid"])
@@ -267,65 +289,71 @@ class CollectionSongCreateView(APIView):
             status=status.HTTP_201_CREATED,
         )
 
-    def _create_album_song(self, request, collection):
-        if not request.data.get("operation_id"):
-            return Response(
-                data={"detail": "Can not upload a Song without an `operation_id`"},
-                status=status.HTTP_400_BAD_REQUEST,
+    def _create_album_song(self, request, collection: Collection) -> Response:
+        if not collection.draft:
+            raise ValidationError(
+                "Songs can only be created for an album that is a draft."
             )
 
-        audio = request.data.get("audio")
-        if not audio:
-            return Response(
-                data={"detail": "An audio file is required."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        upload = AlbumTrackUploadSerializer(data=request.data)
+        upload.is_valid(raise_exception=True)
+        operation_id = upload.validated_data["operation_id"]
 
-        upload_tmp_dir = Path(settings.UPLOAD_TMP_DIR)
-        upload_tmp_dir.mkdir(parents=True, exist_ok=True)
+        if existing := _find_album_song(collection, operation_id):
+            return Response(AlbumTrackSerializer(existing).data, status.HTTP_200_OK)
 
-        with tempfile.NamedTemporaryFile(dir=upload_tmp_dir, delete=False) as tmp:
-            for chunk in audio.chunks():
-                tmp.write(chunk)
-            temp_path = tmp.name
-
-        try:
-            audio_info = validate_audio(temp_path)
-        except Exception:
-            Path(temp_path).unlink(missing_ok=True)
-            raise
-
-        serializer = BaseSongCreateSerializer(
+        song_serializer = BaseSongCreateSerializer(
             data=request.data, context={"request": request}
         )
-        serializer.is_valid(raise_exception=True)
+        song_serializer.is_valid(raise_exception=True)
 
-        base_song_inst = serializer.save()
-        collection_song_inst = CollectionSong.objects.create(
-            collection=collection, song=base_song_inst
-        )
-
-        UploadManager(song_uuid=base_song_inst.uuid).set_status("queued")
+        audio = upload.validated_data["audio"]
+        song_uuid = uuid7()
         try:
-            convert_audio.apply_async(
-                kwargs={
-                    "file_path": temp_path,
-                    "song_uuid": str(base_song_inst.uuid),
-                    "initiator_uuid": str(request.user.uuid),
-                    "operation_id": request.data["operation_id"],
-                    "audio_info": dataclasses.asdict(audio_info),
-                }
+            source = move_upload_to_track_dir(
+                audio.temporary_file_path(), song_uuid, audio.name
             )
+            audio_info = validate_audio(source)
+            with transaction.atomic():
+                song = song_serializer.save(uuid=song_uuid)
+                collection_song = CollectionSong.objects.create(
+                    collection=collection,
+                    song=song,
+                    operation_id=operation_id,
+                    position=upload.validated_data["position"],
+                )
+                transaction.on_commit(
+                    partial(
+                        create_song_conversion_task,
+                        song_uuid,
+                        request.user.uuid,
+                        audio_info,
+                    )
+                )
+        except IntegrityError:
+            delete_track_dir(song_uuid)
+            existing = _find_album_song(collection, operation_id)
+            if existing is None:
+                raise
+            return Response(AlbumTrackSerializer(existing).data, status.HTTP_200_OK)
         except Exception:
-            Path(temp_path).unlink(missing_ok=True)
+            delete_track_dir(song_uuid)
             raise
+
+        collection_song.song.refresh_from_db(fields=["status", "status_detail"])
         return Response(
-            data={
-                "song_uuid": str(base_song_inst.uuid),
-                "collection_song_uuid": str(collection_song_inst.uuid),
-            },
-            status=status.HTTP_202_ACCEPTED,
+            AlbumTrackSerializer(collection_song).data, status.HTTP_202_ACCEPTED
         )
+
+
+def _find_album_song(
+    collection: Collection, operation_id: UUID
+) -> CollectionSong | None:
+    return (
+        CollectionSong.objects.select_related("song")
+        .filter(collection=collection, operation_id=operation_id)
+        .first()
+    )
 
 
 class AlbumBySongView(APIView):

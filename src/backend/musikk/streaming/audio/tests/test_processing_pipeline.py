@@ -1,5 +1,6 @@
 import shutil
 import tempfile
+import time
 import uuid
 from pathlib import Path
 from unittest.mock import Mock, patch
@@ -143,6 +144,34 @@ class TestProcessingPipelineSteps(TestCase):
             step.rollback(ctx)
             mock_del.assert_called_once_with(storage_dir="final_dir_xyz")
 
+    def test_ffmpeg_step_passes_remaining_time_as_timeout(self):
+        mock_ffmpeg = Mock()
+        mock_ffmpeg.convert_audio.return_value = ["a.mp4"]
+        ctx = ProcessingContext(
+            orig_audio_file_path=str(self.input_file),
+            intermediate_dir="i",
+            final_dir="f",
+            audio_info=MOCK_AUDIO_INFO,
+            deadline=time.monotonic() + 100,
+        )
+
+        FFmpegStep(ffmpeg_wrapper=mock_ffmpeg).process(ctx)
+
+        timeout = mock_ffmpeg.convert_audio.call_args.kwargs["timeout"]
+        self.assertGreater(timeout, 90)
+        self.assertLessEqual(timeout, 100)
+
+    def test_remaining_seconds_raises_after_deadline(self):
+        ctx = ProcessingContext(
+            orig_audio_file_path="s",
+            intermediate_dir="i",
+            final_dir="f",
+            audio_info=MOCK_AUDIO_INFO,
+            deadline=time.monotonic() - 1,
+        )
+        with self.assertRaises(AudioProcessingPipelineError):
+            ctx.remaining_seconds()
+
     def test_pipeline_run_success_returns_result_and_cleans_intermediate(self):
         step1 = Mock()
         step2 = Mock()
@@ -165,6 +194,7 @@ class TestProcessingPipelineSteps(TestCase):
                 source=str(self.input_file),
                 final_storage_dir=final_dir,
                 audio_info=MOCK_AUDIO_INFO,
+                work_dir=Path(self._tmp_media) / "work",
             )
             self.assertEqual(res.song_repr, {"mpd": "x"})
             mock_rmtree.assert_called_once_with(
@@ -194,6 +224,7 @@ class TestProcessingPipelineSteps(TestCase):
                     source=str(self.input_file),
                     final_storage_dir=final_dir,
                     audio_info=MOCK_AUDIO_INFO,
+                    work_dir=Path(self._tmp_media) / "work",
                 )
 
             step1.rollback.assert_called_once()
@@ -208,6 +239,8 @@ class TestProcessingPipelineSteps(TestCase):
             source=str(self.input_file),
             final_storage_dir=storage_subdir,
             audio_info=audio_info,
+            work_dir=Path(self._tmp_media) / "work",
+            deadline=time.monotonic() + 120,
         )
 
         self.assertIsNotNone(result.song_repr)
@@ -261,7 +294,9 @@ class TestLoudnessMeasurementStepTargetSelection(TestCase):
             ],
         )
         step.process(ctx)
-        mock_loudness.assert_called_once_with("/tmp/inter/flac-None-def.mp4")
+        mock_loudness.assert_called_once_with(
+            "/tmp/inter/flac-None-def.mp4", timeout=None
+        )
         self.assertAlmostEqual(ctx.loudness_lufs, -14.0)
         self.assertAlmostEqual(ctx.true_peak_dbtp, -1.0)
 
@@ -280,7 +315,9 @@ class TestLoudnessMeasurementStepTargetSelection(TestCase):
             ],
         )
         step.process(ctx)
-        mock_loudness.assert_called_once_with("/tmp/inter/libfdk_aac-96-abc.mp4")
+        mock_loudness.assert_called_once_with(
+            "/tmp/inter/libfdk_aac-96-abc.mp4", timeout=None
+        )
 
     @patch("streaming.audio.processing_pipeline.get_audio_loudness")
     def test_silent_audio_sets_none(self, mock_loudness):

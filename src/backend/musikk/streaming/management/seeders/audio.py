@@ -16,6 +16,7 @@ from streaming.audio.shaka_packager_conf.shaka_packager_wrapper import ManifestT
 from streaming.management.constants import DEFAULT_GENERATED_AUDIO_DIR
 from streaming.management.seeders.images import ImageProvider
 from streaming.models import BaseSong, SongCredit
+from streaming.models.songs import SongStatus
 
 fake = Faker()
 
@@ -39,7 +40,7 @@ def seed_songs(
             title=fake.catch_phrase(),
             description=fake.text(max_nb_chars=512),
             image=image_file,
-            draft=not skip_audio,
+            status=SongStatus.READY if skip_audio else SongStatus.PROCESSING,
         )
         songs.append(song)
 
@@ -48,9 +49,7 @@ def seed_songs(
             storage_dir = os.path.join(settings.AUDIO_CONTENT_PATH, str(uuid.uuid4()))
             audio_tasks.append((i, song, tmp_path, storage_dir))
         else:
-            print(
-                f"[{i + 1}/{song_count}] Created draft '{song.title}' (audio skipped)"
-            )
+            print(f"[{i + 1}/{song_count}] Created '{song.title}' (audio skipped)")
 
     if audio_tasks:
         results = _process_audio_parallel(audio_tasks, song_count, workers)
@@ -64,8 +63,13 @@ def seed_songs(
             song.source_bitrate = audio_info.bit_rate
             song.loudness_lufs = result.loudness_lufs
             song.true_peak_dbtp = result.true_peak_dbtp
-            song.draft = False
+            song.status = SongStatus.READY
             song.save()
+
+        BaseSong.objects.filter(
+            uuid__in=[song.uuid for _, song, _, _ in audio_tasks],
+            status=SongStatus.PROCESSING,
+        ).update(status=SongStatus.FAILED)
 
     for song in songs:
         _assign_credits(song, artists)
@@ -87,6 +91,7 @@ def _process_audio_parallel(tasks, song_count, workers):
                 source=tmp_path,
                 final_storage_dir=storage_dir,
                 audio_info=audio_info,
+                work_dir=tempfile.mkdtemp(),
             )
             return song, result, audio_info
         finally:

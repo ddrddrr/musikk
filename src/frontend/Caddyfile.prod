@@ -15,6 +15,10 @@ musikk.stream {
         file_server
     }
     handle /api/* {
+        # a multipart body is a bit larger than the file in it, so this sits above MAX_FILE_SIZE (2 GiB)
+        request_body {
+            max_size 2100MiB
+        }
         reverse_proxy server:8000 {
             header_up X-Forwarded-Proto {scheme}
         }

@@ -9,7 +9,7 @@ from streaming.api.v1.serializers.songs import (
 )
 from streaming.api.v1.serializers.validators import validate_authors
 from streaming.models.collections import Collection, CollectionCredit, CollectionType
-from streaming.models.songs import CollectionSong
+from streaming.models.songs import CollectionSong, SongStatus
 
 
 def collection_optimizations(qs: QuerySet) -> QuerySet:
@@ -75,7 +75,7 @@ class CollectionSerializerDetailed(CollectionSerializerBasic):
         return CollectionSongRetrieveSerializer(
             CollectionSong.objects.filter(collection=obj)
             .select_related("song")
-            .filter(song__draft=False),
+            .filter(song__status=SongStatus.READY),
             context=self.context,
             many=True,
         ).data
@@ -138,7 +138,7 @@ class CollectionUpdateSerializer(BaseModelSerializer):
         )
         if is_publishing:
             unprocessed_songs = list(
-                self.instance.base_songs.filter(draft=True).values_list(
+                self.instance.base_songs.exclude(status=SongStatus.READY).values_list(
                     "uuid", flat=True
                 )
             )

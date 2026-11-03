@@ -6,6 +6,7 @@ from users.api.v1.serializers import BaseUserSerializer
 
 from streaming.api.v1.serializers.validators import validate_authors
 from streaming.models import BaseSong, CollectionSong, SongCredit
+from streaming.models.songs import SongStatus
 
 
 class BaseSongRetrieveSerializer(BaseModelSerializer):
@@ -69,7 +70,9 @@ class BaseSongCreateSerializer(serializers.ModelSerializer):
             authors = validate_authors(authors)
 
         with transaction.atomic():
-            instance = BaseSong.objects.create(**validated_data, draft=True)
+            instance = BaseSong.objects.create(
+                **validated_data, status=SongStatus.QUEUED
+            )
             SongCredit.objects.bulk_create(
                 [SongCredit(song=instance, author=author) for author in authors]
             )
@@ -93,3 +96,37 @@ class CollectionSongRetrieveSerializer(BaseModelSerializer):
 
     def get_song(self, obj) -> dict:
         return BaseSongRetrieveSerializer(obj.song, context=self.context).data
+
+
+class AlbumTrackUploadSerializer(serializers.Serializer):
+    """
+    The fields of an album track upload that are not song fields. The client
+    picks `operation_id` and `position`, so a repeated request finds its row
+    again, and the track order follows the form instead of the order in
+    which the uploads finish.
+    """
+
+    operation_id = serializers.UUIDField()
+    position = serializers.IntegerField(min_value=0)
+    audio = serializers.FileField()
+
+
+class AlbumTrackSerializer(serializers.ModelSerializer):
+    collection_song_uuid = serializers.UUIDField(source="uuid", read_only=True)
+    song_uuid = serializers.UUIDField(source="song.uuid", read_only=True)
+    title = serializers.CharField(source="song.title", read_only=True)
+    status = serializers.CharField(source="song.status", read_only=True)
+    status_detail = serializers.CharField(source="song.status_detail", read_only=True)
+
+    class Meta:
+        model = CollectionSong
+        fields = [
+            "collection_song_uuid",
+            "song_uuid",
+            "title",
+            "position",
+            "status",
+            "status_detail",
+            "operation_id",
+        ]
+        read_only_fields = fields

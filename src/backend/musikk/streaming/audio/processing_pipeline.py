@@ -1,13 +1,16 @@
 import logging
 import shutil
-import tempfile
+import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from pathlib import Path
 
 from utils.storage import delete_django_storage_dir
 
-from streaming.audio.exceptions import AudioProcessingPipelineError
+from streaming.audio.exceptions import (
+    AudioProcessingPipelineError,
+    ProcessingTimeoutError,
+)
 from streaming.audio.ffmpeg_conf.ffmpeg_wrapper import FFMPEGFull, FFMPEGWrapper
 from streaming.audio.normalization import build_normalization_filters
 from streaming.audio.probes import (
@@ -27,16 +30,34 @@ logger = logging.getLogger(__name__)
 class ProcessingContext:
     """
     Holds state shared between pipeline steps.
+
+    `deadline` is a `time.monotonic()` value. Every subprocess gets the time
+    left until it as its timeout, so the whole pipeline has one time budget
+    instead of a sum of fixed per-step timeouts.
     """
 
     orig_audio_file_path: str
     intermediate_dir: str
     final_dir: str
     audio_info: AudioStreamInfo
+    deadline: float | None = None
     converted_paths: list[str] = field(default_factory=list)
     song_repr: SongRepresentation | None = None
     loudness_lufs: float | None = None
     true_peak_dbtp: float | None = None
+
+    def remaining_seconds(self) -> float | None:
+        """
+        Returns None when there is no deadline, so the subprocess runs
+        without a timeout. Raises once the budget is used up, because a
+        subprocess started then would only be killed right away.
+        """
+        if self.deadline is None:
+            return None
+        remaining = self.deadline - time.monotonic()
+        if remaining <= 0:
+            raise ProcessingTimeoutError("The processing time budget is used up")
+        return remaining
 
 
 class Step(ABC):
@@ -66,6 +87,7 @@ class FFmpegStep(Step):
                 output_dir=ctx.intermediate_dir,
                 audio_info=ctx.audio_info,
                 filters=filters,
+                timeout=ctx.remaining_seconds(),
             )
             if not converted:
                 raise AudioProcessingPipelineError("FFmpeg step produced no outputs")
@@ -100,7 +122,7 @@ class LoudnessMeasurementStep(Step):
                 (p for p in ctx.converted_paths if Path(p).name.startswith("flac-")),
                 ctx.converted_paths[0],
             )
-            lufs, peak = get_audio_loudness(target)
+            lufs, peak = get_audio_loudness(target, timeout=ctx.remaining_seconds())
             ctx.loudness_lufs = lufs
             ctx.true_peak_dbtp = peak
         except Exception:
@@ -126,6 +148,7 @@ class ShakaPackagerStep(Step):
             song_repr = self.wrapper.package_audio_files(
                 local_input_paths=[Path(p) for p in ctx.converted_paths],
                 storage_dir=ctx.final_dir,
+                timeout=ctx.remaining_seconds(),
             )
             ctx.song_repr = song_repr
 
@@ -158,16 +181,24 @@ class ProcessingPipeline:
 
     def run(
         self,
-        source: str,
+        source: str | Path,
         final_storage_dir: str,
         audio_info: AudioStreamInfo,
+        work_dir: str | Path,
+        deadline: float | None = None,
     ) -> ProcessingResult:
-        intermediate_dir = tempfile.mkdtemp()
+        """
+        The caller owns `work_dir`, so the intermediate files stay on the
+        upload volume next to the source, and the caller can delete
+        everything of one track in one place.
+        """
+        Path(work_dir).mkdir(parents=True, exist_ok=True)
         ctx = ProcessingContext(
-            orig_audio_file_path=source,
+            orig_audio_file_path=str(source),
             final_dir=str(final_storage_dir),
-            intermediate_dir=intermediate_dir,
+            intermediate_dir=str(work_dir),
             audio_info=audio_info,
+            deadline=deadline,
         )
 
         executed: list[Step] = []

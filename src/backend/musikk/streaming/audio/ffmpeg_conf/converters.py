@@ -5,6 +5,8 @@ from uuid import uuid4
 from django.conf import settings
 from utils.cmd import run_shell_command
 
+from streaming.audio.config import FORMAT_WHITELIST_ARGS
+
 
 def build_ffmpeg_command(
     input_path: Path,
@@ -18,6 +20,8 @@ def build_ffmpeg_command(
     Build an ffmpeg transcoding command.
 
     ffmpeg flags:
+        - `-format_whitelist <demuxers>`
+            open the input only with an allowed demuxer
         - `-vn -sn -dn`
             remove video, subtitle, and data streams (keep audio only)
         - `-af <filters>`
@@ -29,7 +33,12 @@ def build_ffmpeg_command(
         - `-movflags +faststart`
             move the moov atom to the beginning of the file for faster streaming start
     """
-    parts: list[str] = [settings.FFMPEG_BIN, "-i", str(input_path)]
+    parts: list[str] = [
+        settings.FFMPEG_BIN,
+        *FORMAT_WHITELIST_ARGS,
+        "-i",
+        str(input_path),
+    ]
 
     parts += ["-vn", "-sn", "-dn"]
     if filters:
@@ -56,23 +65,31 @@ class FFMPEGAudioConverter:
         encoder: Literal["flac", "libfdk_aac"],
         bitrate: int | None = None,
         extras: list[str] | None = None,
-        timeout: int | None = 600,
         lossless: bool = False,
+        # some encoders fail when given a mono input, so this is used as an alternative for mono
+        mono_variant: "FFMPEGAudioConverter | None" = None,
     ):
         self.encoder = encoder
         self.bitrate = bitrate
         self.extras = extras or []
-        self.timeout = timeout
         self.lossless = lossless
+        self.mono_variant = mono_variant
+
+    def for_channels(self, channels: int) -> "FFMPEGAudioConverter":
+        if channels == 1 and self.mono_variant:
+            return self.mono_variant
+        return self
 
     def convert_song(
         self,
         file_path: Path,
         storage_dir: Path,
         filters: list[str] | None = None,
+        timeout: float | None = None,
     ) -> str:
         """
         Transcodes a single audio file and returns the local output path (string).
+        `timeout` is in s, None means no limit.
         """
         output_path = self._output_file_path_arg(storage_dir=storage_dir)
 
@@ -85,7 +102,7 @@ class FFMPEGAudioConverter:
                 extras=self.extras,
                 filters=filters,
             ),
-            timeout=self.timeout,
+            timeout=timeout,
         )
 
         return output_path
@@ -102,10 +119,13 @@ FLAC_CONVERTER = FFMPEGAudioConverter("flac", lossless=True)
 AACHEv2_CONVERTER = FFMPEGAudioConverter(
     encoder="libfdk_aac",
     bitrate=24,
-    extras=[
-        "-profile",
-        "aac_he_v2",
-    ],  # see https://trac.ffmpeg.org/wiki/Encode/AAC#Examples2
+    extras=["-profile:a", "aac_he_v2"],
+    # see https://trac.ffmpeg.org/wiki/Encode/AAC#Examples2
+    mono_variant=FFMPEGAudioConverter(
+        encoder="libfdk_aac",
+        bitrate=24,
+        extras=["-profile:a", "aac_he"],
+    ),
 )
 
 AAC_96_CONVERTER = FFMPEGAudioConverter(encoder="libfdk_aac", bitrate=96)
