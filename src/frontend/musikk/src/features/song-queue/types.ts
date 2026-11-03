@@ -1,12 +1,5 @@
-import { CollectionSong } from "@/features/collections/types.ts";
-import { BaseModel } from "@/features/common/types.ts";
+import { ApiSchemas } from "@/api/types.ts";
 
-export interface QueueItem extends BaseModel {
-    collection_song: CollectionSong;
-    position: string;
-}
+export type QueueItem = ApiSchemas["QueueItem"];
 
-export interface SongQueue extends BaseModel {
-    items: QueueItem[];
-    context_items: CollectionSong[];
-}
+export type SongQueue = ApiSchemas["StoredPlaybackState"];

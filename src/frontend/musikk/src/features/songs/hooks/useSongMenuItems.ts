@@ -41,7 +41,8 @@ export function useSongMenuItems(
         { key: "play", label: "Play", icon: Play, variant: "default", onSelect: onPlay },
     ];
 
-    if (showRemoveFromPlaylist) {
+    const collectionUUID = collectionSong.collection;
+    if (showRemoveFromPlaylist && collectionUUID) {
         items.push({
             key: "remove-from-playlist",
             label: "Remove from playlist",
@@ -49,7 +50,7 @@ export function useSongMenuItems(
             variant: "destructive",
             onSelect: () =>
                 removeSongMutation.mutate({
-                    collectionUUID: collectionSong.collection,
+                    collectionUUID,
                     songCollectionSongUUID: collectionSong.uuid,
                 }),
         });

@@ -1,0 +1,3100 @@
+openapi: 3.1.0
+info:
+  title: Musikk API
+  version: 1.0.0
+paths:
+  /api/v1/auth/login:
+    post:
+      operationId: auth_login_create
+      description: |-
+        Check the credentials and return the REST Token
+        if the credentials are valid and authenticated.
+        Calls Django Auth login method to register User ID
+        in Django session framework
+
+        Accept the following POST parameters: username, password
+        Return the REST Framework Token Object's key.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /api/v1/auth/logout:
+    post:
+      operationId: auth_logout_create
+      description: |-
+        Calls Django logout method and delete the Token object
+        assigned to the current User object.
+
+        Accepts/Returns nothing.
+      tags:
+      - auth
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestAuthDetail'
+          description: ''
+  /api/v1/auth/password/change:
+    post:
+      operationId: auth_password_change_create
+      description: |-
+        Calls Django Auth SetPasswordForm save method.
+
+        Accepts the following POST parameters: new_password1, new_password2
+        Returns the success/fail message.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordChangeRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PasswordChangeRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PasswordChangeRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestAuthDetail'
+          description: ''
+  /api/v1/auth/password/reset:
+    post:
+      operationId: auth_password_reset_create
+      description: |-
+        Calls Django Auth PasswordResetForm save method.
+
+        Accepts the following POST parameters: email
+        Returns the success/fail message.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordResetRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PasswordResetRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PasswordResetRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestAuthDetail'
+          description: ''
+  /api/v1/auth/password/reset/confirm:
+    post:
+      operationId: auth_password_reset_confirm_create
+      description: |-
+        Password reset e-mail link is confirmed, therefore
+        this resets the user's password.
+
+        Accepts the following POST parameters: token, uid,
+            new_password1, new_password2
+        Returns the success/fail message.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordResetConfirmRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PasswordResetConfirmRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PasswordResetConfirmRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestAuthDetail'
+          description: ''
+  /api/v1/auth/registration:
+    post:
+      operationId: auth_registration_create
+      description: |-
+        Registers a new user.
+
+        Accepts the following POST parameters: username, email, password1, password2.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BaseRegisterRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BaseRegisterRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BaseRegisterRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestAuthDetail'
+          description: ''
+  /api/v1/auth/resend-email:
+    post:
+      operationId: auth_resend_email_create
+      description: |-
+        Resends another email to an unverified email.
+
+        Accepts the following POST parameter: email.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResendEmailVerificationRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ResendEmailVerificationRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ResendEmailVerificationRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestAuthDetail'
+          description: ''
+  /api/v1/auth/verify-email:
+    post:
+      operationId: auth_verify_email_create
+      description: |-
+        Verifies the email associated with the provided key.
+
+        Accepts the following POST parameter: key.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyEmailRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/VerifyEmailRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/VerifyEmailRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestAuthDetail'
+          description: ''
+  /api/v1/collections:
+    get:
+      operationId: collections_list
+      parameters:
+      - in: query
+        name: author
+        schema:
+          type: string
+          format: uuid
+      - in: query
+        name: connection
+        schema:
+          type: string
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - in: query
+        name: type
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - album
+            - history
+            - liked
+            - playlist
+        description: |-
+          * `playlist` - Playlist
+          * `album` - Album
+          * `history` - History
+          * `liked` - Liked songs
+        explode: true
+        style: form
+      tags:
+      - collections
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCollectionSerializerBasicList'
+          description: ''
+    post:
+      operationId: collections_create
+      tags:
+      - collections
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CollectionCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CollectionCreateRequest'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CollectionCreateRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollectionCreate'
+          description: ''
+  /api/v1/collections/{collection_uuid}/comments:
+    get:
+      operationId: collections_comments_list_by_collection_uuid
+      parameters:
+      - in: path
+        name: collection_uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: query
+        name: connection
+        schema:
+          type: string
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      tags:
+      - collections
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPublicationRetrieveList'
+          description: ''
+    post:
+      operationId: collections_comments_create_by_collection_uuid
+      parameters:
+      - in: path
+        name: collection_uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - collections
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PublicationCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PublicationCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PublicationCreateRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicationRetrieve'
+          description: ''
+  /api/v1/collections/{collection_uuid}/songs:
+    get:
+      operationId: collections_songs_list_by_collection_uuid
+      parameters:
+      - in: path
+        name: collection_uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - collections
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AlbumTrack'
+          description: ''
+    post:
+      operationId: collections_songs_create_by_collection_uuid
+      description: Albums take a track upload and answer with the track. Other collections
+        take an existing song and answer with the new link.
+      parameters:
+      - in: path
+        name: collection_uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - collections
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CollectionSongCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CollectionSongCreateRequest'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CollectionSongCreateRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlbumTrack'
+          description: ''
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollectionSongCreated'
+          description: ''
+        '202':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlbumTrack'
+          description: ''
+  /api/v1/collections/{collection_uuid}/songs/{collection_song_uuid}/remove:
+    delete:
+      operationId: collections_songs_remove_destroy_by_collection_uuid_collection_song_uuid
+      parameters:
+      - in: path
+        name: collection_song_uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: collection_uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - collections
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/collections/{uuid}:
+    get:
+      operationId: collections_retrieve_by_uuid
+      parameters:
+      - in: path
+        name: uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - collections
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollectionSerializerBasic'
+          description: ''
+    delete:
+      operationId: collections_destroy_by_uuid
+      parameters:
+      - in: path
+        name: uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - collections
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/collections/{uuid}/like:
+    post:
+      operationId: collections_like_create_by_uuid
+      parameters:
+      - in: path
+        name: uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - collections
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+    delete:
+      operationId: collections_like_destroy_by_uuid
+      parameters:
+      - in: path
+        name: uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - collections
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/collections/detail/{uuid}:
+    get:
+      operationId: collections_detail_retrieve_by_uuid
+      parameters:
+      - in: path
+        name: uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - collections
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollectionSerializerDetailed'
+          description: ''
+    put:
+      operationId: collections_detail_update_by_uuid
+      parameters:
+      - in: path
+        name: uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - collections
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CollectionUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CollectionUpdateRequest'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CollectionUpdateRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollectionSerializerDetailed'
+          description: ''
+    patch:
+      operationId: collections_detail_partial_update_by_uuid
+      parameters:
+      - in: path
+        name: uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - collections
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedCollectionUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedCollectionUpdateRequest'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCollectionUpdateRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollectionSerializerDetailed'
+          description: ''
+  /api/v1/feed/{user_uuid}/posts:
+    get:
+      operationId: feed_posts_list_by_user_uuid
+      parameters:
+      - in: query
+        name: connection
+        schema:
+          type: string
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - in: path
+        name: user_uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - feed
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPublicationRetrieveList'
+          description: ''
+    post:
+      operationId: feed_posts_create_by_user_uuid
+      parameters:
+      - in: path
+        name: user_uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - feed
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PublicationCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PublicationCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PublicationCreateRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicationRetrieve'
+          description: ''
+  /api/v1/feed/posts:
+    get:
+      operationId: feed_posts_list
+      parameters:
+      - in: query
+        name: connection
+        schema:
+          type: string
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      tags:
+      - feed
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPublicationRetrieveList'
+          description: ''
+    post:
+      operationId: feed_posts_create
+      tags:
+      - feed
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PublicationCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PublicationCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PublicationCreateRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicationRetrieve'
+          description: ''
+  /api/v1/friend-activity/active-songs:
+    get:
+      operationId: friend_activity_active_songs_list
+      tags:
+      - friend-activity
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FriendListening'
+          description: ''
+  /api/v1/liked-songs/add-song/{uuid}:
+    post:
+      operationId: liked_songs_add_song_create_by_uuid
+      parameters:
+      - in: path
+        name: uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - liked-songs
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+    delete:
+      operationId: liked_songs_add_song_destroy_by_uuid
+      parameters:
+      - in: path
+        name: uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - liked-songs
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/me/liked-collections:
+    get:
+      operationId: me_liked_collections_retrieve
+      tags:
+      - me
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeLikedCollections'
+          description: ''
+  /api/v1/me/liked-songs:
+    get:
+      operationId: me_liked_songs_retrieve
+      tags:
+      - me
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeLikedSongs'
+          description: ''
+  /api/v1/notifications:
+    get:
+      operationId: notifications_retrieve
+      tags:
+      - notifications
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationList'
+          description: ''
+    patch:
+      operationId: notifications_partial_update
+      tags:
+      - notifications
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/notifications/{uuid}:
+    delete:
+      operationId: notifications_destroy_by_uuid
+      parameters:
+      - in: path
+        name: uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - notifications
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/publications/{uuid}/children:
+    get:
+      operationId: publications_children_retrieve_by_uuid
+      parameters:
+      - in: path
+        name: uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - publications
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicationChildren'
+          description: ''
+  /api/v1/search:
+    get:
+      operationId: search_retrieve
+      parameters:
+      - in: query
+        name: q
+        schema:
+          type: string
+        required: true
+      tags:
+      - search
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResults'
+          description: ''
+        '204':
+          description: No response body
+  /api/v1/song-queue:
+    get:
+      operationId: song_queue_retrieve
+      tags:
+      - song-queue
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoredPlaybackState'
+          description: ''
+  /api/v1/song-queue/add-collection/{uuid}:
+    post:
+      operationId: song_queue_add_collection_create_by_uuid
+      parameters:
+      - in: path
+        name: uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - song-queue
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/song-queue/add-song/{uuid}:
+    post:
+      operationId: song_queue_add_song_create_by_uuid
+      parameters:
+      - in: path
+        name: uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - song-queue
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/song-queue/append-random:
+    post:
+      operationId: song_queue_append_random_create
+      tags:
+      - song-queue
+      security:
+      - cookieAuth: []
+      responses:
+        '501':
+          description: No response body
+  /api/v1/song-queue/clear:
+    post:
+      operationId: song_queue_clear_create
+      tags:
+      - song-queue
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/song-queue/remove-node/{uuid}:
+    post:
+      operationId: song_queue_remove_node_create_by_uuid
+      parameters:
+      - in: path
+        name: uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - song-queue
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/song-queue/set-head-collection/{uuid}:
+    post:
+      operationId: song_queue_set_head_collection_create_by_uuid
+      parameters:
+      - in: path
+        name: uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - song-queue
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/song-queue/set-head-song/{uuid}:
+    post:
+      operationId: song_queue_set_head_song_create_by_uuid
+      parameters:
+      - in: path
+        name: uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - song-queue
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/song-queue/shift-head:
+    post:
+      operationId: song_queue_shift_head_create
+      tags:
+      - song-queue
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/song-queue/shift-head-backwards:
+    post:
+      operationId: song_queue_shift_head_backwards_create
+      tags:
+      - song-queue
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/song-queue/shift-head/{uuid}:
+    post:
+      operationId: song_queue_shift_head_create_by_uuid
+      parameters:
+      - in: path
+        name: uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - song-queue
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/songs/{collection_song_uuid}/collections:
+    get:
+      operationId: songs_collections_retrieve_by_collection_song_uuid
+      parameters:
+      - in: path
+        name: collection_song_uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - songs
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SongUserCollections'
+          description: ''
+  /api/v1/songs/{uuid}:
+    get:
+      operationId: songs_retrieve_by_uuid
+      parameters:
+      - in: path
+        name: uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - songs
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollectionSongRetrieve'
+          description: ''
+  /api/v1/songs/{uuid}/album:
+    get:
+      operationId: songs_album_retrieve_by_uuid
+      parameters:
+      - in: path
+        name: uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - songs
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollectionSerializerBasic'
+          description: ''
+  /api/v1/streaming-profile:
+    get:
+      operationId: streaming_profile_retrieve
+      tags:
+      - streaming-profile
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StreamingProfileGet'
+          description: ''
+  /api/v1/users/{for_user_uuid}/followed:
+    get:
+      operationId: users_followed_retrieve_by_for_user_uuid
+      parameters:
+      - in: path
+        name: for_user_uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - users
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserFollowed'
+          description: ''
+    post:
+      operationId: users_followed_create_by_for_user_uuid
+      parameters:
+      - in: path
+        name: for_user_uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - users
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+    delete:
+      operationId: users_followed_destroy_by_for_user_uuid
+      parameters:
+      - in: path
+        name: for_user_uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - users
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/users/{for_user_uuid}/followers:
+    get:
+      operationId: users_followers_retrieve_by_for_user_uuid
+      parameters:
+      - in: path
+        name: for_user_uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - users
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserFollowers'
+          description: ''
+  /api/v1/users/{for_user_uuid}/friends:
+    get:
+      operationId: users_friends_retrieve_by_for_user_uuid
+      parameters:
+      - in: path
+        name: for_user_uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - users
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserFriends'
+          description: ''
+  /api/v1/users/{user_uuid}/chats:
+    get:
+      operationId: users_chats_list_by_user_uuid
+      parameters:
+      - in: path
+        name: user_uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - users
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserChatRetrieve'
+          description: ''
+    post:
+      operationId: users_chats_create_by_user_uuid
+      parameters:
+      - in: path
+        name: user_uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserChatCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserChatCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserChatCreateRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserChatCreate'
+          description: ''
+  /api/v1/users/{user_uuid}/chats/{chat_uuid}:
+    get:
+      operationId: users_chats_retrieve_by_user_uuid_chat_uuid
+      parameters:
+      - in: path
+        name: chat_uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: user_uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - users
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserChatRetrieve'
+          description: ''
+  /api/v1/users/{user_uuid}/chats/{chat_uuid}/attachments:
+    get:
+      operationId: users_chats_attachments_list_by_user_uuid_chat_uuid
+      parameters:
+      - in: path
+        name: chat_uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - in: path
+        name: user_uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - users
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAttachmentList'
+          description: ''
+  /api/v1/users/{user_uuid}/chats/{chat_uuid}/members:
+    post:
+      operationId: users_chats_members_create_by_user_uuid_chat_uuid
+      parameters:
+      - in: path
+        name: chat_uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: user_uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatMembersCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ChatMembersCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ChatMembersCreateRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatMembersCreate'
+          description: ''
+  /api/v1/users/{user_uuid}/chats/{chat_uuid}/messages:
+    get:
+      operationId: users_chats_messages_list_by_user_uuid_chat_uuid
+      parameters:
+      - in: path
+        name: chat_uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - in: path
+        name: user_uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - users
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPublicationRetrieveList'
+          description: ''
+    post:
+      operationId: users_chats_messages_create_by_user_uuid_chat_uuid
+      parameters:
+      - in: path
+        name: chat_uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: user_uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PublicationCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PublicationCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PublicationCreateRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicationRetrieve'
+          description: ''
+  /api/v1/users/{uuid}:
+    get:
+      operationId: users_retrieve_by_uuid
+      parameters:
+      - in: path
+        name: uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - users
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseUser'
+          description: ''
+  /api/v1/users/{uuid}/library:
+    get:
+      operationId: users_library_retrieve_by_uuid
+      parameters:
+      - in: path
+        name: uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - users
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserLibrary'
+          description: ''
+  /api/v1/users/me:
+    get:
+      operationId: users_me_retrieve
+      tags:
+      - users
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Me'
+          description: ''
+    put:
+      operationId: users_me_update
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MeUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MeUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MeUpdateRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeUpdated'
+          description: ''
+    patch:
+      operationId: users_me_partial_update
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedMeUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedMeUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedMeUpdateRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeUpdated'
+          description: ''
+components:
+  schemas:
+    AlbumTrack:
+      type: object
+      properties:
+        collection_song_uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        song_uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        title:
+          type: string
+          readOnly: true
+        position:
+          type: integer
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/SongStatusEnum'
+          readOnly: true
+        status_detail:
+          type: string
+          readOnly: true
+        operation_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+          readOnly: true
+          description: Client key of the album upload, so a repeated request finds
+            the same row.
+      required:
+      - collection_song_uuid
+      - operation_id
+      - position
+      - song_uuid
+      - status
+      - status_detail
+      - title
+    AlbumTrackCreateRequest:
+      type: object
+      description: |-
+        The whole form of an album track upload: the song fields and the upload
+        fields together. Only the schema uses it. The view checks the two parts
+        one after the other, so it can find a repeated upload before it checks
+        the song fields.
+      properties:
+        authors:
+          type: array
+          items:
+            type: string
+            format: uuid
+          writeOnly: true
+        title:
+          type: string
+          minLength: 1
+          maxLength: 128
+        image:
+          type:
+          - string
+          - 'null'
+          format: binary
+        description:
+          type: string
+          maxLength: 512
+        operation_id:
+          type: string
+          format: uuid
+        position:
+          type: integer
+          minimum: 0
+        audio:
+          type: string
+          format: binary
+      required:
+      - audio
+      - operation_id
+      - position
+      - title
+    Attachment:
+      oneOf:
+      - $ref: '#/components/schemas/CollectionAttachment'
+      - $ref: '#/components/schemas/SongAttachment'
+      - $ref: '#/components/schemas/UserAttachment'
+      discriminator:
+        propertyName: type
+        mapping:
+          collection: '#/components/schemas/CollectionAttachment'
+          song: '#/components/schemas/SongAttachment'
+          user: '#/components/schemas/UserAttachment'
+    BaseMe:
+      type: object
+      description: |-
+        Read shape for `/users/me`. Extends `BaseUserSerializer` with the
+        private `email` field and the user's own settings, which are only
+        ever exposed to the authenticated owner of the account and must not
+        leak through public user endpoints.
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        date_added:
+          type: string
+          format: date-time
+          readOnly: true
+        date_modified:
+          type: string
+          format: date-time
+          readOnly: true
+        repr:
+          type: string
+          readOnly: true
+        display_name:
+          type: string
+          maxLength: 50
+        bio:
+          type: string
+          maxLength: 2000
+        avatar:
+          type:
+          - string
+          - 'null'
+          format: uri
+        is_artist:
+          type: boolean
+          readOnly: true
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        loudness_normalization:
+          type: boolean
+      required:
+      - avatar
+      - bio
+      - date_added
+      - date_modified
+      - display_name
+      - email
+      - is_artist
+      - loudness_normalization
+      - repr
+      - uuid
+    BaseRegisterRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+        password1:
+          type: string
+          writeOnly: true
+          minLength: 1
+        password2:
+          type: string
+          writeOnly: true
+          minLength: 1
+        is_artist:
+          type: boolean
+          writeOnly: true
+          default: false
+      required:
+      - email
+      - password1
+      - password2
+    BaseSongRetrieve:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        date_added:
+          type: string
+          format: date-time
+          readOnly: true
+        date_modified:
+          type: string
+          format: date-time
+          readOnly: true
+        repr:
+          type: string
+          readOnly: true
+        title:
+          type: string
+          maxLength: 128
+        image:
+          type:
+          - string
+          - 'null'
+          format: uri
+        description:
+          type: string
+          maxLength: 512
+        mpd:
+          type: string
+          readOnly: true
+        m3u8:
+          type: string
+          readOnly: true
+        authors:
+          type: array
+          items:
+            $ref: '#/components/schemas/BaseUser'
+          readOnly: true
+        duration_ms:
+          type:
+          - integer
+          - 'null'
+          maximum: 2147483647
+          minimum: -2147483648
+        loudness_lufs:
+          type:
+          - number
+          - 'null'
+          format: double
+        true_peak_dbtp:
+          type:
+          - number
+          - 'null'
+          format: double
+      required:
+      - authors
+      - date_added
+      - date_modified
+      - description
+      - duration_ms
+      - image
+      - loudness_lufs
+      - m3u8
+      - mpd
+      - repr
+      - title
+      - true_peak_dbtp
+      - uuid
+    BaseUser:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        date_added:
+          type: string
+          format: date-time
+          readOnly: true
+        date_modified:
+          type: string
+          format: date-time
+          readOnly: true
+        repr:
+          type: string
+          readOnly: true
+        display_name:
+          type: string
+          maxLength: 50
+        bio:
+          type: string
+          maxLength: 2000
+        avatar:
+          type:
+          - string
+          - 'null'
+          format: uri
+        is_artist:
+          type: boolean
+          readOnly: true
+      required:
+      - avatar
+      - bio
+      - date_added
+      - date_modified
+      - display_name
+      - is_artist
+      - repr
+      - uuid
+    ChatMembersCreate:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        date_added:
+          type: string
+          format: date-time
+          readOnly: true
+        date_modified:
+          type: string
+          format: date-time
+          readOnly: true
+        repr:
+          type: string
+          readOnly: true
+      required:
+      - date_added
+      - date_modified
+      - repr
+      - uuid
+    ChatMembersCreateRequest:
+      type: object
+      properties:
+        participants:
+          type: array
+          items:
+            type: string
+            format: uuid
+          writeOnly: true
+        chat:
+          type: string
+          format: uuid
+          writeOnly: true
+      required:
+      - chat
+      - participants
+    ChatMessageNotification:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        date_added:
+          type: string
+          format: date-time
+          readOnly: true
+        date_modified:
+          type: string
+          format: date-time
+          readOnly: true
+        repr:
+          type: string
+          readOnly: true
+        is_read:
+          type: boolean
+          readOnly: true
+        message:
+          allOf:
+          - $ref: '#/components/schemas/PublicationRetrieve'
+          readOnly: true
+        receiver:
+          allOf:
+          - $ref: '#/components/schemas/BaseUser'
+          readOnly: true
+        chat_uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        chat_title:
+          type: string
+          readOnly: true
+      required:
+      - chat_title
+      - chat_uuid
+      - date_added
+      - date_modified
+      - is_read
+      - message
+      - receiver
+      - repr
+      - uuid
+    CollectionAttachment:
+      type: object
+      properties:
+        type:
+          type: string
+        obj:
+          $ref: '#/components/schemas/CollectionSerializerBasic'
+      required:
+      - obj
+      - type
+    CollectionCreate:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        date_added:
+          type: string
+          format: date-time
+          readOnly: true
+        date_modified:
+          type: string
+          format: date-time
+          readOnly: true
+        repr:
+          type: string
+          readOnly: true
+        title:
+          type: string
+          maxLength: 128
+        description:
+          type: string
+          maxLength: 512
+        image:
+          type:
+          - string
+          - 'null'
+          format: uri
+        type:
+          $ref: '#/components/schemas/CollectionTypeEnum'
+        private:
+          type: boolean
+        draft:
+          type: boolean
+      required:
+      - date_added
+      - date_modified
+      - description
+      - draft
+      - image
+      - private
+      - repr
+      - title
+      - type
+      - uuid
+    CollectionCreateRequest:
+      type: object
+      properties:
+        authors:
+          type: array
+          items:
+            type: string
+            format: uuid
+          writeOnly: true
+        title:
+          type: string
+          minLength: 1
+          maxLength: 128
+        description:
+          type: string
+          maxLength: 512
+        image:
+          type:
+          - string
+          - 'null'
+          format: binary
+        type:
+          $ref: '#/components/schemas/CollectionTypeEnum'
+        private:
+          type: boolean
+        draft:
+          type: boolean
+      required:
+      - title
+    CollectionSerializerBasic:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        date_added:
+          type: string
+          format: date-time
+          readOnly: true
+        date_modified:
+          type: string
+          format: date-time
+          readOnly: true
+        repr:
+          type: string
+          readOnly: true
+        title:
+          type: string
+          readOnly: true
+        image:
+          type:
+          - string
+          - 'null'
+          format: uri
+          readOnly: true
+        authors:
+          type: array
+          items:
+            $ref: '#/components/schemas/BaseUser'
+          readOnly: true
+        type:
+          $ref: '#/components/schemas/CollectionTypeEnum'
+        private:
+          type: boolean
+          readOnly: true
+        draft:
+          type: boolean
+          readOnly: true
+      required:
+      - authors
+      - date_added
+      - date_modified
+      - draft
+      - image
+      - private
+      - repr
+      - title
+      - type
+      - uuid
+    CollectionSerializerDetailed:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        date_added:
+          type: string
+          format: date-time
+          readOnly: true
+        date_modified:
+          type: string
+          format: date-time
+          readOnly: true
+        repr:
+          type: string
+          readOnly: true
+        title:
+          type: string
+          readOnly: true
+        image:
+          type:
+          - string
+          - 'null'
+          format: uri
+          readOnly: true
+        authors:
+          type: array
+          items:
+            $ref: '#/components/schemas/BaseUser'
+          readOnly: true
+        type:
+          $ref: '#/components/schemas/CollectionTypeEnum'
+        private:
+          type: boolean
+          readOnly: true
+        draft:
+          type: boolean
+          readOnly: true
+        songs:
+          type: array
+          items:
+            $ref: '#/components/schemas/CollectionSongRetrieve'
+          readOnly: true
+        description:
+          type: string
+          readOnly: true
+      required:
+      - authors
+      - date_added
+      - date_modified
+      - description
+      - draft
+      - image
+      - private
+      - repr
+      - songs
+      - title
+      - type
+      - uuid
+    CollectionSongCreateRequest:
+      oneOf:
+      - $ref: '#/components/schemas/AlbumTrackCreateRequest'
+      - $ref: '#/components/schemas/PlaylistSongCreateRequest'
+    CollectionSongCreated:
+      type: object
+      properties:
+        song_uuid:
+          type: string
+          format: uuid
+        collection_song_uuid:
+          type: string
+          format: uuid
+      required:
+      - collection_song_uuid
+      - song_uuid
+    CollectionSongRetrieve:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        date_added:
+          type: string
+          format: date-time
+          readOnly: true
+        date_modified:
+          type: string
+          format: date-time
+          readOnly: true
+        repr:
+          type: string
+          readOnly: true
+        song:
+          allOf:
+          - $ref: '#/components/schemas/BaseSongRetrieve'
+          readOnly: true
+        collection:
+          type:
+          - string
+          - 'null'
+          format: uuid
+      required:
+      - collection
+      - date_added
+      - date_modified
+      - repr
+      - song
+      - uuid
+    CollectionTypeEnum:
+      enum:
+      - playlist
+      - album
+      - history
+      - liked
+      type: string
+      description: |-
+        * `playlist` - Playlist
+        * `album` - Album
+        * `history` - History
+        * `liked` - Liked songs
+    CollectionUpdateRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 128
+        description:
+          type: string
+          maxLength: 512
+        image:
+          type:
+          - string
+          - 'null'
+          format: binary
+        draft:
+          type: boolean
+      required:
+      - title
+    FollowerNotification:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        date_added:
+          type: string
+          format: date-time
+          readOnly: true
+        date_modified:
+          type: string
+          format: date-time
+          readOnly: true
+        repr:
+          type: string
+          readOnly: true
+        is_read:
+          type: boolean
+          readOnly: true
+        sender:
+          allOf:
+          - $ref: '#/components/schemas/BaseUser'
+          readOnly: true
+        receiver:
+          allOf:
+          - $ref: '#/components/schemas/BaseUser'
+          readOnly: true
+      required:
+      - date_added
+      - date_modified
+      - is_read
+      - receiver
+      - repr
+      - sender
+      - uuid
+    FriendListening:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/BaseUser'
+        song:
+          $ref: '#/components/schemas/CollectionSongRetrieve'
+      required:
+      - song
+      - user
+    LoginRequest:
+      type: object
+      properties:
+        username:
+          type: string
+        email:
+          oneOf:
+          - type: string
+            format: email
+          - type: string
+            maxLength: 0
+        password:
+          type: string
+          minLength: 1
+      required:
+      - password
+    Me:
+      type: object
+      properties:
+        me:
+          $ref: '#/components/schemas/BaseMe'
+      required:
+      - me
+    MeLikedCollections:
+      type: object
+      properties:
+        collection_uuids:
+          type: array
+          items:
+            type: string
+            format: uuid
+      required:
+      - collection_uuids
+    MeLikedSongs:
+      type: object
+      properties:
+        song_uuids:
+          type: array
+          items:
+            type: string
+            format: uuid
+      required:
+      - song_uuids
+    MeUpdateRequest:
+      type: object
+      description: |-
+        Write shape for `PATCH /users/me`. The field list is intentionally a
+        strict subset of `BaseMeSerializer`: `role`, `email`, and
+        `is_artist` are excluded because role transitions, email changes,
+        and the artist flag are handled through dedicated flows rather than
+        a generic profile edit. All remaining fields are optional so that
+        the client can submit partial updates.
+      properties:
+        display_name:
+          type: string
+          minLength: 1
+          maxLength: 50
+        bio:
+          type: string
+          maxLength: 2000
+        avatar:
+          type:
+          - string
+          - 'null'
+          format: binary
+        loudness_normalization:
+          type: boolean
+    MeUpdated:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/BaseMe'
+      required:
+      - user
+    NotificationList:
+      type: object
+      properties:
+        replies:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReplyNotification'
+        followers:
+          type: array
+          items:
+            $ref: '#/components/schemas/FollowerNotification'
+        chat_messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChatMessageNotification'
+      required:
+      - chat_messages
+      - followers
+      - replies
+    PaginatedAttachmentList:
+      type: object
+      required:
+      - count
+      - next
+      - previous
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Attachment'
+    PaginatedCollectionSerializerBasicList:
+      type: object
+      required:
+      - count
+      - next
+      - previous
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/CollectionSerializerBasic'
+    PaginatedPublicationRetrieveList:
+      type: object
+      required:
+      - count
+      - next
+      - previous
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicationRetrieve'
+    PasswordChangeRequest:
+      type: object
+      properties:
+        new_password1:
+          type: string
+          minLength: 1
+          maxLength: 128
+        new_password2:
+          type: string
+          minLength: 1
+          maxLength: 128
+      required:
+      - new_password1
+      - new_password2
+    PasswordResetConfirmRequest:
+      type: object
+      description: Serializer for confirming a password reset attempt.
+      properties:
+        new_password1:
+          type: string
+          minLength: 1
+          maxLength: 128
+        new_password2:
+          type: string
+          minLength: 1
+          maxLength: 128
+        uid:
+          type: string
+          minLength: 1
+        token:
+          type: string
+          minLength: 1
+      required:
+      - new_password1
+      - new_password2
+      - token
+      - uid
+    PasswordResetRequest:
+      type: object
+      description: Serializer for requesting a password reset e-mail.
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+      required:
+      - email
+    PatchedCollectionUpdateRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 128
+        description:
+          type: string
+          maxLength: 512
+        image:
+          type:
+          - string
+          - 'null'
+          format: binary
+        draft:
+          type: boolean
+    PatchedMeUpdateRequest:
+      type: object
+      description: |-
+        Write shape for `PATCH /users/me`. The field list is intentionally a
+        strict subset of `BaseMeSerializer`: `role`, `email`, and
+        `is_artist` are excluded because role transitions, email changes,
+        and the artist flag are handled through dedicated flows rather than
+        a generic profile edit. All remaining fields are optional so that
+        the client can submit partial updates.
+      properties:
+        display_name:
+          type: string
+          minLength: 1
+          maxLength: 50
+        bio:
+          type: string
+          maxLength: 2000
+        avatar:
+          type:
+          - string
+          - 'null'
+          format: binary
+        loudness_normalization:
+          type: boolean
+    PlaylistSongCreateRequest:
+      type: object
+      properties:
+        song_uuid:
+          type: string
+          format: uuid
+      required:
+      - song_uuid
+    PublicationChildren:
+      type: object
+      properties:
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicationRetrieve'
+          readOnly: true
+      required:
+      - children
+    PublicationCreateRequest:
+      type: object
+      properties:
+        content:
+          type: string
+          minLength: 1
+          maxLength: 2000
+        attachment:
+          oneOf:
+          - $ref: '#/components/schemas/TypeModelRefRequest'
+          - type: 'null'
+          writeOnly: true
+        parent_uuid:
+          type:
+          - string
+          - 'null'
+          format: uuid
+          writeOnly: true
+      required:
+      - content
+    PublicationRetrieve:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        date_added:
+          type: string
+          format: date-time
+          readOnly: true
+        date_modified:
+          type: string
+          format: date-time
+          readOnly: true
+        repr:
+          type: string
+          readOnly: true
+        author:
+          allOf:
+          - $ref: '#/components/schemas/BaseUser'
+          readOnly: true
+        root_author_uuid:
+          type:
+          - string
+          - 'null'
+          readOnly: true
+        content:
+          type: string
+          maxLength: 2000
+        is_deleted:
+          type: boolean
+        attachment:
+          oneOf:
+          - $ref: '#/components/schemas/Attachment'
+          - type: 'null'
+          readOnly: true
+        created_for:
+          allOf:
+          - $ref: '#/components/schemas/TypeModelRef'
+          readOnly: true
+        parent_uuid:
+          type:
+          - string
+          - 'null'
+          readOnly: true
+        parent_author:
+          oneOf:
+          - $ref: '#/components/schemas/BaseUser'
+          - type: 'null'
+          - type: 'null'
+          readOnly: true
+        parent_repr:
+          type:
+          - string
+          - 'null'
+          readOnly: true
+        has_children:
+          type: boolean
+          readOnly: true
+      required:
+      - attachment
+      - author
+      - content
+      - created_for
+      - date_added
+      - date_modified
+      - has_children
+      - is_deleted
+      - parent_author
+      - parent_repr
+      - parent_uuid
+      - repr
+      - root_author_uuid
+      - uuid
+    QueueItem:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        date_added:
+          type: string
+          format: date-time
+          readOnly: true
+        date_modified:
+          type: string
+          format: date-time
+          readOnly: true
+        repr:
+          type: string
+          readOnly: true
+        collection_song:
+          allOf:
+          - $ref: '#/components/schemas/CollectionSongRetrieve'
+          readOnly: true
+        position:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,12})?$
+      required:
+      - collection_song
+      - date_added
+      - date_modified
+      - position
+      - repr
+      - uuid
+    ReplyNotification:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        date_added:
+          type: string
+          format: date-time
+          readOnly: true
+        date_modified:
+          type: string
+          format: date-time
+          readOnly: true
+        repr:
+          type: string
+          readOnly: true
+        is_read:
+          type: boolean
+          readOnly: true
+        orig_publication:
+          allOf:
+          - $ref: '#/components/schemas/PublicationRetrieve'
+          readOnly: true
+        reply_publication:
+          allOf:
+          - $ref: '#/components/schemas/PublicationRetrieve'
+          readOnly: true
+      required:
+      - date_added
+      - date_modified
+      - is_read
+      - orig_publication
+      - reply_publication
+      - repr
+      - uuid
+    ResendEmailVerificationRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+      required:
+      - email
+    RestAuthDetail:
+      type: object
+      properties:
+        detail:
+          type: string
+          readOnly: true
+      required:
+      - detail
+    SearchResults:
+      type: object
+      properties:
+        songs:
+          type: array
+          items:
+            $ref: '#/components/schemas/CollectionSongRetrieve'
+        albums:
+          type: array
+          items:
+            $ref: '#/components/schemas/CollectionSerializerBasic'
+        playlists:
+          type: array
+          items:
+            $ref: '#/components/schemas/CollectionSerializerBasic'
+        users:
+          type: array
+          items:
+            $ref: '#/components/schemas/BaseUser'
+        artists:
+          type: array
+          items:
+            $ref: '#/components/schemas/BaseUser'
+      required:
+      - albums
+      - artists
+      - playlists
+      - songs
+      - users
+    SongAttachment:
+      type: object
+      properties:
+        type:
+          type: string
+        obj:
+          $ref: '#/components/schemas/CollectionSongRetrieve'
+      required:
+      - obj
+      - type
+    SongCollectionLink:
+      type: object
+      properties:
+        collection_uuid:
+          type: string
+          format: uuid
+        collection_song_uuid:
+          type: string
+          format: uuid
+      required:
+      - collection_song_uuid
+      - collection_uuid
+    SongStatusEnum:
+      enum:
+      - queued
+      - processing
+      - ready
+      - failed
+      type: string
+      description: |-
+        * `queued` - Queued
+        * `processing` - Processing
+        * `ready` - Ready
+        * `failed` - Failed
+    SongUserCollections:
+      type: object
+      properties:
+        collections:
+          type: array
+          items:
+            $ref: '#/components/schemas/SongCollectionLink'
+      required:
+      - collections
+    StoredPlaybackState:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        date_added:
+          type: string
+          format: date-time
+          readOnly: true
+        date_modified:
+          type: string
+          format: date-time
+          readOnly: true
+        repr:
+          type: string
+          readOnly: true
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/QueueItem'
+          readOnly: true
+        context_items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CollectionSongRetrieve'
+          readOnly: true
+      required:
+      - context_items
+      - date_added
+      - date_modified
+      - items
+      - repr
+      - uuid
+    StreamingProfileGet:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        date_added:
+          type: string
+          format: date-time
+          readOnly: true
+        date_modified:
+          type: string
+          format: date-time
+          readOnly: true
+        repr:
+          type: string
+          readOnly: true
+        user:
+          type: string
+          format: uuid
+          readOnly: true
+        player:
+          type: string
+          format: uuid
+          readOnly: true
+        liked_collections:
+          type: array
+          items:
+            $ref: '#/components/schemas/CollectionSerializerBasic'
+          readOnly: true
+        history:
+          allOf:
+          - $ref: '#/components/schemas/CollectionSerializerBasic'
+          readOnly: true
+        liked_songs:
+          allOf:
+          - $ref: '#/components/schemas/CollectionSerializerBasic'
+          readOnly: true
+      required:
+      - date_added
+      - date_modified
+      - history
+      - liked_collections
+      - liked_songs
+      - player
+      - repr
+      - user
+      - uuid
+    TypeModelRef:
+      type: object
+      description: |-
+        The `{type, uuid}` reference that `TypeToModelResolver` reads and writes.
+        Only the schema uses it, because the resolver builds and reads the dict
+        itself.
+      properties:
+        type:
+          type: string
+        uuid:
+          type: string
+          format: uuid
+      required:
+      - type
+      - uuid
+    TypeModelRefRequest:
+      type: object
+      description: |-
+        The `{type, uuid}` reference that `TypeToModelResolver` reads and writes.
+        Only the schema uses it, because the resolver builds and reads the dict
+        itself.
+      properties:
+        type:
+          type: string
+          minLength: 1
+        uuid:
+          type: string
+          format: uuid
+      required:
+      - type
+      - uuid
+    UserAttachment:
+      type: object
+      properties:
+        type:
+          type: string
+        obj:
+          $ref: '#/components/schemas/BaseUser'
+      required:
+      - obj
+      - type
+    UserChatCreate:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        date_added:
+          type: string
+          format: date-time
+          readOnly: true
+        date_modified:
+          type: string
+          format: date-time
+          readOnly: true
+        repr:
+          type: string
+          readOnly: true
+      required:
+      - date_added
+      - date_modified
+      - repr
+      - uuid
+    UserChatCreateRequest:
+      type: object
+      properties:
+        participants:
+          type: array
+          items:
+            type: string
+            format: uuid
+          writeOnly: true
+        title:
+          type: string
+          writeOnly: true
+        image:
+          type:
+          - string
+          - 'null'
+          format: binary
+          writeOnly: true
+        is_direct:
+          type: boolean
+          writeOnly: true
+      required:
+      - is_direct
+      - participants
+    UserChatRetrieve:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        date_added:
+          type: string
+          format: date-time
+          readOnly: true
+        date_modified:
+          type: string
+          format: date-time
+          readOnly: true
+        repr:
+          type: string
+          readOnly: true
+        title:
+          type: string
+          readOnly: true
+        image:
+          type:
+          - string
+          - 'null'
+          format: uri
+          readOnly: true
+        last_message:
+          oneOf:
+          - $ref: '#/components/schemas/PublicationRetrieve'
+          - type: 'null'
+          - type: 'null'
+          readOnly: true
+        is_read:
+          type: boolean
+          readOnly: true
+        members:
+          type: array
+          items:
+            $ref: '#/components/schemas/BaseUser'
+          readOnly: true
+        is_direct:
+          type: boolean
+          description: Indicates, whether the Chat is between two people only.
+      required:
+      - date_added
+      - date_modified
+      - image
+      - is_direct
+      - is_read
+      - last_message
+      - members
+      - repr
+      - title
+      - uuid
+    UserFollowed:
+      type: object
+      properties:
+        followed:
+          type: array
+          items:
+            $ref: '#/components/schemas/BaseUser'
+      required:
+      - followed
+    UserFollowers:
+      type: object
+      properties:
+        followers:
+          type: array
+          items:
+            $ref: '#/components/schemas/BaseUser'
+      required:
+      - followers
+    UserFriends:
+      type: object
+      properties:
+        friends:
+          type: array
+          items:
+            $ref: '#/components/schemas/BaseUser'
+      required:
+      - friends
+    UserLibrary:
+      type: object
+      properties:
+        history:
+          $ref: '#/components/schemas/CollectionSerializerBasic'
+        liked_songs:
+          $ref: '#/components/schemas/CollectionSerializerBasic'
+        created_collections:
+          type: array
+          items:
+            $ref: '#/components/schemas/CollectionSerializerBasic'
+        liked_collections:
+          type: array
+          items:
+            $ref: '#/components/schemas/CollectionSerializerBasic'
+      required:
+      - created_collections
+      - history
+      - liked_collections
+      - liked_songs
+    VerifyEmailRequest:
+      type: object
+      properties:
+        key:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - key
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid

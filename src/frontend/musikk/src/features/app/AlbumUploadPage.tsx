@@ -3,7 +3,6 @@ import { AlbumSongUploadSection } from "@/features/album-upload/components/Album
 import { useUpdateCollection } from "@/features/collections/api/mutations.ts";
 import { CollectionForm } from "@/features/collections/components/CollectionForm.tsx";
 import { useCollectionCreation } from "@/features/collections/hooks/useCollectionCreation.ts";
-import { Collection } from "@/features/collections/types.ts";
 import { BackButton } from "@/features/common/BackButton.tsx";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -14,7 +13,7 @@ export function AlbumUploadPage() {
 
     const { form, submit, isSubmitting } = useCollectionCreation({
         type: "album",
-        onSuccess: (collection: Collection) => {
+        onSuccess: (collection) => {
             void navigate(`/upload/${collection.uuid}`, { replace: true });
         },
     });

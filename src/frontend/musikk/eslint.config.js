@@ -24,7 +24,7 @@ const reactRefreshRecommended = reactRefresh.configs?.vite ?? {
 };
 
 export default tseslint.config(
-    { ignores: ["dist", "eslint.config.js", "vite.config.ts"] },
+    { ignores: ["dist", "eslint.config.js", "vite.config.ts", "src/api/openapi.gen.ts"] },
 
     {
         files: ["src/**/*.{js,jsx,ts,tsx}"],

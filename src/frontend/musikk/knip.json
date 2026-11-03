@@ -1,6 +1,7 @@
 {
     "$schema": "./node_modules/knip/schema.json",
     "ignoreIssues": {
-        "src/features/ui/**": ["exports", "types"]
+        "src/features/ui/**": ["exports", "types"],
+        "src/api/openapi.gen.ts": ["exports", "types"]
     }
 }

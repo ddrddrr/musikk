@@ -1,4 +1,5 @@
 from django.contrib.contenttypes.models import ContentType
+from drf_spectacular.utils import extend_schema, extend_schema_view
 from musikk.pagination import BaseLimitOffsetPagination
 from notifications.models import ChatMessageNotification, ReplyNotification
 from rest_framework.exceptions import PermissionDenied
@@ -15,13 +16,14 @@ from websockets.event_helpers import send_ws_event, user_group
 from websockets.topics import topic_group
 
 from social.api.v1.filters import PublicationConnectionFilter
-from social.api.v1.mixins import PublicationsListCreateMixin
+from social.api.v1.mixins import PUBLICATION_CREATE_SCHEMA, PublicationsListCreateMixin
 from social.api.v1.serializers import (
     ChatAttachmentSerializer,
     ChatMembersCreateSerializer,
     PublicationChildrenSerializer,
     UserChatCreateSerializer,
     UserChatRetrieveSerializer,
+    attachment_schema,
 )
 from social.models import Publication
 from social.models.chat import Chat, ChatMember
@@ -34,6 +36,7 @@ class PublicationChildrenView(RetrieveAPIView):
     lookup_field = "uuid"
 
 
+@PUBLICATION_CREATE_SCHEMA
 class CollectionCommentsListCreateView(PublicationsListCreateMixin, ListCreateAPIView):
     filterset_class = PublicationConnectionFilter
     list_top_level_only = False
@@ -68,6 +71,7 @@ class CollectionCommentsListCreateView(PublicationsListCreateMixin, ListCreateAP
             )
 
 
+@PUBLICATION_CREATE_SCHEMA
 class FeedPostsListCreateView(PublicationsListCreateMixin, ListCreateAPIView):
     filterset_class = PublicationConnectionFilter
 
@@ -98,6 +102,7 @@ class FeedPostsListCreateView(PublicationsListCreateMixin, ListCreateAPIView):
             )
 
 
+@PUBLICATION_CREATE_SCHEMA
 class ChatMessagesListCreateView(PublicationsListCreateMixin, ListCreateAPIView):
     list_top_level_only = False
 
@@ -139,6 +144,8 @@ class ChatMessagesListCreateView(PublicationsListCreateMixin, ListCreateAPIView)
 
 
 class UserChatsListCreateView(ListCreateAPIView):
+    queryset = Chat.objects.none()
+
     def get_serializer_class(self):
         if self.request.method == "POST":
             return UserChatCreateSerializer
@@ -170,7 +177,9 @@ class ChatRetrieveView(RetrieveAPIView):
         ).prefetch_related("chatmember_set__member")
 
 
+@extend_schema_view(get=extend_schema(responses=attachment_schema(many=True)))
 class ChatAttachmentsListView(ListAPIView):
+    queryset = Publication.objects.none()
     serializer_class = ChatAttachmentSerializer
     pagination_class = BaseLimitOffsetPagination
 

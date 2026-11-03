@@ -1,14 +1,39 @@
 from base.serializers import BaseModelSerializer, UUIDListField
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
+from drf_spectacular.utils import (
+    PolymorphicProxySerializer,
+    extend_schema_field,
+    inline_serializer,
+)
 from rest_framework import serializers
 from users.api.v1.serializers import BaseUserSerializer
 
-from social.api.v1.fields import TypeModelRefField
+from social.api.v1.fields import TypeModelRefField, TypeModelRefSerializer
 from social.api.v1.type_model_maps import ATTACHMENT_RESOLVER, CREATED_FOR_RESOLVER
 from social.api.v1.validators import validate_participants_are_friends
 from social.models import Publication
 from social.models.chat import Chat, ChatMember
+
+
+def attachment_schema(**kwargs) -> PolymorphicProxySerializer:
+    """
+    Describes the `{type, obj}` dict that `ATTACHMENT_RESOLVER` returns. The
+    variants come from the resolver's serializer map, so a new attachment type
+    reaches the schema without a second list to keep in sync.
+    """
+    variants = {}
+    for type_key, serializer_class in ATTACHMENT_RESOLVER.type_serializer_map.items():
+        variants[type_key] = inline_serializer(
+            name=f"{type_key.capitalize()}Attachment",
+            fields={"type": serializers.CharField(), "obj": serializer_class()},
+        )
+    return PolymorphicProxySerializer(
+        component_name="Attachment",
+        serializers=variants,
+        resource_type_field_name="type",
+        **kwargs,
+    )
 
 
 class PublicationCreateSerializer(BaseModelSerializer):
@@ -94,7 +119,8 @@ class PublicationRetrieveSerializer(BaseModelSerializer):
         root = obj.get_root()
         return str(root.author.uuid) if root.author else None
 
-    def get_attachment(self, obj) -> dict | None:
+    @extend_schema_field(attachment_schema(allow_null=True))
+    def get_attachment(self, obj):
         if not obj.attachment_object:
             return None
 
@@ -102,7 +128,8 @@ class PublicationRetrieveSerializer(BaseModelSerializer):
             obj.attachment_object, context=self.context
         )
 
-    def get_created_for(self, obj) -> dict:
+    @extend_schema_field(TypeModelRefSerializer)
+    def get_created_for(self, obj):
         return CREATED_FOR_RESOLVER.get_model_instance_representation(
             obj.created_for_object
         )
@@ -110,7 +137,8 @@ class PublicationRetrieveSerializer(BaseModelSerializer):
     def get_parent_uuid(self, obj) -> str | None:
         return str(obj.parent.uuid) if obj.parent else None
 
-    def get_parent_author(self, obj) -> dict | None:
+    @extend_schema_field(BaseUserSerializer(allow_null=True))
+    def get_parent_author(self, obj):
         return BaseUserSerializer(obj.parent.author).data if obj.parent else None
 
     def get_parent_repr(self, obj) -> str | None:
@@ -127,6 +155,7 @@ class PublicationChildrenSerializer(BaseModelSerializer):
         model = Publication
         fields = ["children"]
 
+    @extend_schema_field(PublicationRetrieveSerializer(many=True))
     def get_children(self, obj):
         qs = obj.replies.all().order_by("date_added")
         serializer = PublicationRetrieveSerializer(qs, many=True, context=self.context)
@@ -163,6 +192,7 @@ class UserChatRetrieveSerializer(BaseModelSerializer):
 
         return super().to_representation(instance)
 
+    @extend_schema_field(PublicationRetrieveSerializer(allow_null=True))
     def get_last_message(self, obj):
         pub = getattr(self, "_last_pub", None)
         return (
@@ -171,7 +201,7 @@ class UserChatRetrieveSerializer(BaseModelSerializer):
             else None
         )
 
-    def get_is_read(self, obj):
+    def get_is_read(self, obj) -> bool:
         if not (pub := getattr(self, "_last_pub", None)):
             return False
 
@@ -179,6 +209,7 @@ class UserChatRetrieveSerializer(BaseModelSerializer):
         cm = ChatMember.objects.get(chat=obj, member=user)  # validated in the view
         return cm.last_read_message_id == pub.pk
 
+    @extend_schema_field(BaseUserSerializer(many=True))
     def get_members(self, obj):
         # expects prefetch_related('chatmember_set__member') in the view
         return BaseUserSerializer(

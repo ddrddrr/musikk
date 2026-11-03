@@ -1,13 +1,8 @@
 import { api_client } from "@/api/axiosConf.ts";
-import { UUID } from "@/api/types.ts";
+import { ApiSchemas, UUID } from "@/api/types.ts";
 import { UserURLs } from "@/features/user/api/endpoints.ts";
 import { userKeys } from "@/features/user/api/queryKeys.ts";
-import { CurrentUser } from "@/features/user/types.ts";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-
-interface UserUpdateResponse {
-    user: CurrentUser;
-}
 
 interface UserUpdateParams {
     display_name?: string;
@@ -33,7 +28,10 @@ export function useMeUpdateMutation() {
                 formData.append("loudness_normalization", String(loudness_normalization));
             }
 
-            const res = await api_client.patch<UserUpdateResponse>(UserURLs.meUpdate, formData);
+            const res = await api_client.patch<ApiSchemas["MeUpdated"]>(
+                UserURLs.meUpdate,
+                formData,
+            );
             return res.data;
         },
         onSuccess: ({ user }) => {

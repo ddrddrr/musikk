@@ -1,6 +1,7 @@
 from base.serializers import BaseModelSerializer
 from django.core.files.storage import default_storage
 from django.db import transaction
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 from users.api.v1.serializers import BaseUserSerializer
 
@@ -12,7 +13,7 @@ from streaming.models.songs import SongStatus
 class BaseSongRetrieveSerializer(BaseModelSerializer):
     mpd = serializers.SerializerMethodField(read_only=True)
     m3u8 = serializers.SerializerMethodField(read_only=True)
-    authors = serializers.SerializerMethodField(read_only=True, allow_null=True)
+    authors = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = BaseSong
@@ -28,12 +29,13 @@ class BaseSongRetrieveSerializer(BaseModelSerializer):
             "true_peak_dbtp",
         ]
 
-    def get_mpd(self, obj):
+    def get_mpd(self, obj) -> str:
         return default_storage.url(obj.mpd)
 
-    def get_m3u8(self, obj):
+    def get_m3u8(self, obj) -> str:
         return default_storage.url(obj.m3u8)
 
+    @extend_schema_field(BaseUserSerializer(many=True))
     def get_authors(self, obj):
         cache = getattr(obj, "_prefetched_objects_cache", None) or {}
         if "credits" in cache:
@@ -94,7 +96,8 @@ class CollectionSongRetrieveSerializer(BaseModelSerializer):
         model = CollectionSong
         fields = BaseModelSerializer.Meta.fields + ["song", "collection"]
 
-    def get_song(self, obj) -> dict:
+    @extend_schema_field(BaseSongRetrieveSerializer)
+    def get_song(self, obj):
         return BaseSongRetrieveSerializer(obj.song, context=self.context).data
 
 
@@ -111,11 +114,31 @@ class AlbumTrackUploadSerializer(serializers.Serializer):
     audio = serializers.FileField()
 
 
+class AlbumTrackCreateSerializer(AlbumTrackUploadSerializer, BaseSongCreateSerializer):
+    """
+    The whole form of an album track upload: the song fields and the upload
+    fields together. Only the schema uses it. The view checks the two parts
+    one after the other, so it can find a repeated upload before it checks
+    the song fields.
+    """
+
+    class Meta(BaseSongCreateSerializer.Meta):
+        fields = BaseSongCreateSerializer.Meta.fields + [
+            "operation_id",
+            "position",
+            "audio",
+        ]
+
+
 class AlbumTrackSerializer(serializers.ModelSerializer):
     collection_song_uuid = serializers.UUIDField(source="uuid", read_only=True)
+    # the model allows null, but `CollectionSong.save` always sets it for a song in a collection
+    position = serializers.IntegerField(read_only=True)
     song_uuid = serializers.UUIDField(source="song.uuid", read_only=True)
     title = serializers.CharField(source="song.title", read_only=True)
-    status = serializers.CharField(source="song.status", read_only=True)
+    status = serializers.ChoiceField(
+        choices=SongStatus.choices, source="song.status", read_only=True
+    )
     status_detail = serializers.CharField(source="song.status_detail", read_only=True)
 
     class Meta:

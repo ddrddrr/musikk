@@ -1,5 +1,5 @@
 import { api_client } from "@/api/axiosConf.ts";
-import { UUID } from "@/api/types.ts";
+import { ApiSchemas, UUID } from "@/api/types.ts";
 import { Collection } from "@/features/collections/types.ts";
 import { SongURLs } from "@/features/songs/api/endpoints.ts";
 import { songKeys } from "@/features/songs/api/queryKeys.ts";
@@ -10,17 +10,10 @@ export async function albumBySongRetrieve(songUUID: UUID): Promise<Collection> {
     return res.data;
 }
 
-export interface CollectionMembership {
-    collection_uuid: UUID;
-    collection_song_uuid: UUID;
-}
-
-interface CollectionMembershipResponse {
-    collections: CollectionMembership[];
-}
+type CollectionMembership = ApiSchemas["SongCollectionLink"];
 
 async function collectionMemberships(collectionSongUUID: UUID): Promise<CollectionMembership[]> {
-    const res = await api_client.get<CollectionMembershipResponse>(
+    const res = await api_client.get<ApiSchemas["SongUserCollections"]>(
         SongURLs.collectionMemberships(collectionSongUUID),
     );
     return res.data.collections;

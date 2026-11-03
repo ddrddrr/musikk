@@ -1,3 +1,5 @@
+from base.openapi import NO_CONTENT_SCHEMA
+from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.generics import RetrieveAPIView, get_object_or_404
 from rest_framework.request import Request
@@ -32,6 +34,7 @@ class StoredPlaybackStateRetrieveView(PlayerMixin, RetrieveAPIView):
 class QueueAddSongView(PlayerMixin):
     permission_classes = [IsPublicOrCollectionAuthor]
 
+    @NO_CONTENT_SCHEMA
     def post(self, request, *args, **kwargs):
         song = get_object_or_404(CollectionSong, uuid=kwargs["uuid"])
         self.check_object_permissions(request, song)
@@ -43,6 +46,7 @@ class QueueAddSongView(PlayerMixin):
 class QueueAddCollectionView(PlayerMixin):
     permission_classes = [IsPublicOrCollectionAuthor]
 
+    @NO_CONTENT_SCHEMA
     def post(self, request, *args, **kwargs):
         collection = get_object_or_404(Collection, uuid=kwargs["uuid"])
         self.check_object_permissions(request, collection)
@@ -54,6 +58,7 @@ class QueueAddCollectionView(PlayerMixin):
 class PlayerPlaySongView(PlayerMixin):
     permission_classes = [IsPublicOrCollectionAuthor]
 
+    @NO_CONTENT_SCHEMA
     def post(self, request, *args, **kwargs):
         song = get_object_or_404(CollectionSong, uuid=kwargs["uuid"])
         self.check_object_permissions(request, song)
@@ -65,6 +70,7 @@ class PlayerPlaySongView(PlayerMixin):
 class PlayerPlayCollectionView(PlayerMixin):
     permission_classes = [IsPublicOrCollectionAuthor]
 
+    @NO_CONTENT_SCHEMA
     def post(self, request, *args, **kwargs):
         collection = get_object_or_404(Collection, uuid=kwargs["uuid"])
         self.check_object_permissions(request, collection)
@@ -75,11 +81,13 @@ class PlayerPlayCollectionView(PlayerMixin):
 
 # TODO
 class QueueAppendRandomSongsView(PlayerMixin):
+    @extend_schema(request=None, responses={501: None})
     def post(self, request, *args, **kwargs):
         return Response(status=status.HTTP_501_NOT_IMPLEMENTED)
 
 
 class QueueRemoveItemView(PlayerMixin):
+    @extend_schema(request=None, responses={200: None})
     def post(self, request, *args, **kwargs):
         item = get_object_or_404(QueueItem, uuid=kwargs["uuid"])
 
@@ -94,12 +102,14 @@ class QueueRemoveItemView(PlayerMixin):
 
 
 class PlayerClearView(PlayerMixin):
+    @NO_CONTENT_SCHEMA
     def post(self, request, *args, **kwargs):
         self.get_controller(request).clear()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class PlayerNextView(PlayerMixin):
+    @NO_CONTENT_SCHEMA
     def post(self, request, *args, **kwargs):
         controller = self.get_controller(request)
 
@@ -118,6 +128,7 @@ class PlayerNextView(PlayerMixin):
 
 
 class PlayerPrevView(PlayerMixin):
+    @NO_CONTENT_SCHEMA
     def post(self, request, *args, **kwargs):
         self.get_controller(request).prev()
         return Response(status=status.HTTP_204_NO_CONTENT)

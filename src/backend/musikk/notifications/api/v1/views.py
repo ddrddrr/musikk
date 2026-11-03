@@ -1,4 +1,6 @@
+from base.openapi import NO_CONTENT_SCHEMA
 from django.utils import timezone
+from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import status
 from rest_framework.generics import (
     GenericAPIView,
@@ -19,6 +21,16 @@ from notifications.models import (
 
 
 class NotificationsPersonalListUpdateView(GenericAPIView):
+    @extend_schema(
+        responses=inline_serializer(
+            name="NotificationList",
+            fields={
+                "replies": ReplyNotificationSerializer(many=True),
+                "followers": FollowerNotificationSerializer(many=True),
+                "chat_messages": ChatMessageNotificationSerializer(many=True),
+            },
+        )
+    )
     def get(self, request, *args, **kwargs):
         replies = ReplyNotificationSerializer(
             ReplyNotification.objects.exclude(
@@ -41,6 +53,7 @@ class NotificationsPersonalListUpdateView(GenericAPIView):
             {"replies": replies, "followers": followers, "chat_messages": chat_messages}
         )
 
+    @NO_CONTENT_SCHEMA
     def patch(self, request, *args, **kwargs):
         profile = request.user.notificationprofile
         profile.read_at = timezone.now()
@@ -49,6 +62,7 @@ class NotificationsPersonalListUpdateView(GenericAPIView):
 
 
 class NotificationDeleteView(GenericAPIView):
+    @NO_CONTENT_SCHEMA
     def delete(self, request, *args, **kwargs):
         user = self.request.user
         notif_uuid = kwargs["uuid"]

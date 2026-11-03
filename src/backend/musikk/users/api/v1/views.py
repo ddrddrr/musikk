@@ -1,5 +1,7 @@
+from base.openapi import NO_CONTENT_SCHEMA
 from django.http import HttpResponse
 from django.views.decorators.csrf import ensure_csrf_cookie
+from drf_spectacular.utils import extend_schema, extend_schema_view, inline_serializer
 from notifications.models import FollowerNotification
 from rest_framework import status
 from rest_framework.generics import (
@@ -27,6 +29,18 @@ def csrf(request):
     return HttpResponse(status=204)
 
 
+ME_UPDATE_SCHEMA = extend_schema(
+    responses=inline_serializer(name="MeUpdated", fields={"user": BaseMeSerializer()})
+)
+
+
+@extend_schema_view(
+    get=extend_schema(
+        responses=inline_serializer(name="Me", fields={"me": BaseMeSerializer()})
+    ),
+    put=ME_UPDATE_SCHEMA,
+    patch=ME_UPDATE_SCHEMA,
+)
 class MeView(RetrieveUpdateAPIView):
     serializer_class = BaseMeSerializer
 
@@ -65,6 +79,11 @@ class UserRetrieveView(RetrieveAPIView):
 class FriendsView(APIView):
     permission_classes = [IsSelfOrFriend]
 
+    @extend_schema(
+        responses=inline_serializer(
+            name="UserFriends", fields={"friends": BaseUserSerializer(many=True)}
+        )
+    )
     def get(self, *args, **kwargs):
         user = get_object_or_404(BaseUser, uuid=kwargs["for_user_uuid"])
         self.check_object_permissions(self.request, user)
@@ -80,6 +99,11 @@ class FriendsView(APIView):
 class FollowersView(APIView):
     permission_classes = [IsSelfOrFriend]
 
+    @extend_schema(
+        responses=inline_serializer(
+            name="UserFollowers", fields={"followers": BaseUserSerializer(many=True)}
+        )
+    )
     def get(self, *args, **kwargs):
         user = get_object_or_404(BaseUser, uuid=kwargs["for_user_uuid"])
         self.check_object_permissions(self.request, user)
@@ -97,6 +121,11 @@ class FollowersView(APIView):
 class FollowedView(APIView):
     permission_classes = [IsSelfOrFriend]
 
+    @extend_schema(
+        responses=inline_serializer(
+            name="UserFollowed", fields={"followed": BaseUserSerializer(many=True)}
+        )
+    )
     def get(self, *args, **kwargs):
         user = get_object_or_404(BaseUser, uuid=kwargs["for_user_uuid"])
         self.check_object_permissions(self.request, user)
@@ -110,6 +139,7 @@ class FollowedView(APIView):
             }
         )
 
+    @NO_CONTENT_SCHEMA
     def post(self, *args, **kwargs):
         follow_user = get_object_or_404(BaseUser, uuid=kwargs["for_user_uuid"])
         user_follow, created = UserFollow.objects.get_or_create(
@@ -135,6 +165,7 @@ class FollowedView(APIView):
             )
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    @NO_CONTENT_SCHEMA
     def delete(self, *args, **kwargs):
         unfollow_user = get_object_or_404(BaseUser, uuid=kwargs["for_user_uuid"])
         user_connection = get_object_or_404(

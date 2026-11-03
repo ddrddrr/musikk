@@ -1,14 +1,14 @@
 import { EmptyState } from "@/features/common/EmptyState.tsx";
-import { NotificationListResponse } from "@/features/notifications/api/queries.ts";
 import { NotificationCard } from "@/features/notifications/NotificationCard.tsx";
 import {
     ChatMessageNotification,
     FollowerNotification,
+    NotificationList,
     ReplyNotification,
 } from "@/features/notifications/types.ts";
 
 interface NotificationOverlayProps {
-    notifications: NotificationListResponse;
+    notifications: NotificationList;
 }
 
 type TaggedNotification =

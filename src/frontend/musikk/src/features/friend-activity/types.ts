@@ -1,7 +1,3 @@
-import { CollectionSong } from "@/features/collections/types.ts";
-import { BaseUser } from "@/features/user/types.ts";
+import { ApiSchemas } from "@/api/types.ts";
 
-export interface UserSong {
-    user: BaseUser;
-    song: CollectionSong;
-}
+export type UserSong = ApiSchemas["FriendListening"];

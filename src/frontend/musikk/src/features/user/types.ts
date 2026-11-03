@@ -1,17 +1,9 @@
-import { BaseModel } from "@/features/common/types.ts";
+import { ApiSchemas } from "@/api/types.ts";
 import { z } from "zod";
 
-export interface BaseUser extends BaseModel {
-    kind?: "user";
-    display_name: string;
-    avatar: string;
-    bio: string;
-    is_artist: boolean;
-}
+export type BaseUser = ApiSchemas["BaseUser"] & { kind?: "user" };
 
-export interface CurrentUser extends BaseUser {
-    loudness_normalization: boolean;
-}
+export type CurrentUser = ApiSchemas["BaseMe"];
 
 export const ProfileFormSchema = z.object({
     display_name: z

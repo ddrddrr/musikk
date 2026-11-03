@@ -1,5 +1,5 @@
 import { api_client } from "@/api/axiosConf.ts";
-import { PaginatedRes, UUID } from "@/api/types.ts";
+import { ApiSchemas, PaginatedRes, UUID } from "@/api/types.ts";
 import { CollectionURLs } from "@/features/collections/api/endpoints.ts";
 import { collectionKeys } from "@/features/collections/api/queryKeys.ts";
 import {
@@ -39,15 +39,8 @@ export function useCollectionsByAuthorQuery(authorUUID: UUID, type: CollectionTy
     });
 }
 
-interface UserLibraryResponse {
-    history: Collection;
-    liked_songs: Collection;
-    created_collections: Collection[];
-    liked_collections: Collection[];
-}
-
-export async function fetchUserLibrary(userUUID: UUID): Promise<UserLibraryResponse> {
-    const response = await api_client.get<UserLibraryResponse>(
+export async function fetchUserLibrary(userUUID: UUID): Promise<ApiSchemas["UserLibrary"]> {
+    const response = await api_client.get<ApiSchemas["UserLibrary"]>(
         CollectionURLs.userLibrary(userUUID),
     );
     return response.data;

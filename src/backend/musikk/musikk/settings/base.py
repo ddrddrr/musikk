@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     "django_filters",
     "django_extensions",
     "rest_framework",
+    "drf_spectacular",
     "allauth",
     "allauth.account",
     "allauth.socialaccount",
@@ -132,6 +133,27 @@ REST_FRAMEWORK = {
     # "DEFAULT_PAGINATION_CLASS": "musikk.pagination.BaseLimitOffsetPagination",
     "PAGE_SIZE": 10,
     "EXCEPTION_HANDLER": "base.exception_handler.musikk_exception_handler",
+    "DEFAULT_SCHEMA_CLASS": "base.openapi.MusikkAutoSchema",
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Musikk API",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+    # without it the prefix is guessed from all URLs, and the DEBUG-only URLs would change the operation ids
+    "SCHEMA_PATH_PREFIX": "/api/v1",
+    # 3.0 wraps nullable refs in allOf, which openapi-typescript reads as a subtype and drops the discriminator
+    "OAS_VERSION": "3.1.0",
+    # separate read and write components, so read-only fields are required in the read shape
+    "COMPONENT_SPLIT_REQUEST": True,
+    "ENUM_NAME_OVERRIDES": {
+        "CollectionTypeEnum": "streaming.models.collections.CollectionType",
+        "SongStatusEnum": "streaming.models.songs.SongStatus",
+    },
+    "POSTPROCESSING_HOOKS": [
+        "drf_spectacular.hooks.postprocess_schema_enums",
+        "base.openapi.require_response_fields",
+    ],
 }
 
 ### AUTH

@@ -1,4 +1,5 @@
 from base.serializers import BaseModelSerializer
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from streaming.api.v1.serializers.collections import CollectionSerializerBasic
@@ -22,20 +23,23 @@ class StreamingProfileGetSerializer(BaseModelSerializer):
             "liked_songs",
         ]
 
-    def get_liked_collections(self, obj: StreamingProfile) -> list[dict]:
+    @extend_schema_field(CollectionSerializerBasic(many=True))
+    def get_liked_collections(self, obj: StreamingProfile):
         return CollectionSerializerBasic(
             obj.liked_collections.all(),
             many=True,
             context=self.context,
         ).data
 
-    def get_history(self, obj: StreamingProfile) -> dict:
+    @extend_schema_field(CollectionSerializerBasic)
+    def get_history(self, obj: StreamingProfile):
         return CollectionSerializerBasic(
             obj.history,
             context=self.context,
         ).data
 
-    def get_liked_songs(self, obj: StreamingProfile) -> dict:
+    @extend_schema_field(CollectionSerializerBasic)
+    def get_liked_songs(self, obj: StreamingProfile):
         return CollectionSerializerBasic(
             obj.liked_songs,
             context=self.context,

@@ -13,7 +13,7 @@ from notifications.models import (
 class BaseNotificationSerializer(BaseModelSerializer):
     is_read = serializers.SerializerMethodField()
 
-    def get_is_read(self, obj):
+    def get_is_read(self, obj) -> bool:
         read_at = self.context["request"].user.notificationprofile.read_at
         if read_at is None:
             return False

@@ -1,16 +1,16 @@
 import { api_client } from "@/api/axiosConf.ts";
-import { UUID } from "@/api/types.ts";
+import { ApiSchemas, UUID } from "@/api/types.ts";
 import { UserURLs } from "@/features/user/api/endpoints.ts";
 import { userKeys } from "@/features/user/api/queryKeys.ts";
 import { useQuery } from "@tanstack/react-query";
 
 async function fetchLikedSongUUIDs(): Promise<Set<UUID>> {
-    const res = await api_client.get<{ song_uuids: UUID[] }>(UserURLs.meLikedSongs);
+    const res = await api_client.get<ApiSchemas["MeLikedSongs"]>(UserURLs.meLikedSongs);
     return new Set(res.data.song_uuids);
 }
 
 async function fetchLikedCollectionUUIDs(): Promise<Set<UUID>> {
-    const res = await api_client.get<{ collection_uuids: UUID[] }>(UserURLs.meLikedCollections);
+    const res = await api_client.get<ApiSchemas["MeLikedCollections"]>(UserURLs.meLikedCollections);
     return new Set(res.data.collection_uuids);
 }
 

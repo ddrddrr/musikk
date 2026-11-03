@@ -1,4 +1,5 @@
 from django.db.models import Prefetch
+from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -9,6 +10,16 @@ from streaming.models import SongCredit
 
 
 class FriendsLatestListenedView(APIView):
+    @extend_schema(
+        responses=inline_serializer(
+            name="FriendListening",
+            fields={
+                "user": BaseUserSerializer(),
+                "song": CollectionSongRetrieveSerializer(),
+            },
+            many=True,
+        )
+    )
     def get(self, request, *args, **kwargs):
         friends_qs = self.request.user.friends.select_related(
             "streamingprofile__stored_playback_state__current_collection_song__song",

@@ -1,4 +1,5 @@
 from django.contrib.postgres.search import TrigramSimilarity
+from drf_spectacular.utils import OpenApiParameter, extend_schema, inline_serializer
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -15,6 +16,22 @@ MAX_RESULTS = 10
 
 
 class SearchView(APIView):
+    @extend_schema(
+        parameters=[OpenApiParameter("q", str, required=True)],
+        responses={
+            200: inline_serializer(
+                name="SearchResults",
+                fields={
+                    "songs": CollectionSongRetrieveSerializer(many=True),
+                    "albums": CollectionSerializerBasic(many=True),
+                    "playlists": CollectionSerializerBasic(many=True),
+                    "users": BaseUserSerializer(many=True),
+                    "artists": BaseUserSerializer(many=True),
+                },
+            ),
+            204: None,
+        },
+    )
     def get(self, request, *args, **kwargs):
         query = request.query_params.get("q", "").strip()
         if not query:

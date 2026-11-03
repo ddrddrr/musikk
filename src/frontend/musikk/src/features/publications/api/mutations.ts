@@ -1,8 +1,8 @@
 import { api_client } from "@/api/axiosConf.ts";
-import { UUID } from "@/api/types.ts";
+import { ApiSchemas, UUID } from "@/api/types.ts";
 import { ChatURLs, PublicationURLs } from "@/features/publications/api/endpoints.ts";
 import { publicationKeys } from "@/features/publications/api/queryKeys.ts";
-import { AttachmentRef, Chat, Publication } from "@/features/publications/types.ts";
+import { AttachmentRef, Publication } from "@/features/publications/types.ts";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface PublicationPayload {
@@ -107,7 +107,7 @@ export function useCreateChat() {
             isDirect,
             title,
             image,
-        }: CreateChatParams): Promise<Chat> => {
+        }: CreateChatParams): Promise<ApiSchemas["UserChatCreate"]> => {
             const formData = new FormData();
 
             participants.forEach((uuid) => {
@@ -122,7 +122,10 @@ export function useCreateChat() {
                 formData.append("image", image);
             }
 
-            const response = await api_client.post<Chat>(ChatURLs.userChats(userUUID), formData);
+            const response = await api_client.post<ApiSchemas["UserChatCreate"]>(
+                ChatURLs.userChats(userUUID),
+                formData,
+            );
             return response.data;
         },
         onSuccess: (_data, variables) => {

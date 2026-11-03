@@ -1,9 +1,16 @@
 from functools import partial
 from uuid import UUID, uuid7
 
+from base.openapi import NO_CONTENT_SCHEMA
 from django.db import IntegrityError, transaction
+from drf_spectacular.utils import (
+    PolymorphicProxySerializer,
+    extend_schema,
+    extend_schema_view,
+    inline_serializer,
+)
 from musikk.pagination import BaseLimitOffsetPagination
-from rest_framework import status
+from rest_framework import serializers, status
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import (
     ListCreateAPIView,
@@ -26,6 +33,7 @@ from streaming.api.v1.serializers.collections import (
     collection_optimizations,
 )
 from streaming.api.v1.serializers.songs import (
+    AlbumTrackCreateSerializer,
     AlbumTrackSerializer,
     AlbumTrackUploadSerializer,
 )
@@ -82,6 +90,17 @@ class CollectionListCreateView(ListCreateAPIView):
 class UserLibraryView(APIView):
     serializer_class = CollectionSerializerBasic
 
+    @extend_schema(
+        responses=inline_serializer(
+            name="UserLibrary",
+            fields={
+                "history": CollectionSerializerBasic(),
+                "liked_songs": CollectionSerializerBasic(),
+                "created_collections": CollectionSerializerBasic(many=True),
+                "liked_collections": CollectionSerializerBasic(many=True),
+            },
+        )
+    )
     def get(self, request, *args, **kwargs):
         profile = request.user.streamingprofile
         ctx = {"request": request}
@@ -119,6 +138,7 @@ class CollectionRetrieveView(APIView):
             return [IsCollecitonAuthor()]
         return [IsPublicOrCollectionAuthor()]
 
+    @extend_schema(responses=CollectionSerializerBasic)
     def get(self, request, *args, **kwargs):
         collection = get_object_or_404(
             Collection.objects.published(), uuid=kwargs["uuid"]
@@ -127,6 +147,7 @@ class CollectionRetrieveView(APIView):
         data = CollectionSerializerBasic(collection, context={"request": request}).data
         return Response(status=status.HTTP_200_OK, data=data)
 
+    @NO_CONTENT_SCHEMA
     def delete(self, request, *args, **kwargs):
         collection = get_object_or_404(Collection, uuid=kwargs["uuid"])
         self.check_object_permissions(request, collection)
@@ -143,6 +164,10 @@ class CollectionRetrieveView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+@extend_schema_view(
+    put=extend_schema(responses=CollectionSerializerDetailed),
+    patch=extend_schema(responses=CollectionSerializerDetailed),
+)
 class CollectionRetrieveUpdateView(RetrieveUpdateAPIView):
     lookup_field = "uuid"
     queryset = Collection.objects.all()
@@ -192,6 +217,7 @@ class CollectionRetrieveUpdateView(RetrieveUpdateAPIView):
 class CollectionAddLikedView(APIView):
     permission_classes = [IsPublicOrCollectionAuthor]
 
+    @NO_CONTENT_SCHEMA
     def post(self, request, *args, **kwargs):
         collection_uuid = kwargs["uuid"]
         with transaction.atomic():
@@ -205,6 +231,7 @@ class CollectionAddLikedView(APIView):
         send_ws_event(group, ServerEvent.LIKED_COLLECTIONS_CHANGED)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    @NO_CONTENT_SCHEMA
     def delete(self, request, *args, **kwargs):
         collection_uuid = kwargs["uuid"]
         with transaction.atomic():
@@ -222,6 +249,7 @@ class CollectionAddLikedView(APIView):
 class CollectionRemoveSongView(APIView):
     permission_classes = [IsCollecitonAuthor]
 
+    @extend_schema(responses={200: None})
     def delete(self, *args, **kwargs):
         collection_song = get_object_or_404(
             CollectionSong.objects.select_related("collection", "song"),
@@ -251,6 +279,7 @@ class CollectionSongListCreateView(APIView):
     permission_classes = [IsCollecitonAuthor]
     parser_classes = [MultiPartParser, FormParser, JSONParser]
 
+    @extend_schema(responses=AlbumTrackSerializer(many=True))
     def get(self, request, *args, **kwargs):
         album = get_object_or_404(
             Collection, uuid=kwargs["collection_uuid"], type=CollectionType.ALBUM
@@ -264,6 +293,32 @@ class CollectionSongListCreateView(APIView):
         )
         return Response(AlbumTrackSerializer(tracks, many=True).data)
 
+    @extend_schema(
+        description="Albums take a track upload and answer with the track. "
+        "Other collections take an existing song and answer with the new link.",
+        request=PolymorphicProxySerializer(
+            component_name="CollectionSongCreate",
+            serializers=[
+                AlbumTrackCreateSerializer,
+                inline_serializer(
+                    name="PlaylistSongCreate",
+                    fields={"song_uuid": serializers.UUIDField()},
+                ),
+            ],
+            resource_type_field_name=None,
+        ),
+        responses={
+            200: AlbumTrackSerializer,
+            201: inline_serializer(
+                name="CollectionSongCreated",
+                fields={
+                    "song_uuid": serializers.UUIDField(),
+                    "collection_song_uuid": serializers.UUIDField(),
+                },
+            ),
+            202: AlbumTrackSerializer,
+        },
+    )
     def post(self, request, *args, **kwargs):
         collection = get_object_or_404(Collection, uuid=kwargs["collection_uuid"])
         self.check_object_permissions(request, collection)
@@ -359,6 +414,7 @@ def _find_album_song(
 class AlbumBySongView(APIView):
     permission_classes = [IsPublicOrCollectionAuthor]
 
+    @extend_schema(responses=CollectionSerializerBasic)
     def get(self, request, *args, **kwargs):
         collection_song = get_object_or_404(
             CollectionSong.objects.select_related("song"),

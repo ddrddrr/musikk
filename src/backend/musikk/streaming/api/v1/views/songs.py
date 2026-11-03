@@ -1,6 +1,8 @@
 import logging
 
-from rest_framework import status
+from base.openapi import NO_CONTENT_SCHEMA
+from drf_spectacular.utils import extend_schema, inline_serializer
+from rest_framework import serializers, status
 from rest_framework.generics import RetrieveAPIView, get_object_or_404
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -25,6 +27,7 @@ class CollectionSongRetrieveView(RetrieveAPIView):
 class SongAddLikedView(APIView):
     permission_classes = [IsPublicOrCollectionAuthor]
 
+    @NO_CONTENT_SCHEMA
     def post(self, *args, **kwargs):
         profile: StreamingProfile = self.request.user.streamingprofile
 
@@ -41,6 +44,7 @@ class SongAddLikedView(APIView):
         send_ws_event(group, ServerEvent.LIKED_SONGS_CHANGED)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    @NO_CONTENT_SCHEMA
     def delete(self, *args, **kwargs):
         profile: StreamingProfile = self.request.user.streamingprofile
 
@@ -59,6 +63,21 @@ class SongAddLikedView(APIView):
 
 
 class SongUserCollections(APIView):
+    @extend_schema(
+        responses=inline_serializer(
+            name="SongUserCollections",
+            fields={
+                "collections": inline_serializer(
+                    name="SongCollectionLink",
+                    fields={
+                        "collection_uuid": serializers.UUIDField(),
+                        "collection_song_uuid": serializers.UUIDField(),
+                    },
+                    many=True,
+                )
+            },
+        )
+    )
     def get(self, request, collection_song_uuid: str):
         collection_song = get_object_or_404(CollectionSong, uuid=collection_song_uuid)
 

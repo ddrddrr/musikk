@@ -1,6 +1,7 @@
 from base.serializers import BaseModelSerializer, UUIDListField
 from django.db import transaction
 from django.db.models import Prefetch, QuerySet
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 from users.api.v1.serializers import BaseUserSerializer
 
@@ -23,7 +24,7 @@ def collection_optimizations(qs: QuerySet) -> QuerySet:
 
 
 class CollectionSerializerBasic(BaseModelSerializer):
-    authors = serializers.SerializerMethodField(read_only=True, allow_null=True)
+    authors = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Collection
@@ -42,7 +43,8 @@ class CollectionSerializerBasic(BaseModelSerializer):
             "draft": {"read_only": True},
         }
 
-    def get_authors(self, obj) -> dict:
+    @extend_schema_field(BaseUserSerializer(many=True))
+    def get_authors(self, obj):
         cache = getattr(obj, "_prefetched_objects_cache", None) or {}
         if "collection_credits" in cache:
             credits = cache["collection_credits"]
@@ -71,7 +73,8 @@ class CollectionSerializerDetailed(CollectionSerializerBasic):
             "description": {"read_only": True},
         }
 
-    def get_songs(self, obj) -> dict:
+    @extend_schema_field(CollectionSongRetrieveSerializer(many=True))
+    def get_songs(self, obj):
         return CollectionSongRetrieveSerializer(
             CollectionSong.objects.filter(collection=obj)
             .select_related("song")

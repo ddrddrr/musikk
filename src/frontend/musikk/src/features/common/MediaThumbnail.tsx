@@ -3,7 +3,7 @@ import { Music } from "lucide-react";
 import { type ReactNode } from "react";
 
 type MediaThumbnailProps = {
-    src?: string;
+    src?: string | null;
     alt?: string;
     fallback?: ReactNode;
     className?: string;

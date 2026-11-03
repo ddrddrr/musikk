@@ -85,7 +85,7 @@ export function ProfileForm() {
                 <div className="mb-6 flex items-center gap-4">
                     <Avatar className="size-12 rounded-sm">
                         <AvatarImage
-                            src={user.avatar}
+                            src={user.avatar ?? undefined}
                             alt={user.display_name}
                             className="object-cover"
                         />

@@ -1,9 +1,9 @@
 import { api_client } from "@/api/axiosConf.ts";
 import { getErrorDetail } from "@/api/errorUtils.ts";
-import { UUID } from "@/api/types.ts";
+import { ApiSchemas, UUID } from "@/api/types.ts";
 import { CollectionURLs } from "@/features/collections/api/endpoints.ts";
 import { collectionKeys } from "@/features/collections/api/queryKeys.ts";
-import { Collection } from "@/features/collections/types.ts";
+import { CollectionDetailed, CreatedCollection } from "@/features/collections/types.ts";
 import { songKeys } from "@/features/songs/api/queryKeys.ts";
 import { userKeys } from "@/features/user/api/queryKeys.ts";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -154,7 +154,7 @@ interface CreateCollectionInput {
     draft?: boolean;
 }
 
-async function createCollection(input: CreateCollectionInput): Promise<Collection> {
+async function createCollection(input: CreateCollectionInput): Promise<CreatedCollection> {
     const formData = new FormData();
 
     formData.append("title", input.title);
@@ -167,7 +167,7 @@ async function createCollection(input: CreateCollectionInput): Promise<Collectio
 
     input.authors?.forEach((u) => formData.append("authors", String(u)));
 
-    const res = await api_client.post<Collection>(CollectionURLs.collectionCreate, formData);
+    const res = await api_client.post<CreatedCollection>(CollectionURLs.collectionCreate, formData);
     return res.data;
 }
 
@@ -195,7 +195,7 @@ interface UpdateCollectionParams {
 async function updateCollection({
     collectionUUID,
     input,
-}: UpdateCollectionParams): Promise<Collection> {
+}: UpdateCollectionParams): Promise<CollectionDetailed> {
     const formData = new FormData();
 
     if (input.title !== undefined) formData.append("title", input.title);
@@ -203,7 +203,7 @@ async function updateCollection({
     if (input.image !== undefined) formData.append("image", input.image);
     if (input.draft !== undefined) formData.append("draft", String(input.draft));
 
-    const res = await api_client.patch<Collection>(
+    const res = await api_client.patch<CollectionDetailed>(
         CollectionURLs.collectionDetail(collectionUUID),
         formData,
     );
@@ -233,7 +233,7 @@ interface CollectionSongPayload {
 async function createCollectionSong(payload: CollectionSongPayload) {
     const formData = new FormData();
     formData.append("song_uuid", payload.songUUID);
-    const res = await api_client.post<{ song_uuid: UUID; collection_song_uuid: UUID }>(
+    const res = await api_client.post<ApiSchemas["CollectionSongCreated"]>(
         CollectionURLs.collectionSongCreate(payload.collectionUUID),
         formData,
     );

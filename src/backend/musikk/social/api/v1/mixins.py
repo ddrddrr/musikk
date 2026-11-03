@@ -1,5 +1,6 @@
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Model
+from drf_spectacular.utils import extend_schema, extend_schema_view
 from musikk.pagination import BaseLimitOffsetPagination
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.mixins import CreateModelMixin, ListModelMixin
@@ -11,8 +12,17 @@ from social.api.v1.serializers import (
 )
 from social.models import Publication
 
+PUBLICATION_CREATE_SCHEMA = extend_schema_view(
+    post=extend_schema(responses={201: PublicationRetrieveSerializer})
+)
+"""
+`PublicationCreateSerializer` answers with the retrieve shape, which the
+generator cannot see. Apply it to every view that uses the mixin below.
+"""
+
 
 class PublicationsListCreateMixin(ListModelMixin, CreateModelMixin):
+    queryset = Publication.objects.none()
     pagination_class = BaseLimitOffsetPagination
     list_top_level_only = True
 

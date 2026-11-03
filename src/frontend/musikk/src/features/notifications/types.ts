@@ -1,24 +1,9 @@
-import { BaseModel } from "@/features/common/types.ts";
-import { Publication } from "@/features/publications/types.ts";
-import { BaseUser } from "@/features/user/types.ts";
+import { ApiSchemas } from "@/api/types.ts";
 
-interface BaseNotification extends BaseModel {
-    is_read: boolean;
-}
+export type ReplyNotification = ApiSchemas["ReplyNotification"];
 
-export interface ReplyNotification extends BaseNotification {
-    orig_publication: Publication;
-    reply_publication: Publication;
-}
+export type FollowerNotification = ApiSchemas["FollowerNotification"];
 
-export interface FollowerNotification extends BaseNotification {
-    sender: BaseUser;
-    receiver: BaseUser;
-}
+export type ChatMessageNotification = ApiSchemas["ChatMessageNotification"];
 
-export interface ChatMessageNotification extends BaseNotification {
-    message: Publication;
-    chat_uuid: string;
-    chat_title: string;
-    receiver: BaseUser;
-}
+export type NotificationList = ApiSchemas["NotificationList"];

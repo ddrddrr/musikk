@@ -1,7 +1,7 @@
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
 import { useCreateCollection } from "@/features/collections/api/mutations.ts";
 import { CollectionCreationSchema } from "@/features/collections/schemas.ts";
-import { Collection } from "@/features/collections/types.ts";
+import { CreatedCollection } from "@/features/collections/types.ts";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import z from "zod";
@@ -17,7 +17,7 @@ const DEFAULT_VALUES: CollectionCreationFormValues = {
 
 type UseCollectionCreationOptions = {
     type: "playlist" | "album";
-    onSuccess?: (collection: Collection) => void;
+    onSuccess?: (collection: CreatedCollection) => void;
 };
 
 export function useCollectionCreation({ type, onSuccess }: UseCollectionCreationOptions) {

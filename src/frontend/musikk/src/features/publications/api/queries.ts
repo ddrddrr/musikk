@@ -1,6 +1,6 @@
 import { api_client } from "@/api/axiosConf.ts";
 import { getOffsetFromNextUrl } from "@/api/hooks.ts";
-import { PaginatedRes, UUID } from "@/api/types.ts";
+import { ApiSchemas, PaginatedRes, UUID } from "@/api/types.ts";
 import { ChatURLs, PublicationURLs } from "@/features/publications/api/endpoints.ts";
 import { publicationKeys } from "@/features/publications/api/queryKeys.ts";
 import { Attachment, Chat, FeedConnection, Publication } from "@/features/publications/types.ts";
@@ -78,7 +78,7 @@ export function useCollectionComments(collectionUUID: UUID) {
 }
 
 async function fetchPublicationChildren(pubUUID: UUID): Promise<Publication[]> {
-    const res = await api_client.get<{ children: Publication[] }>(
+    const res = await api_client.get<ApiSchemas["PublicationChildren"]>(
         PublicationURLs.publicationChildren(pubUUID),
     );
     return res.data.children;
