@@ -60,6 +60,12 @@ function listenForFirstGesture(onGesture: () => void): () => void {
     return stopListening;
 }
 
+function waitForEvent(target: EventTarget, type: string): Promise<void> {
+    return new Promise((resolve) => {
+        target.addEventListener(type, () => resolve(), { once: true });
+    });
+}
+
 // plays songs through Shaka and the audio element.
 // It knows nothing about modes, WS messages or the playback state
 export class LocalAudioOutput {
@@ -186,10 +192,10 @@ export class LocalAudioOutput {
     play(): void {
         const attached = this.attached;
         if (!attached) return;
-        this.fadeGuard.beginOp();
-        // e.g. a pause is still fading out. play() would cut the sound for a moment
+        // e.g. a pause is still fading out. play() would cut the sound for a moment.
+        // A seek can also still be waiting for its sound, so this fade in waits for sound too
         if (!attached.audio.paused) {
-            this.graph?.fadeIn();
+            void this.fadeInOnceSoundFlows(this.fadeGuard.beginOp());
             return;
         }
         void this.tryPlay(attached);
@@ -216,8 +222,14 @@ export class LocalAudioOutput {
         void (async () => {
             await this.graph?.fadeOut();
             if (this.fadeGuard.isOpStale(seekOpId)) return;
+            const seeked = waitForEvent(audio, "seeked");
             audio.currentTime = targetMs / 1000;
-            this.graph?.fadeIn();
+            // a paused element stays silent, and the next play fades it in
+            if (audio.paused) return;
+            // until seeked the analyser can still see sound from the old position
+            await seeked;
+            if (this.fadeGuard.isOpStale(seekOpId)) return;
+            await this.fadeInOnceSoundFlows(seekOpId);
         })();
     }
 
@@ -310,7 +322,16 @@ export class LocalAudioOutput {
         audio.currentTime = resumeAt;
     }
 
+    private async fadeInOnceSoundFlows(fadeOpId: number): Promise<void> {
+        const graph = this.graph;
+        if (!graph) return;
+        await graph.waitForSound();
+        if (this.fadeGuard.isOpStale(fadeOpId)) return;
+        graph.fadeIn();
+    }
+
     private async tryPlay({ audio, handlers }: AttachedAudio): Promise<void> {
+        const fadeOpId = this.fadeGuard.beginOp();
         try {
             this.graph?.silence();
             // the element can still be muted from an earlier fallback, and a muted play
@@ -318,7 +339,8 @@ export class LocalAudioOutput {
             audio.muted = false;
             await audio.play();
             handlers.onMutedFallbackChange(false);
-            this.graph?.fadeIn();
+            // not awaited, so that load() still resolves as soon as play() does
+            void this.fadeInOnceSoundFlows(fadeOpId);
         } catch (err) {
             if (err instanceof DOMException && err.name === "AbortError") return;
             // if the user opens the app on a completely new device (non-active yet)
