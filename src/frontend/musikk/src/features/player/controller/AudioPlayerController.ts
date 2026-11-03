@@ -154,6 +154,10 @@ export class AudioPlayerController {
         this.playbackHandlers!.onSongEnd();
     }
 
+    setUserVolume(value: number): void {
+        this.output.setUserVolume(value);
+    }
+
     unmute(ensureAudioPipeline: () => void): Promise<void> {
         return this.output.unmute(ensureAudioPipeline);
     }

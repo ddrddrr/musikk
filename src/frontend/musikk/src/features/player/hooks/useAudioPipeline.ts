@@ -1,5 +1,4 @@
 import { usePlayback } from "@/features/playback/hooks/usePlayback.ts";
-import { readDeviceVolume } from "@/features/player/deviceVolumeStorage.ts";
 import { useLoudnessNormalization } from "@/features/player/hooks/useLoudnessNormalization.ts";
 import { Song } from "@/features/songs/types.ts";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -9,7 +8,7 @@ const LOUDNESS_TARGET = -14; // LUFS
 const TRUE_PEAK_CEILING = -1; // dBTP
 
 // see https://developer.mozilla.org/en-US/docs/Web/API/GainNode for why ramps are needed
-const VOLUME_RAMP_TIME_CONSTANT = 0.05; // should be good enough...
+const LOUDNESS_RAMP_TIME_CONSTANT = 0.05; // seconds
 const DEFAULT_FADE_MS = 125;
 
 interface UseAudioPipelineOptions {
@@ -19,7 +18,6 @@ interface UseAudioPipelineOptions {
 
 interface UseAudioPipelineReturn {
     ensureAudioPipeline: () => void;
-    setUserVolume: (value: number) => void;
     fadeIn: (durationMs?: number) => void;
     fadeOut: (durationMs?: number) => Promise<void>;
 }
@@ -28,7 +26,6 @@ interface AudioPipeline {
     ctx: AudioContext;
     source: MediaElementAudioSourceNode;
     loudnessGain: GainNode;
-    volumeGain: GainNode;
     gainEnvelope: GainNode;
 }
 
@@ -51,40 +48,24 @@ function buildAudioPipeline(audio: HTMLAudioElement): AudioPipeline {
 
     const source = ctx.createMediaElementSource(audio);
     const loudnessGain = ctx.createGain();
-
-    const volumeGain = ctx.createGain();
-    // get from localStorage so an unmute on first gesture doesn't briefly play at 100%
-    const savedVolume = readDeviceVolume();
-    if (savedVolume !== undefined) {
-        volumeGain.gain.value = savedVolume / 100;
-    }
-
     const gainEnvelope = ctx.createGain();
 
     source.connect(loudnessGain);
-    loudnessGain.connect(volumeGain);
-    volumeGain.connect(gainEnvelope);
+    loudnessGain.connect(gainEnvelope);
     gainEnvelope.connect(ctx.destination);
 
-    return { ctx, source, loudnessGain, volumeGain, gainEnvelope };
+    return { ctx, source, loudnessGain, gainEnvelope };
 }
 
 function rampGain(gainNode: GainNode, ctx: AudioContext, target: number) {
     const now = ctx.currentTime;
     // https://developer.mozilla.org/en-US/docs/Web/API/AudioParam
-    // we need to remove scheduled events as when we move the volume slider there is a ton
-    // of events scheduled every "slide tick" and without cancellation they would unexpectadly
-    // override each other
+    // a new gain can come while the last ramp still runs (e.g. the switch is flipped twice),
+    // and without cancellation the scheduled events would override each other
     gainNode.gain.cancelScheduledValues(now);
     // then we set the curr value from which we are going to ramp
     gainNode.gain.setValueAtTime(gainNode.gain.value, now);
-    // we dont use linearRampToValueAtTime/exponentialRampToValueAtTime because
-    // we don't know the "end time" of when the user will finish moving the slider
-    gainNode.gain.setTargetAtTime(target, now, VOLUME_RAMP_TIME_CONSTANT);
-}
-
-function rampToUserVolume(volumeGain: GainNode, ctx: AudioContext, value: number) {
-    rampGain(volumeGain, ctx, Math.max(0, Math.min(1, value)));
+    gainNode.gain.setTargetAtTime(target, now, LOUDNESS_RAMP_TIME_CONSTANT);
 }
 
 function rampGainEnvelope(
@@ -188,12 +169,6 @@ export function useAudioPipeline({
         hasPipeline,
     ]);
 
-    const setUserVolume = useCallback((value: number) => {
-        const pipeline = pipelineRef.current;
-        if (!pipeline) return;
-        rampToUserVolume(pipeline.volumeGain, pipeline.ctx, value);
-    }, []);
-
     const fadeIn = useCallback((durationMs: number = DEFAULT_FADE_MS) => {
         const pipeline = pipelineRef.current;
         if (!pipeline) return;
@@ -212,5 +187,5 @@ export function useAudioPipeline({
 
     useEffect(() => disposePipeline(pipelineRef), []);
 
-    return { ensureAudioPipeline, setUserVolume, fadeIn, fadeOut };
+    return { ensureAudioPipeline, fadeIn, fadeOut };
 }

@@ -15,7 +15,7 @@ export function PlayerBox({
     const { playbackState } = usePlayback();
     const { error: queueError, refetch: queueRefetch } = useQueue();
 
-    const { ensureAudioPipeline, setUserVolume, fadeIn, fadeOut } = useAudioPipeline({
+    const { ensureAudioPipeline, fadeIn, fadeOut } = useAudioPipeline({
         audioRef,
         song: playbackState?.collectionSong.song,
     });
@@ -44,7 +44,6 @@ export function PlayerBox({
                     setIsQueueOpen={setIsQueueOpen}
                     isMutedFallback={isMutedFallback}
                     onUnmute={unmute}
-                    setUserVolume={setUserVolume}
                 />
             )}
 

@@ -33,6 +33,8 @@ export class LocalAudioOutput {
     private attached: AttachedAudio | null = null;
     private isAudioReady = false;
     private hasAudioLoadFailed = false;
+    // kept here, because the volume can be set before the audio element is attached
+    private userVolume = 1;
 
     private loadGuard = createStaleAsyncOpGuard();
     private playOrPauseGuard = createStaleAsyncOpGuard();
@@ -58,6 +60,7 @@ export class LocalAudioOutput {
             toast.error(detail?.message ?? "An audio streaming error occurred.");
         });
         this.attached = { audio, player, handlers };
+        this.applyUserVolume();
     }
 
     tearDownPlayer(): void {
@@ -173,6 +176,11 @@ export class LocalAudioOutput {
         attached.handlers.onMutedFallbackChange(false);
     }
 
+    setUserVolume(value: number): void {
+        this.userVolume = Math.max(0, Math.min(1, value));
+        this.applyUserVolume();
+    }
+
     markEnded(): void {
         this.isAudioReady = false;
     }
@@ -201,6 +209,11 @@ export class LocalAudioOutput {
         if (this.loadGuard.isOpStale(opId)) return null;
         attached.audio.pause();
         return { opId, attached };
+    }
+
+    // a squared curve, because with a linear one the lower half of the slider sounds too loud
+    private applyUserVolume(): void {
+        if (this.attached) this.attached.audio.volume = this.userVolume ** 2;
     }
 
     private seekToStartPoint(audio: HTMLAudioElement, positionMs: number): void {

@@ -19,20 +19,12 @@ interface PlayerBarProps {
     setIsQueueOpen: React.Dispatch<React.SetStateAction<boolean>>;
     isMutedFallback: boolean;
     onUnmute: () => Promise<void>;
-    setUserVolume: (value: number) => void;
 }
-export function PlayerBar({
-    setIsQueueOpen,
-    isMutedFallback,
-    onUnmute,
-    setUserVolume,
-}: PlayerBarProps) {
+export function PlayerBar({ setIsQueueOpen, isMutedFallback, onUnmute }: PlayerBarProps) {
     const { playbackState } = usePlayback();
     const controller = usePlayerController();
     const playingCollectionSong = playbackState?.collectionSong;
-    const { volume, setVolume, handleVolumeCommit, handleMuteToggle } = useVolume({
-        setUserVolume,
-    });
+    const { volume, setVolume, handleVolumeCommit, handleMuteToggle } = useVolume();
     const [seekDraftMs, setSeekDraftMs] = useState<number | null>(null);
     const nextMutation = useQueueNext();
     const prevMutation = useQueuePrev();

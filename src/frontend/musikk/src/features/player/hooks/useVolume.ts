@@ -1,15 +1,13 @@
 import { useDeviceList } from "@/features/playback/hooks/useDeviceList.ts";
+import { usePlayerController } from "@/features/playback/hooks/usePlayerController.ts";
 import { useSetDeviceVolumeAction } from "@/features/playback/ws/actionHooks.ts";
 import { readDeviceVolume, writeDeviceVolume } from "@/features/player/deviceVolumeStorage.ts";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 type SliderValue = number[];
 
-interface UseVolumeOptions {
-    setUserVolume: (value: number) => void;
-}
-
-export function useVolume({ setUserVolume }: UseVolumeOptions) {
+export function useVolume() {
+    const controller = usePlayerController();
     const { activeDevice } = useDeviceList();
     const setDeviceVolume = useSetDeviceVolumeAction();
     const [volume, setVolume] = useState(() => readDeviceVolume() ?? 100);
@@ -19,9 +17,9 @@ export function useVolume({ setUserVolume }: UseVolumeOptions) {
 
     // local changes
     useEffect(() => {
-        setUserVolume(volume / 100);
+        controller.setUserVolume(volume / 100);
         writeDeviceVolume(volume);
-    }, [volume, setUserVolume]);
+    }, [controller, volume]);
 
     // when we get vol from ws
     if (remoteVolume !== prevRemoteVolume) {
