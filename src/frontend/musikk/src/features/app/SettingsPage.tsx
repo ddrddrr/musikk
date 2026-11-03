@@ -1,13 +1,27 @@
+import { getErrorDetail } from "@/api/errorUtils.ts";
 import { useAuth } from "@/features/auth/hooks/useAuth.ts";
 import { BackButton } from "@/features/common/BackButton.tsx";
-import { useLoudnessNormalization } from "@/features/player/hooks/useLoudnessNormalization.ts";
 import { Button } from "@/features/ui/button.tsx";
 import { Switch } from "@/features/ui/switch.tsx";
+import { useMeUpdateMutation } from "@/features/user/api/mutations.ts";
 import { EditProfileDialog } from "@/features/user/components/EditProfileDialog.tsx";
+import { toast } from "sonner";
 
 export function SettingsPage() {
-    const { logout } = useAuth();
-    const loudnessNormalization = useLoudnessNormalization();
+    const { logout, user } = useAuth();
+    const { mutate: updateMe } = useMeUpdateMutation();
+
+    // the toast lives here and not in the hook, because the profile form shows its errors inline
+    const setLoudnessNormalization = (isEnabled: boolean) => {
+        updateMe(
+            { loudness_normalization: isEnabled },
+            {
+                onError: (error) => {
+                    toast.error(getErrorDetail(error, "Failed to save the setting"));
+                },
+            },
+        );
+    };
 
     return (
         <div className="flex flex-1 flex-col items-center gap-8 p-8">
@@ -31,8 +45,8 @@ export function SettingsPage() {
                     <Switch
                         aria-labelledby="loudness-normalization-label"
                         aria-describedby="loudness-normalization-description"
-                        checked={loudnessNormalization.isEnabled}
-                        onCheckedChange={loudnessNormalization.setIsEnabled}
+                        checked={user?.loudness_normalization ?? true}
+                        onCheckedChange={setLoudnessNormalization}
                     />
                 </div>
 

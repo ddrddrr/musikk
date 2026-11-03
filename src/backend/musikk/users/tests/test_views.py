@@ -76,3 +76,19 @@ class TestMeUpdateView(TestCase):
         self.assertEqual(response.status_code, 200)
         me.refresh_from_db()
         self.assertEqual(me.bio, "")
+
+    def test_patch_turns_off_loudness_normalization(self, _mock_ws):
+        me = BaseUserFactory()
+        patch_request = self.factory.patch(
+            reverse("api:me"), {"loudness_normalization": "false"}, format="multipart"
+        )
+        force_authenticate(patch_request, user=me)
+        patch_response = MeView.as_view()(patch_request)
+
+        me.refresh_from_db()
+        get_request = self.factory.get(reverse("api:me"))
+        force_authenticate(get_request, user=me)
+        get_response = MeView.as_view()(get_request)
+
+        self.assertEqual(patch_response.status_code, 200)
+        self.assertFalse(get_response.data["me"]["loudness_normalization"])

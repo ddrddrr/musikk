@@ -3,7 +3,7 @@ import { login as loginAPI, logout as logoutAPI } from "@/features/auth/api/muta
 import { AuthContext } from "@/features/auth/providers/AuthContext.tsx";
 import { fetchMe } from "@/features/user/api/queries.ts";
 import { userKeys } from "@/features/user/api/queryKeys.ts";
-import { BaseUser } from "@/features/user/types.ts";
+import { CurrentUser } from "@/features/user/types.ts";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Cookies from "js-cookie";
 import { ReactNode, useCallback, useEffect, useMemo } from "react";
@@ -22,7 +22,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         isLoading,
         refetch,
         error,
-    } = useQuery<BaseUser | null>({
+    } = useQuery<CurrentUser | null>({
         queryKey: userKeys.me(),
         queryFn: fetchMe,
         retry: false,

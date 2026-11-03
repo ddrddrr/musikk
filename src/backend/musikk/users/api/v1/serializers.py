@@ -36,14 +36,14 @@ class BaseUserSerializer(BaseModelSerializer):
 class BaseMeSerializer(BaseUserSerializer):
     """
     Read shape for `/users/me`. Extends `BaseUserSerializer` with the
-    private `email` field, which is only ever exposed to the
-    authenticated owner of the account and must not leak through public
-    user endpoints.
+    private `email` field and the user's own settings, which are only
+    ever exposed to the authenticated owner of the account and must not
+    leak through public user endpoints.
     """
 
     class Meta(BaseUserSerializer.Meta):
         model = BaseUser
-        fields = BaseUserSerializer.Meta.fields + ["email"]
+        fields = BaseUserSerializer.Meta.fields + ["email", "loudness_normalization"]
 
 
 class MeUpdateSerializer(BaseMeSerializer):
@@ -58,7 +58,7 @@ class MeUpdateSerializer(BaseMeSerializer):
 
     class Meta(BaseMeSerializer.Meta):
         model = BaseUser
-        fields = ["display_name", "bio", "avatar"]
+        fields = ["display_name", "bio", "avatar", "loudness_normalization"]
         extra_kwargs = {
             "display_name": {"required": False},
             "bio": {"required": False, "allow_blank": True},

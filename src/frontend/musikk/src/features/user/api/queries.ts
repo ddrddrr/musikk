@@ -2,12 +2,12 @@ import { api_client, api_client_public } from "@/api/axiosConf.ts";
 import { UUID } from "@/api/types.ts";
 import { UserURLs } from "@/features/user/api/endpoints.ts";
 import { userKeys } from "@/features/user/api/queryKeys.ts";
-import { BaseUser } from "@/features/user/types.ts";
+import { BaseUser, CurrentUser } from "@/features/user/types.ts";
 import { skipToken, useQuery } from "@tanstack/react-query";
 import { isAxiosError } from "axios";
 
 interface MeResponse {
-    me: BaseUser;
+    me: CurrentUser;
 }
 
 interface FriendsResponse {
@@ -22,7 +22,7 @@ interface FollowedResponse {
     followed: BaseUser[];
 }
 
-export async function fetchMe(): Promise<BaseUser | null> {
+export async function fetchMe(): Promise<CurrentUser | null> {
     try {
         const res = await api_client_public.get<MeResponse>(UserURLs.me);
         return res.data.me;

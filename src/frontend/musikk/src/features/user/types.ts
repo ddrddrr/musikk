@@ -9,6 +9,10 @@ export interface BaseUser extends BaseModel {
     is_artist: boolean;
 }
 
+export interface CurrentUser extends BaseUser {
+    loudness_normalization: boolean;
+}
+
 export const ProfileFormSchema = z.object({
     display_name: z
         .string()

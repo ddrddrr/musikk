@@ -1,8 +1,8 @@
-import { BaseUser } from "@/features/user/types.ts";
+import { CurrentUser } from "@/features/user/types.ts";
 import { createContext } from "react";
 
 export interface AuthContextType {
-    user: BaseUser | null;
+    user: CurrentUser | null;
     isAuthenticated: boolean;
     isLoading: boolean;
     login: (email: string, password: string) => Promise<void>;

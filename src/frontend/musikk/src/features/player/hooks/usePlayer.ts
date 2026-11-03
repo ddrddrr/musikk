@@ -1,9 +1,9 @@
+import { useAuth } from "@/features/auth/hooks/useAuth.ts";
 import { usePlayerController } from "@/features/playback/hooks/usePlayerController.ts";
 import {
     useActiveDeviceReportAction,
     useSetPlaybackAction,
 } from "@/features/playback/ws/actionHooks.ts";
-import { useLoudnessNormalization } from "@/features/player/hooks/useLoudnessNormalization.ts";
 import { useQueueNext } from "@/features/song-queue/api/mutations.ts";
 import { useEffect, useState } from "react";
 
@@ -20,7 +20,8 @@ interface UsePlayerReturn {
 
 export function usePlayer({ audioRef }: UsePlayerOptions): UsePlayerReturn {
     const controller = usePlayerController();
-    const { isEnabled: isNormalizationEnabled } = useLoudnessNormalization();
+    const { user } = useAuth();
+    const isNormalizationEnabled = user?.loudness_normalization ?? true;
     const sendActiveDeviceReport = useActiveDeviceReportAction();
     const sendSet = useSetPlaybackAction();
     const { mutate: nextMutate } = useQueueNext();
