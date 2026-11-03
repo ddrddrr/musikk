@@ -13,7 +13,6 @@ import { AuthProvider } from "@/features/auth/providers/AuthProvider.tsx";
 import { AuthenticatedLayout } from "@/features/layout/AuthenticatedLayout.tsx";
 import { DeviceListProvider } from "@/features/playback/providers/DeviceListProvider.tsx";
 import { PlaybackProvider } from "@/features/playback/providers/PlaybackProvider.tsx";
-import { LoudnessPresetProvider } from "@/features/player/providers/LoudnessPresetProvider.tsx";
 import { useIsMobile } from "@/hooks/useIsMobile.ts";
 import { WebSocketProvider } from "@/providers/WebSocketProvider.tsx";
 
@@ -53,9 +52,7 @@ export function App() {
                                 <WebSocketProvider>
                                     <DeviceListProvider>
                                         <PlaybackProvider>
-                                            <LoudnessPresetProvider>
-                                                <AuthenticatedApp />
-                                            </LoudnessPresetProvider>
+                                            <AuthenticatedApp />
                                         </PlaybackProvider>
                                     </DeviceListProvider>
                                 </WebSocketProvider>

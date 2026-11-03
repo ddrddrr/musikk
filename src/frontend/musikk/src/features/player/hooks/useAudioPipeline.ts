@@ -1,15 +1,10 @@
 import { usePlayback } from "@/features/playback/hooks/usePlayback.ts";
 import { readDeviceVolume } from "@/features/player/deviceVolumeStorage.ts";
-import { useLoudnessPreset } from "@/features/player/hooks/useLoudnessPreset.ts";
-import { type LoudnessPreset } from "@/features/player/providers/loudnessPresetContext.ts";
+import { useLoudnessNormalization } from "@/features/player/hooks/useLoudnessNormalization.ts";
 import { Song } from "@/features/songs/types.ts";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-const LOUDNESS_TARGETS: Record<Exclude<LoudnessPreset, "off">, number> = {
-    quiet: -19, // LUFS
-    normal: -14,
-    loud: -11,
-};
+const LOUDNESS_TARGET = -14; // LUFS
 
 const TRUE_PEAK_CEILING = -1; // dBTP
 
@@ -35,33 +30,18 @@ interface AudioPipeline {
     loudnessGain: GainNode;
     volumeGain: GainNode;
     gainEnvelope: GainNode;
-    compressor: DynamicsCompressorNode;
 }
 
 // boosting a quiet track can push its peaks above 0 dBFS (clipping),
 // so we cap gainDb at the headroom we have left before TRUE_PEAK_CEILING
-function computeGainDb(song: Song, targetLufs: number): number {
+function computeGainDb(song: Song): number {
     if (song.loudness_lufs == null) return 0;
-    let gainDb = targetLufs - song.loudness_lufs;
+    let gainDb = LOUDNESS_TARGET - song.loudness_lufs;
     if (song.true_peak_dbtp != null) {
         const maxGain = TRUE_PEAK_CEILING - song.true_peak_dbtp;
         gainDb = Math.min(gainDb, maxGain);
     }
     return gainDb;
-}
-
-// the "loud" preset uses the compressor as a limiter so we can push gain higher without clipping
-function applyCompressor(compressorNode: DynamicsCompressorNode, preset: LoudnessPreset) {
-    if (preset === "loud") {
-        compressorNode.threshold.value = TRUE_PEAK_CEILING;
-        compressorNode.knee.value = 0;
-        compressorNode.ratio.value = 20;
-        compressorNode.attack.value = 0.005; // 5ms
-        compressorNode.release.value = 0.1; // 100ms
-    } else {
-        compressorNode.threshold.value = 0;
-        compressorNode.ratio.value = 1;
-    }
 }
 
 function buildAudioPipeline(audio: HTMLAudioElement): AudioPipeline {
@@ -80,15 +60,13 @@ function buildAudioPipeline(audio: HTMLAudioElement): AudioPipeline {
     }
 
     const gainEnvelope = ctx.createGain();
-    const compressor = ctx.createDynamicsCompressor();
 
     source.connect(loudnessGain);
     loudnessGain.connect(volumeGain);
     volumeGain.connect(gainEnvelope);
-    gainEnvelope.connect(compressor);
-    compressor.connect(ctx.destination);
+    gainEnvelope.connect(ctx.destination);
 
-    return { ctx, source, loudnessGain, volumeGain, gainEnvelope: gainEnvelope, compressor };
+    return { ctx, source, loudnessGain, volumeGain, gainEnvelope };
 }
 
 function rampGain(gainNode: GainNode, ctx: AudioContext, target: number) {
@@ -130,24 +108,21 @@ function rampGainEnvelope(
 function applyLoudnessSettings(
     pipeline: AudioPipeline,
     song: Song | undefined,
-    preset: LoudnessPreset,
+    isNormalizationEnabled: boolean,
 ) {
     if (pipeline.ctx.state === "suspended") {
         void pipeline.ctx.resume();
     }
     // ramp here, because the new song gain is in process while the old song still fades out,
     // without this it would click
-    if (preset === "off" || song?.loudness_lufs == null) {
+    if (!isNormalizationEnabled || song?.loudness_lufs == null) {
         rampGain(pipeline.loudnessGain, pipeline.ctx, 1);
-        pipeline.compressor.threshold.value = 0;
-        pipeline.compressor.ratio.value = 1;
         return;
     }
-    const gainDb = computeGainDb(song, LOUDNESS_TARGETS[preset]);
+    const gainDb = computeGainDb(song);
     // audio api's gain is linear, so we convert from dB
     // prolly factor out to a method
     rampGain(pipeline.loudnessGain, pipeline.ctx, Math.pow(10, gainDb / 20));
-    applyCompressor(pipeline.compressor, preset);
 }
 
 // browsers gate AudioContext creation/resume on a user gesture
@@ -186,10 +161,10 @@ export function useAudioPipeline({
     song,
 }: UseAudioPipelineOptions): UseAudioPipelineReturn {
     const { isThisDeviceActive } = usePlayback();
-    const { preset } = useLoudnessPreset();
+    const { isEnabled: isNormalizationEnabled } = useLoudnessNormalization();
     const pipelineRef = useRef<AudioPipeline | null>(null);
     // drives a re-render after the gesture-bound build, so the settings effect re-fires
-    // and replaces the browser-default DynamicsCompressor with the configured values
+    // and applies the current song's gain to the new graph
     const [hasPipeline, setHasPipeline] = useState(false);
 
     const ensureAudioPipeline = useCallback(() => {
@@ -203,12 +178,12 @@ export function useAudioPipeline({
 
     useEffect(() => {
         if (!isThisDeviceActive || !pipelineRef.current) return;
-        applyLoudnessSettings(pipelineRef.current, song, preset);
+        applyLoudnessSettings(pipelineRef.current, song, isNormalizationEnabled);
     }, [
         song?.uuid,
         song?.loudness_lufs,
         song?.true_peak_dbtp,
-        preset,
+        isNormalizationEnabled,
         isThisDeviceActive,
         hasPipeline,
     ]);

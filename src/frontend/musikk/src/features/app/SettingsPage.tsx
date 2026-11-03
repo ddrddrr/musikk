@@ -1,13 +1,13 @@
 import { useAuth } from "@/features/auth/hooks/useAuth.ts";
 import { BackButton } from "@/features/common/BackButton.tsx";
-import { useLoudnessPreset } from "@/features/player/hooks/useLoudnessPreset.ts";
-import { LoudnessPresetSelector } from "@/features/player/LoudnessPresetSelector.tsx";
+import { useLoudnessNormalization } from "@/features/player/hooks/useLoudnessNormalization.ts";
 import { Button } from "@/features/ui/button.tsx";
+import { Switch } from "@/features/ui/switch.tsx";
 import { EditProfileDialog } from "@/features/user/components/EditProfileDialog.tsx";
 
 export function SettingsPage() {
     const { logout } = useAuth();
-    const { preset, setPreset } = useLoudnessPreset();
+    const loudnessNormalization = useLoudnessNormalization();
 
     return (
         <div className="flex flex-1 flex-col items-center gap-8 p-8">
@@ -17,13 +17,23 @@ export function SettingsPage() {
             <div className="flex w-full max-w-md flex-col gap-6">
                 <div className="flex items-center justify-between gap-4">
                     <div className="flex flex-col">
-                        <span className="text-base font-medium">Keep songs at the same volume</span>
-                        <span className="text-xs text-muted-foreground">
+                        <span id="loudness-normalization-label" className="text-base font-medium">
+                            Keep songs at the same volume
+                        </span>
+                        <span
+                            id="loudness-normalization-description"
+                            className="text-xs text-muted-foreground"
+                        >
                             Songs can originally have different volume level. This makes them sound
                             the same, so you don&apos;t have to readjust the volume manually
                         </span>
                     </div>
-                    <LoudnessPresetSelector value={preset} onChange={setPreset} />
+                    <Switch
+                        aria-labelledby="loudness-normalization-label"
+                        aria-describedby="loudness-normalization-description"
+                        checked={loudnessNormalization.isEnabled}
+                        onCheckedChange={loudnessNormalization.setIsEnabled}
+                    />
                 </div>
 
                 <EditProfileDialog
