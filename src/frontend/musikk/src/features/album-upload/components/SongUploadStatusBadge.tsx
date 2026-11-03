@@ -1,16 +1,12 @@
-import { SongUploadStatus } from "@/features/album-upload/types.ts";
+import { TrackStatus } from "@/features/album-upload/types.ts";
 import { Spinner } from "@/features/ui/spinner.tsx";
 import { cn } from "@/lib/utils.ts";
 
-function inProgressLabel(status: SongUploadStatus) {
-    if (status === "pending") return "waiting";
-    if (status === "uploading") return "uploading";
-    if (status === "queued") return "queued";
-    if (status === "processing") return "processing";
-    return null;
+function isInProgress(status: TrackStatus): boolean {
+    return status === "uploading" || status === "queued" || status === "processing";
 }
 
-function statusStyle(status: SongUploadStatus) {
+function statusStyle(status: TrackStatus) {
     if (status === "ready") return "text-success bg-success/10 border-success/30";
     return "text-destructive bg-destructive/10 border-destructive/30";
 }
@@ -19,22 +15,14 @@ export function SongUploadStatusBadge({
     status,
     detail,
 }: {
-    status: SongUploadStatus;
+    status: TrackStatus;
     detail?: string;
 }) {
-    if (status === "unknown") return null;
-
-    const label = inProgressLabel(status);
-    if (label !== null) {
+    if (isInProgress(status)) {
         return (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Spinner />
-                <span>{label}</span>
-                {detail && (
-                    <div className="max-w-[50ch] truncate text-xs text-muted-foreground">
-                        {detail}
-                    </div>
-                )}
+                <span>{status}</span>
             </div>
         );
     }

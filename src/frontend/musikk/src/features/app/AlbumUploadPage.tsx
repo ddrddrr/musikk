@@ -5,17 +5,17 @@ import { CollectionForm } from "@/features/collections/components/CollectionForm
 import { useCollectionCreation } from "@/features/collections/hooks/useCollectionCreation.ts";
 import { Collection } from "@/features/collections/types.ts";
 import { BackButton } from "@/features/common/BackButton.tsx";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 export function AlbumUploadPage() {
     const navigate = useNavigate();
-    const [albumUUID, setAlbumUUID] = useState<UUID | null>(null);
+    // the album uuid lives in the URL, so a reload of the page resumes the upload
+    const { albumUUID } = useParams<{ albumUUID: UUID }>();
 
     const { form, submit, isSubmitting } = useCollectionCreation({
         type: "album",
         onSuccess: (collection: Collection) => {
-            setAlbumUUID(collection.uuid);
+            void navigate(`/upload/${collection.uuid}`, { replace: true });
         },
     });
 
@@ -64,6 +64,7 @@ export function AlbumUploadPage() {
                                 Add and upload all songs before creating the album.
                             </p>
                             <AlbumSongUploadSection
+                                key={albumUUID}
                                 albumUUID={albumUUID}
                                 onComplete={() => publishAlbum(albumUUID)}
                             />

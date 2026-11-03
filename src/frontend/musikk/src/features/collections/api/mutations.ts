@@ -78,7 +78,7 @@ interface CollectionRemoveSongParams {
     songCollectionSongUUID: UUID;
 }
 
-async function collectionRemoveSong({
+export async function collectionRemoveSong({
     collectionUUID,
     songCollectionSongUUID,
 }: CollectionRemoveSongParams) {

@@ -1,3 +1,4 @@
+import { useAlbumUploadWsEvents } from "@/features/album-upload/wsEvents.ts";
 import { useCollectionWsEvents } from "@/features/collections/wsEvents.ts";
 import { useNotificationWsEvents } from "@/features/notifications/wsEvents.ts";
 import { useDeviceLifecycle } from "@/features/playback/hooks/useDeviceLifecycle.ts";
@@ -13,6 +14,7 @@ export function useWebSocketListeners() {
     useUserWsEvents();
     useQueueWsEvents();
     useCollectionWsEvents();
+    useAlbumUploadWsEvents();
     useNotificationWsEvents();
     useUserChatsWsEvents();
 }

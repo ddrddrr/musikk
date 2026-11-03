@@ -1,19 +1,16 @@
 import { UUID } from "@/api/types.ts";
 
-// unkown is an internal FE fall-back state
-export type SongUploadStatus =
-    | "unknown"
-    | "pending"
-    | "uploading"
-    | "queued"
-    | "processing"
-    | "ready"
-    | "failed";
+type ServerTrackStatus = "queued" | "processing" | "ready" | "failed";
 
-interface SongUploadInfo {
-    status: SongUploadStatus;
-    songUUID?: UUID;
-    detail?: string;
+// "uploading" exists only in the browser, while the POST of a form row is in flight
+export type TrackStatus = ServerTrackStatus | "uploading";
+
+export interface AlbumTrack {
+    collection_song_uuid: UUID;
+    song_uuid: UUID;
+    title: string;
+    position: number;
+    status: ServerTrackStatus;
+    status_detail: string;
+    operation_id: UUID | null;
 }
-// operationID : songUploadInfo
-export type SongUploadState = Record<UUID, SongUploadInfo>;

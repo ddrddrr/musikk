@@ -1,35 +1,77 @@
 import { api_client } from "@/api/axiosConf.ts";
+import { getErrorDetail } from "@/api/errorUtils.ts";
 import { UUID } from "@/api/types.ts";
-import { CollectionURLs } from "@/features/collections/api/endpoints.ts";
+import { AlbumUploadURLs } from "@/features/album-upload/api/endpoints.ts";
+import { albumUploadKeys } from "@/features/album-upload/api/queryKeys.ts";
+import { AlbumTrack } from "@/features/album-upload/types.ts";
+import { collectionRemoveSong } from "@/features/collections/api/mutations.ts";
+import { Mutation, useMutation, useMutationState, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
-interface CollectionSongPayload {
+export interface AlbumTrackUploadParams {
     // TODO: playlist/album song creation views
     operationID: UUID;
-    collectionUUID: UUID;
+    position: number;
     title: string;
     audio: File;
     image?: File;
 }
 
-export async function uploadCollectionSong(payload: CollectionSongPayload) {
+async function uploadAlbumTrack(
+    albumUUID: UUID,
+    params: AlbumTrackUploadParams,
+): Promise<AlbumTrack> {
     const formData = new FormData();
-
-    if (!(payload?.operationID && payload?.audio && payload?.title)) {
-        throw new Error(
-            "`operationID`, `audio` and `title` are required for CollectionSong upload operation",
-        );
+    formData.append("operation_id", params.operationID);
+    formData.append("position", String(params.position));
+    formData.append("title", params.title);
+    formData.append("audio", params.audio);
+    if (params.image) {
+        formData.append("image", params.image);
     }
 
-    formData.append("operation_id", payload.operationID);
-    formData.append("title", payload.title);
-    formData.append("audio", payload.audio);
-    if (payload.image) {
-        formData.append("image", payload.image);
-    }
-
-    const res = await api_client.post<{ song_uuid: UUID; collection_song_uuid: UUID }>(
-        CollectionURLs.collectionSongCreate(payload.collectionUUID),
-        formData,
-    );
+    const res = await api_client.post<AlbumTrack>(AlbumUploadURLs.tracks(albumUUID), formData);
     return res.data;
+}
+
+export function useUploadAlbumTrack(albumUUID: UUID) {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationKey: albumUploadKeys.uploads(albumUUID),
+        mutationFn: (params: AlbumTrackUploadParams) => uploadAlbumTrack(albumUUID, params),
+        // returning the promise keeps the upload pending until the new track is in the list,
+        // so the track never disappears from the screen in between
+        onSuccess: () =>
+            queryClient.invalidateQueries({ queryKey: albumUploadKeys.tracks(albumUUID) }),
+        onError: (error) => {
+            toast.error(getErrorDetail(error, "Failed to upload song"));
+        },
+    });
+}
+
+function uploadVariables(mutation: Mutation): AlbumTrackUploadParams {
+    return mutation.state.variables as AlbumTrackUploadParams;
+}
+
+export function useAlbumTrackUploadsInFlight(albumUUID: UUID): AlbumTrackUploadParams[] {
+    return useMutationState({
+        filters: { mutationKey: albumUploadKeys.uploads(albumUUID), status: "pending" },
+        select: uploadVariables,
+    });
+}
+
+export function useRemoveAlbumTrack(albumUUID: UUID) {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (collectionSongUUID: UUID) =>
+            collectionRemoveSong({
+                collectionUUID: albumUUID,
+                songCollectionSongUUID: collectionSongUUID,
+            }),
+        onSuccess: () =>
+            queryClient.invalidateQueries({ queryKey: albumUploadKeys.tracks(albumUUID) }),
+        onError: (error) => {
+            toast.error(getErrorDetail(error, "Failed to remove song"));
+        },
+    });
 }

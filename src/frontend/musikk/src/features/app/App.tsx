@@ -24,6 +24,7 @@ function AuthenticatedApp() {
             <Route element={<AuthenticatedLayout />}>
                 <Route path="/*" element={<HomePage />} />
                 <Route path="/upload" element={<AlbumUploadPage />} />
+                <Route path="/upload/:albumUUID" element={<AlbumUploadPage />} />
                 <Route path="/settings" element={<SettingsPage />} />
             </Route>
         </Routes>
