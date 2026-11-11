@@ -92,3 +92,17 @@ class TestMeUpdateView(TestCase):
 
         self.assertEqual(patch_response.status_code, 200)
         self.assertFalse(get_response.data["me"]["loudness_normalization"])
+
+
+class TestMediaAccessView(TestCase):
+    def test_allows_a_logged_in_user(self):
+        self.client.force_login(BaseUserFactory())
+
+        response = self.client.get(reverse("api:media-access"))
+
+        self.assertEqual(response.status_code, 204)
+
+    def test_rejects_an_anonymous_user(self):
+        response = self.client.get(reverse("api:media-access"))
+
+        self.assertEqual(response.status_code, 401)

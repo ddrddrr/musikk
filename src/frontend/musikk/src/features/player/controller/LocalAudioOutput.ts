@@ -104,6 +104,7 @@ export class LocalAudioOutput {
         }
         const player = new shaka.Player();
         player.addEventListener("error", (event: Event) => {
+            // TODO: log the user out when a segment request gets a 401 because the session expired.
             const detail = (event as CustomEvent<{ message?: string }>).detail;
             toast.error(detail?.message ?? "An audio streaming error occurred.");
         });

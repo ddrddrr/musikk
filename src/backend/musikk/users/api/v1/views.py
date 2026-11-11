@@ -29,6 +29,17 @@ def csrf(request):
     return HttpResponse(status=204)
 
 
+def media_access(request):
+    """
+    Caddy calls this through forward_auth before it serves a file under /media/. Caddy serves
+    the file only on a 2xx answer and passes any other answer to the client unchanged. It is a
+    plain Django view and not a DRF one, so the API throttles do not count every audio segment.
+    """
+    if request.user.is_authenticated:
+        return HttpResponse(status=204)
+    return HttpResponse(status=401)
+
+
 ME_UPDATE_SCHEMA = extend_schema(
     responses=inline_serializer(name="MeUpdated", fields={"user": BaseMeSerializer()})
 )

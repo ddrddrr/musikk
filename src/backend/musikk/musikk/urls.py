@@ -4,12 +4,26 @@ from django.contrib import admin
 from django.http import HttpResponse
 from django.urls import path
 from django.urls.conf import include
+from django.utils.cache import patch_cache_control
 from django.views.generic import TemplateView
+from django.views.static import serve
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 
 def _health(request):
     return HttpResponse("ok", content_type="text/plain")
+
+
+def _serve_media(request, path, document_root):
+    """
+    Serves media in development with the same login check and cache headers that Caddy gives
+    in production, so a page that loads media without a session fails in development too.
+    """
+    if not request.user.is_authenticated:
+        return HttpResponse(status=401)
+    response = serve(request, path, document_root=document_root)
+    patch_cache_control(response, private=True, no_cache=True)
+    return response
 
 
 urlpatterns = [
@@ -23,7 +37,7 @@ urlpatterns = [
         name="account_email_verification_sent",
     ),
 ] + static(
-    settings.MEDIA_URL, document_root=settings.MEDIA_ROOT
+    settings.MEDIA_URL, view=_serve_media, document_root=settings.MEDIA_ROOT
 )  # served only when DEBUG=True
 
 if settings.DEBUG:

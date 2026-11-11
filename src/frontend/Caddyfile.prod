@@ -11,6 +11,11 @@ musikk.stream {
         file_server
     }
     handle_path /media/* {
+        forward_auth server:8000 {
+            uri /api/v1/media-access
+        }
+        # the browser keeps its copy but asks again before each reuse, so every reuse passes the login check
+        header Cache-Control "private, no-cache"
         root /app/media
         file_server
     }

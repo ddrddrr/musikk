@@ -1,25 +1,26 @@
 from dj_rest_auth.registration.views import (
     RegisterView,
-    VerifyEmailView,
     ResendEmailVerificationView,
+    VerifyEmailView,
 )
 from dj_rest_auth.views import (
-    PasswordResetView,
-    PasswordResetConfirmView,
     LoginView,
     LogoutView,
     PasswordChangeView,
+    PasswordResetConfirmView,
+    PasswordResetView,
 )
 from django.urls import path
 from django.urls.conf import include
 
 from users.api.v1.views import (
-    UserRetrieveView,
-    MeView,
-    FriendsView,
-    FollowersView,
     FollowedView,
+    FollowersView,
+    FriendsView,
+    MeView,
+    UserRetrieveView,
     csrf,
+    media_access,
 )
 
 dj_rest_auth_urls = [
@@ -43,6 +44,7 @@ dj_rest_auth_urls = [
 urlpatterns = [
     path("auth/", include(dj_rest_auth_urls)),
     path("csrf", csrf),
+    path("media-access", media_access, name="media-access"),
     path(
         "users/<uuid:uuid>",
         UserRetrieveView.as_view(),
