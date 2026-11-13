@@ -47,7 +47,11 @@ song_urls = [
         CollectionSongRetrieveView.as_view(),
         name="song-retrieve",
     ),
-    path("songs/<uuid:uuid>/album", AlbumBySongView.as_view(), name="album-by-song"),
+    path(
+        "songs/<uuid:song_uuid>/album",
+        AlbumBySongView.as_view(),
+        name="album-by-song",
+    ),
     path(
         "songs/<uuid:collection_song_uuid>/collections",
         SongUserCollections.as_view(),

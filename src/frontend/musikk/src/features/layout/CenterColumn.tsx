@@ -3,6 +3,7 @@ import { MusicFeed } from "@/features/layout/MusicFeed.tsx";
 import { ChatBoxRouteHandler } from "@/features/publications/components/chat/ChatBoxRouteHandler.tsx";
 import { ChatPreviewList } from "@/features/publications/components/chat/ChatPreviewList.tsx";
 import { GlobalFeed } from "@/features/publications/components/posts/GlobalFeed.tsx";
+import { SongCommentsRouteHandler } from "@/features/songs/components/SongCommentsRouteHandler.tsx";
 import { Connections } from "@/features/user/components/Connections.tsx";
 import { ProfilePage } from "@/features/user/components/ProfilePage.tsx";
 import { Route, Routes, useParams } from "react-router-dom";
@@ -15,6 +16,7 @@ export function CenterColumn() {
                     <Route path="/" element={<MusicFeed />} />
                     <Route path="/feed" element={<GlobalFeed />} />
                     <Route path="collection/:uuid/*" element={<SongCollectionContainerWrapper />} />
+                    <Route path="songs/:songUUID/comments" element={<SongCommentsRouteHandler />} />
                     <Route path="users/:uuid" element={<ProfilePage />} />
                     <Route path="connections" element={<Connections />} />
                     <Route path="chats" element={<ChatPreviewList />} />

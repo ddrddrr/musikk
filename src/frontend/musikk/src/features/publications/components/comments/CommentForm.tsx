@@ -1,27 +1,23 @@
-import { UUID } from "@/api/types.ts";
-import {
-    PublicationDraft,
-    useCreateCollectionComment,
-} from "@/features/publications/api/mutations.ts";
+import { PublicationDraft, useCreateComment } from "@/features/publications/api/mutations.ts";
 import { PublicationForm } from "@/features/publications/components/PublicationForm.tsx";
 import { commentSchema } from "@/features/publications/schemas.ts";
-import { Publication } from "@/features/publications/types.ts";
+import { CommentableObjectRef, Publication } from "@/features/publications/types.ts";
 import { Button } from "@/features/ui/button.tsx";
 
 interface CommentFormProps {
-    collectionUUID: UUID;
+    commentable: CommentableObjectRef;
     replyTo?: Publication;
     setReplyTo?: (comment?: Publication) => void;
     onTyping?: () => void;
 }
 
-export function CommentForm({ collectionUUID, replyTo, setReplyTo, onTyping }: CommentFormProps) {
-    const createCollectionCommentMutation = useCreateCollectionComment();
+export function CommentForm({ commentable, replyTo, setReplyTo, onTyping }: CommentFormProps) {
+    const createCommentMutation = useCreateComment();
 
     const submit = (draft: PublicationDraft) =>
-        createCollectionCommentMutation.mutateAsync({
+        createCommentMutation.mutateAsync({
             ...draft,
-            collectionUUID,
+            commentable,
             parentUUID: replyTo?.uuid,
         });
 

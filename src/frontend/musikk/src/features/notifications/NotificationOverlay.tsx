@@ -18,10 +18,14 @@ type TaggedNotification =
 
 function replyTarget(notification: ReplyNotification): string {
     const { created_for, root_author_uuid } = notification.reply_publication;
-    if (created_for.type === "feed") {
-        return `/users/${root_author_uuid}`;
+    switch (created_for.type) {
+        case "feed":
+            return `/users/${root_author_uuid}`;
+        case "song":
+            return `/songs/${created_for.uuid}/comments`;
+        default:
+            return `/collection/${created_for.uuid}/comments`;
     }
-    return `/collection/${created_for.uuid}/comments`;
 }
 
 // TODO: rewrite as different sections? replies, friend stuff, new music etc?

@@ -3,10 +3,19 @@ import { PlayerBox } from "@/features/player/PlayerBox.tsx";
 import { SongQueue } from "@/features/song-queue/components/SongQueue.tsx";
 import { Toaster } from "@/features/ui/sonner.tsx";
 import { useState } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 
 export function AuthenticatedLayout() {
     const [isQueueOpen, setIsQueueOpen] = useState(false);
+    const location = useLocation();
+    const [prevLocation, setPrevLocation] = useState(location);
+
+    // the queue covers the page, so any navigation closes it
+    // otherwise a link clicked inside the queue would change the page out of sight
+    if (location !== prevLocation) {
+        setPrevLocation(location);
+        setIsQueueOpen(false);
+    }
 
     return (
         <div className="flex h-screen flex-col bg-muted">
@@ -22,7 +31,7 @@ export function AuthenticatedLayout() {
                 )}
             </div>
             <Toaster position="top-center" />
-            <PlayerBox setIsQueueOpen={setIsQueueOpen} />
+            <PlayerBox onToggleQueue={() => setIsQueueOpen((open) => !open)} />
         </div>
     );
 }

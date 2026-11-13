@@ -1,5 +1,5 @@
 import { UUID } from "@/api/types.ts";
-import { FeedConnection } from "@/features/publications/types.ts";
+import { CommentableObjectRef, FeedConnection } from "@/features/publications/types.ts";
 
 export const publicationKeys = {
     base: ["publications"] as const,
@@ -10,8 +10,8 @@ export const publicationKeys = {
         [...publicationKeys.globalFeed(connection), "poll"] as const,
     feed: (userUUID: UUID) => [...publicationKeys.base, "feed", userUUID] as const,
     feedPoll: (userUUID: UUID) => [...publicationKeys.feed(userUUID), "poll"] as const,
-    collectionComments: (collectionUUID: UUID) =>
-        [...publicationKeys.base, "collection-comments", collectionUUID] as const,
+    comments: ({ type, uuid }: CommentableObjectRef) =>
+        [...publicationKeys.base, "comments", type, uuid] as const,
     allChildren: () => [...publicationKeys.base, "children"] as const,
     children: (pubUUID: UUID) => [...publicationKeys.allChildren(), pubUUID] as const,
     chats: () => [...publicationKeys.base, "chats"] as const,

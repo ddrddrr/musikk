@@ -7,7 +7,9 @@ from social.api.v1.views import (
     ChatRetrieveView,
     CollectionCommentsListCreateView,
     FeedPostsListCreateView,
+    GlobalFeedPostsListView,
     PublicationChildrenView,
+    SongCommentsListCreateView,
     UserChatsListCreateView,
 )
 
@@ -46,7 +48,7 @@ urlpatterns = [
     ),
     path(
         "feed/posts",
-        FeedPostsListCreateView.as_view(),
+        GlobalFeedPostsListView.as_view(),
         name="global-feed-list",
     ),
     path(
@@ -58,5 +60,10 @@ urlpatterns = [
         "collections/<uuid:collection_uuid>/comments",
         CollectionCommentsListCreateView.as_view(),
         name="collection-comments-list-retrieve",
+    ),
+    path(
+        "songs/<uuid:song_uuid>/comments",
+        SongCommentsListCreateView.as_view(),
+        name="song-comments-list-create",
     ),
 ] + chat_urlpatterns

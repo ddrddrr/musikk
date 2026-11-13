@@ -19,7 +19,8 @@ import { Link } from "react-router-dom";
 
 interface SongCollectionHeaderProps {
     collection: CollectionDetailed;
-    showComments: boolean;
+    compact: boolean;
+    isCommentsOpen: boolean;
     commentsToggleTo: string;
     songsCount: number;
     renderAddToLikedButton: boolean;
@@ -56,7 +57,8 @@ function PlaylistMenuDropdown({
 
 export function CollectionHeader({
     collection,
-    showComments,
+    compact,
+    isCommentsOpen,
     commentsToggleTo,
     songsCount,
     renderAddToLikedButton,
@@ -64,7 +66,8 @@ export function CollectionHeader({
     isAuthorPlaylist,
     onDeleteClick,
 }: SongCollectionHeaderProps) {
-    const buttonSize = showComments ? "sm" : "md";
+    const buttonSize = compact ? "sm" : "md";
+    const commentsButtonLabel = isCommentsOpen ? "Hide Comments" : "Show Comments";
     const actionButtons = (
         <>
             {songsCount > 0 && <CollectionPlayButton collection={collection} size={buttonSize} />}
@@ -77,6 +80,28 @@ export function CollectionHeader({
             )}
         </>
     );
+    const infoAndActions = compact ? (
+        <div className="mb-2">
+            <p className="truncate text-sm font-bold">{collection.title}</p>
+            <div className="mt-2 flex gap-3">{actionButtons}</div>
+        </div>
+    ) : (
+        <div className="flex items-center justify-between">
+            <div className="min-w-0">
+                <p className="text-xl font-bold">{collection.title}</p>
+                <AuthorLinks
+                    authors={collection.authors}
+                    className="text-sm text-muted-foreground"
+                />
+                {collection.description && (
+                    <p className="mt-2 line-clamp-2 text-base text-muted-foreground">
+                        {collection.description}
+                    </p>
+                )}
+            </div>
+            <div className="ml-2 flex flex-shrink-0 gap-2">{actionButtons}</div>
+        </div>
+    );
 
     return (
         <>
@@ -86,50 +111,22 @@ export function CollectionHeader({
                     alt={collection.title}
                     className={cn(
                         "rounded-sm border-2 border-foreground",
-                        showComments ? "size-20" : "size-32",
+                        compact ? "size-20" : "size-32",
                     )}
                 />
 
-                <div className="min-w-0 flex-1">
-                    {showComments ? (
-                        <div className="mb-2">
-                            <p className="truncate text-sm font-bold">{collection.title}</p>
-                            <div className="mt-2 flex gap-3">{actionButtons}</div>
-                        </div>
-                    ) : (
-                        <div className="flex items-center justify-between">
-                            <div className="min-w-0">
-                                <p className="text-xl font-bold">{collection.title}</p>
-                                <AuthorLinks
-                                    authors={collection.authors}
-                                    className="text-sm text-muted-foreground"
-                                />
-                                {collection.description && (
-                                    <p className="mt-2 line-clamp-2 text-base text-muted-foreground">
-                                        {collection.description}
-                                    </p>
-                                )}
-                            </div>
-                            <div className="ml-2 flex flex-shrink-0 gap-2">{actionButtons}</div>
-                        </div>
-                    )}
-                </div>
+                <div className="min-w-0 flex-1">{infoAndActions}</div>
             </div>
 
             <div className="flex items-center justify-between">
                 <h3
-                    className={cn(
-                        "p-1 font-bold text-foreground",
-                        showComments ? "text-sm" : "text-lg",
-                    )}
+                    className={cn("p-1 font-bold text-foreground", compact ? "text-sm" : "text-lg")}
                 >
                     Songs • {songsCount}
                 </h3>
                 {renderCommentsButton && (
-                    <Button variant="accent" size={showComments ? "sm" : "lg"} asChild>
-                        <Link to={commentsToggleTo}>
-                            {showComments ? "Hide Comments" : "Show Comments"}
-                        </Link>
+                    <Button variant="accent" size={compact ? "sm" : "lg"} asChild>
+                        <Link to={commentsToggleTo}>{commentsButtonLabel}</Link>
                     </Button>
                 )}
             </div>

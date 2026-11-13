@@ -17,4 +17,12 @@ export interface AttachmentRef {
 
 export type Publication = ApiSchemas["PublicationRetrieve"];
 
+export type CommentableObjectType = "collection" | "song";
+
+// the object that owns a comment thread, in the `{type, uuid}` shape the backend uses for `created_for`
+export interface CommentableObjectRef {
+    type: CommentableObjectType;
+    uuid: UUID;
+}
+
 export type Chat = ApiSchemas["UserChatRetrieve"];

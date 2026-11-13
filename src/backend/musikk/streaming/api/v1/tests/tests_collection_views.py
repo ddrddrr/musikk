@@ -850,12 +850,44 @@ class TestDraftVisibility(TestCase):
     def test_album_by_song_404_for_draft(self):
         song = BaseSongFactory()
         album = self._make_draft_album()
-        cs = CollectionSong.objects.create(collection=album, song=song)
+        CollectionSong.objects.create(collection=album, song=song)
 
-        url = reverse("api:album-by-song", kwargs={"uuid": cs.uuid})
+        url = reverse("api:album-by-song", kwargs={"song_uuid": song.uuid})
 
         for user in (self.author, self.outsider):
             request = self.factory.get(url)
             force_authenticate(request, user=user)
-            response = AlbumBySongView.as_view()(request, uuid=cs.uuid)
+            response = AlbumBySongView.as_view()(request, song_uuid=song.uuid)
             self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+
+class TestAlbumBySongView(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.factory = APIRequestFactory()
+        cls.user = BaseUserFactory()
+
+    def test_finds_album_by_base_song_uuid(self):
+        song = BaseSongFactory()
+        album = CollectionFactory(type="album", draft=False, private=False, songs=[])
+        CollectionSong.objects.create(collection=album, song=song)
+        playlist = CollectionFactory(type="playlist", private=False, songs=[])
+        CollectionSong.objects.create(collection=playlist, song=song)
+
+        url = reverse("api:album-by-song", kwargs={"song_uuid": song.uuid})
+        request = self.factory.get(url)
+        force_authenticate(request, user=self.user)
+        response = AlbumBySongView.as_view()(request, song_uuid=song.uuid)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["uuid"], str(album.uuid))
+
+    def test_404_for_unknown_song(self):
+        song_uuid = uuid.uuid4()
+        url = reverse("api:album-by-song", kwargs={"song_uuid": song_uuid})
+        request = self.factory.get(url)
+        force_authenticate(request, user=self.user)
+        response = AlbumBySongView.as_view()(request, song_uuid=song_uuid)
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)

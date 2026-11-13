@@ -326,6 +326,12 @@ paths:
   /api/v1/collections/{collection_uuid}/comments:
     get:
       operationId: collections_comments_list_by_collection_uuid
+      description: |-
+        Comments on an object that other users can see, such as an album. A new
+        comment sends `comments_changed_event` on the object's WebSocket topic, so
+        open comment threads refetch. The payload carries the object's uuid under
+        the URL kwarg name, for example `collection_uuid`. A reply also creates a
+        reply notification for the author of the parent comment.
       parameters:
       - in: path
         name: collection_uuid
@@ -362,6 +368,12 @@ paths:
           description: ''
     post:
       operationId: collections_comments_create_by_collection_uuid
+      description: |-
+        Comments on an object that other users can see, such as an album. A new
+        comment sends `comments_changed_event` on the object's WebSocket topic, so
+        open comment threads refetch. The payload carries the object's uuid under
+        the URL kwarg name, for example `collection_uuid`. A reply also creates a
+        reply notification for the author of the parent comment.
       parameters:
       - in: path
         name: collection_uuid
@@ -640,6 +652,11 @@ paths:
   /api/v1/feed/{user_uuid}/posts:
     get:
       operationId: feed_posts_list_by_user_uuid
+      description: |-
+        Lists and creates the publications of the object whose uuid is in the URL
+        under `created_for_url_kwarg`. The `access_policy` decides who can read
+        them and who can start a new thread. Subclasses only add what happens
+        after a publication is created, in `ws_on_create`.
       parameters:
       - in: query
         name: connection
@@ -676,6 +693,11 @@ paths:
           description: ''
     post:
       operationId: feed_posts_create_by_user_uuid
+      description: |-
+        Lists and creates the publications of the object whose uuid is in the URL
+        under `created_for_url_kwarg`. The `access_policy` decides who can read
+        them and who can start a new thread. Subclasses only add what happens
+        after a publication is created, in `ws_on_create`.
       parameters:
       - in: path
         name: user_uuid
@@ -736,31 +758,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedPublicationRetrieveList'
-          description: ''
-    post:
-      operationId: feed_posts_create
-      tags:
-      - feed
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PublicationCreateRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PublicationCreateRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PublicationCreateRequest'
-        required: true
-      security:
-      - cookieAuth: []
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PublicationRetrieve'
           description: ''
   /api/v1/friend-activity/active-songs:
     get:
@@ -1099,6 +1096,108 @@ paths:
               schema:
                 $ref: '#/components/schemas/SongUserCollections'
           description: ''
+  /api/v1/songs/{song_uuid}/album:
+    get:
+      operationId: songs_album_retrieve_by_song_uuid
+      parameters:
+      - in: path
+        name: song_uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - songs
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollectionSerializerBasic'
+          description: ''
+  /api/v1/songs/{song_uuid}/comments:
+    get:
+      operationId: songs_comments_list_by_song_uuid
+      description: |-
+        Comments on an object that other users can see, such as an album. A new
+        comment sends `comments_changed_event` on the object's WebSocket topic, so
+        open comment threads refetch. The payload carries the object's uuid under
+        the URL kwarg name, for example `collection_uuid`. A reply also creates a
+        reply notification for the author of the parent comment.
+      parameters:
+      - in: query
+        name: connection
+        schema:
+          type: string
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - in: path
+        name: song_uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - songs
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPublicationRetrieveList'
+          description: ''
+    post:
+      operationId: songs_comments_create_by_song_uuid
+      description: |-
+        Comments on an object that other users can see, such as an album. A new
+        comment sends `comments_changed_event` on the object's WebSocket topic, so
+        open comment threads refetch. The payload carries the object's uuid under
+        the URL kwarg name, for example `collection_uuid`. A reply also creates a
+        reply notification for the author of the parent comment.
+      parameters:
+      - in: path
+        name: song_uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - songs
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PublicationCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PublicationCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PublicationCreateRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicationRetrieve'
+          description: ''
   /api/v1/songs/{uuid}:
     get:
       operationId: songs_retrieve_by_uuid
@@ -1119,27 +1218,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CollectionSongRetrieve'
-          description: ''
-  /api/v1/songs/{uuid}/album:
-    get:
-      operationId: songs_album_retrieve_by_uuid
-      parameters:
-      - in: path
-        name: uuid
-        schema:
-          type: string
-          format: uuid
-        required: true
-      tags:
-      - songs
-      security:
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CollectionSerializerBasic'
           description: ''
   /api/v1/streaming-profile:
     get:
@@ -1413,6 +1491,11 @@ paths:
   /api/v1/users/{user_uuid}/chats/{chat_uuid}/messages:
     get:
       operationId: users_chats_messages_list_by_user_uuid_chat_uuid
+      description: |-
+        Lists and creates the publications of the object whose uuid is in the URL
+        under `created_for_url_kwarg`. The `access_policy` decides who can read
+        them and who can start a new thread. Subclasses only add what happens
+        after a publication is created, in `ws_on_create`.
       parameters:
       - in: path
         name: chat_uuid
@@ -1451,6 +1534,11 @@ paths:
           description: ''
     post:
       operationId: users_chats_messages_create_by_user_uuid_chat_uuid
+      description: |-
+        Lists and creates the publications of the object whose uuid is in the URL
+        under `created_for_url_kwarg`. The `access_policy` decides who can read
+        them and who can start a new thread. Subclasses only add what happens
+        after a publication is created, in `ws_on_create`.
       parameters:
       - in: path
         name: chat_uuid

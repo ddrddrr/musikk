@@ -4,12 +4,16 @@ import { useCollectionDetailQuery } from "@/features/collections/api/queries.ts"
 import { CollectionHeader } from "@/features/collections/components/CollectionHeader.tsx";
 import { DeletePlaylistDialog } from "@/features/collections/components/DeletePlaylistDialog.tsx";
 import { useDeletePlaylist } from "@/features/collections/hooks/useDeletePlaylist.ts";
+import { CollectionDetailed } from "@/features/collections/types.ts";
 import { BackButton } from "@/features/common/BackButton.tsx";
 import { CenteredSpinner } from "@/features/common/CenteredSpinner.tsx";
 import { EmptyState } from "@/features/common/EmptyState.tsx";
 import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
-import { CommentBox } from "@/features/publications/components/collection-comments/CommentBox.tsx";
+import { CommentBox } from "@/features/publications/components/comments/CommentBox.tsx";
+import { COMMENTS_BORDER_BY_TYPE } from "@/features/publications/components/comments/commentsBorder.ts";
+import { CommentableObjectRef } from "@/features/publications/types.ts";
 import { DefaultSongActions } from "@/features/songs/components/DefaultSongActions.tsx";
+import { SongCommentsButton } from "@/features/songs/components/SongCommentsButton.tsx";
 import { SongContainer } from "@/features/songs/components/SongContainer.tsx";
 import { SongMenuButton } from "@/features/songs/components/SongMenuButton.tsx";
 import { useUserLibrary } from "@/features/user/hooks/useUserLibrary.ts";
@@ -21,11 +25,37 @@ interface CollectionContainerProps {
     collectionUUID: UUID;
 }
 
+interface OpenCommentThread {
+    commentable: CommentableObjectRef;
+    title: string;
+}
+
+/**
+ * Finds the thread that the URL opens in the side panel: the collection's own thread, or the thread of one of its
+ * songs. A song that is not in the collection opens nothing, because the panel takes its title from the song's row.
+ */
+function findOpenCommentThread(
+    collection: CollectionDetailed,
+    isCollectionCommentsRoute: boolean,
+    openSongUUID: UUID | undefined,
+): OpenCommentThread | null {
+    if (isCollectionCommentsRoute) {
+        return {
+            commentable: { type: "collection", uuid: collection.uuid },
+            title: collection.title,
+        };
+    }
+    const openSong = collection.songs.find((cs) => cs.song.uuid === openSongUUID)?.song;
+    if (!openSong) return null;
+    return { commentable: { type: "song", uuid: openSong.uuid }, title: openSong.title };
+}
+
 export function CollectionContainer({ collectionUUID }: CollectionContainerProps) {
     const currUserUUID = useUserUUID();
     const { data: library } = useUserLibrary();
     const { liked_songs, history, created_collections } = library ?? {};
-    const isCommentsRoute = !!useMatch("/collection/:uuid/comments");
+    const isCollectionCommentsRoute = !!useMatch("/collection/:uuid/comments");
+    const openSongUUID = useMatch("/collection/:uuid/songs/:songUUID/comments")?.params.songUUID;
 
     const {
         isPending,
@@ -34,9 +64,10 @@ export function CollectionContainer({ collectionUUID }: CollectionContainerProps
         refetch,
     } = useCollectionDetailQuery(collectionUUID);
 
-    const commentsToggleTo = isCommentsRoute
-        ? `/collection/${collectionUUID}`
-        : `/collection/${collectionUUID}/comments`;
+    const collectionPath = `/collection/${collectionUUID}`;
+    const commentsToggleTo = isCollectionCommentsRoute
+        ? collectionPath
+        : `${collectionPath}/comments`;
 
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const { deletePlaylist, isDeleting } = useDeletePlaylist();
@@ -54,7 +85,14 @@ export function CollectionContainer({ collectionUUID }: CollectionContainerProps
         ?.map((c) => c.uuid)
         .includes(collection?.uuid);
 
-    const showComments = isCommentsRoute && notPersonalCollection && !collection.private;
+    const canComment = notPersonalCollection && !collection.private;
+    const openThread = canComment
+        ? findOpenCommentThread(collection, isCollectionCommentsRoute, openSongUUID)
+        : null;
+    const showComments = openThread !== null;
+    const isCollectionThreadOpen = openThread?.commentable.type === "collection";
+    const openThreadSongUUID =
+        openThread?.commentable.type === "song" ? openThread.commentable.uuid : undefined;
     const removeFromPlaylistCtxBtn =
         !!currUserUUID && collection?.authors.map((a) => a.uuid).includes(currUserUUID);
     const isAuthorPlaylist = removeFromPlaylistCtxBtn && collection.type === "playlist";
@@ -74,8 +112,9 @@ export function CollectionContainer({ collectionUUID }: CollectionContainerProps
                             renderAddToLikedButton={
                                 notPersonalCollection && !isUserCreatedCollection
                             }
-                            renderCommentsButton={notPersonalCollection && !collection?.private}
-                            showComments={showComments}
+                            renderCommentsButton={canComment}
+                            compact={showComments}
+                            isCommentsOpen={isCollectionThreadOpen}
                             isAuthorPlaylist={isAuthorPlaylist}
                             onDeleteClick={() => setDeleteDialogOpen(true)}
                         />
@@ -86,16 +125,33 @@ export function CollectionContainer({ collectionUUID }: CollectionContainerProps
                         {songs.length > 0 && (
                             <ul className="flex flex-col gap-2">
                                 {songs.map((collectionSong) => {
-                                    const songActions = showComments ? (
-                                        <SongMenuButton
-                                            collectionSong={collectionSong}
-                                            size="sm"
-                                            showRemoveFromPlaylist={removeFromPlaylistCtxBtn}
+                                    const songUUID = collectionSong.song.uuid;
+                                    const isSongThreadOpen = songUUID === openThreadSongUUID;
+                                    const songCommentsTo = isSongThreadOpen
+                                        ? collectionPath
+                                        : `${collectionPath}/songs/${songUUID}/comments`;
+                                    const commentsButton = (
+                                        <SongCommentsButton
+                                            to={songCommentsTo}
+                                            isOpen={isSongThreadOpen}
+                                            size={songSize}
                                         />
+                                    );
+                                    const songActions = showComments ? (
+                                        <div className="flex items-center gap-1">
+                                            {commentsButton}
+                                            <SongMenuButton
+                                                collectionSong={collectionSong}
+                                                size="sm"
+                                                showRemoveFromPlaylist={removeFromPlaylistCtxBtn}
+                                            />
+                                        </div>
                                     ) : (
                                         <DefaultSongActions
                                             collectionSong={collectionSong}
                                             size={songSize}
+                                            commentsButton={commentsButton}
+                                            showComments={canComment}
                                             showRemoveFromPlaylist={removeFromPlaylistCtxBtn}
                                         />
                                     );
@@ -107,6 +163,10 @@ export function CollectionContainer({ collectionUUID }: CollectionContainerProps
                                                 size={songSize}
                                                 showDuration
                                                 actions={songActions}
+                                                className={cn(
+                                                    isSongThreadOpen &&
+                                                        COMMENTS_BORDER_BY_TYPE.song,
+                                                )}
                                             />
                                         </li>
                                     );
@@ -116,9 +176,16 @@ export function CollectionContainer({ collectionUUID }: CollectionContainerProps
                     </div>
                 </div>
 
-                {showComments && (
+                {openThread && (
                     <div className="min-w-0 flex-1">
-                        <CommentBox collectionUUID={collectionUUID} />
+                        {/* sticky, so the thread stays in view next to a song far down the list */}
+                        <CommentBox
+                            key={`${openThread.commentable.type}-${openThread.commentable.uuid}`}
+                            commentable={openThread.commentable}
+                            title={openThread.title}
+                            closeTo={collectionPath}
+                            className="sticky top-0"
+                        />
                     </div>
                 )}
             </div>

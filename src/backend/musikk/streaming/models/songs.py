@@ -1,4 +1,5 @@
 from base.models import BaseModel
+from django.apps import apps
 from django.conf import settings
 from django.db import models, transaction
 from users.models import UserRole
@@ -16,6 +17,20 @@ class SongStatus(models.TextChoices):
 class BaseSongQuerySet(models.QuerySet):
     def published(self):
         return self.filter(status=SongStatus.READY)
+
+    def in_public_published_album(self):
+        """
+        Songs on at least one public album that is not a draft. Other users
+        can only see a song once it is on such an album. `collections.py`
+        imports this module, so the collection model comes from the app
+        registry instead of an import.
+        """
+        collection_model = apps.get_model("streaming", "Collection")
+        public_albums = collection_model.objects.albums().public().published()
+        album_entries = CollectionSong.objects.filter(
+            song=models.OuterRef("pk"), collection__in=public_albums
+        )
+        return self.filter(models.Exists(album_entries))
 
 
 BaseSongManager = models.Manager.from_queryset(BaseSongQuerySet)

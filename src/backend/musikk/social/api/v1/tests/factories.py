@@ -1,12 +1,29 @@
 import factory
-from factory import SubFactory
-
 from base.tests.factories import BaseModelFactory
-from social.models import Publication
+from factory import SubFactory
 from streaming.tests.factories import CollectionFactory
 from users.tests.factories import BaseUserFactory
 
+from social.models import Publication
+from social.models.chat import Chat, ChatMember
+
 fake = factory.Faker
+
+
+class ChatFactory(BaseModelFactory):
+    class Meta:
+        model = Chat
+
+    title = fake("sentence", nb_words=3)
+    is_direct = False
+
+
+class ChatMemberFactory(BaseModelFactory):
+    class Meta:
+        model = ChatMember
+
+    chat = SubFactory(ChatFactory)
+    member = SubFactory(BaseUserFactory)
 
 
 class UserContentFactory(BaseModelFactory):

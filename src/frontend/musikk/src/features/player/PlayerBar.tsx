@@ -12,15 +12,16 @@ import { Slider } from "@/features/ui/slider.tsx";
 import { IconTooltip } from "@/features/ui/tooltip.tsx";
 import { AuthorLinks } from "@/features/user/components/AuthorLinks.tsx";
 import { formatDuration } from "@/utils/formatDuration.ts";
-import { ListMusic, SkipBack, SkipForward, Volume2, VolumeX } from "lucide-react";
-import React, { useCallback, useState } from "react";
+import { ListMusic, MessageCircle, SkipBack, SkipForward, Volume2, VolumeX } from "lucide-react";
+import { useCallback, useState } from "react";
+import { Link } from "react-router-dom";
 
 interface PlayerBarProps {
-    setIsQueueOpen: React.Dispatch<React.SetStateAction<boolean>>;
+    onToggleQueue: () => void;
     isMutedFallback: boolean;
     onUnmute: () => void;
 }
-export function PlayerBar({ setIsQueueOpen, isMutedFallback, onUnmute }: PlayerBarProps) {
+export function PlayerBar({ onToggleQueue, isMutedFallback, onUnmute }: PlayerBarProps) {
     const { playbackState } = usePlayback();
     const controller = usePlayerController();
     const playingCollectionSong = playbackState?.collectionSong;
@@ -61,7 +62,7 @@ export function PlayerBar({ setIsQueueOpen, isMutedFallback, onUnmute }: PlayerB
                         <div className="flex min-w-0 flex-col">
                             <button
                                 type="button"
-                                onClick={() => void navigateToAlbum(playingCollectionSong.uuid)}
+                                onClick={() => void navigateToAlbum(playingSong.uuid)}
                                 className="cursor-pointer truncate bg-transparent p-0 text-left text-sm font-bold hover:underline"
                             >
                                 {playingSong.title}
@@ -151,12 +152,22 @@ export function PlayerBar({ setIsQueueOpen, isMutedFallback, onUnmute }: PlayerB
                         />
                     </div>
 
+                    {playingSong && (
+                        <IconTooltip label="Show Comments" side="top">
+                            <Button variant="ghost" size="icon" aria-label="Show Comments" asChild>
+                                <Link to={`/songs/${playingSong.uuid}/comments`}>
+                                    <MessageCircle />
+                                </Link>
+                            </Button>
+                        </IconTooltip>
+                    )}
+
                     <IconTooltip label="Queue" side="top">
                         <Button
                             variant="ghost"
                             size="icon"
                             aria-label="Queue"
-                            onClick={() => setIsQueueOpen((prev: boolean) => !prev)}
+                            onClick={onToggleQueue}
                         >
                             <ListMusic />
                         </Button>

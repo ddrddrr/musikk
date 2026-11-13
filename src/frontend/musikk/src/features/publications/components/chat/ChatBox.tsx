@@ -48,12 +48,10 @@ export function ChatBox({ chatUUID }: ChatBoxProps) {
     const { typers, notifyTyping } = useTypingIndicator(chatTopic(chatUUID), "chat.typing");
 
     const messagesContainerRef = useRef<HTMLDivElement>(null);
-    const messagesEndRef = useRef<HTMLDivElement>(null);
-    useAutoScrollToBottom(messagesEndRef, isMessagesPending, messages);
+    useAutoScrollToBottom(messagesContainerRef, isMessagesPending, messages);
     useScrollAnchor(messagesContainerRef, isFetchingNextPage);
     const { hasNewMessages, scrollToBottom } = useNewMessagesIndicator(
         messagesContainerRef,
-        messagesEndRef,
         messages,
     );
 
@@ -91,7 +89,6 @@ export function ChatBox({ chatUUID }: ChatBoxProps) {
                         />
                     </div>
                     <ChatMessageList messages={messages} />
-                    <div ref={messagesEndRef} />
                 </div>
                 <NewMessagesIndicator visible={hasNewMessages} onClick={scrollToBottom} />
             </div>

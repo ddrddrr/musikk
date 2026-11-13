@@ -205,8 +205,22 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /**
+         * @description Comments on an object that other users can see, such as an album. A new
+         *     comment sends `comments_changed_event` on the object's WebSocket topic, so
+         *     open comment threads refetch. The payload carries the object's uuid under
+         *     the URL kwarg name, for example `collection_uuid`. A reply also creates a
+         *     reply notification for the author of the parent comment.
+         */
         get: operations["collections_comments_list_by_collection_uuid"];
         put?: never;
+        /**
+         * @description Comments on an object that other users can see, such as an album. A new
+         *     comment sends `comments_changed_event` on the object's WebSocket topic, so
+         *     open comment threads refetch. The payload carries the object's uuid under
+         *     the URL kwarg name, for example `collection_uuid`. A reply also creates a
+         *     reply notification for the author of the parent comment.
+         */
         post: operations["collections_comments_create_by_collection_uuid"];
         delete?: never;
         options?: never;
@@ -302,8 +316,20 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /**
+         * @description Lists and creates the publications of the object whose uuid is in the URL
+         *     under `created_for_url_kwarg`. The `access_policy` decides who can read
+         *     them and who can start a new thread. Subclasses only add what happens
+         *     after a publication is created, in `ws_on_create`.
+         */
         get: operations["feed_posts_list_by_user_uuid"];
         put?: never;
+        /**
+         * @description Lists and creates the publications of the object whose uuid is in the URL
+         *     under `created_for_url_kwarg`. The `access_policy` decides who can read
+         *     them and who can start a new thread. Subclasses only add what happens
+         *     after a publication is created, in `ws_on_create`.
+         */
         post: operations["feed_posts_create_by_user_uuid"];
         delete?: never;
         options?: never;
@@ -320,7 +346,7 @@ export interface paths {
         };
         get: operations["feed_posts_list"];
         put?: never;
-        post: operations["feed_posts_create"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -647,14 +673,14 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/songs/{uuid}": {
+    "/api/v1/songs/{song_uuid}/album": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get: operations["songs_retrieve_by_uuid"];
+        get: operations["songs_album_retrieve_by_song_uuid"];
         put?: never;
         post?: never;
         delete?: never;
@@ -663,14 +689,44 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/songs/{uuid}/album": {
+    "/api/v1/songs/{song_uuid}/comments": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get: operations["songs_album_retrieve_by_uuid"];
+        /**
+         * @description Comments on an object that other users can see, such as an album. A new
+         *     comment sends `comments_changed_event` on the object's WebSocket topic, so
+         *     open comment threads refetch. The payload carries the object's uuid under
+         *     the URL kwarg name, for example `collection_uuid`. A reply also creates a
+         *     reply notification for the author of the parent comment.
+         */
+        get: operations["songs_comments_list_by_song_uuid"];
+        put?: never;
+        /**
+         * @description Comments on an object that other users can see, such as an album. A new
+         *     comment sends `comments_changed_event` on the object's WebSocket topic, so
+         *     open comment threads refetch. The payload carries the object's uuid under
+         *     the URL kwarg name, for example `collection_uuid`. A reply also creates a
+         *     reply notification for the author of the parent comment.
+         */
+        post: operations["songs_comments_create_by_song_uuid"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/songs/{uuid}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["songs_retrieve_by_uuid"];
         put?: never;
         post?: never;
         delete?: never;
@@ -814,8 +870,20 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /**
+         * @description Lists and creates the publications of the object whose uuid is in the URL
+         *     under `created_for_url_kwarg`. The `access_policy` decides who can read
+         *     them and who can start a new thread. Subclasses only add what happens
+         *     after a publication is created, in `ws_on_create`.
+         */
         get: operations["users_chats_messages_list_by_user_uuid_chat_uuid"];
         put?: never;
+        /**
+         * @description Lists and creates the publications of the object whose uuid is in the URL
+         *     under `created_for_url_kwarg`. The `access_policy` decides who can read
+         *     them and who can start a new thread. Subclasses only add what happens
+         *     after a publication is created, in `ws_on_create`.
+         */
         post: operations["users_chats_messages_create_by_user_uuid_chat_uuid"];
         delete?: never;
         options?: never;
@@ -2082,31 +2150,6 @@ export interface operations {
             };
         };
     };
-    feed_posts_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["PublicationCreateRequest"];
-                "application/x-www-form-urlencoded": components["schemas"]["PublicationCreateRequest"];
-                "multipart/form-data": components["schemas"]["PublicationCreateRequest"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PublicationRetrieve"];
-                };
-            };
-        };
-    };
     friend_activity_active_songs_list: {
         parameters: {
             query?: never;
@@ -2542,6 +2585,81 @@ export interface operations {
             };
         };
     };
+    songs_album_retrieve_by_song_uuid: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                song_uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CollectionSerializerBasic"];
+                };
+            };
+        };
+    };
+    songs_comments_list_by_song_uuid: {
+        parameters: {
+            query?: {
+                connection?: string;
+                /** @description Number of results to return per page. */
+                limit?: number;
+                /** @description The initial index from which to return the results. */
+                offset?: number;
+            };
+            header?: never;
+            path: {
+                song_uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedPublicationRetrieveList"];
+                };
+            };
+        };
+    };
+    songs_comments_create_by_song_uuid: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                song_uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PublicationCreateRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PublicationCreateRequest"];
+                "multipart/form-data": components["schemas"]["PublicationCreateRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicationRetrieve"];
+                };
+            };
+        };
+    };
     songs_retrieve_by_uuid: {
         parameters: {
             query?: never;
@@ -2559,27 +2677,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CollectionSongRetrieve"];
-                };
-            };
-        };
-    };
-    songs_album_retrieve_by_uuid: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                uuid: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CollectionSerializerBasic"];
                 };
             };
         };

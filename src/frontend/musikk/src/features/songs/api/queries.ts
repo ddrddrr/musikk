@@ -10,6 +10,13 @@ export async function albumBySongRetrieve(songUUID: UUID): Promise<Collection> {
     return res.data;
 }
 
+export function useAlbumBySong(songUUID: UUID) {
+    return useQuery({
+        queryKey: songKeys.albumBySong(songUUID),
+        queryFn: () => albumBySongRetrieve(songUUID),
+    });
+}
+
 type CollectionMembership = ApiSchemas["SongCollectionLink"];
 
 async function collectionMemberships(collectionSongUUID: UUID): Promise<CollectionMembership[]> {

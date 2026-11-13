@@ -51,9 +51,7 @@ from streaming.ws.events import ServerEvent
 
 
 class CollectionListCreateView(ListCreateAPIView):
-    queryset = Collection.objects.filter(private=False, draft=False).order_by(
-        "-date_added"
-    )
+    queryset = Collection.objects.public().published().order_by("-date_added")
     filterset_class = CollectionFilter
     pagination_class = BaseLimitOffsetPagination
     parser_classes = [MultiPartParser, FormParser, JSONParser]
@@ -416,15 +414,10 @@ class AlbumBySongView(APIView):
 
     @extend_schema(responses=CollectionSerializerBasic)
     def get(self, request, *args, **kwargs):
-        collection_song = get_object_or_404(
-            CollectionSong.objects.select_related("song"),
-            uuid=kwargs["uuid"],
-        )
-
         album = get_object_or_404(
             Collection.objects.published(),
             type=CollectionType.ALBUM,
-            base_songs=collection_song.song,
+            base_songs__uuid=kwargs["song_uuid"],
         )
         self.check_object_permissions(request, album)
 

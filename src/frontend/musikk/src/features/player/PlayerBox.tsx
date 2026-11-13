@@ -2,13 +2,9 @@ import { QueryErrorBox } from "@/features/common/QueryErrorBox.tsx";
 import { usePlayer } from "@/features/player/hooks/usePlayer.ts";
 import { PlayerBar } from "@/features/player/PlayerBar.tsx";
 import { useQueue } from "@/features/song-queue/api/queries.ts";
-import React, { useRef } from "react";
+import { useRef } from "react";
 
-export function PlayerBox({
-    setIsQueueOpen,
-}: {
-    setIsQueueOpen: React.Dispatch<React.SetStateAction<boolean>>;
-}) {
+export function PlayerBox({ onToggleQueue }: { onToggleQueue: () => void }) {
     const audioRef = useRef<HTMLAudioElement>(null);
     const { error: queueError, refetch: queueRefetch } = useQueue();
 
@@ -30,7 +26,7 @@ export function PlayerBox({
             )}
             {!hasQueueError && (
                 <PlayerBar
-                    setIsQueueOpen={setIsQueueOpen}
+                    onToggleQueue={onToggleQueue}
                     isMutedFallback={isMutedFallback}
                     onUnmute={unmute}
                 />

@@ -103,7 +103,7 @@ export function SongContainer({
                 {/*TODO: unify with other clickable names which are links?*/}
                 <button
                     type="button"
-                    onClick={() => void navigateToAlbum(collectionSong.uuid)}
+                    onClick={() => void navigateToAlbum(song.uuid)}
                     className={cn(
                         titleVariants({ size }),
                         "cursor-pointer bg-transparent p-0 text-left hover:underline",

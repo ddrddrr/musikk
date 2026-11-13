@@ -3,7 +3,13 @@ import { getOffsetFromNextUrl } from "@/api/hooks.ts";
 import { ApiSchemas, PaginatedRes, UUID } from "@/api/types.ts";
 import { ChatURLs, PublicationURLs } from "@/features/publications/api/endpoints.ts";
 import { publicationKeys } from "@/features/publications/api/queryKeys.ts";
-import { Attachment, Chat, FeedConnection, Publication } from "@/features/publications/types.ts";
+import {
+    Attachment,
+    Chat,
+    CommentableObjectRef,
+    FeedConnection,
+    Publication,
+} from "@/features/publications/types.ts";
 import { InfiniteData, useInfiniteQuery, useQuery } from "@tanstack/react-query";
 
 export async function fetchPublicationPage(
@@ -63,14 +69,14 @@ export function useFeedPosts(userUUID: UUID) {
     });
 }
 
-export function useCollectionComments(collectionUUID: UUID) {
+export function useComments(commentable: CommentableObjectRef) {
     return useInfiniteQuery({
         ...offsetPagination,
-        queryKey: publicationKeys.collectionComments(collectionUUID),
+        queryKey: publicationKeys.comments(commentable),
         select: oldestFirst<Publication>,
         queryFn: ({ pageParam }) =>
             fetchPublicationPage(
-                PublicationURLs.collectionComments(collectionUUID),
+                PublicationURLs.comments(commentable),
                 PUBLICATION_PAGE_SIZE,
                 pageParam,
             ),

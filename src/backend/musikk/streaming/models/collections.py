@@ -31,6 +31,20 @@ class CollectionQuerySet(models.QuerySet):
     def published(self):
         return self.filter(draft=False)
 
+    def public_or_authored_by(self, user):
+        """
+        Public collections, plus the private ones the user is credited on.
+        Anonymous users get only the public ones. The credit check is an
+        `Exists` subquery, so a collection with several credits comes back
+        once.
+        """
+        if not user.is_authenticated:
+            return self.public()
+        credits_of_user = CollectionCredit.objects.filter(
+            collection=models.OuterRef("pk"), author=user
+        )
+        return self.filter(models.Q(private=False) | models.Exists(credits_of_user))
+
 
 CollectionManager = models.Manager.from_queryset(CollectionQuerySet)
 

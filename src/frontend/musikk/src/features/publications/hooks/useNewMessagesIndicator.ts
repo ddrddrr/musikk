@@ -8,7 +8,6 @@ function distanceFromBottom(container: HTMLElement): number {
 
 export function useNewMessagesIndicator(
     containerRef: RefObject<HTMLDivElement | null>,
-    bottomRef: RefObject<HTMLDivElement | null>,
     messages: { uuid: string }[],
 ) {
     const [hasNewMessages, setHasNewMessages] = useState(false);
@@ -42,9 +41,10 @@ export function useNewMessagesIndicator(
     }, [messages, containerRef]);
 
     const scrollToBottom = useCallback(() => {
-        bottomRef.current?.scrollIntoView({ behavior: "smooth" });
         setHasNewMessages(false);
-    }, [bottomRef]);
+        const container = containerRef.current;
+        if (container) container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
+    }, [containerRef]);
 
     return { hasNewMessages, scrollToBottom };
 }

@@ -5,7 +5,7 @@ from users.models import UserFollow
 from users.tests.factories import BaseUserFactory
 
 from social.api.v1.tests.factories import PublicationFactory
-from social.api.v1.views import FeedPostsListCreateView
+from social.api.v1.views import GlobalFeedPostsListView
 
 
 class TestPublicationConnectionFilter(TestCase):
@@ -40,7 +40,7 @@ class TestPublicationConnectionFilter(TestCase):
             url = f"{url}?connection={connection}"
         request = self.factory.get(url)
         force_authenticate(request, user=self.me)
-        return FeedPostsListCreateView.as_view()(request)
+        return GlobalFeedPostsListView.as_view()(request)
 
     def _uuids(self, response) -> set[str]:
         return {item["uuid"] for item in response.data["results"]}

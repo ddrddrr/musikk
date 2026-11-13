@@ -1,18 +1,18 @@
 import { RefObject, useEffect, useRef } from "react";
 
-// adapted from https://stackoverflow.com/questions/37620694/how-to-scroll-to-bottom-in-react
-// (the invisible div approach)
 export function useAutoScrollToBottom(
-    bottomRef: RefObject<HTMLDivElement | null>,
+    containerRef: RefObject<HTMLDivElement | null>,
     isPending: boolean,
     data: unknown,
 ) {
     const didInitialScrollRef = useRef(false);
 
     useEffect(() => {
-        if (didInitialScrollRef.current || isPending || !data || !bottomRef.current) return;
+        const container = containerRef.current;
+        if (didInitialScrollRef.current || isPending || !data || !container) return;
 
-        bottomRef.current.scrollIntoView();
+        // scrollIntoView would also scroll the page around the list
+        container.scrollTop = container.scrollHeight;
         didInitialScrollRef.current = true;
-    }, [isPending, data, bottomRef]);
+    }, [isPending, data, containerRef]);
 }

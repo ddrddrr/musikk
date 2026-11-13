@@ -4,6 +4,7 @@ import { useAddSong } from "@/features/song-queue/api/mutations.ts";
 import { useSongPlayHandler } from "@/features/songs/hooks/useSongPlayHandler.ts";
 import type { LucideIcon } from "lucide-react";
 import { BetweenHorizonalStart, Play, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
 export interface SongMenuItem {
     key: string;
@@ -36,7 +37,10 @@ export function useSongMenuItems(
             label: "Add to queue",
             icon: BetweenHorizonalStart,
             variant: "default",
-            onSelect: () => addSongMutation.mutate(collectionSong.uuid),
+            onSelect: () =>
+                addSongMutation.mutate(collectionSong.uuid, {
+                    onSuccess: () => toast.success("Added to queue"),
+                }),
         },
         { key: "play", label: "Play", icon: Play, variant: "default", onSelect: onPlay },
     ];

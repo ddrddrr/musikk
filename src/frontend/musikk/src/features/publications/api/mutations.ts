@@ -2,7 +2,7 @@ import { api_client } from "@/api/axiosConf.ts";
 import { ApiSchemas, UUID } from "@/api/types.ts";
 import { ChatURLs, PublicationURLs } from "@/features/publications/api/endpoints.ts";
 import { publicationKeys } from "@/features/publications/api/queryKeys.ts";
-import { AttachmentRef, Publication } from "@/features/publications/types.ts";
+import { AttachmentRef, CommentableObjectRef, Publication } from "@/features/publications/types.ts";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface PublicationPayload {
@@ -69,22 +69,22 @@ export function useCreatePost() {
     });
 }
 
-interface CreateCollectionCommentParams extends PublicationInput {
-    collectionUUID: UUID;
+interface CreateCommentParams extends PublicationInput {
+    commentable: CommentableObjectRef;
 }
 
-export function useCreateCollectionComment() {
+export function useCreateComment() {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: async ({ collectionUUID, ...input }: CreateCollectionCommentParams) => {
+        mutationFn: async ({ commentable, ...input }: CreateCommentParams) => {
             await createPublication(
-                PublicationURLs.collectionComments(collectionUUID),
+                PublicationURLs.comments(commentable),
                 buildPublicationPayload(input),
             );
         },
         onSuccess: (_data, variables) => {
             void queryClient.invalidateQueries({
-                queryKey: publicationKeys.collectionComments(variables.collectionUUID),
+                queryKey: publicationKeys.comments(variables.commentable),
             });
         },
     });

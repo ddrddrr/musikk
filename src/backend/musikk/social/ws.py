@@ -2,38 +2,47 @@ import time
 from enum import StrEnum
 
 from asgiref.sync import async_to_sync as atos
-from streaming.models import Collection
-from users.models import BaseUser
 from websockets.action_service import WSAction, WSActionService
 from websockets.serializers import TopicSerializer
 from websockets.topics import topic_group, topic_validator
 
-from social.models.chat import ChatMember
+from social.publication_access_policies import (
+    PUBLICATION_ACCESS_POLICY_BY_MODEL,
+    PublicationAccessPolicy,
+)
 
 
 class ServerEvent(StrEnum):
     COLLECTION_COMMENTS_CHANGED = "collection.comments.changed"
+    SONG_COMMENTS_CHANGED = "song.comments.changed"
     CHAT_MESSAGES_CHANGED = "chat.messages.changed"
-    CHAT_TYPING = "chat.typing"
-    COLLECTION_COMMENTS_TYPING = "collection_comments.typing"
 
 
-@topic_validator("chat")
-def validate_chat(user: BaseUser, topic_id: str) -> bool:
-    return ChatMember.objects.filter(chat__uuid=topic_id, member=user).exists()
+PUBLICATION_ACCESS_POLICIES_WITH_WS_TOPIC: tuple[PublicationAccessPolicy, ...] = tuple(
+    policy
+    for policy in PUBLICATION_ACCESS_POLICY_BY_MODEL.values()
+    if policy.ws_topic_prefix is not None
+)
 
 
-@topic_validator("collection_comments")
-def validate_collection_comments(user: BaseUser, topic_id: str) -> bool:
-    return Collection.objects.filter(uuid=topic_id, private=False, draft=False).exists()
+def _register_publication_topic_validators() -> None:
+    """
+    A publication topic, such as `chat.<uuid>`, lets in exactly the users who
+    can read the publications of that object.
+    """
+    for policy in PUBLICATION_ACCESS_POLICIES_WITH_WS_TOPIC:
+        topic_validator(policy.ws_topic_prefix)(policy.can_read_publications_by_uuid)
+
+
+_register_publication_topic_validators()
 
 
 class TypingWSActionService(WSActionService):
     # minimum gap between typing sends
     MIN_INTERVAL = 2  # sec
     PREFIX_TO_EVENT: dict[str, str] = {
-        "chat": ServerEvent.CHAT_TYPING,
-        "collection_comments": ServerEvent.COLLECTION_COMMENTS_TYPING,
+        policy.ws_topic_prefix: f"{policy.ws_topic_prefix}.typing"
+        for policy in PUBLICATION_ACCESS_POLICIES_WITH_WS_TOPIC
     }
 
     def __init__(self, consumer):

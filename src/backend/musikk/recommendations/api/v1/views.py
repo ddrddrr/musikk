@@ -6,7 +6,6 @@ from rest_framework.views import APIView
 from streaming.api.v1.serializers.collections import CollectionSerializerBasic
 from streaming.api.v1.serializers.songs import CollectionSongRetrieveSerializer
 from streaming.models import BaseSong, Collection
-from streaming.models.collections import CollectionType
 from streaming.models.songs import CollectionSong
 from users.api.v1.serializers import BaseUserSerializer
 from users.models import BaseUser, UserRole
@@ -40,62 +39,53 @@ class SearchView(APIView):
         data = {
             "songs": self._songs(query),
             "albums": self.search(
-                Collection,
+                Collection.objects.albums().public().published(),
                 query,
                 "title",
                 CollectionSerializerBasic,
-                extra_filters={"type": "album", "private": False, "draft": False},
             ),
             "playlists": self.search(
-                Collection,
+                Collection.objects.playlists().public().published(),
                 query,
                 "title",
                 CollectionSerializerBasic,
-                extra_filters={"type": "playlist", "private": False, "draft": False},
             ),
             "users": self.search(
-                BaseUser,
+                BaseUser.objects.filter(role=UserRole.BASE),
                 query,
                 "display_name",
                 BaseUserSerializer,
-                extra_filters={"role": UserRole.BASE},
             ),
             "artists": self.search(
-                BaseUser,
+                BaseUser.objects.filter(role=UserRole.ARTIST),
                 query,
                 "display_name",
                 BaseUserSerializer,
-                extra_filters={"role": UserRole.ARTIST},
             ),
         }
 
         return Response(data=data, status=status.HTTP_200_OK)
 
-    def search(
-        self, model, query, field_name, serializer_class, extra_filters=None
-    ) -> list:
-        qs = model.objects.annotate(similarity=TrigramSimilarity(field_name, query))
-
-        if extra_filters:
-            qs = qs.filter(**extra_filters)
-
-        qs = qs.filter(similarity__gt=TRIGRAM_SIMILARITY_THRESHOLD).order_by(
-            "-similarity"
-        )[:MAX_RESULTS]
+    def search(self, queryset, query, field_name, serializer_class) -> list:
+        qs = (
+            queryset.annotate(similarity=TrigramSimilarity(field_name, query))
+            .filter(similarity__gt=TRIGRAM_SIMILARITY_THRESHOLD)
+            .order_by("-similarity")[:MAX_RESULTS]
+        )
 
         return serializer_class(qs, many=True, context={"request": self.request}).data
 
     def _songs(self, query):
         matching_songs = (
-            BaseSong.objects.annotate(similarity=TrigramSimilarity("title", query))
+            BaseSong.objects.published()
+            .in_public_published_album()
+            .annotate(similarity=TrigramSimilarity("title", query))
             .filter(similarity__gt=TRIGRAM_SIMILARITY_THRESHOLD)
             .order_by("-similarity")[:MAX_RESULTS]
         )
 
         sc_songs = CollectionSong.objects.filter(
-            collection__type=CollectionType.ALBUM,
-            collection__private=False,
-            collection__draft=False,
+            collection__in=Collection.objects.albums().public().published(),
             song__in=matching_songs,
         )
 

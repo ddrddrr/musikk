@@ -50,7 +50,7 @@ export function SongCard({ collectionSong, size = "md", onClick = undefined }: S
             onClick(collectionSong);
             return;
         }
-        void navigateToAlbum(collectionSong.uuid);
+        void navigateToAlbum(uuid);
     }
 
     return (
