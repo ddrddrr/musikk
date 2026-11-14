@@ -33,7 +33,6 @@ def seed_songs(
     audio_tasks: list[tuple[int, BaseSong, str, str]] = []
 
     for i in range(song_count):
-        audio_path = _pick_random_audio(audio_dir)
         image_file = image_provider.get_image()
 
         song = BaseSong.objects.create(
@@ -45,7 +44,7 @@ def seed_songs(
         songs.append(song)
 
         if not skip_audio:
-            tmp_path = _copy_to_temp(audio_path)
+            tmp_path = _copy_to_temp(_pick_random_audio(audio_dir))
             storage_dir = os.path.join(settings.AUDIO_CONTENT_PATH, str(uuid.uuid4()))
             audio_tasks.append((i, song, tmp_path, storage_dir))
         else:

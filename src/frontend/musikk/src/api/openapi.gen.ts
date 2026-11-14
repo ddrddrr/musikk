@@ -1666,6 +1666,13 @@ export interface operations {
                     "application/json": components["schemas"]["RestAuthDetail"];
                 };
             };
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     auth_resend_email_create: {

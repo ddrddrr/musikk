@@ -93,3 +93,6 @@ media/*
 ### LaTeX build artifacts
 text/out/*
 !text/out/thesis.pdf
+text/_minted/
+text/thesis.*
+!text/thesis.tex

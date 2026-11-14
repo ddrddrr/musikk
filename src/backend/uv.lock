@@ -86,6 +86,10 @@ dev = [
     { name = "ruff" },
     { name = "types-channels" },
 ]
+seed = [
+    { name = "factory-boy" },
+    { name = "faker" },
+]
 
 [package.metadata]
 requires-dist = [
@@ -113,6 +117,10 @@ dev = [
     { name = "faker", specifier = ">=37.4.0" },
     { name = "ruff", specifier = ">=0.14.14" },
     { name = "types-channels", specifier = ">=4.3.0.20250822" },
+]
+seed = [
+    { name = "factory-boy", specifier = ">=3.3.3" },
+    { name = "faker", specifier = ">=37.4.0" },
 ]
 
 [[package]]

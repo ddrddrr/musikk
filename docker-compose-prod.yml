@@ -1,21 +1,29 @@
 name: musikk
 
+# the server and the Celery worker run the same image. Only the server builds it, because Compose
+# fails when two services build an image with the same name.
+x-backend: &backend
+  image: musikk-backend
+  env_file:
+    - .env.prod
+  environment:
+    DJANGO_SETTINGS_MODULE: musikk.settings.prod
+    UPLOAD_TMP_DIR: /var/uploads_tmp
+  restart: unless-stopped
+  depends_on:
+    database:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
+  networks:
+    - main
+
 services:
   server:
+    <<: *backend
     build:
       context: ./src/backend/
       dockerfile: Dockerfile
-    env_file:
-      - .env.prod
-    environment:
-      DJANGO_SETTINGS_MODULE: musikk.settings.prod
-      UPLOAD_TMP_DIR: /var/uploads_tmp
-    restart: unless-stopped
-    depends_on:
-      database:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
     expose:
       - 8000
     volumes:
@@ -23,13 +31,11 @@ services:
       - django_media:/app/media
       - upload_tmp:/var/uploads_tmp
     healthcheck:
-      test: [ "CMD", "curl", "-fsS", "http://localhost:${DJANGO_PORT}/health/" ]
+      test: [ "CMD", "curl", "-fsS", "http://localhost:8000/health/" ]
       interval: 10s
       timeout: 3s
       retries: 5
       start_period: 30s
-    networks:
-      - main
 
   database:
     image: postgres:17
@@ -42,7 +48,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}" ]
+      test: [ "CMD-SHELL", "pg_isready -h localhost -U $${POSTGRES_USER} -d $${POSTGRES_DB}" ]
       interval: 5s
       timeout: 3s
       retries: 10
@@ -50,37 +56,24 @@ services:
       - main
 
   celery_worker:
-    build:
-      context: ./src/backend/
-      dockerfile: Dockerfile
+    <<: *backend
     entrypoint: [ "./start-celery-worker.sh" ]
-    env_file:
-      - .env.prod
-    environment:
-      DJANGO_SETTINGS_MODULE: musikk.settings.prod
-      UPLOAD_TMP_DIR: /var/uploads_tmp
-    restart: unless-stopped
-    depends_on:
-      redis:
-        condition: service_healthy
-      database:
-        condition: service_healthy
     volumes:
       - django_media:/app/media
       - upload_tmp:/var/uploads_tmp
-    networks:
-      - main
 
   redis:
     image: redis:8.0-alpine
-    command: [ "redis-server","--requirepass","${REDIS_PASSWORD}" ]
+    # $$ makes the container read the password from its env_file. With ${...}, Compose would take
+    # REDIS_PASSWORD from the shell first, which may hold another value, for example from direnv.
+    command: [ "sh", "-c", "exec redis-server --requirepass \"$$REDIS_PASSWORD\"" ]
     expose:
       - 6379
     env_file:
       - .env.prod
     restart: unless-stopped
     healthcheck:
-      test: [ "CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping" ]
+      test: [ "CMD-SHELL", "REDISCLI_AUTH=\"$$REDIS_PASSWORD\" redis-cli ping" ]
       interval: 5s
       timeout: 3s
       retries: 10
@@ -95,8 +88,8 @@ services:
       - .env.prod
     restart: unless-stopped
     ports:
-      - "80:80"
-      - "443:443"
+      - "${HTTP_PORT:-80}:80"
+      - "${HTTPS_PORT:-443}:443"
     volumes:
       - ${CADDYFILE:-./src/frontend/Caddyfile.prod}:/etc/caddy/Caddyfile
       - caddy_data:/data

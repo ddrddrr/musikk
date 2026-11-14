@@ -2,6 +2,78 @@
 
 A music streaming app with focus on social features.
 
+## For reviewers
+
+The easiest way to run the app is the full Docker stack. It needs only Docker and git.
+
+1. **Install Docker**
+
+   - macOS on Apple Silicon: [Docker Desktop](https://docs.docker.com/desktop/setup/install/mac-install/).
+   - Windows: WSL2 with Ubuntu, and either Docker Desktop with WSL integration turned on or Docker Engine installed
+     inside WSL. Read [Supported platforms](#supported-platforms) before you clone the repository.
+   - Debian and Ubuntu: Docker Engine with the Compose plugin from
+     [Docker's own repository](https://docs.docker.com/engine/install/). If `docker` needs `sudo` on your machine, put
+     `sudo` before the commands below.
+
+2. **Create the env file**
+
+   In the project folder, run:
+
+   ```
+   cp .env-prod-example .env.prod
+   ```
+
+   The example works without changes. If you change `SECRET_KEY` or a password in it, do not use `$`, because Docker
+   Compose reads `$` in this file as the start of a variable name. This command prints a random key without `$`:
+
+   ```
+   python3 -c "import secrets; print(secrets.token_urlsafe(50))"
+   ```
+
+3. **Start the app**
+
+   ```
+   make run-local-docker
+   ```
+
+   Without `make`: `docker compose --env-file .env.prod -f docker-compose-prod.yml up --build`.
+
+   The first start builds the images and compiles FFmpeg from source. On an Apple Silicon Mac with 2 CPUs for Docker,
+   this took about 9 minutes. Later starts take a few seconds. Keep this terminal open and run the next commands in a
+   second terminal.
+
+4. **Fill the app with sample data**
+
+   ```
+   make run-local-docker-seed
+   ```
+
+   Without `make`: `docker compose --env-file .env.prod -f docker-compose-prod.yml exec server python manage.py initmodels`.
+
+   The command creates users, artists, songs with audio, albums, playlists, posts and chats. It takes a few minutes.
+   Near the start of its output it prints one line for each account, for example `artist: <email> / <password>`.
+
+5. **Open** `http://localhost` and log in with one of the printed accounts. You can also sign up. The app sends no
+   emails in this setup, so a new account works right away.
+
+6. **Stop the app** with Ctrl+C in the first terminal, or with `make run-local-docker-down`. The data stays, and
+   `make run-local-docker` starts the app again. To delete the database and the uploaded files, run
+   `make run-local-docker-reset` (`docker compose --env-file .env.prod -f docker-compose-prod.yml down -v`).
+
+If port 80 or 443 is already taken on your machine, set another port in `.env.prod`, for example `HTTP_PORT=8080` or
+`HTTPS_PORT=8443`. With `HTTP_PORT=8080`, the app is at `http://localhost:8080`.
+
+## Supported platforms
+
+- Debian and Ubuntu, on x86_64 and arm64
+- macOS on Apple Silicon
+- Windows through WSL2 only
+
+On Windows, clone the repository with the git inside WSL into the Linux file system, for example into `~/musikk`, not
+into a folder under `/mnt/c`. Run every command in the WSL shell. PowerShell and cmd are not supported.
+
+Other Linux distributions may work with Docker Engine, but nobody has tested them. Podman is not supported.
+
 ## Features
 
 - Albums, playlists, listening history
@@ -31,77 +103,45 @@ A music streaming app with focus on social features.
 
 There are two ways to run the app:
 
-- **Full Docker stack** — everything in containers, one command. Good for a quick try.
-- **Dev mode** — backend and frontend run on the host as dev servers, only Postgres and Redis run in Docker.
+- **Full Docker stack**: everything runs in containers. This is the way for reviewers.
+- **Dev mode**: the backend and the frontend run on the host as dev servers. Only Postgres and Redis run in Docker.
 
-The `make` targets below are wrappers over the underlying commands (see [`Makefile`](Makefile)), so `make` itself
-is not required, you can run the commands directly if preferred.
+The `make` targets are short forms of the commands in the [`Makefile`](Makefile), so `make` is optional.
 
-### Option A — Full Docker stack
+### Option A: full Docker stack
 
-Requirements: Docker + Docker Compose. Runs anywhere Docker can run `linux/amd64` containers.
+[For reviewers](#for-reviewers) lists the steps. A few more details:
 
-1. **Create env file**
+- The example env file uses Django's console email backend. Registration and password-reset emails are printed to the
+  server log instead of being sent. To send real mail, set `EMAIL_BACKEND` to the mail provider of your choice and fill
+  in the variables it needs (see `django-anymail`).
+- `ACCOUNT_EMAIL_VERIFICATION` (django-allauth) controls the email confirmation on signup. The example sets it to
+  `none`, so a new account is active right away.
+- The server runs `migrate` and `collectstatic` on every start.
 
-   ```
-   cp .env.prod.example .env.prod
-   ```
+### Option B: dev mode
 
-   The example uses Django's console email backend, so registration and password-reset emails
-   are printed to the server log instead of being sent. To send real mail, set `EMAIL_BACKEND`
-   to the mail provider of your choice and fill in the required vars (see `django-anymail`).
-
-   Email confirmation on signup is controlled by `ACCOUNT_EMAIL_VERIFICATION` (django-allauth).
-   The default env sets it to `none`: no confirmation email is sent and the account is active
-   immediately, but the signup form still shows the "Confirmation email has been sent"
-   message. You can just navigate to the home page after registering, there is no email to confirm,
-   the account will be ready to use immediatelly.
-
-2. **Run it**
-
-   ```
-   make run-local-docker
-   ```
-
-   Equivalent to: `docker compose --env-file .env.prod -f docker-compose-prod.yml up --build`.
-
-   First boot builds the backend image (compiles FFmpeg from source — slow) and the frontend
-   image (Vite build), then waits on health checks. The server entrypoint runs `migrate` and
-   `collectstatic` automatically.
-
-3. **Open** `http://localhost`.
-
-4. **Tear down**
-
-   ```
-   make run-local-docker-down
-   ```
-
-   Add `-v` (`docker compose -f docker-compose-prod.yml down -v`) to also wipe volumes.
-
-### Option B — Dev mode
-
-Backend and frontend run on the host with auto-reload, infra (Postgres + Redis) runs in Docker.
+The backend and the frontend run on the host with auto-reload. Postgres and Redis run in Docker. Celery tasks run inside
+the backend process, so there is no Celery worker, and an upload request waits until the song is processed.
 
 Requirements:
 
 - Python 3.14
-- [uv](https://docs.astral.sh/uv/) for backend deps
-- Node 22+ and npm for frontend deps
-- FFmpeg and Shaka Packager binaries (MacOS/Debian-based systems only) — needed if you want audio uploads to work.
-  See [Native binaries](#native-binaries) below.
-- Optional: [direnv](https://direnv.net/) for env var loading. See [direnv](#direnv) below.
+- [uv](https://docs.astral.sh/uv/) for the backend packages
+- Node 22.12 or newer and npm for the frontend packages. Vite 7.3 needs this Node version.
+- [direnv](https://direnv.net/), which loads the variables from `.env` into the shell. See [direnv](#direnv) below.
+- FFmpeg and Shaka Packager for audio uploads and sample audio. See [Native binaries](#native-binaries) below.
 
 Steps:
 
-1. **Create env file**
+1. **Create the env file**
 
    ```
-   cp .env.local.example .env
+   cp .env-local-example .env
+   direnv allow
    ```
 
-   Edit `.env` to fill in `SECRET_KEY` and any passwords, if desired.
-   The local example already wires `POSTGRES_*`, `REDIS_*`, `FFMPEG_BIN`, etc.
+   Edit `.env` to fill in `SECRET_KEY` and the passwords, if you want.
 
 2. **Infra (Postgres + Redis)**
 
@@ -117,8 +157,10 @@ Steps:
    cd src/backend/musikk
    uv sync
    uv run python manage.py migrate
-   uv run python manage.py runserver
+   uv run python manage.py runserver 8005
    ```
+
+   The frontend dev server sends API requests to `DJANGO_PORT` from `.env`, which is 8005 in the example.
 
 4. **Frontend**
 
@@ -128,21 +170,21 @@ Steps:
    npm run dev
    ```
 
-   Defaults to `http://localhost:5175` (port via `VITE_PORT`).
+   The dev server listens on `VITE_PORT` from `.env`, which is 5175 in the example.
 
 5. **Open** `http://localhost:5175`.
 
-After step 1, `make run-local-dev` does steps 2 to 4 in one terminal. It starts Postgres and Redis, runs `migrate`,
-and starts the backend, the Celery worker and the frontend. Ctrl+C stops all three. It needs the variables from `.env`
-in the shell, for example through [direnv](#direnv), and the packages from `uv sync` and `npm install`.
+After step 1, `make run-local-dev` does steps 2 to 4 in one terminal. It starts Postgres and Redis, runs `migrate`, and
+starts the backend and the frontend. Ctrl+C stops both. It needs the packages from `uv sync` and `npm install`.
+`make run-local-dev-down` stops Postgres and Redis.
 
 ## Native binaries
 
-For audio uploads to work, FFmpeg and Shaka Packager must be installed and the env vars
-`FFMPEG_BIN`, `FFPROBE_BIN` (usually installed alongside FFmpeg), and `SHAKA_PACKAGER_BIN`
-must point to them.
+Audio uploads and sample audio need FFmpeg and Shaka Packager. This section only matters in dev mode, because the
+Docker image has its own copies.
 
-This section only matters in dev mode, the Docker images ship their own copies.
+By default, Django uses `ffmpeg`, `ffprobe` and `packager` from `.tools/bin/` in the project folder. To use other
+copies, set `FFMPEG_BIN`, `FFPROBE_BIN` and `SHAKA_PACKAGER_BIN` in `.env`.
 
 ### Automated install
 
@@ -150,35 +192,24 @@ This section only matters in dev mode, the Docker images ship their own copies.
 make setup-tools
 ```
 
-This builds FFmpeg from source and downloads Shaka Packager into `.tools/bin/`
-(project-local). Re-running is a no-op if the binaries are already there; use `make clean-tools`
-to rebuild.
+This builds FFmpeg from source and downloads Shaka Packager into `.tools/bin/`. When the binaries are already there, it
+does nothing.
 
-The default `.env.local.example` already points `FFMPEG_BIN`, `FFPROBE_BIN`, and
-`SHAKA_PACKAGER_BIN` at `.tools/bin/`, so no extra config is needed.
-
-Only MacOS and Debian-based Linuxes are supported, since FFmpeg is built from source and
-the script uses Homebrew on macOS and `apt-get`on Linux, in addition Makefile downloads
-`packager-osx-arm64` or `packager-linux-x64`.
-If you already have compatible FFmpeg/Shaka binaries installed system-wide, you can reuse them by
-pointing the env vars at them instead of running `make setup-tools`.
+It works on macOS on Apple Silicon and on Debian-based Linux, because the FFmpeg script uses Homebrew on macOS and
+`apt-get` on Linux. On other platforms, install the binaries yourself and point the variables above at them.
 
 Other useful targets:
 
-- `make setup-ffmpeg` / `make setup-shaka` — install just one of them
-- `make check-tools` — print versions of the installed binaries
-- `make clean-tools` — remove `.tools/`
-
-On other platforms `make setup-tools` doesn't work directly, but you can still run the dev backend,
-install the binaries manually and point the env vars at them.
+- `make setup-ffmpeg` and `make setup-shaka` install only one of them.
+- `make check-tools` prints the versions of the binaries that Django uses.
+- `make clean-tools` removes `.tools/`, so the next `make setup-tools` builds everything again.
 
 ## direnv
 
-`direnv` is recommended for env var management. It auto-loads the variables from `.env` when
-you enter the project directory and unloads them when you leave.
+Dev mode needs direnv. It loads the variables from `.env` when you enter the project folder, and unloads them when you
+leave.
 
-Install direnv by following the instructions on the [direnv website](https://direnv.net/),
-then:
+Install direnv by following the instructions on the [direnv website](https://direnv.net/), then:
 
 ```
 mkdir -p ~/.config/direnv
@@ -198,45 +229,40 @@ In the project root (where `.env` lives):
 direnv allow
 ```
 
-Env var changes will be picked up on any command run in the terminal (e.g., after `ls`).
+direnv picks up changes in `.env` on the next command you run in the terminal (for example `ls`).
 
 ## Sample data
 
-There is a management command for creating sample app data, so it's possible to see
-how the app looks "populated":
+The `initmodels` command fills the database with users, artists, songs, albums, playlists, follows, publications,
+chats, messages and notifications. It prints the email and password of every account it creates.
 
-- `initmodels` — seeds users, artists, songs, albums, playlists, follows, publications, chats,
-  messages and notifications. Generated user/artist credentials are printed to stdout.
-  Pass `--generate-audio` to also synthesize audio files with FFmpeg, or `--skip-audio` to skip
-  audio entirely. See `--help` for explanation of params (`--users`, `--songs`, etc.).
+The songs get real audio. On the first run, the command generates sample audio files with FFmpeg and processes them
+like uploaded songs. Later runs reuse these files. In dev mode they are in `src/backend/musikk/samples/generated/`.
 
-  Audio generation uses FFmpeg and Shaka Packager, so the same platform restrictions as in
-  [Native binaries](#native-binaries) apply when running against the dev backend. Pass
-  `--skip-audio` to bypass this, or run the seed against the full compose stack.
+The `clearmodels` command deletes the sample data again.
 
-The data can be cleared afterwards with the `clearmodels` command.
+In the Docker stack:
 
-Run them against the dev backend:
+```
+make run-local-docker-seed
+make run-local-docker-clear
+```
+
+In dev mode, with Postgres running, for example through `make run-local-dev`:
 
 ```
 make run-local-dev-seed
 make run-local-dev-clear
 ```
 
-These need Postgres to run, for example through `make run-local-dev`. To pass options such as `--skip-audio`, run the
-command directly:
+`ARGS` passes options to `initmodels`, for example:
 
 ```
-cd src/backend/musikk
-uv run python manage.py initmodels --skip-audio
+make run-local-docker-seed ARGS="--songs 10 --skip-audio"
 ```
 
-Or against the running compose stack:
-
-```
-make run-local-docker-seed
-make run-local-docker-clear
-```
+`--skip-audio` creates songs without audio, `--generate-audio` makes new audio files even when some exist, and
+`--help` lists all options.
 
 ## License
 

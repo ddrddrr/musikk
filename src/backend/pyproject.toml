@@ -27,9 +27,12 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    { include-group = "seed" },
     "django-extensions>=4.1",
-    "factory-boy>=3.3.3",
-    "faker>=37.4.0",
     "ruff>=0.14.14",
     "types-channels>=4.3.0.20250822",
+]
+seed = [
+    "factory-boy>=3.3.3",
+    "faker>=37.4.0",
 ]

@@ -7,6 +7,7 @@ import os
 import tempfile
 from pathlib import Path
 from typing import Literal
+from urllib.parse import quote
 
 from decouple import AutoConfig, Csv
 
@@ -49,7 +50,6 @@ INSTALLED_APPS = [
     ##
     "anymail",
     "django_filters",
-    "django_extensions",
     "rest_framework",
     "drf_spectacular",
     "allauth",
@@ -98,10 +98,17 @@ REDIS_HOST = config("REDIS_HOST", default="localhost")
 REDIS_PORT = config("REDIS_PORT", default="6375")
 REDIS_DB = config("REDIS_DB", default="1")
 
+
+def _redis_url(db: str | int) -> str:
+    # a password with @, / or : would otherwise break the URL
+    password = quote(REDIS_PASSWORD, safe="")
+    return f"redis://:{password}@{REDIS_HOST}:{REDIS_PORT}/{db}"
+
+
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": f"redis://:{REDIS_PASSWORD}@{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}",
+        "LOCATION": _redis_url(REDIS_DB),
     }
 }
 
@@ -110,7 +117,7 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [f"redis://:{REDIS_PASSWORD}@{REDIS_HOST}:{REDIS_PORT}/0"],
+            "hosts": [_redis_url(0)],
         },
     }
 }
@@ -283,9 +290,12 @@ AUDIO_CONTENT_PATH = config("AUDIO_CONTENT_PATH", default="audio")
 MEDIA_URL = config("MEDIA_URL", default="media/")
 
 ### FFMPEG, Shaka-packager
-FFMPEG_BIN = config("FFMPEG_BIN", default="/usr/bin/ffmpeg")
-FFPROBE_BIN = config("FFPROBE_BIN", default="/usr/bin/ffprobe")
-SHAKA_PACKAGER_BIN = config("SHAKA_PACKAGER_BIN", default="/usr/bin/packager")
+TOOLS_BIN_DIR = ROOT_DIR / ".tools" / "bin"
+FFMPEG_BIN = config("FFMPEG_BIN", default=str(TOOLS_BIN_DIR / "ffmpeg"))
+FFPROBE_BIN = config("FFPROBE_BIN", default=str(TOOLS_BIN_DIR / "ffprobe"))
+SHAKA_PACKAGER_BIN = config(
+    "SHAKA_PACKAGER_BIN", default=str(TOOLS_BIN_DIR / "packager")
+)
 
 ### LOGS
 # TODO: improve
@@ -322,12 +332,11 @@ MAX_PATH_LENGTH = os.pathconf("/", "PC_PATH_MAX")
 ### Celery
 # See detailed info about options here https://gist.github.com/fjsj/da41321ac96cf28a96235cb20e7236f6
 
-CELERY_TASK_ALWAYS_EAGER = config("CELERY_TASK_ALWAYS_EAGER", cast=bool, default=True)
 # autodiscover_tasks finds only `<app>.tasks`, and the audio tasks live one package deeper
 CELERY_IMPORTS = ["streaming.audio.tasks"]
 CELERY_BROKER_URL = config(
     "CELERY_BROKER_URL",
-    default=f"redis://:{REDIS_PASSWORD}@{REDIS_HOST}:{REDIS_PORT}/2",
+    default=_redis_url(2),
 )
 # must stay above the longest task time limit (the audio task, see streaming/audio/tasks.py),
 # otherwise Redis hands the message of a task that is still running to a second worker
@@ -336,10 +345,10 @@ CELERY_BROKER_TRANSPORT_OPTIONS = {"visibility_timeout": 3600}  # s
 # this is setup, so the task is always finished (even if fails)
 CELERY_TASK_ACKS_LATE = config("CELERY_TASK_ACKS_LATE", cast=bool, default=True)
 CELERY_TASK_ACKS_ON_FAILURE_OR_TIMEOUT = config(
-    "CELERY_TASK_ACKS_ON_FAILURE_OR_TIMEOUT", cast=bool, default=False
+    "CELERY_TASK_ACKS_ON_FAILURE_OR_TIMEOUT", cast=bool, default=True
 )
 CELERY_TASK_REJECT_ON_WORKER_LOST = config(
-    "CELERY_TASK_REJECT_ON_WORKER_LOST", cast=bool, default=True
+    "CELERY_TASK_REJECT_ON_WORKER_LOST", cast=bool, default=False
 )
 CELERY_WORKER_PREFETCH_MULTIPLIER = config(
     "CELERY_WORKER_PREFETCH_MULTIPLIER", cast=int, default=1

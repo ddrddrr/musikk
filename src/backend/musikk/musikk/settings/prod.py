@@ -34,6 +34,7 @@ SESSION_COOKIE_SECURE = config("SESSION_COOKIE_SECURE", default=True, cast=bool)
 # and the combination of USE_X_FORWARDED_HOST + SECURE_PROXY_SSL_HEADER ensures that this evaluates
 # to True if we send the proper forwarded host header from caddy
 SECURE_SSL_REDIRECT = config("SECURE_SSL_REDIRECT", default=True, cast=bool)
+SECURE_REDIRECT_EXEMPT = [r"^health/$"]
 SECURE_REFERRER_POLICY = "same-origin"
 
 USE_X_FORWARDED_HOST = True

@@ -49,7 +49,7 @@ $SUDO apt-get install -y --no-install-recommends \
   automake \
   build-essential \
   curl \
-  git-core \
+  git \
   libgnutls28-dev \
   libtool \
   nasm \
@@ -62,9 +62,10 @@ if [ "$EXTRAS" -eq 1 ]; then
   EXTRA_FLAGS="$FFMPEG_EXTRA_FLAGS"
 fi
 
-echo "Building fdk-aac from source..."
+echo "Building fdk-aac $FDK_AAC_VERSION from source..."
 cd "$PREFIX/src"
-git -C fdk-aac pull 2>/dev/null || git clone --depth 1 https://github.com/mstorsjo/fdk-aac
+rm -rf fdk-aac
+git clone --depth 1 --branch "$FDK_AAC_VERSION" https://github.com/mstorsjo/fdk-aac
 cd fdk-aac
 autoreconf -fiv
 ./configure --prefix="$PREFIX" --disable-shared

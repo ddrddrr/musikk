@@ -1,10 +1,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
 import * as z from "zod";
 
 import { setFormServerErrors } from "@/api/errorUtils.ts";
-import { register } from "@/features/auth/api/mutations.ts";
+import { useRegister } from "@/features/auth/api/mutations.ts";
 import { EmailField } from "@/features/auth/components/EmailField.tsx";
 import { PasswordField } from "@/features/auth/components/PasswordField.tsx";
 import { FormServerError } from "@/features/common/FormServerError.tsx";
@@ -34,21 +34,26 @@ const SUCCESS_MESSAGE =
     "Please follow the link in the email and validate your account.";
 
 export function SignUpForm() {
+    const navigate = useNavigate();
     const form = useForm<SignUpFormValues>({
         resolver: zodResolver(signupSchema),
         defaultValues: { userRole: "StreamingUser" },
     });
 
-    const { mutate, isPending, isSuccess } = useMutation({
-        mutationFn: register,
-        onError(error) {
-            setFormServerErrors(form, error);
-        },
-    });
+    const { mutate, isPending, data: needsEmailConfirmation } = useRegister();
 
     const onSubmit = (values: SignUpFormValues) => {
         form.clearErrors("root");
-        mutate(values);
+        mutate(values, {
+            onSuccess(needsConfirmation) {
+                if (!needsConfirmation) {
+                    void navigate("/");
+                }
+            },
+            onError(error) {
+                setFormServerErrors(form, error);
+            },
+        });
     };
 
     const serverErrorMessage = form.formState.errors.root?.serverError?.message;
@@ -94,7 +99,7 @@ export function SignUpForm() {
                         {isPending ? <Spinner /> : "Sign Up"}
                     </Button>
                     <FormServerError message={serverErrorMessage} />
-                    {isSuccess && (
+                    {needsEmailConfirmation && (
                         <div
                             className={cn(
                                 "rounded-sm border-2 p-4 font-medium",

@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 from django.core.management.base import BaseCommand
 from django.db import transaction
@@ -39,7 +40,10 @@ class Command(BaseCommand):
         parser.add_argument(
             "--generate-audio",
             action="store_true",
-            help="Generate audio files with FFmpeg (to samples/generated/)",
+            help=(
+                "Generate new audio files with FFmpeg into samples/generated/. "
+                "Without this flag, files are generated only when the folder is empty."
+            ),
         )
         parser.add_argument(
             "--audio-duration-range",
@@ -57,7 +61,10 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         image_provider = ImageProvider()
 
-        if options["generate_audio"] and not options["skip_audio"]:
+        needs_audio_files = options["generate_audio"] or not _has_audio_files(
+            DEFAULT_GENERATED_AUDIO_DIR
+        )
+        if needs_audio_files and not options["skip_audio"]:
             dur_min, dur_max = (
                 int(x) for x in options["audio_duration_range"].split(",")
             )
@@ -153,3 +160,7 @@ class Command(BaseCommand):
             )
 
         self.stdout.write("")
+
+
+def _has_audio_files(audio_dir: Path) -> bool:
+    return audio_dir.is_dir() and any(path.is_file() for path in audio_dir.iterdir())

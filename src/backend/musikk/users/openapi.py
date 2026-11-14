@@ -51,7 +51,7 @@ class RegisterViewExtension(OpenApiViewExtension):
 
     def view_replacement(self):
         class Fixed(self.target_class):
-            @extend_schema(responses={201: RestAuthDetailSerializer})
+            @extend_schema(responses={201: RestAuthDetailSerializer, 204: None})
             def post(self, request, *args, **kwargs):
                 pass
 

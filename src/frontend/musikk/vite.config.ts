@@ -15,6 +15,8 @@ export default defineConfig(({ mode }) => {
             },
         },
         server: {
+            // the backend trusts only VITE_PORT for CSRF, so a busy port must fail instead of moving on
+            strictPort: true,
             proxy: {
                 "/api": {
                     target: `http://localhost:${backendPort}`,
