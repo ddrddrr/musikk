@@ -1,4 +1,4 @@
-from django.contrib.postgres.search import TrigramSimilarity
+from django.contrib.postgres.search import TrigramSimilarity, TrigramWordSimilarity
 from drf_spectacular.utils import OpenApiParameter, extend_schema, inline_serializer
 from rest_framework import status
 from rest_framework.response import Response
@@ -10,7 +10,9 @@ from streaming.models.songs import CollectionSong
 from users.api.v1.serializers import BaseUserSerializer
 from users.models import BaseUser, UserRole
 
-TRIGRAM_SIMILARITY_THRESHOLD = 0.3
+# the default of pg_trgm.word_similarity_threshold. A single letter scores 0.5,
+# so it finds nothing
+SUBSTRING_SIMILARITY_THRESHOLD = 0.6
 MAX_RESULTS = 10
 
 
@@ -67,28 +69,34 @@ class SearchView(APIView):
         return Response(data=data, status=status.HTTP_200_OK)
 
     def search(self, queryset, query, field_name, serializer_class) -> list:
-        qs = (
-            queryset.annotate(similarity=TrigramSimilarity(field_name, query))
-            .filter(similarity__gt=TRIGRAM_SIMILARITY_THRESHOLD)
-            .order_by("-similarity")[:MAX_RESULTS]
-        )
-
+        qs = self._ranked(queryset, query, field_name)
         return serializer_class(qs, many=True, context={"request": self.request}).data
 
     def _songs(self, query):
-        matching_songs = (
-            BaseSong.objects.published()
-            .in_public_published_album()
-            .annotate(similarity=TrigramSimilarity("title", query))
-            .filter(similarity__gt=TRIGRAM_SIMILARITY_THRESHOLD)
-            .order_by("-similarity")[:MAX_RESULTS]
-        )
-
-        sc_songs = CollectionSong.objects.filter(
+        # ranks the album entries directly, because a second query for the entries
+        # of the matching songs would sort them by their position in the album
+        entries = CollectionSong.objects.filter(
             collection__in=Collection.objects.albums().public().published(),
-            song__in=matching_songs,
+            song__in=BaseSong.objects.published(),
         )
-
+        qs = self._ranked(entries, query, "song__title")
         return CollectionSongRetrieveSerializer(
-            sc_songs, many=True, context={"request": self.request}
+            qs, many=True, context={"request": self.request}
         ).data
+
+    @staticmethod
+    def _ranked(queryset, query, field_name):
+        """
+        Compares the query with the best matching part of the name, so the start of a
+        word ("lov") finds a long name ("Love Me Tender"). Every name that contains the
+        query gets the same score, so the similarity to the whole name sorts these
+        names, and the names closest to the query come first.
+        """
+        return (
+            queryset.annotate(
+                substring_similarity=TrigramWordSimilarity(query, field_name),
+                whole_name_similarity=TrigramSimilarity(field_name, query),
+            )
+            .filter(substring_similarity__gte=SUBSTRING_SIMILARITY_THRESHOLD)
+            .order_by("-substring_similarity", "-whole_name_similarity")[:MAX_RESULTS]
+        )

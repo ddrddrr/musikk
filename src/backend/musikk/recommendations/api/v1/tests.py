@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.urls.base import reverse
 from rest_framework.test import APIRequestFactory, force_authenticate
-from streaming.tests.factories import CollectionFactory
+from streaming.tests.factories import BaseSongFactory, CollectionFactory
 from users.tests.factories import BaseUserFactory
 
 from recommendations.api.v1.views import SearchView
@@ -78,3 +78,30 @@ class TestSearchView(TestCase):
         response = SearchView.as_view()(request)
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.data["users"]) >= 3)
+
+    def _search(self, q):
+        request = self.factory.get(reverse("api:search"), {"q": q})
+        force_authenticate(user=self.user, request=request)
+        return SearchView.as_view()(request)
+
+    def test_start_of_a_word_finds_a_long_title(self):
+        song = BaseSongFactory(title="Love Me Tender")
+        CollectionFactory(type="album", private=False, songs=[song])
+
+        response = self._search("lov")
+
+        self.assertEqual(response.status_code, 200)
+        titles = [entry["song"]["title"] for entry in response.data["songs"]]
+        self.assertIn("Love Me Tender", titles)
+
+    def test_songs_come_in_order_of_similarity_not_album_position(self):
+        # both titles contain the query, and the longer one is first in the album
+        long_title = BaseSongFactory(title="Love Me Tender")
+        short_title = BaseSongFactory(title="Love Me")
+        CollectionFactory(type="album", private=False, songs=[long_title, short_title])
+
+        response = self._search("love me")
+
+        self.assertEqual(response.status_code, 200)
+        titles = [entry["song"]["title"] for entry in response.data["songs"]]
+        self.assertEqual(titles[:2], ["Love Me", "Love Me Tender"])
