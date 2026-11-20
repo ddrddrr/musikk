@@ -1,5 +1,6 @@
 import { MediaThumbnail } from "@/features/common/MediaThumbnail.tsx";
 import type { Song } from "@/features/songs/types.ts";
+import { OverflowTooltip } from "@/features/ui/tooltip.tsx";
 import { UserIdentifier } from "@/features/user/components/UserIdentifier.tsx";
 
 type SongDisplayProps = {
@@ -26,7 +27,9 @@ export function SongDisplay({ song }: SongDisplayProps) {
                         <UserIdentifier key={author.uuid} user={author} />
                     ))}
                 </div>
-                <p className="truncate text-xl font-bold">{song.title}</p>
+                <OverflowTooltip label={song.title}>
+                    <p className="truncate text-xl font-bold">{song.title}</p>
+                </OverflowTooltip>
             </div>
         </div>
     );

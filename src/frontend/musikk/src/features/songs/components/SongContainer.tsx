@@ -2,6 +2,7 @@ import { CollectionSong } from "@/features/collections/types.ts";
 import { MediaThumbnail } from "@/features/common/MediaThumbnail.tsx";
 import { DefaultSongActions } from "@/features/songs/components/DefaultSongActions.tsx";
 import { useNavigateToSongAlbum } from "@/features/songs/hooks/useNavigateToSongAlbum.ts";
+import { OverflowTooltip } from "@/features/ui/tooltip.tsx";
 import { AuthorLinks } from "@/features/user/components/AuthorLinks.tsx";
 import { cn } from "@/lib/utils.ts";
 import { formatDuration } from "@/utils/formatDuration.ts";
@@ -38,7 +39,7 @@ const containerVariants = cva(
     },
 );
 
-const imageVariants = cva("", {
+const imageVariants = cva("shrink-0", {
     variants: {
         size: {
             sm: "size-8",
@@ -101,16 +102,18 @@ export function SongContainer({
             {showImage && <MediaThumbnail src={song.image} className={imageVariants({ size })} />}
             <div className="flex min-w-0 flex-col">
                 {/*TODO: unify with other clickable names which are links?*/}
-                <button
-                    type="button"
-                    onClick={() => void navigateToAlbum(song.uuid)}
-                    className={cn(
-                        titleVariants({ size }),
-                        "cursor-pointer bg-transparent p-0 text-left hover:underline",
-                    )}
-                >
-                    {song.title}
-                </button>
+                <OverflowTooltip label={song.title}>
+                    <button
+                        type="button"
+                        onClick={() => void navigateToAlbum(song.uuid)}
+                        className={cn(
+                            titleVariants({ size }),
+                            "cursor-pointer bg-transparent p-0 text-left hover:underline",
+                        )}
+                    >
+                        {song.title}
+                    </button>
+                </OverflowTooltip>
                 {variant === "inline" && (
                     <AuthorLinks authors={song.authors} className={authorsVariants({ size })} />
                 )}

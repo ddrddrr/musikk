@@ -59,4 +59,42 @@ function IconTooltip({ label, children, side = "bottom" }: IconTooltipProps) {
     );
 }
 
-export { IconTooltip, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger };
+type OverflowTooltipProps = {
+    label: string;
+    children: React.ReactElement;
+};
+
+/**
+ * Shows the full text when the child cuts it off with `truncate` or `line-clamp`. The child must be the
+ * element that hides the overflow, because that element is measured. Text that fits gets no tooltip.
+ */
+function OverflowTooltip({ label, children }: OverflowTooltipProps) {
+    return (
+        <Tooltip>
+            <TooltipTrigger
+                asChild
+                onPointerMove={preventOpenUnlessCut}
+                onFocus={preventOpenUnlessCut}
+            >
+                {children}
+            </TooltipTrigger>
+            <TooltipContent className="max-w-sm break-words">{label}</TooltipContent>
+        </Tooltip>
+    );
+}
+
+/**
+ * Radix skips its own open handler when an earlier handler calls `preventDefault`. A controlled `open`
+ * prop does not work here, because Radix would still count the blocked tooltip as open, and the next
+ * tooltip would then open without its delay.
+ */
+function preventOpenUnlessCut(event: React.SyntheticEvent<HTMLElement>) {
+    const element = event.currentTarget;
+    const isCut =
+        element.scrollWidth > element.clientWidth || element.scrollHeight > element.clientHeight;
+    if (!isCut) {
+        event.preventDefault();
+    }
+}
+
+export { IconTooltip, OverflowTooltip, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger };

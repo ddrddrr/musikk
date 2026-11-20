@@ -1,6 +1,7 @@
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
 import { useChatImage } from "@/features/publications/hooks/useChatImage.ts";
 import { Chat } from "@/features/publications/types.ts";
+import { OverflowTooltip } from "@/features/ui/tooltip.tsx";
 import { UserAvatar } from "@/features/user/components/UserAvatar.tsx";
 import { cn } from "@/lib/utils.ts";
 import { formatDateTime } from "@/utils/formatDate.ts";
@@ -28,7 +29,9 @@ export function ChatPreview({ chat }: ChatPreviewProps) {
                 <UserAvatar src={chatImg} alt={chatImgAlt} size="sm" />
                 <div className="min-w-0 flex-1">
                     <div className="flex items-baseline justify-between gap-2">
-                        <h3 className="truncate text-sm font-bold">{chat.title}</h3>
+                        <OverflowTooltip label={chat.title}>
+                            <h3 className="truncate text-sm font-bold">{chat.title}</h3>
+                        </OverflowTooltip>
                         {lastMessageTime && (
                             <span className="shrink-0 text-xs text-muted-foreground">
                                 {lastMessageTime}
@@ -36,21 +39,23 @@ export function ChatPreview({ chat }: ChatPreviewProps) {
                         )}
                     </div>
                     {chat.last_message && (
-                        <p className="mt-1 truncate text-sm text-muted-foreground">
-                            {chat.last_message.is_deleted ? (
-                                <span className="italic">Message deleted</span>
-                            ) : (
-                                <>
-                                    <span className="font-medium">
-                                        {chat.last_message.author.uuid === userUUID
-                                            ? "You"
-                                            : chat.last_message.author.display_name}
-                                        :
-                                    </span>{" "}
-                                    {chat.last_message.content}
-                                </>
-                            )}
-                        </p>
+                        <OverflowTooltip label={chat.last_message.content}>
+                            <p className="mt-1 truncate text-sm text-muted-foreground">
+                                {chat.last_message.is_deleted ? (
+                                    <span className="italic">Message deleted</span>
+                                ) : (
+                                    <>
+                                        <span className="font-medium">
+                                            {chat.last_message.author.uuid === userUUID
+                                                ? "You"
+                                                : chat.last_message.author.display_name}
+                                            :
+                                        </span>{" "}
+                                        {chat.last_message.content}
+                                    </>
+                                )}
+                            </p>
+                        </OverflowTooltip>
                     )}
                 </div>
             </div>

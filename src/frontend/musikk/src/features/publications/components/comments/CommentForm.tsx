@@ -3,6 +3,7 @@ import { PublicationForm } from "@/features/publications/components/PublicationF
 import { commentSchema } from "@/features/publications/schemas.ts";
 import { CommentableObjectRef, Publication } from "@/features/publications/types.ts";
 import { Button } from "@/features/ui/button.tsx";
+import { OverflowTooltip } from "@/features/ui/tooltip.tsx";
 
 interface CommentFormProps {
     commentable: CommentableObjectRef;
@@ -41,10 +42,14 @@ function ReplyPreview({ reply, onCancel }: { reply: Publication; onCancel: () =>
     return (
         <div className="mb-2 flex items-start justify-between border-l-2 border-foreground pl-2 text-xs text-muted-foreground">
             <div className="max-w-xs min-w-0 truncate">
-                <div className="truncate font-medium">
-                    {reply.author.display_name || "Anonymous"}
-                </div>
-                <div className="truncate italic">{reply.content}</div>
+                <OverflowTooltip label={reply.author.display_name || "Anonymous"}>
+                    <div className="truncate font-medium">
+                        {reply.author.display_name || "Anonymous"}
+                    </div>
+                </OverflowTooltip>
+                <OverflowTooltip label={reply.content}>
+                    <div className="truncate italic">{reply.content}</div>
+                </OverflowTooltip>
             </div>
             <Button type="button" variant="ghost" size="sm" onClick={onCancel} className="shrink-0">
                 Cancel

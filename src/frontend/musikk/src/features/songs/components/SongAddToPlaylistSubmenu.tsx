@@ -11,6 +11,7 @@ import {
     DropdownMenuSubContent,
     DropdownMenuSubTrigger,
 } from "@/features/ui/dropdown-menu.tsx";
+import { OverflowTooltip } from "@/features/ui/tooltip.tsx";
 import { useUserLibrary } from "@/features/user/hooks/useUserLibrary.ts";
 import { Check, ListPlus, Plus } from "lucide-react";
 
@@ -73,7 +74,9 @@ export function SongAddToPlaylistSubmenu({ collectionSong }: SongAddToPlaylistSu
                                     <Plus className="size-4" />
                                 )}
                             </div>
-                            <span className="flex-1 truncate">{collection.title}</span>
+                            <OverflowTooltip label={collection.title}>
+                                <span className="flex-1 truncate">{collection.title}</span>
+                            </OverflowTooltip>
                         </DropdownMenuItem>
                     );
                 })}

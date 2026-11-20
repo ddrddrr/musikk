@@ -1,5 +1,6 @@
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/features/ui/form.tsx";
 import { Input } from "@/features/ui/input.tsx";
+import { OverflowTooltip } from "@/features/ui/tooltip.tsx";
 import { cn } from "@/lib/utils.ts";
 import { useFormContext } from "react-hook-form";
 
@@ -39,9 +40,11 @@ export function FileField({
                                     </span>
 
                                     {file?.name && (
-                                        <span className="min-w-0 flex-1 truncate text-sm">
-                                            {file.name}
-                                        </span>
+                                        <OverflowTooltip label={file.name}>
+                                            <span className="min-w-0 flex-1 truncate text-sm">
+                                                {file.name}
+                                            </span>
+                                        </OverflowTooltip>
                                     )}
 
                                     <Input

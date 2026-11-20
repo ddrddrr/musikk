@@ -1,5 +1,6 @@
 import { TrackStatus } from "@/features/album-upload/types.ts";
 import { Spinner } from "@/features/ui/spinner.tsx";
+import { OverflowTooltip } from "@/features/ui/tooltip.tsx";
 import { cn } from "@/lib/utils.ts";
 
 type InProgressStatus = Extract<TrackStatus, "queued" | "processing">;
@@ -45,7 +46,11 @@ export function SongUploadStatusBadge({
                 {status}
             </div>
             {detail && (
-                <div className="max-w-[50ch] truncate text-xs text-muted-foreground">{detail}</div>
+                <OverflowTooltip label={detail}>
+                    <div className="max-w-[50ch] truncate text-xs text-muted-foreground">
+                        {detail}
+                    </div>
+                </OverflowTooltip>
             )}
         </div>
     );

@@ -14,7 +14,7 @@ import { useScrollAnchor } from "@/features/publications/hooks/useScrollAnchor.t
 import { useTypingIndicator } from "@/features/publications/hooks/useTypingIndicator.ts";
 import { CommentableObjectRef, Publication } from "@/features/publications/types.ts";
 import { Button } from "@/features/ui/button.tsx";
-import { IconTooltip } from "@/features/ui/tooltip.tsx";
+import { IconTooltip, OverflowTooltip } from "@/features/ui/tooltip.tsx";
 import { cn } from "@/lib/utils.ts";
 import { commentsTopic, commentsTypingEvent } from "@/ws/topics.ts";
 import { X } from "lucide-react";
@@ -47,10 +47,12 @@ export function CommentBox({ commentable, title, closeTo, className }: CommentBo
                     borderColor,
                 )}
             >
-                <p className="min-w-0 truncate text-sm">
-                    <span className="text-muted-foreground">Comments on </span>
-                    <span className="font-bold">{title}</span>
-                </p>
+                <OverflowTooltip label={`Comments on ${title}`}>
+                    <p className="min-w-0 truncate text-sm">
+                        <span className="text-muted-foreground">Comments on </span>
+                        <span className="font-bold">{title}</span>
+                    </p>
+                </OverflowTooltip>
                 <IconTooltip label="Close">
                     <Button variant="ghost" size="icon-sm" aria-label="Close comments" asChild>
                         <Link to={closeTo}>

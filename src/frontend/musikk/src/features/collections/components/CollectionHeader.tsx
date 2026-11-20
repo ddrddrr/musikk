@@ -11,7 +11,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/features/ui/dropdown-menu.tsx";
-import { IconTooltip } from "@/features/ui/tooltip.tsx";
+import { IconTooltip, OverflowTooltip } from "@/features/ui/tooltip.tsx";
 import { AuthorLinks } from "@/features/user/components/AuthorLinks.tsx";
 import { cn } from "@/lib/utils.ts";
 import { EllipsisVertical, Trash2 } from "lucide-react";
@@ -82,7 +82,9 @@ export function CollectionHeader({
     );
     const infoAndActions = compact ? (
         <div className="mb-2">
-            <p className="truncate text-sm font-bold">{collection.title}</p>
+            <OverflowTooltip label={collection.title}>
+                <p className="truncate text-sm font-bold">{collection.title}</p>
+            </OverflowTooltip>
             <div className="mt-2 flex gap-3">{actionButtons}</div>
         </div>
     ) : (
@@ -94,9 +96,11 @@ export function CollectionHeader({
                     className="text-sm text-muted-foreground"
                 />
                 {collection.description && (
-                    <p className="mt-2 line-clamp-2 text-base text-muted-foreground">
-                        {collection.description}
-                    </p>
+                    <OverflowTooltip label={collection.description}>
+                        <p className="mt-2 line-clamp-2 text-base text-muted-foreground">
+                            {collection.description}
+                        </p>
+                    </OverflowTooltip>
                 )}
             </div>
             <div className="ml-2 flex flex-shrink-0 gap-2">{actionButtons}</div>

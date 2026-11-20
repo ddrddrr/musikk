@@ -9,7 +9,7 @@ import { useQueueNext, useQueuePrev } from "@/features/song-queue/api/mutations.
 import { useNavigateToSongAlbum } from "@/features/songs/hooks/useNavigateToSongAlbum.ts";
 import { Button } from "@/features/ui/button.tsx";
 import { Slider } from "@/features/ui/slider.tsx";
-import { IconTooltip } from "@/features/ui/tooltip.tsx";
+import { IconTooltip, OverflowTooltip } from "@/features/ui/tooltip.tsx";
 import { AuthorLinks } from "@/features/user/components/AuthorLinks.tsx";
 import { formatDuration } from "@/utils/formatDuration.ts";
 import { ListMusic, MessageCircle, SkipBack, SkipForward, Volume2, VolumeX } from "lucide-react";
@@ -60,13 +60,15 @@ export function PlayerBar({ onToggleQueue, isMutedFallback, onUnmute }: PlayerBa
                             className="size-14 shrink-0 border-2 border-foreground"
                         />
                         <div className="flex min-w-0 flex-col">
-                            <button
-                                type="button"
-                                onClick={() => void navigateToAlbum(playingSong.uuid)}
-                                className="cursor-pointer truncate bg-transparent p-0 text-left text-sm font-bold hover:underline"
-                            >
-                                {playingSong.title}
-                            </button>
+                            <OverflowTooltip label={playingSong.title}>
+                                <button
+                                    type="button"
+                                    onClick={() => void navigateToAlbum(playingSong.uuid)}
+                                    className="cursor-pointer truncate bg-transparent p-0 text-left text-sm font-bold hover:underline"
+                                >
+                                    {playingSong.title}
+                                </button>
+                            </OverflowTooltip>
                             <AuthorLinks
                                 authors={playingCollectionSong.song.authors}
                                 className="text-xs text-muted-foreground"

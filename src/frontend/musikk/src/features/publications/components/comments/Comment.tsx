@@ -1,6 +1,7 @@
 import { PostAttachment } from "@/features/publications/components/posts/PostAttachment.tsx";
 import { PostHeader } from "@/features/publications/components/posts/PostHeader.tsx";
 import { Publication } from "@/features/publications/types.ts";
+import { OverflowTooltip } from "@/features/ui/tooltip.tsx";
 
 interface CommentProps {
     comment: Publication;
@@ -12,10 +13,14 @@ export function Comment({ comment, setReplyTo }: CommentProps) {
         <div className="rounded-sm border border-foreground bg-muted p-3">
             {comment.parent_uuid && comment.parent_author && comment.parent_repr && (
                 <div className="mb-2 min-w-0 border-l-2 border-foreground pl-2 text-xs text-muted-foreground">
-                    <div className="truncate font-medium">
-                        {comment.parent_author.display_name || "Anonymous"}
-                    </div>
-                    <div className="truncate italic">{comment.parent_repr}</div>
+                    <OverflowTooltip label={comment.parent_author.display_name || "Anonymous"}>
+                        <div className="truncate font-medium">
+                            {comment.parent_author.display_name || "Anonymous"}
+                        </div>
+                    </OverflowTooltip>
+                    <OverflowTooltip label={comment.parent_repr}>
+                        <div className="truncate italic">{comment.parent_repr}</div>
+                    </OverflowTooltip>
                 </div>
             )}
             <div className="mb-1">
