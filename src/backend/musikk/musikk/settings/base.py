@@ -138,8 +138,6 @@ REST_FRAMEWORK = {
     "DEFAULT_FILTER_BACKENDS": [
         "django_filters.rest_framework.DjangoFilterBackend",
     ],
-    # "DEFAULT_PAGINATION_CLASS": "musikk.pagination.BaseLimitOffsetPagination",
-    "PAGE_SIZE": 10,
     "EXCEPTION_HANDLER": "base.exception_handler.musikk_exception_handler",
     "DEFAULT_SCHEMA_CLASS": "base.openapi.MusikkAutoSchema",
 }
@@ -189,12 +187,6 @@ ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
 ACCOUNT_LOGIN_METHODS = ["email"]
 
-# Deprecated, but required in dj-rest-auth
-# see https://github.com/iMerica/dj-rest-auth/issues/685
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_AUTHENTICATION_METHOD = "email"
-ACCOUNT_USERNAME_REQUIRED = False
-
 ACCOUNT_EMAIL_VERIFICATION: Literal["mandatory", "none", "optional"] = config(
     "ACCOUNT_EMAIL_VERIFICATION", default="mandatory"
 )
@@ -204,7 +196,10 @@ ACCOUNT_CHANGE_EMAIL = True
 ACCOUNT_MAX_EMAIL_ADDRESSES = 2
 
 ACCOUNT_ADAPTER = "users.adapters.BaseAccountAdapter"
-ACCOUNT_RATE_LIMITS = config("ACCOUNT_RATE_LIMITS", default=True, cast=bool)
+# allauth takes a dict of limits or False, which is wtf but okay
+ACCOUNT_RATE_LIMITS: dict[str, str] | Literal[False] = (
+    {} if config("ACCOUNT_RATE_LIMITS", default=True, cast=bool) else False
+)
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 AUTH_PASSWORD_VALIDATORS = [

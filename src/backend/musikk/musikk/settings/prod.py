@@ -39,5 +39,7 @@ SECURE_REFERRER_POLICY = "same-origin"
 
 USE_X_FORWARDED_HOST = True
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+# without this X-Forwarded-For (and ip rate limits) won't work properly
+ALLAUTH_TRUSTED_PROXY_COUNT = 1
 
 LOGGING["root"]["level"] = "INFO"
