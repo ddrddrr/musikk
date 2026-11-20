@@ -3,10 +3,11 @@ from pathlib import Path
 
 from django.conf import settings
 
+IMAGES_DIR = "images"
 
-# TODO: set images dir to settings
+
 def deafult_image_path(instance, filename):
-    image_dir = Path(settings.MEDIA_ROOT) / "images" / instance.__class__.__name__
+    image_dir = Path(settings.MEDIA_ROOT) / IMAGES_DIR / instance.__class__.__name__
     image_dir.mkdir(parents=True, exist_ok=True)
 
-    return os.path.join("images", instance.__class__.__name__, str(instance.uuid))
+    return os.path.join(IMAGES_DIR, instance.__class__.__name__, str(instance.uuid))

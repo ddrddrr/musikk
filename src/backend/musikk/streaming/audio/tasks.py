@@ -12,6 +12,10 @@ from django.utils import timezone
 from utils.storage import delete_django_storage_dir
 from websockets.event_helpers import send_ws_event, user_group
 
+from streaming.audio.config import (
+    CONVERSION_SOFT_TIME_LIMIT_SECONDS,
+    CONVERSION_TIME_LIMIT_SECONDS,
+)
 from streaming.audio.exceptions import (
     AudioProcessingPipelineError,
     ProcessingTimeoutError,
@@ -30,21 +34,18 @@ from streaming.ws.events import ServerEvent
 
 logger = logging.getLogger(__name__)
 
-SOFT_TIME_LIMIT_SECONDS = 30 * 60  # 30min, just a reasonable number, not tested
-
 
 @shared_task(
     acks_on_failure_or_timeout=True,
-    soft_time_limit=SOFT_TIME_LIMIT_SECONDS,
-    # one more minute for the cleanup after the soft limit
-    time_limit=SOFT_TIME_LIMIT_SECONDS + 60,
+    soft_time_limit=CONVERSION_SOFT_TIME_LIMIT_SECONDS,
+    time_limit=CONVERSION_TIME_LIMIT_SECONDS,
 )
 def convert_audio(
     song_uuid: str | UUID, initiator_uuid: str | UUID, audio_info: dict
 ) -> None:
     """Turns the uploaded song into the streamable files."""
     # the soft limit can't stop the FFmpeg threads, so they get an earlier deadline
-    deadline = time.monotonic() + SOFT_TIME_LIMIT_SECONDS - 30
+    deadline = time.monotonic() + CONVERSION_SOFT_TIME_LIMIT_SECONDS - 30
 
     if not _mark_song_as_processing_if_queued(song_uuid):
         logger.info(f"Song {song_uuid} was not found or queued, skipping processing")

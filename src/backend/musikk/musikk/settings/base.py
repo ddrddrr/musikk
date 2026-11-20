@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Literal
 from urllib.parse import quote
 
+from celery.schedules import crontab
 from decouple import AutoConfig, Csv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -226,8 +227,10 @@ AUTH_PASSWORD_VALIDATORS = [
 FRONTEND_URL = config("FRONTEND_URL", default="http://localhost:5175")
 
 ### MAIL
-EMAIL_BACKEND = config(
-    "EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend"
+# only queues the mail, the `send_email` task then sends it with EMAIL_DELIVERY_BACKEND
+EMAIL_BACKEND = "base.email.CeleryEmailBackend"
+EMAIL_DELIVERY_BACKEND = config(
+    "EMAIL_DELIVERY_BACKEND", default="django.core.mail.backends.console.EmailBackend"
 )
 DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="no-reply@mail.musikk.stream")
 SERVER_EMAIL = config("SERVER_EMAIL", default="server@mail.musikk.stream")
@@ -235,6 +238,8 @@ ANYMAIL = {
     "MAILGUN_API_KEY": config("MAILGUN_API_KEY", ""),
     "MAILGUN_SENDER_DOMAIN": config("MAILGUN_SENDER_DOMAIN", ""),
     "MAILGUN_API_URL": config("MAILGUN_API_URL", ""),
+    # below the soft time limit of send_email(), so slow sends which indicate an error will become a retry
+    "REQUESTS_TIMEOUT": 10,  # s
 }
 
 
@@ -326,13 +331,10 @@ LOGGING = {
     },
 }
 
-### MISC
-MAX_PATH_LENGTH = os.pathconf("/", "PC_PATH_MAX")
-
 ### Celery
-# See detailed info about options here https://gist.github.com/fjsj/da41321ac96cf28a96235cb20e7236f6
+# more info on settings here https://gist.github.com/fjsj/da41321ac96cf28a96235cb20e7236f6
 
-# autodiscover_tasks finds only `<app>.tasks`, and the audio tasks live one package deeper
+# autodiscover_tasks finds only top-level app tasks, and the audio tasks live one package deeper
 CELERY_IMPORTS = ["streaming.audio.tasks"]
 CELERY_BROKER_URL = config(
     "CELERY_BROKER_URL",
@@ -363,10 +365,25 @@ CELERY_TASK_SOFT_TIME_LIMIT = config(
     "CELERY_TASK_SOFT_TIME_LIMIT", cast=int, default=540
 )
 CELERY_TASK_TIME_LIMIT = config("CELERY_TASK_TIME_LIMIT", cast=int, default=600)
-# the worker runs beat too (`-B` in start-celery-worker.sh), there is one worker
+# a sep queue for audio tasks, since audio tasks block the workers for a long time
+CELERY_TASK_ROUTES = {
+    "streaming.audio.tasks.convert_audio": {"queue": "audio"},
+}
 CELERY_BEAT_SCHEDULE = {
     "cleanup-uploads": {
         "task": "streaming.audio.tasks.cleanup_uploads",
-        "schedule": 60 * 60,  # s
+        "schedule": crontab(minute=0),
+    },
+    "clear-expired-sessions": {
+        "task": "base.tasks.clear_expired_sessions",
+        "schedule": crontab(hour=3, minute=0),
+    },
+    "cleanup-orphan-images": {
+        "task": "base.tasks.cleanup_orphan_images",
+        "schedule": crontab(hour=3, minute=30),
     },
 }
+
+
+### MISC
+MAX_PATH_LENGTH = os.pathconf("/", "PC_PATH_MAX")

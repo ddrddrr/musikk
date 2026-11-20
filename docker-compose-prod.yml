@@ -1,29 +1,22 @@
 name: musikk
 
-# the server and the Celery worker run the same image. Only the server builds it, because Compose
-# fails when two services build an image with the same name.
-x-backend: &backend
-  image: musikk-backend
-  env_file:
-    - .env.prod
-  environment:
-    DJANGO_SETTINGS_MODULE: musikk.settings.prod
-    UPLOAD_TMP_DIR: /var/uploads_tmp
-  restart: unless-stopped
-  depends_on:
-    database:
-      condition: service_healthy
-    redis:
-      condition: service_healthy
-  networks:
-    - main
-
 services:
   server:
-    <<: *backend
+    image: musikk-backend
     build:
       context: ./src/backend/
       dockerfile: Dockerfile
+    env_file:
+      - .env.prod
+    environment:
+      DJANGO_SETTINGS_MODULE: musikk.settings.prod
+      UPLOAD_TMP_DIR: /var/uploads_tmp
+    restart: unless-stopped
+    depends_on:
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     expose:
       - 8000
     volumes:
@@ -36,6 +29,8 @@ services:
       timeout: 3s
       retries: 5
       start_period: 30s
+    networks:
+      - main
 
   database:
     image: postgres:17
@@ -55,17 +50,51 @@ services:
     networks:
       - main
 
-  celery_worker:
-    <<: *backend
-    entrypoint: [ "./start-celery-worker.sh" ]
+  celery_worker_audio:
+    # build is not specified, since backend already built the image
+    image: musikk-backend
+    entrypoint: celery -A musikk worker -l INFO -Q audio
+    env_file:
+      - .env.prod
+    environment:
+      DJANGO_SETTINGS_MODULE: musikk.settings.prod
+      UPLOAD_TMP_DIR: /var/uploads_tmp
+    restart: unless-stopped
+    depends_on:
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     volumes:
       - django_media:/app/media
       - upload_tmp:/var/uploads_tmp
+    networks:
+      - main
+
+  celery_worker_scheduled:
+    image: musikk-backend
+    entrypoint: celery -A musikk worker -l INFO -Q celery --concurrency 2 -B
+    env_file:
+      - .env.prod
+    environment:
+      DJANGO_SETTINGS_MODULE: musikk.settings.prod
+      UPLOAD_TMP_DIR: /var/uploads_tmp
+    restart: unless-stopped
+    depends_on:
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - django_media:/app/media
+      - upload_tmp:/var/uploads_tmp
+    networks:
+      - main
 
   redis:
     image: redis:8.0-alpine
-    # $$ makes the container read the password from its env_file. With ${...}, Compose would take
-    # REDIS_PASSWORD from the shell first, which may hold another value, for example from direnv.
+    # $$ makes the container read the password from its env_file
+    # with ${}, Compose would take REDIS_PASSWORD from the shell first, which may have a value for example from direnv
     command: [ "sh", "-c", "exec redis-server --requirepass \"$$REDIS_PASSWORD\"" ]
     expose:
       - 6379
@@ -107,7 +136,6 @@ volumes:
   django_media:
   # mounted at /var rather than /tmp because the volume persists across
   # container restarts and /tmp can be cleared by OS whenever
-  # (the hourly `cleanup_uploads` Celery task removes leftover files)
   upload_tmp:
 
 networks:

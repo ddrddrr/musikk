@@ -6,8 +6,10 @@ from datetime import timedelta
 from pathlib import Path
 from unittest.mock import patch
 
+from django.conf import settings
 from django.test import TestCase, override_settings
 from django.utils import timezone
+from utils.storage import delete_django_storage_dir
 
 from streaming.audio.upload_cleanup import (
     STUCK_PROCESSING_AFTER,
@@ -30,9 +32,12 @@ def _set_age(path: Path, age: timedelta) -> None:
 class UploadCleanupTest(TestCase):
     def setUp(self):
         self.upload_tmp = tempfile.mkdtemp()
+        # the cleanup lists the song content folders, which must not be the real ones
+        self.media_root = tempfile.mkdtemp()
         self.override = override_settings(
             UPLOAD_TMP_DIR=self.upload_tmp,
             FILE_UPLOAD_TEMP_DIR=os.path.join(self.upload_tmp, "incoming"),
+            MEDIA_ROOT=self.media_root,
         )
         self.override.enable()
         create_upload_dirs()
@@ -40,6 +45,7 @@ class UploadCleanupTest(TestCase):
     def tearDown(self):
         self.override.disable()
         shutil.rmtree(self.upload_tmp, ignore_errors=True)
+        shutil.rmtree(self.media_root, ignore_errors=True)
 
     def _song(self, status: SongStatus, age: timedelta = timedelta()) -> BaseSong:
         song = BaseSongFactory(status=status)
@@ -95,6 +101,27 @@ class UploadCleanupTest(TestCase):
             self.assertFalse(folder.exists(), folder)
         for folder in (queued, processing, just_moved):
             self.assertTrue(folder.exists(), folder)
+
+    def _content_dir(self, age: timedelta = timedelta(hours=2)) -> tuple[str, Path]:
+        storage_dir = os.path.join(settings.AUDIO_CONTENT_PATH, str(uuid.uuid4()))
+        folder = Path(self.media_root) / storage_dir
+        folder.mkdir(parents=True)
+        (folder / "manifest.mpd").write_bytes(b"manifest")
+        _set_age(folder, age)
+        return storage_dir, folder
+
+    def test_orphan_song_content_folders_are_deleted(self, mock_delete_storage):
+        mock_delete_storage.side_effect = delete_django_storage_dir
+        song_dir, song_folder = self._content_dir()
+        BaseSongFactory(status=SongStatus.READY, content_path=song_dir)
+        _, orphan_folder = self._content_dir()
+        _, young_orphan_folder = self._content_dir(age=timedelta(minutes=5))
+
+        run_upload_cleanup()
+
+        self.assertFalse(orphan_folder.exists())
+        self.assertTrue(song_folder.exists())
+        self.assertTrue(young_orphan_folder.exists())
 
     def test_old_incoming_files_are_deleted(self, mock_delete_storage):
         old = incoming_dir() / "old.upload"

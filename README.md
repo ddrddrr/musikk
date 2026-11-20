@@ -113,8 +113,8 @@ The `make` targets are short forms of the commands in the [`Makefile`](Makefile)
 [For reviewers](#for-reviewers) lists the steps. A few more details:
 
 - The example env file uses Django's console email backend. Registration and password-reset emails are printed to the
-  server log instead of being sent. To send real mail, set `EMAIL_BACKEND` to the mail provider of your choice and fill
-  in the variables it needs (see `django-anymail`).
+  server log instead of being sent. To send real mail, set `EMAIL_DELIVERY_BACKEND` to the mail provider of your
+  choice and fill in the variables it needs (see `django-anymail`).
 - `ACCOUNT_EMAIL_VERIFICATION` (django-allauth) controls the email confirmation on signup. The example sets it to
   `none`, so a new account is active right away.
 - The server runs `migrate` and `collectstatic` on every start.

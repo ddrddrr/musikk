@@ -1,5 +1,6 @@
 import logging
 import os
+from collections.abc import Iterator
 from pathlib import Path
 
 from django.core.files.base import File
@@ -83,6 +84,16 @@ def delete_django_storage_dir(storage_dir: str | Path) -> None:
             logger.exception(f"Failed to delete directory {storage_dir}")
     except Exception:
         logger.exception(f"Failed to list or delete storage directory {storage_dir}")
+
+
+def walk_django_storage_files(storage_dir: str) -> Iterator[str]:
+    if not default_storage.exists(storage_dir):
+        return
+    subdirs, files = default_storage.listdir(storage_dir)
+    for file_name in files:
+        yield f"{storage_dir}/{file_name}"
+    for subdir in subdirs:
+        yield from walk_django_storage_files(f"{storage_dir}/{subdir}")
 
 
 def get_django_storage_files(storage_file_paths: list[str], tmpdir: str) -> list[Path]:

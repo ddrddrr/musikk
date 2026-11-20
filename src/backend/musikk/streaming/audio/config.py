@@ -8,6 +8,11 @@ MAX_DURATION_SECONDS = 7200  # 2h
 MAX_SAMPLE_RATE = 384_000
 MAX_CHANNELS = 8  # dolby 7.1 surround
 
+# 30min, just a reasonable number, not tested
+CONVERSION_SOFT_TIME_LIMIT_SECONDS = 30 * 60
+# one more minute for the cleanup after the soft limit
+CONVERSION_TIME_LIMIT_SECONDS = CONVERSION_SOFT_TIME_LIMIT_SECONDS + 60
+
 # not adding .ape,.mka and other less popular formats
 # since don't want to research their stability and quirks.
 ALLOWED_DEMUXERS = (

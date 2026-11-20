@@ -55,8 +55,8 @@ RUN case "$TARGETARCH" in \
 RUN ffmpeg -version && ffprobe -version && packager --version
 
 WORKDIR /app
-COPY setup/entrypoint.sh setup/start-celery-worker.sh ./
-RUN chmod +x entrypoint.sh start-celery-worker.sh
+COPY setup/entrypoint.sh ./
+RUN chmod +x entrypoint.sh
 
 COPY musikk ./
 
