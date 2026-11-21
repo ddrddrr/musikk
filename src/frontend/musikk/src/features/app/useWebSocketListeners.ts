@@ -5,11 +5,15 @@ import { useDeviceLifecycle } from "@/features/playback/hooks/useDeviceLifecycle
 import { useUserChatsWsEvents } from "@/features/publications/hooks/useUserChatsWsEvents.ts";
 import { useQueueWsEvents } from "@/features/song-queue/wsEvents.ts";
 import { useUserWsEvents } from "@/features/user/wsEvents.ts";
+import { useConnectionLostToast } from "@/ws/useConnectionLostToast.ts";
 import { useErrorEvent } from "@/ws/useErrorEvent.ts";
+import { useRefetchAfterReconnect } from "@/ws/useRefetchAfterReconnect.ts";
 
 // TODO: move closer to the providers that use them
 export function useWebSocketListeners() {
     useErrorEvent();
+    useConnectionLostToast();
+    useRefetchAfterReconnect();
     useDeviceLifecycle();
     useUserWsEvents();
     useQueueWsEvents();

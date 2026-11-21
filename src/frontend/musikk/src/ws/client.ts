@@ -13,6 +13,14 @@ type MessageHandler = (payload: unknown) => void;
 const RECONNECT_BASE_DELAY_MS = 500;
 const RECONNECT_MAX_DELAY_MS = 30000;
 
+function runHandler(handler: () => void, kind: string) {
+    try {
+        handler();
+    } catch (error) {
+        console.error(`WS Error in ${kind} handler:`, error);
+    }
+}
+
 export class WSClient {
     private ws: WebSocket | null = null;
     private url: string;
@@ -21,9 +29,9 @@ export class WSClient {
     private reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
 
     private listeners = new Map<string, Set<MessageHandler>>();
-    private pendingMessages: string[] = [];
     private topicSubscriptions = new Map<string, number>();
     private openHandlers = new Set<() => void>();
+    private closeHandlers = new Set<() => void>();
 
     constructor(url: string) {
         this.url = url;
@@ -57,17 +65,8 @@ export class WSClient {
             }
 
             for (const handler of this.openHandlers) {
-                try {
-                    handler();
-                } catch (error) {
-                    console.error("WS Error in open handler:", error);
-                }
+                runHandler(handler, "open");
             }
-
-            if (this.pendingMessages.length > 0) {
-                console.debug(`WS Flushing ${this.pendingMessages.length} pending messages`);
-            }
-            this.flush();
         };
 
         socket.onmessage = (e: MessageEvent<string>) => {
@@ -118,6 +117,9 @@ export class WSClient {
             }
 
             this.scheduleReconnect();
+            for (const handler of this.closeHandlers) {
+                runHandler(handler, "close");
+            }
         };
     }
 
@@ -173,58 +175,48 @@ export class WSClient {
         this.ws = null;
     }
 
+    // an action sent while the connection is down is dropped, because after the reconnect
+    // it may be stale, e.g. a pause clicked minutes ago would pause a song started since then
     send({ action, payload }: UserAction) {
-        this.pendingMessages.push(JSON.stringify({ action, payload }));
-        this.flush();
-    }
-
-    // send bypassing the pendingMessages queue, if ws is open
-    // otherwise drop the payload
-    sendIfOpen({ action, payload }: UserAction) {
         const ws = this.ws;
-        if (ws?.readyState !== WebSocket.OPEN) return;
-        ws.send(JSON.stringify({ action, payload }));
-    }
-
-    // the invariant is that the pendingMessages arr is empty before we call send()
-    // and after onopen (in connect)
-    private flush() {
-        const ws = this.ws;
-        if (ws?.readyState !== WebSocket.OPEN) return;
-        while (this.pendingMessages.length > 0) {
-            ws.send(this.pendingMessages.shift()!);
+        if (ws?.readyState !== WebSocket.OPEN) {
+            console.debug(`WS Dropped action '${action}', the connection is not open`);
+            return;
         }
+        ws.send(JSON.stringify({ action, payload }));
     }
 
     onOpen(handler: () => void): () => void {
         this.openHandlers.add(handler);
         if (this.isOpen()) {
-            try {
-                handler();
-            } catch (error) {
-                console.error("WS Error in open handler:", error);
-            }
+            runHandler(handler, "open");
         }
         return () => {
             this.openHandlers.delete(handler);
         };
     }
 
-    // topic requests skip the pending queue: onopen subscribes to every topic in
-    // topicSubscriptions, so a queued request would send the same subscribe twice
+    // runs when the connection drops and a reconnect is scheduled, not on a manual close
+    onClose(handler: () => void): () => void {
+        this.closeHandlers.add(handler);
+        return () => {
+            this.closeHandlers.delete(handler);
+        };
+    }
+
     subscribeTopic(topic: string): () => void {
         const count = this.topicSubscriptions.get(topic) ?? 0;
         this.topicSubscriptions.set(topic, count + 1);
 
         if (count === 0) {
-            this.sendIfOpen({ action: "subscribe", payload: { topic } });
+            this.send({ action: "subscribe", payload: { topic } });
         }
 
         return () => {
             const current = this.topicSubscriptions.get(topic) ?? 0;
             if (current <= 1) {
                 this.topicSubscriptions.delete(topic);
-                this.sendIfOpen({ action: "unsubscribe", payload: { topic } });
+                this.send({ action: "unsubscribe", payload: { topic } });
             } else {
                 this.topicSubscriptions.set(topic, current - 1);
             }

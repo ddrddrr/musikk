@@ -67,10 +67,9 @@ export function useSetPlaybackAction() {
 
 export function useActiveDeviceReportAction() {
     const ws = useWSClient();
-    // a queued report would already be stale when the connection reopens
     return useCallback(
         (payload: ActiveDeviceReportPayload) =>
-            ws.sendIfOpen({ action: "playback.active-device-report", payload }),
+            ws.send({ action: "playback.active-device-report", payload }),
         [ws],
     );
 }
