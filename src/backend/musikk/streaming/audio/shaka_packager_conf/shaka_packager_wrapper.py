@@ -21,12 +21,6 @@ class ManifestType(StrEnum):
 
 @dataclass(frozen=True)
 class SongRepresentation:
-    """
-    Attributes:
-        content_path (str | Path): storage prefix/directory where packaged content was uploaded.
-        manifests (dict[ManifestType, str]): mapping from manifest type to storage path.
-    """
-
     content_path: str | Path
     manifests: dict[ManifestType, str]
 
@@ -89,12 +83,7 @@ def build_shaka_packager_command(
 
 
 class ShakaPackagerWrapper:
-    """
-    Wrapper around shaka-packager:
-        - Downloads input audio files from Django storage to a temporary directory
-        - Runs shaka-packager to produce DASH (MPD) and HLS (M3U8) manifests + segments
-        - Uploads the generated files to Django storage under `storage_dir`
-    """
+    """Runs shaka-packager on local files and uploads the output to Django storage"""
 
     def __init__(
         self,
@@ -110,14 +99,7 @@ class ShakaPackagerWrapper:
     ) -> SongRepresentation:
         """
         Packages multiple audio files into DASH (MPD) and HLS (M3U8) manifests using shaka-packager.
-
-        Args:
-            local_input_paths: list of local filesystem paths to converted audio files.
-            storage_dir: storage prefix/directory where output files will be uploaded (e.g. 'audio/song123')
-            timeout: seconds for the packager subprocess, None means no limit
-
-        Returns:
-            SongRepresentation with content_path set to storage_dir and manifests mapping.
+        `timeout` is in s, None means no limit.
         """
         assert local_input_paths, "No input files provided."
 

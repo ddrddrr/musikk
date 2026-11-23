@@ -11,29 +11,15 @@ from streaming.ws.state_broadcasters.playback import PlaybackStateBroadcaster
 
 
 class PlaybackWSActionService(WSActionService):
-    """Handles playback-related ws actions.
+    """
+    Handles playback-related ws actions.
 
-    Only the active device, the one tab that plays the audio, knows the real play
-    state and position. So between track changes it is the only one that writes
-    them. It sends a report each time its audio plays, pauses or seeks,
-    and in heartbeat intervals.
-    The server stores the report and sends it to all tabs as a snapshot.
+    Only the active device (the tab that plays the audio) knows the real play state and position,
+    so between track changes it's the only one writing them. It reports on play, pause, seek and
+    on a heartbeat, and the server sends each report to all tabs as a snapshot.
 
-    A tab that wants to play, pause or seek sends a set command. The server does
-    not store the command. It forwards it to the active device, which applies it
-    to its audio and then reports the result.
-
-    If no device is active, no tab plays the audio, so there is nobody to forward
-    the command to. Then the sender becomes the active device and the server
-    stores the command itself, as it already does when it pauses on a device
-    switch. One snapshot then tells the sender both that it is active and what
-    to play.
-
-    The stored position is a pair of `last_known_song_pos_ms` and
-    `last_known_song_pos_updated_at_server_ms`, because a plain position would
-    already be old when a tab reads it. A reader adds the server time passed since
-    `last_known_song_pos_updated_at_server_ms` to get the current position. Each
-    snapshot carries the server time, so tabs can estimate the server clock.
+    Other tabs send set commands, which the server just forwards to the active device. If no
+    device is active, the sender becomes active and the server stores the command itself.
     """
 
     def __init__(self, consumer):

@@ -42,16 +42,7 @@ class FFMPEGWrapper:
         Transcodes audio into formats defined by the configured converters.
 
         Converters run in parallel. All output files are written to `output_dir`.
-
-        Args:
-            file_path: Path to the source audio file.
-            output_dir: Local directory where converted files are written.
-            audio_info: AudioStreamInfo for tier selection and normalization.
-            filters: FFmpeg audio filter strings to apply (normalization, etc.).
-            timeout: Seconds for each FFmpeg subprocess, None means no limit.
-
-        Returns:
-            List of local file paths for each converted output.
+        `timeout` is in s per FFmpeg subprocess, None means no limit.
         """
         converters = self._select_converters(audio_info)
         if not converters:

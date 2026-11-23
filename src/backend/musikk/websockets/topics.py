@@ -24,17 +24,9 @@ def topic_group(prefix: str, topic_id: str) -> str:
 
 
 class TopicWSActionService(WSActionService):
-    """Generic pub/sub over Channels groups.
-
-    Flow:
-      1. A feature registers an auth rule with `@topic_validator("<prefix>")`.
-      2. Client sends `{action: "subscribe", topic: "<prefix>.<id>"}`.
-        The validator decides if the user may join, and on success the channel
-        is added to the Channels group `topic.<prefix>.<id>` and tracked on
-        `consumer.subscribed_topics`.
-      3. Producers broadcast to the same group via `topic_group(prefix, id)`,
-        so subscribers and publishers stay in sync on the group name.
-      4. On disconnect every joined group is dropped to avoid leaks.
+    """
+    Generic pub/sub over Channels groups. Features register a validator with
+    `@topic_validator("<prefix>")`, producers send via `topic_group(prefix, id)`
     """
 
     def get_actions(self) -> dict[str, WSAction]:

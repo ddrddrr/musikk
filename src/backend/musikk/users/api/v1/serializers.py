@@ -16,12 +16,6 @@ class BaseRegisterSerializer(RegisterSerializer):
     )
 
     def validate_signup_password(self, value: str) -> str:
-        """
-        Lets the owner of a public instance close sign-up to strangers. When the
-        `SIGNUP_PASSWORD` setting is set, only people who got this password from the
-        owner can create an account. When it is empty, anyone can sign up and the field
-        is ignored.
-        """
         expected = settings.SIGNUP_PASSWORD
         if expected and not secrets.compare_digest(value.encode(), expected.encode()):
             raise serializers.ValidationError("The sign-up password is wrong.")
@@ -52,12 +46,7 @@ class BaseUserSerializer(BaseModelSerializer):
 
 
 class BaseMeSerializer(BaseUserSerializer):
-    """
-    Read shape for `/users/me`. Extends `BaseUserSerializer` with the
-    private `email` field and the user's own settings, which are only
-    ever exposed to the authenticated owner of the account and must not
-    leak through public user endpoints.
-    """
+    """Read shape for `/users/me`."""
 
     class Meta(BaseUserSerializer.Meta):
         model = BaseUser
@@ -65,14 +54,7 @@ class BaseMeSerializer(BaseUserSerializer):
 
 
 class MeUpdateSerializer(BaseMeSerializer):
-    """
-    Write shape for `PATCH /users/me`. The field list is intentionally a
-    strict subset of `BaseMeSerializer`: `role`, `email`, and
-    `is_artist` are excluded because role transitions, email changes,
-    and the artist flag are handled through dedicated flows rather than
-    a generic profile edit. All remaining fields are optional so that
-    the client can submit partial updates.
-    """
+    """Write shape for `PATCH /users/me`."""
 
     class Meta(BaseMeSerializer.Meta):
         model = BaseUser

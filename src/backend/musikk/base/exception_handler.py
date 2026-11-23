@@ -9,13 +9,6 @@ GENERIC_FIELD_DETAIL = "Some fields are invalid."
 
 
 def musikk_exception_handler(exc: Exception, context: dict) -> Response | None:
-    """Reshape DRF error responses into a single canonical body.
-
-    Body shape: ``{"detail": str, "code": str, "errors": dict[str, list[str]]}``.
-    Returning ``None`` lets Django produce a 500 for unhandled Python exceptions
-    -- DRF only handles its own ``APIException`` subclasses plus ``Http404`` and
-    ``PermissionDenied``.
-    """
     response = drf_exception_handler(exc, context)
     if response is None:
         return None

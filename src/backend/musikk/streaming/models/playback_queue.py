@@ -16,14 +16,10 @@ class SourceType(models.TextChoices):
 # two possible item types that could be added to the Queue
 # can be implemented in the future if other item types will be supported by the Queue
 class QueueSource(BaseModel):
-    """A queue entry that has not become a `QueueItem` yet.
-
-    A song source turns into one item, then deletes itself.
-    A collection source produces up to `FILL_BATCH` items per refill, and keeps going
-    across refills until the collection ends; `collection_cursor` tracks how far it is now.
-    We keep the source around instead of
-    expanding it up front, so the queue can take a long collection
-    without writing thousands of rows at once.
+    """
+    A queue entry that isn't a `QueueItem` yet. A song source turns into one item, a collection
+    source adds up to `FILL_BATCH` items per refill until the collection ends. Sources aren't
+    expanded up front, so a long collection doesn't write thousands of rows.
     """
 
     queue = models.ForeignKey(
@@ -88,21 +84,12 @@ FILL_BATCH = 20
 
 
 class PlaybackQueue(BaseModel):
-    """Items the user added on top of the current `CollectionCursor`.
+    """
+    Items the user added on top of the current `CollectionCursor`, "play next" takes from here first.
 
-    The queue has priority over CollectionCursor: "play next"
-    takes from here first, and only falls back
-    to the context when the queue is empty.
-
-    There are two kinds of rows. `QueueItem` rows are the real,
-    ordered entries used by `pop_first` and `window`.
-    `QueueSource` rows are kept in storage and not yet expanded;
-    `_fill` turns them into items when the item count drops below
-    `REFILL_THRESHOLD`, adding at most `FILL_BATCH` per cycle.
-
-    `next_item_position` is the append position used by
-    `_calculate_append_position`. All inserts go through this class,
-    so the position scheme and refill rules stay in one place.
+    `QueueSource` rows aren't expanded yet, `_fill` turns them into `QueueItem`s when the item
+    count drops below `REFILL_THRESHOLD`. All inserts should go through this class to keep the
+    positions consistent.
     """
 
     next_item_position = models.DecimalField(

@@ -996,12 +996,7 @@ export interface components {
             | components["schemas"]["CollectionAttachment"]
             | components["schemas"]["SongAttachment"]
             | components["schemas"]["UserAttachment"];
-        /**
-         * @description Read shape for `/users/me`. Extends `BaseUserSerializer` with the
-         *     private `email` field and the user's own settings, which are only
-         *     ever exposed to the authenticated owner of the account and must not
-         *     leak through public user endpoints.
-         */
+        /** @description Read shape for `/users/me`. */
         BaseMe: {
             /** Format: uuid */
             readonly uuid: string;
@@ -1227,14 +1222,7 @@ export interface components {
         MeLikedSongs: {
             song_uuids: string[];
         };
-        /**
-         * @description Write shape for `PATCH /users/me`. The field list is intentionally a
-         *     strict subset of `BaseMeSerializer`: `role`, `email`, and
-         *     `is_artist` are excluded because role transitions, email changes,
-         *     and the artist flag are handled through dedicated flows rather than
-         *     a generic profile edit. All remaining fields are optional so that
-         *     the client can submit partial updates.
-         */
+        /** @description Write shape for `PATCH /users/me`. */
         MeUpdateRequest: {
             display_name?: string;
             bio?: string;
@@ -1318,14 +1306,7 @@ export interface components {
             image?: string | null;
             draft?: boolean;
         };
-        /**
-         * @description Write shape for `PATCH /users/me`. The field list is intentionally a
-         *     strict subset of `BaseMeSerializer`: `role`, `email`, and
-         *     `is_artist` are excluded because role transitions, email changes,
-         *     and the artist flag are handled through dedicated flows rather than
-         *     a generic profile edit. All remaining fields are optional so that
-         *     the client can submit partial updates.
-         */
+        /** @description Write shape for `PATCH /users/me`. */
         PatchedMeUpdateRequest: {
             display_name?: string;
             bio?: string;

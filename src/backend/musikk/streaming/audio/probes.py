@@ -182,8 +182,7 @@ def _parse_ebur128_lufs(stderr: str) -> float | None:
     """
     Extract LUFS loudness from ebur128 summary.
 
-    The raw output contains per-frame lines that also have ``I:`` values;
-    we take the last match which is the summary value.
+    The per-frame lines also have `I:` values, so we take the last match, which is the summary.
     Returns None for audio with LUFS==-inf.
     """
     matches = re.findall(r"I:\s+([-\d.]+|-inf)\s+LUFS", stderr)
@@ -201,10 +200,8 @@ def _parse_ebur128_peak(stderr: str) -> float | None:
     """
     Extract true peak from ebur128 summary.
 
-    The summary ``Peak:`` line has one value per channel
-    (e.g., ``Peak: -1.1 -2.3 dBFS`` for stereo).
-    Returns the loudest (max) channel peak.
-    Returns None when all channels are -inf.
+    The summary `Peak:` line has one value per channel (e.g. `Peak: -1.1 -2.3 dBFS` for stereo).
+    Returns the loudest channel, or None when all channels are -inf.
     """
     match = re.search(r"Peak:\s+(.+?)\s*dBFS", stderr)
     if not match:
