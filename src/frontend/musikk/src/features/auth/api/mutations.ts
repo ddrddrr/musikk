@@ -25,6 +25,7 @@ interface RegistrationParams {
     password2: string;
     email: string;
     userRole: "StreamingUser" | "Artist";
+    signupPassword: string;
 }
 
 /**
@@ -32,7 +33,7 @@ interface RegistrationParams {
  * answers 201 with a message in that case, and 204 when it has already logged the new user in.
  */
 async function register(payload: RegistrationParams): Promise<boolean> {
-    const { password1, password2, email, userRole } = payload;
+    const { password1, password2, email, userRole, signupPassword } = payload;
     const is_artist = userRole === "Artist";
 
     const res = await api_client_public.post<ApiSchemas["RestAuthDetail"]>(AuthURLs.register, {
@@ -40,6 +41,7 @@ async function register(payload: RegistrationParams): Promise<boolean> {
         password2,
         email: email.toLowerCase(),
         is_artist,
+        signup_password: signupPassword,
     });
     return res.status === 201;
 }

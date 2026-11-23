@@ -140,6 +140,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/auth/registration/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Tells the sign-up form whether to show the sign-up password field. The form
+         *     loads it before anyone has logged in, so it is open to Anonymous Users.
+         */
+        get: operations["auth_registration_settings_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/auth/resend-email": {
         parameters: {
             query?: never;
@@ -1010,6 +1030,8 @@ export interface components {
             password2: string;
             /** @default false */
             is_artist: boolean;
+            /** @default  */
+            signup_password: string;
         };
         BaseSongRetrieve: {
             /** Format: uuid */
@@ -1359,6 +1381,9 @@ export interface components {
             /** Format: decimal */
             position: string;
         };
+        RegistrationSettings: {
+            signup_password_required: boolean;
+        };
         ReplyNotification: {
             /** Format: uuid */
             readonly uuid: string;
@@ -1672,6 +1697,25 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    auth_registration_settings_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RegistrationSettings"];
+                };
             };
         };
     };

@@ -1,12 +1,18 @@
 from unittest.mock import patch
 
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 from rest_framework.test import APIRequestFactory, force_authenticate
 
 from users.api.v1.views import FollowedView, FollowersView, FriendsView, MeView
-from users.models import UserFollow
+from users.models import BaseUser, UserFollow
 from users.tests.factories import BaseUserFactory
+
+NEW_ACCOUNT = {
+    "email": "new.user@example.com",
+    "password1": "Slow-Turtle-482",
+    "password2": "Slow-Turtle-482",
+}
 
 
 class TestConnectionListViews(TestCase):
@@ -106,3 +112,65 @@ class TestMediaAccessView(TestCase):
         response = self.client.get(reverse("api:media-access"))
 
         self.assertEqual(response.status_code, 401)
+
+
+class TestRegistrationSignupPassword(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.url = reverse("api:rest_register")
+
+    def _register(self, **extra):
+        return self.client.post(
+            self.url, {**NEW_ACCOUNT, **extra}, content_type="application/json"
+        )
+
+    def _account_exists(self):
+        return BaseUser.objects.filter(email=NEW_ACCOUNT["email"]).exists()
+
+    @override_settings(SIGNUP_PASSWORD="")
+    def test_signs_up_without_a_password_when_none_is_set(self):
+        self._register()
+
+        self.assertTrue(self._account_exists())
+
+    @override_settings(SIGNUP_PASSWORD="demo-password")
+    def test_signs_up_with_the_right_password(self):
+        self._register(signup_password="demo-password")
+
+        self.assertTrue(self._account_exists())
+
+    @override_settings(SIGNUP_PASSWORD="demo-password")
+    def test_rejects_a_wrong_password(self):
+        response = self._register(signup_password="wrong-password")
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("signup_password", response.json()["errors"])
+        self.assertFalse(self._account_exists())
+
+    @override_settings(SIGNUP_PASSWORD="demo-password")
+    def test_rejects_a_missing_password(self):
+        response = self._register()
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("signup_password", response.json()["errors"])
+        self.assertFalse(self._account_exists())
+
+
+class TestRegistrationSettingsView(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.url = reverse("api:registration-settings")
+
+    @override_settings(SIGNUP_PASSWORD="demo-password")
+    def test_reports_a_required_password_to_an_anonymous_user(self):
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.json(), {"signup_password_required": True})
+
+    @override_settings(SIGNUP_PASSWORD="")
+    def test_reports_no_password_when_none_is_set(self):
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.json(), {"signup_password_required": False})

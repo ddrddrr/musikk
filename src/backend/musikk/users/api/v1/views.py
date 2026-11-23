@@ -1,14 +1,16 @@
 from base.openapi import NO_CONTENT_SCHEMA
+from django.conf import settings
 from django.http import HttpResponse
 from django.views.decorators.csrf import ensure_csrf_cookie
 from drf_spectacular.utils import extend_schema, extend_schema_view, inline_serializer
 from notifications.models import FollowerNotification
-from rest_framework import status
+from rest_framework import serializers, status
 from rest_framework.generics import (
     RetrieveAPIView,
     RetrieveUpdateAPIView,
     get_object_or_404,
 )
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from websockets.event_helpers import send_ws_event, user_group
@@ -38,6 +40,24 @@ def media_access(request):
     if request.user.is_authenticated:
         return HttpResponse(status=204)
     return HttpResponse(status=401)
+
+
+@extend_schema(
+    responses=inline_serializer(
+        name="RegistrationSettings",
+        fields={"signup_password_required": serializers.BooleanField()},
+    )
+)
+class RegistrationSettingsView(APIView):
+    """
+    Tells the sign-up form whether to show the sign-up password field. The form
+    loads it before anyone has logged in, so it is open to Anonymous Users.
+    """
+
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        return Response({"signup_password_required": bool(settings.SIGNUP_PASSWORD)})
 
 
 ME_UPDATE_SCHEMA = extend_schema(

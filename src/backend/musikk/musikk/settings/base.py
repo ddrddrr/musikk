@@ -196,6 +196,7 @@ ACCOUNT_CHANGE_EMAIL = True
 ACCOUNT_MAX_EMAIL_ADDRESSES = 2
 
 ACCOUNT_ADAPTER = "users.adapters.BaseAccountAdapter"
+SIGNUP_PASSWORD: str = config("SIGNUP_PASSWORD", default="")
 # allauth takes a dict of limits or False, which is wtf but okay
 ACCOUNT_RATE_LIMITS: dict[str, str] | Literal[False] = (
     {} if config("ACCOUNT_RATE_LIMITS", default=True, cast=bool) else False

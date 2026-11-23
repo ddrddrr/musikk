@@ -184,6 +184,24 @@ paths:
           description: ''
         '204':
           description: No response body
+  /api/v1/auth/registration/settings:
+    get:
+      operationId: auth_registration_settings_retrieve
+      description: |-
+        Tells the sign-up form whether to show the sign-up password field. The form
+        loads it before anyone has logged in, so it is open to Anonymous Users.
+      tags:
+      - auth
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegistrationSettings'
+          description: ''
   /api/v1/auth/resend-email:
     post:
       operationId: auth_resend_email_create
@@ -1847,6 +1865,10 @@ components:
           type: boolean
           writeOnly: true
           default: false
+        signup_password:
+          type: string
+          writeOnly: true
+          default: ''
       required:
       - email
       - password1
@@ -2774,6 +2796,13 @@ components:
       - position
       - repr
       - uuid
+    RegistrationSettings:
+      type: object
+      properties:
+        signup_password_required:
+          type: boolean
+      required:
+      - signup_password_required
     ReplyNotification:
       type: object
       properties:

@@ -19,3 +19,18 @@ export function useVerifyEmailQuery(confirmationKey: string | undefined) {
         staleTime: Infinity,
     });
 }
+
+async function fetchRegistrationSettings(): Promise<ApiSchemas["RegistrationSettings"]> {
+    const res = await api_client_public.get<ApiSchemas["RegistrationSettings"]>(
+        AuthURLs.registrationSettings,
+    );
+    return res.data;
+}
+
+export function useRegistrationSettingsQuery() {
+    return useQuery({
+        queryKey: authKeys.registrationSettings(),
+        queryFn: fetchRegistrationSettings,
+        staleTime: Infinity,
+    });
+}

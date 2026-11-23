@@ -18,6 +18,7 @@ from users.api.v1.views import (
     FollowersView,
     FriendsView,
     MeView,
+    RegistrationSettingsView,
     UserRetrieveView,
     csrf,
     media_access,
@@ -25,6 +26,11 @@ from users.api.v1.views import (
 
 dj_rest_auth_urls = [
     path("registration", RegisterView.as_view(), name="rest_register"),
+    path(
+        "registration/settings",
+        RegistrationSettingsView.as_view(),
+        name="registration-settings",
+    ),
     path(r"verify-email", VerifyEmailView.as_view(), name="rest_verify_email"),
     path(
         r"resend-email",

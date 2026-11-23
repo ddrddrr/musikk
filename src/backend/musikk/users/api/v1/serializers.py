@@ -1,5 +1,8 @@
+import secrets
+
 from base.serializers import BaseModelSerializer
 from dj_rest_auth.registration.serializers import RegisterSerializer
+from django.conf import settings
 from rest_framework import serializers
 
 from users.models import BaseUser, UserRole
@@ -8,6 +11,21 @@ from users.models import BaseUser, UserRole
 class BaseRegisterSerializer(RegisterSerializer):
     username = None
     is_artist = serializers.BooleanField(write_only=True, default=False)
+    signup_password = serializers.CharField(
+        write_only=True, default="", allow_blank=True
+    )
+
+    def validate_signup_password(self, value: str) -> str:
+        """
+        Lets the owner of a public instance close sign-up to strangers. When the
+        `SIGNUP_PASSWORD` setting is set, only people who got this password from the
+        owner can create an account. When it is empty, anyone can sign up and the field
+        is ignored.
+        """
+        expected = settings.SIGNUP_PASSWORD
+        if expected and not secrets.compare_digest(value.encode(), expected.encode()):
+            raise serializers.ValidationError("The sign-up password is wrong.")
+        return value
 
     def save(self, request):
         user = super().save(request)
