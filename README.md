@@ -50,9 +50,8 @@ The `make` targets are short forms of the commands in the [`Makefile`](Makefile)
 
    Without `make`: `docker compose --env-file .env.prod -f docker-compose-prod.yml up --build`.
 
-   The first start builds the images and compiles FFmpeg from source. On an Apple Silicon Mac with 2 CPUs for Docker,
-   this took about 9 minutes. Later starts take a few seconds. Keep this terminal open and run the next commands in a
-   second terminal.
+   The first start builds the images and compiles FFmpeg from source. This takes 10 to 15 minutes and needs about 2 GB
+   of memory. Later starts take a few seconds. Keep this terminal open and run the next commands in a second terminal.
 
 4. **Fill the app with sample data**
 
