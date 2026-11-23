@@ -226,20 +226,18 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * @description Comments on an object that other users can see, such as an album. A new
-         *     comment sends `comments_changed_event` on the object's WebSocket topic, so
-         *     open comment threads refetch. The payload carries the object's uuid under
-         *     the URL kwarg name, for example `collection_uuid`. A reply also creates a
-         *     reply notification for the author of the parent comment.
+         * @description Lists and creates the publications of the object whose uuid is in the URL
+         *     under `created_for_url_kwarg`. The `access_policy` decides who can read
+         *     them and who can start a new thread. Subclasses only add what happens
+         *     after a publication is created, in `ws_on_create`.
          */
         get: operations["collections_comments_list_by_collection_uuid"];
         put?: never;
         /**
-         * @description Comments on an object that other users can see, such as an album. A new
-         *     comment sends `comments_changed_event` on the object's WebSocket topic, so
-         *     open comment threads refetch. The payload carries the object's uuid under
-         *     the URL kwarg name, for example `collection_uuid`. A reply also creates a
-         *     reply notification for the author of the parent comment.
+         * @description Lists and creates the publications of the object whose uuid is in the URL
+         *     under `created_for_url_kwarg`. The `access_policy` decides who can read
+         *     them and who can start a new thread. Subclasses only add what happens
+         *     after a publication is created, in `ws_on_create`.
          */
         post: operations["collections_comments_create_by_collection_uuid"];
         delete?: never;
@@ -717,20 +715,18 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * @description Comments on an object that other users can see, such as an album. A new
-         *     comment sends `comments_changed_event` on the object's WebSocket topic, so
-         *     open comment threads refetch. The payload carries the object's uuid under
-         *     the URL kwarg name, for example `collection_uuid`. A reply also creates a
-         *     reply notification for the author of the parent comment.
+         * @description Lists and creates the publications of the object whose uuid is in the URL
+         *     under `created_for_url_kwarg`. The `access_policy` decides who can read
+         *     them and who can start a new thread. Subclasses only add what happens
+         *     after a publication is created, in `ws_on_create`.
          */
         get: operations["songs_comments_list_by_song_uuid"];
         put?: never;
         /**
-         * @description Comments on an object that other users can see, such as an album. A new
-         *     comment sends `comments_changed_event` on the object's WebSocket topic, so
-         *     open comment threads refetch. The payload carries the object's uuid under
-         *     the URL kwarg name, for example `collection_uuid`. A reply also creates a
-         *     reply notification for the author of the parent comment.
+         * @description Lists and creates the publications of the object whose uuid is in the URL
+         *     under `created_for_url_kwarg`. The `access_policy` decides who can read
+         *     them and who can start a new thread. Subclasses only add what happens
+         *     after a publication is created, in `ws_on_create`.
          */
         post: operations["songs_comments_create_by_song_uuid"];
         delete?: never;

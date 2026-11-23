@@ -131,7 +131,7 @@ class TestCollectionCommentsListCreateView(TestCase):
 
     def test_created_for_inherited_from_root_when_reply_omits_created_for(self):
         parent = PublicationFactory(
-            author=self.user, created_for_object=self.collection
+            author=self.other_user, created_for_object=self.collection
         )
 
         payload = {
@@ -153,6 +153,32 @@ class TestCollectionCommentsListCreateView(TestCase):
         n = ReplyNotification.objects.first()
         self.assertEqual(n.orig_publication, parent)
         self.assertEqual(n.reply_publication.uuid, db_pub.uuid)
+
+    def test_reply_to_own_comment_creates_no_notification(self):
+        parent = PublicationFactory(
+            author=self.user, created_for_object=self.collection
+        )
+        payload = {
+            "content": fake.paragraph(nb_sentences=2),
+            "parent_uuid": str(parent.uuid),
+        }
+
+        response = self._post(payload, user=self.user)
+
+        self.assertEqual(response.status_code, 201, repr(response.data))
+        self.assertFalse(ReplyNotification.objects.exists())
+
+    def test_reply_to_comment_of_deleted_user_creates_no_notification(self):
+        parent = PublicationFactory(author=None, created_for_object=self.collection)
+        payload = {
+            "content": fake.paragraph(nb_sentences=2),
+            "parent_uuid": str(parent.uuid),
+        }
+
+        response = self._post(payload, user=self.user)
+
+        self.assertEqual(response.status_code, 201, repr(response.data))
+        self.assertFalse(ReplyNotification.objects.exists())
 
     def test_failure_when_attachment_type_is_wrong(self):
         payload = {
@@ -345,6 +371,18 @@ class TestFeedPostsListCreateView(TestCase):
         response = self._post(self.other_user, payload, user=self.user)
 
         self.assertEqual(response.status_code, 403)
+
+    def test_reply_to_own_feed_post_creates_no_notification(self):
+        post = PublicationFactory(author=self.user, created_for_object=self.user)
+        payload = {
+            "content": fake.paragraph(nb_sentences=2),
+            "parent_uuid": str(post.uuid),
+        }
+
+        response = self._post(self.user, payload, user=self.user)
+
+        self.assertEqual(response.status_code, 201, repr(response.data))
+        self.assertFalse(ReplyNotification.objects.exists())
 
     def test_unknown_user_feed_returns_404(self):
         request = self.factory.get("/")

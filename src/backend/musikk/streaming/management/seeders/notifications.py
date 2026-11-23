@@ -34,7 +34,7 @@ def _seed_follower_notifications(follows: list[UserFollow]) -> int:
 
 
 def _seed_reply_notifications(publications: list[Publication]) -> int:
-    replies = [p for p in publications if p.parent is not None and p.parent.author]
+    replies = [p for p in publications if p.is_reply_to_another_user]
     notifs = [
         ReplyNotification(orig_publication=p.parent, reply_publication=p)
         for p in replies

@@ -39,6 +39,12 @@ class Publication(UserContent):
             node = node.parent
         return node
 
+    @property
+    def is_reply_to_another_user(self) -> bool:
+        if self.parent is None or self.parent.author_id is None:
+            return False
+        return self.parent.author_id != self.author_id
+
     class Meta(UserContent.Meta):
         db_table = "publications"
         # indexes =

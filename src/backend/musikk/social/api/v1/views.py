@@ -50,14 +50,6 @@ class PublicationChildrenView(RetrieveAPIView):
 
 
 class CommentsListCreateView(PublicationsListCreateMixin, ListCreateAPIView):
-    """
-    Comments on an object that other users can see, such as an album. A new
-    comment sends `comments_changed_event` on the object's WebSocket topic, so
-    open comment threads refetch. The payload carries the object's uuid under
-    the URL kwarg name, for example `collection_uuid`. A reply also creates a
-    reply notification for the author of the parent comment.
-    """
-
     filterset_class = PublicationConnectionFilter
     list_top_level_only = False
     comments_changed_event: ServerEvent
@@ -69,7 +61,7 @@ class CommentsListCreateView(PublicationsListCreateMixin, ListCreateAPIView):
             self.comments_changed_event,
             **{self.created_for_url_kwarg: created_for_uuid},
         )
-        if self._created_publication.parent:
+        if self._created_publication.is_reply_to_another_user:
             ReplyNotification.objects.create(
                 orig_publication=self._created_publication.parent,
                 reply_publication=self._created_publication,
@@ -111,7 +103,7 @@ class FeedPostsListCreateView(PublicationsListCreateMixin, ListCreateAPIView):
     created_for_url_kwarg = "user_uuid"
 
     def ws_on_create(self):
-        if self._created_publication.parent:
+        if self._created_publication.is_reply_to_another_user:
             ReplyNotification.objects.create(
                 orig_publication=self._created_publication.parent,
                 reply_publication=self._created_publication,
