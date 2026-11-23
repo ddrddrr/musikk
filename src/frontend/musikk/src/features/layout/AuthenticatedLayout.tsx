@@ -1,8 +1,10 @@
+import { PageErrorFallback } from "@/features/errors/PageErrorFallback.tsx";
 import { Header } from "@/features/layout/header/Header.tsx";
 import { PlayerBox } from "@/features/player/PlayerBox.tsx";
 import { SongQueue } from "@/features/song-queue/components/SongQueue.tsx";
 import { Toaster } from "@/features/ui/sonner.tsx";
 import { useState } from "react";
+import { ErrorBoundary } from "react-error-boundary";
 import { Outlet, useLocation } from "react-router-dom";
 
 export function AuthenticatedLayout() {
@@ -21,14 +23,17 @@ export function AuthenticatedLayout() {
         <div className="flex h-screen flex-col bg-muted">
             <Header />
             <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
-                <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-                    <Outlet />
-                </div>
-                {isQueueOpen && (
-                    <div className="absolute inset-0 z-20 border-t border-foreground bg-card">
-                        <SongQueue />
+                {/* resetKeys clears the error */}
+                <ErrorBoundary resetKeys={[location.key]} fallback={<PageErrorFallback />}>
+                    <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+                        <Outlet />
                     </div>
-                )}
+                    {isQueueOpen && (
+                        <div className="absolute inset-0 z-20 border-t border-foreground bg-card">
+                            <SongQueue />
+                        </div>
+                    )}
+                </ErrorBoundary>
             </div>
             <Toaster position="top-center" />
             <PlayerBox onToggleQueue={() => setIsQueueOpen((open) => !open)} />

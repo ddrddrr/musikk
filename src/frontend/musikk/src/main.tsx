@@ -1,9 +1,9 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import { ErrorBoundary } from "react-error-boundary";
 
 import { App } from "@/features/app/App.tsx";
-import { ErrorBoundary } from "@/features/errors/ErrorBoundary.tsx";
 import { GenericErrorFallback } from "@/features/errors/GenericErrorFallback.tsx";
 import { TooltipProvider } from "@/features/ui/tooltip.tsx";
 import "@/index.css";
