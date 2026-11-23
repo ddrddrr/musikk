@@ -29,61 +29,42 @@ def local_dir_to_django_storage(
     paths: dict[str, str] = {}
     local_dir = Path(local_dir)
 
-    try:
-        for root, _, files in os.walk(local_dir):
-            for fname in files:
-                abs_path = Path(root) / fname
-                rel_path = abs_path.relative_to(local_dir).as_posix()
-                key = f"{storage_prefix}/{rel_path}"
+    for root, _, files in os.walk(local_dir):
+        for fname in files:
+            abs_path = Path(root) / fname
+            rel_path = abs_path.relative_to(local_dir).as_posix()
+            key = f"{storage_prefix}/{rel_path}"
 
-                try:
-                    if overwrite and default_storage.exists(key):
-                        default_storage.delete(key)
+            if overwrite and default_storage.exists(key):
+                default_storage.delete(key)
 
-                    with open(abs_path, "rb") as f:
-                        paths[str(abs_path)] = default_storage.save(key, File(f))
-                except Exception:
-                    logger.exception(
-                        f"Failed to upload file {abs_path} to storage at {key}"
-                    )
-                    raise
-    except Exception:
-        logger.exception(f"Failed to upload directory {local_dir} to storage")
-        raise
+            with open(abs_path, "rb") as f:
+                paths[str(abs_path)] = default_storage.save(key, File(f))
 
     return paths
 
 
 def delete_django_storage_dir(storage_dir: str | Path) -> None:
+    """
+    Logs a failure instead of raising it. Most callers run this while they handle
+    another error, and an exception here would hide that error.
+    """
     storage_dir = str(storage_dir)
-
     try:
-        if not default_storage.exists(storage_dir):
-            logger.debug(
-                f"Storage directory {storage_dir} does not exist, skipping deletion"
-            )
-            return
-
-        subdirs, files = default_storage.listdir(storage_dir)
-
-        for fname in files:
-            try:
-                default_storage.delete(f"{storage_dir}/{fname}")
-            except Exception:
-                logger.exception(f"Failed to delete file {storage_dir}/{fname}")
-
-        for sub in subdirs:
-            try:
-                delete_django_storage_dir(f"{storage_dir}/{sub}")
-            except Exception:
-                logger.exception(f"Failed to delete subdirectory {storage_dir}/{sub}")
-
-        try:
-            default_storage.delete(storage_dir)
-        except Exception:
-            logger.exception(f"Failed to delete directory {storage_dir}")
+        _delete_storage_tree(storage_dir)
     except Exception:
-        logger.exception(f"Failed to list or delete storage directory {storage_dir}")
+        logger.exception(f"Failed to delete storage directory {storage_dir}")
+
+
+def _delete_storage_tree(storage_dir: str) -> None:
+    if not default_storage.exists(storage_dir):
+        return
+    subdirs, files = default_storage.listdir(storage_dir)
+    for file_name in files:
+        default_storage.delete(f"{storage_dir}/{file_name}")
+    for subdir in subdirs:
+        _delete_storage_tree(f"{storage_dir}/{subdir}")
+    default_storage.delete(storage_dir)
 
 
 def walk_django_storage_files(storage_dir: str) -> Iterator[str]:
@@ -94,32 +75,3 @@ def walk_django_storage_files(storage_dir: str) -> Iterator[str]:
         yield f"{storage_dir}/{file_name}"
     for subdir in subdirs:
         yield from walk_django_storage_files(f"{storage_dir}/{subdir}")
-
-
-def get_django_storage_files(storage_file_paths: list[str], tmpdir: str) -> list[Path]:
-    """Download files from Django storage to tmpdir and return their local paths."""
-    local_paths: list[Path] = []
-
-    for idx, file_path in enumerate(storage_file_paths):
-        try:
-            if not default_storage.exists(file_path):
-                logger.error(f"Storage file {file_path} does not exist")
-                raise FileNotFoundError(f"Storage file {file_path} not found")
-
-            fname = Path(file_path).name
-            local_fname = f"{idx:02d}_{fname}"
-            local_path = Path(tmpdir) / local_fname
-
-            with (
-                default_storage.open(file_path, "rb") as src,
-                open(local_path, "wb") as dst,
-            ):
-                for chunk in src.chunks():
-                    dst.write(chunk)
-
-            local_paths.append(local_path)
-        except Exception:
-            logger.exception(f"Failed to download file {file_path} from storage")
-            raise
-
-    return local_paths
