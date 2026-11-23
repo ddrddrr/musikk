@@ -7,6 +7,9 @@ CSRF_TRUSTED_ORIGINS = [
     config("SERVICE_URL", default="https://musikk.stream"),
 ]
 
+# no default, because the console default from base.py would print mail to the log on the server
+EMAIL_DELIVERY_BACKEND = config("EMAIL_DELIVERY_BACKEND")
+
 REST_FRAMEWORK = REST_FRAMEWORK | {
     "DEFAULT_THROTTLE_CLASSES": [
         "rest_framework.throttling.AnonRateThrottle",

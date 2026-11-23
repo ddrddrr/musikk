@@ -20,7 +20,7 @@ The easiest way to run the app is the full Docker stack. It needs only Docker an
    In the project folder, run:
 
    ```
-   cp .env-prod-example .env.prod
+   cp .env-docker-example .env.prod
    ```
 
    The example works without changes. If you change `SECRET_KEY` or a password in it, do not use `$`, because Docker
@@ -112,11 +112,13 @@ The `make` targets are short forms of the commands in the [`Makefile`](Makefile)
 
 [For reviewers](#for-reviewers) lists the steps. A few more details:
 
-- The example env file uses Django's console email backend. Registration and password-reset emails are printed to the
+- `.env-docker-example` is for your own machine. The production server copies `.env-server-example` to `.env.prod`
+  instead and replaces every `!!!SET ...!!!` value in it.
+- `.env-docker-example` uses Django's console email backend. Registration and password-reset emails are printed to the
   server log instead of being sent. To send real mail, set `EMAIL_DELIVERY_BACKEND` to the mail provider of your
   choice and fill in the variables it needs (see `django-anymail`).
-- `ACCOUNT_EMAIL_VERIFICATION` (django-allauth) controls the email confirmation on signup. The example sets it to
-  `none`, so a new account is active right away.
+- `ACCOUNT_EMAIL_VERIFICATION` (django-allauth) controls the email confirmation on signup. `.env-docker-example` sets
+  it to `none`, so a new account is active right away.
 - The server runs `migrate` and `collectstatic` on every start.
 
 ### Option B: dev mode
