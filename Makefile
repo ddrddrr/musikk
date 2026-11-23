@@ -36,7 +36,7 @@ DOCKER_COMPOSE := docker compose --env-file .env.prod -f docker-compose-prod.yml
 help: ## Show this list of commands
 	@awk 'BEGIN {FS = ":.*## "} /^[a-zA-Z0-9_-]+:.*## / {printf "  %-24s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 	@echo
-	@echo 'The seed commands pass ARGS on to initmodels, e.g. make run-local-dev-seed ARGS="--generate-audio"'
+	@echo 'The seed commands pass ARGS on to initmodels, e.g. make run-local-dev-seed ARGS="--skip-audio"'
 
 setup-tools: setup-ffmpeg setup-shaka ## Install ffmpeg and shaka-packager into .tools
 

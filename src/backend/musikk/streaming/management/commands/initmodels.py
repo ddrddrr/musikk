@@ -32,17 +32,18 @@ class Command(BaseCommand):
         parser.add_argument("--albums", type=int, default=70)
         parser.add_argument("--follows", type=int, default=15)
         parser.add_argument("--publications", type=int, default=100)
+        parser.add_argument("--song-comments", type=int, default=100)
         parser.add_argument("--feed-posts", type=int, default=100)
         parser.add_argument("--direct-chats", type=int, default=3)
         parser.add_argument("--group-chats", type=int, default=1)
         parser.add_argument("--messages-per-chat", type=int, default=50)
-        parser.add_argument("--skip-audio", action="store_true")
         parser.add_argument(
-            "--generate-audio",
+            "--skip-audio",
             action="store_true",
             help=(
-                "Generate new audio files with FFmpeg into samples/generated/. "
-                "Without this flag, files are generated only when the folder is empty."
+                "Create the songs without audio. Without this flag, the songs get audio "
+                "from samples/generated/. When that folder is empty or missing, "
+                "the command generates the files with FFmpeg first."
             ),
         )
         parser.add_argument(
@@ -61,10 +62,9 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         image_provider = ImageProvider()
 
-        needs_audio_files = options["generate_audio"] or not _has_audio_files(
+        if not options["skip_audio"] and not _has_audio_files(
             DEFAULT_GENERATED_AUDIO_DIR
-        )
-        if needs_audio_files and not options["skip_audio"]:
+        ):
             dur_min, dur_max = (
                 int(x) for x in options["audio_duration_range"].split(",")
             )
@@ -122,13 +122,15 @@ class Command(BaseCommand):
             )
 
             self.stdout.write(
-                f"\nGenerating {options['publications']} publications and {options['feed_posts']} feed posts"
+                f"\nGenerating {options['publications']} publications, "
+                f"{options['song_comments']} song comments and {options['feed_posts']} feed posts"
             )
             publications = seed_publications(
                 users=all_users,
                 collections=playlists + albums,
                 songs=songs,
                 pub_count=options["publications"],
+                song_comment_count=options["song_comments"],
                 feed_post_count=options["feed_posts"],
             )
 

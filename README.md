@@ -240,6 +240,7 @@ chats, messages and notifications. It prints the email and password of every acc
 
 The songs get real audio. On the first run, the command generates sample audio files with FFmpeg and processes them
 like uploaded songs. Later runs reuse these files. In dev mode they are in `src/backend/musikk/samples/generated/`.
+To get new files, delete this folder before the next run.
 
 The `clearmodels` command deletes the sample data again.
 
@@ -263,8 +264,7 @@ make run-local-dev-clear
 make run-local-docker-seed ARGS="--songs 10 --skip-audio"
 ```
 
-`--skip-audio` creates songs without audio, `--generate-audio` makes new audio files even when some exist, and
-`--help` lists all options.
+`--skip-audio` creates songs without audio, and `--help` lists all options.
 
 ## License
 

@@ -17,6 +17,7 @@ def seed_publications(
     collections: list[Collection],
     songs: list[BaseSong],
     pub_count: int,
+    song_comment_count: int,
     feed_post_count: int,
 ) -> list[Publication]:
     if not users:
@@ -52,8 +53,11 @@ def seed_publications(
 
         publications.append(pub)
 
+    song_comments = _seed_song_comments(users, songs, song_comment_count)
+    publications.extend(song_comments)
+
     # replies to some existing publications
-    reply_count = min(pub_count // 3, len(publications))
+    reply_count = len(publications) // 3
     for _ in range(reply_count):
         parent = random.choice(publications)
         reply = Publication.objects.create(
@@ -77,7 +81,8 @@ def seed_publications(
 
     print(
         f"Generated {len(publications)} publications "
-        f"({pub_count} comments, {reply_count} replies, {feed_post_count} feed posts)"
+        f"({pub_count} collection comments, {len(song_comments)} song comments, "
+        f"{reply_count} replies, {feed_post_count} feed posts)"
     )
     return publications
 
@@ -160,6 +165,34 @@ def seed_chat_messages(
 
     print(f"Generated {len(result)} chat messages across {len(chats)} chats")
     return result
+
+
+def _seed_song_comments(
+    users: list[BaseUser], songs: list[BaseSong], count: int
+) -> list[Publication]:
+    """
+    Only songs on a public album that is not a draft get comments, because the
+    app shows comments only for those songs.
+    """
+    commentable_songs = list(
+        BaseSong.objects.published()
+        .in_public_published_album()
+        .filter(pk__in=[song.pk for song in songs])
+    )
+    if not commentable_songs:
+        return []
+
+    song_ct = ContentType.objects.get_for_model(BaseSong)
+    comments: list[Publication] = []
+    for _ in range(count):
+        comment = Publication.objects.create(
+            author=random.choice(users),
+            content=fake.paragraph(nb_sentences=2),
+            created_for_type=song_ct,
+            created_for_id=random.choice(commentable_songs).pk,
+        )
+        comments.append(comment)
+    return comments
 
 
 def _find_friend_pairs(users: list[BaseUser]) -> list[tuple[BaseUser, BaseUser]]:
