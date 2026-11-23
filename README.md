@@ -2,15 +2,34 @@
 
 A music streaming app with focus on social features.
 
-## For reviewers
+## Supported platforms
 
-The easiest way to run the app is the full Docker stack. It needs only Docker and git.
+- Debian and Ubuntu, on x86_64 and arm64
+- macOS on Apple Silicon
+- Windows through WSL2 only
+
+On Windows, clone the repository with the git inside WSL into the Linux file system, for example into `~/musikk`, not
+into a folder under `/mnt/c`. Run every command in the WSL shell. PowerShell and cmd are not supported.
+
+Other Linux distributions or Podman were not tested.
+
+## Running the app
+
+There are two ways to run the app:
+
+- **Docker stack**: everything runs in containers. It needs only Docker and git, so it is the easiest way to try the
+  app.
+- **Dev mode**: the backend and the frontend run on the host as dev servers. Only Postgres and Redis run in Docker.
+
+The `make` targets are short forms of the commands in the [`Makefile`](Makefile), so `make` is optional.
+
+### Docker stack
 
 1. **Install Docker**
 
    - macOS on Apple Silicon: [Docker Desktop](https://docs.docker.com/desktop/setup/install/mac-install/).
    - Windows: WSL2 with Ubuntu, and either Docker Desktop with WSL integration turned on or Docker Engine installed
-     inside WSL. Read [Supported platforms](#supported-platforms) before you clone the repository.
+     inside WSL.
    - Debian and Ubuntu: Docker Engine with the Compose plugin from
      [Docker's own repository](https://docs.docker.com/engine/install/). If `docker` needs `sudo` on your machine, put
      `sudo` before the commands below.
@@ -21,13 +40,6 @@ The easiest way to run the app is the full Docker stack. It needs only Docker an
 
    ```
    cp .env-docker-example .env.prod
-   ```
-
-   The example works without changes. If you change `SECRET_KEY` or a password in it, do not use `$`, because Docker
-   Compose reads `$` in this file as the start of a variable name. This command prints a random key without `$`:
-
-   ```
-   python3 -c "import secrets; print(secrets.token_urlsafe(50))"
    ```
 
 3. **Start the app**
@@ -50,8 +62,9 @@ The easiest way to run the app is the full Docker stack. It needs only Docker an
 
    Without `make`: `docker compose --env-file .env.prod -f docker-compose-prod.yml exec server python manage.py initmodels`.
 
-   The command creates users, artists, songs with audio, albums, playlists, posts and chats. It takes a few minutes.
-   Near the start of its output it prints one line for each account, for example `artist: <email> / <password>`.
+   The command creates users, artists, songs with audio, albums, playlists, posts and chats.
+   Near the start of its output it prints one line for each account created (and they could be used), for example `artist: <email> / <password>`.
+   [Sample data](#sample-data) lists its options.
 
 5. **Open** `http://localhost` and log in with one of the printed accounts. You can also sign up. The app sends no
    emails in this setup, so a new account works right away.
@@ -63,75 +76,17 @@ The easiest way to run the app is the full Docker stack. It needs only Docker an
 If port 80 or 443 is already taken on your machine, set another port in `.env.prod`, for example `HTTP_PORT=8080` or
 `HTTPS_PORT=8443`. With `HTTP_PORT=8080`, the app is at `http://localhost:8080`.
 
-## Supported platforms
+### Dev mode
 
-- Debian and Ubuntu, on x86_64 and arm64
-- macOS on Apple Silicon
-- Windows through WSL2 only
-
-On Windows, clone the repository with the git inside WSL into the Linux file system, for example into `~/musikk`, not
-into a folder under `/mnt/c`. Run every command in the WSL shell. PowerShell and cmd are not supported.
-
-Other Linux distributions may work with Docker Engine, but nobody has tested them. Podman is not supported.
-
-## Features
-
-- Albums, playlists, listening history
-- Social feed, publications, threaded comments, real-time chat
-- Audio uploads and normalization
-- Adaptive streaming via DASH/HLS and Shaka Player (Frontend)
-- Multi-tab/device synchronization of playback and volume. Device list and active device switching
-
-## Tech stack
-
-- **Backend**: Python 3.14, Django 5.2, Django REST Framework, Channels (WebSockets), Daphne (ASGI), Celery
-- **Frontend**: React 19, Vite, TypeScript, Tailwind CSS 4, ShadCN/Radix UI, TanStack Query, Shaka Player
-- **Audio processing**: FFmpeg, Shaka packager
-- **Data**: PostgreSQL 17, Redis 8 (cache, Channels layer, Celery broker)
-- **Infra**: Docker Compose, Caddy reverse proxy
-
-## Components
-
-- **server** — Django ASGI app (Daphne), serves REST + WebSockets on `:8000`
-- **celery_worker** — async tasks (audio transcoding, packaging, etc.)
-- **database** — PostgreSQL 17
-- **redis** — cache, Channels layer, Celery broker
-- **proxy** — Caddy: serves the built SPA, reverse-proxies `/api/*` and `/ws/*` to the server, serves `/static/*` and
-  `/media/*`
-
-## Running the app
-
-There are two ways to run the app:
-
-- **Full Docker stack**: everything runs in containers. This is the way for reviewers.
-- **Dev mode**: the backend and the frontend run on the host as dev servers. Only Postgres and Redis run in Docker.
-
-The `make` targets are short forms of the commands in the [`Makefile`](Makefile), so `make` is optional.
-
-### Option A: full Docker stack
-
-[For reviewers](#for-reviewers) lists the steps. A few more details:
-
-- `.env-docker-example` is for your own machine. The production server copies `.env-server-example` to `.env.prod`
-  instead and replaces every `!!!SET ...!!!` value in it.
-- `.env-docker-example` uses Django's console email backend. Registration and password-reset emails are printed to the
-  server log instead of being sent. To send real mail, set `EMAIL_DELIVERY_BACKEND` to the mail provider of your
-  choice and fill in the variables it needs (see `django-anymail`).
-- `ACCOUNT_EMAIL_VERIFICATION` (django-allauth) controls the email confirmation on signup. `.env-docker-example` sets
-  it to `none`, so a new account is active right away.
-- The server runs `migrate` and `collectstatic` on every start.
-
-### Option B: dev mode
-
-The backend and the frontend run on the host with auto-reload. Postgres and Redis run in Docker. Celery tasks run inside
-the backend process, so there is no Celery worker, and an upload request waits until the song is processed.
+The backend and the frontend run as dev servers on the host. Postgres and Redis run in Docker.
+Celery tasks run synchronously inside the backend process, so there is no Celery worker.
 
 Requirements:
 
+- Docker, for Postgres and Redis
 - Python 3.14
 - [uv](https://docs.astral.sh/uv/) for the backend packages
 - Node 22.12 or newer and npm for the frontend packages. Vite 7.3 needs this Node version.
-- [direnv](https://direnv.net/), which loads the variables from `.env` into the shell. See [direnv](#direnv) below.
 - FFmpeg and Shaka Packager for audio uploads and sample audio. See [Native binaries](#native-binaries) below.
 
 Steps:
@@ -140,12 +95,27 @@ Steps:
 
    ```
    cp .env-local-example .env
-   direnv allow
    ```
 
-   Edit `.env` to fill in `SECRET_KEY` and the passwords, if you want.
+   See [Environment variables](#environment-variables) for more details below.
 
-2. **Infra (Postgres + Redis)**
+2. **Start the app**
+
+   ```
+   make run-local-dev
+   ```
+
+   This starts Postgres and Redis in Docker, installs the backend and frontend packages, runs `migrate`, and starts
+   the backend and the frontend dev servers in this terminal. Ctrl+C stops both dev servers.
+   `make run-local-dev-down` stops Postgres and Redis.
+
+3. **Open** `http://localhost:5175`.
+
+#### Without make
+
+Instead of step 2, run these commands. The backend and the frontend each need their own terminal.
+
+1. **Infra (Postgres + Redis)**
 
    ```
    docker compose -f docker-compose-local.yml up -d
@@ -153,7 +123,7 @@ Steps:
 
    Postgres listens on host port `5435`, Redis on `6375`.
 
-3. **Backend**
+2. **Backend**
 
    ```
    cd src/backend/musikk
@@ -164,7 +134,7 @@ Steps:
 
    The frontend dev server sends API requests to `DJANGO_PORT` from `.env`, which is 8005 in the example.
 
-4. **Frontend**
+3. **Frontend**
 
    ```
    cd src/frontend/musikk
@@ -174,28 +144,35 @@ Steps:
 
    The dev server listens on `VITE_PORT` from `.env`, which is 5175 in the example.
 
-5. **Open** `http://localhost:5175`.
+#### Environment variables
 
-After step 1, `make run-local-dev` does steps 2 to 4 in one terminal. It starts Postgres and Redis, runs `migrate`, and
-starts the backend and the frontend. Ctrl+C stops both. It needs the packages from `uv sync` and `npm install`.
-`make run-local-dev-down` stops Postgres and Redis.
+The backend and the frontend read their settings from environment variables. They do not read `.env` themselves, so
+the variables from `.env` must be set in the shell where you start them. Any tool that loads a `.env` file into the
+shell works, e.g. [direnv](https://direnv.net/). It loads the variables when you enter the project folder, and unloads
+them when you leave. The `.envrc` in the project root tells direnv to load `.env`. Install direnv and hook it into
+your shell as the direnv website describes, then run in the project root:
 
-## Native binaries
+```
+direnv allow
+```
 
-Audio uploads and sample audio need FFmpeg and Shaka Packager. This section only matters in dev mode, because the
-Docker image has its own copies.
+direnv picks up changes in `.env` on the next command you run in the terminal (for example `ls`).
+
+#### Native binaries
+
+Audio uploads and sample audio need FFmpeg and Shaka Packager. The Docker image has its own copies, so you need them
+on the host only in dev mode.
 
 By default, Django uses `ffmpeg`, `ffprobe` and `packager` from `.tools/bin/` in the project folder. To use other
 copies, set `FFMPEG_BIN`, `FFPROBE_BIN` and `SHAKA_PACKAGER_BIN` in `.env`.
 
-### Automated install
+To install them into `.tools/bin/`, run:
 
 ```
 make setup-tools
 ```
 
-This builds FFmpeg from source and downloads Shaka Packager into `.tools/bin/`. When the binaries are already there, it
-does nothing.
+This builds FFmpeg from source and downloads Shaka Packager. When the binaries are already there, it does nothing.
 
 It works on macOS on Apple Silicon and on Debian-based Linux, because the FFmpeg script uses Homebrew on macOS and
 `apt-get` on Linux. On other platforms, install the binaries yourself and point the variables above at them.
@@ -206,36 +183,9 @@ Other useful targets:
 - `make check-tools` prints the versions of the binaries that Django uses.
 - `make clean-tools` removes `.tools/`, so the next `make setup-tools` builds everything again.
 
-## direnv
-
-Dev mode needs direnv. It loads the variables from `.env` when you enter the project folder, and unloads them when you
-leave.
-
-Install direnv by following the instructions on the [direnv website](https://direnv.net/), then:
-
-```
-mkdir -p ~/.config/direnv
-touch ~/.config/direnv/direnv.toml
-```
-
-Add to `~/.config/direnv/direnv.toml`:
-
-```toml
-[global]
-load_dotenv = true
-```
-
-In the project root (where `.env` lives):
-
-```
-direnv allow
-```
-
-direnv picks up changes in `.env` on the next command you run in the terminal (for example `ls`).
-
 ## Sample data
 
-The `initmodels` command fills the database with users, artists, songs, albums, playlists, follows, publications,
+The `initmodels` django command fills the database with users, artists, songs, albums, playlists, follows, publications,
 chats, messages and notifications. It prints the email and password of every account it creates.
 
 The songs get real audio. On the first run, the command generates sample audio files with FFmpeg and processes them
@@ -265,6 +215,22 @@ make run-local-docker-seed ARGS="--songs 10 --skip-audio"
 ```
 
 `--skip-audio` creates songs without audio, and `--help` lists all options.
+
+## Features
+
+- Albums, playlists, listening history
+- Social feed, publications, threaded comments, real-time chat
+- Audio uploads and normalization
+- Adaptive streaming via DASH/HLS and Shaka Player (Frontend)
+- Multi-tab/device synchronization of playback and volume. Device list and active device switching
+
+## Tech stack
+
+- **Backend**: Python 3.14, Django 5.2, Django REST Framework, Channels (WebSockets), Daphne (ASGI), Celery
+- **Frontend**: React 19, Vite, TypeScript, Tailwind CSS 4, ShadCN/Radix UI, TanStack Query, Shaka Player
+- **Audio processing**: FFmpeg, Shaka packager
+- **Data**: PostgreSQL 17, Redis 8 (cache, Channels layer, Celery broker)
+- **Infra**: Docker Compose, Caddy reverse proxy
 
 ## License
 

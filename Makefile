@@ -99,12 +99,14 @@ run-local-docker-seed: ## Fill the Docker database with sample data
 run-local-docker-clear: ## Delete the sample data from the Docker database
 	$(DOCKER_COMPOSE) exec server python manage.py clearmodels
 
-# needs the variables from .env in the shell, which direnv loads.
+# needs the variables from .env in the shell, for example through direnv.
 # Celery tasks run inside the backend process in dev mode, so no worker is started.
 # The servers run in the background of one shell, where they may ignore Ctrl+C,
 # so the trap stops the whole process group
-run-local-dev: ## Start Postgres and Redis in Docker, run the backend and frontend locally
+run-local-dev: ## Start Postgres and Redis in Docker, install the packages, run the backend and frontend locally
 	docker compose -f docker-compose-local.yml up -d
+	uv sync --directory src/backend/musikk
+	npm --prefix src/frontend/musikk install
 	@tries=0; \
 	until docker compose -f docker-compose-local.yml exec -T database sh -c 'pg_isready -q -h localhost -U "$$POSTGRES_USER"'; do \
 		tries=$$((tries + 1)); \
