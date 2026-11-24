@@ -72,14 +72,13 @@ class TestComputeTargetChannels(TestCase):
 
 
 class TestBuildNormalizationFilters(TestCase):
-    def test_standard_stereo_44100_only_formats_bit_depth(self):
+    def test_standard_stereo_44100_needs_no_filters(self):
         filters = build_normalization_filters(_make_info())
-        self.assertEqual(filters, ["aformat=sample_fmts=s16"])
+        self.assertEqual(filters, [])
 
     def test_high_sample_rate_adds_resample(self):
         filters = build_normalization_filters(_make_info(sample_rate=96000))
         self.assertIn("aresample=48000", filters)
-        self.assertIn("aformat=sample_fmts=s16", filters)
 
     def test_multichannel_adds_downmix(self):
         filters = build_normalization_filters(_make_info(channels=6))
@@ -89,7 +88,6 @@ class TestBuildNormalizationFilters(TestCase):
         filters = build_normalization_filters(_make_info(channels=6, sample_rate=96000))
         self.assertIn("aresample=out_chlayout=stereo", filters)
         self.assertIn("aresample=48000", filters)
-        self.assertIn("aformat=sample_fmts=s16", filters)
 
     def test_downmix_before_resample(self):
         filters = build_normalization_filters(_make_info(channels=6, sample_rate=96000))
@@ -97,10 +95,6 @@ class TestBuildNormalizationFilters(TestCase):
         resample_idx = filters.index("aresample=48000")
         self.assertLess(downmix_idx, resample_idx)
 
-    def test_format_filter_always_last(self):
-        filters = build_normalization_filters(_make_info(channels=6, sample_rate=96000))
-        self.assertEqual(filters[-1], "aformat=sample_fmts=s16")
-
-    def test_mono_low_rate_only_formats(self):
+    def test_mono_low_rate_needs_no_filters(self):
         filters = build_normalization_filters(_make_info(channels=1, sample_rate=22050))
-        self.assertEqual(filters, ["aformat=sample_fmts=s16"])
+        self.assertEqual(filters, [])

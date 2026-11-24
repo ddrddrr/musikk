@@ -11,6 +11,7 @@ from streaming.audio.exceptions import (
     AudioProcessingPipelineError,
     ProcessingTimeoutError,
 )
+from streaming.audio.ffmpeg_conf.converters import ConvertedFile
 from streaming.audio.ffmpeg_conf.ffmpeg_wrapper import FFMPEGFull, FFMPEGWrapper
 from streaming.audio.normalization import build_normalization_filters
 from streaming.audio.probes import (
@@ -41,7 +42,7 @@ class ProcessingContext:
     final_dir: str
     audio_info: AudioStreamInfo
     deadline: float | None = None
-    converted_paths: list[str] = field(default_factory=list)
+    converted_files: list[ConvertedFile] = field(default_factory=list)
     song_repr: SongRepresentation | None = None
     loudness_lufs: float | None = None
     true_peak_dbtp: float | None = None
@@ -91,7 +92,7 @@ class FFmpegStep(Step):
             )
             if not converted:
                 raise AudioProcessingPipelineError("FFmpeg step produced no outputs")
-            ctx.converted_paths = converted
+            ctx.converted_files = converted
 
             logger.debug(f"FFmpeg conversion completed: {len(converted)} files")
         except Exception:
@@ -107,27 +108,34 @@ class LoudnessMeasurementStep(Step):
     """
     Measures track's loudness in LUFS and dBTP.
 
-    Supports only mono or stereo tracks.
-    As a consequence should be ran after the conversion of the user
-    input to internal representation (since user input can have multiple channels).
-    Can be ran only on one representation of the file (preferrably lossless), since
-    after FFmpeg conversion LUFS/dBTP do not vary much from codec to codec.
+    Should be run after the conversion of the user input to internal
+    representation (since user input can have more channels than the stereo
+    mix that Users hear).
+    Can be run only on one representation of the file (lossless, otherwise the
+    AAC with the highest bitrate), since after FFmpeg conversion LUFS does not
+    vary much from codec to codec. dBTP can differ for low bitrates (e.g.
+    HE-AACv2), which is why the highest bitrate is preferred.
     """
 
     def process(self, ctx: ProcessingContext) -> None:
         try:
-            target = next(
-                # TODO: flac is hardcoded here now and requires the knowledge of codecs used
-                # by the ffmpeg step, the fallback to first defined is not ideal; improve
-                (p for p in ctx.converted_paths if Path(p).name.startswith("flac-")),
-                ctx.converted_paths[0],
+            target = self._highest_bitrate_file(ctx.converted_files)
+            lufs, peak = get_audio_loudness(
+                target.path, timeout=ctx.remaining_seconds()
             )
-            lufs, peak = get_audio_loudness(target, timeout=ctx.remaining_seconds())
             ctx.loudness_lufs = lufs
             ctx.true_peak_dbtp = peak
         except Exception:
             logger.exception("Loudness measurement failed")
             raise
+
+    @staticmethod
+    def _highest_bitrate_file(files: list[ConvertedFile]) -> ConvertedFile:
+        """The lower the bitrate, the bigger the alterations in the audio info, so we get the highest bitrate file."""
+        for file in files:
+            if file.converter.lossless:
+                return file
+        return max(files, key=lambda file: file.converter.bitrate or 0)
 
 
 class ShakaPackagerStep(Step):
@@ -135,18 +143,18 @@ class ShakaPackagerStep(Step):
         self.wrapper = shaka_wrapper
 
     def process(self, ctx: ProcessingContext) -> None:
-        if not ctx.converted_paths:
+        if not ctx.converted_files:
             raise AudioProcessingPipelineError(
                 "No converted files available for packaging"
             )
 
         try:
             logger.debug(
-                f"Starting Shaka Packager with {len(ctx.converted_paths)} input files"
+                f"Starting Shaka Packager with {len(ctx.converted_files)} input files"
             )
 
             song_repr = self.wrapper.package_audio_files(
-                local_input_paths=[Path(p) for p in ctx.converted_paths],
+                local_input_paths=[Path(f.path) for f in ctx.converted_files],
                 storage_dir=ctx.final_dir,
                 timeout=ctx.remaining_seconds(),
             )

@@ -10,6 +10,7 @@ from streaming.audio.ffmpeg_conf.converters import (
     AAC_320_CONVERTER,
     FLAC_CONVERTER,
     AACHEv2_CONVERTER,
+    ConvertedFile,
     FFMPEGAudioConverter,
 )
 from streaming.audio.probes import AudioStreamInfo
@@ -37,7 +38,7 @@ class FFMPEGWrapper:
         audio_info: AudioStreamInfo,
         filters: list[str] | None = None,
         timeout: float | None = None,
-    ) -> list[str]:
+    ) -> list[ConvertedFile]:
         """
         Transcodes audio into formats defined by the configured converters.
 

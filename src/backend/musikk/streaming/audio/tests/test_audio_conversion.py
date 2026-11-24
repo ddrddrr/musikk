@@ -1,4 +1,5 @@
 import json
+import shutil
 import tempfile
 from pathlib import Path
 
@@ -13,6 +14,7 @@ from streaming.audio.ffmpeg_conf.ffmpeg_wrapper import (
     FFMPEGFull,
     FFMPEGWrapper,
 )
+from streaming.audio.normalization import build_normalization_filters
 from streaming.audio.probes import AudioStreamInfo, get_audio_metadata
 
 
@@ -49,10 +51,10 @@ class TestFFMPEGConversion(TestCase):
             self.assertTrue(
                 len(results) > 0, "No files were returned from convert_audio"
             )
-            for path in results:
+            for converted in results:
                 self.assertTrue(
-                    Path(path).exists(),
-                    f"Expected converted file to exist: {path}",
+                    Path(converted.path).exists(),
+                    f"Expected converted file to exist: {converted.path}",
                 )
 
     def test_all_codecs_convert(self):
@@ -66,14 +68,14 @@ class TestFFMPEGConversion(TestCase):
             self.assertEqual(
                 len(results), 5, "Expected 5 converted files from FFMPEGFull"
             )
-            for path in results:
+            for converted in results:
                 self.assertTrue(
-                    Path(path).exists(),
-                    f"Expected converted file to exist: {path}",
+                    Path(converted.path).exists(),
+                    f"Expected converted file to exist: {converted.path}",
                 )
 
 
-def _aac_profile(path: str) -> str:
+def _probe_stream(path: str, entries: str) -> dict[str, str]:
     result = run_shell_command(
         [
             settings.FFPROBE_BIN,
@@ -82,13 +84,61 @@ def _aac_profile(path: str) -> str:
             "-select_streams",
             "a",
             "-show_entries",
-            "stream=profile",
+            f"stream={entries}",
             "-of",
             "json",
             path,
         ]
     )
-    return json.loads(result.stdout)["streams"][0]["profile"]
+    return json.loads(result.stdout)["streams"][0]
+
+
+def _aac_profile(path: str) -> str:
+    return _probe_stream(path, "profile")["profile"]
+
+
+class TestHighResolutionSource(TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        super().setUpClass()
+        cls._tmp_dir = tempfile.mkdtemp()
+        cls.source = Path(cls._tmp_dir) / "s24_96k.wav"
+        run_shell_command(
+            [
+                settings.FFMPEG_BIN,
+                "-v",
+                "error",
+                "-f",
+                "lavfi",
+                "-i",
+                "sine=frequency=1000:sample_rate=96000:duration=1",
+                "-ac",
+                "2",
+                "-c:a",
+                "pcm_s24le",
+                str(cls.source),
+            ]
+        )
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        shutil.rmtree(cls._tmp_dir)
+        super().tearDownClass()
+
+    def test_flac_version_keeps_24_bits_after_resample(self):
+        info = get_audio_metadata(self.source)
+        with tempfile.TemporaryDirectory() as output_dir:
+            results = FFMPEGFull.convert_audio(
+                file_path=self.source,
+                output_dir=output_dir,
+                audio_info=info,
+                filters=build_normalization_filters(info),
+            )
+            [flac] = [f for f in results if f.converter.lossless]
+            stream = _probe_stream(flac.path, "sample_rate,bits_per_raw_sample")
+
+        self.assertEqual(len(results), 5)
+        self.assertEqual(stream, {"sample_rate": "48000", "bits_per_raw_sample": "24"})
 
 
 class TestHEAACProfile(TestCase):
@@ -100,7 +150,7 @@ class TestHEAACProfile(TestCase):
         [output] = self.wrapper.convert_audio(
             file_path=source, output_dir=output_dir, audio_info=info
         )
-        return output
+        return output.path
 
     def test_stereo_source_is_encoded_as_he_aac_v2(self):
         with tempfile.TemporaryDirectory() as output_dir:

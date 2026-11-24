@@ -10,6 +10,14 @@ from django.test import TestCase, override_settings
 from utils.storage import delete_django_storage_dir
 
 from streaming.audio.exceptions import AudioProcessingPipelineError
+from streaming.audio.ffmpeg_conf.converters import (
+    AAC_96_CONVERTER,
+    AAC_160_CONVERTER,
+    AAC_320_CONVERTER,
+    FLAC_CONVERTER,
+    AACHEv2_CONVERTER,
+    ConvertedFile,
+)
 from streaming.audio.probes import AudioStreamInfo, get_audio_metadata
 from streaming.audio.processing_pipeline import (
     AudioProcessingPipeline,
@@ -30,6 +38,9 @@ MOCK_AUDIO_INFO = AudioStreamInfo(
     bit_rate=None,
 )
 
+AAC_96_FILE = ConvertedFile(path="a.mp4", converter=AAC_96_CONVERTER)
+AAC_160_FILE = ConvertedFile(path="b.mp4", converter=AAC_160_CONVERTER)
+
 
 class TestProcessingPipelineSteps(TestCase):
     @classmethod
@@ -47,9 +58,9 @@ class TestProcessingPipelineSteps(TestCase):
         cls.input_file = tests_dir / "data" / "file1.wav"
         assert cls.input_file.exists(), f"Test input_file not found: {cls.input_file}"
 
-    def test_ffmpeg_step_success_sets_converted_paths(self):
+    def test_ffmpeg_step_success_sets_converted_files(self):
         mock_ffmpeg = Mock()
-        mock_ffmpeg.convert_audio.return_value = ["a.mp4", "b.mp4"]
+        mock_ffmpeg.convert_audio.return_value = [AAC_96_FILE, AAC_160_FILE]
 
         step = FFmpegStep(ffmpeg_wrapper=mock_ffmpeg)
         ctx = ProcessingContext(
@@ -60,7 +71,7 @@ class TestProcessingPipelineSteps(TestCase):
         )
 
         step.process(ctx)
-        self.assertEqual(ctx.converted_paths, ["a.mp4", "b.mp4"])
+        self.assertEqual(ctx.converted_files, [AAC_96_FILE, AAC_160_FILE])
 
     def test_ffmpeg_step_raises_when_no_outputs(self):
         mock_ffmpeg = Mock()
@@ -79,7 +90,7 @@ class TestProcessingPipelineSteps(TestCase):
 
     def test_ffmpeg_step_rollback_removes_intermediate_dir(self):
         mock_ffmpeg = Mock()
-        mock_ffmpeg.convert_audio.return_value = ["a.mp4"]
+        mock_ffmpeg.convert_audio.return_value = [AAC_96_FILE]
 
         step = FFmpegStep(ffmpeg_wrapper=mock_ffmpeg)
         ctx = ProcessingContext(
@@ -93,7 +104,7 @@ class TestProcessingPipelineSteps(TestCase):
             step.rollback(ctx)
             mock_rmtree.assert_called_once_with("/tmp/int_dir_123", ignore_errors=True)
 
-    def test_shaka_step_requires_converted_paths(self):
+    def test_shaka_step_requires_converted_files(self):
         mock_shaka = Mock()
         mock_shaka.package_audio_files.return_value = {"ok": True}
 
@@ -103,7 +114,7 @@ class TestProcessingPipelineSteps(TestCase):
             intermediate_dir="i",
             final_dir="f",
             audio_info=MOCK_AUDIO_INFO,
-            converted_paths=[],
+            converted_files=[],
         )
 
         with self.assertRaises(AudioProcessingPipelineError):
@@ -119,7 +130,7 @@ class TestProcessingPipelineSteps(TestCase):
             intermediate_dir="i",
             final_dir="f",
             audio_info=MOCK_AUDIO_INFO,
-            converted_paths=["a.mp4"],
+            converted_files=[AAC_96_FILE],
         )
 
         step.process(ctx)
@@ -135,7 +146,7 @@ class TestProcessingPipelineSteps(TestCase):
             intermediate_dir="i",
             final_dir="final_dir_xyz",
             audio_info=MOCK_AUDIO_INFO,
-            converted_paths=["a.mp4"],
+            converted_files=[AAC_96_FILE],
         )
 
         with patch(
@@ -146,7 +157,7 @@ class TestProcessingPipelineSteps(TestCase):
 
     def test_ffmpeg_step_passes_remaining_time_as_timeout(self):
         mock_ffmpeg = Mock()
-        mock_ffmpeg.convert_audio.return_value = ["a.mp4"]
+        mock_ffmpeg.convert_audio.return_value = [AAC_96_FILE]
         ctx = ProcessingContext(
             orig_audio_file_path=str(self.input_file),
             intermediate_dir="i",
@@ -177,7 +188,7 @@ class TestProcessingPipelineSteps(TestCase):
         step2 = Mock()
 
         def proc1(ctx):
-            ctx.converted_paths = ["a.mp4"]
+            ctx.converted_files = [AAC_96_FILE]
 
         def proc2(ctx):
             ctx.song_repr = {"mpd": "x"}
@@ -206,7 +217,7 @@ class TestProcessingPipelineSteps(TestCase):
         step2 = Mock()
 
         def proc1(ctx):
-            ctx.converted_paths = ["a.mp4"]
+            ctx.converted_files = [AAC_96_FILE]
 
         def proc2(ctx):
             raise RuntimeError("boom")
@@ -278,58 +289,51 @@ class TestProcessingPipelineSteps(TestCase):
 
 
 class TestLoudnessMeasurementStepTargetSelection(TestCase):
-    @patch("streaming.audio.processing_pipeline.get_audio_loudness")
-    def test_prefers_flac_output(self, mock_loudness):
-        mock_loudness.return_value = (-14.0, -1.0)
-        step = LoudnessMeasurementStep()
+    def _measure(
+        self,
+        files: list[ConvertedFile],
+        loudness: tuple[float | None, float | None] = (-14.0, -1.0),
+    ) -> tuple[ProcessingContext, Mock]:
         ctx = ProcessingContext(
             orig_audio_file_path="/fake/source.wav",
             intermediate_dir="/tmp/inter",
             final_dir="/tmp/final",
             audio_info=MOCK_AUDIO_INFO,
-            converted_paths=[
-                "/tmp/inter/libfdk_aac-96-abc.mp4",
-                "/tmp/inter/flac-None-def.mp4",
-                "/tmp/inter/libfdk_aac-320-ghi.mp4",
-            ],
+            converted_files=files,
         )
-        step.process(ctx)
-        mock_loudness.assert_called_once_with(
-            "/tmp/inter/flac-None-def.mp4", timeout=None
+        with patch(
+            "streaming.audio.processing_pipeline.get_audio_loudness",
+            return_value=loudness,
+        ) as mock_loudness:
+            LoudnessMeasurementStep().process(ctx)
+        return ctx, mock_loudness
+
+    def test_lossless_upload_measures_flac_version(self):
+        ctx, mock_loudness = self._measure(
+            [
+                ConvertedFile(path="/tmp/inter/1.mp4", converter=AAC_320_CONVERTER),
+                ConvertedFile(path="/tmp/inter/2.mp4", converter=FLAC_CONVERTER),
+                ConvertedFile(path="/tmp/inter/3.mp4", converter=AAC_96_CONVERTER),
+            ]
         )
+        mock_loudness.assert_called_once_with("/tmp/inter/2.mp4", timeout=None)
         self.assertAlmostEqual(ctx.loudness_lufs, -14.0)
         self.assertAlmostEqual(ctx.true_peak_dbtp, -1.0)
 
-    @patch("streaming.audio.processing_pipeline.get_audio_loudness")
-    def test_falls_back_to_first_when_no_flac(self, mock_loudness):
-        mock_loudness.return_value = (-16.0, -2.0)
-        step = LoudnessMeasurementStep()
-        ctx = ProcessingContext(
-            orig_audio_file_path="/fake/source.wav",
-            intermediate_dir="/tmp/inter",
-            final_dir="/tmp/final",
-            audio_info=MOCK_AUDIO_INFO,
-            converted_paths=[
-                "/tmp/inter/libfdk_aac-96-abc.mp4",
-                "/tmp/inter/libfdk_aac-320-ghi.mp4",
-            ],
+    def test_lossy_upload_measures_highest_aac_bitrate(self):
+        _, mock_loudness = self._measure(
+            [
+                ConvertedFile(path="/tmp/inter/1.mp4", converter=AACHEv2_CONVERTER),
+                ConvertedFile(path="/tmp/inter/2.mp4", converter=AAC_160_CONVERTER),
+                ConvertedFile(path="/tmp/inter/3.mp4", converter=AAC_96_CONVERTER),
+            ]
         )
-        step.process(ctx)
-        mock_loudness.assert_called_once_with(
-            "/tmp/inter/libfdk_aac-96-abc.mp4", timeout=None
-        )
+        mock_loudness.assert_called_once_with("/tmp/inter/2.mp4", timeout=None)
 
-    @patch("streaming.audio.processing_pipeline.get_audio_loudness")
-    def test_silent_audio_sets_none(self, mock_loudness):
-        mock_loudness.return_value = (None, None)
-        step = LoudnessMeasurementStep()
-        ctx = ProcessingContext(
-            orig_audio_file_path="/fake/source.wav",
-            intermediate_dir="/tmp/inter",
-            final_dir="/tmp/final",
-            audio_info=MOCK_AUDIO_INFO,
-            converted_paths=["/tmp/inter/flac-None-abc.mp4"],
+    def test_silent_audio_sets_none(self):
+        ctx, _ = self._measure(
+            [ConvertedFile(path="/tmp/inter/1.mp4", converter=FLAC_CONVERTER)],
+            loudness=(None, None),
         )
-        step.process(ctx)
         self.assertIsNone(ctx.loudness_lufs)
         self.assertIsNone(ctx.true_peak_dbtp)

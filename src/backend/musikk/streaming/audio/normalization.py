@@ -29,7 +29,7 @@ def _compute_target_channels(source_channels: int) -> int | None:
 
 
 def build_normalization_filters(info: AudioStreamInfo) -> list[str]:
-    """Build FFmpeg -af filter strings for channel, sample rate, and bit depth normalization."""
+    """Gives every version the same channel count and sample rate."""
     filters: list[str] = []
 
     target_channels = _compute_target_channels(info.channels)
@@ -41,7 +41,5 @@ def build_normalization_filters(info: AudioStreamInfo) -> list[str]:
     target_rate = _compute_target_sample_rate(info.sample_rate)
     if target_rate is not None:
         filters.append(f"aresample={target_rate}")
-
-    filters.append("aformat=sample_fmts=s16")
 
     return filters

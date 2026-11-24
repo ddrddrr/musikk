@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
 from uuid import uuid4
@@ -25,7 +26,7 @@ def build_ffmpeg_command(
         - `-vn -sn -dn`
             remove video, subtitle, and data streams (keep audio only)
         - `-af <filters>`
-            audio filter graph (e.g. loudnorm, volume)
+            audio filter graph (e.g. aresample)
         - `-c:a <encoder>`
             audio codec (e.g. flac, libfdk_aac)
         - `-b:a <bitrate>k`
@@ -86,9 +87,10 @@ class FFMPEGAudioConverter:
         storage_dir: Path,
         filters: list[str] | None = None,
         timeout: float | None = None,
-    ) -> str:
+    ) -> "ConvertedFile":
         """
-        Transcodes a single audio file and returns the local output path (string).
+        Transcodes a single audio file. The result keeps the converter, so later
+        steps can choose a file by its codec and bitrate, not by its name.
         `timeout` is in s, None means no limit.
         """
         output_path = self._output_file_path_arg(storage_dir=storage_dir)
@@ -105,13 +107,18 @@ class FFMPEGAudioConverter:
             timeout=timeout,
         )
 
-        return output_path
+        return ConvertedFile(path=output_path, converter=self)
 
     def _output_file_path_arg(self, storage_dir: Path) -> str:
         return str(
-            storage_dir
-            / f"{self.encoder}-{str(self.bitrate) or 'static'}-{uuid4().hex}.mp4"
+            storage_dir / f"{self.encoder}-{self.bitrate or 'static'}-{uuid4().hex}.mp4"
         )
+
+
+@dataclass(frozen=True)
+class ConvertedFile:
+    path: str
+    converter: FFMPEGAudioConverter
 
 
 FLAC_CONVERTER = FFMPEGAudioConverter("flac", lossless=True)
