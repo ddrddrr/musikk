@@ -295,8 +295,41 @@ class TestCollectionDeleteView(TestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertTrue(Collection.objects.filter(uuid=collection.uuid).exists())
 
-    def test_delete_album_returns_400(self):
-        collection = CollectionFactory(type="album", songs=[])
+    @patch("streaming.models.songs.delete_django_storage_dir")
+    def test_delete_album_deletes_its_songs_everywhere(self, mock_delete_storage):
+        songs = [
+            BaseSongFactory(content_path="audio/first-song"),
+            BaseSongFactory(content_path="audio/second-song"),
+        ]
+        album = CollectionFactory(type="album", songs=songs)
+        CollectionCredit.objects.create(collection=album, author=self.author)
+        other_users_playlist = CollectionFactory(type="playlist", songs=songs[:1])
+        CollectionCredit.objects.create(
+            collection=other_users_playlist, author=self.other_user
+        )
+
+        url = reverse("api:collection-retrieve", kwargs={"uuid": album.uuid})
+        request = self.factory.delete(url)
+        force_authenticate(request, user=self.author)
+        with self.captureOnCommitCallbacks(execute=True):
+            response = CollectionRetrieveView.as_view()(request, uuid=album.uuid)
+
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(Collection.objects.filter(uuid=album.uuid).exists())
+        self.assertFalse(
+            BaseSong.objects.filter(uuid__in=[s.uuid for s in songs]).exists()
+        )
+        self.assertTrue(
+            Collection.objects.filter(uuid=other_users_playlist.uuid).exists()
+        )
+        self.assertFalse(other_users_playlist.collectionsongs.exists())
+        self.assertCountEqual(
+            [c.args[0] for c in mock_delete_storage.call_args_list],
+            ["audio/first-song", "audio/second-song"],
+        )
+
+    def test_delete_liked_songs_returns_400(self):
+        collection = CollectionFactory(type="liked", songs=[])
         CollectionCredit.objects.create(collection=collection, author=self.author)
 
         url = reverse("api:collection-retrieve", kwargs={"uuid": collection.uuid})
@@ -305,7 +338,9 @@ class TestCollectionDeleteView(TestCase):
         response = CollectionRetrieveView.as_view()(request, uuid=collection.uuid)
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data["detail"], "Only playlists can be deleted.")
+        self.assertEqual(
+            response.data["detail"], "Only playlists and albums can be deleted."
+        )
         self.assertTrue(Collection.objects.filter(uuid=collection.uuid).exists())
 
     def test_delete_nonexistent_collection_returns_404(self):
@@ -650,19 +685,24 @@ class TestRemoveAlbumTrack(TestCase):
             return CollectionRemoveSongView.as_view()(request, **kwargs)
 
     @patch("streaming.models.songs.delete_django_storage_dir")
-    def test_draft_album_track_removes_song_and_its_files(self, mock_delete_storage):
-        album = self._collection(type="album", draft=True)
-        song = BaseSongFactory(content_path="audio/some-song")
-        collection_song = CollectionSong.objects.create(collection=album, song=song)
+    def test_album_track_removes_song_and_its_files(self, mock_delete_storage):
+        for draft in (True, False):
+            with self.subTest(draft=draft):
+                mock_delete_storage.reset_mock()
+                album = self._collection(type="album", draft=draft)
+                song = BaseSongFactory(content_path="audio/some-song")
+                collection_song = CollectionSong.objects.create(
+                    collection=album, song=song
+                )
 
-        response = self._remove(collection_song)
+                response = self._remove(collection_song)
 
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertFalse(BaseSong.objects.filter(uuid=song.uuid).exists())
-        self.assertFalse(
-            CollectionSong.objects.filter(uuid=collection_song.uuid).exists()
-        )
-        mock_delete_storage.assert_called_once_with("audio/some-song")
+                self.assertEqual(response.status_code, status.HTTP_200_OK)
+                self.assertFalse(BaseSong.objects.filter(uuid=song.uuid).exists())
+                self.assertFalse(
+                    CollectionSong.objects.filter(uuid=collection_song.uuid).exists()
+                )
+                mock_delete_storage.assert_called_once_with("audio/some-song")
 
     @patch("streaming.models.songs.delete_django_storage_dir")
     def test_playlist_entry_removes_only_the_link(self, mock_delete_storage):
@@ -678,15 +718,6 @@ class TestRemoveAlbumTrack(TestCase):
             CollectionSong.objects.filter(uuid=collection_song.uuid).exists()
         )
         mock_delete_storage.assert_not_called()
-
-    def test_published_album_track_keeps_the_song(self):
-        album = self._collection(type="album", draft=False)
-        song = BaseSongFactory()
-        collection_song = CollectionSong.objects.create(collection=album, song=song)
-
-        self._remove(collection_song)
-
-        self.assertTrue(BaseSong.objects.filter(uuid=song.uuid).exists())
 
 
 class TestCollectionDraftOnCreate(TestCase):

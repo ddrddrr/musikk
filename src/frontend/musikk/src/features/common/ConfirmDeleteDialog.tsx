@@ -8,30 +8,31 @@ import {
     DialogTitle,
 } from "@/features/ui/dialog.tsx";
 
-interface DeletePlaylistDialogProps {
+interface ConfirmDeleteDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    playlistTitle: string;
+    title: string;
+    description: string;
     onConfirm: () => void;
     isDeleting: boolean;
 }
 
-export function DeletePlaylistDialog({
+export function ConfirmDeleteDialog({
     open,
     onOpenChange,
-    playlistTitle,
+    title,
+    description,
     onConfirm,
     isDeleting,
-}: DeletePlaylistDialogProps) {
+}: ConfirmDeleteDialogProps) {
+    const confirmLabel = isDeleting ? "Deleting..." : "Delete";
+
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Delete playlist</DialogTitle>
-                    <DialogDescription>
-                        Are you sure you want to delete &quot;{playlistTitle}&quot;? This action
-                        cannot be undone.
-                    </DialogDescription>
+                    <DialogTitle>{title}</DialogTitle>
+                    <DialogDescription>{description}</DialogDescription>
                 </DialogHeader>
                 <DialogFooter>
                     <Button
@@ -42,7 +43,7 @@ export function DeletePlaylistDialog({
                         Cancel
                     </Button>
                     <Button variant="destructive" onClick={onConfirm} disabled={isDeleting}>
-                        {isDeleting ? "Deleting..." : "Delete"}
+                        {confirmLabel}
                     </Button>
                 </DialogFooter>
             </DialogContent>

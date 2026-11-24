@@ -150,15 +150,14 @@ class CollectionRetrieveView(APIView):
         collection = get_object_or_404(Collection, uuid=kwargs["uuid"])
         self.check_object_permissions(request, collection)
 
-        # TODO: albums should be as well, but we need song handling
-        if collection.type != CollectionType.PLAYLIST:
-            raise ValidationError("Only playlists can be deleted.")
+        if collection.type not in (CollectionType.PLAYLIST, CollectionType.ALBUM):
+            raise ValidationError("Only playlists and albums can be deleted.")
 
         collection.delete()
-        send_ws_event(
-            user_group(request.user.uuid),
-            ServerEvent.LIBRARY_CHANGED,
-        )
+        group = user_group(request.user.uuid)
+        send_ws_event(group, ServerEvent.LIBRARY_CHANGED)
+        if collection.type == CollectionType.ALBUM:
+            _send_songs_deleted_events(group)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -256,21 +255,29 @@ class CollectionRemoveSongView(APIView):
         )
         self.check_object_permissions(self.request, collection_song)
 
-        collection = collection_song.collection
-        if collection.type == CollectionType.ALBUM and collection.draft:
-            # album not finalized yet, so we delete the actual song files
+        group = user_group(self.request.user.uuid)
+        # an album owns its songs, other collections only link to them
+        if collection_song.collection.type == CollectionType.ALBUM:
             collection_song.song.delete()
+            _send_songs_deleted_events(group)
         else:
-            # otherwise we just "unlink" the song from the collection
             collection_song.delete()
+            send_ws_event(group, ServerEvent.COLLECTION_CHANGED)
 
-        send_ws_event(
-            user_group(self.request.user.uuid),
-            ServerEvent.COLLECTION_CHANGED,
-        )
         return Response(
             status=status.HTTP_200_OK,
         )
+
+
+def _send_songs_deleted_events(group: str) -> None:
+    """
+    A deleted song also leaves the playlists, liked songs and queue of its
+    author, so the author's frontend has to fetch all of them again. Other
+    users get no event and see the song until their next fetch.
+    """
+    send_ws_event(group, ServerEvent.COLLECTION_CHANGED)
+    send_ws_event(group, ServerEvent.LIKED_SONGS_CHANGED)
+    send_ws_event(group, ServerEvent.QUEUE_CHANGED)
 
 
 class CollectionSongListCreateView(APIView):

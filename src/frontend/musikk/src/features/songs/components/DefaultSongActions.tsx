@@ -1,4 +1,4 @@
-import { CollectionSong } from "@/features/collections/types.ts";
+import { CollectionSong, CollectionType } from "@/features/collections/types.ts";
 import { ActionButtonSize } from "@/features/common/types.ts";
 import { SongAddToLikedButton } from "@/features/songs/components/SongAddToLikedButton.tsx";
 import { SongCommentsButton } from "@/features/songs/components/SongCommentsButton.tsx";
@@ -15,7 +15,7 @@ type DefaultSongActionsProps = {
     playButton?: ReactNode;
     commentsButton?: ReactNode;
     showComments?: boolean;
-    showRemoveFromPlaylist?: boolean;
+    removableFrom?: CollectionType;
     showAddToLiked?: boolean;
     onRemoveFromQueue?: () => void;
 };
@@ -26,7 +26,7 @@ export function DefaultSongActions({
     playButton,
     commentsButton,
     showComments = true,
-    showRemoveFromPlaylist = false,
+    removableFrom,
     showAddToLiked = true,
     onRemoveFromQueue,
 }: DefaultSongActionsProps) {
@@ -44,7 +44,7 @@ export function DefaultSongActions({
             <SongMenuButton
                 collectionSong={collectionSong}
                 size={size}
-                showRemoveFromPlaylist={showRemoveFromPlaylist}
+                removableFrom={removableFrom}
                 onRemoveFromQueue={onRemoveFromQueue}
             />
         </div>

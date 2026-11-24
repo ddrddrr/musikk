@@ -16,7 +16,7 @@ interface SongContextMenuProps {
 }
 
 export function SongContextMenu({ children, song, onRemoveFromQueue }: SongContextMenuProps) {
-    const items = useSongMenuItems(song, { onRemoveFromQueue });
+    const { items } = useSongMenuItems(song, { onRemoveFromQueue });
 
     return (
         <ContextMenu>

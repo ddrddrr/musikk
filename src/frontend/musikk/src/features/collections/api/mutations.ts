@@ -65,10 +65,10 @@ export function useDeleteCollection() {
         mutationFn: deleteCollection,
         onSuccess: () => {
             void queryClient.invalidateQueries({ queryKey: userKeys.libraries() });
-            void queryClient.invalidateQueries({ queryKey: collectionKeys.details() });
+            void queryClient.invalidateQueries({ queryKey: collectionKeys.base });
         },
         onError: (error) => {
-            toast.error(getErrorDetail(error, "Failed to delete playlist"));
+            toast.error(getErrorDetail(error, "Failed to delete collection"));
         },
     });
 }
@@ -96,10 +96,10 @@ export function useRemoveSongFromCollection() {
                 queryKey: collectionKeys.detail(variables.collectionUUID),
             });
             void queryClient.invalidateQueries({ queryKey: songKeys.collectionMemberships() });
-            toast.success("Removed from playlist");
+            toast.success("Song removed");
         },
         onError: (error) => {
-            toast.error(getErrorDetail(error, "Failed to remove song from playlist"));
+            toast.error(getErrorDetail(error, "Failed to remove song"));
         },
     });
 }

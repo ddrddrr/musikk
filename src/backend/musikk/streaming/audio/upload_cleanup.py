@@ -7,7 +7,6 @@ from uuid import UUID
 
 from django.conf import settings
 from django.core.files.storage import default_storage
-from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
 from utils.storage import delete_django_storage_dir
@@ -72,13 +71,7 @@ def delete_old_draft_albums(now: datetime) -> None:
     )
     for collection in drafts:
         logger.info(f"Deleting draft album {collection.uuid} ({collection.title!r})")
-        with transaction.atomic():
-            songs = BaseSong.objects.filter(
-                collectionsongs__collection=collection
-            ).distinct()
-            for song in songs:
-                song.delete()
-            collection.delete()
+        collection.delete()
 
 
 # the upload view creates the track folder a few seconds before the song

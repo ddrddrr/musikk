@@ -1,7 +1,7 @@
 import { CollectionAddToLikedButton } from "@/features/collections/components/CollectionAddToLikedButton.tsx";
 import { CollectionAddToQueueButton } from "@/features/collections/components/CollectionAddToQueueButton.tsx";
 import { CollectionPlayButton } from "@/features/collections/components/CollectionPlayButton.tsx";
-import { CollectionDetailed } from "@/features/collections/types.ts";
+import { CollectionDetailed, CollectionType } from "@/features/collections/types.ts";
 import { MediaThumbnail } from "@/features/common/MediaThumbnail.tsx";
 import { ActionButtonSize } from "@/features/common/types.ts";
 import { Button } from "@/features/ui/button.tsx";
@@ -25,15 +25,17 @@ interface SongCollectionHeaderProps {
     songsCount: number;
     renderAddToLikedButton: boolean;
     renderCommentsButton: boolean;
-    isAuthorPlaylist?: boolean;
+    canDelete?: boolean;
     onDeleteClick?: () => void;
 }
 
-function PlaylistMenuDropdown({
+function CollectionMenuDropdown({
     size,
+    collectionType,
     onDeleteClick,
 }: {
     size: ActionButtonSize;
+    collectionType: CollectionType;
     onDeleteClick?: () => void;
 }) {
     return (
@@ -48,7 +50,7 @@ function PlaylistMenuDropdown({
             <DropdownMenuContent>
                 <DropdownMenuItem variant="destructive" onSelect={onDeleteClick}>
                     <Trash2 />
-                    Delete playlist
+                    Delete {collectionType}
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
@@ -63,7 +65,7 @@ export function CollectionHeader({
     songsCount,
     renderAddToLikedButton,
     renderCommentsButton,
-    isAuthorPlaylist,
+    canDelete,
     onDeleteClick,
 }: SongCollectionHeaderProps) {
     const buttonSize = compact ? "sm" : "md";
@@ -75,8 +77,12 @@ export function CollectionHeader({
                 <CollectionAddToLikedButton collection={collection} size={buttonSize} />
             )}
             <CollectionAddToQueueButton collection={collection} size={buttonSize} />
-            {isAuthorPlaylist && (
-                <PlaylistMenuDropdown size={buttonSize} onDeleteClick={onDeleteClick} />
+            {canDelete && (
+                <CollectionMenuDropdown
+                    size={buttonSize}
+                    collectionType={collection.type}
+                    onDeleteClick={onDeleteClick}
+                />
             )}
         </>
     );

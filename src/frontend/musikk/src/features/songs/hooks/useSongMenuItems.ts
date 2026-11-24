@@ -1,12 +1,13 @@
 import { useRemoveSongFromCollection } from "@/features/collections/api/mutations.ts";
-import { CollectionSong } from "@/features/collections/types.ts";
+import { CollectionSong, CollectionType } from "@/features/collections/types.ts";
 import { useAddSong } from "@/features/song-queue/api/mutations.ts";
 import { useSongPlayHandler } from "@/features/songs/hooks/useSongPlayHandler.ts";
 import type { LucideIcon } from "lucide-react";
 import { BetweenHorizonalStart, Play, Trash2 } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
 
-export interface SongMenuItem {
+interface SongMenuItem {
     key: string;
     label: string;
     icon: LucideIcon;
@@ -15,21 +16,44 @@ export interface SongMenuItem {
 }
 
 interface SongMenuItemsOptions {
-    showRemoveFromPlaylist?: boolean;
+    removableFrom?: CollectionType;
     onRemoveFromQueue?: () => void;
 }
+
+interface RemoveSongDialogState {
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+    onConfirm: () => void;
+    isDeleting: boolean;
+}
+
+interface SongMenu {
+    items: SongMenuItem[];
+    removeDialog: RemoveSongDialogState;
+}
+
+const REMOVE_LABEL_BY_TYPE: Record<CollectionType, string> = {
+    playlist: "Remove from playlist",
+    album: "Remove from album",
+    liked: "Remove from liked songs",
+    history: "Remove from history",
+};
 
 /**
  * Describes the song actions without rendering them, so the dropdown menu and the context menu show the
  * same items and each renders them with its own menu primitives.
+ *
+ * Removing a song from an album deletes the song for every user, so on an album that item only opens
+ * `removeDialog`. A caller that passes `removableFrom` has to render that dialog.
  */
 export function useSongMenuItems(
     collectionSong: CollectionSong,
-    { showRemoveFromPlaylist = false, onRemoveFromQueue }: SongMenuItemsOptions = {},
-): SongMenuItem[] {
+    { removableFrom, onRemoveFromQueue }: SongMenuItemsOptions = {},
+): SongMenu {
     const removeSongMutation = useRemoveSongFromCollection();
     const addSongMutation = useAddSong();
     const { onClick: onPlay } = useSongPlayHandler(collectionSong);
+    const [isRemoveDialogOpen, setRemoveDialogOpen] = useState(false);
 
     const items: SongMenuItem[] = [
         {
@@ -46,17 +70,22 @@ export function useSongMenuItems(
     ];
 
     const collectionUUID = collectionSong.collection;
-    if (showRemoveFromPlaylist && collectionUUID) {
+    const removeSong = () => {
+        if (!collectionUUID) return;
+        removeSongMutation.mutate(
+            { collectionUUID, songCollectionSongUUID: collectionSong.uuid },
+            { onSuccess: () => setRemoveDialogOpen(false) },
+        );
+    };
+    const openRemoveDialog = () => setRemoveDialogOpen(true);
+
+    if (removableFrom && collectionUUID) {
         items.push({
-            key: "remove-from-playlist",
-            label: "Remove from playlist",
+            key: "remove-from-collection",
+            label: REMOVE_LABEL_BY_TYPE[removableFrom],
             icon: Trash2,
             variant: "destructive",
-            onSelect: () =>
-                removeSongMutation.mutate({
-                    collectionUUID,
-                    songCollectionSongUUID: collectionSong.uuid,
-                }),
+            onSelect: removableFrom === "album" ? openRemoveDialog : removeSong,
         });
     }
 
@@ -70,5 +99,13 @@ export function useSongMenuItems(
         });
     }
 
-    return items;
+    return {
+        items,
+        removeDialog: {
+            open: isRemoveDialogOpen,
+            onOpenChange: setRemoveDialogOpen,
+            onConfirm: removeSong,
+            isDeleting: removeSongMutation.isPending,
+        },
+    };
 }

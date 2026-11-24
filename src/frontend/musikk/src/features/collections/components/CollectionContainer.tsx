@@ -2,8 +2,8 @@ import { UUID } from "@/api/types.ts";
 import { useUserUUID } from "@/features/auth/hooks/useUserUUID.ts";
 import { useCollectionDetailQuery } from "@/features/collections/api/queries.ts";
 import { CollectionHeader } from "@/features/collections/components/CollectionHeader.tsx";
-import { DeletePlaylistDialog } from "@/features/collections/components/DeletePlaylistDialog.tsx";
-import { useDeletePlaylist } from "@/features/collections/hooks/useDeletePlaylist.ts";
+import { DeleteCollectionDialog } from "@/features/collections/components/DeleteCollectionDialog.tsx";
+import { useCollectionDeletion } from "@/features/collections/hooks/useCollectionDeletion.ts";
 import { CollectionDetailed } from "@/features/collections/types.ts";
 import { BackButton } from "@/features/common/BackButton.tsx";
 import { CenteredSpinner } from "@/features/common/CenteredSpinner.tsx";
@@ -70,7 +70,7 @@ export function CollectionContainer({ collectionUUID }: CollectionContainerProps
         : `${collectionPath}/comments`;
 
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-    const { deletePlaylist, isDeleting } = useDeletePlaylist();
+    const { deleteCollection, isDeleting } = useCollectionDeletion();
 
     if (isPending) return <CenteredSpinner className="min-h-[400px]" />;
 
@@ -93,9 +93,9 @@ export function CollectionContainer({ collectionUUID }: CollectionContainerProps
     const isCollectionThreadOpen = openThread?.commentable.type === "collection";
     const openThreadSongUUID =
         openThread?.commentable.type === "song" ? openThread.commentable.uuid : undefined;
-    const removeFromPlaylistCtxBtn =
-        !!currUserUUID && collection?.authors.map((a) => a.uuid).includes(currUserUUID);
-    const isAuthorPlaylist = removeFromPlaylistCtxBtn && collection.type === "playlist";
+    const isAuthor = !!currUserUUID && collection.authors.map((a) => a.uuid).includes(currUserUUID);
+    const songsRemovableFrom = isAuthor ? collection.type : undefined;
+    const canDelete = isAuthor && (collection.type === "playlist" || collection.type === "album");
 
     const songSize = showComments ? "sm" : "md";
 
@@ -115,7 +115,7 @@ export function CollectionContainer({ collectionUUID }: CollectionContainerProps
                             renderCommentsButton={canComment}
                             compact={showComments}
                             isCommentsOpen={isCollectionThreadOpen}
-                            isAuthorPlaylist={isAuthorPlaylist}
+                            canDelete={canDelete}
                             onDeleteClick={() => setDeleteDialogOpen(true)}
                         />
 
@@ -143,7 +143,7 @@ export function CollectionContainer({ collectionUUID }: CollectionContainerProps
                                             <SongMenuButton
                                                 collectionSong={collectionSong}
                                                 size="sm"
-                                                showRemoveFromPlaylist={removeFromPlaylistCtxBtn}
+                                                removableFrom={songsRemovableFrom}
                                             />
                                         </div>
                                     ) : (
@@ -152,7 +152,7 @@ export function CollectionContainer({ collectionUUID }: CollectionContainerProps
                                             size={songSize}
                                             commentsButton={commentsButton}
                                             showComments={canComment}
-                                            showRemoveFromPlaylist={removeFromPlaylistCtxBtn}
+                                            removableFrom={songsRemovableFrom}
                                         />
                                     );
 
@@ -190,12 +190,12 @@ export function CollectionContainer({ collectionUUID }: CollectionContainerProps
                 )}
             </div>
 
-            {isAuthorPlaylist && (
-                <DeletePlaylistDialog
+            {canDelete && (
+                <DeleteCollectionDialog
                     open={deleteDialogOpen}
                     onOpenChange={setDeleteDialogOpen}
-                    playlistTitle={collection.title}
-                    onConfirm={() => deletePlaylist(collection.uuid)}
+                    collection={collection}
+                    onConfirm={() => deleteCollection(collection)}
                     isDeleting={isDeleting}
                 />
             )}

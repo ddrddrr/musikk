@@ -1,5 +1,5 @@
 from base.models import BaseModel
-from django.db import models
+from django.db import models, transaction
 from utils.paths import deafult_image_path
 
 from streaming.models.songs import BaseSong, CollectionSong
@@ -73,6 +73,19 @@ class Collection(BaseModel):
     )
 
     objects = CollectionManager()
+
+    def delete(self, using=None, keep_parents=False):
+        """
+        An album owns its songs, so deleting an album also deletes its songs
+        and their audio files. The songs then leave every playlist, liked
+        songs list and queue they were in. Other collections only link to
+        songs, so their songs stay.
+        """
+        with transaction.atomic(using=using):
+            if self.type == CollectionType.ALBUM:
+                for song in self.base_songs.all():
+                    song.delete()
+            return super().delete(using, keep_parents)
 
     def ordered_songs(self) -> list[BaseSong]:
         return [
