@@ -93,3 +93,26 @@ media/*
 ### LaTeX build artifacts
 text/out/*
 !text/out/thesis.pdf
+# Files that latexmk and editors leave next to the .tex sources
+text/**/*.aux
+text/**/*.bbl
+text/**/*.bcf
+text/**/*.blg
+text/**/*.dvi
+text/**/*.xdv
+text/**/*.fdb_latexmk
+text/**/*.fls
+text/**/*.idx
+text/**/*.ilg
+text/**/*.ind
+text/**/*.lof
+text/**/*.lot
+text/**/*.log
+text/**/*.out
+text/**/*.toc
+text/**/*.run.xml
+text/**/*.synctex.gz
+text/**/*.luabridge.lua
+text/_minted*/
+# PDFs built next to thesis.tex. The diagram PDFs in text/diagrams stay tracked.
+text/*.pdf
