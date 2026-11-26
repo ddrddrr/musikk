@@ -5,6 +5,7 @@ import { formatDate, isSameDay } from "@/utils/formatDate.ts";
 
 interface ChatMessageListProps {
     messages: Publication[];
+    setReplyTo: (message: Publication) => void;
 }
 
 // move if reused in the future
@@ -20,7 +21,7 @@ function DateSeparator({ date }: { date: string }) {
     );
 }
 
-export function ChatMessageList({ messages }: ChatMessageListProps) {
+export function ChatMessageList({ messages, setReplyTo }: ChatMessageListProps) {
     if (messages.length === 0) {
         return <EmptyState message="No messages yet" />;
     }
@@ -42,7 +43,11 @@ export function ChatMessageList({ messages }: ChatMessageListProps) {
                         className={index === 0 ? "" : isFirstInGroup ? "mt-3" : "mt-0.5"}
                     >
                         {showDateSeparator && <DateSeparator date={message.date_added} />}
-                        <ChatMessage message={message} isFirstInGroup={isFirstInGroup} />
+                        <ChatMessage
+                            message={message}
+                            isFirstInGroup={isFirstInGroup}
+                            setReplyTo={setReplyTo}
+                        />
                     </div>
                 );
             })}

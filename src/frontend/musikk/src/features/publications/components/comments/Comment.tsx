@@ -1,7 +1,8 @@
 import { PostAttachment } from "@/features/publications/components/posts/PostAttachment.tsx";
 import { PostHeader } from "@/features/publications/components/posts/PostHeader.tsx";
+import { ReplyButton } from "@/features/publications/components/ReplyButton.tsx";
+import { ReplyQuote } from "@/features/publications/components/ReplyQuote.tsx";
 import { Publication } from "@/features/publications/types.ts";
-import { OverflowTooltip } from "@/features/ui/tooltip.tsx";
 
 interface CommentProps {
     comment: Publication;
@@ -12,16 +13,11 @@ export function Comment({ comment, setReplyTo }: CommentProps) {
     return (
         <div className="rounded-sm border border-foreground bg-muted p-3">
             {comment.parent_uuid && comment.parent_author && comment.parent_repr && (
-                <div className="mb-2 min-w-0 border-l-2 border-foreground pl-2 text-xs text-muted-foreground">
-                    <OverflowTooltip label={comment.parent_author.display_name || "Anonymous"}>
-                        <div className="truncate font-medium">
-                            {comment.parent_author.display_name || "Anonymous"}
-                        </div>
-                    </OverflowTooltip>
-                    <OverflowTooltip label={comment.parent_repr}>
-                        <div className="truncate italic">{comment.parent_repr}</div>
-                    </OverflowTooltip>
-                </div>
+                <ReplyQuote
+                    author={comment.parent_author}
+                    text={comment.parent_repr}
+                    className="mb-2"
+                />
             )}
             <div className="mb-1">
                 <PostHeader author={comment.author} dateAdded={comment.date_added} />
@@ -38,12 +34,7 @@ export function Comment({ comment, setReplyTo }: CommentProps) {
                     <PostAttachment attachment={comment.attachment} size="sm" />
                 </div>
             )}
-            <button
-                onClick={() => setReplyTo(comment)}
-                className="mt-1 text-xs text-info hover:underline"
-            >
-                Reply
-            </button>
+            <ReplyButton onClick={() => setReplyTo(comment)} className="mt-1" />
         </div>
     );
 }

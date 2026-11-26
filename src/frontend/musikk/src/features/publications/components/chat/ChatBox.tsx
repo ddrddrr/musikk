@@ -16,7 +16,7 @@ import { useScrollAnchor } from "@/features/publications/hooks/useScrollAnchor.t
 import { useTypingIndicator } from "@/features/publications/hooks/useTypingIndicator.ts";
 import { Publication } from "@/features/publications/types.ts";
 import { chatTopic } from "@/ws/topics.ts";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 
 const NO_MESSAGES: Publication[] = [];
 
@@ -46,6 +46,7 @@ export function ChatBox({ chatUUID }: ChatBoxProps) {
     } = useChatMessages(userUUID, chatUUID);
 
     const { typers, notifyTyping } = useTypingIndicator(chatTopic(chatUUID), "chat.typing");
+    const [replyTo, setReplyTo] = useState<Publication | undefined>(undefined);
 
     const messagesContainerRef = useRef<HTMLDivElement>(null);
     useAutoScrollToBottom(messagesContainerRef, isMessagesPending, messages);
@@ -88,7 +89,7 @@ export function ChatBox({ chatUUID }: ChatBoxProps) {
                             fetchNextPage={fetchNextPage}
                         />
                     </div>
-                    <ChatMessageList messages={messages} />
+                    <ChatMessageList messages={messages} setReplyTo={setReplyTo} />
                 </div>
                 <NewMessagesIndicator visible={hasNewMessages} onClick={scrollToBottom} />
             </div>
@@ -96,7 +97,12 @@ export function ChatBox({ chatUUID }: ChatBoxProps) {
             <TypingIndicator typers={typers} />
 
             <div className="border-t-2 border-foreground bg-muted p-4">
-                <ChatMessageForm chat={chat} onTyping={notifyTyping} />
+                <ChatMessageForm
+                    chat={chat}
+                    replyTo={replyTo}
+                    setReplyTo={setReplyTo}
+                    onTyping={notifyTyping}
+                />
             </div>
         </div>
     );

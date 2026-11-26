@@ -18,6 +18,7 @@ from websockets.topics import topic_group
 from social.api.v1.tests.factories import ChatMemberFactory, PublicationFactory
 from social.api.v1.views import (
     ChatAttachmentsListView,
+    ChatMessagesListCreateView,
     CollectionCommentsListCreateView,
     FeedPostsListCreateView,
     PublicationChildrenView,
@@ -391,6 +392,35 @@ class TestFeedPostsListCreateView(TestCase):
         response = FeedPostsListCreateView.as_view()(request, user_uuid=uuid4())
 
         self.assertEqual(response.status_code, 404)
+
+
+class TestChatMessagesListCreateView(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.factory = APIRequestFactory()
+
+    def setUp(self):
+        self.membership = ChatMemberFactory()
+        other_membership = ChatMemberFactory(chat=self.membership.chat)
+        self.message = PublicationFactory(
+            author=other_membership.member, created_for_object=self.membership.chat
+        )
+
+    def test_member_replies_to_chat_message(self):
+        payload = {"content": fake.sentence(), "parent_uuid": str(self.message.uuid)}
+        request = self.factory.post("/", payload, format="json")
+        force_authenticate(request, user=self.membership.member)
+
+        response = ChatMessagesListCreateView.as_view()(
+            request,
+            user_uuid=self.membership.member.uuid,
+            chat_uuid=self.membership.chat.uuid,
+        )
+
+        self.assertEqual(response.status_code, 201, repr(response.data))
+        self.assertEqual(response.data["parent_uuid"], str(self.message.uuid))
+        self.assertFalse(ReplyNotification.objects.exists())
 
 
 class TestPublicationChildrenView(TestCase):

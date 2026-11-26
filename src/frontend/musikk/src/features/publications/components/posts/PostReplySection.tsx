@@ -1,7 +1,7 @@
 import { UUID } from "@/api/types.ts";
 import { PostForm } from "@/features/publications/components/posts/PostForm.tsx";
+import { ReplyButton } from "@/features/publications/components/ReplyButton.tsx";
 import { Publication } from "@/features/publications/types.ts";
-import { Button } from "@/features/ui/button.tsx";
 import { useState } from "react";
 
 type PostReplySectionProps = {
@@ -16,18 +16,14 @@ export function PostReplySection({
     onReplyCreated,
 }: PostReplySectionProps) {
     const [isReplying, setIsReplying] = useState(false);
+    const replyButtonLabel = isReplying ? "Cancel" : "Reply";
 
     return (
         <>
             <div className="flex items-center gap-2 text-xs">
-                <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setIsReplying((prev) => !prev)}
-                    className="h-auto px-0 text-xs text-info hover:underline"
-                >
-                    {isReplying ? "Cancel" : "Reply"}
-                </Button>
+                <ReplyButton onClick={() => setIsReplying((prev) => !prev)}>
+                    {replyButtonLabel}
+                </ReplyButton>
             </div>
 
             {isReplying && (

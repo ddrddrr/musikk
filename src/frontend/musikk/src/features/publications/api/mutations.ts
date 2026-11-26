@@ -136,7 +136,7 @@ export function useCreateChat() {
     });
 }
 
-interface CreateChatMessageParams extends PublicationDraft {
+interface CreateChatMessageParams extends PublicationInput {
     userUUID: UUID;
     chatUUID: UUID;
 }
@@ -144,10 +144,10 @@ interface CreateChatMessageParams extends PublicationDraft {
 export function useCreateChatMessage() {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: async ({ userUUID, chatUUID, ...draft }: CreateChatMessageParams) => {
+        mutationFn: async ({ userUUID, chatUUID, ...input }: CreateChatMessageParams) => {
             await createPublication(
                 ChatURLs.chatMessages(userUUID, chatUUID),
-                buildPublicationPayload(draft),
+                buildPublicationPayload(input),
             );
         },
         onSuccess: (_data, variables) => {

@@ -8,7 +8,7 @@ export function ChatBoxRouteHandler() {
     return (
         <div className="flex flex-col p-4">
             <BackButton />
-            <ChatBox chatUUID={chatUUID} />
+            <ChatBox key={chatUUID} chatUUID={chatUUID} />
         </div>
     );
 }
